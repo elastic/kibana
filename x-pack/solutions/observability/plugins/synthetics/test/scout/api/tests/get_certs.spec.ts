@@ -15,7 +15,9 @@ const SYNTHETICS_MONITOR_TYPE = 'synthetics-monitor';
 const LEGACY_SYNTHETICS_MONITOR_TYPE = 'synthetics-monitor-multi-space';
 
 const HTTP_DATA_STREAM = 'synthetics-http-default';
+const BROWSER_NETWORK_DATA_STREAM = 'synthetics-browser.network-default';
 const TEST_TAG = 'scout-cert-tag';
+const BROWSER_TAG = 'scout-cert-browser-tag';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -46,6 +48,11 @@ interface CertFacetsBody {
 
 const findCount = (counts: CertFacetCount[], value: string) =>
   counts.find((entry) => entry.value === value)?.count;
+
+// Both certs routes wrap their payload in a `{ data }` envelope, so unwrap it
+// before asserting on the cert result / facets shape.
+const certData = (res: { body: unknown }): CertResultBody =>
+  (res.body as { data: CertResultBody }).data;
 
 /**
  * API coverage for the certificates route (`GET internal/synthetics/certs`),
@@ -95,6 +102,60 @@ apiTest.describe(
       await esClient.index({ index: HTTP_DATA_STREAM, document, refresh: 'wait_for' });
     };
 
+    // Seeds a browser network event (`synthetics.type: journey/network_info`) that
+    // carries a TLS certificate, a response mime type (resource-type filter) and a
+    // `Sec-Fetch-Site` request header (origin filter). It reuses the enabled HTTP
+    // monitor's id because the certs query matches browser events by
+    // `synthetics.type` + monitor id, not by the monitor's saved-object type.
+    const indexBrowserNetworkCert = async (
+      esClient: EsClient,
+      {
+        commonName,
+        mimeType,
+        secFetchSite,
+      }: { commonName: string; mimeType: string; secFetchSite: string }
+    ) => {
+      const document: Record<string, any> = {
+        '@timestamp': new Date(now).toISOString(),
+        config_id: monitorId,
+        monitor: {
+          id: monitorId,
+          name: 'Cert browser monitor',
+          type: 'browser',
+          timespan: {
+            gte: new Date(now - 3 * 60 * 1000).toISOString(),
+            lt: new Date(now).toISOString(),
+          },
+        },
+        synthetics: { type: 'journey/network_info' },
+        url: { full: 'https://browser.scout.test/' },
+        observer: { name: 'test-private-location', geo: { name: 'Test private location' } },
+        agent: { name: 'scout-agent' },
+        http: {
+          response: { mime_type: mimeType },
+          // Request headers live only in `_source`; the origin filter reads this via
+          // a runtime field.
+          request: { headers: { sec_fetch_site: secFetchSite } },
+        },
+        tls: {
+          server: {
+            x509: {
+              subject: { common_name: commonName, distinguished_name: `CN=${commonName}` },
+              issuer: { common_name: 'Browser Test CA' },
+              not_after: new Date(now + 60 * DAY_MS).toISOString(),
+              not_before: new Date(now - 60 * DAY_MS).toISOString(),
+            },
+          },
+        },
+        tags: [BROWSER_TAG],
+      };
+      await esClient.index({
+        index: BROWSER_NETWORK_DATA_STREAM,
+        document,
+        refresh: 'wait_for',
+      });
+    };
+
     const getCerts = async (apiClient: ApiClientFixture, query = '') => {
       const res = await apiClient.get(`${SYNTHETICS_API_URLS.CERTS}${query}`, {
         headers: editorHeaders,
@@ -125,8 +186,8 @@ apiTest.describe(
         types: [SYNTHETICS_MONITOR_TYPE, LEGACY_SYNTHETICS_MONITOR_TYPE],
       });
       await esClient.deleteByQuery({
-        index: `${HTTP_DATA_STREAM}*`,
-        query: { term: { tags: TEST_TAG } },
+        index: `${HTTP_DATA_STREAM}*,${BROWSER_NETWORK_DATA_STREAM}*`,
+        query: { terms: { tags: [TEST_TAG, BROWSER_TAG] } },
         conflicts: 'proceed',
         refresh: true,
         ignore_unavailable: true,
@@ -136,7 +197,19 @@ apiTest.describe(
     apiTest('returns an empty result when no monitors are configured', async ({ apiClient }) => {
       const res = await getCerts(apiClient);
       expect(res).toHaveStatusCode(200);
-      expect(res.body).toMatchObject({ certs: [], total: 0 });
+      expect(certData(res)).toMatchObject({ certs: [], total: 0 });
+
+      // The facets route short-circuits to empty arrays (skipping the ES query)
+      // when no monitor is enabled.
+      const facetsRes = await getCertFacets(apiClient);
+      expect(facetsRes).toHaveStatusCode(200);
+      expect((facetsRes.body as { data: CertFacetsBody }).data).toStrictEqual({
+        monitorTypes: [],
+        tags: [],
+        resourceTypes: [],
+        party: [],
+        expiringWithin: [],
+      });
     });
 
     apiTest(
@@ -173,7 +246,7 @@ apiTest.describe(
 
         const res = await getCerts(apiClient);
         expect(res).toHaveStatusCode(200);
-        const body = res.body as CertResultBody;
+        const body = certData(res);
 
         expect(body.total).toBe(3);
         expect(body.stats).toStrictEqual({ expired: 1, expiringSoon: 1 });
@@ -193,21 +266,21 @@ apiTest.describe(
     apiTest('filters certificates by monitor type', async ({ apiClient }) => {
       const tcpRes = await getCerts(apiClient, '?monitorTypes=tcp');
       expect(tcpRes).toHaveStatusCode(200);
-      expect((tcpRes.body as CertResultBody).total).toBe(0);
+      expect(certData(tcpRes).total).toBe(0);
 
       const httpRes = await getCerts(apiClient, '?monitorTypes=http');
       expect(httpRes).toHaveStatusCode(200);
-      expect((httpRes.body as CertResultBody).total).toBe(3);
+      expect(certData(httpRes).total).toBe(3);
     });
 
     apiTest('filters certificates by tag', async ({ apiClient }) => {
       const matchRes = await getCerts(apiClient, `?tags=${TEST_TAG}`);
       expect(matchRes).toHaveStatusCode(200);
-      expect((matchRes.body as CertResultBody).total).toBe(3);
+      expect(certData(matchRes).total).toBe(3);
 
       const missRes = await getCerts(apiClient, '?tags=this-tag-does-not-exist');
       expect(missRes).toHaveStatusCode(200);
-      expect((missRes.body as CertResultBody).total).toBe(0);
+      expect(certData(missRes).total).toBe(0);
     });
 
     apiTest('filters certificates by expiry window (notValidAfter)', async ({ apiClient }) => {
@@ -216,20 +289,20 @@ apiTest.describe(
       const within30 = await getCerts(apiClient, `?notValidAfter=${encodeURIComponent('now+30d')}`);
       expect(within30).toHaveStatusCode(200);
       // expiring.scout.test (now+10d) and expired.scout.test (now-10d); excludes valid (now+60d).
-      expect((within30.body as CertResultBody).total).toBe(2);
+      expect(certData(within30).total).toBe(2);
 
       const withinYear = await getCerts(
         apiClient,
         `?notValidAfter=${encodeURIComponent('now+1y')}`
       );
       expect(withinYear).toHaveStatusCode(200);
-      expect((withinYear.body as CertResultBody).total).toBe(3);
+      expect(certData(withinYear).total).toBe(3);
     });
 
     apiTest('returns global distinct-cert counts per filter value', async ({ apiClient }) => {
       const res = await getCertFacets(apiClient);
       expect(res).toHaveStatusCode(200);
-      const facets = res.body as CertFacetsBody;
+      const facets = (res.body as { data: CertFacetsBody }).data;
 
       // All three seeded certs come from one HTTP monitor and share TEST_TAG.
       expect(findCount(facets.monitorTypes, 'http')).toBe(3);
@@ -258,6 +331,83 @@ apiTest.describe(
       expect(findCount(facets.expiringWithin, 'now+30d')).toBe(2);
       expect(findCount(facets.expiringWithin, 'now+90d')).toBe(3);
       expect(findCount(facets.expiringWithin, 'now+1y')).toBe(3);
+    });
+
+    apiTest(
+      'includes browser certificates and scopes them by resource type and origin',
+      async ({ apiClient, esClient }) => {
+        // A first-party HTML-document cert and a third-party script cert, captured
+        // on a browser monitor's network events.
+        await indexBrowserNetworkCert(esClient, {
+          commonName: 'first.browser.scout.test',
+          mimeType: 'text/html',
+          secFetchSite: 'same-origin',
+        });
+        await indexBrowserNetworkCert(esClient, {
+          commonName: 'third.browser.scout.test',
+          mimeType: 'application/javascript',
+          secFetchSite: 'cross-site',
+        });
+
+        // monitorTypes=browser returns both browser certs, deduped on common name,
+        // with no fingerprint (browser network events don't capture sha256).
+        const browserRes = await getCerts(apiClient, '?monitorTypes=browser');
+        expect(browserRes).toHaveStatusCode(200);
+        const browserBody = certData(browserRes);
+        expect(browserBody.total).toBe(2);
+        expect(browserBody.certs.map((cert) => cert.common_name).sort()).toStrictEqual([
+          'first.browser.scout.test',
+          'third.browser.scout.test',
+        ]);
+        expect(browserBody.certs.every((cert) => cert.sha256 === undefined)).toBe(true);
+
+        // Resource-type filter narrows by response mime category (text/html -> html,
+        // application/javascript -> script).
+        const htmlRes = await getCerts(apiClient, '?browserResourceTypes=html');
+        expect(htmlRes).toHaveStatusCode(200);
+        expect(certData(htmlRes).certs.map((cert) => cert.common_name)).toStrictEqual([
+          'first.browser.scout.test',
+        ]);
+
+        const scriptRes = await getCerts(apiClient, '?browserResourceTypes=script');
+        expect(scriptRes).toHaveStatusCode(200);
+        expect(certData(scriptRes).certs.map((cert) => cert.common_name)).toStrictEqual([
+          'third.browser.scout.test',
+        ]);
+
+        // Origin filter maps Sec-Fetch-Site onto first/third-party (same-origin ->
+        // first-party, cross-site -> third-party).
+        const firstPartyRes = await getCerts(apiClient, '?party=first_party');
+        expect(firstPartyRes).toHaveStatusCode(200);
+        expect(certData(firstPartyRes).certs.map((cert) => cert.common_name)).toStrictEqual([
+          'first.browser.scout.test',
+        ]);
+
+        const thirdPartyRes = await getCerts(apiClient, '?party=third_party');
+        expect(thirdPartyRes).toHaveStatusCode(200);
+        expect(certData(thirdPartyRes).certs.map((cert) => cert.common_name)).toStrictEqual([
+          'third.browser.scout.test',
+        ]);
+      }
+    );
+
+    apiTest('reports browser resource-type and origin facet counts', async ({ apiClient }) => {
+      const res = await getCertFacets(apiClient);
+      expect(res).toHaveStatusCode(200);
+      const facets = (res.body as { data: CertFacetsBody }).data;
+
+      // One html + one script browser cert were seeded by the previous test.
+      expect(findCount(facets.resourceTypes, 'html')).toBe(1);
+      expect(findCount(facets.resourceTypes, 'script')).toBe(1);
+      expect(findCount(facets.resourceTypes, 'image')).toBe(0);
+
+      // One first-party (same-origin) + one third-party (cross-site).
+      expect(findCount(facets.party, 'first_party')).toBe(1);
+      expect(findCount(facets.party, 'third_party')).toBe(1);
+
+      // Browser certs now appear alongside the three lightweight HTTP certs.
+      expect(findCount(facets.monitorTypes, 'browser')).toBe(2);
+      expect(findCount(facets.monitorTypes, 'http')).toBe(3);
     });
   }
 );
