@@ -14,6 +14,7 @@ steps:
         CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
   - label: ':kibana: Kibana Serverless Tests for ${ENVIRONMENT}'
+    if: build.env("DEPLOYMENT_SLICES") !~ /.*staging-ds-2.*/
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
     soft_fail: true # Remove when tests stabilize
     build:
