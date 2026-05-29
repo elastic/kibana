@@ -138,6 +138,46 @@ describe('useEpisodesHistogramQuery', () => {
     expect(queryArg).toMatch(/rule\.id/);
   });
 
+  it('fills future breakdown buckets with zero-count rows for known categories', async () => {
+    // Time range covers two 1-hour buckets; only the first has an episode.
+    // The second (future-like) bucket must still appear in the datatable for each known
+    // breakdown category so the chart x-axis covers the full selected time range.
+    mockExecuteEsqlQuery.mockResolvedValue([
+      {
+        first_timestamp: '2024-01-01T00:00:00.000Z',
+        last_timestamp: '2024-01-01T00:30:00.000Z',
+        'episode.status': 'inactive',
+        effective_status: 'inactive',
+      },
+    ]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesHistogramQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange, // covers 00:00–02:00 → two 1h buckets
+          bucketInterval: '1h',
+          breakdownField: 'effective_status',
+        }),
+      { wrapper: wrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const rows = result.current.table?.rows ?? [];
+    // Both buckets must be present for the known category 'inactive'
+    const inactiveRows = rows.filter((r) => r.effective_status === 'inactive');
+    expect(inactiveRows.length).toBe(2);
+    // The second bucket must be zero-count
+    const secondBucket = inactiveRows.find(
+      (r) =>
+        new Date(r.time_bucket as string).getTime() ===
+        new Date('2024-01-01T01:00:00.000Z').getTime()
+    );
+    expect(secondBucket?.count).toBe(0);
+  });
+
   it('includes timeRange in the executeEsqlQuery input', async () => {
     mockExecuteEsqlQuery.mockResolvedValue([]);
 

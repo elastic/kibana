@@ -87,6 +87,22 @@ export const useEpisodesHistogramQuery = ({
       dateMath.parse(timeRange?.to ?? 'now', { roundUp: true })?.valueOf() ?? Date.now();
     const buckets = generateTimeBuckets(startMs, endMs, bucketInterval);
     const counts = computeOverlapCounts(rawEpisodes, buckets, breakdownField);
+
+    // When a breakdown is active, future buckets (no overlapping episodes) produce no rows.
+    // Fill those gaps with zero-count entries for each category that appears in other buckets
+    // so the chart x-axis always covers the full selected time range.
+    if (breakdownField && counts.length > 0) {
+      const knownCategories = [...new Set(counts.map((c) => c.breakdown!))];
+      const coveredBuckets = new Set(counts.map((c) => c.bucketStart));
+      for (const { start } of buckets) {
+        if (!coveredBuckets.has(start)) {
+          for (const breakdown of knownCategories) {
+            counts.push({ bucketStart: start, count: 0, breakdown });
+          }
+        }
+      }
+    }
+
     return formatHistogramDatatable(counts, breakdownField);
   }, [rawEpisodes, timeRange, bucketInterval, breakdownField]);
 
