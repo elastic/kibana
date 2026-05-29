@@ -10,23 +10,57 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 
 export interface VisualizationDimensions {
   height: number;
+  /**
+   * Recommended container width for the visualization wrapper.
+   */
   width?: number;
 }
 
 export const DEFAULT_VISUALIZATION_HEIGHT = 240;
+
+const METRIC_DIMENSIONS: VisualizationDimensions = {
+  height: 130,
+  width: 260,
+};
+
+const DATATABLE_DIMENSIONS: VisualizationDimensions = {
+  height: 350,
+  width: 768,
+};
+
+const HORIZONTAL_BULLET_GAUGE_DIMENSIONS: VisualizationDimensions = {
+  height: 110,
+  width: 768,
+};
+
+const VERTICAL_BULLET_GAUGE_DIMENSIONS: VisualizationDimensions = {
+  height: 470,
+  width: 260,
+};
+
+const ARC_GAUGE_DIMENSIONS: VisualizationDimensions = {
+  height: 360,
+  width: 480,
+};
 
 type GaugeShape =
   | { type: 'bullet'; orientation?: 'horizontal' | 'vertical' }
   | { type: 'arc' | 'circle' | 'semi_circle' };
 
 const getGaugeDimensions = (shape: GaugeShape | undefined): VisualizationDimensions => {
-  if (!shape || shape.type !== 'bullet') {
-    // arc, circle, semi_circle — or missing shape defaults to bullet horizontal
-    return shape ? { height: 360, width: 480 } : { height: 110, width: 768 };
+  // Missing shape falls back to horizontal bullet dimensions.
+  if (!shape) {
+    return HORIZONTAL_BULLET_GAUGE_DIMENSIONS;
   }
+
+  // Arc-like gauges use shared arc dimensions.
+  if (shape.type !== 'bullet') {
+    return ARC_GAUGE_DIMENSIONS;
+  }
+
   return shape.orientation === 'vertical'
-    ? { height: 470, width: 260 }
-    : { height: 110, width: 768 };
+    ? VERTICAL_BULLET_GAUGE_DIMENSIONS
+    : HORIZONTAL_BULLET_GAUGE_DIMENSIONS;
 };
 
 /**
@@ -40,14 +74,17 @@ export const getVisualizationDimensionsFromLensConfig = (
 
   switch (chartType) {
     case SupportedChartType.Metric:
-      return { height: 130, width: 260 };
+      return METRIC_DIMENSIONS;
+
     case SupportedChartType.Datatable:
     case 'data_table':
-      return { height: 350, width: 768 };
+      return DATATABLE_DIMENSIONS;
+
     case SupportedChartType.Gauge: {
       const styling = lensConfig.styling as { shape?: GaugeShape } | undefined;
       return getGaugeDimensions(styling?.shape);
     }
+
     default:
       return { height: DEFAULT_VISUALIZATION_HEIGHT };
   }
@@ -63,11 +100,14 @@ export const getVisualizationDimensionsFromChartType = (
 ): VisualizationDimensions => {
   switch (chartType) {
     case ChartType.Metric:
-      return { height: 130, width: 260 };
+      return METRIC_DIMENSIONS;
+
     case ChartType.Table:
-      return { height: 350, width: 768 };
+      return DATATABLE_DIMENSIONS;
+
     case ChartType.Gauge:
-      return { height: 360, width: 480 }; // arc dimensions; subtype unknown at this point
+      return ARC_GAUGE_DIMENSIONS; // gauge subtype unknown at this point
+
     default:
       return { height: DEFAULT_VISUALIZATION_HEIGHT };
   }
