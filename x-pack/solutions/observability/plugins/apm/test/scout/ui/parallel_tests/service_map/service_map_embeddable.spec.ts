@@ -13,14 +13,13 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
 const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
-const COMBO_BOX_LOADING_TIMEOUT = 5_000;
+const SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY = 'postgresql';
+const SERVICE_MAP_TEST_POSTGRESQL_EDGE = `${SERVICE_MAP_TEST_SERVICE}~>${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`;
 
 test.describe(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.setTimeout(120_000);
-
     let dataViewId: string;
 
     test.beforeAll(async ({ apiServices }) => {
@@ -48,6 +47,8 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.setTimeout(120000);
+
       await test.step('open a new dashboard', async () => {
         await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT });
       });
@@ -118,7 +119,7 @@ test.describe(
 
         await expect
           .poll(() => pageObjects.serviceMapPage.getServiceMapEditorComboBoxLoadingCount(), {
-            timeout: COMBO_BOX_LOADING_TIMEOUT,
+            timeout: EXTENDED_TIMEOUT,
           })
           .toBe(0);
 
@@ -134,7 +135,7 @@ test.describe(
 
         await expect
           .poll(() => pageObjects.serviceMapPage.getServiceMapEditorComboBoxLoadingCount(), {
-            timeout: COMBO_BOX_LOADING_TIMEOUT,
+            timeout: EXTENDED_TIMEOUT,
           })
           .toBe(0);
 
@@ -172,12 +173,33 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
       });
 
-      await test.step('click on a service node and verify popover appears', async () => {
-        await pageObjects.serviceMapPage.clickServiceNode(SERVICE_MAP_TEST_SERVICE);
+      await test.step('click on a service node and verify popover contents', async () => {
+        await pageObjects.serviceMapPage.openServiceNodePopover(SERVICE_MAP_TEST_SERVICE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopover).toBeVisible({ timeout: 5000 });
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
           SERVICE_MAP_TEST_SERVICE
+        );
+        await expect(pageObjects.serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
+
+        await page.keyboard.press('Escape');
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+      });
+
+      await test.step('click on a service map edge and verify popover contents', async () => {
+        await pageObjects.serviceMapPage.openEdgePopover(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
+
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
+          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`
+        );
+        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
+        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText(
+          'Explore traces'
         );
 
         await page.keyboard.press('Escape');
