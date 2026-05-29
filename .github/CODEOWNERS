@@ -918,7 +918,6 @@ src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
