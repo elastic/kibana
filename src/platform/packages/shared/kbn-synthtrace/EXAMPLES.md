@@ -93,13 +93,13 @@ const esEvents = toElasticsearchOutput([
 For live data ingestion:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --live
 ```
 
 For a fixed time window:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
 ```
 
 ### Local Development
@@ -107,7 +107,7 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 When running the CLI locally, you can simply use the following command to ingest data to a locally running Elasticsearch and Kibana instance:
 
 ```sh
-node scripts/synthtrace simple_trace.ts
+node scripts/synthtrace simple_trace
 ```
 
 _Assuming both Elasticsearch and Kibana are running on the default localhost ports with default credentials._
@@ -119,7 +119,7 @@ If the Kibana URL differs from the Elasticsearch URL in protocol or hostname, yo
 For example when running ES (with ssl) and Kibana (without ssl) locally in Serverless mode:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
+node scripts/synthtrace simple_trace --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
 ```
 
 ### Using CLI for Elastic Cloud URLs
@@ -127,7 +127,7 @@ node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:chan
 If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
+node scripts/synthtrace simple_trace --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
 ```
 
 ### Using CLI with an API key
@@ -135,7 +135,7 @@ node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@y
 You can use a Kibana API key for authentication by passing the `--apiKey` option:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
+node scripts/synthtrace simple_trace --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
 ```
 
 ## Scenario Examples
