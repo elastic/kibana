@@ -119,7 +119,7 @@ export class SearchInferenceEndpointsPlugin
       privileges: {
         all: {
           app: [],
-          api: [ApiPrivileges.manage(PLUGIN_ID)],
+          api: [ApiPrivileges.manage(PLUGIN_ID), 'manage_advanced_settings'],
           catalogue: [],
           management: {
             modelManagement: [
