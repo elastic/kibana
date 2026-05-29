@@ -7,7 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { NavigationCustomizationMove } from '@kbn/core-chrome-browser';
 import { computeMoves } from './compute_moves';
+
+/** Replays moves on a copy of the default order, mirroring apply_customization. */
+const replay = (
+  defaultOrder: readonly string[],
+  moves: NavigationCustomizationMove[]
+): string[] => {
+  const result = [...defaultOrder];
+  for (const { id, afterId } of moves) {
+    const fromIdx = result.indexOf(id);
+    if (fromIdx !== -1) result.splice(fromIdx, 1);
+    if (afterId === null) {
+      result.unshift(id);
+    } else {
+      const afterIdx = result.indexOf(afterId);
+      result.splice(afterIdx + 1, 0, id);
+    }
+  }
+  return result;
+};
 
 describe('computeMoves', () => {
   it('returns empty array when user order matches default', () => {
@@ -45,11 +65,35 @@ describe('computeMoves', () => {
     expect(moves).toContainEqual({ id: 'x', afterId: 'a' });
   });
 
-  it('handles items absent from user order (removed items) gracefully — no error', () => {
-    // 'b' removed from userOrder — computeMoves only iterates userOrder so no issue
+  it('handles items absent from user order (removed items) without recording spurious moves', () => {
+    // 'b' removed from userOrder. [a, c] is already a subsequence of [a, b, c],
+    // so nothing actually moved relative to the default — no moves should be recorded.
     const moves = computeMoves(['a', 'b', 'c'], ['a', 'c']);
-    // 'c' now follows 'a' directly; default predecessor was 'b' → move recorded
-    expect(moves).toEqual([{ id: 'c', afterId: 'a' }]);
+    expect(moves).toEqual([]);
+  });
+
+  it('records a single move (not a cascade) when one item is dragged to the bottom', () => {
+    // default: [discover, dashboards, agent_builder, workflows, machine_learning]
+    // user drags 'discover' to the bottom.
+    const defaultOrder = [
+      'discover',
+      'dashboards',
+      'agent_builder',
+      'workflows',
+      'machine_learning',
+    ];
+    const userOrder = ['dashboards', 'agent_builder', 'workflows', 'machine_learning', 'discover'];
+
+    const moves = computeMoves(defaultOrder, userOrder);
+
+    // Intent-preserving: only the dragged item is recorded, anchored after the
+    // item it now follows — not a cascade of moves for every item it passed.
+    expect(moves).toEqual([{ id: 'discover', afterId: 'machine_learning' }]);
+  });
+
+  it('records a single move when one item is dragged to the top', () => {
+    const moves = computeMoves(['a', 'b', 'c', 'd', 'e'], ['e', 'a', 'b', 'c', 'd']);
+    expect(moves).toEqual([{ id: 'e', afterId: null }]);
   });
 
   it('records a single move when one item is moved to the middle', () => {
@@ -64,19 +108,32 @@ describe('computeMoves', () => {
 
     const moves = computeMoves(defaultOrder, userOrder);
 
-    // Replay the moves on a copy of the default order
-    const result = [...defaultOrder];
-    for (const { id, afterId } of moves) {
-      const fromIdx = result.indexOf(id);
-      result.splice(fromIdx, 1);
-      if (afterId === null) {
-        result.unshift(id);
-      } else {
-        const afterIdx = result.indexOf(afterId);
-        result.splice(afterIdx + 1, 0, id);
-      }
-    }
+    expect(replay(defaultOrder, moves)).toEqual(userOrder);
+  });
 
-    expect(result).toEqual(userOrder);
+  describe('replay reproduces the user order across many arrangements', () => {
+    const defaultOrder = ['a', 'b', 'c', 'd', 'e', 'f'];
+    const cases: string[][] = [
+      ['a', 'b', 'c', 'd', 'e', 'f'], // unchanged
+      ['f', 'e', 'd', 'c', 'b', 'a'], // full reverse
+      ['b', 'c', 'd', 'e', 'f', 'a'], // first to last
+      ['f', 'a', 'b', 'c', 'd', 'e'], // last to first
+      ['a', 'c', 'b', 'd', 'f', 'e'], // two independent swaps
+      ['c', 'a', 'f', 'b', 'e', 'd'], // scrambled
+      ['d', 'e', 'f', 'a', 'b', 'c'], // block rotation
+    ];
+
+    it.each(cases.map((userOrder) => [userOrder]))('reproduces %j', (userOrder) => {
+      const moves = computeMoves(defaultOrder, userOrder);
+      expect(replay(defaultOrder, moves)).toEqual(userOrder);
+    });
+  });
+
+  it('emits the minimal number of moves (n - LCS length)', () => {
+    // default [a, b, c, d, e] vs user [c, d, a, b, e]:
+    // LCS is [a, b, e] (length 3) → exactly 2 items moved.
+    const moves = computeMoves(['a', 'b', 'c', 'd', 'e'], ['c', 'd', 'a', 'b', 'e']);
+    expect(moves).toHaveLength(2);
+    expect(replay(['a', 'b', 'c', 'd', 'e'], moves)).toEqual(['c', 'd', 'a', 'b', 'e']);
   });
 });
