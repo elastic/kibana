@@ -169,7 +169,10 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.InProgress, executionId: 'exec-1' });
+      expect(result).toEqual({
+        status: StreamsKIsOnboardingStatus.InProgress,
+        executionId: 'exec-1',
+      });
     });
 
     it('returns Completed with output details for a completed execution', async () => {
@@ -225,11 +228,11 @@ describe('StreamsKIsOnboardingClient', () => {
         featuresSkipped: false,
         discoveredFeatures: [],
         featuresConnectorUsed: '',
-        featuresTokensUsed: {},
+        featuresTokensUsed: { prompt: 0, completion: 0, total: 0 },
         queriesSkipped: false,
         persistedQueries: [],
         queriesConnectorUsed: '',
-        queriesTokensUsed: {},
+        queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
       });
     });
 
@@ -280,7 +283,10 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.Canceled, executionId: 'exec-1' });
+      expect(result).toEqual({
+        status: StreamsKIsOnboardingStatus.Canceled,
+        executionId: 'exec-1',
+      });
     });
 
     it('queries with the correct concurrency group key', async () => {
@@ -378,7 +384,7 @@ describe('StreamsKIsOnboardingClient', () => {
       expect(result).toEqual(executions);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          sortField: 'finishedAt',
+          sortField: 'createdAt',
           sortOrder: 'desc',
           size: 10000,
           collapse: 'concurrencyGroupKey',

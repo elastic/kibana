@@ -20,6 +20,7 @@ import {
   MAX_SCHEDULED_STREAMS,
 } from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   classifyStreams,
   parseExcludePatterns,
@@ -92,7 +93,7 @@ const eligibleStreamsRoute = createServerRoute({
     streamsKIsOnboardingClient,
   }): Promise<EligibleStreamsResponse> => {
     if (!streamsKIsOnboardingClient) {
-      throw new StatusError('Workflows management is not available', 503);
+      throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
     const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =

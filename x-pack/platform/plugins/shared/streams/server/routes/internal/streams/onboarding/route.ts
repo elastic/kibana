@@ -6,11 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { StreamsKIsOnboardingStep, StreamsKIsOnboardingStatus, type StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
+import {
+  StreamsKIsOnboardingStep,
+  StreamsKIsOnboardingStatus,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { StatusError } from '../../../../lib/streams/errors/status_error';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import type { StreamsKIsOnboardingInputs } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
@@ -45,7 +49,10 @@ export const onboardingExecuteRoute = createServerRoute({
         steps: z
           .array(z.enum(StreamsKIsOnboardingStep))
           .optional()
-          .default([StreamsKIsOnboardingStep.FeaturesIdentification, StreamsKIsOnboardingStep.QueriesGeneration])
+          .default([
+            StreamsKIsOnboardingStep.FeaturesIdentification,
+            StreamsKIsOnboardingStep.QueriesGeneration,
+          ])
           .describe(
             'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
           ),
@@ -80,7 +87,7 @@ export const onboardingExecuteRoute = createServerRoute({
     streamsKIsOnboardingClient,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
     if (!streamsKIsOnboardingClient) {
-      throw new StatusError('Workflows management is not available', 503);
+      throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
@@ -110,9 +117,14 @@ export const onboardingExecuteRoute = createServerRoute({
     }
 
     // action === 'cancel'
+    // Cancellation may be a no-op (nothing running, or already terminal), so we
+    // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    return { status: StreamsKIsOnboardingStatus.Canceled };
+    const { executionId: _executionId, ...statusResult } =
+      await streamsKIsOnboardingClient.getStatus({ streamName });
+
+    return statusResult;
   },
 });
 
@@ -139,7 +151,7 @@ export const onboardingStatusRoute = createServerRoute({
     streamsKIsOnboardingClient,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
     if (!streamsKIsOnboardingClient) {
-      throw new StatusError('Workflows management is not available', 503);
+      throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
@@ -149,7 +161,8 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    const { executionId: _, ...statusResult } = await streamsKIsOnboardingClient.getStatus({ streamName });
+    const { executionId: _executionId, ...statusResult } =
+      await streamsKIsOnboardingClient.getStatus({ streamName });
     return statusResult;
   },
 });

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { BaseFeature } from '../feature';
+import type { GeneratedSignificantEventQuery } from '../api/significant_events';
+
 export interface StreamsKIsOnboardingResult {
   featuresSkipped: boolean;
-  discoveredFeatures: unknown[];
+  discoveredFeatures: BaseFeature[];
   featuresConnectorUsed: string;
-  featuresTokensUsed: Record<string, unknown>;
+  featuresTokensUsed: ChatCompletionTokenCount;
   queriesSkipped: boolean;
-  persistedQueries: unknown[];
+  persistedQueries: GeneratedSignificantEventQuery[];
   queriesConnectorUsed: string;
-  queriesTokensUsed: Record<string, unknown>;
+  queriesTokensUsed: ChatCompletionTokenCount;
 }
 
 export enum StreamsKIsOnboardingStep {
@@ -43,7 +47,5 @@ export type StreamsKIsOnboardingStatusResult =
   | ({ status: StreamsKIsOnboardingStatus.Completed } & StreamsKIsOnboardingResult);
 
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
-export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> = new Set([
-  StreamsKIsOnboardingStatus.InProgress,
-  StreamsKIsOnboardingStatus.BeingCanceled,
-]);
+export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> =
+  new Set([StreamsKIsOnboardingStatus.InProgress, StreamsKIsOnboardingStatus.BeingCanceled]);

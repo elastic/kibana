@@ -11,8 +11,16 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { StreamsKIsOnboardingStatus, type StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import {
+  StreamsKIsOnboardingStatus,
+  type StreamsKIsOnboardingStatusResult,
+  type BaseFeature,
+  type GeneratedSignificantEventQuery,
+} from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
 /**
  * Inputs passed to the managed onboarding workflow (streams_ki/onboarding.yaml).
@@ -46,12 +54,12 @@ export interface StreamsKIsOnboardingOutput {
   streamName: string;
   featuresSkipped: boolean;
   featuresConnectorUsed: string;
-  discoveredFeatures: unknown[];
-  featuresTokensUsed: Record<string, unknown>;
+  discoveredFeatures: BaseFeature[];
+  featuresTokensUsed: ChatCompletionTokenCount;
   queriesSkipped: boolean;
   queriesConnectorUsed: string;
-  persistedQueries: unknown[];
-  queriesTokensUsed: Record<string, unknown>;
+  persistedQueries: GeneratedSignificantEventQuery[];
+  queriesTokensUsed: ChatCompletionTokenCount;
 }
 
 const ONBOARDING_EXECUTIONS_SPACE_ID = DEFAULT_SPACE_ID;
@@ -129,11 +137,11 @@ const mapExecutionToStatusResult = (
       featuresSkipped: output.featuresSkipped === true,
       discoveredFeatures: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
       featuresConnectorUsed: output.featuresConnectorUsed ?? '',
-      featuresTokensUsed: output.featuresTokensUsed ?? {},
+      featuresTokensUsed: output.featuresTokensUsed ?? EMPTY_TOKEN_COUNT,
       queriesSkipped: output.queriesSkipped === true,
       persistedQueries: Array.isArray(output.persistedQueries) ? output.persistedQueries : [],
       queriesConnectorUsed: output.queriesConnectorUsed ?? '',
-      queriesTokensUsed: output.queriesTokensUsed ?? {},
+      queriesTokensUsed: output.queriesTokensUsed ?? EMPTY_TOKEN_COUNT,
     };
   }
 
@@ -302,14 +310,19 @@ export class StreamsKIsOnboardingClient {
   /**
    * Returns the latest onboarding execution per stream, collapsed by
    * concurrency group key. At most {@link MAX_STREAMS_PER_QUERY} streams
-   * are returned (one execution each), sorted by finishedAt date descending.
+   * are returned (one execution each), sorted by createdAt date descending.
+   *
+   * We sort by createdAt (not finishedAt) so the most recently *started*
+   * execution wins per stream: a currently running execution has no
+   * finishedAt, and sorting by finishedAt would hide it behind an older
+   * completed run, breaking the "already running" classification.
    */
   async getRecentExecutions(): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         size: MAX_STREAMS_PER_QUERY,
-        sortField: 'finishedAt',
+        sortField: 'createdAt',
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',
       },
