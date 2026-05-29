@@ -18,5 +18,10 @@ test.describe('Cross-Cluster Replication - Home Page', { tag: CCR_TAGS }, () => 
   test('loads the app and displays the create follower index button', async ({ pageObjects }) => {
     await expect(pageObjects.ccr.appTitle).toHaveText('Cross-Cluster Replication');
     await expect(pageObjects.ccr.createFollowerIndexButton).toBeVisible();
+  test('loads the app and displays the create follower index button', async ({ page, pageObjects }) => {
+    await expect(pageObjects.ccr.appTitle).toHaveText('Cross-Cluster Replication');
+    await expect(pageObjects.ccr.createFollowerIndexButton).toBeVisible();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
   });
 });
