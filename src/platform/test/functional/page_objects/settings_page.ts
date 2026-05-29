@@ -149,6 +149,26 @@ export class SettingsPageObject extends FtrService {
     await this.common.navigateToApp('settings');
   }
 
+  async navigateToDataViewById(id: string) {
+    await this.common.navigateToApp(`management/kibana/dataViews/dataView/${id}`);
+    await this.testSubjects.existOrFail('editIndexPattern');
+  }
+
+  async navigateToDataViews() {
+    await this.common.navigateToApp('management/kibana/dataViews');
+    await this.testSubjects.existOrFail('createDataViewButton');
+  }
+
+  async navigateToSavedObjects() {
+    await this.common.navigateToApp('management/kibana/objects');
+    await this.testSubjects.existOrFail('importObjects');
+  }
+
+  async navigateToAdvancedSettings() {
+    await this.common.navigateToApp('management/kibana/settings');
+    await this.testSubjects.existOrFail('settingsSearchBar');
+  }
+
   async getIndexPatternField() {
     return this.testSubjects.find('createIndexPatternTitleInput');
   }
