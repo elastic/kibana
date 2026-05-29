@@ -31,7 +31,7 @@ ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
-ajv@8.18.0
+ajv@8.20.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
 browserslist@4.28.1
@@ -91,7 +91,7 @@ source-map@0.6.1
 supports-color@8.1.1
 tapable@2.3.0
 terser-webpack-plugin@5.3.17
-terser@5.40.0
+terser@5.44.1
 tslib@1.14.1
 undici-types@7.16.0
 update-browserslist-db@1.2.3

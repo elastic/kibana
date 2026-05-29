@@ -38,7 +38,7 @@ ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
-ajv@8.18.0
+ajv@8.20.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
 browserslist@4.28.1
@@ -138,7 +138,7 @@ stylis@4.3.6
 supports-color@8.1.1
 tapable@2.3.0
 terser-webpack-plugin@5.3.17
-terser@5.40.0
+terser@5.44.1
 throttle-debounce@3.0.1
 toggle-selection@1.0.6
 ts-easing@0.2.0
