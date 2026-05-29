@@ -700,7 +700,7 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs, undefined));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
       }
     }
 
