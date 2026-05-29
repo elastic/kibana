@@ -9,18 +9,27 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function getTypeI18n(type: string) {
+export type FormulaArgType = 'number' | 'boolean' | 'string';
+
+/**
+ * Returns a locale-aware display label for an internal type constant.
+ * Use this only for display in UI text, tooltips, and error messages.
+ * Never use the return value for identity comparisons.
+ */
+export const getTypeLabel = (type: FormulaArgType): string => {
   if (type === 'number') {
     return i18n.translate('lensFormulaDocs.number', { defaultMessage: 'number' });
   }
   if (type === 'string') {
     return i18n.translate('lensFormulaDocs.string', { defaultMessage: 'string' });
   }
-  if (type === 'boolean') {
-    return i18n.translate('lensFormulaDocs.boolean', { defaultMessage: 'boolean' });
-  }
-  return '';
-}
+  return i18n.translate('lensFormulaDocs.boolean', { defaultMessage: 'boolean' });
+};
+
+/**
+ * @deprecated Use `getTypeLabel` instead.
+ */
+export const getTypeI18n = getTypeLabel;
 
 export const tinymathFunctions: Record<
   string,
@@ -30,14 +39,16 @@ export const tinymathFunctions: Record<
       name: string;
       optional?: boolean;
       defaultValue?: string | number;
-      type?: string;
+      /** Locale-invariant type constant. Use getTypeLabel() to get the translated display label. */
+      type?: FormulaArgType;
       alternativeWhenMissing?: string;
     }>;
     // Help is in Markdown format
     help: string;
     // When omitted defaults to "number".
     // Used for comparison functions return type
-    outputType?: string;
+    /** Locale-invariant type constant. Use getTypeLabel() to get the translated display label. */
+    outputType?: FormulaArgType;
   }
 > = {
   add: {
@@ -45,11 +56,11 @@ export const tinymathFunctions: Record<
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.addFunction.markdown', {
@@ -72,11 +83,11 @@ Example: Offset count by a static value
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.subtractFunction.markdown', {
@@ -94,11 +105,11 @@ Example: Calculate the range of a field
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.multiplyFunction.markdown', {
@@ -119,11 +130,11 @@ Example: Calculate price after constant tax rate
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.divideFunction.markdown', {
@@ -143,7 +154,7 @@ Example: \`divide(sum(bytes), 2)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.absFunction.markdown', {
@@ -159,7 +170,7 @@ Example: Calculate average distance to sea level \`abs(average(altitude))\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.cbrtFunction.markdown', {
@@ -176,7 +187,7 @@ Example: Calculate side length from volume
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.ceilFunction.markdown', {
@@ -193,16 +204,16 @@ Example: Round up price to the next dollar
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.min', { defaultMessage: 'min' }),
-        type: getTypeI18n('number'),
+        type: 'number',
         alternativeWhenMissing: 'pick_max',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.max', { defaultMessage: 'max' }),
-        type: getTypeI18n('number'),
+        type: 'number',
         alternativeWhenMissing: 'pick_min',
       },
     ],
@@ -226,7 +237,7 @@ clamp(
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.cubeFunction.markdown', {
@@ -243,7 +254,7 @@ Example: Calculate volume from side length
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.expFunction.markdown', {
@@ -261,7 +272,7 @@ Example: Calculate the natural exponential function
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.fixFunction.markdown', {
@@ -278,7 +289,7 @@ Example: Rounding towards zero
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.floorFunction.markdown', {
@@ -295,13 +306,13 @@ Example: Round down a price
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.base', { defaultMessage: 'base' }),
         optional: true,
         defaultValue: 'e',
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.logFunction.markdown', {
@@ -321,11 +332,11 @@ log(sum(bytes), 2)
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.base', { defaultMessage: 'base' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.modFunction.markdown', {
@@ -342,11 +353,11 @@ Example: Calculate last three digits of a value
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.base', { defaultMessage: 'base' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.powFunction.markdown', {
@@ -363,13 +374,13 @@ Example: Calculate volume based on side length
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.decimals', { defaultMessage: 'decimals' }),
         optional: true,
         defaultValue: 0,
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.roundFunction.markdown', {
@@ -389,7 +400,7 @@ round(sum(bytes), 2)
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.sqrtFunction.markdown', {
@@ -406,7 +417,7 @@ Example: Calculate side length based on area
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.squareFunction.markdown', {
@@ -423,11 +434,11 @@ Example: Calculate area based on side length
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.maxFunction.markdown', {
@@ -444,11 +455,11 @@ Example: Find the maximum between two fields averages
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.minFunction.markdown', {
@@ -465,13 +476,13 @@ Example: Find the minimum between two fields averages
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.value', { defaultMessage: 'value' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.defaultValue', {
           defaultMessage: 'default',
         }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.defaultFunction.markdown', {
@@ -488,14 +499,14 @@ Example: Return -1 when a field has no data
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
-    outputType: getTypeI18n('boolean'),
+    outputType: 'boolean',
     help: i18n.translate('lensFormulaDocs.tinymath.ltFunction.markdown', {
       defaultMessage: `
 Performs a lower than comparison between two values.
@@ -514,14 +525,14 @@ Example: \`lt(average(bytes), 1000)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
-    outputType: getTypeI18n('boolean'),
+    outputType: 'boolean',
     help: i18n.translate('lensFormulaDocs.tinymath.gtFunction.markdown', {
       defaultMessage: `
 Performs a greater than comparison between two values.
@@ -540,14 +551,14 @@ Example: \`gt(average(bytes), 1000)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
-    outputType: getTypeI18n('boolean'),
+    outputType: 'boolean',
     help: i18n.translate('lensFormulaDocs.tinymath.eqFunction.markdown', {
       defaultMessage: `
 Performs an equality comparison between two values.
@@ -566,14 +577,14 @@ Example: \`eq(sum(bytes), 1000000)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
-    outputType: getTypeI18n('boolean'),
+    outputType: 'boolean',
     help: i18n.translate('lensFormulaDocs.tinymath.lteFunction.markdown', {
       defaultMessage: `
 Performs a lower than or equal comparison between two values.
@@ -592,14 +603,14 @@ Example: \`lte(average(bytes), 1000)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
-    outputType: getTypeI18n('boolean'),
+    outputType: 'boolean',
     help: i18n.translate('lensFormulaDocs.tinymath.gteFunction.markdown', {
       defaultMessage: `
 Performs a greater than comparison between two values.
@@ -618,15 +629,15 @@ Example: \`gte(average(bytes), 1000)\`
     positionalArguments: [
       {
         name: i18n.translate('lensFormulaDocs.tinymath.condition', { defaultMessage: 'condition' }),
-        type: getTypeI18n('boolean'),
+        type: 'boolean',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.left', { defaultMessage: 'left' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
       {
         name: i18n.translate('lensFormulaDocs.tinymath.right', { defaultMessage: 'right' }),
-        type: getTypeI18n('number'),
+        type: 'number',
       },
     ],
     help: i18n.translate('lensFormulaDocs.tinymath.ifElseFunction.markdown', {

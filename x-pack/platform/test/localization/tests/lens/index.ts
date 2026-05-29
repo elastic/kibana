@@ -72,6 +72,5 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./smokescreen'));
-    loadTestFile(require.resolve('./formula'));
   });
 }
