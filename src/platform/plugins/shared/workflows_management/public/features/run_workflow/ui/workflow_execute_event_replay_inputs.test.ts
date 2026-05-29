@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EventTriggerReplayInput } from '@kbn/workflows';
-import type { TriggerEventReplaySource } from '@kbn/workflows';
+import type { EventTriggerReplayInput, TriggerEventReplaySource } from '@kbn/workflows';
 import { buildTriggerEventReplayInputs } from './workflow_execute_event_replay_inputs';
 
 describe('buildTriggerEventReplayInputs', () => {
