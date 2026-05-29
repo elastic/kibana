@@ -387,7 +387,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             methods.setValue('query', { format: 'standalone', breach: current.breach });
           }
         }
-        if (isBuilderMode && builderState && typeof builderState === 'object') {
+        if (isBuilderMode && builderState) {
           const { recovery: _, ...rest } = builderState as Record<string, unknown>;
           setBuilderState(rest);
         }

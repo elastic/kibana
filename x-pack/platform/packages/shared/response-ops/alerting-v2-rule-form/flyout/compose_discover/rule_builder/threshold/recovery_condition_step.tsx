@@ -63,7 +63,13 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
 
   const recoveryConfig = builderState.recovery;
 
-  const generatedRecoveryBlock = useMemo(() => buildRecoveryBlock(builderState), [builderState]);
+  const generatedRecoveryBlock = useMemo(
+    () =>
+      recoveryConfig
+        ? buildRecoveryBlock({ recovery: recoveryConfig } as ThresholdFormValues)
+        : undefined,
+    [recoveryConfig]
+  );
 
   useEffect(() => {
     if (!recoveryConfig || !generatedRecoveryBlock) return;
