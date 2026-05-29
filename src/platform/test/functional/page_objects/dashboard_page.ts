@@ -13,9 +13,9 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator';
 
 import expect from '@kbn/expect';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
-import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 
 interface SaveDashboardOptions {
   /**

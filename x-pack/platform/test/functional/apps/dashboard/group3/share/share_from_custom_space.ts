@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function sharingFromSpace({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
