@@ -83,10 +83,12 @@ export const writeEntityIds = async (
   logger: Logger,
   records: EntityRelationshipRecord[]
 ): Promise<WriteEntityIdsResult> => {
-  if (records.length === 0) return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
+  if (records.length === 0)
+    return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
 
   const valid = filterValid(records);
-  if (valid.length === 0) return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
+  if (valid.length === 0)
+    return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
 
   const merged = mergeRecords(valid);
 
@@ -107,7 +109,8 @@ export const writeEntityIds = async (
     }
   }
 
-  if (objects.length === 0) return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
+  if (objects.length === 0)
+    return { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
   const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
@@ -145,5 +148,10 @@ export const writeEntityIds = async (
     }
   }
 
-  return { updated, notFound: missingErrors.length, errors: realErrors.length, relationshipTypeApplied };
+  return {
+    updated,
+    notFound: missingErrors.length,
+    errors: realErrors.length,
+    relationshipTypeApplied,
+  };
 };
