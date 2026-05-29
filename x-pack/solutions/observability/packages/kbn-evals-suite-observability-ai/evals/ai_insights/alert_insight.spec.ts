@@ -13,6 +13,7 @@ import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
 } from '../../src/data_generators/replay';
+import { getAlertRuleDiagnostics } from '../../src/scenarios/alert_rule_diagnostics';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
 import { waitForActiveAlert } from '../../src/wait_for_active_alert';
 import { evaluate } from './evaluate_ai_insights';
@@ -56,20 +57,13 @@ function createScenarioTest(scenario: AlertScenario) {
       });
 
       log.info('Waiting for alert to be created');
-      const { params: ruleParams, rule_type_id: ruleTypeId } = scenario.alertRule.ruleParams;
       alertId = await waitForActiveAlert({
         esClient,
         kbnClient,
         alertsIndex: scenario.alertRule.alertsIndex,
         ruleId,
         log,
-        diagnostics: {
-          scenarioId: scenario.id,
-          ruleTypeId,
-          serviceName: 'serviceName' in ruleParams ? ruleParams.serviceName : undefined,
-          windowSize: 'windowSize' in ruleParams ? ruleParams.windowSize : undefined,
-          windowUnit: 'windowUnit' in ruleParams ? ruleParams.windowUnit : undefined,
-        },
+        diagnostics: getAlertRuleDiagnostics(scenario.id, scenario.alertRule.ruleParams),
       });
     });
 

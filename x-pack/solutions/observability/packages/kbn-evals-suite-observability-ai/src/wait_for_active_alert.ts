@@ -296,17 +296,27 @@ async function appendApmDataDiagnostics({
   const isTransactionDurationRule = diagnostics.ruleTypeId === 'apm.transaction_duration';
   const isErrorRateRule = diagnostics.ruleTypeId === 'apm.error_rate';
 
-  if (isTransactionDurationRule) {
+  if (isMetricsLatencyRule) {
+    const aggregatedTransactionMetricsFilter = {
+      bool: {
+        filter: [
+          timeFilter,
+          serviceFilter,
+          { exists: { field: 'transaction.duration.histogram' } },
+          { term: { 'metricset.name': 'transaction' } },
+          { term: { 'processor.event': 'metric' } },
+        ],
+      },
+    };
     const metricCount = await safeCount(esClient, {
       index: 'metrics-*,metrics-apm*',
-      query: {
-        bool: {
-          filter: [timeFilter, serviceFilter],
-        },
-      },
+      query: aggregatedTransactionMetricsFilter,
     });
+    const ruleDescription = isCustomThresholdRule
+      ? 'custom threshold rules query metrics-* with transaction.duration.histogram'
+      : 'transaction duration rules query aggregated transaction metrics';
     lines.push(
-      `APM metrics docs for service "${serviceName}" in ${timeGte}..now: ${metricCount} (transaction duration rules query aggregated transaction metrics)`
+      `APM metrics docs for service "${serviceName}" in ${timeGte}..now: ${metricCount} (${ruleDescription})`
     );
 
     const transactionCount = await safeCount(esClient, {
@@ -321,7 +331,11 @@ async function appendApmDataDiagnostics({
       `APM transaction events for service "${serviceName}" in ${timeGte}..now: ${transactionCount}`
     );
 
-    if (metricCount === 0 && transactionCount === 0) {
+    if (metricCount === 0 && transactionCount > 0) {
+      lines.push(
+        'likely cause: traces exist but aggregated transaction metrics are missing (check snapshot includes metrics-transaction.1m.otel-default and EDOT elasticapm processor output)'
+      );
+    } else if (metricCount === 0 && transactionCount === 0) {
       lines.push(
         'likely cause: no APM latency data for this service in the rule time window (check snapshot replay and service.name)'
       );

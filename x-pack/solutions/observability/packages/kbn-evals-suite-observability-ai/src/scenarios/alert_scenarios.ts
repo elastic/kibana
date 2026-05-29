@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { AlertScenario, TransactionDurationAggregationType } from './types';
-import { AD_HIGH_CPU_GCS, PAYMENT_SERVICE_GCS, PAYMENT_UNREACHABLE_GCS } from './constants';
+import type { AlertScenario } from './types';
+import {
+  AD_HIGH_CPU_GCS,
+  AD_HIGH_CPU_METRICS_DATA_VIEW,
+  PAYMENT_SERVICE_GCS,
+  PAYMENT_UNREACHABLE_GCS,
+} from './constants';
 
 const PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID = 'payment-error-count-alert';
 const PAYMENT_UNREACHABLE_ALERT_SCENARIO_ID = 'payment-unreachable-alert';
@@ -114,31 +119,49 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
   },
   [AD_HIGH_CPU_ALERT_SCENARIO_ID]: {
     id: AD_HIGH_CPU_ALERT_SCENARIO_ID,
-    description: 'APM transaction duration alert for ad service under high CPU load',
+    description: 'Custom threshold alert for ad service latency under high CPU load',
     snapshotName: 'ad-high-cpu',
     gcs: AD_HIGH_CPU_GCS,
     alertRule: {
       ruleParams: {
-        consumer: 'apm',
+        consumer: 'observability',
         enabled: true,
-        name: 'Latency threshold - ad service high CPU',
-        rule_type_id: 'apm.transaction_duration',
+        name: 'Custom threshold - ad service high CPU latency',
+        rule_type_id: 'observability.rules.custom_threshold',
         tags: [],
         params: {
-          threshold: 5,
-          aggregationType: '95th' as TransactionDurationAggregationType,
-          windowSize: 5,
-          windowUnit: 'm',
-          serviceName: 'ad',
-          environment: 'ENVIRONMENT_ALL',
-          groupBy: ['service.name', 'service.environment'],
+          criteria: [
+            {
+              comparator: '>',
+              threshold: [2000],
+              timeSize: 5,
+              timeUnit: 'm',
+              metrics: [
+                {
+                  name: 'A',
+                  field: 'transaction.duration.histogram',
+                  aggType: 'p95',
+                  filter: '',
+                },
+              ],
+            },
+          ],
+          alertOnNoData: true,
+          alertOnGroupDisappear: true,
+          searchConfiguration: {
+            query: {
+              query: 'service.name: "ad"',
+              language: 'kuery',
+            },
+            index: AD_HIGH_CPU_METRICS_DATA_VIEW,
+          },
         },
         actions: [],
         schedule: {
           interval: '1m',
         },
       },
-      alertsIndex: '.alerts-observability.apm.alerts-default',
+      alertsIndex: '.alerts-observability.threshold.alerts-default',
     },
     expectedOutput: AD_HIGH_CPU_ALERT_EXPECTED,
   },

@@ -25,8 +25,37 @@ export type ApmErrorCountRuleCreateRequest = CreateRuleRequestBody<ErrorCountRul
 export type ApmTransactionDurationRuleCreateRequest =
   CreateRuleRequestBody<TransactionDurationRuleParams>;
 
+export interface CustomThresholdCriteria {
+  comparator: string;
+  threshold: number[];
+  timeSize: number;
+  timeUnit: string;
+  metrics: Array<{
+    name: string;
+    field?: string;
+    aggType: string;
+    filter?: string;
+  }>;
+}
+
+export interface CustomThresholdRuleParams {
+  criteria: CustomThresholdCriteria[];
+  alertOnNoData: boolean;
+  alertOnGroupDisappear: boolean;
+  searchConfiguration: {
+    query: { query: string; language: string };
+    index: string | Record<string, unknown>;
+  };
+  groupBy?: string[];
+}
+
+export type CustomThresholdRuleCreateRequest = CreateRuleRequestBody<CustomThresholdRuleParams>;
+
 export interface AlertRuleConfig {
-  ruleParams: ApmErrorCountRuleCreateRequest | ApmTransactionDurationRuleCreateRequest;
+  ruleParams:
+    | ApmErrorCountRuleCreateRequest
+    | ApmTransactionDurationRuleCreateRequest
+    | CustomThresholdRuleCreateRequest;
   alertsIndex: string;
 }
 

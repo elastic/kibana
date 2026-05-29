@@ -28,3 +28,15 @@ export const AD_HIGH_CPU_GCS: GcsConfig = {
   bucket: GCS_BUCKET,
   basePath: 'otel-demo/ad-high-cpu',
 };
+
+export const AD_HIGH_CPU_METRICS_DATA_VIEW = {
+  id: 'ad-high-cpu-eval-metrics',
+  title: 'metrics-*',
+  timeFieldName: '@timestamp',
+  sourceFilters: [],
+  fieldFormats: {},
+  runtimeFieldMap: {},
+  allowNoIndex: false,
+  name: 'metrics-*',
+  allowHidden: false,
+} as const;
