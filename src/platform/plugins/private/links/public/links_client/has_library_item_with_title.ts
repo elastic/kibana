@@ -10,13 +10,9 @@
 import { linksClient } from './links_client';
 
 export const hasLibraryItemWithTitle = async (title: string) => {
-  const { hits } = await linksClient.search(
-    {
-      text: `"${title}"`,
-      limit: 10,
-    },
-    { onlyTitle: true }
-  );
+  const { data } = await linksClient.search({
+    query: `"${title}"`,
+  });
 
-  return hits.some((obj) => obj.attributes.title?.toLowerCase() === title.toLowerCase());
+  return data.some((links) => links.data.title.toLowerCase() === title.toLowerCase());
 };
