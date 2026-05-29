@@ -90,8 +90,8 @@ jest.mock('../lib/resolve_links', () => {
 jest.mock('../links_client', () => {
   return {
     linksClient: {
-      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
-      update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
+      create: jest.fn().mockResolvedValue({ id: '333' }),
+      update: jest.fn().mockResolvedValue({ id: '123' }),
     },
   };
 });
@@ -249,11 +249,10 @@ describe('getLinksEmbeddableFactory', () => {
       const { api } = await buildLinksEmbeddable(byValueState);
       const newId = await api.saveToLibrary('some new title');
       expect(linksClient.create).toHaveBeenCalledWith({
-        data: {
-          title: 'some new title',
-          links: getLinks(),
-          layout: 'horizontal',
-        },
+        title: 'some new title',
+        description: 'just a few links',
+        links: getLinks(),
+        layout: 'horizontal',
       });
       expect(newId).toBe('333');
       expect(api.getSerializedStateByReference(newId)).toEqual({

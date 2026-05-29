@@ -9,10 +9,10 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
-import { extractReferences } from './references';
-import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 import type { StoredLinksState } from '../../../server';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
+import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
+import { extractReferences } from './references';
 
 export function transformIn(state: LinksEmbeddableState): {
   state: StoredLinksState;
