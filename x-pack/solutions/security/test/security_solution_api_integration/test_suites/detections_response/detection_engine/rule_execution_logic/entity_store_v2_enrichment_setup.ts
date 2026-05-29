@@ -48,16 +48,32 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   const retry = getService('retry');
   const log = getService('log');
 
-  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<void> => {
+  /**
+   * Installs Entity Store V2 engines and seeds entities.
+   *
+   * Returns `false` when Entity Store V2 is not available in the current environment
+   * (e.g. ESS / non-MKI stateful). Callers should call `this.skip()` when `false` is
+   * returned so the test suite is skipped rather than failing.
+   *
+   * Returns `true` when setup completed successfully.
+   */
+  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<boolean> => {
     const entityTypes: string[] = [];
     if (enrichmentConfig.hosts?.length) entityTypes.push('host');
     if (enrichmentConfig.users?.length) entityTypes.push('user');
 
-    if (entityTypes.length === 0) return;
+    if (entityTypes.length === 0) return true;
 
     const installRes = await withHeaders(supertest.post('/api/security/entity_store/install')).send(
       { entityTypes }
     );
+
+    if (installRes.status === 404 || installRes.status === 503) {
+      log.debug(
+        `Entity Store V2 is not available in this environment (status ${installRes.status}), skipping`
+      );
+      return false;
+    }
 
     if (installRes.status !== 200 && installRes.status !== 201) {
       throw new Error(
@@ -72,7 +88,7 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       if (res.body.status === 'error') {
         throw new Error(`Entity Store V2 install errored: ${JSON.stringify(res.body)}`);
       }
-      return res.body.status === 'stopped';
+      return res.body.status === 'running' || res.body.status === 'stopped';
     });
 
     for (const hostConfig of enrichmentConfig.hosts ?? []) {
@@ -100,6 +116,8 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
       }
     }
+
+    return true;
   };
 
   const teardown = async (): Promise<void> => {
