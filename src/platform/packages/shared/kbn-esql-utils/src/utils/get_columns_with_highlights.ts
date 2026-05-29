@@ -32,14 +32,14 @@ const POST_TAG_OPTION_NAME = 'post_tag';
  * ES|QL functions that can produce highlight markup in output columns when
  * called with `{ "highlight": true }`.
  */
-export const FUNCTIONS_WITH_HIGHLIGHT_SUPPORT = ['top_snippets'];
+const FUNCTIONS_WITH_HIGHLIGHT_SUPPORT = ['top_snippets'];
 
 export interface ESQLHighlightTags {
   preTag: string;
   postTag: string;
 }
 
-export type EsqlColumnsWithHighlights = Record<string, ESQLHighlightTags>;
+export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
 
 /**
  * Returns columns built using a highlighting algorithm,
@@ -64,8 +64,8 @@ export type EsqlColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  *   },
  * }
  */
-export function getColumnsWithHighlights(query: string): EsqlColumnsWithHighlights {
-  const columnsWithHighlights: EsqlColumnsWithHighlights = {};
+export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighlights {
+  const columnsWithHighlights: ESQLColumnsWithHighlights = {};
   const { root } = Parser.parse(query);
 
   const highlightFunctionsCandidates = Walker.findAll(

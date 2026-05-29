@@ -8,7 +8,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { EsqlColumnsWithHighlights } from '@kbn/esql-utils';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
@@ -31,7 +31,7 @@ export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | 
    * As oposed to DSL, ES|QL highlights are inlined in the hit value.
    * This record holds which columns have highlights and what tag was used for it.
    */
-  inline_highlights?: EsqlColumnsWithHighlights;
+  inline_highlights?: ESQLColumnsWithHighlights;
 }
 
 /**

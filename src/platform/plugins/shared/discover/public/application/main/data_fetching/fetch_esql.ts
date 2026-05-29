@@ -28,7 +28,7 @@ import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common'
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
-import type { EsqlColumnsWithHighlights } from '@kbn/esql-utils';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -115,7 +115,7 @@ export function fetchEsql({
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
-            let inlineHighlights: EsqlColumnsWithHighlights | undefined;
+            let inlineHighlights: ESQLColumnsWithHighlights | undefined;
             if (isOfAggregateQueryType(query)) {
               try {
                 inlineHighlights = getColumnsWithHighlights(query.esql);
