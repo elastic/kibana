@@ -9,6 +9,7 @@
 
 import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, ForEachContextSchema, WhileContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -321,6 +322,47 @@ describe('getContextSchemaForPath', () => {
 
     expect((context.shape as any).item).toBeDefined();
     expect((context.shape as any).index).toBeDefined();
+  });
+
+  it('should return nested $map alias context for data.map fields', () => {
+    const definitionWithDataMap = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {
+        items: {
+          labels: [{ name: 'bug' }],
+        },
+      },
+      steps: [
+        {
+          name: 'map-step',
+          type: 'data.map',
+          items: '${{ consts.items }}',
+          with: {
+            fields: {
+              labels: {
+                $map: { items: '${{ item.labels }}', item: 'label' },
+                name: '${{ label.name }}',
+              },
+            },
+          },
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
+    const context = getContextSchemaForPath(definitionWithDataMap, graph, [
+      'steps',
+      0,
+      'with',
+      'fields',
+      'labels',
+      'name',
+    ]);
+
+    expect(getSchemaAtPath(context, 'label.name').schema).toBeInstanceOf(z.ZodLiteral);
   });
 
   it('should return the context for first step in false branch of if-split', () => {

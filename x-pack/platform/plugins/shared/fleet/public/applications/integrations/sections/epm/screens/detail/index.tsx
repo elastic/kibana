@@ -30,11 +30,15 @@ import semverLt from 'semver/functions/lt';
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
-  getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import {
+  getAgentlessRelease,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -49,7 +53,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
@@ -75,6 +78,7 @@ import {
   LoadingIconPanel,
   MiniIcon,
   AddIntegrationButton,
+  AddIntegrationButtonDisabledReason,
   EditIntegrationButton,
 } from './components';
 import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
@@ -196,6 +200,31 @@ export function Detail() {
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
+  const isViewingOldPackage =
+    packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
+
+  const isViewingDifferentVersion =
+    isInstalled &&
+    packageInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    packageInfo.version !== packageInfo.installationInfo.version;
+
+  const isViewingUnavailableVersion = Boolean(
+    isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
+  );
+
+  const addIntegrationDisabledReason: AddIntegrationButtonDisabledReason | undefined =
+    isViewingUnavailableVersion
+      ? isInstalled
+        ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
+        : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
+      : !userCanInstallPackages
+      ? missingSecurityConfiguration
+        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : undefined;
+
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >();
@@ -294,8 +323,14 @@ export function Detail() {
   const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
     (ALERTING_ASSET_TYPES as string[]).includes(type)
   );
+  const pkgInstallationInfo =
+    packageInfo && 'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const hasInstalledAlertingAssets = (pkgInstallationInfo?.installed_kibana ?? []).some((asset) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(asset.type)
+  );
   const showAlertingTab =
     hasArchiveAlertingAssets ||
+    hasInstalledAlertingAssets ||
     (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state
@@ -345,6 +380,16 @@ export function Detail() {
     () => getDeferredInstallationsCnt(packageInfo),
     [packageInfo]
   );
+
+  const integrationName = integration ?? undefined;
+
+  const releaseLabel = useMemo(() => {
+    if (packageInfo && isOnlyAgentlessIntegration(packageInfo, integrationName)) {
+      const release = getAgentlessRelease(packageInfo, integrationName);
+      if (release !== undefined) return release;
+    }
+    return getPackageReleaseLabel(packageInfo?.version ?? '');
+  }, [packageInfo, integrationName]);
 
   const headerLeftContent = useMemo(
     () => (
@@ -399,11 +444,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      {releaseLabel !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge
-                            release={getPackageReleaseLabel(packageInfo.version)}
-                          />
+                          <HeaderReleaseBadge release={releaseLabel} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -415,7 +458,15 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
+    [
+      integrationInfo,
+      isLoading,
+      packageInfo,
+      fromIntegrationsPath,
+      queryParams,
+      packageInfoError,
+      releaseLabel,
+    ]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
@@ -598,7 +649,7 @@ export function Detail() {
                           )}
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
-                              userCanInstallPackages={userCanInstallPackages}
+                              disabledReason={addIntegrationDisabledReason}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),
@@ -606,7 +657,6 @@ export function Detail() {
                                   ? { agentPolicyId: agentPolicyIdFromContext }
                                   : {}),
                               })}
-                              missingSecurityConfiguration={missingSecurityConfiguration}
                               packageName={wrapTitleWithDeprecated({
                                 packageInfo,
                                 integrationInfo,
@@ -644,12 +694,11 @@ export function Detail() {
       isInstalled,
       isCustomPackage,
       handleEditIntegrationClick,
-      userCanInstallPackages,
+      addIntegrationDisabledReason,
       getHref,
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      missingSecurityConfiguration,
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,

@@ -1,5 +1,5 @@
 {
-  "sha1": "6e013bc79940c4a3958441f95eb6a0e3da67fd69",
+  "sha1": "97dcacd5bbf653018c71574564fcaef825577338",
   "tests": [
     {
       "id": "926362ac9e9161a-ce96c191932cf3e",
@@ -221,6 +221,34 @@
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
         "line": 188,
         "column": 9
+      }
+    },
+    {
+      "id": "36d5b3c1e8655d5-94347be68b888e4",
+      "title": "Homepage - Limited permissions user should only see Data Management panel and Storage/Indices badges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "36d5b3c1e8655d5-f6bc7b4906887c3",
+      "title": "Homepage - Limited permissions user should only see Data Management in primary sidenav",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
+        "line": 52,
+        "column": 15
       }
     },
     {

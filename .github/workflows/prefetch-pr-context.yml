@@ -54,11 +54,74 @@ jobs:
             ' "$files_json" > "$output_file"
           }
 
+          add_cross_referenced_pulls_to_metadata() {
+            local owner="${REPO%%/*}"
+            local repo_name="${REPO#*/}"
+            local cross_refs_file
+            cross_refs_file="$(mktemp)"
+
+            gh api graphql \
+              -f owner="$owner" \
+              -f repo="$repo_name" \
+              -F number="$PR_NUMBER" \
+              -f query='
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $number) {
+                      timelineItems(first: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
+                        nodes {
+                          ... on CrossReferencedEvent {
+                            source {
+                              ... on PullRequest {
+                                number
+                                url
+                                state
+                                baseRefName
+                                title
+                                labels(first: 50) {
+                                  nodes {
+                                    name
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ' \
+              --jq '
+                [
+                  .data.repository.pullRequest.timelineItems.nodes[]?.source
+                  | select(. != null)
+                  | select(.number != null)
+                  | {
+                      number,
+                      url,
+                      state,
+                      baseRefName,
+                      title,
+                      labels: [.labels.nodes[]?.name]
+                    }
+                ]
+              ' > "$cross_refs_file"
+
+            jq --slurpfile crossReferencedPulls "$cross_refs_file" \
+              '. + { crossReferencedPulls: $crossReferencedPulls[0] }' \
+              /tmp/pr-context/pr-metadata.json > /tmp/pr-context/pr-metadata-with-cross-refs.json
+
+            mv /tmp/pr-context/pr-metadata-with-cross-refs.json /tmp/pr-context/pr-metadata.json
+          }
+
           mkdir -p /tmp/pr-context
 
           gh pr view "$PR_NUMBER" --repo "$REPO" \
-            --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
+            --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels,mergeCommit,mergedAt,state \
             > /tmp/pr-context/pr-metadata.json
+
+          add_cross_referenced_pulls_to_metadata
 
           fetch_paginated_array \
             "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100" \

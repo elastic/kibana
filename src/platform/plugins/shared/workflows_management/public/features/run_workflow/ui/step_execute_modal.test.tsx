@@ -14,7 +14,8 @@ import { z } from '@kbn/zod/v4';
 import type { StepExecuteModalProps } from './step_execute_modal';
 import { StepExecuteModal } from './step_execute_modal';
 
-jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));

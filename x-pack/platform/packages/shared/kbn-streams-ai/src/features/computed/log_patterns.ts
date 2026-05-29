@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLogPatterns } from '@kbn/ai-tools';
+import { getSigEventsLogPatternsEsql, type LogPatternEsqlEntry } from '@kbn/ai-tools';
 import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { ComputedFeatureGenerator } from './types';
@@ -19,12 +19,7 @@ const MAX_SAMPLE_LENGTH = 500;
 const truncateSample = (sample: string) =>
   sample.length > MAX_SAMPLE_LENGTH ? `${sample.slice(0, MAX_SAMPLE_LENGTH)}…` : sample;
 
-export interface LogPatternEntry {
-  field: string;
-  pattern: string;
-  count: number;
-  sample: string;
-}
+export type LogPatternEntry = LogPatternEsqlEntry;
 
 export function selectLogPatternsForLlm(patterns: LogPatternEntry[]): LogPatternEntry[] {
   const common = patterns.slice(0, MAX_COMMON_PATTERNS);
@@ -56,12 +51,13 @@ This is useful for understanding the types of logs in the stream and identifying
       plugin: 'streams',
     });
 
-    const patterns = await getLogPatterns({
+    const patterns = await getSigEventsLogPatternsEsql({
       esClient: tracedClient,
       index: stream.name,
       start,
       end,
       fields: LOG_MESSAGE_FIELDS,
+      logger,
     });
 
     return { patterns: selectLogPatternsForLlm(patterns) };

@@ -24,10 +24,14 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
   compact = false,
   replacements,
 }) => {
-  const { showAssistantOverlay, disabled } = useViewInAiAssistant({
+  const { showAssistantOverlay, disabled, isAssistantVisible } = useViewInAiAssistant({
     attackDiscovery,
     replacements,
   });
+
+  if (!isAssistantVisible) {
+    return null;
+  }
 
   return compact ? (
     <EuiButtonEmpty

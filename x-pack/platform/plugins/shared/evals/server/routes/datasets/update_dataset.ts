@@ -11,9 +11,9 @@ import {
   INTERNAL_API_ACCESS,
   UpdateEvaluationDatasetRequestBody,
   UpdateEvaluationDatasetRequestParams,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -33,7 +33,7 @@ export const registerUpdateDatasetRoute = ({
       path: EVALS_DATASET_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Update evaluation dataset',
     })

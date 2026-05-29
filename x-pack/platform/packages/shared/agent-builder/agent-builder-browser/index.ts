@@ -24,6 +24,17 @@ export type {
 } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
+export { ConversationInputShell } from './conversation_input_shell';
+export type { ConversationInputShellProps } from './conversation_input_shell';
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  EmbeddableConversationProps,
+  PublicEmbeddableConversationProps,
+  OpenConversationSidebarOptions,
+  ConversationSidebarRef,
+  OpenConversationSidebarReturn,
+} from './plugin_contract';
 export { AgentBuilderAnnouncementModal } from './announcement_modal/agent_builder_announcement_modal';
 export type {
   AgentBuilderAnnouncementModalProps,

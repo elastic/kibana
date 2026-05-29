@@ -455,6 +455,52 @@ describe('BarDetails', () => {
     });
   });
 
+  describe('in case of missing destination', () => {
+    const mockItemWithMissingDestination = {
+      ...mockItem,
+      missingDestination: true,
+    } as unknown as TraceWaterfallItem;
+
+    it('renders missing destination icon when missingDestination is true', () => {
+      const { getByTestId } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+      expect(getByTestId('apmBarDetailsMissingDestinationIcon')).toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is false', () => {
+      const item = {
+        ...mockItem,
+        missingDestination: false,
+      } as unknown as TraceWaterfallItem;
+      const { queryByTestId } = render(<BarDetails item={item} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is undefined', () => {
+      const { queryByTestId } = render(<BarDetails item={mockItem} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows a tooltip on hover', async () => {
+      const user = userEvent.setup();
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+
+      await user.hover(getByTestId('apmBarDetailsMissingDestinationIcon'));
+
+      await waitFor(() => {
+        expect(getByTestId('apmBarDetailsMissingDestinationTooltip')).toBeInTheDocument();
+        expect(
+          getByText(
+            'This exit span is missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('in case of cold start', () => {
     it('renders cold start badge when coldstart is true', () => {
       const mockItemWithColdStart = {
@@ -544,26 +590,12 @@ describe('BarDetails', () => {
         const badge = getByTestId('apmBarDetailsServiceNameBadge');
         expect(badge).toHaveAttribute('aria-label', 'Go to my-service service overview');
       });
-    });
 
-    describe('when getServiceBadgeHref is provided in context and badge is clicked', () => {
-      it('stops propagation to prevent triggering the row click', async () => {
-        const user = userEvent.setup();
-        const parentClickHandler = jest.fn();
-
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
-          getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
-        });
-
-        const { getByTestId } = render(
-          <div onClick={parentClickHandler} onKeyDown={() => {}}>
-            <BarDetails item={{ ...mockItem, serviceName: 'my-service' }} left={10} />
-          </div>
+      it('sets data-prevent-row-click to prevent the row click handler from firing', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).toHaveAttribute(
+          'data-prevent-row-click'
         );
-
-        await user.click(getByTestId('apmBarDetailsServiceNameBadge'));
-
-        expect(parentClickHandler).not.toHaveBeenCalled();
       });
     });
 

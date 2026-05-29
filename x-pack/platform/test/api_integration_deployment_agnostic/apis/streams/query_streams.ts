@@ -67,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       await forkStream(apiClient, 'logs.otel', {
         stream: { name: PARENT_STREAM_NAME },
@@ -104,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Parent view reference validation', () => {

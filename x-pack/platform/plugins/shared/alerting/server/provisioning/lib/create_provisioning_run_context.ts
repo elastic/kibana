@@ -26,11 +26,12 @@ export const createProvisioningRunContext = async (
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
   });
   const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
   });
+  // The provisioning status SO has no encrypted attributes, so a plain internal
+  // repository is sufficient here.
   const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
     UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-    API_KEY_PENDING_INVALIDATION_TYPE,
   ]);
   return {
     coreStart,

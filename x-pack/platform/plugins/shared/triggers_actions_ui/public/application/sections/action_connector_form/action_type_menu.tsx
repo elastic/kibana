@@ -7,12 +7,30 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiCard,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
+import { shouldHideWorkflowsOnlyConnector } from '@kbn/alerts-ui-shared/src/common/utils/action_type_model_utils';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -53,6 +71,15 @@ const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: str
   });
 };
 
+export function getConnectorIcon(id: string): IconType {
+  const lazyIcon = ConnectorIconsMap.get(id);
+  if (lazyIcon) {
+    return lazyIcon;
+  }
+
+  return 'plugs';
+}
+
 export const ActionTypeMenu = ({
   onActionTypeChange,
   featureId,
@@ -64,6 +91,7 @@ export const ActionTypeMenu = ({
   const {
     http,
     notifications: { toasts },
+    uiSettings,
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -73,7 +101,6 @@ export const ActionTypeMenu = ({
       try {
         setLoadingActionTypes(true);
         const availableActionTypes = await loadActionTypes({ http, featureId });
-        setLoadingActionTypes(false);
 
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
@@ -102,27 +129,52 @@ export const ActionTypeMenu = ({
             ),
           });
         }
+      } finally {
+        setLoadingActionTypes(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([id, details]) => {
+  const registeredActionTypes = Object.entries(actionTypesIndex ?? {})
+    .filter(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
-      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        if (shouldHideWorkflowsOnlyConnector(actionType.supportedFeatureIds, uiSettings)) {
+          return false;
+        }
+
+        return actionType.enabledInConfig === true;
+      }
+
+      if (!actionTypeModel) {
+        return false;
+      }
+
+      const shouldHideInUi = actionTypeModel.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
 
-      return details.enabledInConfig === true && !shouldHideInUi;
+      return actionType.enabledInConfig === true && !shouldHideInUi;
     })
     .map(([id, actionType]) => {
-      const actionTypeModel = actionTypeRegistry.get(id);
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        return {
+          iconClass: getConnectorIcon(actionType.id),
+          selectMessage: actionType.description ?? '',
+          actionType,
+          name: actionType.name,
+          isExperimental: actionType.isExperimental ?? false,
+          isDeprecated: actionType.isDeprecated,
+        };
+      }
+
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        isExperimental: actionTypeModel.isExperimental,
+        isExperimental: actionTypeModel?.isExperimental,
         isDeprecated: actionType.isDeprecated,
       };
     });
@@ -136,19 +188,48 @@ export const ActionTypeMenu = ({
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
+      const isLLMConnector = isLLMConnectorTypeId(item.actionType.id);
+      const description = isLLMConnector ? (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{item.selectMessage}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={DEPRECATED_LLM_CONNECTOR_INFO}
+              data-test-subj={`${item.actionType.id}-deprecation-info`}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        item.selectMessage
+      );
       const card = (
         <EuiCard
           betaBadgeProps={
-            item.isExperimental
+            item.isDeprecated
+              ? {
+                  label: DEPRECATED_LABEL,
+                  tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+                  color: 'warning',
+                }
+              : item.isExperimental
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
           role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          icon={<EuiIcon size="xl" type={item.iconClass} aria-hidden={true} />}
           title={item.name}
-          description={item.selectMessage}
+          description={description}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => {
             onActionTypeChange(item.actionType);

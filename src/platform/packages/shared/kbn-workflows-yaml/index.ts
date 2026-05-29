@@ -51,6 +51,17 @@ export type { LiquidValidationError } from './common/liquid/validate_liquid_temp
 export { getYamlDocumentErrors } from './common/yaml/validate_yaml_document';
 export { updateYamlField } from './common/yaml/update_yaml_field';
 export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  NESTED_STEP_KEYS,
+  isNestedStepKey,
+  type NestedStepKey,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from './common/yaml/build_workflow_lookup';
+export {
   stringifyWorkflowDefinition,
   WORKFLOW_DEFINITION_KEYS_ORDER,
 } from './common/yaml/stringify_workflow_definition';
@@ -61,6 +72,22 @@ export {
 } from './common/yaml/parse_workflow_yaml_to_json';
 export { parseYamlToJSONWithoutValidation } from './common/yaml/parse_workflow_yaml_to_json_without_validation';
 export { parseWorkflowYamlForAutocomplete } from './common/yaml/parse_workflow_yaml_for_autocomplete';
+export {
+  parseLineForCompletion,
+  isVariableLineParseResult,
+} from './common/yaml/parse_line_for_completion';
+export type {
+  LineParseResult,
+  VariableLineParseResult,
+  ForeachVariableLineParseResult,
+  LiquidLineParseResult,
+  LiquidSyntaxLineParseResult,
+  ConnectorIdLineParseResult,
+  WorkflowLineParseResult,
+  WorkflowInputsLineParseResult,
+  TypeLineParseResult,
+  TimezoneLineParseResult,
+} from './common/yaml/parse_line_for_completion';
 
 // Zod helpers
 export { inferZodType } from './common/zod/infer_zod_type';
@@ -77,3 +104,14 @@ export type {
   EnrichmentResult,
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
+
+// Yaml editing utilities
+export {
+  insertStep,
+  modifyStep,
+  modifyStepProperty,
+  modifyWorkflowProperty,
+  deleteStep,
+  getStepNode,
+} from './lib/yaml_edit';
+export type { StepDefinition, EditResult } from './lib/yaml_edit';

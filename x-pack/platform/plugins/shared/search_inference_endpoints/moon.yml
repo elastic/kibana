@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/search-api-panels'
   - '@kbn/usage-collection-plugin'
   - '@kbn/analytics'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod

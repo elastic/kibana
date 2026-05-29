@@ -38,6 +38,10 @@ jest.mock('../../../common/navigation', () => ({
     getCasesEditTemplateUrl: jest.fn().mockReturnValue('/templates/edit'),
     navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
   }),
+  useCasesFieldLibraryNavigation: () => ({
+    getCasesFieldLibraryUrl: jest.fn().mockReturnValue('/field-library'),
+    navigateToCasesFieldLibrary: jest.fn(),
+  }),
 }));
 
 const apiMock = api as jest.Mocked<typeof api>;

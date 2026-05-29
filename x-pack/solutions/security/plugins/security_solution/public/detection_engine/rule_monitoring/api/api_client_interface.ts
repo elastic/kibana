@@ -19,12 +19,6 @@ import type {
 
 export interface IRuleMonitoringApiClient {
   /**
-   * Installs resources (dashboards, data views, etc) related to rule monitoring
-   * and Detection Engine health, and can do any other setup work.
-   */
-  setupDetectionEngineHealthApi(): Promise<void>;
-
-  /**
    * Fetches unified rule execution results.
    * @throws An error if response is not OK.
    */

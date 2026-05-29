@@ -16,7 +16,11 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
-import { createTestQueryClient, createQueryClientWrapper } from '../../hooks/test_utils';
+import {
+  createMockSpaces,
+  createTestQueryClient,
+  createQueryClientWrapper,
+} from '../../hooks/test_utils';
 
 jest.mock('../../hooks/use_create_alert_action');
 jest.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
@@ -26,6 +30,7 @@ const useFetchAlertEpisodeTagSuggestionsMock = jest.mocked(useFetchAlertEpisodeT
 
 const mockHttp: HttpStart = httpServiceMock.createStartContract();
 const mockExpressions = expressionsPluginMock.createStartContract();
+const mockSpaces = createMockSpaces();
 
 const queryClient = createTestQueryClient();
 const queryWrapper = createQueryClientWrapper(queryClient);
@@ -43,10 +48,11 @@ describe('AlertEpisodeTagsFlyout', () => {
     groupHash: 'gh-1',
     currentTags: [] as string[],
     http: mockHttp,
-    services: { expressions: mockExpressions },
+    services: { expressions: mockExpressions, spaces: mockSpaces },
   };
 
   beforeEach(() => {
+    mutate.mockClear();
     useFetchAlertEpisodeTagSuggestionsMock.mockReturnValue({
       data: ['beta', 'gamma'],
       isLoading: false,
@@ -177,5 +183,27 @@ describe('AlertEpisodeTagsFlyout', () => {
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onSave with selected tags and closes without calling the internal mutation when onSave is provided', async () => {
+    const user = userEvent.setup();
+    const mockOnSave = jest.fn();
+    const mockOnClose = jest.fn();
+
+    render(
+      <AlertEpisodeTagsFlyout
+        {...defaultProps}
+        onClose={mockOnClose}
+        currentTags={['tag-a']}
+        onSave={mockOnSave}
+      />,
+      { wrapper: queryWrapper }
+    );
+
+    await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
+
+    expect(mockOnSave).toHaveBeenCalledWith(['tag-a']);
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(mutate).not.toHaveBeenCalled();
   });
 });

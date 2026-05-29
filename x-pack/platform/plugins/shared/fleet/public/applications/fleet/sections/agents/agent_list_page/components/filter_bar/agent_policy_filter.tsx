@@ -78,7 +78,7 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
       }
       isOpen={isAgentPoliciesFilterOpen}
       closePopover={() => setIsAgentPoliciesFilterOpen(false)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -98,7 +98,6 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
         }}
         data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
-          paddingSize: 's',
           style: {
             minWidth: 200,
           },

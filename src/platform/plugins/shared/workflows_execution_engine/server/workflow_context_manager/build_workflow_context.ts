@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import {
   applyInputDefaults,
-  normalizeFieldsToJsonSchema,
+  getInputsFromDefinition,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
@@ -28,9 +28,8 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeFieldsToJsonSchema(
-    workflowExecution.workflowDefinition.inputs
-  );
+
+  const normalizedInputsSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
 
   // Extract parent workflow information from context if available
   const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;

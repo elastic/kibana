@@ -10,6 +10,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { LINK_LOADING_ARIA_LABEL, UNKNOWN_LINK_LABEL } from './translations';
 
 export interface UserActionTitleLinkProps {
@@ -31,18 +32,19 @@ const UserActionTitleLinkComponent: React.FC<UserActionTitleLinkProps> = ({
   dataTestSubj = 'user-action-link',
   isLoading = false,
 }) => {
+  const href = getHref?.(targetId);
+  const displayLabel = label ?? fallbackLabel ?? UNKNOWN_LINK_LABEL;
+
   const onLinkClick = useCallback(
     (ev: React.MouseEvent) => {
       if (onClick) {
+        if (href && hasActiveModifierKey(ev)) return;
         ev.preventDefault();
         onClick(targetId, ev);
       }
     },
-    [targetId, onClick]
+    [targetId, onClick, href]
   );
-
-  const href = getHref?.(targetId);
-  const displayLabel = label ?? fallbackLabel ?? UNKNOWN_LINK_LABEL;
 
   const isValidLink = useMemo(() => {
     if (!onClick && !href) {

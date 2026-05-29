@@ -97,6 +97,12 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate(
+        'xpack.watcher.sections.watchEdit.actions.addActionPopoverAriaLabel',
+        {
+          defaultMessage: 'Add action',
+        }
+      )}
     >
       <EuiContextMenuPanel
         items={actions.map((action, index) => {
@@ -114,7 +120,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
             >
               <EuiFlexGroup responsive={false}>
                 <EuiFlexItem grow={false} css={styles.watcherTresholdActionContextMenuItem}>
-                  <EuiIcon type={action.iconClass} />
+                  <EuiIcon type={action.iconClass} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <strong>{action.typeName}</strong>

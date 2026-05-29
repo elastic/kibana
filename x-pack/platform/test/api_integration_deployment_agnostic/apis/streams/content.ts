@@ -63,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
         [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -148,6 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Export', () => {

@@ -2,7 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
   },
   "include": ["**/*.ts"],
   "kbn_references": [
@@ -11,6 +11,8 @@
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/core",
-    "@kbn/repo-info"  ],
+    "@kbn/repo-info",
+    "@kbn/human-readable-id"
+  ],
   "exclude": ["target/**/*"]
 }

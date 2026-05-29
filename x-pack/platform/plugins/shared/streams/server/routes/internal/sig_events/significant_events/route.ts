@@ -12,7 +12,9 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { searchModeSchema } from '../../../utils/search_mode';
 import {
@@ -164,7 +166,10 @@ const readAllSignificantEventsRoute = createServerRoute({
     query: z.object({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
-      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
         .union([z.string().transform((val) => [val]), z.array(z.string())])
@@ -189,14 +194,23 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
     const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
@@ -206,6 +220,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         query,
         streamNames,
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );

@@ -32,3 +32,16 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
  * - System connectors have empty config/secrets schemas. Make sure these system connectors are able to execute by receiving params alone.
  */
 export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-system']]);
+
+/**
+ * Workflow attachment and SML types used by the agent builder integration.
+ */
+export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
+export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+export const WORKFLOW_SML_TYPE = 'workflow';
+
+/**
+ * UI event broadcast on the agent builder events bus when a workflow YAML
+ * attachment is created or modified by an agent tool.
+ */
+export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';

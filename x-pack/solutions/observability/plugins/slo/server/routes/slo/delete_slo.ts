@@ -35,7 +35,8 @@ export const deleteSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager,
       scopedClusterClient,
-      rulesClient
+      rulesClient,
+      logger
     );
 
     await deleteSLO.execute(params.path.id);

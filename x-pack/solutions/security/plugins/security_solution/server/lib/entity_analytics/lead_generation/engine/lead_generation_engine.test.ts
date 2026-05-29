@@ -17,18 +17,22 @@ jest.mock('./llm_synthesize');
 // Helpers
 // ---------------------------------------------------------------------------
 
-const createMockEntity = (name: string, type = 'user'): LeadEntity => ({
-  record: { name, type, id: `${type}-${name}` } as unknown as LeadEntity['record'],
-  type,
-  name,
-});
+const createMockEntity = (name: string, type = 'user'): LeadEntity => {
+  const id = `${type}:${name}`;
+  return {
+    record: { name, type, id } as unknown as LeadEntity['record'],
+    id,
+    type,
+    name,
+  };
+};
 
 const createMockObservation = (
   entity: LeadEntity,
   moduleId: string,
   overrides: Partial<Observation> = {}
 ): Observation => ({
-  entityId: `${entity.type}:${entity.name}`,
+  entityId: entity.id,
   moduleId,
   type: 'test_signal',
   score: 75,

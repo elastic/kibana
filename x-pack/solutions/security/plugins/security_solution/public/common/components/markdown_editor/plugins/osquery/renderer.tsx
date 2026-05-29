@@ -18,7 +18,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
-import { AlertDataContext } from '../../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
+import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
 import { useKibana } from '../../../../lib/kibana';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 

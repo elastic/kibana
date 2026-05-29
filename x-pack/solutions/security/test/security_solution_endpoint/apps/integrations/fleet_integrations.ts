@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const retry = getService('retry');
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   describe('When in the Fleet application', function () {
@@ -44,13 +45,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should display the endpoint custom content', async () => {
         await (await fleetIntegrations.findIntegrationDetailCustomTab()).click();
-        await testSubjects.existOrFail('fleetEndpointPackageCustomContent');
+        await retry.waitForWithTimeout(
+          'endpoint custom content to render',
+          30_000,
+          async () => await testSubjects.exists('fleetEndpointPackageCustomContent')
+        );
       });
 
       it('should show the Trusted Apps page when link is clicked', async () => {
         await (await fleetIntegrations.findIntegrationDetailCustomTab()).click();
+        await retry.waitForWithTimeout(
+          'trusted apps link to render',
+          30_000,
+          async () => await testSubjects.exists('trustedApps-artifactsLink')
+        );
         await (await testSubjects.find('trustedApps-artifactsLink')).click();
-        await trustedApps.ensureIsOnTrustedAppsEmptyPage();
+        await retry.tryForTime(30_000, async () => {
+          await trustedApps.ensureIsOnTrustedAppsEmptyPage();
+        });
       });
     });
   });

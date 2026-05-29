@@ -8,11 +8,11 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
 } from '../../../common/api/detection_engine/prebuilt_rules';
+import { INITIALIZE_SECURITY_SOLUTION_URL } from '../../../common/api/initialization';
 
 interface PrebuiltRulesStatusResponse {
   stats: {
@@ -71,10 +71,13 @@ export const ensurePrebuiltRulesInstalled = async ({
     // Bootstrap packages needed for prebuilt rules (Fleet/EPR dependent).
     await kbnClient.request({
       method: 'POST',
-      path: BOOTSTRAP_PREBUILT_RULES_URL,
+      path: INITIALIZE_SECURITY_SOLUTION_URL,
       headers: {
         'kbn-xsrf': 'true',
-        'elastic-api-version': INTERNAL_API_VERSION,
+        'elastic-api-version': '2023-10-31',
+      },
+      body: {
+        flows: ['init-prebuilt-rules'],
       },
     });
 

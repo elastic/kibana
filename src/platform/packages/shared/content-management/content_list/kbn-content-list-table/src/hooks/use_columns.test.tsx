@@ -11,6 +11,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
@@ -49,20 +50,25 @@ describe('useColumns', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
+  });
+
   describe('default columns', () => {
     it('returns Name and UpdatedAt columns when `children` is `undefined` (no item config)', () => {
       const { result } = renderHook(() => useColumns(undefined), {
         wrapper: createWrapper(),
       });
 
-      // Actions column is omitted because no onEdit/onDelete is configured.
+      // Actions column is omitted because no edit/delete handlers are configured.
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]).toMatchObject({
+      expect(result.current[0].column).toMatchObject({
         field: 'title',
         name: 'Name',
         sortable: true,
       });
-      expect(result.current[1]).toMatchObject({
+      expect(result.current[1].column).toMatchObject({
         field: 'updatedAt',
         name: 'Last updated',
         sortable: true,
@@ -72,28 +78,54 @@ describe('useColumns', () => {
     it('includes Actions column when item config has edit/delete handlers', () => {
       const onEdit = jest.fn();
       const onDelete = jest.fn();
-      const wrapper = createWrapper({ item: { onEdit, onDelete } });
+      const wrapper = createWrapper({
+        item: {
+          actions: {
+            edit: { onItemAction: onEdit },
+            delete: { onBulkAction: onDelete },
+          },
+        },
+      });
 
       const { result } = renderHook(() => useColumns(undefined, onDelete), {
         wrapper,
       });
 
       expect(result.current).toHaveLength(3);
-      expect(result.current[0]).toMatchObject({ field: 'title', name: 'Name' });
-      expect(result.current[1]).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
-      expect(result.current[2]).toMatchObject({ name: 'Actions' });
+      expect(result.current[0].column).toMatchObject({ field: 'title', name: 'Name' });
+      expect(result.current[1].column).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
+      expect(result.current[2].column).toMatchObject({ name: 'Actions' });
     });
 
-    it('includes only Edit action when only onEdit is configured', () => {
+    it('includes only Edit action when only `actions.edit.onItemAction` is configured', () => {
       const onEdit = jest.fn();
-      const wrapper = createWrapper({ item: { onEdit } });
+      const wrapper = createWrapper({
+        item: { actions: { edit: { onItemAction: onEdit } } },
+      });
 
       const { result } = renderHook(() => useColumns(undefined), {
         wrapper,
       });
 
       expect(result.current).toHaveLength(3);
-      const actionsColumn = result.current[2];
+      const actionsColumn = result.current[2].column;
+      expect(actionsColumn).toMatchObject({ name: 'Actions' });
+      expect((actionsColumn as { actions: unknown[] }).actions).toHaveLength(1);
+    });
+
+    it('includes only Edit action when only `actions.edit.getItemActionHref` is configured', () => {
+      const wrapper = createWrapper({
+        item: {
+          actions: { edit: { getItemActionHref: (i) => `/edit/${i.id}` } },
+        },
+      });
+
+      const { result } = renderHook(() => useColumns(undefined), {
+        wrapper,
+      });
+
+      expect(result.current).toHaveLength(3);
+      const actionsColumn = result.current[2].column;
       expect(actionsColumn).toMatchObject({ name: 'Actions' });
       expect((actionsColumn as { actions: unknown[] }).actions).toHaveLength(1);
     });
@@ -101,7 +133,15 @@ describe('useColumns', () => {
     it('omits Actions column in read-only mode even with handlers', () => {
       const onEdit = jest.fn();
       const onDelete = jest.fn();
-      const wrapper = createWrapper({ isReadOnly: true, item: { onEdit, onDelete } });
+      const wrapper = createWrapper({
+        isReadOnly: true,
+        item: {
+          actions: {
+            edit: { onItemAction: onEdit },
+            delete: { onBulkAction: onDelete },
+          },
+        },
+      });
 
       const { result } = renderHook(() => useColumns(undefined, onDelete), {
         wrapper,
@@ -109,8 +149,8 @@ describe('useColumns', () => {
 
       // Actions column is omitted in read-only mode.
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]).toMatchObject({ field: 'title' });
-      expect(result.current[1]).toMatchObject({ field: 'updatedAt' });
+      expect(result.current[0].column).toMatchObject({ field: 'title' });
+      expect(result.current[1].column).toMatchObject({ field: 'updatedAt' });
     });
 
     it('returns Name and UpdatedAt when children contain no valid column parts', () => {
@@ -122,8 +162,8 @@ describe('useColumns', () => {
 
       // Falls back to defaults; Actions omitted (no item config).
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]).toMatchObject({ field: 'title', name: 'Name' });
-      expect(result.current[1]).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
+      expect(result.current[0].column).toMatchObject({ field: 'title', name: 'Name' });
+      expect(result.current[1].column).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
     });
   });
 
@@ -144,7 +184,7 @@ describe('useColumns', () => {
       });
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0]).toMatchObject({
+      expect(result.current[0].column).toMatchObject({
         field: 'title',
         name: 'Dashboard Name',
         width: '32em',
@@ -162,7 +202,7 @@ describe('useColumns', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current[0]).toMatchObject({ sortable: false });
+      expect(result.current[0].column).toMatchObject({ sortable: false });
     });
   });
 
@@ -186,7 +226,7 @@ describe('useColumns', () => {
       });
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0]).toMatchObject({
+      expect(result.current[0].column).toMatchObject({
         field: 'status',
         name: 'Status',
         width: '12em',
@@ -204,7 +244,42 @@ describe('useColumns', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current[0]).toMatchObject({ field: 'updatedAt' });
+      expect(result.current[0].column).toMatchObject({ field: 'updatedAt' });
+    });
+
+    it('uses a custom column skeleton descriptor when provided', () => {
+      const render = jest.fn(() => <span>avatar</span>);
+      const children = (
+        <Column
+          id="avatar"
+          name="Avatar"
+          render={render}
+          skeleton={{ shape: 'circle', size: 24 }}
+        />
+      );
+
+      const { result } = renderHook(() => useColumns(children), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current[0].skeleton).toEqual({ shape: 'circle', size: 24 });
+    });
+
+    it('uses a custom column skeleton callback when provided', () => {
+      const render = jest.fn(() => <span>status</span>);
+      const skeleton = jest.fn(() => ({ shape: 'rectangle' as const, width: 72, height: 20 }));
+      const children = <Column id="status" name="Status" render={render} skeleton={skeleton} />;
+
+      const { result } = renderHook(() => useColumns(children), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current[0].skeleton).toEqual({ shape: 'rectangle', width: 72, height: 20 });
+      expect(skeleton).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityName: 'dashboard',
+        })
+      );
     });
   });
 
@@ -223,8 +298,8 @@ describe('useColumns', () => {
       });
 
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]).toMatchObject({ field: 'title', name: 'Name' });
-      expect(result.current[1]).toMatchObject({ field: 'type', name: 'Type' });
+      expect(result.current[0].column).toMatchObject({ field: 'title', name: 'Name' });
+      expect(result.current[1].column).toMatchObject({ field: 'type', name: 'Type' });
     });
   });
 
@@ -254,8 +329,8 @@ describe('useColumns', () => {
       });
 
       // Both columns should have sorting disabled.
-      expect(result.current[0]).toMatchObject({ sortable: false });
-      expect(result.current[1]).toMatchObject({ sortable: false });
+      expect(result.current[0].column).toMatchObject({ sortable: false });
+      expect(result.current[1].column).toMatchObject({ sortable: false });
     });
   });
 });
