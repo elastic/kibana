@@ -88,7 +88,6 @@ export interface StreamsPluginSetupDependencies {
   globalSearch?: GlobalSearchPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 

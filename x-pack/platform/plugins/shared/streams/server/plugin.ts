@@ -333,7 +333,7 @@ export class StreamsPlugin
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
-        getScopedClients,
+        getScopedClients: this.streamsGetScopedClients!,
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
