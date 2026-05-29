@@ -428,9 +428,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
-      const composed = formValuesFromYamlToCompose(result.values);
-      if (isEditing) composed.kind = initialKind;
-      methods.reset(composed);
+      methods.reset(formValuesFromYamlToCompose(result.values));
       syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
@@ -460,11 +458,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const compose = formValuesFromYamlToCompose(result.values);
-          if (isEditing) compose.kind = initialKind;
-          methods.reset(compose);
+          const composed = formValuesFromYamlToCompose(result.values);
+          methods.reset(composed);
           syncSandbox();
-          if (getBreachQuery(compose.query).trim()) {
+          if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
         }
@@ -474,7 +471,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch, isEditing, initialKind]
+    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -513,15 +510,13 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
-      const composed = formValuesFromYamlToCompose(result.values);
-      if (isEditing) composed.kind = initialKind;
-      methods.reset(composed);
+      methods.reset(formValuesFromYamlToCompose(result.values));
       // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
-  }, [cancelYamlParse, yamlText, methods, handleSubmit, isEditing, initialKind]);
+  }, [cancelYamlParse, yamlText, methods, handleSubmit]);
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
