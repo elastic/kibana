@@ -16,18 +16,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/group4', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
-    });
-
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
+      await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });
 
-    loadTestFile(require.resolve('./_discover_fields_api'));
     loadTestFile(require.resolve('./_adhoc_data_views'));
     loadTestFile(require.resolve('./_date_nested'));
-    loadTestFile(require.resolve('./_chart_hidden'));
     loadTestFile(require.resolve('./_context_encoded_url_params'));
     loadTestFile(require.resolve('./_data_view_edit'));
     loadTestFile(require.resolve('./_field_list_new_fields'));

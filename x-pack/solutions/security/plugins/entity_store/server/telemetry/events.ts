@@ -60,6 +60,103 @@ interface EntityMaintainerEvent {
   errorMessage?: string;
 }
 
+interface EntityMaintainerRunSummaryFunnel {
+  /** Entities or records scanned from source */
+  scanned: number;
+  /** Entities that passed business-logic qualification */
+  qualified: number;
+  /**
+   * Bulk-update objects built after cross-source merge; omitted when the
+   * maintainer has no distinct proposal phase (relationship and resolution
+   * maintainers go straight from qualified → applied).
+   */
+  proposed?: number;
+  /** Writes successfully applied to the entity store */
+  applied: number;
+  /** 404 bulk errors — entity absent from store; omitted when not applicable */
+  droppedNotInStore?: number;
+  /** Entities intentionally skipped (ambiguous, deferred); omitted when not applicable */
+  skipped?: number;
+  /** Non-404 write errors */
+  failed: number;
+}
+
+interface EntityMaintainerRunSummarySource {
+  /** Integration or logical input id (e.g. "aws_cloudtrail") */
+  id: string;
+  /** Records scanned from this source */
+  scanned: number;
+  /** Records that qualified from this source */
+  qualified: number;
+  /** Source outcome: index_missing | empty | partial | producing | error */
+  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+}
+
+interface EntityMaintainerRunSummaryBreakdown {
+  /** Relationship kind or sub-category name */
+  name: string;
+  /** Applied writes for this breakdown entry */
+  count: number;
+}
+
+interface EntityMaintainerRunSummaryStage {
+  /** Stage name (fixed enum per maintainer) */
+  name: string;
+  /** Stage outcome: success | error | skipped */
+  status: 'success' | 'error' | 'skipped';
+  /** Stage duration in milliseconds */
+  durationMs: number;
+  /** Fixed enum per maintainer when status is skipped */
+  skipReason?: string;
+  /** Fixed enum per maintainer when status is error */
+  errorKind?: string;
+  /** Stage-specific applied count rolling up into funnel.applied */
+  applied?: number;
+}
+
+export interface EntityMaintainerRunSummaryEvent {
+  /** Entity maintainer identifier */
+  id: string;
+  /** Kibana space the maintainer runs in (e.g. "default") */
+  namespace: string;
+  /** UUID shared by all events from one scheduled run; joins to logs */
+  runId: string;
+  /** Sub-run discriminator; only risk-score uses this (one event per entity type) */
+  scope?: {
+    /** Scope discriminator kind (e.g. "entity_type") */
+    kind: string;
+    /** Scope value (e.g. "host", "user", "service", "generic") */
+    value: string;
+  };
+  /** Total run duration in milliseconds */
+  durationMs: number;
+  /** Number of outer-loop pagination passes consumed during the run */
+  iterations?: number;
+  /** Run hit a hard-coded pagination or query ceiling and stopped voluntarily */
+  truncated?: boolean;
+  /** Run was cut short by an external abort signal */
+  aborted: boolean;
+  /** Sanitised error class name, set only on error */
+  errorClass?: string;
+  /** Error message capped at 500 chars, set only on error */
+  errorMessage?: string;
+  funnel: EntityMaintainerRunSummaryFunnel;
+  /**
+   * Per-source pre-merge funnel: counts how many records each integration or logical input
+   * contributed, before cross-source deduplication. Answers "where did the inputs come from?".
+   * Pairs with breakdown, which counts outputs by relationship kind. Omitted when not applicable.
+   */
+  sources?: EntityMaintainerRunSummarySource[];
+  /**
+   * Per-relationship-kind split of applied writes: counts outputs after the merge, grouped by
+   * what was written (e.g. relationship type, sub-category). Answers "what was produced?".
+   * Pairs with sources, which counts inputs by integration. Omitted when not applicable.
+   */
+  breakdown?: EntityMaintainerRunSummaryBreakdown[];
+  /** Per-stage execution detail for multi-stage maintainers; omitted when not applicable */
+  stages?: EntityMaintainerRunSummaryStage[];
+}
+
 // ------------------------------------
 // Event definitions
 // ------------------------------------
@@ -175,6 +272,211 @@ export const ENTITY_MAINTAINER_EVENT = {
   },
 } as const satisfies EventTypeOpts<EntityMaintainerEvent>;
 
+export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
+  eventType: 'entity_store_entity_maintainer_run_summary',
+  schema: {
+    id: {
+      type: 'keyword',
+      _meta: { description: 'Entity maintainer identifier' },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Kibana space the maintainer runs in (e.g. "default")' },
+    },
+    runId: {
+      type: 'keyword',
+      _meta: { description: 'UUID shared by all events from one scheduled run; joins to logs' },
+    },
+    scope: {
+      properties: {
+        kind: {
+          type: 'keyword',
+          _meta: { description: 'Scope discriminator kind (e.g. "entity_type")' },
+        },
+        value: {
+          type: 'keyword',
+          _meta: { description: 'Scope value (e.g. "host", "user", "service", "generic")' },
+        },
+      },
+      _meta: {
+        optional: true,
+        description: 'Sub-run discriminator; only risk-score uses this (one event per entity type)',
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: { description: 'Total run duration in milliseconds' },
+    },
+    iterations: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description: 'Number of outer-loop pagination passes consumed during the run',
+      },
+    },
+    truncated: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Run hit a hard-coded pagination or query ceiling and stopped voluntarily',
+      },
+    },
+    aborted: {
+      type: 'boolean',
+      _meta: { description: 'Run was cut short by an external abort signal' },
+    },
+    errorClass: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Sanitised error class name, set only on error' },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Error message capped at 500 chars, set only on error',
+      },
+    },
+    funnel: {
+      properties: {
+        scanned: {
+          type: 'long',
+          _meta: { description: 'Entities or records scanned from source' },
+        },
+        qualified: {
+          type: 'long',
+          _meta: { description: 'Entities that passed business-logic qualification' },
+        },
+        proposed: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description:
+              'Bulk-update objects built after cross-source merge; omitted when the maintainer has no distinct proposal phase (relationship and resolution maintainers go straight from qualified → applied)',
+          },
+        },
+        applied: {
+          type: 'long',
+          _meta: { description: 'Writes successfully applied to the entity store' },
+        },
+        droppedNotInStore: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description: '404 bulk errors — entity absent from store; omitted when not applicable',
+          },
+        },
+        skipped: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description:
+              'Entities intentionally skipped (ambiguous, deferred); omitted when not applicable',
+          },
+        },
+        failed: {
+          type: 'long',
+          _meta: { description: 'Non-404 write errors' },
+        },
+      },
+    },
+    sources: {
+      type: 'array',
+      items: {
+        properties: {
+          id: {
+            type: 'keyword',
+            _meta: { description: 'Integration or logical input id (e.g. "aws_cloudtrail")' },
+          },
+          scanned: {
+            type: 'long',
+            _meta: { description: 'Records scanned from this source' },
+          },
+          qualified: {
+            type: 'long',
+            _meta: { description: 'Records that qualified from this source' },
+          },
+          outcome: {
+            type: 'keyword',
+            _meta: {
+              description: 'Source outcome: index_missing | empty | partial | producing | error',
+            },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Per-source pre-merge funnel: counts how many records each integration or logical input contributed, before cross-source deduplication. Answers "where did the inputs come from?". Pairs with breakdown, which counts outputs by relationship kind. Omitted when not applicable.',
+      },
+    },
+    breakdown: {
+      type: 'array',
+      items: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Relationship kind or sub-category name' },
+          },
+          count: {
+            type: 'long',
+            _meta: { description: 'Applied writes for this breakdown entry' },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Per-relationship-kind split of applied writes: counts outputs after the merge, grouped by what was written (e.g. relationship type, sub-category). Answers "what was produced?". Pairs with sources, which counts inputs by integration. Omitted when not applicable.',
+      },
+    },
+    stages: {
+      type: 'array',
+      items: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Stage name (fixed enum per maintainer)' },
+          },
+          status: {
+            type: 'keyword',
+            _meta: { description: 'Stage outcome: success | error | skipped' },
+          },
+          durationMs: {
+            type: 'long',
+            _meta: { description: 'Stage duration in milliseconds' },
+          },
+          skipReason: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Fixed enum per maintainer when status is skipped',
+            },
+          },
+          errorKind: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Fixed enum per maintainer when status is error',
+            },
+          },
+          applied: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description: 'Stage-specific applied count rolling up into funnel.applied',
+            },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Per-stage execution detail for multi-stage maintainers; omitted when not applicable',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityMaintainerRunSummaryEvent>;
+
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
@@ -250,6 +552,7 @@ const events = [
   ENTITY_STORE_USAGE_EVENT,
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_MAINTAINER_EVENT,
+  ENTITY_MAINTAINER_RUN_SUMMARY_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -266,6 +569,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
   [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
   [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
+  [ENTITY_MAINTAINER_RUN_SUMMARY_EVENT.eventType]: EntityMaintainerRunSummaryEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;

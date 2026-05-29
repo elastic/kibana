@@ -253,7 +253,7 @@ describe('updateFailureIssue()', () => {
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
-        commandLine: 'npx playwright test --config=config.ts',
+        commandLine: 'node scripts/playwright test --config=config.ts',
       }
     );
 
@@ -434,7 +434,7 @@ describe('createFailureIssue() - Scout failures', () => {
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
-        commandLine: 'npx playwright test --config config.ts',
+        commandLine: 'node scripts/playwright test --config config.ts',
       },
       api,
       'main',
@@ -499,7 +499,7 @@ describe('createFailureIssue() - Scout failures', () => {
         location: '/path/to/test.ts',
         duration: 3000,
         owners: 'team:test',
-        commandLine: 'npx playwright test',
+        commandLine: 'node scripts/playwright test',
         kibanaModule: {
           id: 'test-module',
           type: 'plugin',

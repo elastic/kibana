@@ -40,7 +40,10 @@ If the cherry-pick has conflicts:
    - the target branch version of the file.
 3. Resolve only files involved in the conflict. Do not edit unrelated files. If a conflict represents a deletion, use `git rm <file>` instead of leaving an empty file behind.
 4. For package or lockfile conflicts:
-   - Apply the source PR dependency/version intent to the target branch's package manifest.
+   - Apply only the source PR dependency/version intent to the target branch's package manifest.
+   - For dependency-only Renovate PRs, infer intent from the PR body and from `git diff <source merge commit SHA>^ <source merge commit SHA> -- package.json`, not from the entire incoming conflict block. Preserve unrelated target-branch dependency versions that only appear because they are adjacent in the conflicted block.
+   - Treat same-major dependency updates as mechanical, even when the target branch is on an older minor version. For example, updating an existing `1.20.x` package to the source PR's `1.24.x` target is still a same-major dependency update, not a structural conflict.
+   - Return `needs manual backport` for dependency conflicts only when a source PR package is missing from the target branch, the source PR changes a package across majors, or the package/version intent cannot be verified from the PR body and source commit diff.
    - Never manually resolve lockfile conflicts.
    - Run `yarn kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
    - Do not edit lockfiles that were not part of the conflict unless `yarn kbn bootstrap` updates them as part of dependency regeneration.

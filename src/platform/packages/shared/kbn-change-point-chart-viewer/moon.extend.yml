@@ -1,0 +1,2 @@
+dependsOn:
+  - '@kbn/embeddable-plugin'
