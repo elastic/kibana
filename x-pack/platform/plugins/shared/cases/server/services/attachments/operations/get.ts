@@ -134,8 +134,7 @@ export class AttachmentGetter {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
-          so as SavedObject<AttachmentPersistedAttributes>,
-          this.context.persistableStateAttachmentTypeRegistry
+          so as SavedObject<AttachmentPersistedAttributes>
         ) as SavedObject<AttachmentAttributesV2>;
         const transformed = transformAttributesForMode({
           attributes: injectedSo.attributes,
@@ -171,8 +170,7 @@ export class AttachmentGetter {
         validatedAttachments.push(so as AttachmentSavedObjectTransformedV2);
       } else {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
-          so as SavedObject<AttachmentPersistedAttributes>,
-          this.context.persistableStateAttachmentTypeRegistry
+          so as SavedObject<AttachmentPersistedAttributes>
         ) as SavedObject<AttachmentAttributesV2>;
         const transformed = transformAttributesForMode({
           attributes: injectedSo.attributes,
@@ -503,8 +501,7 @@ export class AttachmentGetter {
       }
 
       const injectedRes = injectAttachmentSOAttributesFromRefs(
-        res as SavedObject<AttachmentPersistedAttributes>,
-        this.context.persistableStateAttachmentTypeRegistry
+        res as SavedObject<AttachmentPersistedAttributes>
       ) as SavedObject<AttachmentAttributesV2>;
       const transformed = transformAttributesForMode({
         attributes: injectedRes.attributes,
@@ -821,8 +818,7 @@ export class AttachmentGetter {
   ): AttachmentSavedObjectTransformedV2[] {
     return response.saved_objects.map((so) => {
       const injectedSo = injectAttachmentSOAttributesFromRefs(
-        so as SavedObject<AttachmentPersistedAttributes>,
-        this.context.persistableStateAttachmentTypeRegistry
+        so as SavedObject<AttachmentPersistedAttributes>
       ) as SavedObject<AttachmentAttributesV2>;
 
       const transformed = transformAttributesForMode({

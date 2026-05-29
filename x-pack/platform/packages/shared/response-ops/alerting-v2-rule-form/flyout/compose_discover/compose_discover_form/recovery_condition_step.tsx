@@ -45,26 +45,10 @@ const customRecoveryDescription = i18n.translate(
   { defaultMessage: 'Define a custom recovery condition.' }
 );
 
-const noRecoveryLabel = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDropDownOptionLabel',
-  { defaultMessage: 'No recovery' }
-);
-
-const noRecoveryDescription = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDescription',
-  { defaultMessage: 'Do not recover alerts automatically.' }
-);
-
-const noRecoveryComingSoonBadgeLabel = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryComingSoonBadgeLabel',
-  { defaultMessage: 'Coming soon' }
-);
-
 const RECOVERY_TYPE_OPTIONS: Array<{
   value: RecoveryType;
   inputDisplay: string;
   dropdownDisplay: React.ReactNode;
-  disabled?: boolean;
 }> = [
   {
     value: 'default',
@@ -90,26 +74,6 @@ const RECOVERY_TYPE_OPTIONS: Array<{
       </>
     ),
   },
-  {
-    value: 'none',
-    disabled: true,
-    inputDisplay: noRecoveryLabel,
-    dropdownDisplay: (
-      <>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            <strong>{noRecoveryLabel}</strong>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{noRecoveryComingSoonBadgeLabel}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="s" color="subdued">
-          <p>{noRecoveryDescription}</p>
-        </EuiText>
-      </>
-    ),
-  },
 ];
 
 interface RecoveryTypeSelectorProps {
@@ -128,6 +92,7 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
     fullWidth
   >
     <EuiSuperSelect
+      compressed
       options={RECOVERY_TYPE_OPTIONS}
       valueOfSelected={recoveryType}
       onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}
@@ -173,7 +138,13 @@ export function RecoveryConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={baseQuery} label="base query" />
+          <QuerySummary
+            query={baseQuery}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.recoveryCondition.noBaseQueryDefined',
+              { defaultMessage: 'No base query defined' }
+            )}
+          />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
             <strong>
@@ -184,7 +155,13 @@ export function RecoveryConditionStep({
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={recoveryBlock} label="recovery condition" />
+          <QuerySummary
+            query={recoveryBlock}
+            emptyMessage={i18n.translate(
+              'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryConditionDefined',
+              { defaultMessage: 'No recovery condition defined' }
+            )}
+          />
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

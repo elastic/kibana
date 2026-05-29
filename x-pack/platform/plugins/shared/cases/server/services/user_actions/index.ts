@@ -219,10 +219,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
           res.attributes
@@ -285,10 +282,7 @@ export class CaseUserActionService {
         return;
       }
 
-      const res = transformToExternalModel(
-        userActions.saved_objects[0],
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(userActions.saved_objects[0]);
 
       const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
         res.attributes
@@ -370,10 +364,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
           res.attributes
@@ -419,10 +410,7 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      const res = transformToExternalModel(
-        doc,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(doc);
 
       const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
         res.attributes
@@ -541,10 +529,7 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      const transformedUserActions = legacyTransformFindResponseToExternalModel(
-        userActions,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(userActions);
 
       const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
         [];
