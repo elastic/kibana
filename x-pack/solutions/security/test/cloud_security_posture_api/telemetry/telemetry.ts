@@ -398,8 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
       // - packagePolicyCount: number
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/247313
-    it.skip('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
+    it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
       const {
         body: [{ stats: apiResponse }],
       } = await supertest
