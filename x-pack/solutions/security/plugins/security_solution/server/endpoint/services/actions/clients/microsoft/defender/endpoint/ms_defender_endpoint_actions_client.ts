@@ -1054,22 +1054,22 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             const shouldUpdateErrorMessage = !isCancelledAction && isError;
 
             const isRunscriptAction = mdeCommand === 'LiveResponse' && command === 'runscript';
-            const output: ActionResponseOutput<EndpointActionResponseDataOutput> = {
-              type: 'json',
-              content: {},
-            };
+            let output: ActionResponseOutput<EndpointActionResponseDataOutput> | undefined;
             let meta: {} | undefined;
 
             // If not a `cancel` response action and the MS Defender action status is `Canceled`, then
             // set the `canceled_by` and `canceled_id` fields in the output content so that we show the
             // action with a status of cancel in kibana
             if (machineAction.status === 'Cancelled' && command !== `cancel`) {
+              output = output ?? { type: 'json', content: {} };
               output.content.canceled_by = 'action';
               output.content.canceled_id = '';
             }
 
             if (isRunscriptAction) {
               const outputFile = await this.fetchMachineLiveResponseFile(machineActionId);
+
+              output = output ?? { type: 'json', content: {} };
               Object.assign(output.content, {
                 stdout: outputFile?.stdout || '',
                 stderr: outputFile?.stderr || '',
