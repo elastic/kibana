@@ -6435,6 +6435,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-views-as-code-plugin@link:src/platform/plugins/shared/data_views_as_code":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
@@ -6852,10 +6856,6 @@
   uid ""
 
 "@kbn/esql@link:src/platform/plugins/shared/esql":
-  version "0.0.0"
-  uid ""
-
-"@kbn/eui-provider-dev-warning@link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning":
   version "0.0.0"
   uid ""
 
@@ -9660,6 +9660,14 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout-constants@link:src/platform/kbn-ui/chrome-layout-constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout-utils@link:src/platform/kbn-ui/chrome-layout-utils":
   version "0.0.0"
   uid ""
 
