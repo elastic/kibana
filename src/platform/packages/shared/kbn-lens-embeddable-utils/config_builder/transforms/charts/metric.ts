@@ -349,7 +349,7 @@ function buildFromTextBasedLayer(
                   type: 'bar',
                   max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
-                    ? { direction: visualization.progressDirection }
+                    ? { orientation: visualization.progressDirection }
                     : {}),
                 },
               }
@@ -470,7 +470,8 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.trendlineLayerType) {
-      primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
+      // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
+      primaryMetric.background_chart = { type: 'trend' };
     }
 
     if (visualization.palette) {
@@ -483,7 +484,8 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.color = AUTO_COLOR;
     }
 
-    if (visualization.applyColorTo) {
+    // Check for valid enum, somehow set to bar in integrations panels to 'bar', unknown values default to unselected
+    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
   }
