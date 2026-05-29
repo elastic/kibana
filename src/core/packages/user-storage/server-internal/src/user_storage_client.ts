@@ -84,24 +84,17 @@ export class UserStorageClient implements IUserStorageClient {
     let globalData: Record<string, unknown> | undefined;
 
     if (objectsToFetch.length > 0) {
-      try {
-        const { saved_objects: docs } = await this.soClient.bulkGet<UserStorageAttributes>(
-          objectsToFetch
-        );
-        for (const doc of docs) {
-          // bulkGet surfaces a missing SO via `doc.error` rather than throwing.
-          if (doc.error) continue;
-          if (doc.type === USER_STORAGE_SO_TYPE) {
-            spaceData = doc.attributes.data;
-          } else if (doc.type === USER_STORAGE_GLOBAL_SO_TYPE) {
-            globalData = doc.attributes.data;
-          }
+      const { saved_objects: docs } = await this.soClient.bulkGet<UserStorageAttributes>(
+        objectsToFetch
+      );
+      for (const doc of docs) {
+        // bulkGet surfaces a missing SO via `doc.error` rather than throwing.
+        if (doc.error) continue;
+        if (doc.type === USER_STORAGE_SO_TYPE) {
+          spaceData = doc.attributes.data;
+        } else if (doc.type === USER_STORAGE_GLOBAL_SO_TYPE) {
+          globalData = doc.attributes.data;
         }
-      } catch (err) {
-        // Preloading must never crash the page render. If the user lacks
-        // privileges for user-storage saved objects (e.g. certain SAML/auth
-        // configurations), fall through and return defaults for every key.
-        this.logger.debug(`getForInjection bulkGet failed, returning defaults: ${err.message}`);
       }
     }
 

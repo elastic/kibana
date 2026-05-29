@@ -182,19 +182,15 @@ describe('UserStorageClient.getForInjection()', () => {
     expect(logger.warn.mock.calls[0][0]).toMatch(/space:a/);
   });
 
-  it('returns defaults when bulkGet throws (e.g. authorization failure)', async () => {
+  it('propagates errors thrown by bulkGet itself (e.g. transport failure)', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
       ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
     ]);
-    const { client, savedObjectsClient, logger } = buildClient(definitions);
+    const { client, savedObjectsClient } = buildClient(definitions);
 
     savedObjectsClient.bulkGet.mockRejectedValue(new Error('boom'));
 
-    const result = await client.getForInjection();
-    expect(result).toEqual({ 'space:a': 'a-default' });
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('getForInjection bulkGet failed')
-    );
+    await expect(client.getForInjection()).rejects.toThrow('boom');
   });
 });
 

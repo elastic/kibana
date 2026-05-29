@@ -13,12 +13,14 @@ import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } f
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -70,10 +72,13 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 /** @internal */
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
   private userStorageStart?: UserStorageServiceStart;
-  constructor(private readonly coreContext: CoreContext) {}
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -408,7 +413,23 @@ export class RenderingService {
     const client = userStorage.asScoped(request);
     if (!client) return {};
 
-    return client.getForInjection();
+    try {
+      return await client.getForInjection();
+    } catch (err) {
+      // Authorization errors are expected for users whose auth realm does not
+      // grant access to user-storage saved objects (e.g. certain SAML configs).
+      // Degrade gracefully so the page still renders with default values.
+      if (
+        SavedObjectsErrorHelpers.isForbiddenError(err) ||
+        SavedObjectsErrorHelpers.isNotAuthorizedError(err)
+      ) {
+        this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
+        return {};
+      }
+
+      this.logger.error(`User storage preload failed: ${err.message}`);
+      return {};
+    }
   }
 }
 
