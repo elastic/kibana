@@ -42,6 +42,7 @@ test.describe(
       });
     });
 
+    // Pre-migration tag 'skipFIPS'
     test('manage_security sees only the security section with all four links', async ({
       browserAuth,
       pageObjects,
