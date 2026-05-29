@@ -274,45 +274,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'semantic validation: rejects an upsert create whose query fails ES analysis',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('upsert-semantic-create'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
-          metadata: { name: 'upsert-semantic-create' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)' },
-          },
-        }),
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.breach.query');
-    }
-  );
-
-  apiTest(
-    'semantic validation: rejects an upsert replace whose query fails ES analysis',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'upsert-semantic-replace' } })
-      );
-      const response = await apiClient.put(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
-          metadata: { name: 'upsert-semantic-replace' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)' },
-          },
-        }),
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.breach.query');
-    }
-  );
-
-  apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('writer-can-upsert'), {

@@ -293,94 +293,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'semantic validation: rejects a standalone breach.query that calls an unknown function',
-    async ({ apiClient }) => {
-      // Unknown-function errors are raised by Elasticsearch at semantic-analysis
-      // time regardless of the underlying indices, so this is a stable signal
-      // that Layer 2 validation reached ES.
-      const body = buildCreateRuleData({
-        metadata: { name: 'semantic-breach-unknown-fn' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)' },
-        },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.breach.query');
-    }
-  );
-
-  apiTest(
-    'semantic validation: rejects a composed segment that fails ES analysis once joined with base',
-    async ({ apiClient }) => {
-      const body = buildCreateRuleData({
-        metadata: { name: 'semantic-segment-unknown-fn' },
-        query: {
-          format: 'composed',
-          base: 'FROM metrics-* | STATS cpu = AVG(cpu) BY host',
-          breach: { segment: 'EVAL z = __not_a_real_function__(1)' },
-        },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.breach.segment');
-    }
-  );
-
-  apiTest(
-    'semantic validation: rejects a recovery query that fails ES analysis',
-    async ({ apiClient }) => {
-      const body = buildCreateRuleData({
-        metadata: { name: 'semantic-recovery-unknown-fn' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          recovery: {
-            strategy: 'query',
-            query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)',
-          },
-        },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.recovery.query');
-    }
-  );
-
-  apiTest(
-    'semantic validation: rejects a no_data query that fails ES analysis',
-    async ({ apiClient }) => {
-      const body = buildCreateRuleData({
-        metadata: { name: 'semantic-no-data-unknown-fn' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: {
-            query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)',
-            behavior: 'emit',
-          },
-        },
-      });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('query.no_data.query');
-    }
-  );
-
-  apiTest(
     'create: returns 201 with the signal kind round-tripped to the response',
     async ({ apiClient, apiServices }) => {
       // Signal rules must opt out of the default `state_transition`,
@@ -416,9 +328,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         schedule: { every: '5m', lookback: '10m' },
         query: {
           format: 'standalone',
-          breach: {
-            query: 'FROM logs-* | LIMIT 10 | EVAL status = "error" | WHERE status == "error"',
-          },
+          breach: { query: 'FROM logs-* | LIMIT 10' },
         },
         state_transition: { pending_count: 3 },
         grouping: { fields: ['host.name'] },
@@ -448,12 +358,12 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
           format: 'standalone',
           breach: {
             query:
-              'FROM logs-* | EVAL severity = "high", host_name = "host-1" | WHERE severity == "high" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
+              'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
           },
           recovery: {
             strategy: 'query',
             query:
-              'FROM logs-* | EVAL severity = "resolved", host_name = "host-1" | WHERE severity == "resolved" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
+              'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
           },
         },
       });
@@ -511,7 +421,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       metadata: { name: 'composed-rule' },
       query: {
         format: 'composed',
-        base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
         breach: { segment: 'WHERE count >= 10' },
       },
     });
@@ -530,7 +440,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         metadata: { name: 'composed-recover-rule' },
         query: {
           format: 'composed',
-          base: 'FROM logs-* | EVAL host_name = "host-1", value = 0 | STATS max_val = MAX(value) BY host_name',
+          base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
           breach: { segment: 'WHERE max_val >= 10' },
           recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
         },
@@ -551,7 +461,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         metadata: { name: 'composed-no-data-rule' },
         query: {
           format: 'composed',
-          base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
           breach: { segment: 'WHERE count >= 1' },
           no_data: { segment: 'WHERE count == 0', behavior: 'last_status' },
         },

@@ -115,8 +115,8 @@ export type NoDataBehavior = z.infer<typeof noDataBehaviorSchema>;
  * Appendable ES|QL segment (e.g. `WHERE …`) — a bare command without a
  * leading pipe. Not a complete program on its own, so we only enforce
  * structural bounds here (length, non-empty, no leading pipe). Full
- * parser/semantic validation runs once the segment is composed with the
- * surrounding `base` (see Layer 2 in the route handler).
+ * parser validation only runs when the segment is composed with its
+ * `base` via `composeEsqlQuery`.
  */
 export const esqlQuerySegmentSchema = z
   .string()

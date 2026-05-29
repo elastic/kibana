@@ -6,7 +6,6 @@
  */
 
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -99,33 +98,23 @@ describe('RulesClient', () => {
     jest.useRealTimers();
   });
 
-  function createClientWithEs() {
+  function createClient() {
     const actionPolicyClient = {
       deleteActionPoliciesByFilter: jest
         .fn()
         .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
     } as unknown as ActionPolicyClient;
 
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({} as never);
-
-    const client = new RulesClient({
+    return new RulesClient({
       services: {
         request,
         rulesSavedObjectService,
         taskManager,
         userService,
         actionPolicyClient,
-        esClient,
       },
       options: { spaceId: 'space-1' },
     });
-
-    return { client, esClient };
-  }
-
-  function createClient() {
-    return createClientWithEs().client;
   }
 
   describe('createRule', () => {
@@ -261,155 +250,6 @@ describe('RulesClient', () => {
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-      });
-    });
-  });
-
-  describe('semantic ES|QL validation', () => {
-    describe('createRule', () => {
-      it('submits each effective ES|QL string to ES with "| LIMIT 0" appended', async () => {
-        const { client, esClient } = createClientWithEs();
-        mockSavedObjectsClient.create.mockResolvedValueOnce({
-          id: 'rule-id-sem-1',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: baseSoAttrs,
-          references: [],
-        });
-
-        await client.createRule({
-          data: {
-            ...baseCreateData,
-            query: {
-              format: 'composed',
-              base: 'FROM metrics-* | STATS errors = COUNT(*) BY host',
-              breach: { segment: 'WHERE errors > 10' },
-              recovery: {
-                strategy: 'query',
-                segment: 'WHERE errors == 0',
-              },
-              no_data: { segment: 'WHERE host IS NULL', behavior: 'emit' },
-            },
-          },
-          options: { id: 'rule-id-sem-1' },
-        });
-
-        const submitted = esClient.esql.query.mock.calls.map(([args]) => args.query);
-        expect(submitted).toEqual([
-          'FROM metrics-* | STATS errors = COUNT(*) BY host | WHERE errors > 10 | LIMIT 0',
-          'FROM metrics-* | STATS errors = COUNT(*) BY host | WHERE errors == 0 | LIMIT 0',
-          'FROM metrics-* | STATS errors = COUNT(*) BY host | WHERE host IS NULL | LIMIT 0',
-        ]);
-      });
-
-      it('throws 400 keyed to the failing block when ES rejects the breach query', async () => {
-        const { client, esClient } = createClientWithEs();
-        esClient.esql.query.mockReset();
-        esClient.esql.query.mockRejectedValueOnce(new Error('Column [errors] cannot be resolved'));
-
-        await expect(
-          client.createRule({
-            data: {
-              ...baseCreateData,
-              query: {
-                format: 'composed',
-                base: 'FROM metrics-* | STATS cpu = AVG(cpu) BY host',
-                breach: { segment: 'WHERE errors > 10' },
-              },
-            },
-            options: { id: 'rule-id-sem-bad' },
-          })
-        ).rejects.toMatchObject({
-          output: { statusCode: 400 },
-          message: expect.stringContaining('query.breach.segment'),
-        });
-
-        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('updateRule', () => {
-      it('skips semantic validation when the body has no query', async () => {
-        const { client, esClient } = createClientWithEs();
-        mockSavedObjectsClient.get.mockResolvedValueOnce({
-          id: 'rule-id-noquery',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: baseSoAttrs,
-          version: 'v1',
-          references: [],
-        });
-
-        await client.updateRule({
-          id: 'rule-id-noquery',
-          data: { metadata: { name: 'renamed' } } as UpdateRuleData,
-        });
-
-        expect(esClient.esql.query).not.toHaveBeenCalled();
-      });
-
-      it('throws 400 when the new query fails semantic validation and does not write the SO', async () => {
-        const { client, esClient } = createClientWithEs();
-        esClient.esql.query.mockReset();
-        esClient.esql.query.mockRejectedValueOnce(new Error('Column [errors] cannot be resolved'));
-        mockSavedObjectsClient.get.mockResolvedValueOnce({
-          id: 'rule-id-sem-update-bad',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: baseSoAttrs,
-          version: 'v1',
-          references: [],
-        });
-
-        await expect(
-          client.updateRule({
-            id: 'rule-id-sem-update-bad',
-            data: {
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM logs-* | WHERE errors > 10' },
-              },
-            },
-          })
-        ).rejects.toMatchObject({
-          output: { statusCode: 400 },
-          message: expect.stringContaining('query.breach.query'),
-        });
-
-        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('upsertRule', () => {
-      it('throws 400 keyed to the failing block on replace and does not write the SO', async () => {
-        const { client, esClient } = createClientWithEs();
-        esClient.esql.query.mockReset();
-        esClient.esql.query.mockRejectedValueOnce(new Error('Column [errors] cannot be resolved'));
-
-        const existingDoc = {
-          id: 'rule-id-sem-upsert-bad',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: baseSoAttrs,
-          version: 'v1',
-          references: [],
-        };
-        mockSavedObjectsClient.get.mockResolvedValueOnce(existingDoc);
-        mockSavedObjectsClient.get.mockResolvedValueOnce(existingDoc);
-
-        await expect(
-          client.upsertRule({
-            id: 'rule-id-sem-upsert-bad',
-            data: {
-              ...baseCreateData,
-              query: {
-                format: 'standalone',
-                breach: { query: 'FROM logs-* | WHERE errors > 10' },
-              },
-            },
-          })
-        ).rejects.toMatchObject({
-          output: { statusCode: 400 },
-          message: expect.stringContaining('query.breach.query'),
-        });
-
-        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
     });
   });
