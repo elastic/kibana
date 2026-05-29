@@ -44,6 +44,7 @@ export function getSourceField(
       case 'grok':
       case 'dissect':
       case 'date':
+      case 'uri_parts':
         return processor.from;
       case 'manual_ingest_pipeline':
         return undefined;
