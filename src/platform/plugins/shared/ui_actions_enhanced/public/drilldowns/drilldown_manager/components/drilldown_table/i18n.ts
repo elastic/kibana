@@ -39,7 +39,7 @@ export const txtDeleteDrilldowns = (count: number) =>
   });
 
 export const txtTableCaption = i18n.translate(
-  'embeddableApi.components.DrilldownTable.tableCaption',
+  'uiActionsEnhanced.components.DrilldownTable.tableCaption',
   {
     defaultMessage: 'Drilldowns',
   }
