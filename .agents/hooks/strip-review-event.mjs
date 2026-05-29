@@ -49,18 +49,21 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 /**
- * Detects an `event=` flag pair on `gh api .../reviews` regardless of how
- * the value is quoted. Only the prefix
- * `(-f|-F|--field|--raw-field …)['"]?event=` matters, including pflag's
- * attached shorthand values (`-fevent=...`, `-f=event=...`) — the regex never
- * consumes the value, so every value-side shell-quoting and shell-expansion
- * shape is covered without alternation: bare, single-quoted, double-quoted,
- * whole-pair quoted, `$(…)`, backticks, `${VAR:-…}`. The match drives a `deny`
- * decision pointing the agent at the canonical `--input <file>` path;
- * quote-aware iteration in `hasEventFlagOutsideQuotes` ignores literal
- * `event=` text inside a `-f body="…"` argument.
+ * Detects an `event=` flag pair on `gh api .../reviews` regardless of how the
+ * field NAME is quoted. The matched prefix is
+ * `(-f|-F|--field|--raw-field …)(?:$?['"]|\)?event=`, covering pflag's attached
+ * shorthand (`-fevent=...`, `-f=event=...`) and the name-side quoting the shell
+ * strips before `gh` sees argv: bare, single/double quotes, ANSI-C
+ * (`$'event=...'`) and locale (`$"event=..."`) quoting, and a leading backslash
+ * escape (`\event=...`) — all of which bash passes to `gh` as `event=...`. The
+ * regex never consumes the value, so every value-side shell-quoting /
+ * expansion shape (`$(…)`, backticks, `${VAR:-…}`) is covered without
+ * alternation. The match drives a `deny` pointing the agent at the canonical
+ * `--input <file>` path; quote-aware iteration in `hasEventFlagOutsideQuotes`
+ * ignores literal `event=` text inside a `-f body="…"` argument.
  */
-const eventFlag = /\s(?:-[fF](?:=|\s+)?|--(?:raw-)?field(?:=|\s+))['"]?event=/g;
+const eventFlag =
+  /\s(?:-[fF](?:=|\s+)?|--(?:raw-)?field(?:=|\s+))(?:\$?['"]|\\)?event=/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
