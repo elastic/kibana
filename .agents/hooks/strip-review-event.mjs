@@ -201,19 +201,15 @@ const hasPublishFlagOutsideQuotes = (segment) => {
 };
 
 /**
- * Walks `src` tracking quote state and returns the first top-level pipeline
- * segment satisfying `predicate`, as `{ start, end }` offsets into `src`.
- * Returns `null` when no such segment exists.
+ * Walks `src` tracking quote state and returns `{ start, end }` offsets for
+ * every top-level pipeline segment, splitting on `;`, `|`, single `&`, `&&`,
+ * `||`, and newlines that fall outside a shell-quoted region.
  */
-const findSegmentSlice = (src, predicate) => {
+const collectSegments = (src) => {
+  const segments = [];
   let i = 0;
   let quote = null;
   let segStart = 0;
-
-  const consider = (segEnd) => {
-    const text = src.slice(segStart, segEnd);
-    return predicate(text) ? { start: segStart, end: segEnd } : null;
-  };
 
   while (i < src.length) {
     const c = src[i];
@@ -239,8 +235,7 @@ const findSegmentSlice = (src, predicate) => {
       c === '\n' ||
       (c === '&' && src[i + 1] !== '&');
     if (isSep2 || isSep1) {
-      const hit = consider(i);
-      if (hit) return hit;
+      segments.push({ start: segStart, end: i });
       const step = isSep2 ? 2 : 1;
       segStart = i + step;
       i = segStart;
@@ -248,38 +243,35 @@ const findSegmentSlice = (src, predicate) => {
     }
     i += 1;
   }
-  return consider(src.length);
+  segments.push({ start: segStart, end: src.length });
+  return segments;
 };
 
 /**
- * Analyse a raw shell command and return either `null` (allow, possibly
- * after rewriting an `--input <file>` payload to drop an `event` key) or
- * `{ deny: <reason> }` with a deny reason. The wrappers translate the
- * return value into the per-tool output JSON shape.
+ * Returns the first top-level segment satisfying `predicate`, as
+ * `{ start, end }` offsets into `src`, or `null` when none match.
  */
-export const analyzeReviewCommand = (raw) => {
-  if (typeof raw !== 'string' || raw === '') return null;
+const findSegmentSlice = (src, predicate) =>
+  collectSegments(src).find((seg) => predicate(src.slice(seg.start, seg.end))) ??
+  null;
 
-  // Normalize line continuations the way bash does: `\<newline>` (both
-  // outside and inside double quotes) is removed entirely, not replaced
-  // with a space. Without this, `findSegmentSlice` splits on the bare
-  // `\n` and a multi-line `gh api .../reviews \<nl> -f event=APPROVE`
-  // invocation would be seen as two separate segments, with `event=...`
-  // landing in a segment that no longer matches the review-creation
-  // regex and slipping past the deny.
-  const cmd = raw.replace(/\\\n/g, '');
+/**
+ * Returns every top-level segment satisfying `predicate`. Unlike
+ * `findSegmentSlice`, this does not stop at the first hit: a command can chain
+ * several review-creation calls (e.g. a safe `--input <file>` call followed by
+ * a publishing `-f event=` call), and each segment must be inspected so a
+ * later segment cannot smuggle a publish past the deny.
+ */
+const findAllSegmentSlices = (src, predicate) =>
+  collectSegments(src).filter((seg) => predicate(src.slice(seg.start, seg.end)));
 
-  if (findSegmentSlice(cmd, isPrReviewPublish)) {
-    return {
-      deny: '`gh pr review --approve | --request-changes | --comment` publishes the review immediately. Create the review in PENDING state by writing the request body to a JSON file (no `event` key) and submitting it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`, then submit the review explicitly with `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
-    };
-  }
-
-  const slice = findSegmentSlice(cmd, isReviewCreationCall);
-  if (!slice) return null;
-
-  const segment = cmd.slice(slice.start, slice.end);
-
+/**
+ * Inspect a single review-creation segment. Returns `{ deny }` when the
+ * segment would publish the review or is otherwise opaque to the hook, or
+ * `null` after sanitising an `--input <file>` payload in place. `raw` is the
+ * full (un-split) command, needed only for the heredoc ambiguity check.
+ */
+const analyzeCreationSegment = (segment, raw) => {
   const fileMatch = segment.match(inputFilePath);
   const filePath = fileMatch
     ? fileMatch.groups.doubleQuoted ||
@@ -301,12 +293,13 @@ export const analyzeReviewCommand = (raw) => {
   }
 
   if (filePath && filePathSource !== 'singleQuoted') {
-    const hasShellExpansion =
+    const hasUnreadablePath =
       shellExpansionInPath.test(filePath) ||
-      (filePathSource === 'bare' && filePath.startsWith('~'));
-    if (hasShellExpansion) {
+      (filePathSource === 'bare' &&
+        (filePath.startsWith('~') || filePath.includes('\\')));
+    if (hasUnreadablePath) {
       return {
-        deny: 'The `--input` path contains shell expansion (`$VAR`, `$(...)`, backticks, or a leading `~`). The hook reads the literal path and cannot expand shell metacharacters, so the request body would slip through unchecked. Pass an absolute or already-expanded path so the file can be rewritten before submission.',
+        deny: 'The `--input` path contains shell expansion (`$VAR`, `$(...)`, backticks, a leading `~`) or a backslash escape (e.g. `path\\ with\\ spaces.json`) that the shell resolves but the hook reads literally. The hook would read the wrong path and the real request body would slip through unchecked. Pass an absolute, already-expanded path and quote it (single or double quotes) instead of backslash-escaping, so the file can be rewritten before submission.',
       };
     }
   }
@@ -343,6 +336,46 @@ export const analyzeReviewCommand = (raw) => {
     } catch {
       /* file doesn't exist or isn't JSON — skip */
     }
+  }
+
+  return null;
+};
+
+/**
+ * Analyse a raw shell command and return either `null` (allow, possibly
+ * after rewriting an `--input <file>` payload to drop an `event` key) or
+ * `{ deny: <reason> }` with a deny reason. The wrappers translate the
+ * return value into the per-tool output JSON shape.
+ */
+export const analyzeReviewCommand = (raw) => {
+  if (typeof raw !== 'string' || raw === '') return null;
+
+  // Normalize line continuations the way bash does: `\<newline>` (both
+  // outside and inside double quotes) is removed entirely, not replaced
+  // with a space. Without this, `findSegmentSlice` splits on the bare
+  // `\n` and a multi-line `gh api .../reviews \<nl> -f event=APPROVE`
+  // invocation would be seen as two separate segments, with `event=...`
+  // landing in a segment that no longer matches the review-creation
+  // regex and slipping past the deny.
+  const cmd = raw.replace(/\\\n/g, '');
+
+  if (findSegmentSlice(cmd, isPrReviewPublish)) {
+    return {
+      deny: '`gh pr review --approve | --request-changes | --comment` publishes the review immediately. Create the review in PENDING state by writing the request body to a JSON file (no `event` key) and submitting it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`, then submit the review explicitly with `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
+    };
+  }
+
+  // Inspect every review-creation segment, not just the first. A chain such as
+  // `gh api .../reviews --input safe.json; gh api .../reviews -f event=COMMENT`
+  // has a benign first segment and a publishing second segment; stopping at the
+  // first match would sanitise `safe.json`, allow the command, and let the
+  // second call publish. Deny on the first segment that fails any check.
+  const slices = findAllSegmentSlices(cmd, isReviewCreationCall);
+  if (slices.length === 0) return null;
+
+  for (const slice of slices) {
+    const result = analyzeCreationSegment(cmd.slice(slice.start, slice.end), raw);
+    if (result) return result;
   }
 
   return null;
