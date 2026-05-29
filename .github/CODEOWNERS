@@ -2095,6 +2095,8 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
 
+# Visualization
+/x-pack/platform/test/functional/services/lens.ts @elastic/kibana-visualization
 
 # Machine Learning
 /x-pack/platform/test/stack_functional_integration/apps/ml @elastic/ml-ui
