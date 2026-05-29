@@ -8,7 +8,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { createMockServices } from '../../hooks/test_utils';
+import {
+  createMockServices,
+  createTestQueryClient,
+  createQueryClientWrapper,
+} from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('./details_header_section', () => ({
@@ -29,6 +33,7 @@ jest.mock('./runbook_section', () => ({
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+const Wrapper = createQueryClientWrapper(createTestQueryClient());
 
 const baseProps = {
   episodeId: 'ep-1',
@@ -39,7 +44,7 @@ const baseProps = {
 
 describe('AlertEpisodeDetailsFlyout', () => {
   it('renders header, overview tab body by default, and footer button with the right href', () => {
-    render(<AlertEpisodeDetailsFlyout {...baseProps} />);
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     expect(screen.getByTestId('headerSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('overviewSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toHaveAttribute(
@@ -49,28 +54,34 @@ describe('AlertEpisodeDetailsFlyout', () => {
   });
 
   it('switches to related tab', () => {
-    render(<AlertEpisodeDetailsFlyout {...baseProps} />);
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabRelated'));
     expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
   });
 
   it('switches to metadata tab', () => {
-    render(<AlertEpisodeDetailsFlyout {...baseProps} />);
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
   it('switches to runbook tab', () => {
-    render(<AlertEpisodeDetailsFlyout {...baseProps} />);
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabRunbook'));
     expect(screen.getByTestId('runbookSectionStub')).toBeInTheDocument();
   });
 
-  it('calls onClose when the flyout fires its close handler', () => {
+  it('calls onClose when the footer close button is clicked', () => {
     const onClose = jest.fn();
-    render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />);
-    // EuiFlyout exposes a close button with aria-label "Close this dialog" by default
-    fireEvent.click(screen.getByLabelText(/close/i));
+    render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseButton'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onClose when the top-bar icon button is clicked', () => {
+    const onClose = jest.fn();
+    render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
+    fireEvent.click(screen.getByLabelText('Close'));
     expect(onClose).toHaveBeenCalled();
   });
 });

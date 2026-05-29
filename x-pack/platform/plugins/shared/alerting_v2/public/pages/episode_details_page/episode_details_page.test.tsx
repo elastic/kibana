@@ -29,10 +29,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
 
 // Sections that call useFetchEpisodeQuery independently are mocked to keep the
 // test focused on the page-level layout and sidebar.
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_details_list_section', () => ({
-  AlertEpisodeMetadataDetailsListSection: () => (
-    <div data-test-subj="stubMetadataDetailsListSection" />
-  ),
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/overview_list_section', () => ({
+  AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => ({
@@ -53,10 +51,6 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () 
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
   AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/actions_overview_section', () => ({
-  AlertEpisodeActionsOverviewSection: () => <div data-test-subj="stubActionsOverviewSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
