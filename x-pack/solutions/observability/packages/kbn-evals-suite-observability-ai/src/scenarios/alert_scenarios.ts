@@ -133,7 +133,7 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
           criteria: [
             {
               comparator: '>',
-              threshold: [2000],
+              threshold: [15000],
               timeSize: 5,
               timeUnit: 'm',
               metrics: [

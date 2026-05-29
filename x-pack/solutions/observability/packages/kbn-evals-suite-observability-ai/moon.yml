@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/agent-builder-common'
   - '@kbn/es-snapshot-loader'
-  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package
