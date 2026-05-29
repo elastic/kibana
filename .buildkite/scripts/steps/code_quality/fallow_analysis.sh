@@ -6,6 +6,8 @@ source .buildkite/scripts/common/util.sh
 
 FALLOW_VERSION="2.76.0"
 FALLOW_OWNERS=("@elastic/search-kibana" "@elastic/workchat-eng")
+SNAPSHOT_FILE="fallow-snapshot.json"
+SNAPSHOT_DIR=".fallow/snapshots"
 
 # Extract section body for a specific owner from grouped human output.
 # Stops at the next owner section or the health score table.
@@ -40,7 +42,6 @@ extract_owner_health() {
   local line
   line=$(printf '%s\n' "$output" | grep -oE "^[[:space:]]+${escaped}[[:space:]]+[0-9.]+[[:space:]]+[A-F][[:space:]]+[0-9]+[[:space:]]+[0-9]+" || true)
   if [ -z "$line" ]; then return; fi
-  # Extract: score grade hotspots (3rd, 4th, 5th numbers: score, files, hotspots)
   local score grade hotspots
   score=$(printf '%s\n' "$line" | grep -oE "[0-9]+\.[0-9]+" | head -1)
   grade=$(printf '%s\n' "$line" | grep -oE "[A-F]" | head -1)
@@ -51,6 +52,28 @@ extract_owner_health() {
 echo "--- Install fallow v${FALLOW_VERSION}"
 npm ci --prefix .buildkite
 .buildkite/node_modules/.bin/fallow --version
+
+echo "--- Load previous snapshot for trend comparison"
+TREND_FLAG=""
+PREV_BUILD=""
+if [ -n "${BUILDKITE_API_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
+  PREV_BUILD=$(curl -sf \
+    -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
+    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&branch=main&per_page=1" \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null || true)
+fi
+
+if [ -n "$PREV_BUILD" ]; then
+  mkdir -p "$SNAPSHOT_DIR"
+  if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
+    echo "Loaded snapshot from build #${PREV_BUILD} — trend comparison enabled"
+    TREND_FLAG="--trend"
+  else
+    echo "No snapshot in build #${PREV_BUILD} — this run will create the first baseline"
+  fi
+else
+  echo "No previous build found — this run will create the first baseline"
+fi
 
 echo "--- Run fallow analysis"
 echo "Checks: dead code (unused exports/types/files) · duplication · complexity hotspots"
@@ -66,12 +89,15 @@ echo ""
 echo "See hotspots for your team:"
 echo "  npx fallow@${FALLOW_VERSION} health --workspace 'x-pack/solutions/search/**'"
 set +e
+# shellcheck disable=SC2086
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
   --production-dead-code \
   --format human \
   --quiet \
   --score \
+  --save-snapshot "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" \
+  $TREND_FLAG \
   2>&1)
 set -e
 
@@ -89,6 +115,9 @@ done
 echo "--- Health scores (complexity + maintainability, 0-100)"
 echo "Columns: score | grade | files analyzed | hotspots (high complexity + high churn) | p90 cyclomatic"
 printf '%s\n' "$FALLOW_OUTPUT" | awk '/^● Per-owner health/,0'
+
+echo "--- Save snapshot for next run"
+buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 
 echo "--- Post Buildkite annotation"
 
