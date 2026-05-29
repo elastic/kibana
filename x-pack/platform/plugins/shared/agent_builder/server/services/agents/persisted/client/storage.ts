@@ -85,6 +85,8 @@ export interface AgentConfigurationProperties {
   tools: ToolSelection[];
   skill_ids?: string[];
   enable_elastic_capabilities?: boolean;
+  single_agent_mode?: boolean;
+  disable_filestore?: boolean;
   workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];

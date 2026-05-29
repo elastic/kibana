@@ -20,4 +20,6 @@ export type ResolvedResearchStepConfiguration = Required<
 export interface ResolvedConfiguration {
   research: ResolvedResearchStepConfiguration;
   answer: ResolvedAnswerStepConfiguration;
+  /** Mirrors AgentConfiguration.single_agent_mode — skip the answer-agent call. */
+  singleAgentMode: boolean;
 }
