@@ -2516,7 +2516,7 @@ export default ({ getService }: FtrProviderContext) => {
                 {
                   user: { name: 'root' },
                   entity: {
-                    id: 'user:root',
+                    id: 'user:root@unknown',
                     type: 'user',
                     risk: { calculated_level: 'Low', calculated_score_norm: 11 },
                   },
@@ -2602,7 +2602,7 @@ export default ({ getService }: FtrProviderContext) => {
               users: [
                 {
                   user: { name: 'root' },
-                  entity: { id: 'user:root', type: 'user' },
+                  entity: { id: 'user:root@unknown', type: 'user' },
                   asset: { criticality: 'extreme_impact' },
                 },
               ],

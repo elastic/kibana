@@ -1100,7 +1100,7 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: 'root' },
-              entity: { id: 'user:root', type: 'user' },
+              entity: { id: 'user:root@unknown', type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],

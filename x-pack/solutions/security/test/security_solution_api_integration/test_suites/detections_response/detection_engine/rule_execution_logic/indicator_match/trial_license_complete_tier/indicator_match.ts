@@ -2534,7 +2534,7 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: ENRICHMENT_USER_NAME },
-              entity: { id: `user:${ENRICHMENT_USER_NAME}`, type: 'user' },
+              entity: { id: `user:${ENRICHMENT_USER_NAME}@unknown`, type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
