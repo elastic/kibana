@@ -2,10 +2,11 @@
 
 This document is a **catalogue of hypotheses** — concrete, capability-preserving changes that *could* improve Hosts UI performance, with the design rationale, expected mechanical effect, and trade-offs of each. It is forward-looking by construction: nothing here describes what was shipped, what was measured, or which PR landed which proposal.
 
-**PoC outcomes** (what was tried, what worked, what got dropped, with measured numbers) live in the [PoC outcomes comment][outcomes] on [observability-dev#5590][outcomes]. **Forensic measurements of the legacy behaviour** (per-stage breakdowns, ordering analysis, APM-host matrix, state-sub-agg multiplier) live in the [forensic report][report] earlier on the same issue.
+**PoC outcomes** (what was tried, what worked, what got dropped, with measured numbers) live in the [PoC outcomes comment][outcomes] on [observability-dev#5590][outcomes]. **Forensic measurements of the legacy behaviour** (per-stage breakdowns, ordering analysis, APM-host matrix, state-sub-agg multiplier) live in [`REPORT.md`][report] in this directory (originally published as a [comment][report-source] on the same PoC issue).
 
 [outcomes]: https://github.com/elastic/observability-dev/issues/5590#issuecomment-4563528163
-[report]: https://github.com/elastic/observability-dev/issues/5590#issuecomment-4499497658
+[report]: ./REPORT.md
+[report-source]: https://github.com/elastic/observability-dev/issues/5590#issuecomment-4499497658
 
 **Capability-preservation rule** for every proposal below: same columns, same KPIs, same sort/filter options, same drill-downs, same tabs and the same data shown to the user. Where a change has any user-visible side effect (even cosmetic), it is explicitly called out.
 
