@@ -166,7 +166,7 @@ export const TableFieldValue = ({
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
         {isCollapsible && (
           <EuiFlexItem grow={false} css={styles.collapseButtonWrapper}>
-            <EuiToolTip content={toggleButtonLabel} disableScreenReaderOutput>
+            <EuiToolTip content={toggleButtonLabel} disableScreenReaderOutput position="left">
               <EuiButtonIcon
                 iconType={isCollapsed ? 'plusSquare' : 'minusSquare'}
                 size="xs"
