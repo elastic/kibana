@@ -23,6 +23,12 @@ export interface ModuleLookup {
    * `"@kbn/core-http-server-internal"` → `"src/core/packages/http/server-internal"`
    */
   byId: Map<string, string>;
+  /**
+   * `"@kbn/core-http-server-internal"` → `"platform"` (the `group` field from
+   * `kibana.jsonc`: `platform` or a solution name such as `observability`).
+   * Modules whose manifest omits `group` are absent from this map.
+   */
+  groupById: Map<string, string>;
 }
 
 let cachedModuleLookup: ModuleLookup | null = null;
@@ -41,6 +47,7 @@ export function getModuleLookup(): ModuleLookup {
 
   const byDir = new Map<string, string>();
   const byId = new Map<string, string>();
+  const groupById = new Map<string, string>();
 
   for (const file of files) {
     if (file.includes('__fixtures__')) {
@@ -52,11 +59,23 @@ export function getModuleLookup(): ModuleLookup {
     if (config.id && typeof config.id === 'string') {
       byDir.set(dir, config.id);
       byId.set(config.id, dir);
+      if (config.group && typeof config.group === 'string') {
+        groupById.set(config.id, config.group);
+      }
     }
   }
 
-  cachedModuleLookup = { byDir, byId };
+  cachedModuleLookup = { byDir, byId, groupById };
   return cachedModuleLookup;
+}
+
+/**
+ * Returns the `group` declared in a module's `kibana.jsonc` (e.g. `platform` or
+ * a solution name like `observability`), or `undefined` when the module is
+ * unknown or declares no group.
+ */
+export function getModuleGroup(moduleId: string): string | undefined {
+  return getModuleLookup().groupById.get(moduleId);
 }
 
 export function findModuleForPath(filePath: string): string | undefined {

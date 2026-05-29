@@ -12,7 +12,13 @@ jest.mock('#pipeline-utils', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
+import {
+  FTR_SKIP_UNAFFECTED_LABEL,
+  FTR_SOFT_FAIL_UNAFFECTED_LABEL,
+  MAX_MINUTES,
+  PREVENT_SELECTIVE_TESTS_LABEL,
+  RETRIES,
+} from './const';
 import { loadRunOrderConfig } from './env_config';
 
 const TYPE_ENV = {
@@ -55,6 +61,8 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.ftrConfigsDeps).toEqual(['build']);
     expect(cfg.jestConfigsDeps).toEqual([]);
     expect(cfg.useSelectiveTesting).toBe(false);
+    expect(cfg.ftrSkipUnaffectedSolutions).toBe(false);
+    expect(cfg.ftrSoftFailUnaffectedSolutions).toBe(false);
   });
 
   it('parses CSV envs and trims whitespace', () => {
@@ -141,6 +149,27 @@ describe('loadRunOrderConfig', () => {
   it('disables selective testing when not a PR', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(false);
+  });
+
+  it('enables FTR skip-unaffected when its label is present', () => {
+    process.env.GITHUB_PR_LABELS = `foo,${FTR_SKIP_UNAFFECTED_LABEL},bar`;
+    const cfg = loadRunOrderConfig();
+    expect(cfg.ftrSkipUnaffectedSolutions).toBe(true);
+    expect(cfg.ftrSoftFailUnaffectedSolutions).toBe(false);
+  });
+
+  it('enables FTR soft-fail-unaffected when its label is present', () => {
+    process.env.GITHUB_PR_LABELS = `${FTR_SOFT_FAIL_UNAFFECTED_LABEL}`;
+    const cfg = loadRunOrderConfig();
+    expect(cfg.ftrSoftFailUnaffectedSolutions).toBe(true);
+    expect(cfg.ftrSkipUnaffectedSolutions).toBe(false);
+  });
+
+  it('leaves both FTR selective flags off when no related label is present', () => {
+    process.env.GITHUB_PR_LABELS = 'some-other-label';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.ftrSkipUnaffectedSolutions).toBe(false);
+    expect(cfg.ftrSoftFailUnaffectedSolutions).toBe(false);
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

@@ -116,3 +116,66 @@ export const STEP_KEYS = {
 
 /** PR label that prevents selective testing. */
 export const PREVENT_SELECTIVE_TESTS_LABEL = 'ci:prevent-selective-testing';
+
+/**
+ * PR label that drops FTR configs belonging to solutions the PR does not touch.
+ * Only takes effect when the diff is confined to one or more solutions (no
+ * platform/shared/CI/test-infra changes); otherwise the full suite still runs.
+ */
+export const FTR_SKIP_UNAFFECTED_LABEL = 'ci:skip-unaffected-ftr-configs';
+
+/**
+ * PR label that keeps running FTR configs of untouched solutions but makes their
+ * failures non-blocking (they no longer fail the PR). Same confinement gate as
+ * the skip label. If both labels are present, skip wins.
+ */
+export const FTR_SOFT_FAIL_UNAFFECTED_LABEL = 'ci:soft-fail-unaffected-ftr-configs';
+
+/** The base `group` shared across solutions (from `kibana.jsonc`). */
+export const PLATFORM_GROUP = 'platform';
+
+/** Solution `group` values (from `kibana.jsonc`), matching `VALID_SOLUTIONS`. */
+export const SOLUTION_GROUPS = [
+  'observability',
+  'security',
+  'search',
+  'workplaceai',
+  'vectordb',
+] as const;
+
+/**
+ * Maps a solution `group` to the infix used in its FTR manifest filenames
+ * (`.buildkite/ftr-manifests/ftr_<infix>_*.yml`). Most match 1:1, but a few
+ * historical names differ (`observability`→`oblt`, `workplaceai`→`workplace_ai`).
+ */
+export const SOLUTION_MANIFEST_INFIX: Record<string, string> = {
+  observability: 'oblt',
+  security: 'security',
+  search: 'search',
+  workplaceai: 'workplace_ai',
+  vectordb: 'vectordb',
+};
+
+/**
+ * Touching any of these forces the full FTR suite to run (blocking), even when
+ * the rest of the diff looks solution-scoped. Kept narrow: shared test harness,
+ * FTR base services, CI selection logic, and root toolchain files. Most of these
+ * already resolve to the `platform` group or `[uncategorized]` and would bail
+ * anyway — listing them makes the intent explicit and guards path edge-cases.
+ */
+export const CRITICAL_FILES_FTR = [
+  'package.json',
+  'yarn.lock',
+  'tsconfig.base.json',
+  'tsconfig.json',
+  '.node-version',
+  '.nvmrc',
+  'src/setup_node_env/**/*',
+  'src/platform/packages/shared/kbn-test/**/*',
+  'src/platform/packages/shared/kbn-ftr-common-functional-services/**/*',
+  'src/platform/packages/shared/kbn-ftr-common-functional-ui-services/**/*',
+  '.buildkite/ftr-manifests/**/*',
+  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
+  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+  '.buildkite/scripts/steps/test/**/*',
+];

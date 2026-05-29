@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
+import {
+  MAX_MINUTES,
+  RETRIES,
+  PREVENT_SELECTIVE_TESTS_LABEL,
+  FTR_SKIP_UNAFFECTED_LABEL,
+  FTR_SOFT_FAIL_UNAFFECTED_LABEL,
+} from './const';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
 
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
@@ -78,9 +84,21 @@ export function loadRunOrderConfig() {
     useSelectiveTesting:
       Boolean(process.env.GITHUB_PR_NUMBER) &&
       !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
+
+    // Opt-in FTR solution-selective behaviour, driven by PR labels. These are
+    // independent of `useSelectiveTesting` (which only governs Jest) but still
+    // require a merge base to diff against.
+    ftrSkipUnaffectedSolutions: hasLabel(FTR_SKIP_UNAFFECTED_LABEL),
+    ftrSoftFailUnaffectedSolutions: hasLabel(FTR_SOFT_FAIL_UNAFFECTED_LABEL),
+
     prMergeBase: process.env.GITHUB_PR_MERGE_BASE || undefined,
     prNumber: process.env.GITHUB_PR_NUMBER || undefined,
   } as const;
+}
+
+/** True when the given label is present in `GITHUB_PR_LABELS`. */
+function hasLabel(label: string): boolean {
+  return (parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(label);
 }
 
 export type RunOrderConfig = ReturnType<typeof loadRunOrderConfig>;

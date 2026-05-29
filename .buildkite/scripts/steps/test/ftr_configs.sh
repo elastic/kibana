@@ -44,6 +44,26 @@ if [ "$configs" == "" ]; then
   exit 1
 fi
 
+# Configs belonging to solutions the PR does not touch can be made non-blocking
+# via the `ci:soft-fail-unaffected-ftr-configs` label: they still run, but their
+# failures are only reported/annotated and do not fail this step. The list is
+# produced by pick_test_group_run_order and uploaded as an artifact (it is
+# always present, possibly empty, for builds that go through the orchestrator).
+softFailConfigs=""
+if [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
+  # Mirror the ftr_run_order.json download (GCS first, Buildkite-artifact
+  # fallback). `|| true` keeps a genuine miss (non-orchestrator pipelines) from
+  # tripping `set -e`; we then guard on the file actually existing.
+  download_tmp_artifact ftr_soft_fail_configs.json . "$BUILDKITE_BUILD_ID" || true
+  if [ -f ftr_soft_fail_configs.json ]; then
+    softFailConfigs=$(jq -r '.[]' ftr_soft_fail_configs.json 2>/dev/null || echo "")
+    if [[ "$softFailConfigs" ]]; then
+      echo "--- The following FTR configs are non-blocking (untouched solutions):"
+      echo "$softFailConfigs"
+    fi
+  fi
+fi
+
 failedConfigs=""
 results=()
 
@@ -53,6 +73,12 @@ while read -r config; do
   fi
 
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
+
+  # Is this config non-blocking (belongs to a solution the PR doesn't touch)?
+  isSoftFail="false"
+  if [[ "$softFailConfigs" ]] && grep -Fxq -- "$config" <<< "$softFailConfigs"; then
+    isSoftFail="true"
+  fi
 
   # see if this config has already been executed successfully
   CONFIG_EXECUTION_KEY="${config}_executed"
@@ -117,13 +143,25 @@ while read -r config; do
     duration="${timeSec}s"
   fi
 
+  resultLabel="${lastCode}"
+  if [[ "$isSoftFail" == "true" && $lastCode -ne 0 ]]; then
+    resultLabel="${lastCode} (non-blocking)"
+  fi
+
   results+=("- $config
     duration: ${duration}
-    result: ${lastCode}")
+    result: ${resultLabel}")
 
   if [ $lastCode -eq 0 ]; then
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
+  elif [[ "$isSoftFail" == "true" ]]; then
+    # Non-blocking config: report the failure but don't fail the step or queue
+    # it for the failed-only retry.
+    echo "⚠️ Non-blocking FTR config failed with code $lastCode (untouched solution): $config"
+    echo "^^^ +++"
+    buildkite-agent annotate --style "warning" --context "ftr-non-blocking" --append "⚠️ Non-blocking FTR failure: \`${config}\` (exit ${lastCode})
+" || true
   else
     exitCode=10
     echo "FTR exited with code $lastCode"

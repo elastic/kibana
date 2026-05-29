@@ -13,6 +13,7 @@ import minimatch from 'minimatch';
 import { parse as loadYaml } from 'yaml';
 
 import { serverless, stateful } from '../../../ftr-manifests/ftr_configs_manifests.json';
+import { SOLUTION_MANIFEST_INFIX } from './const';
 import type { FtrConfigsManifest } from './types';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
@@ -32,7 +33,7 @@ export function getEnabledFtrConfigs(
   } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
 
-  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
+  const mappedSolutions = solutions?.map((s) => SOLUTION_MANIFEST_INFIX[s] ?? s);
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     if (
       mappedSolutions &&

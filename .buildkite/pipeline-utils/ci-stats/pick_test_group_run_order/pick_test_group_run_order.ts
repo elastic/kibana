@@ -17,10 +17,11 @@ import { CiStatsClient } from '../client';
 
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
 import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
-import { loadRunOrderConfig } from './env_config';
+import { loadRunOrderConfig, type RunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
+import { diffSoftFailConfigs, resolveAffectedFtrSolutions } from './selective_ftr';
 import { isScoutTestsOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
@@ -77,6 +78,14 @@ export async function pickTestGroupRunOrder() {
   );
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
+  // Opt-in FTR solution-selective behaviour (PR labels). When the diff is
+  // confined to one or more solutions we either drop the untouched solutions'
+  // configs (skip) or keep running them as non-blocking (soft-fail). Otherwise
+  // the full enabled suite runs, blocking, exactly as before.
+  const ftrSoftFailConfigs = ftrConfigsIncluded
+    ? await applyFtrSolutionSelection(bk, config, ftrConfigsByQueue)
+    : [];
+
   if (selectiveTestingMergeBase) {
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
     if (selectiveCtx !== null) {
@@ -128,6 +137,11 @@ export async function pickTestGroupRunOrder() {
   if (ftrConfigsIncluded) {
     Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
     bk.uploadArtifacts('ftr_run_order.json');
+
+    // Always emitted (possibly empty) so the FTR job can unconditionally decide
+    // which configs are non-blocking without guessing whether the file exists.
+    Fs.writeFileSync('ftr_soft_fail_configs.json', JSON.stringify(ftrSoftFailConfigs, null, 2));
+    bk.uploadArtifacts('ftr_soft_fail_configs.json');
   }
 
   const steps: BuildkiteStep[] = [
@@ -172,6 +186,79 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
+}
+
+/**
+ * Apply the opt-in FTR solution-selective labels to the enabled config set.
+ *
+ * - `ci:skip-unaffected-ftr-configs`: mutate `ftrConfigsByQueue` in place to
+ *   keep only the touched solutions (+ platform/base); returns `[]`.
+ * - `ci:soft-fail-unaffected-ftr-configs`: leave `ftrConfigsByQueue` untouched
+ *   (everything still runs) and return the untouched-solution config paths that
+ *   the FTR job should treat as non-blocking.
+ *
+ * When neither label is set, no merge base is available, or the diff cannot be
+ * narrowed to solutions, nothing changes and `[]` is returned (full blocking
+ * suite). If both labels are set, skip wins.
+ */
+async function applyFtrSolutionSelection(
+  bk: BuildkiteClient,
+  config: RunOrderConfig,
+  ftrConfigsByQueue: Map<string, string[]>
+): Promise<string[]> {
+  const skip = config.ftrSkipUnaffectedSolutions;
+  const softFail = config.ftrSoftFailUnaffectedSolutions;
+  if (!skip && !softFail) return [];
+
+  if (!config.prMergeBase) {
+    bk.setAnnotation(
+      'ftr-selective-testing',
+      'warning',
+      'FTR selective testing label set but no merge base is available — running the full FTR suite (blocking).'
+    );
+    return [];
+  }
+
+  const { solutions, reason } = await resolveAffectedFtrSolutions(config.prMergeBase);
+  if (!solutions) {
+    bk.setAnnotation(
+      'ftr-selective-testing',
+      'info',
+      `FTR selective testing not applied — running the full FTR suite (blocking). Reason: ${reason}.`
+    );
+    return [];
+  }
+
+  const solutionList = [...solutions].sort();
+  const { ftrConfigsByQueue: blockingByQueue } = getEnabledFtrConfigs(
+    config.ftrConfigPatterns,
+    solutionList
+  );
+
+  // `skip` wins when both labels are present.
+  if (skip) {
+    ftrConfigsByQueue.clear();
+    for (const [queue, names] of blockingByQueue) {
+      ftrConfigsByQueue.set(queue, names);
+    }
+    bk.setAnnotation(
+      'ftr-selective-testing',
+      'info',
+      `FTR selective testing: skipping configs of untouched solutions. ${reason}. ` +
+        `Running solution(s) [${solutionList.join(', ')}] + platform/base only.`
+    );
+    return [];
+  }
+
+  const softFailConfigs = diffSoftFailConfigs(ftrConfigsByQueue, blockingByQueue);
+  bk.setAnnotation(
+    'ftr-selective-testing',
+    'info',
+    `FTR selective testing: ${softFailConfigs.length} config(s) of untouched solutions are non-blocking ` +
+      `(they still run, but their failures won't fail this PR). ${reason}. ` +
+      `Blocking solution(s) [${solutionList.join(', ')}] + platform/base.`
+  );
+  return softFailConfigs;
 }
 
 /**

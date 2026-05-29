@@ -21,6 +21,7 @@ jest.mock('../utils', () => ({
 import {
   getModuleLookup,
   findModuleForPath,
+  getModuleGroup,
   getModuleDependencies,
   buildModuleDownstreamGraph,
   resetModuleLookupCache,
@@ -258,6 +259,37 @@ describe('module_lookup', () => {
       const { byDir } = getModuleLookup();
       expect(byDir.has('packages/no-id')).toBe(false);
       expect(byDir.size).toBe(MODULES.length);
+    });
+  });
+
+  describe('getModuleGroup', () => {
+    it('captures the `group` field from kibana.jsonc for every module', () => {
+      const { groupById } = getModuleLookup();
+      for (const spec of MODULES) {
+        // createModule() writes `group: 'platform'` for all test modules
+        expect(groupById.get(spec.id)).toBe('platform');
+      }
+    });
+
+    it('returns the group for a known module via getModuleGroup', () => {
+      expect(getModuleGroup('@kbn/core')).toBe('platform');
+    });
+
+    it('returns undefined for an unknown module', () => {
+      expect(getModuleGroup('@kbn/does-not-exist')).toBeUndefined();
+    });
+
+    it('omits modules whose kibana.jsonc has no group', () => {
+      const dir = path.join(tmpDir, 'packages', 'no-group');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(
+        path.join(dir, 'kibana.jsonc'),
+        JSON.stringify({ type: 'shared-common', id: '@kbn/no-group' })
+      );
+      commitAll(tmpDir, 'add module without group');
+
+      resetModuleLookupCache();
+      expect(getModuleGroup('@kbn/no-group')).toBeUndefined();
     });
   });
 
