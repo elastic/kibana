@@ -17,7 +17,7 @@ describe('ScheduleTypeSelector', () => {
       renderWithProviders(<ScheduleTypeSelector value="interval" onChange={jest.fn()} />);
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
-      const rruleRadio = screen.getByLabelText('Recurrence') as HTMLInputElement;
+      const rruleRadio = screen.getByLabelText('Date & time') as HTMLInputElement;
       expect(intervalRadio.checked).toBe(true);
       expect(rruleRadio.checked).toBe(false);
     });
@@ -26,7 +26,7 @@ describe('ScheduleTypeSelector', () => {
       renderWithProviders(<ScheduleTypeSelector value="rrule" onChange={jest.fn()} />);
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
-      const rruleRadio = screen.getByLabelText('Recurrence') as HTMLInputElement;
+      const rruleRadio = screen.getByLabelText('Date & time') as HTMLInputElement;
       expect(intervalRadio.checked).toBe(false);
       expect(rruleRadio.checked).toBe(true);
     });
@@ -72,7 +72,7 @@ describe('ScheduleTypeSelector', () => {
       );
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
-      const rruleRadio = screen.getByLabelText('Recurrence') as HTMLInputElement;
+      const rruleRadio = screen.getByLabelText('Date & time') as HTMLInputElement;
       expect(intervalRadio.checked).toBe(false);
       expect(rruleRadio.checked).toBe(true);
     });
@@ -122,7 +122,7 @@ describe('ScheduleTypeSelector', () => {
         </>
       );
 
-      const rruleLabels = screen.getAllByText('Recurrence');
+      const rruleLabels = screen.getAllByText('Date & time');
       expect(rruleLabels).toHaveLength(2);
       fireEvent.click(rruleLabels[1]);
 

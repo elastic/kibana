@@ -5,38 +5,19 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
-import styled from '@emotion/styled';
 
-const StyledEuiCard = styled(EuiCard)`
-  padding: 16px 92px 16px 16px !important;
-  border: ${({ theme, selectable }) => {
-    if (selectable?.isSelected) {
-      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
-    }
-  }};
-
-  .euiTitle {
-    font-size: 1rem;
-  }
-
-  .euiSpacer {
-    display: none;
-  }
-
-  .euiText {
-    margin-top: 0;
-    margin-left: 25px;
-    color: ${({ theme }) => theme.euiTheme.colors.subduedText};
-  }
-
-  > button[role='switch'] {
-    display: none;
-  }
-`;
+const BOLD_LABEL_PROPS = { style: { fontWeight: 'bold' } } as const;
+const FULL_HEIGHT_CSS = css({ height: '100%' });
 
 interface PackTypeSelectableProps {
   packType: string;
@@ -49,81 +30,58 @@ const PackTypeSelectableComponent = ({
   setPackType,
   resetFormFields,
 }: PackTypeSelectableProps) => {
+  const idPrefix = useGeneratedHtmlId({ prefix: 'osqueryPackType' });
+
   const handleChange = useCallback(
-    (type: any) => {
+    (type: 'global' | 'policy') => {
       setPackType(type);
-      if (resetFormFields) {
-        resetFormFields();
-      }
+      resetFormFields?.();
     },
     [resetFormFields, setPackType]
   );
-  const policyCardSelectable = useMemo(
-    () => ({
-      onClick: () => handleChange('policy'),
-      isSelected: packType === 'policy',
-    }),
-    [packType, handleChange]
-  );
 
-  const globalCardSelectable = useMemo(
-    () => ({
-      onClick: () => handleChange('global'),
-      isSelected: packType === 'global',
-    }),
-    [packType, handleChange]
-  );
+  const handleSelectPolicy = useCallback(() => handleChange('policy'), [handleChange]);
+  const handleSelectGlobal = useCallback(() => handleChange('global'), [handleChange]);
 
   return (
     <EuiFlexItem>
       <EuiFormRow label="Type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <StyledEuiCard
-              layout="horizontal"
-              title={
-                <EuiRadio
-                  id={'osquery_pack_type_policy'}
-                  name="packType"
-                  label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
-                    defaultMessage: 'Policy',
-                  })}
-                  onChange={noop}
-                  checked={packType === 'policy'}
-                />
-              }
-              titleSize="xs"
-              hasBorder
-              description={i18n.translate('xpack.osquery.pack.form.policyDescription', {
+            <EuiCheckableCard
+              id={`${idPrefix}-policy`}
+              name={idPrefix}
+              css={FULL_HEIGHT_CSS}
+              label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
+                defaultMessage: 'Policy',
+              })}
+              labelProps={BOLD_LABEL_PROPS}
+              checked={packType === 'policy'}
+              onChange={handleSelectPolicy}
+              data-test-subj="osqueryPackTypePolicy"
+            >
+              {i18n.translate('xpack.osquery.pack.form.policyDescription', {
                 defaultMessage: 'Schedule pack for specific policy.',
               })}
-              data-test-subj={'osqueryPackTypePolicy'}
-              selectable={policyCardSelectable}
-              {...(packType === 'policy' && { color: 'primary' })}
-            />
+            </EuiCheckableCard>
           </EuiFlexItem>
           <EuiFlexItem>
-            <StyledEuiCard
-              layout="horizontal"
-              title={
-                <EuiRadio
-                  id={'osquery_pack_type_global'}
-                  name="packType"
-                  label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
-                    defaultMessage: 'Global',
-                  })}
-                  onChange={noop}
-                  checked={packType === 'global'}
-                />
-              }
-              titleSize="xs"
-              description={i18n.translate('xpack.osquery.pack.form.globalDescription', {
+            <EuiCheckableCard
+              id={`${idPrefix}-global`}
+              name={idPrefix}
+              css={FULL_HEIGHT_CSS}
+              label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
+                defaultMessage: 'Global',
+              })}
+              labelProps={BOLD_LABEL_PROPS}
+              checked={packType === 'global'}
+              onChange={handleSelectGlobal}
+              data-test-subj="osqueryPackTypeGlobal"
+            >
+              {i18n.translate('xpack.osquery.pack.form.globalDescription', {
                 defaultMessage: 'Use pack across all policies',
               })}
-              selectable={globalCardSelectable}
-              data-test-subj={'osqueryPackTypeGlobal'}
-              {...(packType === 'global' && { color: 'primary' })}
-            />
+            </EuiCheckableCard>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>

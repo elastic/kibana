@@ -9,21 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
-import { ThemeProvider } from '@emotion/react';
-
-const themeStub = {
-  euiTheme: {
-    colors: {
-      primary: '#006BB4',
-      success: '#017D73',
-      subduedText: '#69707D',
-    },
-    border: { width: { thin: '1px' } },
-    size: { base: '16px' },
-  } as unknown as EuiThemeComputed<{}>,
-};
 
 export const renderWithProviders = (
   ui: React.ReactElement,
@@ -32,9 +18,7 @@ export const renderWithProviders = (
   render(ui, {
     wrapper: ({ children }) => (
       <EuiProvider>
-        <ThemeProvider theme={themeStub}>
-          <IntlProvider locale="en">{children}</IntlProvider>
-        </ThemeProvider>
+        <IntlProvider locale="en">{children}</IntlProvider>
       </EuiProvider>
     ),
     ...options,

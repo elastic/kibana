@@ -23,7 +23,7 @@ export const SCHEDULE_TYPE_INTERVAL_LABEL = i18n.translate(
 
 export const SCHEDULE_TYPE_RECURRENCE_LABEL = i18n.translate(
   'xpack.osquery.scheduleSection.scheduleTypeRecurrenceLabel',
-  { defaultMessage: 'Recurrence' }
+  { defaultMessage: 'Date & time' }
 );
 
 export const SCHEDULE_TYPE_LOCKED_HELP = i18n.translate(

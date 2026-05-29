@@ -122,7 +122,6 @@ export const SplayTimeField = ({
             isInvalid={isInvalid}
             append={
               <EuiSelect
-                // compressed
                 options={UNIT_OPTIONS}
                 value={value.unit}
                 onChange={handleUnitChange}
