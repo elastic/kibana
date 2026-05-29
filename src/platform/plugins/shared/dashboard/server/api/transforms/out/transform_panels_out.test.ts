@@ -11,13 +11,12 @@ import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
 const mockGetTransforms = jest.fn();
-const mockGetAllEmbeddableSchemas = jest.fn().mockReturnValue({});
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
-    getAllEmbeddableSchemas: mockGetAllEmbeddableSchemas,
+    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   };
 });
 
@@ -104,15 +103,16 @@ describe('transformPanelsOut', () => {
   });
 
   it('drops any invalid panels', () => {
-    mockGetAllEmbeddableSchemas.mockReturnValue({
-      DASHBOARD_MARKDOWN: {
+    mockGetTransforms
+      .mockReturnValueOnce({
         title: 'markdown',
+        transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
         schema: {
           getSchema: jest.fn().mockReturnValue({}),
-          validate: jest.fn(),
+          validate: jest.fn().mockImplementation((val) => val),
         },
-      },
-      invalidPanel: {
+      })
+      .mockReturnValueOnce({
         title: 'invalid',
         schema: {
           getSchema: jest.fn().mockReturnValue({}),
@@ -120,8 +120,7 @@ describe('transformPanelsOut', () => {
             throw new Error('Boo!');
           }),
         },
-      },
-    });
+      });
 
     const panelsJSON = JSON.stringify([
       {
@@ -182,7 +181,7 @@ describe('transformPanelsOut', () => {
       }
     `);
 
-    mockGetAllEmbeddableSchemas.mockReturnValue({});
+    // mockGetTransforms.mockReturnValue({});
   });
 
   it('shows warning when over 100 panels', () => {
