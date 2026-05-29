@@ -1,3 +1,9 @@
+@fastify/compress
+@fastify/cors
+@fastify/multipart
+@hapi/iron
+fastify
+find-my-way
 knip
 safe-stable-stringify
 ajv-draft-04
@@ -48,10 +54,4 @@ jszip
 @swc/helpers
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
-@fastify/multipart
-@hapi/iron
-fastify
-find-my-way
 @opentelemetry/otlp-transformer
-@fastify/compress
-@fastify/cors
