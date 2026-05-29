@@ -181,8 +181,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistPinnedEventResponse'
-          description: >-
-            Indicates the event was successfully pinned to or unpinned from the
+          description: Indicates the event was successfully pinned to or unpinned from the
             Timeline.
       summary: Pin/unpin an event
       tags:
@@ -199,9 +198,7 @@ paths:
               type: object
               properties:
                 savedObjectIds:
-                  description: >-
-                    The list of IDs of the Timelines or Timeline templates to
-                    delete
+                  description: The list of IDs of the Timelines or Timeline templates to delete
                   example:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
@@ -209,9 +206,7 @@ paths:
                   maxItems: 100
                   type: array
                 searchIds:
-                  description: >-
-                    Saved search IDs that should be deleted alongside the
-                    timelines
+                  description: Saved search IDs that should be deleted alongside the timelines
                   example:
                     - 23f3-43g34g322-e5g5hrh6h-45454
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
@@ -486,8 +481,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: >-
-            Indicates that the draft Timeline was successfully created. In the
+          description: Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
             Timeline is cleared and returned.
         '403':
@@ -660,8 +654,7 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Indicates the import of Timelines was unsuccessful because of an
+          description: Indicates the import of Timelines was unsuccessful because of an
             invalid file extension.
         '404':
           content:
@@ -676,8 +669,7 @@ paths:
                   statusCode:
                     example: 404
                     type: number
-          description: >-
-            Indicates that we were unable to locate the saved object client
+          description: Indicates that we were unable to locate the saved object client
             necessary to handle the import.
         '409':
           content:
@@ -784,9 +776,8 @@ paths:
       description: Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
-        - description: >-
-            If true, only timelines that are marked as favorites by the user are
-            returned.
+        - description: If true, only timelines that are marked as favorites by the user
+            are returned.
           in: query
           name: only_user_favorite
           schema:
@@ -919,8 +910,7 @@ components:
               nullable: true
               type: string
             timelineId:
-              description: >-
-                The `savedObjectId` of the Timeline that this note is associated
+              description: The `savedObjectId` of the Timeline that this note is associated
                 with
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string

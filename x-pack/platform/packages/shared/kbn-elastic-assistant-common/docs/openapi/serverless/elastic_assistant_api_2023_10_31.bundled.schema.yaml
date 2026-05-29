@@ -508,8 +508,7 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. This response indicates an issue with the request,
+          description: Generic Error. This response indicates an issue with the request,
             such as missing required parameters or incorrect data.
       summary: Create a conversation
       tags:
@@ -632,8 +631,7 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. The request could not be processed due to an invalid
+          description: Generic Error. The request could not be processed due to an invalid
             query parameter or other issue.
       summary: Get conversations
       tags:
@@ -828,8 +826,7 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. This response indicates an issue with the request,
+          description: Generic Error. This response indicates an issue with the request,
             such as missing required parameters or incorrect data.
       summary: Update a conversation
       tags:
@@ -1025,8 +1022,7 @@ paths:
         content:
           application/json:
             example:
-              content: >-
-                To reset your password, go to the settings page and click 'Reset
+              content: To reset your password, go to the settings page and click 'Reset
                 Password'.
               tags:
                 - password
@@ -1041,9 +1037,8 @@ paths:
           content:
             application/json:
               example:
-                content: >-
-                  To reset your password, go to the settings page and click
-                  'Reset Password'.
+                content: To reset your password, go to the settings page and click 'Reset
+                  Password'.
                 id: '12345'
                 tags:
                   - password
@@ -1061,8 +1056,7 @@ paths:
                 message: The 'title' field is required.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as invalid input or missing required
+          description: A generic error occurred, such as invalid input or missing required
             fields.
       summary: Create a Knowledge Base Entry
       tags:
@@ -1270,8 +1264,7 @@ paths:
                 message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as an invalid `id` or the entry not
+          description: A generic error occurred, such as an invalid `id` or the entry not
             being found.
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
@@ -1293,9 +1286,8 @@ paths:
           content:
             application/json:
               example:
-                content: >-
-                  To reset your password, go to the settings page and click
-                  'Reset Password'.
+                content: To reset your password, go to the settings page and click 'Reset
+                  Password'.
                 id: '12345'
                 tags:
                   - password
@@ -1313,8 +1305,7 @@ paths:
                 message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as an invalid `id` or the entry not
+          description: A generic error occurred, such as an invalid `id` or the entry not
             being found.
       summary: Read a Knowledge Base Entry
       tags:
@@ -1335,8 +1326,7 @@ paths:
         content:
           application/json:
             example:
-              content: >-
-                To reset your password, go to the settings page, click 'Reset
+              content: To reset your password, go to the settings page, click 'Reset
                 Password', and follow the instructions.
               tags:
                 - password
@@ -1352,8 +1342,7 @@ paths:
           content:
             application/json:
               example:
-                content: >-
-                  To reset your password, go to the settings page, click 'Reset
+                content: To reset your password, go to the settings page, click 'Reset
                   Password', and follow the instructions.
                 id: '12345'
                 tags:
@@ -1373,8 +1362,7 @@ paths:
                 message: The 'content' field cannot be empty.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as invalid input or the entry not
+          description: A generic error occurred, such as invalid input or the entry not
             being found.
       summary: Update a Knowledge Base Entry
       tags:

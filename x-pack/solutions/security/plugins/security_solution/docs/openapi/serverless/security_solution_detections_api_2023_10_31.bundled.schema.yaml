@@ -341,7 +341,7 @@ paths:
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
 
                     | EVAL event_rate = count / DATE_DIFF("seconds",
-                    min_timestamp, NOW())
+                    min_timestamp, NOW()) 
 
                     | KEEP event_rate
               example6:
@@ -1362,7 +1362,7 @@ paths:
 
         The edit action allows you to add, delete, or set tags, index patterns,
         investigation fields, rule actions and schedules for multiple rules at
-        once.
+        once. 
 
         The edit action is idempotent, meaning that if you add a tag to a rule
         that already has that tag, no changes are made. The same is true for
@@ -3002,9 +3002,8 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -3066,8 +3065,7 @@ paths:
                       - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
                     remove: []
                   ids:
-                    - >-
-                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+                    - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
               remove:
                 value:
                   assignees:
@@ -3075,8 +3073,7 @@ paths:
                     remove:
                       - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
                   ids:
-                    - >-
-                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+                    - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
             schema:
               type: object
               properties:
@@ -3100,7 +3097,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       - bulk: 0,
                       - search: 0
@@ -3349,8 +3346,7 @@ paths:
               add:
                 value:
                   ids:
-                    - >-
-                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                    - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
                   tags:
                     tags_to_add:
                       - Duplicate
@@ -3358,8 +3354,7 @@ paths:
               remove:
                 value:
                   ids:
-                    - >-
-                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                    - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
                   tags:
                     tags_to_add: []
                     tags_to_remove:
@@ -3374,9 +3369,8 @@ paths:
               required:
                 - ids
                 - tags
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -3701,7 +3695,7 @@ components:
         - value
     BulkActionEditPayloadSchedule:
       description: >
-        Overwrites schedule of rules.
+        Overwrites schedule of rules. 
 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already
@@ -8013,9 +8007,9 @@ components:
         - For prebuilt rules it represents the version of the rule's content in
         the source [detection-rules](https://github.com/elastic/detection-rules)
         repository (and the corresponding `security_detection_engine` Fleet
-        package that is used for distributing prebuilt rules).
+        package that is used for distributing prebuilt rules). 
 
-        - For custom rules it is set to `1` when the rule is created.
+        - For custom rules it is set to `1` when the rule is created. 
 
         > info
 
@@ -8735,7 +8729,7 @@ components:
         - type: must be mapping
 
         - value: field from the Elasticsearch threat index
-
+          
         You can use Boolean and and or logic to define the conditions for when
         matching fields and values generate alerts. Sibling entries objects are
         evaluated using or logic, whereas multiple entries in a single entries

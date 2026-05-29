@@ -1454,9 +1454,8 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: >-
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
+                  message: "[request query]: namespace_type.0: Invalid enum value. Expected
+                    'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2008,10 +2007,9 @@ paths:
               type: object
               properties:
                 _version:
-                  description: >-
-                    The version id, normally returned by the API when the item
-                    was retrieved. Use it ensure updates are done against the
-                    latest version.
+                  description: The version id, normally returned by the API when the item was
+                    retrieved. Use it ensure updates are done against the latest
+                    version.
                   type: string
                 comments:
                   $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'

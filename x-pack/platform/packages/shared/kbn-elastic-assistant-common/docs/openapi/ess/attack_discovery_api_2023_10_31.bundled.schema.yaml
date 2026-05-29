@@ -36,12 +36,11 @@ paths:
                   properties:
                     enable_field_rendering:
                       default: false
-                      description: >-
-                        Enables a markdown syntax used to render pivot fields,
-                        for example `{{ user.name james }}`. When disabled, the
-                        same example would be rendered as `james`. This is
-                        primarily used for Attack discovery views within Kibana.
-                        Defaults to `false`.
+                      description: Enables a markdown syntax used to render pivot fields, for example
+                        `{{ user.name james }}`. When disabled, the same example
+                        would be rendered as `james`. This is primarily used for
+                        Attack discovery views within Kibana. Defaults to
+                        `false`.
                       example: false
                       type: boolean
                     ids:
@@ -92,10 +91,8 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: >-
-                      Array of updated Attack discovery alert objects. Each item
-                      includes the applied modifications from the bulk update
-                      request.
+                    description: Array of updated Attack discovery alert objects. Each item includes
+                      the applied modifications from the bulk update request.
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
@@ -113,9 +110,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the bulk update request
+                    description: Human-readable error message describing what went wrong with the
+                      bulk update request
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -246,8 +242,7 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: >-
-            Field used to sort results. See `AttackDiscoveryFindSortField` for
+        - description: Field used to sort results. See `AttackDiscoveryFindSortField` for
             allowed values.
           example: '@timestamp'
           in: query
@@ -1377,8 +1372,7 @@ paths:
               }'
   /api/attack_discovery/generations:
     get:
-      description: >-
-        Get the latest attack discovery generations metadata (that are not
+      description: Get the latest attack discovery generations metadata (that are not
         dismissed) for the current user. This endpoint retrieves generation
         metadata including execution status and statistics for Attack discovery
         generations.
@@ -1443,9 +1437,7 @@ paths:
                     example: 400
                     type: number
           description: Bad request
-      summary: >-
-        Get the latest attack discovery generations metadata for the current
-        user
+      summary: Get the latest attack discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1458,15 +1450,13 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/generations/{execution_uuid}:
     get:
-      description: >-
-        Returns a specific Attack discovery generation, including all generated
-        Attack discoveries and associated metadata, including execution status
-        and statistics.
+      description: Returns a specific Attack discovery generation, including all
+        generated Attack discoveries and associated metadata, including
+        execution status and statistics.
       operationId: GetAttackDiscoveryGeneration
       parameters:
-        - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned at the start of an Attack discovery
+        - description: The unique identifier for the Attack discovery generation
+            execution. This UUID is returned at the start of an Attack discovery
             generation.
           example: 2e13f386-46cf-4d65-9e2b-68609e132ba5
           in: path
@@ -1526,9 +1516,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request
+                    description: Human-readable error message describing what went wrong with the
+                      request
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -1540,8 +1529,7 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: >-
-        Get a single Attack discovery generation, including its discoveries and
+      summary: Get a single Attack discovery generation, including its discoveries and
         (optional) generation metadata
       tags:
         - Security Attack discovery API
@@ -1555,17 +1543,15 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/generations/{execution_uuid}/_dismiss:
     post:
-      description: >-
-        Dismisses an attack discovery generation for the current user,
+      description: Dismisses an attack discovery generation for the current user,
         indicating that it's status should not be reported in the UI. This sets
         the generation's status to "dismissed" and affects how the generation
         appears in subsequent queries.
       operationId: PostAttackDiscoveryGenerationsDismiss
       parameters:
-        - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned when an attack discovery generation is created
-            and can be found in generation responses.
+        - description: The unique identifier for the Attack discovery generation
+            execution. This UUID is returned when an attack discovery generation
+            is created and can be found in generation responses.
           example: 46b218d5-535d-4329-be56-d0f6af6986b7
           in: path
           name: execution_uuid
@@ -1658,8 +1644,7 @@ paths:
                   - loading_message
                   - start
                   - status
-          description: >-
-            Successful response - The attack discovery generation has been
+          description: Successful response - The attack discovery generation has been
             dismissed
         '400':
           content:
@@ -1672,9 +1657,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request.
+                    description: Human-readable error message describing what went wrong with the
+                      request.
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -1699,11 +1683,11 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules:
     post:
-      description: >-
-        Creates a new Attack discovery schedule that analyzes security alerts at
-        specified intervals. The schedule defines when and how Attack discovery
-        analysis should run, including which alerts to analyze, which AI
-        connector to use, and what actions to take when discoveries are found.
+      description: Creates a new Attack discovery schedule that analyzes security
+        alerts at specified intervals. The schedule defines when and how Attack
+        discovery analysis should run, including which alerts to analyze, which
+        AI connector to use, and what actions to take when discoveries are
+        found.
       operationId: CreateAttackDiscoverySchedules
       requestBody:
         content:
@@ -1725,8 +1709,7 @@ paths:
                 interval: 24h
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
-        description: >-
-          Attack discovery schedule configuration including name, parameters,
+        description: Attack discovery schedule configuration including name, parameters,
           schedule interval, and actions
         required: true
       responses:
@@ -1813,8 +1796,7 @@ paths:
              }'
   /api/attack_discovery/schedules/_find:
     get:
-      description: >-
-        Finds Attack discovery schedules that match the search criteria.
+      description: Finds Attack discovery schedules that match the search criteria.
         Supports pagination and sorting by various fields.
       operationId: FindAttackDiscoverySchedules
       parameters:
@@ -1825,8 +1807,7 @@ paths:
           required: false
           schema:
             type: number
-        - description: >-
-            Number of Attack discovery schedules to return per page (used for
+        - description: Number of Attack discovery schedules to return per page (used for
             pagination). Defaults to 10.
           example: 10
           in: query
@@ -1872,9 +1853,8 @@ paths:
                     description: Number of items requested per page.
                     type: number
                   total:
-                    description: >-
-                      Total number of Attack discovery schedules matching the
-                      query (across all pages).
+                    description: Total number of Attack discovery schedules matching the query
+                      (across all pages).
                     type: number
                 required:
                   - page
@@ -1914,8 +1894,7 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules/{id}:
     delete:
-      description: >-
-        Permanently deletes an Attack discovery schedule and all associated
+      description: Permanently deletes an Attack discovery schedule and all associated
         configuration.
       operationId: DeleteAttackDiscoverySchedules
       parameters:
@@ -1966,10 +1945,10 @@ paths:
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
     get:
-      description: >-
-        Retrieves a specific Attack discovery schedule by its unique identifier.
-        Returns complete schedule configuration including parameters, interval
-        settings, associated actions, and execution history.
+      description: Retrieves a specific Attack discovery schedule by its unique
+        identifier. Returns complete schedule configuration including
+        parameters, interval settings, associated actions, and execution
+        history.
       operationId: GetAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to
@@ -2035,11 +2014,10 @@ paths:
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
     put:
-      description: >-
-        Updates an existing Attack discovery schedule with new configuration.
-        All schedule properties can be modified including name, parameters,
-        interval, and actions. The update operation replaces the entire schedule
-        configuration with the provided values.
+      description: Updates an existing Attack discovery schedule with new
+        configuration. All schedule properties can be modified including name,
+        parameters, interval, and actions. The update operation replaces the
+        entire schedule configuration with the provided values.
       operationId: UpdateAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to
@@ -2070,8 +2048,7 @@ paths:
                 interval: 12h
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
-        description: >-
-          Updated Attack discovery schedule configuration. All fields are
+        description: Updated Attack discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
         required: true
       responses:
@@ -2143,8 +2120,7 @@ paths:
              }'
   /api/attack_discovery/schedules/{id}/_disable:
     post:
-      description: >-
-        Disables an Attack discovery schedule, preventing it from running
+      description: Disables an Attack discovery schedule, preventing it from running
         according to its configured interval. The schedule configuration is
         preserved and can be re-enabled later. Any currently running executions
         will complete, but no new executions will be started.
@@ -2198,11 +2174,10 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules/{id}/_enable:
     post:
-      description: >-
-        Enables a previously disabled Attack discovery schedule, allowing it to
-        run according to its configured interval. Once enabled, the schedule
-        will begin executing at the next scheduled time based on its interval
-        configuration.
+      description: Enables a previously disabled Attack discovery schedule, allowing
+        it to run according to its configured interval. Once enabled, the
+        schedule will begin executing at the next scheduled time based on its
+        interval configuration.
       operationId: EnableAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to
@@ -2679,9 +2654,8 @@ components:
         - schedule
         - actions
     AttackDiscoveryFindSortField:
-      description: >-
-        Allowed field names to sort Attack discovery results by. Clients should
-        only pass one of the listed values.
+      description: Allowed field names to sort Attack discovery results by. Clients
+        should only pass one of the listed values.
       enum:
         - '@timestamp'
       type: string
@@ -2839,8 +2813,7 @@ components:
           example: 400
           type: number
     Filters:
-      description: >-
-        The filter array used to define the conditions for when alerts are
+      description: The filter array used to define the conditions for when alerts are
         selected as an attack discovery context. Defaults to an empty array.
       items: {}
       type: array

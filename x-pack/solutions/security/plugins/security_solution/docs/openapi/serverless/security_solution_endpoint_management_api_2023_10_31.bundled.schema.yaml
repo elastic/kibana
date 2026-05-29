@@ -331,10 +331,9 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified
+                    here. The action will be logged in any cases associated with
+                    the specified alerts.
                   example:
                     - alert-id-1
                     - alert-id-2
@@ -496,9 +495,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    inputParams: >-
-                      --delete --paths-to-delete
-                      /tmp/temp_file.txt,/tmp/random_file.txt
+                    inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
                     script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/RunScriptRouteRequestBody'
@@ -605,10 +602,9 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified
+                    here. The action will be logged in any cases associated with
+                    the specified alerts.
                   example:
                     - alert-id-1
                     - alert-id-2
@@ -1009,10 +1005,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -1329,10 +1324,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -1511,10 +1505,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -1768,10 +1761,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -1959,10 +1951,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2499,10 +2490,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2569,10 +2559,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2651,7 +2640,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
           script: 1111-2222-3333-4444-5555-6666-7777-8888
       properties:
         inputParams:
@@ -2659,9 +2648,7 @@ components:
           minLength: 1
           type: string
         script:
-          description: >-
-            The script ID from SentinelOne scripts library that will be
-            executed.
+          description: The script ID from SentinelOne scripts library that will be executed.
           minLength: 1
           type: string
       required:
@@ -2745,10 +2732,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2916,10 +2902,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -3012,8 +2997,7 @@ components:
         - minLength: 1
           type: string
     WithOutputs:
-      description: >-
-        A list of action IDs that should include the complete output of the
+      description: A list of action IDs that should include the complete output of the
         action.
       example:
         - action-id-1
