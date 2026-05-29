@@ -15,6 +15,7 @@ export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 
 interface SaveDashboardOptions {
   /**
@@ -241,10 +242,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    const breadcrumbLink = this.config.get('serverless')
-      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
-      : 'breadcrumb dashboardListingBreadcrumb first';
-    await this.testSubjects.click(breadcrumbLink);
+    await this.common.navigateToUrlWithBrowserHistory(DASHBOARD_APP_ID, '/list');
     const warning = await this.testSubjects.exists('confirmModalTitleText');
     if (warning) {
       await this.testSubjects.click(
