@@ -8,10 +8,10 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { WorkflowListDto, WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import React, { useState } from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowListDto, WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSelectorWithProvider } from './workflow_selector_with_provider';
 import type { WorkflowSelectorConfig } from './workflow_utils';
 
@@ -76,10 +76,7 @@ const buildResponse = (results: WorkflowListItemDto[]): WorkflowListDto => ({
   results,
 });
 
-const renderWithServices = (
-  args: StoryArgs,
-  getWorkflows: () => Promise<WorkflowListDto>
-) => {
+const renderWithServices = (args: StoryArgs, getWorkflows: () => Promise<WorkflowListDto>) => {
   const services = {
     application: {
       getUrlForApp: (appId: string) => `/app/${appId}`,
