@@ -358,17 +358,23 @@ export class NavigationPublicPlugin
   } {
     let renderableNodes: ChromeProjectNavigationNode[] = [];
     let overflowItemIds: string[] = [];
+    // The true default order, captured by the service from the raw nav definition
+    // before any customization moves are applied. Deriving the default order from
+    // `renderableNodes` here would be wrong: those nodes are already in the user's
+    // customized order, so the modal would diff the customized order against itself
+    // and silently wipe the saved customization on the first onChange.
+    let defaultItemIds: string[] = [];
 
     chrome.project
       .getNavigation$()
       .subscribe((nav) => {
         renderableNodes = nav.renderableNodes;
         overflowItemIds = nav.overflowItemIds;
+        defaultItemIds = nav.defaultItemIds;
       })
       .unsubscribe();
 
     const overflowSet = new Set(overflowItemIds);
-    const defaultItemIds = renderableNodes.map((node) => node.id);
     const items = renderableNodes.map((node) => ({
       id: node.id,
       title: (node.title ?? node.id) as string,
