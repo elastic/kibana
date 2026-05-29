@@ -10,8 +10,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import { extractWorkflowMetadata } from '../../../../../common/lib/telemetry/utils/extract_workflow_metadata';
+import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
