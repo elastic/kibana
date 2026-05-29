@@ -21,7 +21,7 @@ import {
   inactiveSecurityAlertsOlderThan90,
   inactiveStackAlertsNewerThan90,
   inactiveStackAlertsOlderThan90,
-} from '../fixtures/alert_deletion_test_utils';
+} from '@kbn/alerting-api-integration-helpers';
 import { test } from '../fixtures';
 
 const ALERT_INDEX_ALIASES = [
