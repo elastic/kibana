@@ -23,17 +23,19 @@ const dashboardCreateDescription =
   'Creates a new dashboard and returns its ID, full state, and metadata.';
 
 const createCurlCodeSample = ({
+  lang = 'cURL',
   label,
   method,
   path,
   body,
 }: {
+  lang?: string;
   label: string;
   method: 'POST' | 'PUT';
   path: string;
   body: object;
 }) => ({
-  lang: 'cURL',
+  lang,
   label,
   source:
     [
@@ -46,17 +48,19 @@ const createCurlCodeSample = ({
 });
 
 const createConsoleCodeSample = ({
+  lang = 'Console',
   label,
   method,
   path,
   body,
 }: {
+  lang?: string;
   label: string;
   method: 'POST' | 'PUT';
   path: string;
   body: object;
 }) => ({
-  lang: 'Console',
+  lang,
   label,
   source: [`${method} kbn:${path}`, JSON.stringify(body, null, 2)].join('\n') + '\n',
 });
@@ -467,24 +471,28 @@ const dashboardUpdateBody = {
 
 const dashboardCreateCodeSamples = [
   createCurlCodeSample({
+    lang: 'cURL_simple',
     label: 'Create a dashboard (simple) - cURL',
     method: 'POST',
     path: '/api/dashboards',
     body: dashboardCreateSimpleBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_simple',
     label: 'Create a dashboard (simple) - Console',
     method: 'POST',
     path: '/api/dashboards',
     body: dashboardCreateSimpleConsoleBody,
   }),
   createCurlCodeSample({
+    lang: 'cURL_Sections',
     label: 'Create a dashboard (with sections and controls) - cURL',
     method: 'POST',
     path: '/api/dashboards',
     body: dashboardCreateWithSectionsAndControlsBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_sections',
     label: 'Create a dashboard (with sections and controls) - Console',
     method: 'POST',
     path: '/api/dashboards',

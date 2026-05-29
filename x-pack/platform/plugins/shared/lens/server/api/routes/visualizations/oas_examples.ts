@@ -27,17 +27,19 @@ const lensCreateDescription = [
 ].join('\n');
 
 const createCurlCodeSample = ({
+  lang = 'cURL',
   label,
   method,
   path,
   body,
 }: {
+  lang?: string;
   label: string;
   method: 'POST' | 'PUT';
   path: string;
   body: object;
 }) => ({
-  lang: 'cURL',
+  lang,
   label,
   source:
     [
@@ -50,17 +52,19 @@ const createCurlCodeSample = ({
 });
 
 const createConsoleCodeSample = ({
+  lang = 'Console',
   label,
   method,
   path,
   body,
 }: {
+  lang?: string;
   label: string;
   method: 'POST' | 'PUT';
   path: string;
   body: object;
 }) => ({
-  lang: 'Console',
+  lang,
   label,
   source: [`${method} kbn:${path}`, JSON.stringify(body, null, 2)].join('\n') + '\n',
 });
@@ -185,60 +189,70 @@ const lensUpdateVisualizationBody = {
 
 const lensCreateCodeSamples = [
   createCurlCodeSample({
+    lang: 'cURL_metric',
     label: 'Create a metric visualization - cURL',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateMetricVisualizationBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_metric',
     label: 'Create a metric visualization - Console',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateMetricVisualizationBody,
   }),
   createCurlCodeSample({
+    lang: 'cURL_xy',
     label: 'Create an XY line chart - cURL',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateAnXYLineChartBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_xy',
     label: 'Create an XY line chart - Console',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateAnXYLineChartBody,
   }),
   createCurlCodeSample({
+    lang: 'cURL_pie',
     label: 'Create a pie/donut chart - cURL',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreatePieDonutChartBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_pie',
     label: 'Create a pie/donut chart - Console',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreatePieDonutChartBody,
   }),
   createCurlCodeSample({
+    lang: 'cURL_table',
     label: 'Create a data table - cURL',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateDataTableBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_table',
     label: 'Create a data table - Console',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateDataTableBody,
   }),
   createCurlCodeSample({
+    lang: 'cURL_library',
     label: 'Create a visualization using a library data view - cURL',
     method: 'POST',
     path: '/api/visualizations',
     body: lensCreateVisualizationUsingALibraryDataViewBody,
   }),
   createConsoleCodeSample({
+    lang: 'Console_library',
     label: 'Create a visualization using a library data view - Console',
     method: 'POST',
     path: '/api/visualizations',
