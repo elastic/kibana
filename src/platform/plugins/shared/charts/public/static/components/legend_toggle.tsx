@@ -68,6 +68,9 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
       aria-expanded={showLegend}
       isSelected={showLegend}
       data-test-subj="vislibToggleLegend"
+      title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
+        defaultMessage: 'Toggle legend',
+      })}
     />
   );
 };
