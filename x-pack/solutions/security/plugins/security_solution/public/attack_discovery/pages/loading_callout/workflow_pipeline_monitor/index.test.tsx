@@ -2801,7 +2801,8 @@ describe('WorkflowPipelineMonitor', () => {
         status: ExecutionStatus.COMPLETED,
         stepId: 'validate_discoveries',
         topologicalIndex: 2,
-        workflowDescription: 'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
+        workflowDescription:
+          'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
         workflowId: 'workflow-validation',
         workflowName: 'Validation with transform',
         workflowRunId: 'run-validation',
@@ -2815,7 +2816,8 @@ describe('WorkflowPipelineMonitor', () => {
         status: ExecutionStatus.COMPLETED,
         stepId: 'transform_to_uppercase',
         topologicalIndex: 3,
-        workflowDescription: 'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
+        workflowDescription:
+          'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
         workflowId: 'workflow-validation',
         workflowName: 'Validation with transform',
         workflowRunId: 'run-validation',
