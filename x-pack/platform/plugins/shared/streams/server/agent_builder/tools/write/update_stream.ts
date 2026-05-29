@@ -115,13 +115,28 @@ export const createUpdateStreamTool = ({
   id: UPDATE_STREAM,
   type: ToolType.builtin,
   description: dedent(`
-    Applies changes to a stream's configuration. This tool MUTATES state.
+    Applies changes to a stream's configuration. This tool MUTATES state, but the platform
+    automatically renders a confirmation dialog (Apply / Cancel) using the \`confirmation_body\`
+    parameter — so the user always reviews and approves before any change lands. Always populate
+    \`confirmation_body\` with a clear Markdown preview (current → proposed + impact).
 
-    **Intent gate:** Only call this tool when the user has given a direct, explicit instruction
-    to apply changes — e.g. "fix it", "apply it", "go ahead", "do it", "yes". Questions like
-    "how can we fix this?", "what would you suggest?", or "what's the best approach?" are NOT
-    instructions — they are requests for analysis. For those, use ${DESIGN_PIPELINE} to
-    investigate and present findings, then stop and wait for the user to confirm.
+    **When to call:** When the user has given a direct instruction to change the stream — e.g.
+    "parse my stream", "extract fields", "fix the pipeline", "apply it", "build a pipeline that
+    does X", "remove that step", "rename src_ip to source.ip", "set retention to 30 days", "map
+    response_time as long". Any verb that requests a configuration change qualifies. Do NOT ask
+    in chat for confirmation first when the user's intent is clear and the proposal looks good —
+    the platform dialog is the user's confirmation step. Asking in chat first creates a redundant
+    double confirmation and a worse experience.
+
+    **When NOT to call:** When the user's message is exploratory ("how would I...", "what's
+    wrong with...", "what would you suggest?") — those are requests for analysis. Use
+    ${DESIGN_PIPELINE} to investigate and present findings in chat. Also do NOT call this tool
+    when the ${DESIGN_PIPELINE} simulation is shaky (low success_rate, warnings, errors, or a
+    fallback hint) — present the issues in chat and let the user decide before applying. And do
+    NOT call this tool when the proposal has 3+ steps before the user has reviewed and chosen
+    which subset to apply — the platform dialog is a single Apply / Cancel for the whole pipeline
+    and is not suitable for reviewing many steps at once. Present each step in chat first and
+    let the user pick the subset. See the confidence check rules in the streams skill prompt.
 
     **Cancellation:** If this tool returns "The user chose not to proceed with this action",
     acknowledge the cancellation for this specific operation. Do NOT retry the same operation

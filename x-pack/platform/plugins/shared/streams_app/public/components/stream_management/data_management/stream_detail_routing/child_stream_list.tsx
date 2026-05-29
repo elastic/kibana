@@ -305,7 +305,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         start: timeState.start,
         end: timeState.end,
         userPrompt,
-        existingPartitions: suggestions ?? undefined,
+        previousSuggestions: suggestions ?? undefined,
       });
     },
     [fetchSuggestions, definition.stream.name, timeState.start, timeState.end, suggestions]

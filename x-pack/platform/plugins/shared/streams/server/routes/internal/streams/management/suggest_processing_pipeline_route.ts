@@ -28,32 +28,26 @@ import {
   isOtelStream,
 } from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
-import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { assembleGrokProcessor, type GrokPatternNode } from '@kbn/grok-heuristics';
-import {
-  getReviewFields as getDissectReviewFields,
-  getDissectProcessorWithReview,
-} from '@kbn/dissect-heuristics';
-import type { Logger } from '@kbn/logging';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   getDefaultTextField,
   extractMessagesFromField,
 } from '../../../../../common/pattern_extraction_helpers';
-import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import type { StreamsClient } from '../../../../lib/streams/client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
+import { assertMlTierAccess } from '../../../utils/assert_ml_tier_access';
 import { simulateProcessing } from '../processing/simulation_handler';
-import { reviewGrokFields } from '../processing/grok_suggestions_handler';
-import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
-import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import {
+  extractParsedSampleDocuments,
+  formatInferenceErrorMeta,
+  getErrorMessage,
+  processDissectPattern,
+  processGrokPatterns,
+  type SeedParsingCandidate,
+} from './seed_parsing_helpers';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -77,10 +71,6 @@ type SuggestProcessingPipelineResponse = Observable<
     { pipeline: SuggestProcessingPipelineResult['pipeline'] }
   >
 >;
-
-const MAX_REVIEW_MESSAGES = 10;
-const NUM_REVIEW_EXAMPLES = 10;
-const SYSTEM_PARSING_PRE_SIM_ID = 'system-suggested-parsing-pre-step';
 
 export const suggestProcessingPipelineRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_suggest_processing_pipeline',
@@ -108,12 +98,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     // Wrap entire logic in Observable so errors can be sent as SSE events
     return from(
       (async () => {
-        const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-          STREAMS_TIERED_ML_FEATURE.id
-        );
-        if (!isAvailableForTier) {
-          throw new SecurityError('Cannot access API on the current pricing tier');
-        }
+        assertMlTierAccess({ server });
 
         const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
           await getScopedClients({ request });
@@ -127,6 +112,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             400
           );
         }
+
+        // Resolve the OTel-naming flag once and forward it into both
+        // seed-parser branches so their inner LLM-review calls don't
+        // re-fetch the stream definition. Without this, the route ends
+        // up making three `streamsClient.getStream` round-trips per
+        // suggestion call (this one + one inside each review).
+        const useOtelFieldNames = isOtelStream(stream);
 
         // Get the request abort signal to respect client disconnections
         const requestAbortSignal = getRequestAbortSignal(request);
@@ -150,13 +142,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           : [];
 
         if (messages.length > 0) {
-          const candidatePromises: Array<
-            Promise<{
-              type: 'grok' | 'dissect';
-              processor: GrokProcessor | DissectProcessor;
-              parsedRate: number;
-            } | null>
-          > = [];
+          const candidatePromises: Array<Promise<SeedParsingCandidate | null>> = [];
 
           log.debug(
             `Scheduling parallel grok + dissect extraction (stream=${stream.name} messages=${messages.length} fieldName=${fieldName} connectorId=${connectorId})`
@@ -174,6 +160,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
+              useOtelFieldNames,
               signal: timeoutAbortController.signal,
               logger: log,
             })
@@ -191,17 +178,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
+              useOtelFieldNames,
               signal: timeoutAbortController.signal,
               logger: log,
             })
           );
 
           const settled = await Promise.allSettled(candidatePromises);
-          const candidates: Array<{
-            type: 'grok' | 'dissect';
-            processor: GrokProcessor | DissectProcessor;
-            parsedRate: number;
-          }> = [];
+          const candidates: SeedParsingCandidate[] = [];
 
           for (const result of settled) {
             if (result.status === 'fulfilled' && result.value !== null) {
@@ -243,7 +227,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         let effectiveParsingProcessor: GrokProcessor | DissectProcessor | undefined =
           parsingProcessor;
 
-        const isOtel = isOtelStream(stream);
         const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
           scopedClusterClient.asCurrentUser,
           stream.name
@@ -283,7 +266,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await buildDocumentStructureOverviewForPipelinePrompt(
             documentsForAgent,
             fieldsMetadataClient,
-            isOtel,
+            useOtelFieldNames,
             mappedFields
           )
         );
@@ -347,6 +330,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           success: result.pipeline !== null,
           stream_name: stream.name,
           stream_type: getStreamTypeFromDefinition(stream),
+          source: 'ui',
         });
 
         return result;
@@ -382,324 +366,3 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     );
   },
 });
-
-/**
- * Runs the seed grok/dissect processor alone so fully parsed sample shapes can be passed to the agent.
- */
-async function extractParsedSampleDocuments({
-  streamName,
-  documents,
-  parsingProcessor,
-  scopedClusterClient,
-  streamsClient,
-  fieldsMetadataClient,
-  logger,
-}: {
-  streamName: string;
-  documents: FlattenRecord[];
-  parsingProcessor: GrokProcessor | DissectProcessor;
-  scopedClusterClient: IScopedClusterClient;
-  streamsClient: StreamsClient;
-  fieldsMetadataClient: IFieldsMetadataClient;
-  logger: Logger;
-}): Promise<{ parsedDocuments: FlattenRecord[]; definitionError: boolean }> {
-  const simulationResult = await simulateProcessing({
-    params: {
-      path: { name: streamName },
-      body: {
-        documents,
-        processing: {
-          steps: [{ ...parsingProcessor, customIdentifier: SYSTEM_PARSING_PRE_SIM_ID }],
-        },
-      },
-    },
-    esClient: scopedClusterClient.asCurrentUser,
-    streamsClient,
-    fieldsMetadataClient,
-  });
-
-  if (simulationResult.definition_error) {
-    logger.warn(
-      `Parsing pre-simulation failed (stream=${streamName}): ${simulationResult.definition_error.message}`
-    );
-    return { parsedDocuments: [], definitionError: true };
-  }
-
-  return {
-    parsedDocuments: simulationResult.documents
-      .filter((doc) => doc.status === 'parsed')
-      .map((doc) => doc.value),
-    definitionError: false,
-  };
-}
-
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
-const formatInferenceErrorMeta = (error: unknown): string => {
-  if (isInferenceError(error)) {
-    const parts: string[] = [];
-    if (error.code) parts.push(`code=${error.code}`);
-    if (error.meta?.status) parts.push(`status=${error.meta.status}`);
-    return parts.length > 0 ? ` ${parts.join(' ')}` : '';
-  }
-  return '';
-};
-
-/**
- * Extract grok patterns server-side, call LLM to review them,
- * simulate to get parsed rate, and return the best grok processor.
- */
-async function processGrokPatterns({
-  messages,
-  fieldName,
-  streamName,
-  connectorId,
-  documents,
-  patternExtractionService,
-  inferenceClient,
-  scopedClusterClient,
-  streamsClient,
-  fieldsMetadataClient,
-  signal,
-  logger,
-}: {
-  messages: string[];
-  fieldName: string;
-  streamName: string;
-  connectorId: string;
-  documents: FlattenRecord[];
-  patternExtractionService: IPatternExtractionService;
-  inferenceClient: InferenceClient;
-  scopedClusterClient: IScopedClusterClient;
-  streamsClient: StreamsClient;
-  fieldsMetadataClient: IFieldsMetadataClient;
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
-  const log = logger.get('grok');
-  const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
-
-  let patternGroups: Array<{ messages: string[]; nodes: GrokPatternNode[] }>;
-  try {
-    const extraction = await patternExtractionService.extractGrokPatterns(messages);
-    patternGroups = extraction.patternGroups;
-  } catch (err) {
-    log.warn(
-      `Extraction failed, skipping grok seed (stream=${streamName}): ${getErrorMessage(err)}`
-    );
-    return null;
-  }
-
-  if (patternGroups.length === 0) {
-    return null;
-  }
-
-  const combinedGrokProcessor = await assembleGrokProcessor({
-    from: fieldName,
-    patternGroups,
-    reviewFn: async (reviewFields, reviewMessages) => {
-      log.debug(
-        `Reviewing group (stream=${streamName} messages=${reviewMessages.length} connectorId=${connectorId})`
-      );
-      try {
-        const result = await reviewGrokFields({
-          streamName,
-          connectorId,
-          fieldName,
-          sampleMessages: reviewMessages,
-          reviewFields,
-          inferenceClient,
-          streamsClient,
-          fieldsMetadataClient,
-          signal,
-        });
-        log.debug(`LLM review response received (stream=${streamName} connectorId=${connectorId})`);
-        return result;
-      } catch (error) {
-        const meta = formatInferenceErrorMeta(error);
-        log.error(
-          `LLM review failed` +
-            ` (stream=${streamName} connectorId=${connectorId}${meta}): ${getErrorMessage(error)}`
-        );
-        throw error;
-      }
-    },
-  });
-
-  if (!combinedGrokProcessor) {
-    log.debug(`No grok processor produced (stream=${streamName} connectorId=${connectorId})`);
-    return null;
-  }
-
-  log.debug(
-    `Assembled grok processor (stream=${streamName} patterns=${combinedGrokProcessor.patterns.length} connectorId=${connectorId})`
-  );
-
-  const simulationResult = await simulateProcessing({
-    params: {
-      path: { name: streamName },
-      body: {
-        documents,
-        processing: {
-          steps: [
-            {
-              ...combinedGrokProcessor,
-              customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-            },
-          ],
-        },
-      },
-    },
-    esClient: scopedClusterClient.asCurrentUser,
-    streamsClient,
-    fieldsMetadataClient,
-  });
-
-  const parsedRate =
-    simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID]?.parsed_rate ?? 0;
-
-  log.debug(
-    `Simulation complete (stream=${streamName} parsedRate=${parsedRate} connectorId=${connectorId})`
-  );
-
-  return {
-    type: 'grok',
-    processor: combinedGrokProcessor,
-    parsedRate,
-  };
-}
-
-/**
- * Extract dissect pattern server-side, call LLM to review it,
- * simulate to get parsed rate, and return the dissect processor.
- */
-async function processDissectPattern({
-  messages,
-  fieldName,
-  streamName,
-  connectorId,
-  documents,
-  patternExtractionService,
-  inferenceClient,
-  scopedClusterClient,
-  streamsClient,
-  fieldsMetadataClient,
-  signal,
-  logger,
-}: {
-  messages: string[];
-  fieldName: string;
-  streamName: string;
-  connectorId: string;
-  documents: FlattenRecord[];
-  patternExtractionService: IPatternExtractionService;
-  inferenceClient: InferenceClient;
-  scopedClusterClient: IScopedClusterClient;
-  streamsClient: StreamsClient;
-  fieldsMetadataClient: IFieldsMetadataClient;
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
-  const log = logger.get('dissect');
-  const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
-
-  if (messages.length === 0) {
-    return null;
-  }
-
-  let dissectPattern;
-  let largestGroupMessages: string[];
-  try {
-    const extraction = await patternExtractionService.extractDissectPattern(messages);
-    dissectPattern = extraction.dissectPattern;
-    largestGroupMessages = extraction.largestGroupMessages;
-  } catch (err) {
-    log.warn(
-      `Extraction failed, skipping dissect seed (stream=${streamName}): ${getErrorMessage(err)}`
-    );
-    return null;
-  }
-
-  if (!dissectPattern.ast.nodes.length) {
-    return null;
-  }
-
-  const reviewFields = getDissectReviewFields(dissectPattern, NUM_REVIEW_EXAMPLES);
-
-  let reviewResult;
-  try {
-    log.debug(
-      `Reviewing fields (stream=${streamName} messages=${largestGroupMessages.length} connectorId=${connectorId})`
-    );
-    reviewResult = await reviewDissectFields({
-      streamName,
-      connectorId,
-      fieldName,
-      sampleMessages: largestGroupMessages.slice(0, MAX_REVIEW_MESSAGES),
-      reviewFields,
-      inferenceClient,
-      streamsClient,
-      fieldsMetadataClient,
-      signal,
-    });
-    log.debug(`LLM review response received (stream=${streamName} connectorId=${connectorId})`);
-  } catch (error) {
-    const meta = formatInferenceErrorMeta(error);
-    log.error(
-      `LLM review failed` +
-        ` (stream=${streamName} connectorId=${connectorId}${meta}): ${getErrorMessage(error)}`
-    );
-    throw error;
-  }
-
-  const result = getDissectProcessorWithReview(dissectPattern, reviewResult, fieldName);
-
-  if (!result.pattern || result.pattern.trim().length === 0) {
-    log.debug(`No dissect processor produced (stream=${streamName} connectorId=${connectorId})`);
-    return null;
-  }
-
-  const dissectProcessor: DissectProcessor = {
-    action: 'dissect',
-    from: fieldName,
-    pattern: result.pattern,
-    append_separator: result.processor.dissect.append_separator,
-    description: result.description,
-  };
-
-  log.debug(`Assembled dissect processor (stream=${streamName} connectorId=${connectorId})`);
-
-  const simulationResult = await simulateProcessing({
-    params: {
-      path: { name: streamName },
-      body: {
-        documents,
-        processing: {
-          steps: [
-            {
-              ...dissectProcessor,
-              customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
-            },
-          ],
-        },
-      },
-    },
-    esClient: scopedClusterClient.asCurrentUser,
-    streamsClient,
-    fieldsMetadataClient,
-  });
-
-  const parsedRate =
-    simulationResult.processors_metrics[SUGGESTED_DISSECT_PROCESSOR_ID]?.parsed_rate ?? 0;
-
-  log.debug(
-    `Simulation complete (stream=${streamName} parsedRate=${parsedRate} connectorId=${connectorId})`
-  );
-
-  return {
-    type: 'dissect',
-    processor: dissectProcessor,
-    parsedRate,
-  };
-}

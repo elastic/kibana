@@ -76,9 +76,9 @@ evaluate.describe(
         dataset.examples.forEach((example, idx) => {
           const label = example.input.user_prompt
             ? `prompt: "${truncatePrompt(example.input.user_prompt)}"`
-            : example.input.existing_partitions
-            ? `${example.input.existing_partitions.length} existing`
-            : 'no existing';
+            : example.input.previous_suggestions
+            ? `${example.input.previous_suggestions.length} previous suggestions`
+            : 'no previous suggestions';
 
           evaluate(`${idx + 1}. ${label}`, async ({ evaluatePartitionSuggestion }) => {
             await evaluatePartitionSuggestion({

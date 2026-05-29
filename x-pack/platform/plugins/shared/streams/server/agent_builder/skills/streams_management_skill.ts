@@ -15,6 +15,8 @@ import {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID as QUERY_DOCUMENTS,
   STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE,
   STREAMS_LIST_ILM_POLICIES_TOOL_ID as LIST_ILM_POLICIES,
+  STREAMS_REFINE_EXTRACTED_FIELD_TOOL_ID as REFINE_EXTRACTED_FIELD,
+  STREAMS_SUGGEST_PARTITIONS_TOOL_ID as SUGGEST_PARTITIONS,
   STREAMS_UPDATE_STREAM_TOOL_ID as UPDATE_STREAM,
   STREAMS_CREATE_PARTITION_TOOL_ID as CREATE_PARTITION,
   STREAMS_DELETE_STREAM_TOOL_ID as DELETE_STREAM,
@@ -106,15 +108,62 @@ export const streamsManagementSkill = defineSkillType({
     - "why is my stream broken?" / "diagnose issues" → ${DIAGNOSE_STREAM}
     - "show me documents" / counts / aggregations → ${QUERY_DOCUMENTS}
     - "show me failed documents" / custom failure store queries → ${QUERY_DOCUMENTS} (source: "failures")
-    - "how can we fix the pipeline?" / propose changes → ${DESIGN_PIPELINE} (non-destructive)
+    - "how can we fix the pipeline?" / propose changes / "parse this stream" / "extract field X" → ${DESIGN_PIPELINE} (non-destructive)
+    - "split / partition / route / break up" a stream → ${SUGGEST_PARTITIONS} (non-destructive)
     - "what ILM policies are available?" / lifecycle policy options → ${LIST_ILM_POLICIES}
 
-    Pipeline changes (two phases):
-    Phase 1 — Investigate: Call ${DESIGN_PIPELINE}. Present the results (simulation, field changes, warnings) to the user. STOP.
-    Phase 2 — Apply: ONLY after the user explicitly confirms. Pass the result to ${UPDATE_STREAM}.
+    Pipeline changes — direct instruction vs exploratory question:
+    Direct instruction (e.g. "parse my stream", "fix the pipeline", "extract fields", "remove that step", "rename src_ip to source.ip"):
+    1. Call ${DESIGN_PIPELINE}.
+    2. Run the confidence check below.
+       - If confident AND the proposal has 1–2 steps: IMMEDIATELY call ${UPDATE_STREAM} with the proposed steps and a populated \`confirmation_body\` (Markdown preview: current → proposed + impact). The platform renders a confirmation dialog with Apply / Cancel buttons — do NOT ask the user in chat first.
+       - Otherwise: present the proposal in chat for per-step review (see "Multi-step pipeline review" below). Do NOT chain yet.
+    3. If ${UPDATE_STREAM} returns "The user chose not to proceed", acknowledge and ask the user what they would like to change. Do NOT retry with the same parameters.
+    Exploratory question (e.g. "how would I parse this?", "what's wrong with my pipeline?", "what would you suggest?"):
+    1. Call ${DESIGN_PIPELINE} only. Present the simulation results (success_rate, field_changes, warnings, hints) in chat. Stop and wait for the user.
+    Confidence check before chaining to ${UPDATE_STREAM}:
+    - simulation.success_rate is null or below 70% → present in chat and ask, do NOT auto-chain.
+    - simulation has errors, or warnings is non-empty, or simulation.mode is "partial" → present in chat and ask.
+    - hints mention a fallback (e.g. "Heuristic field extraction did not yield a usable seed pattern") → present in chat and ask.
+    - The user's instruction was ambiguous (e.g. "clean this up", "make it better") → present in chat and ask.
+    - The proposal has 3+ steps → present in chat first (see "Multi-step pipeline review"). The platform dialog is a single Apply / Cancel — applying 3+ steps in one click is hard to review.
+    - All clear AND step count ≤ 2 → chain to ${UPDATE_STREAM} with confirmation_body.
+    Multi-step pipeline review (when the proposal has 3+ steps OR confidence is shaky):
+    1. Render BOTH the existing pipeline (from \`existing_steps\`) AND the proposed pipeline (from \`steps\`) as numbered lists, each step on its own line with a one-line plain-English description of what it does (e.g. "1. Grok step on body.text → extracts ip, method, status, response_time"). Use \`step_changes\` to label each step as ADDED, UNCHANGED, or REMOVED. Include success_rate and any warnings, but do NOT print the raw step JSON.
+    2. Ask explicitly: "Apply all of them, drop one, edit one, or refine?" so the user knows partial selection is supported.
+    3. When the user replies:
+       - "apply all" / "looks good" / "yes" → call ${UPDATE_STREAM} with the full \`steps\` array and a confirmation_body that lists every step. The platform dialog confirms once.
+       - "drop step 3" / "skip the date one" / "apply 1, 2, 4" → filter the \`steps\` array to the chosen subset and call ${UPDATE_STREAM} once with that subset. Mention which steps you kept in confirmation_body.
+       - "drop the existing step that does X" → identify the step in \`existing_steps\` matching the user's description, filter it out of \`steps\` (or the user-curated subset), then call ${UPDATE_STREAM}.
+       - "edit existing step N to also do X" / "edit the proposed grok to capture port" → call ${DESIGN_PIPELINE} again with a refined instruction (e.g. "modify the date step on attributes.timestamp to also accept ISO 8601") and review the new result.
+       - "rerun without X" / "try a different approach" → call ${DESIGN_PIPELINE} again with a refined instruction and start over.
+    4. Filter or reorder the objects from \`steps\` / \`existing_steps\` only — do not edit them inline (the general "no manual construction" rule below applies).
+    5. ALWAYS check \`step_changes\` for entries with kind \`removed\` and warnings starting with "The proposed pipeline REMOVES…". If any exist and the user did not explicitly ask to remove that behavior, treat as low confidence: list each removal explicitly in chat and confirm with the user before applying. Silent drops of existing steps are never acceptable.
     Rules:
     - Never construct Streamlang step objects manually — only use objects from ${DESIGN_PIPELINE} or ${INSPECT_STREAMS}.
     - Prefer a single comprehensive ${DESIGN_PIPELINE} call over multiple calls.
+    - \`extract_fields: true\` ONLY when the user did not name specific output fields (e.g. "parse this stream", "auto-structure body.text"). Otherwise \`extract_fields: false\` (omit) — including for any non-extraction edit (rename, convert, redact, remove a step). Trigger is "no specific fields named", not the word "extract".
+
+    Partition suggestions — direct instruction vs exploratory question:
+    Direct instruction (e.g. "split this stream by service", "partition by host", "route errors out"):
+    1. Call ${SUGGEST_PARTITIONS}. The result includes \`partitions\` (proposed NEW) and \`existing_partitions\` (the stream's actual current children).
+    2. ALWAYS present \`existing_partitions\` first ("This stream already has these children: …"), then the proposed new ones. The user must see what is already there before deciding what to add.
+    3. Run the confidence check below. If confident AND the user has visibility into both lists, IMMEDIATELY call ${CREATE_PARTITION} once per proposed NEW partition, each with a populated \`confirmation_body\` (the partition name + its routing condition + expected impact). The platform renders one confirmation dialog per call, so the user can accept some and reject others. NEVER call ${CREATE_PARTITION} for anything in \`existing_partitions\` — those already exist.
+    4. For each ${CREATE_PARTITION} that returns "The user chose not to proceed", acknowledge that partition is skipped and continue with the next.
+    Exploratory question (e.g. "how should I partition this?", "what splits make sense?"):
+    1. Call ${SUGGEST_PARTITIONS} only. Present both lists (existing + proposed) in chat. Stop and wait for the user.
+    Confidence check before chaining to ${CREATE_PARTITION}:
+    - reason is present (\`no_clusters\`, \`no_samples\`, \`all_data_partitioned\`) or \`partitions\` is empty → present in chat with the reason and the existing children, do NOT auto-chain.
+    - More than 5 NEW partitions were proposed → present in chat first; that many at once is hard to review in dialogs.
+    - The user's instruction was vague (e.g. "split it somehow", "do something useful with it") → present in chat and ask.
+    - All clear → chain to ${CREATE_PARTITION} per NEW partition with confirmation_body.
+    Existing partition modifications:
+    - "remove the X partition" / "delete the nginx child" → use ${DELETE_STREAM} on that child (the platform dialog confirms). ${SUGGEST_PARTITIONS} cannot remove or modify existing routing.
+    - "rename / change the routing for an existing partition" → not supported through these tools today. Tell the user the limitation: they would need to delete the child and recreate it with the new routing condition.
+    Rules:
+    - ${SUGGEST_PARTITIONS} is wired-stream only. For classic streams, partitioning is unsupported.
+    - When the user says "give me different suggestions" or "try again", call ${SUGGEST_PARTITIONS} again and pass the previous result via \`previous_suggestions\`. That field is for not-yet-applied alternatives only; the stream's real children are fetched automatically and surfaced back as \`existing_partitions\` in the response.
+    - When the user already knows the exact name and condition (e.g. "create a partition for errors where log.level = error"), skip ${SUGGEST_PARTITIONS} and go straight to ${CREATE_PARTITION}.
 
     Write operations: "set retention" → ${UPDATE_STREAM} with changes.lifecycle. "create a partition" → ${CREATE_PARTITION}. "delete stream X" → ${DELETE_STREAM}. "map fields" → ${UPDATE_STREAM} with changes.fields. Multiple change types can be combined in a single ${UPDATE_STREAM} call.
 
@@ -155,13 +204,12 @@ export const streamsManagementSkill = defineSkillType({
     END OF PHASE 1 — wait for the user's response.
 
     Processing / ingestion failures — Phase 2 (Apply):
-    Only after the user explicitly confirms.
-    - REMOVE: assemble from existing step objects (omitting the broken step), pass to ${UPDATE_STREAM}.
-    - FIX/MODIFY: call ${DESIGN_PIPELINE} with a natural language description of the change, then pass the result to ${UPDATE_STREAM}.
+    The user must first pick which remedy to apply (Phase 1 typically presents 2+ options). Once they have chosen, follow the "Pipeline changes" flow under <tool_selection>: chain ${DESIGN_PIPELINE} → ${UPDATE_STREAM} with confirmation_body when the result is confident, otherwise present in chat first.
+    - REMOVE: assemble from existing step objects (omitting the broken step), pass to ${UPDATE_STREAM} with confirmation_body. The platform dialog confirms.
+    - FIX/MODIFY: call ${DESIGN_PIPELINE} with a natural language description of the change, then run the confidence check before chaining to ${UPDATE_STREAM}.
 
     Building a new pipeline:
-    Phase 1: Call ${DESIGN_PIPELINE}. Present simulation results. Wait for user confirmation.
-    Phase 2: Pass to ${UPDATE_STREAM} only after user confirms.
+    Follow the "Pipeline changes" flow under <tool_selection>. For a direct instruction ("build me a pipeline that does X, Y, Z"), call ${DESIGN_PIPELINE} and chain to ${UPDATE_STREAM} with confirmation_body when the simulation is clean. For an exploratory question, present results in chat first.
     </remediation_workflows>
 
     <anti_patterns>
@@ -196,7 +244,11 @@ export const streamsManagementSkill = defineSkillType({
     </context_tracking>
 
     <tool_result_handling>
-    - ${DESIGN_PIPELINE} results: present simulation results — success_rate, field_changes, warnings, hints. The result includes \`status: "proposal_not_applied"\` — always present findings to the user before applying. If simulation.mode is "partial", note that existing steps were not re-simulated.
+    - Warnings handling (any tool result with a \`warnings\` array): when the tool's primary outcome is degraded (e.g. \`simulation.success_rate\` is 0%/low/null on ${DESIGN_PIPELINE} or ${REFINE_EXTRACTED_FIELD}, or any tool returns a \`reason\`), do NOT invent an explanation for the cause. Quote the relevant entries from the \`warnings\` array verbatim (in a quoted block or code fence) — they contain the actual underlying error. Treat any degraded outcome as a hard stop on auto-chaining: present the verbatim warnings to the user and ask how to proceed before invoking any write tool (${UPDATE_STREAM}, ${CREATE_PARTITION}, ${DELETE_STREAM}). This rule applies to every tool — tool-specific guidance below adds details, it does not replace this baseline.
+    - ${DESIGN_PIPELINE} results: include \`steps\` (full apply-ready pipeline), \`existing_steps\` (the pipeline as it was), and \`step_changes\` (per-step diff: \`added\` / \`unchanged\` / \`removed\`). \`status: "proposal_not_applied"\` means the proposal still needs the user's approval — apply it via ${UPDATE_STREAM}, which renders a platform confirmation dialog. The dialog is a single Apply / Cancel for the entire pipeline; partial selection at the dialog is not supported. Use the confidence check and step-count rule (see "Pipeline changes" above): chain only when confident AND step count ≤ 2 AND no \`removed\` entries in \`step_changes\` the user did not explicitly ask for; otherwise present existing + proposed in chat for review. When chaining, build \`confirmation_body\` from success_rate, field_changes, warnings, hints, and a per-step list that shows additions vs unchanged. If simulation.mode is "partial", note that existing steps were not re-simulated. When \`extract_fields: true\` was requested, the result carries \`extract_fields_outcome\` (\`success\` | \`fallback\` | \`unsupported\`) and — for non-success cases — a typed \`extract_fields_reason\`. Branch deterministically on these (do not parse \`hints\` prose): \`success\` → present as a normal proposal; \`unsupported\` → tell the user that automated field extraction isn't available on this stream and quote the constraint from \`warnings\` verbatim (currently \`extract_fields: true\` requires an ingest stream — wired or classic; query streams are not eligible because they have no processing pipeline). Stop and do NOT retry — the blocker is the stream type, not the request, so re-issuing with \`extract_fields: false\` will not help on the same stream; \`fallback\` → tell the user heuristics couldn't find a usable seed (mention the \`extract_fields_reason\`, e.g. \`no_text_field\`, \`no_candidate\`, \`no_parsed_documents\`) and that the LLM-only path produced the proposal you're presenting. If hints mention fields with key=value prefixes (e.g. "Field X has values like key=val — all share a key= prefix"), present this to the user and offer to refine the extraction — do NOT silently add anything. If the user confirms, call ${REFINE_EXTRACTED_FIELD} with the exact \`field\`, \`action: "drop_prefix"\`, and \`prefix\` from the hint. CRITICAL: when the ${DESIGN_PIPELINE} proposal has not yet been applied (the typical case immediately after the call), pass the proposal's \`steps\` array as the \`pipeline_steps\` argument. Without it the refinement tool inspects the stream's currently-applied pipeline and will reject with field_not_found because the new field only exists in the proposal. The result composes the new replace step onto your supplied pipeline_steps; chain straight to ${UPDATE_STREAM} so the user reviews + applies the seed extraction AND the prefix-strip in a single confirmation. Do NOT call ${DESIGN_PIPELINE} for prefix-stripping — that path rewrites the whole pipeline and risks dropping other extractions. ${REFINE_EXTRACTED_FIELD} validates the prefix matches 100% of sampled values and refuses (with a clear reason) otherwise; surface the rejection message verbatim if it fires. When the refinement succeeds (simulation passes), chain directly to ${UPDATE_STREAM} with the platform confirmation dialog — the user already expressed intent to apply when they asked to refine, so do not ask again in chat.
+    - Source field selection for ${DESIGN_PIPELINE} with \`extract_fields: true\`: the auto-pick walks PRIORITIZED_CONTENT_FIELDS (message, body.text, …) and ignores the instruction text. When the user names a specific field to parse from (e.g. "parse the error.message column", "extract from event.original instead", "use the X field instead"), pass it via \`seed_source_field\`. If the field hasn't been confirmed earlier in the conversation, run a single ${INSPECT_STREAMS} (aspects: ["schema"]) first to verify it exists or surface a useful "field not found, here's what does exist" answer to the user — preferable to a confusing \`no_text_field\` fallback. When the result's warnings flag a duplication ("already extracts from field …") or overwrite ("New extraction was placed BEFORE …") on the auto-picked field, surface the warning to the user verbatim and offer the choice between applying as-is (build on top), redirecting via \`seed_source_field\` to a different field, or dropping the existing step via a separate \`extract_fields: false\` instruction. Do not silently pick.
+    - Simulation failure handling for ${DESIGN_PIPELINE} / ${REFINE_EXTRACTED_FIELD}: a 0%, low, or null \`simulation.success_rate\` triggers the general "Warnings handling" rule above — quote the warnings verbatim, do NOT chain to ${UPDATE_STREAM}, ask the user how to proceed.
+    - ${SUGGEST_PARTITIONS} results: include \`partitions\` (proposed NEW), \`existing_partitions\` (the stream's actual current children), \`time_range\`, optional \`reason\`, and optional \`previous_suggestions_dropped\` (names that collided with an existing route and were ignored — surface these to the user so they understand the rename). Each suggestion has \`status: "suggestion_not_applied"\` and is applied via ${CREATE_PARTITION} (one call per NEW partition, platform dialog confirms). Use the confidence check (see "Partition suggestions" above) to decide whether to chain or present in chat. ALWAYS surface \`existing_partitions\` to the user before applying anything new. If \`reason\` is present (\`no_clusters\`, \`no_samples\`, \`insufficient_samples\`, \`all_data_partitioned\`), explain it factually and do NOT chain. For \`no_samples\` and \`insufficient_samples\` specifically, ${SUGGEST_PARTITIONS} cannot help (it is data-driven and there isn't enough data) — instead offer to define a partition manually with ${CREATE_PARTITION} if the user already has a routing condition in mind (e.g. "we can split by service.name=checkout right now without sample data"). For \`insufficient_samples\` also quote \`sample_count\` / \`minimum_required\` so the user knows how much more traffic would unblock the data-driven path.
     - ${DIAGNOSE_STREAM} results: error groups include \`sample_document\` — the flattened original document that was rejected. Cross-reference the field values with the error message to understand the root cause (e.g. what value a field contained when a type mismatch occurred). If errors reference specific pipeline steps, call ${INSPECT_STREAMS} with aspects \`['processing']\` to see the full chain and identify which stream defines the responsible step. Evaluate whether the step makes logical sense for the data — a step that processes the wrong field type should be removed, not patched. When \`degraded_fields\` is present, it lists which specific fields triggered the \`_ignored\` flag with per-field counts and last occurrence — use this to explain the root cause of degradation to the user.
     - ${QUERY_DOCUMENTS} with source "failures": documents contain error.type, error.message, error.stack_trace, and the original document under document.source.* (flattened). Use for custom queries when ${DIAGNOSE_STREAM}'s grouped samples are not sufficient.
     - ${INSPECT_STREAMS} results: report effective_lifecycle and effective_failure_store (not raw values). Check type_context notes for stream-type-specific guidance. For quality data, follow the \`assessment\` field — it provides interpretation guidance based on failure recency and pipeline update timing. Do not override the assessment with blanket statements. When degraded_pct is high, suggest using ${DIAGNOSE_STREAM} for per-field breakdown.

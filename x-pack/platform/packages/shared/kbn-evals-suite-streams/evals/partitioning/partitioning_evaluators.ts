@@ -153,7 +153,7 @@ export const createPartitionQualityLlmEvaluator = (
     return evaluators.criteria(criteria).evaluate({
       input: {
         stream_name: (inp as Record<string, unknown> | undefined)?.stream_name,
-        existing_partitions: (inp as Record<string, unknown> | undefined)?.existing_partitions,
+        previous_suggestions: (inp as Record<string, unknown> | undefined)?.previous_suggestions,
         user_prompt: (inp as Record<string, unknown> | undefined)?.user_prompt,
       },
       output: {

@@ -7,12 +7,14 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { registerAgentBuilderTools } from './register_tools';
 import { STREAMS_READ_TOOL_IDS, STREAMS_WRITE_TOOL_IDS } from './tool_ids';
 import { STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID } from './register_tools';
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import type { IPatternExtractionService } from '../../lib/pattern_extraction/pattern_extraction_service';
 
 const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
   isServerless: false,
@@ -26,6 +28,9 @@ describe('registerAgentBuilderTools', () => {
   const telemetry = {
     trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
   } as unknown as EbtTelemetryClient;
+  // Stub: registration only forwards the service to `createDesignPipelineTool`,
+  // so an empty object is enough — no method on it is invoked at register time.
+  const patternExtractionService = {} as IPatternExtractionService;
 
   it('registers all expected tools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
@@ -37,6 +42,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      patternExtractionService,
     });
 
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
@@ -60,6 +66,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      patternExtractionService,
     });
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
@@ -67,6 +74,25 @@ describe('registerAgentBuilderTools', () => {
       expect(tool).toHaveProperty('schema');
       expect((tool as { schema: unknown }).schema).toBeDefined();
     }
+  });
+
+  it('every registered tool id is in the agent-builder allowlist', () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const { getScopedClients } = createMockGetScopedClients();
+
+    registerAgentBuilderTools({
+      agentBuilder,
+      getScopedClients,
+      server: createMockServer() as StreamsServer,
+      logger: loggerMock.create(),
+      telemetry,
+      patternExtractionService,
+    });
+
+    const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
+    const missing = registeredIds.filter((id) => !isAllowedBuiltinTool(id));
+
+    expect(missing).toEqual([]);
   });
 
   it('does not register any tools when agentBuilder is falsy', () => {
@@ -79,6 +105,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      patternExtractionService,
     });
 
     expect(agentBuilder.tools.register).not.toHaveBeenCalled();

@@ -5,358 +5,721 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { NlToStreamlangResult } from './_pipeline_design_utils';
+import type { RunExtractFieldsOutcome } from './extract_fields_handler';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { IPatternExtractionService } from '../../../lib/pattern_extraction/pattern_extraction_service';
+
+// `design_pipeline` is a thin orchestration over two underlying engines —
+// the LLM-only `nlToStreamlang` and the heuristic `runExtractFieldsFlow`.
+// We mock both so each test asserts on the orchestrator alone (which path
+// it picks, how it handles outcomes, how it merges hints, etc.).
+jest.mock('./nl_to_streamlang', () => ({
+  nlToStreamlang: jest.fn(),
+}));
+jest.mock('./extract_fields_handler', () => ({
+  runExtractFieldsFlow: jest.fn(),
+}));
+
+import { createDesignPipelineTool } from './design_pipeline';
 import { nlToStreamlang } from './nl_to_streamlang';
-import type { NlToStreamlangDeps } from './nl_to_streamlang';
-import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
+import { runExtractFieldsFlow } from './extract_fields_handler';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
 
-const wiredStreamDef = (name: string) => ({
-  name,
-  description: '',
-  ingest: {
-    wired: { fields: { message: { type: 'text' } }, routing: [] },
-    processing: { steps: [] },
-    lifecycle: { inherit: {} },
-    failure_store: { inherit: {} },
-  },
-});
+const mockNlToStreamlang = nlToStreamlang as jest.MockedFunction<typeof nlToStreamlang>;
+const mockRunExtractFieldsFlow = runExtractFieldsFlow as jest.MockedFunction<
+  typeof runExtractFieldsFlow
+>;
 
-const makeSimResponse = (
-  overrides?: Partial<ProcessingSimulationResponse>
-): ProcessingSimulationResponse => ({
-  detected_fields: [],
-  documents: [],
-  processors_metrics: {},
-  definition_error: undefined,
-  documents_metrics: {
-    failed_rate: 0,
-    partially_parsed_rate: 0,
-    skipped_rate: 0,
-    parsed_rate: 1,
-    dropped_rate: 0,
-  },
+const buildNlToStreamlangResult = (
+  overrides: Partial<NlToStreamlangResult> = {}
+): NlToStreamlangResult => ({
+  steps: [{ action: 'remove', from: 'message' } as never],
+  existing_steps: [],
+  step_changes: [],
+  summary: 'remove: message',
+  field_changes: [],
+  simulation: { success_rate: 100, sample_count: 5, mode: 'complete' },
+  samples_info: { source: 'stream', count: 5 },
   ...overrides,
 });
 
-const sampleDocuments = [{ message: 'test log line', '@timestamp': '2026-04-16T00:00:00Z' }];
-
-const inlineSamples = (
-  documents: Array<Record<string, unknown>> = sampleDocuments,
-  status: 'processed' | 'unprocessed' = 'processed'
-) => ({ source: 'inline' as const, documents, status });
-
-describe('nlToStreamlang', () => {
-  const createMockDeps = (): NlToStreamlangDeps & {
-    mockInferenceClient: { chatComplete: jest.Mock };
-    mockEsClient: { search: jest.Mock };
-  } => {
-    const mockInferenceClient = {
-      chatComplete: jest.fn(),
-    };
-
-    const mockEsClient = {
-      search: jest.fn().mockResolvedValue({
-        hits: {
-          hits: sampleDocuments.map((doc) => ({ _source: doc })),
+describe('createDesignPipelineTool', () => {
+  const createMockServer = (mlTierAvailable: boolean = true) =>
+    ({
+      core: {
+        pricing: {
+          isFeatureAvailable: jest.fn().mockReturnValue(mlTierAvailable),
         },
-      }),
-    };
+      },
+    } as never);
 
-    return {
-      streamsClient: {
-        getStream: jest.fn().mockResolvedValue(wiredStreamDef('logs.ecs.test')),
-      } as unknown as NlToStreamlangDeps['streamsClient'],
-      esClient: mockEsClient as unknown as NlToStreamlangDeps['esClient'],
-      inferenceClient: mockInferenceClient as unknown as NlToStreamlangDeps['inferenceClient'],
-      simulatePipeline: jest.fn().mockResolvedValue(makeSimResponse()),
-      mockInferenceClient,
-      mockEsClient,
-    };
+  const setup = (
+    options: {
+      patternExtractionService?: IPatternExtractionService;
+      mlTierAvailable?: boolean;
+    } = {}
+  ) => {
+    const { getScopedClients, streamsClient } = createMockGetScopedClients();
+    streamsClient.getStream.mockResolvedValue({
+      type: 'wired',
+      name: 'logs.test',
+      description: '',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [] },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+        settings: {},
+      },
+    } as never);
+    const telemetry = {
+      trackProcessingPipelineSuggested: jest.fn(),
+    } as unknown as EbtTelemetryClient;
+    const tool = createDesignPipelineTool({
+      getScopedClients,
+      patternExtractionService:
+        options.patternExtractionService ?? ({} as IPatternExtractionService),
+      server: createMockServer(options.mlTierAvailable ?? true),
+      logger: loggerMock.create(),
+      telemetry,
+    });
+    const context = createMockToolContext();
+    return { tool, context, streamsClient, telemetry };
   };
 
-  it('returns validated steps from LLM response', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [{ action: 'remove', from: 'message' }],
-      }),
-    });
-
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'remove the message field',
-      },
-      deps
-    );
-
-    expect(result.steps).toHaveLength(1);
-    expect(result.steps[0]).toMatchObject({ action: 'remove', from: 'message' });
-    expect(result.summary).toContain('remove');
-    expect(result.simulation.success_rate).toBe(100);
-    expect(result.simulation.mode).toBeDefined();
-    expect(result.samples_info).toEqual({ source: 'inline', count: 1 });
+  beforeEach(() => {
+    mockNlToStreamlang.mockReset();
+    mockRunExtractFieldsFlow.mockReset();
   });
 
-  it('returns multiple steps when described', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [
-          { action: 'remove', from: 'field_a' },
-          { action: 'remove', from: 'field_b' },
-          { action: 'remove', from: 'field_c' },
+  describe('pricing-tier gate', () => {
+    it('returns a structured tool error and skips telemetry when ml tier is gated', async () => {
+      // Mirrors the HTTP-route gates at `_suggest_processing_pipeline`,
+      // `processing/_suggestions/grok`, and `processing/_suggestions/dissect`.
+      // Without this, the agent surface would bypass an entitlement the UI
+      // honors. Critical side assertions: (a) NO downstream engine runs
+      // (`nlToStreamlang` / `runExtractFieldsFlow`), (b) NO telemetry event
+      // fires — gate failures are an environmental constraint, not a usage
+      // signal, so they must NOT pollute `processing_pipeline_suggested`
+      // dashboards with `success=false` noise.
+      const { tool, context, streamsClient, telemetry } = setup({ mlTierAvailable: false });
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toEqual(
+        expect.stringContaining('not available on the current pricing tier')
+      );
+
+      expect(streamsClient.getStream).not.toHaveBeenCalled();
+      expect(mockNlToStreamlang).not.toHaveBeenCalled();
+      expect(mockRunExtractFieldsFlow).not.toHaveBeenCalled();
+      expect(telemetry.trackProcessingPipelineSuggested).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('extract_fields: false (or omitted) — LLM-only path', () => {
+    it('routes to nlToStreamlang and wraps the result with status + note', async () => {
+      const { tool, context } = setup();
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'remove message' },
+        context
+      );
+
+      expect(mockNlToStreamlang).toHaveBeenCalledTimes(1);
+      expect(mockRunExtractFieldsFlow).not.toHaveBeenCalled();
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect(data.status).toBe('proposal_not_applied');
+      expect(data.stream).toBe('logs.test');
+      expect(data.note).toEqual(expect.stringContaining('proposed pipeline change'));
+      // The full nlToStreamlang result is spread into the response (steps,
+      // simulation, samples_info, …) so the agent has everything to
+      // present to the user.
+      expect(data).toHaveProperty('steps');
+      expect(data).toHaveProperty('simulation');
+      // `extract_fields_*` are scoped to the heuristic path — LLM-only
+      // results must NOT carry them or the skill prompt will branch as
+      // if heuristics ran.
+      expect(data.extract_fields_outcome).toBeUndefined();
+      expect(data.extract_fields_reason).toBeUndefined();
+    });
+
+    it('forwards the inline-samples payload through to nlToStreamlang verbatim', async () => {
+      const { tool, context } = setup();
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      const samples = {
+        source: 'inline' as const,
+        documents: [{ message: 'x' }],
+        status: 'unprocessed' as const,
+      };
+
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'remove message', samples },
+        context
+      );
+
+      expect(mockNlToStreamlang).toHaveBeenCalledWith(
+        expect.objectContaining({ samples }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('extract_fields: true — heuristic path', () => {
+    it('returns the heuristic result on `kind: "success"` without falling back to LLM', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      const heuristicResult = buildNlToStreamlangResult({
+        steps: [{ action: 'grok', from: 'body.text', patterns: ['%{IP:ip}'] } as never],
+        summary: 'grok: body.text',
+        hints: [
+          'Seed parsing was discovered automatically using grok heuristics on field "body.text".',
         ],
-      }),
-    });
-
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'remove field_a, field_b, and field_c',
-      },
-      deps
-    );
-
-    expect(result.steps).toHaveLength(3);
-  });
-
-  it('retries on Zod validation failure', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete
-      .mockResolvedValueOnce({ content: '{ "invalid": true }' })
-      .mockResolvedValueOnce({
-        content: JSON.stringify({ steps: [{ action: 'remove', from: 'message' }] }),
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 4,
+        result: heuristicResult,
       });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'remove message',
-      },
-      deps
-    );
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
 
-    expect(deps.mockInferenceClient.chatComplete).toHaveBeenCalledTimes(2);
-    expect(result.steps).toHaveLength(1);
-  });
+      expect(mockRunExtractFieldsFlow).toHaveBeenCalledTimes(1);
+      // No LLM-only fallback when heuristics produced a usable pipeline.
+      expect(mockNlToStreamlang).not.toHaveBeenCalled();
 
-  it('throws after exhausting retries', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: 'not valid json at all',
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.status).toBe('proposal_not_applied');
+      expect(data.summary).toBe('grok: body.text');
+      expect(data.hints).toEqual(
+        expect.arrayContaining([expect.stringContaining('Seed parsing was discovered')])
+      );
+      // The structured outcome lets the skill prompt branch deterministically.
+      expect(data.extract_fields_outcome).toBe('success');
+      expect(data.extract_fields_reason).toBeUndefined();
     });
 
-    await expect(
-      nlToStreamlang(
+    it('returns the heuristic result on `kind: "unsupported"` (e.g. query stream) without falling back', async () => {
+      // `unsupported` carries a typed warning explaining why the path did
+      // not run. The orchestrator must surface that to the agent rather
+      // than silently retrying via the LLM, which would produce a misleading
+      // pipeline.
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'unsupported',
+        streamType: 'query',
+        warning: 'extract_fields is only supported for ingest streams',
+      });
+
+      const result = await tool.handler(
         {
-          streamName: 'logs.ecs.test',
-          samples: inlineSamples(),
-          instruction: 'do something',
+          stream_name: 'logs.errors-view',
+          instruction: 'parse this',
+          extract_fields: true,
         },
-        deps
-      )
-    ).rejects.toThrow('Failed to generate valid Streamlang after');
+        context
+      );
+
+      expect(mockRunExtractFieldsFlow).toHaveBeenCalledTimes(1);
+      expect(mockNlToStreamlang).not.toHaveBeenCalled();
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.warnings).toEqual([expect.stringContaining('only supported for ingest streams')]);
+      // The structured outcome is the source-of-truth for skill prompt
+      // branching — not the warning prose.
+      expect(data.extract_fields_outcome).toBe('unsupported');
+      expect(data.extract_fields_reason).toBe('unsupported_stream_type');
+      // The unsupported branch carries no proposal, so none of the
+      // proposal-shaped fields should be present.
+      expect(data).not.toHaveProperty('steps');
+      expect(data).not.toHaveProperty('simulation');
+      expect(data).not.toHaveProperty('samples_info');
+      expect(data).not.toHaveProperty('status');
+      expect(data).not.toHaveProperty('note');
+    });
+
+    it('falls back to nlToStreamlang and surfaces structured outcome=fallback on `kind: "fallback"`', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      const fallback: RunExtractFieldsOutcome = {
+        kind: 'fallback',
+        reason: 'no_candidate',
+        streamType: 'wired',
+      };
+      mockRunExtractFieldsFlow.mockResolvedValue(fallback);
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult({ hints: ['llm hint'] }));
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(mockRunExtractFieldsFlow).toHaveBeenCalledTimes(1);
+      expect(mockNlToStreamlang).toHaveBeenCalledTimes(1);
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as {
+        hints?: string[];
+        extract_fields_outcome?: string;
+        extract_fields_reason?: string;
+      };
+      // Structured fields carry the outcome — the skill prompt branches on
+      // these instead of sniffing English from `hints`. The English
+      // duplicate that used to live in `hints[0]` was removed by #12.
+      expect(data.extract_fields_outcome).toBe('fallback');
+      expect(data.extract_fields_reason).toBe('no_candidate');
+      expect(data.hints).toEqual(['llm hint']);
+      expect(data.hints?.[0]).not.toEqual(
+        expect.stringContaining('Heuristic field extraction did not yield')
+      );
+    });
+
+    it('merges `outcome.extraHints` (inline-processed-no-text-field caveat) alongside structured outcome', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      const fallback: RunExtractFieldsOutcome = {
+        kind: 'fallback',
+        reason: 'no_text_field',
+        streamType: 'wired',
+        extraHints: [
+          'The inline samples were marked status: "processed". The existing pipeline may have removed the canonical raw-text field (body.text / message).',
+        ],
+      };
+      mockRunExtractFieldsFlow.mockResolvedValue(fallback);
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult({ hints: ['llm hint'] }));
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as {
+        hints?: string[];
+        extract_fields_outcome?: string;
+        extract_fields_reason?: string;
+      };
+      // Reason flows to the structured field, not into prose.
+      expect(data.extract_fields_outcome).toBe('fallback');
+      expect(data.extract_fields_reason).toBe('no_text_field');
+      // `extraHints` carries genuinely additional context (not a reason
+      // restatement) so it is preserved alongside the LLM's hints.
+      expect(data.hints).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('inline samples were marked status: "processed"'),
+          'llm hint',
+        ])
+      );
+    });
+
+    it('threads `seed_source_field` into the runner so the user can steer the auto-pick', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 1,
+        result: buildNlToStreamlangResult({ hints: [] }),
+      });
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse this stream',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(mockRunExtractFieldsFlow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          streamName: 'logs.test',
+          seedSourceField: 'event.original',
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
-  it('handles simulation errors with retry', async () => {
-    const deps = createMockDeps();
-    const validSteps = JSON.stringify({
-      steps: [{ action: 'remove', from: 'message' }],
-    });
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({ content: validSteps });
+  describe('error handling', () => {
+    it('wraps unexpected errors from nlToStreamlang in a typed tool error', async () => {
+      const { tool, context } = setup();
+      mockNlToStreamlang.mockRejectedValue(new Error('LLM connector unavailable'));
 
-    (deps.simulatePipeline as jest.Mock)
-      .mockResolvedValueOnce(
-        makeSimResponse({
-          definition_error: { type: 'generic_simulation_failure', message: 'grok pattern failed' },
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'remove message' },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.operation).toBe('design_pipeline');
+      expect(data.stream).toBe('logs.test');
+      expect(data.message).toEqual(expect.stringContaining('LLM connector unavailable'));
+    });
+
+    it('wraps unexpected errors from runExtractFieldsFlow in a typed tool error', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockRejectedValue(new Error('worker pool exhausted'));
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.operation).toBe('design_pipeline');
+      expect(data.message).toEqual(expect.stringContaining('worker pool exhausted'));
+      // The error path must NOT silently fall back to nlToStreamlang —
+      // we want the failure to be visible.
+      expect(mockNlToStreamlang).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    it('emits flow=nl_to_streamlang on the LLM-only path (extract_fields omitted)', async () => {
+      const { tool, context, telemetry, streamsClient } = setup();
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler({ stream_name: 'logs.test', instruction: 'remove message' }, context);
+
+      // The LLM path does not surface the stream type, so the handler
+      // performs one `getStream` call solely to populate `stream_type`.
+      expect(streamsClient.getStream).toHaveBeenCalledWith('logs.test');
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'agent',
+          flow: 'nl_to_streamlang',
+          success: true,
+          steps_used: 0,
+          stream_name: 'logs.test',
+          stream_type: 'wired',
         })
-      )
-      .mockResolvedValueOnce(makeSimResponse());
-
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'remove message',
-      },
-      deps
-    );
-
-    expect(deps.mockInferenceClient.chatComplete).toHaveBeenCalledTimes(2);
-    expect(result.steps).toHaveLength(1);
-  });
-
-  it('includes field_changes from simulation', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [
-          {
-            action: 'grok',
-            from: 'message',
-            patterns: ['%{IP:attributes.client_ip}'],
-          },
-        ],
-      }),
+      );
+      // No fallback reason on the direct LLM path.
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.not.objectContaining({ extract_fields_fallback_reason: expect.anything() })
+      );
     });
 
-    (deps.simulatePipeline as jest.Mock).mockResolvedValue(
-      makeSimResponse({
-        detected_fields: [{ name: 'attributes.client_ip', esType: 'keyword' }],
-        documents: [
-          {
-            detected_fields: [],
-            errors: [],
-            status: 'parsed' as const,
-            processed_by: [],
-            value: { 'attributes.client_ip': '192.168.1.1', message: 'test' },
-          },
-        ],
-      })
-    );
+    it('emits flow=extract_fields with stepsUsed when the heuristic path returns success', async () => {
+      const { tool, context, telemetry, streamsClient } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'classic',
+        stepsUsed: 5,
+        result: buildNlToStreamlangResult(),
+      });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'parse IP from message',
-      },
-      deps
-    );
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
 
-    expect(result.field_changes).toContainEqual(
-      expect.objectContaining({
-        field: 'attributes.client_ip',
-        change: 'created',
-        type: 'keyword',
-        sample_values: expect.arrayContaining(['192.168.1.1']),
-      })
-    );
-  });
-
-  it('returns simulation mode in results with inline unprocessed samples', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [{ action: 'remove', from: 'message' }],
-      }),
+      // The heuristic outcome surfaces `streamType` directly, so no extra
+      // `getStream` round-trip is needed for telemetry.
+      expect(streamsClient.getStream).not.toHaveBeenCalled();
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'agent',
+          flow: 'extract_fields',
+          success: true,
+          steps_used: 5,
+          stream_type: 'classic',
+        })
+      );
     });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(sampleDocuments, 'unprocessed'),
-        instruction: 'remove message',
-      },
-      deps
-    );
+    it('emits flow=extract_fields, success=true on the unsupported branch (tool did not throw)', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'unsupported',
+        streamType: 'query',
+        warning: 'extract_fields is only supported for ingest streams',
+      });
 
-    expect(result.simulation.mode).toBe('complete');
-    expect(result.samples_info).toEqual({ source: 'inline', count: 1 });
-  });
+      await tool.handler(
+        { stream_name: 'logs.errors-view', instruction: 'parse', extract_fields: true },
+        context
+      );
 
-  it('returns empty steps with hints when LLM signals unfulfillable', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [],
-        hints: ['Field "nonexistent" does not exist in the documents.'],
-      }),
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'extract_fields',
+          success: true,
+          steps_used: 0,
+          stream_type: 'query',
+        })
+      );
     });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(),
-        instruction: 'parse nonexistent field',
-      },
-      deps
-    );
+    it('emits flow=nl_to_streamlang with extract_fields_fallback_reason when heuristics return fallback', async () => {
+      const { tool, context, telemetry, streamsClient } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'fallback',
+        reason: 'no_candidate',
+        streamType: 'wired',
+      });
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
 
-    expect(result.steps).toHaveLength(0);
-    expect(result.hints).toContainEqual(expect.stringContaining('does not exist'));
-  });
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
 
-  it('extracts fields from provided documents, not fieldCaps', async () => {
-    const deps = createMockDeps();
-    const otelDocs = [{ 'body.text': 'my log message', severity_text: 'INFO' }];
-
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [{ action: 'remove', from: 'body.text' }],
-      }),
+      // Stream type was already resolved by the heuristic outcome — no
+      // second `getStream` call should fire on the fallback path.
+      expect(streamsClient.getStream).not.toHaveBeenCalled();
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'nl_to_streamlang',
+          success: true,
+          stream_type: 'wired',
+          extract_fields_fallback_reason: 'no_candidate',
+        })
+      );
     });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: inlineSamples(otelDocs),
-        instruction: 'remove body.text',
-      },
-      deps
-    );
+    it('emits success=false on the LLM-only path when nlToStreamlang throws', async () => {
+      const { tool, context, telemetry } = setup();
+      mockNlToStreamlang.mockRejectedValue(new Error('connector unavailable'));
 
-    const systemPromptArg = deps.mockInferenceClient.chatComplete.mock.calls[0][0].messages[0]
-      .content as string;
-    expect(systemPromptArg).toContain('body.text');
-    expect(systemPromptArg).toContain('severity_text');
-    expect(result.steps).toHaveLength(1);
-  });
+      await tool.handler({ stream_name: 'logs.test', instruction: 'remove message' }, context);
 
-  it('auto-fetches documents from stream when samples is omitted', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [{ action: 'remove', from: 'message' }],
-      }),
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'nl_to_streamlang',
+          success: false,
+        })
+      );
     });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        instruction: 'remove message',
-      },
-      deps
-    );
+    it('emits success=false with stream_type=unknown when getScopedClients throws before the stream is resolved', async () => {
+      // Simulates a failure prior to any stream lookup — the handler
+      // cannot know the stream type, so it falls back to "unknown" rather
+      // than dropping the event entirely.
+      const { getScopedClients } = createMockGetScopedClients();
+      getScopedClients.mockRejectedValueOnce(new Error('auth error'));
+      const telemetry = {
+        trackProcessingPipelineSuggested: jest.fn(),
+      } as unknown as EbtTelemetryClient;
+      const tool = createDesignPipelineTool({
+        getScopedClients,
+        patternExtractionService: {} as IPatternExtractionService,
+        server: createMockServer(true),
+        logger: loggerMock.create(),
+        telemetry,
+      });
 
-    expect(deps.mockEsClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'logs.ecs.test',
-        size: 100,
-        ignore_unavailable: true,
-      })
-    );
-    expect(result.samples_info).toEqual({ source: 'stream', count: 1 });
-    expect(result.steps).toHaveLength(1);
-  });
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'remove message' },
+        createMockToolContext()
+      );
 
-  it('auto-fetches with custom size when samples source is stream', async () => {
-    const deps = createMockDeps();
-    deps.mockInferenceClient.chatComplete.mockResolvedValue({
-      content: JSON.stringify({
-        steps: [{ action: 'remove', from: 'message' }],
-      }),
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          stream_type: 'unknown',
+        })
+      );
     });
 
-    const result = await nlToStreamlang(
-      {
-        streamName: 'logs.ecs.test',
-        samples: { source: 'stream', size: 50 },
-        instruction: 'remove message',
-      },
-      deps
-    );
+    it('emits success=false on the heuristic path when runExtractFieldsFlow throws', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockRejectedValue(new Error('worker pool exhausted'));
 
-    expect(deps.mockEsClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'logs.ecs.test',
-        size: 50,
-      })
-    );
-    expect(result.samples_info).toEqual({ source: 'stream', count: 1 });
-    expect(result.steps).toHaveLength(1);
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledTimes(1);
+      // `flow` defaults to `nl_to_streamlang` because the throw happened
+      // before the heuristic outcome could be observed; `success: false`
+      // is the meaningful signal here.
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+        })
+      );
+    });
+  });
+
+  describe('source-field conflict telemetry', () => {
+    it('threads pickedSourceField + sourceFieldConflictDetected from a success outcome into the telemetry event', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 3,
+        pickedSourceField: 'body.text',
+        sourceFieldConflictDetected: true,
+        result: buildNlToStreamlangResult(),
+      });
+
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'extract_fields',
+          source_field_picked: 'body.text',
+          source_field_conflict_detected: true,
+          source_field_explicitly_set: false,
+        })
+      );
+    });
+
+    it('emits source_field_explicitly_set=true when the agent passes seed_source_field', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 1,
+        pickedSourceField: 'event.original',
+        sourceFieldConflictDetected: false,
+        result: buildNlToStreamlangResult(),
+      });
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse from event.original',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source_field_picked: 'event.original',
+          source_field_conflict_detected: false,
+          source_field_explicitly_set: true,
+        })
+      );
+    });
+
+    it('emits source_field_explicitly_set=true even when the heuristic path is unavailable (patternExtractionService missing)', async () => {
+      // The user steered with seed_source_field but the heuristic path
+      // could not run — we still want to capture that the user
+      // attempted to override, since "user intent to redirect" is
+      // independent of "heuristic produced anything".
+      const { tool, context, telemetry } = setup(); // no patternExtractionService
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse from event.original',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source_field_explicitly_set: true,
+        })
+      );
+      // No source field was actually picked — heuristic never ran.
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.not.objectContaining({ source_field_picked: expect.anything() })
+      );
+    });
+
+    it('omits all source_field_* fields on the LLM-only path (extract_fields omitted)', async () => {
+      const { tool, context, telemetry } = setup();
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler({ stream_name: 'logs.test', instruction: 'remove message' }, context);
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          source_field_picked: expect.anything(),
+          source_field_conflict_detected: expect.anything(),
+          source_field_explicitly_set: expect.anything(),
+        })
+      );
+    });
+
+    it('threads the meta from a fallback outcome (extraction failed but a field was picked)', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'fallback',
+        reason: 'no_candidate',
+        streamType: 'wired',
+        pickedSourceField: 'body.text',
+        sourceFieldConflictDetected: true,
+      });
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'nl_to_streamlang',
+          extract_fields_fallback_reason: 'no_candidate',
+          source_field_picked: 'body.text',
+          source_field_conflict_detected: true,
+          source_field_explicitly_set: false,
+        })
+      );
+    });
   });
 });

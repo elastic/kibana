@@ -74,6 +74,13 @@ export const handleProcessingGrokSuggestions = async ({
     `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`
   );
 
+  // Resolve the stream definition once so the per-review-call
+  // `useOtelFieldNames` lookup doesn't re-fetch on every iteration of
+  // `assembleGrokProcessor` (and so the agent-builder caller can pass
+  // its already-resolved value directly via `reviewGrokFields`).
+  const stream = await streamsClient.getStream(streamName);
+  const useOtelFieldNames = isOtelStream(stream);
+
   const { patternGroups } = await patternExtractionService.extractGrokPatterns(
     params.body.sample_messages
   );
@@ -110,7 +117,7 @@ export const handleProcessingGrokSuggestions = async ({
         sampleMessages: messages,
         reviewFields,
         inferenceClient,
-        streamsClient,
+        useOtelFieldNames,
         fieldsMetadataClient,
         signal,
       });
@@ -143,7 +150,7 @@ export async function reviewGrokFields({
   sampleMessages,
   reviewFields,
   inferenceClient,
-  streamsClient,
+  useOtelFieldNames,
   fieldsMetadataClient,
   signal,
 }: {
@@ -153,13 +160,10 @@ export async function reviewGrokFields({
   sampleMessages: string[];
   reviewFields: Record<string, { grok_component: string; example_values: string[] }>;
   inferenceClient: InferenceClient;
-  streamsClient: StreamsClient;
+  useOtelFieldNames: boolean;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
 }) {
-  const stream = await streamsClient.getStream(streamName);
-  const useOtelFieldNames = isOtelStream(stream);
-
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
     inferenceClient,

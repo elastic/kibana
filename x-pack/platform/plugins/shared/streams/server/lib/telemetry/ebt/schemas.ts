@@ -234,6 +234,53 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
         description: 'The name of the Stream',
       },
     },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Where the suggestion was triggered from: "ui" for the streams management UI, "agent" for an agent_builder tool invocation',
+      },
+    },
+    flow: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which engine produced the result (agent source only): "extract_fields" for the heuristic + reasoning agent, "nl_to_streamlang" for the direct LLM completion path, "refine_extracted_field" for the deterministic prefix-stripping refinement tool',
+        optional: true,
+      },
+    },
+    extract_fields_fallback_reason: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'When extract_fields was requested but produced no usable seed pattern, the reason it gave up (e.g. "no_candidate", "no_samples", "unsupported"). Set together with flow === "nl_to_streamlang" to identify fallback runs.',
+        optional: true,
+      },
+    },
+    source_field_conflict_detected: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Source-field conflict observability. True when the extract_fields heuristic picked a raw-text field that an existing pipeline step already touches (extracts from, writes to, or removes). Populated only when source === "agent" AND a real source field was picked. Used to size the conflict rate before committing to the upfront-gate UX.',
+        optional: true,
+      },
+    },
+    source_field_explicitly_set: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Source-field conflict observability. True when the agent passed `seed_source_field` to override the auto-picked source field. Proxies for "user redirected after a post-fact warning". Populated only when source === "agent" AND extract_fields was requested.',
+        optional: true,
+      },
+    },
+    source_field_picked: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Source-field conflict observability. The field the seed parser actually read from (auto-picked from PRIORITIZED_CONTENT_FIELDS or supplied via `seed_source_field`). Lets us measure which prioritized field wins most often.',
+        optional: true,
+      },
+    },
   };
 
 const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {

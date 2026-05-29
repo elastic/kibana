@@ -131,10 +131,17 @@ export const createMockToolContext = (): ToolHandlerContext => {
   const inferenceClient = {
     chatComplete: jest.fn(),
     output: jest.fn(),
+    bindTo: jest.fn(),
   };
 
   const modelProvider = agentBuilderMocks.createModelProvider();
-  modelProvider.getDefaultModel.mockResolvedValue({ inferenceClient } as never);
+  // Tools that go through the heuristic path (e.g. design_pipeline with
+  // extract_fields: true) read `model.connector.connectorId`; surface a
+  // stable fake here so those tests don't need to override the provider.
+  modelProvider.getDefaultModel.mockResolvedValue({
+    inferenceClient,
+    connector: { connectorId: 'test-connector' },
+  } as never);
   const toolHandlerContext = agentBuilderMocks.tools.createHandlerContext();
 
   toolHandlerContext.modelProvider = modelProvider;

@@ -13,56 +13,34 @@ import { Streams } from '@kbn/streams-schema';
 import type { StreamlangStep, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import { ACTION_METADATA_MAP, validateStreamlang } from '@kbn/streamlang';
-import { getFlattenedObject } from '@kbn/std';
-import { omit } from 'lodash';
 import type { StreamsClient } from '../../../lib/streams/client';
 import { getStreamConvention } from '../../utils/convention_utils';
 import { extractJson } from './nl_to_es_dsl';
-import { flattenAndTruncateDocs } from './query_documents';
+import {
+  annotateWithDiff,
+  buildSummary,
+  computeFieldChanges,
+  computeSuccessRate,
+  extractFieldsFromDocuments,
+  extractSimulationErrors,
+  injectIgnoreFailure,
+  resolveSamples,
+  stripIgnoreFailure,
+  type FieldChange,
+  type FieldInfo,
+  type NlToStreamlangResult,
+  type SamplesConfig,
+  type SimulationMode,
+} from './_pipeline_design_utils';
 
 const MAX_RETRIES = 3;
 const SIMULATION_SUCCESS_THRESHOLD = 50;
-const MAX_SAMPLE_VALUES_PER_FIELD = 3;
 const MAX_FIELDS_IN_PROMPT = 500;
-const SAMPLE_VALUE_TRUNCATE_LENGTH = 200;
-const DEFAULT_SAMPLE_SIZE = 100;
-
-export type SamplesConfig =
-  | { source: 'stream'; size?: number }
-  | {
-      source: 'inline';
-      documents: Array<Record<string, unknown>>;
-      status: 'processed' | 'unprocessed';
-    };
 
 export interface NlToStreamlangParams {
   streamName: string;
   instruction: string;
   samples?: SamplesConfig;
-}
-
-export interface FieldChange {
-  field: string;
-  change: 'created' | 'removed' | 'modified';
-  type?: string;
-  sample_values?: Array<string | number | boolean>;
-}
-
-export type SimulationMode = 'complete' | 'partial';
-
-export interface NlToStreamlangResult {
-  steps: StreamlangStep[];
-  summary: string;
-  field_changes: FieldChange[];
-  simulation: {
-    success_rate: number | null;
-    errors?: string[];
-    sample_count: number;
-    mode: SimulationMode;
-  };
-  warnings?: string[];
-  hints?: string[];
-  samples_info: { source: 'stream' | 'inline'; count: number };
 }
 
 export interface NlToStreamlangDeps {
@@ -158,36 +136,42 @@ export const nlToStreamlang = async (
       }
 
       if (dsl.steps.length === 0) {
-        return {
-          steps: [],
-          summary: '',
-          field_changes: [],
-          simulation: {
-            success_rate: null,
-            sample_count: documents.length,
-            mode: documentStatus === 'processed' ? 'partial' : 'complete',
+        return annotateWithDiff(
+          {
+            steps: [],
+            summary: '',
+            field_changes: [],
+            simulation: {
+              success_rate: null,
+              sample_count: documents.length,
+              mode: documentStatus === 'processed' ? 'partial' : 'complete',
+            },
+            ...(llmHints.length > 0 && { hints: llmHints }),
+            samples_info: samplesInfo,
           },
-          ...(llmHints.length > 0 && { hints: llmHints }),
-          samples_info: samplesInfo,
-        };
+          existingSteps
+        );
       }
 
       const cleanSteps = stripIgnoreFailure(dsl.steps);
 
       if (documents.length === 0) {
-        return {
-          steps: injectIgnoreFailure(cleanSteps),
-          summary: buildSummary(cleanSteps),
-          field_changes: [],
-          simulation: {
-            success_rate: null,
-            sample_count: 0,
-            mode: 'complete',
+        return annotateWithDiff(
+          {
+            steps: injectIgnoreFailure(cleanSteps, existingSteps),
+            summary: buildSummary(cleanSteps),
+            field_changes: [],
+            simulation: {
+              success_rate: null,
+              sample_count: 0,
+              mode: 'complete',
+            },
+            warnings: ['No sample documents available for simulation.'],
+            ...(llmHints.length > 0 && { hints: llmHints }),
+            samples_info: samplesInfo,
           },
-          warnings: ['No sample documents available for simulation.'],
-          ...(llmHints.length > 0 && { hints: llmHints }),
-          samples_info: samplesInfo,
-        };
+          existingSteps
+        );
       }
 
       const { stepsToSimulate, simMode, isNonAdditive } = determineSimulationStrategy(
@@ -256,20 +240,23 @@ export const nlToStreamlang = async (
         );
       }
 
-      return {
-        steps: injectIgnoreFailure(cleanSteps),
-        summary: buildSummary(cleanSteps),
-        field_changes: fieldChanges,
-        simulation: {
-          success_rate: successRate,
-          ...(simErrors.length > 0 && { errors: simErrors }),
-          sample_count: documents.length,
-          mode: simMode,
+      return annotateWithDiff(
+        {
+          steps: injectIgnoreFailure(cleanSteps, existingSteps),
+          summary: buildSummary(cleanSteps),
+          field_changes: fieldChanges,
+          simulation: {
+            success_rate: successRate,
+            ...(simErrors.length > 0 && { errors: simErrors }),
+            sample_count: documents.length,
+            mode: simMode,
+          },
+          ...(warnings.length > 0 && { warnings }),
+          ...(llmHints.length > 0 && { hints: llmHints }),
+          samples_info: samplesInfo,
         },
-        ...(warnings.length > 0 && { warnings }),
-        ...(llmHints.length > 0 && { hints: llmHints }),
-        samples_info: samplesInfo,
-      };
+        existingSteps
+      );
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
     }
@@ -288,73 +275,32 @@ export const nlToStreamlang = async (
           'Try a different approach or simplify the instruction.'
       );
     }
-    const bestSteps = injectIgnoreFailure(stripIgnoreFailure(dsl.steps));
-    return {
-      steps: bestSteps,
-      summary: buildSummary(bestSteps),
-      field_changes: fieldChanges,
-      simulation: {
-        success_rate: successRate,
-        ...(simErrors.length > 0 && { errors: simErrors }),
-        sample_count: documents.length,
-        mode: simMode,
+    const bestSteps = injectIgnoreFailure(stripIgnoreFailure(dsl.steps), existingSteps);
+    return annotateWithDiff(
+      {
+        steps: bestSteps,
+        summary: buildSummary(bestSteps),
+        field_changes: fieldChanges,
+        simulation: {
+          success_rate: successRate,
+          ...(simErrors.length > 0 && { errors: simErrors }),
+          sample_count: documents.length,
+          mode: simMode,
+        },
+        warnings: [
+          `Best result after ${MAX_RETRIES + 1} attempts: ${successRate}% success rate.`,
+          ...simErrors.slice(0, 3),
+        ],
+        ...(hints.length > 0 && { hints }),
+        samples_info: samplesInfo,
       },
-      warnings: [
-        `Best result after ${MAX_RETRIES + 1} attempts: ${successRate}% success rate.`,
-        ...simErrors.slice(0, 3),
-      ],
-      ...(hints.length > 0 && { hints }),
-      samples_info: samplesInfo,
-    };
+      existingSteps
+    );
   }
 
   throw new Error(
     `Failed to generate valid Streamlang after ${MAX_RETRIES + 1} attempts: ${lastError?.message}`
   );
-};
-
-// ---------------------------------------------------------------------------
-// Sample document resolution
-// ---------------------------------------------------------------------------
-
-const fetchSampleDocuments = async (
-  esClient: ElasticsearchClient,
-  streamName: string,
-  size: number
-): Promise<Array<Record<string, unknown>>> => {
-  const response = await esClient.search({
-    index: streamName,
-    sort: [{ '@timestamp': { order: 'desc' as const } }],
-    size,
-    ignore_unavailable: true,
-  });
-  return flattenAndTruncateDocs(response.hits.hits);
-};
-
-const resolveSamples = async (
-  samples: SamplesConfig | undefined,
-  streamName: string,
-  esClient: ElasticsearchClient
-): Promise<{
-  documents: Array<Record<string, unknown>>;
-  documentStatus: 'processed' | 'unprocessed';
-  samplesInfo: { source: 'stream' | 'inline'; count: number };
-}> => {
-  if (!samples || samples.source === 'stream') {
-    const size =
-      samples?.source === 'stream' ? samples.size ?? DEFAULT_SAMPLE_SIZE : DEFAULT_SAMPLE_SIZE;
-    const documents = await fetchSampleDocuments(esClient, streamName, size);
-    return {
-      documents,
-      documentStatus: 'processed',
-      samplesInfo: { source: 'stream', count: documents.length },
-    };
-  }
-  return {
-    documents: samples.documents,
-    documentStatus: samples.status,
-    samplesInfo: { source: 'inline', count: samples.documents.length },
-  };
 };
 
 // ---------------------------------------------------------------------------
@@ -365,7 +311,23 @@ const buildSystemPrompt = (convention: 'ecs' | 'otel', isWired: boolean): string
   const conventionGuide =
     convention === 'ecs'
       ? 'Use ECS field names: log.level, service.name, host.name, @timestamp, message'
-      : 'Use OTel field names: severity_text, resource.attributes.*, body.text, attributes.*';
+      : [
+          'Use OTel field names. Map common concepts to their canonical OTel paths:',
+          '  - IP addresses → attributes.source.ip / attributes.destination.ip',
+          '  - HTTP status → attributes.http.response.status_code',
+          '  - HTTP method → attributes.http.request.method_original',
+          '  - URL path → attributes.url.path',
+          '  - Response size → attributes.http.response.body.size',
+          '  - Service name → resource.attributes.service.name',
+          '  - Host name → resource.attributes.host.name',
+          '  - Process ID → resource.attributes.process.pid',
+          '  - User agent → resource.attributes.user_agent.original',
+          '  - User ID → attributes.user.id',
+          '  - Log level → severity_text',
+          '  - Raw message → body.text',
+          '  - Other custom fields → attributes.<domain>.<name>',
+          'When the user says "extract X", always use the canonical OTel path — do NOT use a bare name like attributes.ip or attributes.status_code.',
+        ].join('\n');
 
   const wiredConstraint = isWired
     ? '\n- This is a wired stream. Custom/extracted fields MUST go in attributes.*, body.structured.*, or resource.attributes.* — do NOT write to inherited ECS fields (log.level, message, etc.) directly.'
@@ -432,6 +394,7 @@ const buildSystemPrompt = (convention: 'ecs' | 'otel', isWired: boolean): string
     '- Use `where` for single-step inline conditions.',
     '- Use a `condition` block when multiple steps share the same condition.',
     '- Do NOT add `ignore_failure` to any processors. The system adds failure handling automatically after validation.',
+    '- When writing grok/dissect patterns, study the sample values in the Available fields list carefully. If `body.text` (or `message`) contains multiple log formats (e.g. nginx, syslog, app logs), write MULTIPLE grok patterns to match each format — do not write a single pattern that only matches one format.',
     `- Apply the change described to the current pipeline and return the COMPLETE result.${wiredConstraint}`,
   ].join('\n');
 };
@@ -498,198 +461,7 @@ const buildRetryMessage = (
 };
 
 // ---------------------------------------------------------------------------
-// Document-grounded field extraction
-// ---------------------------------------------------------------------------
-
-interface FieldInfo {
-  name: string;
-  type: string;
-  sample_values?: Array<string | number | boolean>;
-  distinct_count?: number;
-}
-
-const inferEsType = (jsTypes: Set<string>): string => {
-  if (jsTypes.has('number')) return 'long';
-  if (jsTypes.has('boolean')) return 'boolean';
-  return 'keyword';
-};
-
-const extractFieldsFromDocuments = (documents: Array<Record<string, unknown>>): FieldInfo[] => {
-  const fieldMap = new Map<
-    string,
-    { types: Set<string>; samples: Set<string | number | boolean>; totalCount: number }
-  >();
-
-  for (const doc of documents) {
-    const flat = getFlattenedObject(doc);
-    for (const [key, value] of Object.entries(flat)) {
-      if (!fieldMap.has(key)) {
-        fieldMap.set(key, { types: new Set(), samples: new Set(), totalCount: 0 });
-      }
-      const entry = fieldMap.get(key)!;
-      entry.totalCount++;
-      if (value != null) {
-        entry.types.add(typeof value);
-        if (entry.samples.size < MAX_SAMPLE_VALUES_PER_FIELD) {
-          if (
-            typeof value === 'string' ||
-            typeof value === 'number' ||
-            typeof value === 'boolean'
-          ) {
-            const truncated =
-              typeof value === 'string' && value.length > SAMPLE_VALUE_TRUNCATE_LENGTH
-                ? value.slice(0, SAMPLE_VALUE_TRUNCATE_LENGTH)
-                : value;
-            entry.samples.add(truncated);
-          }
-        }
-      }
-    }
-  }
-
-  return Array.from(fieldMap.entries()).map(([name, { types, samples }]) => ({
-    name,
-    type: inferEsType(types),
-    sample_values: Array.from(samples),
-    distinct_count: samples.size,
-  }));
-};
-
-// ---------------------------------------------------------------------------
-// Simulation strategy
-// ---------------------------------------------------------------------------
-
-const stepsAreEqual = (a: StreamlangStep, b: StreamlangStep): boolean => {
-  return JSON.stringify(a) === JSON.stringify(b);
-};
-
-const existingStepsPreserved = (
-  cleanExisting: StreamlangStep[],
-  newSteps: StreamlangStep[]
-): boolean => {
-  if (newSteps.length < cleanExisting.length) return false;
-  return cleanExisting.every((step, i) => stepsAreEqual(step, newSteps[i]));
-};
-
-const determineSimulationStrategy = (
-  existingSteps: StreamlangStep[],
-  newSteps: StreamlangStep[],
-  documentStatus: 'processed' | 'unprocessed'
-): { stepsToSimulate: StreamlangStep[]; simMode: SimulationMode; isNonAdditive: boolean } => {
-  if (documentStatus === 'unprocessed') {
-    return {
-      stepsToSimulate: newSteps,
-      simMode: 'complete',
-      isNonAdditive: false,
-    };
-  }
-
-  if (existingSteps.length === 0) {
-    return {
-      stepsToSimulate: newSteps,
-      simMode: 'complete',
-      isNonAdditive: false,
-    };
-  }
-
-  const cleanExisting = stripIgnoreFailure(existingSteps);
-
-  if (existingStepsPreserved(cleanExisting, newSteps)) {
-    const addedSteps = newSteps.slice(cleanExisting.length);
-    if (addedSteps.length > 0) {
-      return {
-        stepsToSimulate: addedSteps,
-        simMode: 'partial',
-        isNonAdditive: false,
-      };
-    }
-  }
-
-  const addedSteps = newSteps.slice(cleanExisting.length);
-  const isNonAdditive =
-    addedSteps.length !== newSteps.length || newSteps.length < cleanExisting.length;
-
-  return {
-    stepsToSimulate: addedSteps.length > 0 ? addedSteps : newSteps,
-    simMode: 'partial',
-    isNonAdditive,
-  };
-};
-
-// ---------------------------------------------------------------------------
-// Simulation result analysis
-// ---------------------------------------------------------------------------
-
-const computeFieldChanges = (
-  simResult: ProcessingSimulationResponse,
-  baseFields: FieldInfo[]
-): FieldChange[] => {
-  const baseFieldNames = new Set(baseFields.map((f) => f.name));
-  const changes: FieldChange[] = [];
-
-  for (const detected of simResult.detected_fields) {
-    if (!baseFieldNames.has(detected.name)) {
-      const sampleValues = extractSampleValues(simResult, detected.name);
-      changes.push({
-        field: detected.name,
-        change: 'created',
-        type: detected.esType,
-        ...(sampleValues.length > 0 && { sample_values: sampleValues }),
-      });
-    }
-  }
-
-  return changes;
-};
-
-const extractSampleValues = (
-  simResult: ProcessingSimulationResponse,
-  fieldName: string
-): Array<string | number | boolean> => {
-  const values: Array<string | number | boolean> = [];
-  const seen = new Set<string | number | boolean>();
-
-  for (const docReport of simResult.documents) {
-    const doc = docReport.value;
-    if (!doc || typeof doc !== 'object') continue;
-    const val = (doc as Record<string, unknown>)[fieldName];
-    if (
-      (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') &&
-      !seen.has(val)
-    ) {
-      values.push(val);
-      seen.add(val);
-      if (values.length >= 5) break;
-    }
-  }
-
-  return values;
-};
-
-const computeSuccessRate = (simResult: ProcessingSimulationResponse): number => {
-  const metrics = simResult.documents_metrics;
-  if (!metrics) return 100;
-  const failedRate = metrics.failed_rate ?? 0;
-  const partiallyParsedRate = metrics.partially_parsed_rate ?? 0;
-  return Math.round((1 - failedRate - partiallyParsedRate) * 100);
-};
-
-const extractSimulationErrors = (simResult: ProcessingSimulationResponse): string[] => {
-  const errors = new Set<string>();
-  for (const docReport of simResult.documents) {
-    if (docReport.status === 'failed' || docReport.status === 'partially_parsed') {
-      for (const simError of docReport.errors) {
-        if (simError.message) {
-          errors.add(simError.message);
-        }
-      }
-    }
-  }
-  return Array.from(errors).slice(0, 5);
-};
-
-// ---------------------------------------------------------------------------
-// Streamlang step manipulation utilities
+// LLM-output normalisation
 // ---------------------------------------------------------------------------
 
 /**
@@ -774,36 +546,65 @@ const normalizeConditionBlocks = (obj: { steps: unknown[] }): { steps: unknown[]
   };
 };
 
-const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
-  return steps.map((step) => {
-    if (isConditionBlock(step)) {
-      return {
-        ...step,
-        condition: {
-          ...step.condition,
-          steps: stripIgnoreFailure(step.condition.steps),
-          ...(step.condition.else && { else: stripIgnoreFailure(step.condition.else) }),
-        },
-      };
-    }
-    return omit(step, 'ignore_failure') as StreamlangStep;
-  });
+// ---------------------------------------------------------------------------
+// Simulation strategy
+// ---------------------------------------------------------------------------
+
+const stepsAreEqual = (a: StreamlangStep, b: StreamlangStep): boolean => {
+  return JSON.stringify(a) === JSON.stringify(b);
 };
 
-const injectIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
-  return steps.map((step) => {
-    if (isConditionBlock(step)) {
+const existingStepsPreserved = (
+  cleanExisting: StreamlangStep[],
+  newSteps: StreamlangStep[]
+): boolean => {
+  if (newSteps.length < cleanExisting.length) return false;
+  return cleanExisting.every((step, i) => stepsAreEqual(step, newSteps[i]));
+};
+
+const determineSimulationStrategy = (
+  existingSteps: StreamlangStep[],
+  newSteps: StreamlangStep[],
+  documentStatus: 'processed' | 'unprocessed'
+): { stepsToSimulate: StreamlangStep[]; simMode: SimulationMode; isNonAdditive: boolean } => {
+  if (documentStatus === 'unprocessed') {
+    return {
+      stepsToSimulate: newSteps,
+      simMode: 'complete',
+      isNonAdditive: false,
+    };
+  }
+
+  if (existingSteps.length === 0) {
+    return {
+      stepsToSimulate: newSteps,
+      simMode: 'complete',
+      isNonAdditive: false,
+    };
+  }
+
+  const cleanExisting = stripIgnoreFailure(existingSteps);
+
+  if (existingStepsPreserved(cleanExisting, newSteps)) {
+    const addedSteps = newSteps.slice(cleanExisting.length);
+    if (addedSteps.length > 0) {
       return {
-        ...step,
-        condition: {
-          ...step.condition,
-          steps: injectIgnoreFailure(step.condition.steps),
-          ...(step.condition.else && { else: injectIgnoreFailure(step.condition.else) }),
-        },
+        stepsToSimulate: addedSteps,
+        simMode: 'partial',
+        isNonAdditive: false,
       };
     }
-    return { ...step, ignore_failure: true } as StreamlangStep;
-  });
+  }
+
+  const addedSteps = newSteps.slice(cleanExisting.length);
+  const isNonAdditive =
+    addedSteps.length !== newSteps.length || newSteps.length < cleanExisting.length;
+
+  return {
+    stepsToSimulate: addedSteps.length > 0 ? addedSteps : newSteps,
+    simMode: 'partial',
+    isNonAdditive,
+  };
 };
 
 const assignTempIds = (steps: StreamlangStep[]): StreamlangStep[] => {
@@ -829,19 +630,4 @@ const assignTempIds = (steps: StreamlangStep[]): StreamlangStep[] => {
     });
   };
   return assign(steps);
-};
-
-const buildSummary = (steps: StreamlangStep[]): string => {
-  const parts: string[] = [];
-  for (const step of steps) {
-    if ('action' in step) {
-      const action = step.action as string;
-      const from = 'from' in step ? (step as unknown as { from: string }).from : undefined;
-      parts.push(from ? `${action}: ${from}` : action);
-    } else if ('condition' in step) {
-      const innerCount = step.condition.steps.length;
-      parts.push(`conditional (${innerCount} inner step${innerCount !== 1 ? 's' : ''})`);
-    }
-  }
-  return parts.join(', ');
 };

@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import type { IPatternExtractionService } from '../../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsServer } from '../../types';
 import {
   createFeatureKnowledgeIndicatorTool,
@@ -23,6 +24,8 @@ import { createDiagnoseStreamTool } from './read/diagnose_stream';
 import { createQueryDocumentsTool } from './read/query_documents';
 import { createDesignPipelineTool } from './read/design_pipeline';
 import { createListIlmPoliciesTool } from './read/list_ilm_policies';
+import { createRefineExtractedFieldTool } from './read/refine_extracted_field';
+import { createSuggestPartitionsTool } from './read/suggest_partitions';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
@@ -40,6 +43,8 @@ export {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
   STREAMS_LIST_ILM_POLICIES_TOOL_ID,
+  STREAMS_REFINE_EXTRACTED_FIELD_TOOL_ID,
+  STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
   STREAMS_UPDATE_STREAM_TOOL_ID,
   STREAMS_CREATE_PARTITION_TOOL_ID,
   STREAMS_DELETE_STREAM_TOOL_ID,
@@ -57,12 +62,14 @@ export function registerAgentBuilderTools({
   server,
   logger,
   telemetry,
+  patternExtractionService,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  patternExtractionService: IPatternExtractionService;
 }): void {
   if (!agentBuilder) {
     return;
@@ -79,8 +86,24 @@ export function registerAgentBuilderTools({
       logger: logger.get('diagnose_stream'),
     }),
     createQueryDocumentsTool({ getScopedClients }),
-    createDesignPipelineTool({ getScopedClients }),
+    createDesignPipelineTool({
+      getScopedClients,
+      patternExtractionService,
+      server,
+      logger: logger.get('design_pipeline'),
+      telemetry,
+    }),
     createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
+    createRefineExtractedFieldTool({
+      getScopedClients,
+      logger: logger.get('refine_extracted_field'),
+      telemetry,
+    }),
+    createSuggestPartitionsTool({
+      getScopedClients,
+      server,
+      logger: logger.get('suggest_partitions'),
+    }),
 
     // Write tools
     createUpdateStreamTool({ getScopedClients, writeQueue }),
