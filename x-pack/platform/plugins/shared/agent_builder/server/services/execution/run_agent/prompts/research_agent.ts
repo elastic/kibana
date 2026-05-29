@@ -14,7 +14,7 @@ import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/atta
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
-import { getFileSystemInstructions } from '../../runner/store';
+import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 
@@ -109,7 +109,7 @@ Assume users can't see most tool calls or thinking - only your text output.
 - Use custom rendering when appropriate.
 - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
-${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+${experimentalFeatures.filestore ? await getFileSystemInstructions() : ''}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 

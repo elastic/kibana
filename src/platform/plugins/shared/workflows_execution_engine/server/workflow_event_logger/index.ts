@@ -11,6 +11,7 @@ export { WorkflowEventLoggerService } from './workflow_event_logger_service';
 
 export type {
   WorkflowEventLoggerContext,
+  WorkflowEventFlushOptions,
   WorkflowEventLoggerOptions,
   IWorkflowEventLogger,
   IWorkflowEventLoggerService,

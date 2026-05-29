@@ -8,6 +8,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
+import { NightshiftPage } from '../pages/nightshift/nightshift';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -28,6 +29,7 @@ import {
   EDIT_RULE_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
+  NIGHTSHIFT_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
@@ -116,6 +118,13 @@ const completeRoutes: Record<RoutePath, RouteDefinition> = {
 };
 
 const routes: Record<RoutePath, RouteDefinition> = {
+  [NIGHTSHIFT_PATH]: {
+    handler: () => {
+      return <NightshiftPage />;
+    },
+    params: {},
+    exact: true,
+  },
   [LANDING_PATH]: {
     handler: () => {
       return (

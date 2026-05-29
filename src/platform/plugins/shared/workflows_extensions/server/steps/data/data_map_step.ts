@@ -9,6 +9,8 @@
 
 import {
   dataMapStepCommonDefinition,
+  DEFAULT_INDEX_BINDING,
+  DEFAULT_ITEM_BINDING,
   type FieldsNode,
   MAP_DIRECTIVE,
   type MapDirectiveValue,
@@ -106,8 +108,8 @@ function processFields(
                   ...options,
                   bindings: {
                     ...bindings,
-                    [mapDir.item ?? 'item']: element,
-                    [mapDir.index ?? 'index']: idx,
+                    [mapDir.item ?? DEFAULT_ITEM_BINDING]: element,
+                    [mapDir.index ?? DEFAULT_INDEX_BINDING]: idx,
                   },
                   depth: depth + 1,
                 })
@@ -163,7 +165,10 @@ export const dataMapStepDefinition = createServerStepDefinition({
       const mappedItems = itemsArray.map((currentItem, currentIndex) =>
         processFields(rawFields, {
           renderTemplate: (value, ctx) => context.contextManager.renderInputTemplate(value, ctx),
-          bindings: { item: currentItem, index: currentIndex },
+          bindings: {
+            [DEFAULT_ITEM_BINDING]: currentItem,
+            [DEFAULT_INDEX_BINDING]: currentIndex,
+          },
         })
       );
 

@@ -12,7 +12,7 @@ import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,7 +20,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
-  initializeUnsavedChanges,
+  initializeStateApi,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -62,7 +62,7 @@ export const getSearchEmbeddableFactory = ({
 }) => {
   const { save, hasLibraryItemWithTitle } = discoverServices.savedSearch;
 
-  const savedSearchEmbeddableFactory: EmbeddableFactory<
+  const savedSearchEmbeddableFactory: EmbeddablePublicDefinition<
     SearchEmbeddablePanelApiState,
     SearchEmbeddableApi
   > = {
@@ -155,7 +155,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
+      const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
         defaultState,
@@ -186,19 +186,18 @@ export const getSearchEmbeddableFactory = ({
             nonPersistedDisplayOptions: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            const lastSavedRuntimeState = await deserializeState({
-              serializedState: lastSaved,
-              discoverServices,
-            });
+        applySerializedState: async (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
 
-            selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
-          }
+          const nextRuntimeState = await deserializeState({
+            serializedState: nextState,
+            discoverServices,
+          });
+
+          selectedTabId$.next(nextRuntimeState.selectedTabId);
+          await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
         },
       });
@@ -216,7 +215,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
@@ -270,7 +269,6 @@ export const getSearchEmbeddableFactory = ({
         hasLibraryItemWithTitle,
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
-        serializeState: () => serialize(savedObjectId$.getValue()),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];

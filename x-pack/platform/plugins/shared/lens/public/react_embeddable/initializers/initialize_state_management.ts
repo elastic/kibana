@@ -15,7 +15,7 @@ import {
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   IntegrationCallbacks,
   LensInternalApi,
@@ -74,7 +74,12 @@ export function initializeStateManagement(
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
     },
-    anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
+    anyStateChange$: merge(
+      internalApi.attributes$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getComparators: () => {
       return {
         attributes:

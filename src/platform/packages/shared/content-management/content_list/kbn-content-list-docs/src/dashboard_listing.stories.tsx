@@ -32,7 +32,7 @@ import {
   createMockStoryFindItems,
   createMockTagFacetProvider,
   createMockUserProfileFacetProvider,
-  useInspectFlyout,
+  useContentEditorFlyout,
 } from './stories_helpers';
 
 const { Section } = KibanaContentListPage;
@@ -54,11 +54,9 @@ const labels = {
 } as const;
 
 const useDashboardProviderProps = ({
-  onInspect,
-  includeInspect = false,
+  openContentEditor,
 }: {
-  onInspect?: (item: ContentListItem) => void;
-  includeInspect?: boolean;
+  openContentEditor?: (item: ContentListItem) => void;
 }) => {
   const favoritesClient = useMemo(
     () => createMockFavoritesClient(['dashboard-001', 'dashboard-003', 'dashboard-007']),
@@ -89,8 +87,10 @@ const useDashboardProviderProps = ({
       tags: createMockTagFacetProvider(MOCK_DASHBOARDS),
       starred: true as const,
       userProfiles: createMockUserProfileFacetProvider(MOCK_DASHBOARDS),
+      // Original story leaves this undefined, which makes `<Action.ContentEditor />` self-skip.
+      ...(openContentEditor ? { contentEditor: { open: openContentEditor } } : {}),
     }),
-    []
+    [openContentEditor]
   );
 
   const item = useMemo(
@@ -107,10 +107,9 @@ const useDashboardProviderProps = ({
             await wait(250);
           },
         },
-        ...(includeInspect && onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
     }),
-    [includeInspect, onInspect]
+    []
   );
 
   return { dataSource, favoritesClient, features, item };
@@ -166,10 +165,9 @@ const OriginalStory = () => {
 };
 
 const ProposalStory = () => {
-  const { onInspect, flyout } = useInspectFlyout();
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
   const { favoritesClient, ...providerProps } = useDashboardProviderProps({
-    onInspect,
-    includeInspect: true,
+    openContentEditor,
   });
 
   const pageElement = useMemo(
@@ -199,7 +197,7 @@ const ProposalStory = () => {
               <Column.CreatedBy />
               <Column.UpdatedAt />
               <Column.Actions>
-                <Action.Inspect />
+                <Action.ContentEditor />
                 <Action.Edit />
                 <Action.Delete />
               </Column.Actions>

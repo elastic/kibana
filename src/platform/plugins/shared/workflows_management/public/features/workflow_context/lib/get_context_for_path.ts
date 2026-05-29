@@ -15,7 +15,10 @@ import { isAtomic, isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
 import type { z } from '@kbn/zod/v4';
 import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
-import { getDataMapContextSchema } from './get_data_map_context_schema';
+import {
+  getDataMapContextSchema,
+  getDataMapNestedContextSchema,
+} from './get_data_map_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
@@ -92,8 +95,22 @@ export function getContextSchemaForPath(
   }
 
   schema = getContextSchemaForStep(schema, workflowGraph, nearestStep.name);
+  schema = extendWithPathSpecificContext(schema, nearestStep, path.slice(nearestStepPath.length));
 
   return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+}
+
+export function extendWithPathSpecificContext(
+  schema: typeof DynamicStepContextSchema,
+  nearestStep: unknown,
+  stepRelativePath: Array<string | number>
+): typeof DynamicStepContextSchema {
+  const nestedDataMapContext = getDataMapNestedContextSchema(schema, nearestStep, stepRelativePath);
+  if (Object.keys(nestedDataMapContext).length === 0) {
+    return schema;
+  }
+
+  return schema.extend(nestedDataMapContext) as typeof DynamicStepContextSchema;
 }
 
 function maybeExtendWithTemplateLocals(
