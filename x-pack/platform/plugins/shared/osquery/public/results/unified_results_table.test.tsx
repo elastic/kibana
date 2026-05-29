@@ -74,6 +74,18 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+const mockSetFilters = jest.fn();
+const mockClearFilters = jest.fn();
+
+jest.mock('./export_filters_context', () => ({
+  useExportFiltersContext: () => ({
+    getFilters: jest.fn(),
+    setFilters: mockSetFilters,
+    clearFilters: mockClearFilters,
+    subscribe: jest.fn(() => () => undefined),
+  }),
+}));
+
 let capturedOnInitialStateChange: ((state: Partial<{ isCompareActive: boolean }>) => void) | null =
   null;
 
@@ -290,6 +302,79 @@ describe('UnifiedResultsTable', () => {
       render(<UnifiedResultsTable {...defaultProps} />);
 
       expect(screen.getAllByTestId('osqueryResultsPanel').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('export filters publishing', () => {
+    // `useActionResults` seeds React Query with
+    // `initialData.aggregations.totalRowCount = 0`, so the publisher must rely
+    // on `isFetched && !isError` to distinguish "loaded, zero rows" from the
+    // initial-loading and error states. See the comment in
+    // `unified_results_table.tsx` next to `unfilteredTotal`.
+    const initialDataAggregations = { totalResponded: 0, totalRowCount: 0 };
+
+    it('keeps total undefined while the initial fetch is still in flight', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: initialDataAggregations },
+        isFetched: false,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: undefined })
+      );
+    });
+
+    it('keeps total undefined when the initial fetch errored, even though `isFetched` is true', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: initialDataAggregations },
+        isFetched: true,
+        isError: true,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: undefined })
+      );
+    });
+
+    it('publishes total: 0 only when the fetch confirms zero rows', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: { totalResponded: 1, totalRowCount: 0 } },
+        isFetched: true,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: 0 })
+      );
+    });
+
+    it('publishes the actual row count when the fetch succeeds with results', () => {
+      setupMocks({ rows: [], total: 7 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: { totalResponded: 1, totalRowCount: 7 } },
+        isFetched: true,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: 7 })
+      );
     });
   });
 });
