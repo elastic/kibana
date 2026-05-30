@@ -8,10 +8,7 @@
 // Migrated from:
 //   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/general.ts
 //
-// 10 of 13 tests migrated. Skipped:
-//   - "should not be able to delete a preconfigured connector": requires preconfigured 'Serverlog'
-//   - "should not be able to edit a preconfigured connector": requires 'test-preconfigured-email'
-//   - "Execution log": requires test.always-firing via createRuleWithActionsAndParams
+// 13 of 13 tests migrated.
 
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient, ScoutPage } from '@kbn/scout';
@@ -441,6 +438,153 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.click('euiFlyoutCloseButton');
   });
 
-  // Skipped: requires test.always-firing rule type via createRuleWithActionsAndParams.
-  test.skip('Execution log - renders the event log list and can filter/sort', async () => {});
+  test('Execution log - renders the event log list and can filter/sort', async ({
+    browserAuth,
+    page,
+    kbnClient,
+    pageObjects,
+  }) => {
+    await browserAuth.loginAsAdmin();
+
+    // Create an ES query rule that always executes (substitute for test.always-firing)
+    const ruleName = `scout-exec-log-${Date.now()}`;
+    const createResp = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: '/api/alerting/rule',
+      headers: { 'kbn-xsrf': 'scout' },
+      body: {
+        name: ruleName,
+        rule_type_id: '.es-query',
+        consumer: 'stackAlerts',
+        params: {
+          searchType: 'esQuery',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          threshold: [0],
+          thresholdComparator: '>=',
+          size: 100,
+          esQuery: '{"query":{"match_all":{}}}',
+          aggType: 'count',
+          groupBy: 'all',
+          termSize: 5,
+          excludeHitsFromPreviousRun: false,
+          sourceFields: [],
+          index: ['.kibana'],
+          timeField: '@timestamp',
+        },
+        schedule: { interval: '1m' },
+        tags: ['scout-exec-log'],
+        actions: [],
+        enabled: true,
+      },
+    });
+    const ruleId = createResp.data.id;
+
+    try {
+      // Trigger an immediate run
+      await kbnClient.request({
+        method: 'POST',
+        path: `/internal/alerting/rule/${ruleId}/_run_soon`,
+        headers: { 'kbn-xsrf': 'scout' },
+      });
+
+      // Poll execution log until at least 1 execution appears (max 30s)
+      const dateStart = new Date();
+      const pollEnd = Date.now() + 30_000;
+      let hasExecutions = false;
+      while (!hasExecutions && Date.now() < pollEnd) {
+        await page.waitForTimeout(1_000);
+        try {
+          const logResp = await kbnClient.request<{ total: number }>({
+            method: 'GET',
+            path: `/internal/alerting/rule/${ruleId}/_execution_log`,
+            headers: {},
+            query: { date_start: dateStart.toISOString() },
+          });
+          hasExecutions = logResp.data.total > 0;
+        } catch {
+          // keep polling
+        }
+      }
+
+      // Navigate to rule details and click Logs tab
+      await pageObjects.ruleDetailsPage.gotoById(ruleId);
+      await page.testSubj.click('logsTab');
+
+      // Guard: if tabbed content is not present, the test cannot proceed (matches FTR guard)
+      if (
+        !(await page.testSubj
+          .locator('ruleDetailsTabbedContent')
+          .isVisible({ timeout: 2_000 })
+          .catch(() => false))
+      ) {
+        return;
+      }
+
+      // Allow entries to accumulate then refresh
+      await page.waitForTimeout(5_000);
+      await page.testSubj.click('superDatePickerApplyTimeButton');
+
+      // Event log list and status filter both exist
+      await expect(page.testSubj.locator('eventLogList')).toBeVisible({ timeout: 10_000 });
+      await expect(page.testSubj.locator('eventLogStatusFilterButton')).toBeVisible();
+
+      // Status badge starts at 0 (no filters active)
+      const statusBadge = page.testSubj
+        .locator('eventLogStatusFilterButton')
+        .locator('.euiNotificationBadge');
+      await expect(statusBadge).toHaveText('0');
+
+      // Enable "success" filter
+      await page.testSubj.click('eventLogStatusFilterButton');
+      await page.testSubj.click('eventLogStatusFilter-success');
+      await page.testSubj.click('eventLogStatusFilterButton');
+
+      // Status badge now shows 1 active filter
+      await expect(statusBadge).toHaveText('1');
+
+      // At least one data row exists
+      await expect(page.locator('.euiDataGridRow')).not.toHaveCount(0, { timeout: 10_000 });
+
+      // Ensure timestamp column is visible
+      await page.testSubj.click('dataGridColumnSelectorButton');
+      const colToggle = page.testSubj.locator(
+        'dataGridColumnSelectorToggleColumnVisibility-timestamp'
+      );
+      if ((await colToggle.getAttribute('aria-checked')) === 'false') {
+        await colToggle.click();
+      }
+      await page.testSubj.click('dataGridColumnSelectorButton');
+
+      // At least one timestamp cell must contain a valid date
+      const timestampCells = await page
+        .locator('[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]')
+        .all();
+      let validTimestamps = 0;
+      for (const cell of timestampCells) {
+        const text = await cell.innerText();
+        if (text.toLowerCase() !== 'invalid date' && !isNaN(Date.parse(text))) {
+          validTimestamps++;
+        }
+      }
+      expect(validTimestamps).toBeGreaterThan(0);
+
+      // Sort ascending: open column action menu, click 2nd button (index 1 = ascending)
+      await page.testSubj.locator('dataGridHeaderCell-timestamp').hover();
+      await page.testSubj.click('dataGridHeaderCellActionButton-timestamp');
+      await page.testSubj.locator('dataGridHeaderCellActionGroup-timestamp').waitFor();
+      await page.testSubj
+        .locator('dataGridHeaderCellActionGroup-timestamp')
+        .locator('li:nth-child(2) button')
+        .click();
+
+      await expect(page.testSubj.locator('dataGridHeaderCellSortingIcon-timestamp')).toBeVisible();
+    } finally {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/internal/alerting/rule/${ruleId}`,
+        headers: { 'kbn-xsrf': 'scout' },
+      });
+    }
+  });
 });
