@@ -10,8 +10,8 @@
 //
 // Rule type substitutions:
 //   test.noop          → .es-query (built-in, always available in Scout stateful/classic)
-//   test.failing       → NOT registered in Scout — 3 tests skipped
-//   test.always-firing → NOT registered in Scout — 2 tests skipped
+//   test.failing       → .es-query with invalid query type (fails at ES execution time)
+//   test.always-firing → .es-query with threshold >= 0 (always fires against .kibana)
 
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
@@ -65,6 +65,90 @@ const deleteConnector = async (kbnClient: KbnClient, connectorId: string) => {
     path: `/api/actions/connector/${connectorId}`,
     headers: { 'kbn-xsrf': 'scout' },
   });
+};
+
+// Unknown query type — ES rejects it at search time, causing rule execution to fail
+const FAILING_ES_QUERY = JSON.stringify({ query: { not_a_real_query_type: {} } });
+
+const runRuleSoon = async (kbnClient: KbnClient, ruleId: string) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/internal/alerting/rule/${ruleId}/_run_soon`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+};
+
+const getAlertSummary = async (kbnClient: KbnClient, ruleId: string) => {
+  const resp = await kbnClient.request<{ alerts: Record<string, { tracked: boolean }> }>({
+    method: 'GET',
+    path: `/internal/alerting/rule/${ruleId}/_alert_summary`,
+    headers: {},
+  });
+  return resp.data;
+};
+
+const createFailingRule = async (kbnClient: KbnClient, name: string, ruleTags: string[]) => {
+  const resp = await kbnClient.request<{ id: string; name: string }>({
+    method: 'POST',
+    path: '/api/alerting/rule',
+    headers: { 'kbn-xsrf': 'scout' },
+    body: {
+      name,
+      rule_type_id: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      actions: [],
+      tags: ruleTags,
+      params: {
+        searchType: 'esQuery',
+        esQuery: FAILING_ES_QUERY,
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [0],
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        index: ['.kibana'],
+        timeField: 'updated_at',
+        aggType: 'count',
+        groupBy: 'all',
+        termSize: 5,
+      },
+    },
+  });
+  return resp.data;
+};
+
+const createAlwaysFiringRule = async (kbnClient: KbnClient, name: string) => {
+  const resp = await kbnClient.request<{ id: string; name: string }>({
+    method: 'POST',
+    path: '/api/alerting/rule',
+    headers: { 'kbn-xsrf': 'scout' },
+    body: {
+      name,
+      rule_type_id: '.es-query',
+      consumer: 'alerts',
+      enabled: true,
+      schedule: { interval: '24h' },
+      actions: [],
+      tags: [],
+      params: {
+        searchType: 'esQuery',
+        esQuery: JSON.stringify({ query: { match_all: {} } }),
+        size: 100,
+        thresholdComparator: '>=',
+        threshold: [0],
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        index: ['.kibana'],
+        timeField: 'updated_at',
+        aggType: 'count',
+        groupBy: 'all',
+        termSize: 5,
+      },
+    },
+  });
+  return resp.data;
 };
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
@@ -388,14 +472,137 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(getTableRows(page)).toHaveCount(0);
   });
 
-  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
-  test.skip('should filter alerts by the status', async () => {});
+  test('should filter alerts by the status', async ({ page, apiServices, kbnClient }) => {
+    const tag = `outcome-filter-${Date.now()}`;
 
-  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
-  test.skip('should display total alerts by status and error banner only when exists alerts with status error', async () => {});
+    const normalRule = await apiServices.alerting.rules.create({
+      ...makeEsQueryRule('normal'),
+      tags: [tag],
+    });
+    createdRuleIds.push(normalRule.data.id);
 
-  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
-  test.skip('Expand error in rules table when there is rule with an error associated', async () => {});
+    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
+    createdRuleIds.push(failRule.id);
+
+    await Promise.all([
+      runRuleSoon(kbnClient, normalRule.data.id),
+      runRuleSoon(kbnClient, failRule.id),
+    ]);
+
+    // Wait until the failing rule shows 'Failed' last run outcome
+    await expect(async () => {
+      await refreshRulesList(page);
+      await searchRules(page, tag);
+      await page.testSubj.click('ruleLastRunOutcomeFilterButton');
+      await page.testSubj.click('ruleLastRunOutcomefailedFilterOption');
+      await page
+        .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+        .waitFor({ timeout: 5_000 });
+      await expect(getTableRows(page)).toHaveCount(1, { timeout: 2_000 });
+    }).toPass({ timeout: 60_000, intervals: [3_000] });
+
+    await expect(getTableRows(page)).toHaveCount(1);
+  });
+
+  test('should display total alerts by status and error banner only when exists alerts with status error', async ({
+    page,
+    apiServices,
+    kbnClient,
+  }) => {
+    const tag = `error-banner-${Date.now()}`;
+
+    const normalRule = await apiServices.alerting.rules.create({
+      ...makeEsQueryRule('normal'),
+      tags: [tag],
+    });
+    createdRuleIds.push(normalRule.data.id);
+    await runRuleSoon(kbnClient, normalRule.data.id);
+
+    // Wait for normal rule to succeed
+    await expect(async () => {
+      await refreshRulesList(page);
+      await searchRules(page, tag);
+      await expect(page.testSubj.locator('totalSucceededRulesCount')).toContainText(
+        'Succeeded: 1',
+        {
+          timeout: 3_000,
+        }
+      );
+    }).toPass({ timeout: 60_000, intervals: [3_000] });
+
+    // No error banner before any failures
+    await expect(page.testSubj.locator('rulesErrorBanner')).toHaveCount(0);
+
+    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
+    createdRuleIds.push(failRule.id);
+    await runRuleSoon(kbnClient, failRule.id);
+
+    // Wait until error banner and status counts update
+    await expect(async () => {
+      await refreshRulesList(page);
+      await searchRules(page, tag);
+      await expect(page.testSubj.locator('rulesErrorBanner')).toBeVisible({ timeout: 3_000 });
+      await expect(page.testSubj.locator('rulesErrorBanner')).toContainText(
+        'Error found in 1 rule. Show rule with error',
+        { timeout: 3_000 }
+      );
+      await expect(page.testSubj.locator('totalRulesCount')).toContainText('2 rules', {
+        timeout: 3_000,
+      });
+      await expect(page.testSubj.locator('totalSucceededRulesCount')).toContainText(
+        'Succeeded: 1',
+        {
+          timeout: 3_000,
+        }
+      );
+      await expect(page.testSubj.locator('totalFailedRulesCount')).toContainText('Failed: 1', {
+        timeout: 3_000,
+      });
+      await expect(page.testSubj.locator('totalWarningRulesCount')).toContainText('Warning: 0', {
+        timeout: 3_000,
+      });
+    }).toPass({ timeout: 60_000, intervals: [3_000] });
+  });
+
+  test('Expand error in rules table when there is rule with an error associated', async ({
+    page,
+    apiServices,
+    kbnClient,
+  }) => {
+    const tag = `expand-error-${Date.now()}`;
+
+    const normalRule = await apiServices.alerting.rules.create({
+      ...makeEsQueryRule('normal'),
+      tags: [tag],
+    });
+    createdRuleIds.push(normalRule.data.id);
+    await runRuleSoon(kbnClient, normalRule.data.id);
+
+    // Wait for normal rule to execute — no expand error link yet
+    await expect(async () => {
+      await refreshRulesList(page);
+      await searchRules(page, tag);
+      await expect(getTableRows(page)).toHaveCount(1, { timeout: 3_000 });
+      await expect(page.testSubj.locator('expandRulesError')).toHaveCount(0);
+    }).toPass({ timeout: 60_000, intervals: [3_000] });
+
+    const failRule = await createFailingRule(kbnClient, `fail-${Date.now()}`, [tag]);
+    createdRuleIds.push(failRule.id);
+    await runRuleSoon(kbnClient, failRule.id);
+
+    // Wait until the expand error link appears
+    await expect(async () => {
+      await refreshRulesList(page);
+      await searchRules(page, tag);
+      await expect(page.testSubj.locator('expandRulesError')).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 60_000, intervals: [3_000] });
+
+    // Expand and verify error details
+    await page.testSubj.click('expandRulesError');
+    const expandedRow = page.locator('.euiTableRow-isExpandedRow');
+    await expect(expandedRow).toBeVisible();
+    await expect(expandedRow).toContainText('Error from last run');
+  });
 
   test('should filter alerts by the alert type', async ({ page, apiServices }) => {
     const uniqueTag = `type-filter-${Date.now()}`;
@@ -640,14 +847,84 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(rule.data.id);
 
     await refreshRulesList(page);
-    await expect(page.testSubj.locator('selectActionButton')).not.toBeDisabled();
+    await expect(page.testSubj.locator('selectActionButton')).toBeEnabled();
   });
 
-  // Skipped: requires test.always-firing to generate active alert instances.
-  test.skip('should untrack disable rule if untrack switch is true', async () => {});
+  test('should untrack disable rule if untrack switch is true', async ({ page, kbnClient }) => {
+    const rule = await createAlwaysFiringRule(kbnClient, `untrack-true-${Date.now()}`);
+    createdRuleIds.push(rule.id);
+    await runRuleSoon(kbnClient, rule.id);
 
-  // Skipped: requires test.always-firing to generate active alert instances.
-  test.skip('should not untrack disable rule if untrack switch if false', async () => {});
+    // Wait for the rule to fire and create a tracked alert instance
+    await expect(async () => {
+      const summary = await getAlertSummary(kbnClient, rule.id);
+      if (!summary.alerts['query matched']?.tracked) {
+        throw new Error('Alert instance not yet tracked');
+      }
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.name);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('disableButton');
+
+    // Untrack modal appears — toggle switch to enable untracking
+    await expect(page.testSubj.locator('untrackAlertsModal')).toBeVisible({ timeout: 5_000 });
+    await page.testSubj.click('untrackAlertsModalSwitch');
+    await page.testSubj
+      .locator('untrackAlertsModal')
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click();
+
+    // Alert instance should now be untracked
+    await expect(async () => {
+      const summary = await getAlertSummary(kbnClient, rule.id);
+      const instance = summary.alerts['query matched'];
+      if (!instance || instance.tracked !== false) {
+        throw new Error('Alert instance still tracked');
+      }
+    }).toPass({ timeout: 30_000, intervals: [2_000] });
+  });
+
+  test('should not untrack disable rule if untrack switch if false', async ({
+    page,
+    kbnClient,
+  }) => {
+    const rule = await createAlwaysFiringRule(kbnClient, `untrack-false-${Date.now()}`);
+    createdRuleIds.push(rule.id);
+    await runRuleSoon(kbnClient, rule.id);
+
+    // Wait for the rule to fire and create a tracked alert instance
+    await expect(async () => {
+      const summary = await getAlertSummary(kbnClient, rule.id);
+      if (!summary.alerts['query matched']?.tracked) {
+        throw new Error('Alert instance not yet tracked');
+      }
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.name);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('disableButton');
+
+    // Untrack modal appears — do NOT toggle switch (default is untrack=false)
+    await expect(page.testSubj.locator('untrackAlertsModal')).toBeVisible({ timeout: 5_000 });
+    await page.testSubj
+      .locator('untrackAlertsModal')
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click();
+
+    // Alert instance should remain tracked
+    await expect(async () => {
+      const summary = await getAlertSummary(kbnClient, rule.id);
+      const instance = summary.alerts['query matched'];
+      if (!instance || instance.tracked !== true) {
+        throw new Error('Alert instance unexpectedly untracked');
+      }
+    }).toPass({ timeout: 30_000, intervals: [2_000] });
+  });
 
   test('should allow rules to be snoozed using the right side dropdown', async ({
     page,
