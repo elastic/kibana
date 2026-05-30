@@ -184,6 +184,174 @@
       }
     },
     {
+      "id": "1e5991e2e9c6383-69ac6df8bd331d6",
+      "title": "Rule Details - Edit rule button should open edit rule flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_edit.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "1e5991e2e9c6383-4194151a53d2e67",
+      "title": "Rule Details - Edit rule button should reset rule when canceling an edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_edit.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-50365dfc8239ea2",
+      "title": "Rule Details - Header renders the rule details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-a2b4added007d73",
+      "title": "Rule Details - Header renders toast when schedule is less than configured minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-8069d0f59a1dc7d",
+      "title": "Rule Details - Header should disable the rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-1ca80e8c5c176fb",
+      "title": "Rule Details - Header should allow you to snooze a disabled rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-f41808004c25933",
+      "title": "Rule Details - Header should reenable a disabled rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-01f225a51c57330",
+      "title": "Rule Details - Header should snooze the rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-d8ff007a590dfdd",
+      "title": "Rule Details - Header should snooze the rule for a set duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    },
+    {
+      "id": "a45df9c720b9719-7cb2becb95a184f",
+      "title": "Rule Details - Header should add snooze schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_header.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "54d204dd08bf2d1-a80dd60264f8ef6",
+      "title": "Rule Details - Saved Objects Management Navigation should navigate to rule details from saved objects management page in default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_so_navigation.spec.ts",
+        "line": 96,
+        "column": 9
+      }
+    },
+    {
+      "id": "54d204dd08bf2d1-c78ed3a6fb5dcee",
+      "title": "Rule Details - Saved Objects Management Navigation should navigate to rule details from saved objects management page in non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_so_navigation.spec.ts",
+        "line": 114,
+        "column": 9
+      }
+    },
+    {
       "id": "b621efd3ec8d996-e8dfa7be3731465",
       "title": "Rule logs \"show all spaces\" switch hides the switch when only the default space exists",
       "expectedStatus": "passed",
@@ -306,6 +474,370 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
         "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-350e61a13c0575a",
+      "title": "Rules list should display alerts in alphabetical order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-48862b943a9b07b",
+      "title": "Rules list should search for alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 148,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-47ec35d63716050",
+      "title": "Rules list should update alert list on the search clear button click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 164,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-f2c6f0faa6babce",
+      "title": "Rules list should search for tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 194,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-32747e088fc269b",
+      "title": "Rules list should display an empty list when search did not return any alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 211,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-f9b180d4de6bec0",
+      "title": "Rules list should disable single alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 225,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-9fbaab44b146fef",
+      "title": "Rules list should re-enable single alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 240,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-3cace3865ad8d87",
+      "title": "Rules list should delete single alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 262,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-427d3b50ef7ac2c",
+      "title": "Rules list should disable all selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 285,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-6ff4e907b42fdd4",
+      "title": "Rules list should enable all selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 302,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-400dcea4242c3dd",
+      "title": "Rules list should render percentile column and cells correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 317,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-2712d127ba7d738",
+      "title": "Rules list should render interval info icon when schedule interval is less than configured minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 337,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-484f882613d26d8",
+      "title": "Rules list should delete all selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 368,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-5a041634f786217",
+      "title": "Rules list should filter alerts by the status",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 392,
+        "column": 8
+      }
+    },
+    {
+      "id": "147307e33c87398-c04e54195ed37f5",
+      "title": "Rules list should display total alerts by status and error banner only when exists alerts with status error",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 395,
+        "column": 8
+      }
+    },
+    {
+      "id": "147307e33c87398-07e22d8c1efb1ab",
+      "title": "Rules list Expand error in rules table when there is rule with an error associated",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 398,
+        "column": 8
+      }
+    },
+    {
+      "id": "147307e33c87398-387f1cff60b9220",
+      "title": "Rules list should filter alerts by the alert type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 400,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-d950cd8b4977d73",
+      "title": "Rules list should filter alerts by the action type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 442,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-40436eb215ad4d8",
+      "title": "Rules list should filter alerts by the rule status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 489,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-344a686f1fbbfc4",
+      "title": "Rules list should filter alerts by the tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 564,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-1e2eb4ac5b35f79",
+      "title": "Rules list should not prevent rules with action execution capabilities from being edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 617,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-14494f15655aa7d",
+      "title": "Rules list should untrack disable rule if untrack switch is true",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 647,
+        "column": 8
+      }
+    },
+    {
+      "id": "147307e33c87398-78854574d5e4c82",
+      "title": "Rules list should not untrack disable rule if untrack switch if false",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 650,
+        "column": 8
+      }
+    },
+    {
+      "id": "147307e33c87398-ac0ab0053270d69",
+      "title": "Rules list should allow rules to be snoozed using the right side dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 652,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-9d4187036a33902",
+      "title": "Rules list should allow rules to be snoozed indefinitely using the right side dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 671,
+        "column": 7
+      }
+    },
+    {
+      "id": "147307e33c87398-d1823f8102937a2",
+      "title": "Rules list should allow snoozed rules to be unsnoozed using the right side dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
+        "line": 692,
         "column": 7
       }
     },

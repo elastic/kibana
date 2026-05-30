@@ -1,0 +1,714 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Migrated from:
+//   x-pack/platform/test/functional_with_es_ssl/apps/rules/rules_list/rules_list.ts
+//
+// Rule type substitutions:
+//   test.noop          → .es-query (built-in, always available in Scout stateful/classic)
+//   test.failing       → NOT registered in Scout — 3 tests skipped
+//   test.always-firing → NOT registered in Scout — 2 tests skipped
+
+import type { KbnClient, ScoutPage } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { test, makeEsQueryRule } from '../fixtures';
+
+// ── API helpers ──────────────────────────────────────────────────────────────
+
+const disableRule = async (kbnClient: KbnClient, ruleId: string) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/api/alerting/rule/${ruleId}/_disable`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+};
+
+const snoozeRule = async (kbnClient: KbnClient, ruleId: string) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/internal/alerting/rule/${ruleId}/_snooze`,
+    headers: { 'kbn-xsrf': 'scout' },
+    body: {
+      snooze_schedule: {
+        duration: 100_000_000,
+        rRule: { count: 1, dtstart: new Date().toISOString(), tzid: 'UTC' },
+      },
+    },
+  });
+};
+
+const createSlackConnector = async (kbnClient: KbnClient, name: string) => {
+  const resp = await kbnClient.request<{ id: string; name: string }>({
+    method: 'POST',
+    path: '/api/actions/connector',
+    headers: { 'kbn-xsrf': 'scout' },
+    body: {
+      name,
+      connector_type_id: '.slack',
+      config: {},
+      secrets: {
+        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+      },
+    },
+  });
+  return resp.data;
+};
+
+const deleteConnector = async (kbnClient: KbnClient, connectorId: string) => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/actions/connector/${connectorId}`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+};
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+
+const searchRules = async (page: ScoutPage, query: string) => {
+  const field = page.testSubj.locator('ruleSearchField');
+  await field.fill(query);
+  await field.press('Enter');
+  await page
+    .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+    .waitFor();
+};
+
+const refreshRulesList = async (page: ScoutPage) => {
+  await page.testSubj.click('logsTab');
+  await page.testSubj.click('rulesTab');
+};
+
+const getTableRows = (page: ScoutPage) =>
+  page.testSubj.locator('rulesList').locator('[data-test-subj^="rule-row"]');
+
+const ensureRuleStatus = async (
+  page: ScoutPage,
+  ruleName: string,
+  status: 'enabled' | 'disabled'
+) => {
+  await expect(async () => {
+    await searchRules(page, ruleName);
+    await expect(page.testSubj.locator('statusDropdown')).toHaveAttribute(
+      'title',
+      new RegExp(status, 'i'),
+      { timeout: 5_000 }
+    );
+  }).toPass({ timeout: 30_000 });
+};
+
+// ── Tests ────────────────────────────────────────────────────────────────────
+
+test.describe('Rules list', { tag: tags.stateful.classic }, () => {
+  const createdRuleIds: string[] = [];
+  const createdConnectorIds: string[] = [];
+
+  test.beforeEach(async ({ browserAuth, page }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('rules');
+    await page.testSubj.click('rulesTab');
+  });
+
+  test.afterEach(async ({ apiServices, kbnClient }) => {
+    const ruleIds = [...createdRuleIds];
+    createdRuleIds.length = 0;
+    await Promise.allSettled(ruleIds.map((id) => apiServices.alerting.rules.delete(id)));
+
+    const connectorIds = [...createdConnectorIds];
+    createdConnectorIds.length = 0;
+    await Promise.allSettled(connectorIds.map((id) => deleteConnector(kbnClient, id)));
+  });
+
+  test('should display alerts in alphabetical order', async ({ page, apiServices }) => {
+    const uniqueTag = `alpha-order-${Date.now()}`;
+    const [rb, rc, ra] = await Promise.all([
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('b'), tags: [uniqueTag] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('c'), tags: [uniqueTag] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('a'), tags: [uniqueTag] }),
+    ]);
+    createdRuleIds.push(rb.data.id, rc.data.id, ra.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+
+    const nameLinks = page.testSubj
+      .locator('rulesList')
+      .locator('[data-test-subj="rulesTableCell-name"] [title]');
+    await expect(nameLinks).toHaveCount(3);
+    const all = await nameLinks.all();
+    await expect(all[0]).toHaveAttribute('title', /^a-/);
+    await expect(all[1]).toHaveAttribute('title', /^b-/);
+    await expect(all[2]).toHaveAttribute('title', /^c-/);
+  });
+
+  test('should search for alert', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('search-test'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    const rows = getTableRows(page);
+    await expect(rows).toHaveCount(1);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${rule.data.name}"]`)
+    ).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+    await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('1');
+  });
+
+  test('should update alert list on the search clear button click', async ({
+    page,
+    apiServices,
+  }) => {
+    const [r1, r2] = await Promise.all([
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('clear-b'), tags: [] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('clear-c'), tags: [] }),
+    ]);
+    createdRuleIds.push(r1.data.id, r2.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, r1.data.name as string);
+    await expect(getTableRows(page)).toHaveCount(1);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${r1.data.name}"]`)
+    ).toBeVisible();
+
+    await page.locator('.euiFormControlLayoutClearButton').click();
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${r1.data.name}"]`)
+    ).toBeVisible();
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${r2.data.name}"]`)
+    ).toBeVisible();
+  });
+
+  test('should search for tags', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create({
+      ...makeEsQueryRule('tags-test'),
+      tags: ['tag', 'tagtag', 'taggity tag'],
+    });
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, `${rule.data.name} tag`);
+
+    await expect(getTableRows(page)).toHaveCount(1);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${rule.data.name}"]`)
+    ).toBeVisible();
+    await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('3');
+  });
+
+  test('should display an empty list when search did not return any alerts', async ({
+    page,
+    apiServices,
+  }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('empty-search'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, "An Alert That For Sure Doesn't Exist!");
+
+    await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await expect(getTableRows(page)).toHaveCount(0);
+  });
+
+  test('should disable single alert', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('disable-single'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('disableButton');
+    await expect(page.testSubj.locator('confirmModalConfirmButton')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+
+    await ensureRuleStatus(page, rule.data.name as string, 'disabled');
+  });
+
+  test('should re-enable single alert', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('reenable-single'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    // Disable via UI
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('disableButton');
+    await expect(page.testSubj.locator('confirmModalConfirmButton')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+
+    await ensureRuleStatus(page, rule.data.name as string, 'disabled');
+
+    // Re-enable via UI (no confirmation modal when enabling)
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('disableButton');
+
+    await ensureRuleStatus(page, rule.data.name as string, 'enabled');
+  });
+
+  test('should delete single alert', async ({ page, apiServices }) => {
+    const r1 = await apiServices.alerting.rules.create(makeEsQueryRule('delete-keep'));
+    const r2 = await apiServices.alerting.rules.create(makeEsQueryRule('delete-target'));
+    createdRuleIds.push(r1.data.id, r2.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, r2.data.name as string);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('deleteRule');
+    await expect(page.testSubj.locator('rulesDeleteConfirmation')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Deleted 1 rule');
+
+    // Remove from cleanup list since the rule was deleted via UI
+    const idx = createdRuleIds.indexOf(r2.data.id);
+    if (idx !== -1) createdRuleIds.splice(idx, 1);
+
+    await searchRules(page, r2.data.name as string);
+    await expect(getTableRows(page)).toHaveCount(0);
+  });
+
+  test('should disable all selection', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('bulk-disable'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click(`checkboxSelectRow-${rule.data.id}`);
+    await page.testSubj.click('bulkAction');
+    await page.testSubj.click('bulkDisable');
+    await expect(page.testSubj.locator('confirmModalConfirmButton')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Disabled 1 rule');
+    await ensureRuleStatus(page, rule.data.name as string, 'disabled');
+  });
+
+  test('should enable all selection', async ({ page, apiServices, kbnClient }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('bulk-enable'));
+    createdRuleIds.push(rule.data.id);
+    await disableRule(kbnClient, rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click(`checkboxSelectRow-${rule.data.id}`);
+    await page.testSubj.click('bulkAction');
+    await page.testSubj.click('bulkEnable');
+
+    await ensureRuleStatus(page, rule.data.name as string, 'enabled');
+  });
+
+  test('should render percentile column and cells correctly', async ({ page, apiServices }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('percentile-test'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+
+    await expect(page.testSubj.locator('rulesTable-P50ColumnName')).toBeVisible();
+    await expect(page.testSubj.locator('P50Percentile')).toBeVisible();
+
+    // Switch to P95
+    await page.testSubj.click('percentileSelectablePopover-iconButton');
+    await expect(page.testSubj.locator('percentileSelectablePopover-selectable')).toBeVisible();
+    await page
+      .locator('[data-test-subj="percentileSelectablePopover-selectable"] li:nth-child(2)')
+      .click();
+    await expect(page.testSubj.locator('percentileSelectablePopover-selectable')).toBeHidden();
+    await expect(page.testSubj.locator('rulesTable-P95ColumnName')).toBeVisible();
+    await expect(page.testSubj.locator('P95Percentile')).toBeVisible();
+  });
+
+  test('should render interval info icon when schedule interval is less than configured minimum', async ({
+    page,
+    apiServices,
+  }) => {
+    const uniqueTag = `interval-icon-${Date.now()}`;
+    const [rShort, rNormal] = await Promise.all([
+      apiServices.alerting.rules.create({
+        ...makeEsQueryRule('a-short-interval'),
+        tags: [uniqueTag],
+        schedule: { interval: '1s' },
+      }),
+      apiServices.alerting.rules.create({
+        ...makeEsQueryRule('b-normal-interval'),
+        tags: [uniqueTag],
+      }),
+    ]);
+    createdRuleIds.push(rShort.data.id, rNormal.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+
+    // icon-0 → short-interval rule (appears first alphabetically as 'a-short-*')
+    await expect(page.testSubj.locator('ruleInterval-config-icon-0')).toBeVisible();
+    await expect(page.testSubj.locator('ruleInterval-config-icon-1')).toBeHidden();
+
+    // clicking the icon opens edit flyout
+    await page.testSubj.click('ruleInterval-config-icon-0');
+    await expect(page.testSubj.locator('rulePageFooterCancelButton')).toBeVisible();
+    await page.testSubj.click('rulePageFooterCancelButton');
+  });
+
+  test('should delete all selection', async ({ page, apiServices }) => {
+    const namePrefix = `bulk-del-${Date.now()}`;
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule(namePrefix));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, namePrefix);
+
+    await page.testSubj.click(`checkboxSelectRow-${rule.data.id}`);
+    await page.testSubj.click('bulkAction');
+    await page.testSubj.click('bulkDelete');
+    await expect(page.testSubj.locator('rulesDeleteConfirmation')).toBeVisible();
+    await page.testSubj.click('confirmModalConfirmButton');
+
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Deleted 1 rule');
+
+    const idx = createdRuleIds.indexOf(rule.data.id);
+    if (idx !== -1) createdRuleIds.splice(idx, 1);
+
+    await searchRules(page, namePrefix);
+    await expect(getTableRows(page)).toHaveCount(0);
+  });
+
+  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
+  test.skip('should filter alerts by the status', async () => {});
+
+  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
+  test.skip('should display total alerts by status and error banner only when exists alerts with status error', async () => {});
+
+  // Skipped: test.failing rule type is not registered in Scout stateful/classic.
+  test.skip('Expand error in rules table when there is rule with an error associated', async () => {});
+
+  test('should filter alerts by the alert type', async ({ page, apiServices }) => {
+    const uniqueTag = `type-filter-${Date.now()}`;
+    const [rEsQuery, rIndexThreshold] = await Promise.all([
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('esq'), tags: [uniqueTag] }),
+      apiServices.alerting.rules.create({
+        name: `idx-thresh-${Date.now()}`,
+        ruleTypeId: '.index-threshold',
+        consumer: 'alerts',
+        enabled: true,
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [uniqueTag],
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000],
+          index: ['.kibana'],
+          timeField: '@timestamp',
+        },
+      }),
+    ]);
+    createdRuleIds.push(rEsQuery.data.id, rIndexThreshold.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    await page.testSubj.click('ruleTypeFilterButton');
+    await expect(page.testSubj.locator('ruleType.es-queryFilterOption')).toBeVisible();
+    await page.testSubj.click('ruleType.es-queryFilterOption');
+    await page.testSubj.click('ruleTypeFilterButton'); // close dropdown
+
+    await expect(getTableRows(page)).toHaveCount(1);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${rEsQuery.data.name}"]`)
+    ).toBeVisible();
+  });
+
+  test('should filter alerts by the action type', async ({ page, apiServices, kbnClient }) => {
+    const slackConnector = await createSlackConnector(
+      kbnClient,
+      `slack-action-filter-${Date.now()}`
+    );
+    createdConnectorIds.push(slackConnector.id);
+
+    const uniqueTag = `action-filter-${Date.now()}`;
+    const [rNoAction, rWithSlack] = await Promise.all([
+      apiServices.alerting.rules.create({ ...makeEsQueryRule('no-action'), tags: [uniqueTag] }),
+      apiServices.alerting.rules.create({
+        ...makeEsQueryRule('with-slack'),
+        tags: [uniqueTag],
+        actions: [
+          {
+            id: slackConnector.id,
+            group: 'query matched',
+            params: { message: 'scout test' },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange' as const,
+              throttle: undefined,
+            },
+          },
+        ],
+      }),
+    ]);
+    createdRuleIds.push(rNoAction.data.id, rWithSlack.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    await page.testSubj.click('actionTypeFilterButton');
+    await page.testSubj.click('actionType.slackFilterOption');
+
+    await expect(getTableRows(page)).toHaveCount(1);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${rWithSlack.data.name}"]`)
+    ).toBeVisible();
+
+    // De-select the action type filter
+    await page.testSubj.click('actionTypeFilterButton');
+    await page.testSubj.click('actionType.slackFilterOption');
+    await expect(page.testSubj.locator('centerJustifiedSpinner')).toBeHidden();
+  });
+
+  test('should filter alerts by the rule status', async ({ page, apiServices, kbnClient }) => {
+    const uniqueTag = `status-filter-${Date.now()}`;
+    const makeRule = (prefix: string) =>
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(prefix), tags: [uniqueTag] });
+
+    const [rEnabled, rDisabled, rSnoozed, rSnoozedDisabled] = await Promise.all([
+      makeRule('status-enabled'),
+      makeRule('status-disabled'),
+      makeRule('status-snoozed'),
+      makeRule('status-snoozed-disabled'),
+    ]);
+    createdRuleIds.push(
+      rEnabled.data.id,
+      rDisabled.data.id,
+      rSnoozed.data.id,
+      rSnoozedDisabled.data.id
+    );
+
+    await disableRule(kbnClient, rDisabled.data.id);
+    await snoozeRule(kbnClient, rSnoozed.data.id);
+    await snoozeRule(kbnClient, rSnoozedDisabled.data.id);
+    await disableRule(kbnClient, rSnoozedDisabled.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+    await expect(getTableRows(page)).toHaveCount(4);
+
+    // Select only enabled → 2 rules (enabled + snoozed)
+    await page.testSubj.click('ruleStatusFilterButton');
+    await page.testSubj.click('ruleStatusFilterOption-enabled');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    // Add disabled → all 4
+    await page.testSubj.click('ruleStatusFilterOption-disabled');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(4);
+
+    // Deselect enabled → only disabled
+    await page.testSubj.click('ruleStatusFilterOption-enabled');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    // Deselect disabled, select snoozed → only snoozed
+    await page.testSubj.click('ruleStatusFilterOption-disabled');
+    await page.testSubj.click('ruleStatusFilterOption-snoozed');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    // Add disabled → disabled + snoozed (3 rules)
+    await page.testSubj.click('ruleStatusFilterOption-disabled');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(3);
+
+    // Add enabled → all 4
+    await page.testSubj.click('ruleStatusFilterOption-enabled');
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(4);
+
+    // Close filter panel
+    await page.testSubj.click('ruleStatusFilterButton');
+  });
+
+  test('should filter alerts by the tag', async ({ page, apiServices }) => {
+    const p = `t-${Date.now()}`;
+    const tagA = `${p}-a`;
+    const tagB = `${p}-b`;
+    const tagC = `${p}-c`;
+
+    const rules = await Promise.all([
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(`${p}-1`), tags: [tagA] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(`${p}-2`), tags: [tagB] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(`${p}-3`), tags: [tagA, tagB] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(`${p}-4`), tags: [tagB, tagC] }),
+      apiServices.alerting.rules.create({ ...makeEsQueryRule(`${p}-5`), tags: [tagC] }),
+    ]);
+    rules.forEach((r) => createdRuleIds.push(r.data.id));
+
+    await refreshRulesList(page);
+    await searchRules(page, p);
+    await expect(getTableRows(page)).toHaveCount(5);
+
+    await page.testSubj.click('ruleTagFilter');
+
+    // Select A → 2 rules
+    await page.testSubj.click(`ruleTagFilterOption-${tagA}`);
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    // Deselect A → all 5
+    await page.testSubj.click(`ruleTagFilterOption-${tagA}`);
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(5);
+
+    // Select A + B → 4 rules
+    await page.testSubj.click(`ruleTagFilterOption-${tagA}`);
+    await page.testSubj.click(`ruleTagFilterOption-${tagB}`);
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(4);
+
+    // Deselect A, B; select C → 2 rules
+    await page.testSubj.click(`ruleTagFilterOption-${tagA}`);
+    await page.testSubj.click(`ruleTagFilterOption-${tagB}`);
+    await page.testSubj.click(`ruleTagFilterOption-${tagC}`);
+    await page
+      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
+      .waitFor();
+    await expect(getTableRows(page)).toHaveCount(2);
+  });
+
+  test('should not prevent rules with action execution capabilities from being edited', async ({
+    page,
+    apiServices,
+    kbnClient,
+  }) => {
+    const slackConnector = await createSlackConnector(kbnClient, `slack-edit-cap-${Date.now()}`);
+    createdConnectorIds.push(slackConnector.id);
+
+    const rule = await apiServices.alerting.rules.create({
+      ...makeEsQueryRule('edit-cap'),
+      actions: [
+        {
+          id: slackConnector.id,
+          group: 'query matched',
+          params: { message: 'scout test' },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange' as const,
+            throttle: undefined,
+          },
+        },
+      ],
+    });
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await expect(page.testSubj.locator('selectActionButton')).not.toBeDisabled();
+  });
+
+  // Skipped: requires test.always-firing to generate active alert instances.
+  test.skip('should untrack disable rule if untrack switch is true', async () => {});
+
+  // Skipped: requires test.always-firing to generate active alert instances.
+  test.skip('should not untrack disable rule if untrack switch if false', async () => {});
+
+  test('should allow rules to be snoozed using the right side dropdown', async ({
+    page,
+    apiServices,
+  }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('snooze-dropdown'));
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('snoozeButton');
+    await page.testSubj.click('ruleSnoozeApply');
+
+    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+
+  test('should allow rules to be snoozed indefinitely using the right side dropdown', async ({
+    page,
+    apiServices,
+  }) => {
+    const rule = await apiServices.alerting.rules.create(
+      makeEsQueryRule('snooze-indefinite-dropdown')
+    );
+    createdRuleIds.push(rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('snoozeButton');
+    await page.testSubj.click('ruleSnoozeIndefiniteApply');
+
+    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozedIndefinitely')).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+
+  test('should allow snoozed rules to be unsnoozed using the right side dropdown', async ({
+    page,
+    apiServices,
+    kbnClient,
+  }) => {
+    const rule = await apiServices.alerting.rules.create(makeEsQueryRule('unsnooze-dropdown'));
+    createdRuleIds.push(rule.data.id);
+    await snoozeRule(kbnClient, rule.data.id);
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await page.testSubj.click('collapsedItemActions');
+    await page.testSubj.click('snoozeButton');
+    await page.testSubj.click('ruleSnoozeCancel');
+
+    await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
+
+    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
+    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozedIndefinitely')).toBeHidden();
+  });
+});
