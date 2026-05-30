@@ -20,7 +20,7 @@
  * is the only thing the rest of the code (and tests) reads.
  */
 
-import type { StateName } from './state';
+import type { NonTerminalState, StateName } from './state';
 import * as CHECK_TARGET_MAPPINGS from './steps/check_target_mappings';
 import * as CHECK_VERSION_INDEX_READY_ACTIONS from './steps/check_version_index_ready_actions';
 import * as CLEANUP_UNKNOWN_AND_EXCLUDED from './steps/cleanup_unknown_and_excluded';
@@ -206,3 +206,43 @@ export const SUCCESSORS = {
 } as const satisfies Record<StateName, readonly StateName[]>;
 
 export type SuccessorsOf<TName extends StateName> = (typeof SUCCESSORS)[TName][number];
+
+/**
+ * Dispatch table: state name → step factory. The loop driver in `./next`
+ * reads from here instead of switching on `state.name`.
+ *
+ * `satisfies Record<NonTerminalState['name'], …>` forces a row per non-terminal
+ * state; adding a new non-terminal state to the union without wiring up its
+ * `step` factory here will not compile. Terminal states (DONE, FATAL) do not
+ * export a `step` and so cannot accidentally be listed.
+ */
+export const STEPS = {
+  [INIT.Name]: INIT.step,
+  [WAIT_FOR_MIGRATION_COMPLETION.Name]: WAIT_FOR_MIGRATION_COMPLETION.step,
+  [WAIT_FOR_YELLOW_SOURCE.Name]: WAIT_FOR_YELLOW_SOURCE.step,
+  [UPDATE_SOURCE_MAPPINGS_PROPERTIES.Name]: UPDATE_SOURCE_MAPPINGS_PROPERTIES.step,
+  [COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.Name]:
+    COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.step,
+  [CLEANUP_UNKNOWN_AND_EXCLUDED.Name]: CLEANUP_UNKNOWN_AND_EXCLUDED.step,
+  [CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.Name]:
+    CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.step,
+  [PREPARE_COMPATIBLE_MIGRATION.Name]: PREPARE_COMPATIBLE_MIGRATION.step,
+  [REFRESH_SOURCE.Name]: REFRESH_SOURCE.step,
+  [CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.Name]:
+    CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.step,
+  [CREATE_NEW_TARGET.Name]: CREATE_NEW_TARGET.step,
+  [CHECK_TARGET_MAPPINGS.Name]: CHECK_TARGET_MAPPINGS.step,
+  [UPDATE_TARGET_MAPPINGS_PROPERTIES.Name]: UPDATE_TARGET_MAPPINGS_PROPERTIES.step,
+  [UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.Name]:
+    UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.step,
+  [UPDATE_TARGET_MAPPINGS_META.Name]: UPDATE_TARGET_MAPPINGS_META.step,
+  [CHECK_VERSION_INDEX_READY_ACTIONS.Name]: CHECK_VERSION_INDEX_READY_ACTIONS.step,
+  [OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.Name]: OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.step,
+  [OUTDATED_DOCUMENTS_SEARCH_READ.Name]: OUTDATED_DOCUMENTS_SEARCH_READ.step,
+  [OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.Name]: OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.step,
+  [OUTDATED_DOCUMENTS_REFRESH.Name]: OUTDATED_DOCUMENTS_REFRESH.step,
+  [OUTDATED_DOCUMENTS_TRANSFORM.Name]: OUTDATED_DOCUMENTS_TRANSFORM.step,
+  [TRANSFORMED_DOCUMENTS_BULK_INDEX.Name]: TRANSFORMED_DOCUMENTS_BULK_INDEX.step,
+  [MARK_VERSION_INDEX_READY.Name]: MARK_VERSION_INDEX_READY.step,
+  [MARK_VERSION_INDEX_READY_CONFLICT.Name]: MARK_VERSION_INDEX_READY_CONFLICT.step,
+} satisfies Record<NonTerminalState['name'], unknown>;

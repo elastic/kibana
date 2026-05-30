@@ -41,7 +41,7 @@ Five concepts, each named for its call-site role:
 | `State`   | discriminated union, one variant per state | `state.ts`, `steps/*.ts` | The migration's current control point plus the data it carries.            |
 | `IO`      | interface of async functions      | `io.ts`                 | The side-effecting operations the machine can perform (ES calls).          |
 | `Step`    | `{ action, transition }`          | `types.ts`, `steps/*.ts` | A recipe: which IO call to run, and how to interpret the response.         |
-| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Dispatches on `state.name` and runs the step. The switch + `assertNever` is the single point of compile-time enforcement that every non-terminal state has a wired-up step factory. |
+| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Looks up the step factory in the `STEPS` table (in `successors.ts`) using `state.name`, runs it, and returns the next state. The `satisfies Record<NonTerminalState['name'], …>` on `STEPS` is the single point of compile-time enforcement that every non-terminal state has a wired-up factory. |
 | `runStep` | `(step) => Promise<State>`        | `types.ts`              | Awaits `action()`, feeds the response to `transition()`.                   |
 
 The loop, in pseudocode:
@@ -133,7 +133,7 @@ v3/
 ├── README.md                        ← this file
 ├── index.ts                         ← public API: runV3Migration + types
 ├── run_v3_migration.ts              ← loop driver
-├── next.ts                          ← dispatch on state.name
+├── next.ts                          ← tiny loop driver; looks up STEPS[state.name]
 ├── state.ts                         ← State union, BaseState, transition helpers
 ├── types.ts                         ← Step, runStep, re-exports from successors
 ├── successors.ts                    ← phase-grouped SUCCESSORS table + SuccessorsOf
@@ -404,8 +404,8 @@ Concrete checklist for a new control point called `MY_STEP`:
    reach it. **If your step calls `handleRetryableFailure` /
    `delayRetryTransition`, include `MY_STEP.Name` in its own row** — a
    retryable failure is a self-loop transition in the graph.
-5. Add a `case` to the switch in `next.ts`. The exhaustiveness check will
-   force you to.
+5. Add a row to the `STEPS` table in `successors.ts` mapping the new state's
+   `Name` to its `step` factory. The `satisfies` check will force you to.
 6. If your state has step-specific fields with constraints
    (e.g. `targetIndex.length > 0`), add a clause to `assertInvariants` in
    `invariants.ts`.
