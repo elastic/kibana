@@ -215,8 +215,17 @@ export class DashboardPageObject extends FtrService {
    */
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
-    const currentUrl = await this.browser.getCurrentUrl();
-    return currentUrl.includes('dashboards#/list');
+    let currentUrl = await this.browser.getCurrentUrl();
+
+    // wait for dashboard route redirect to complete
+    if (currentUrl.includes(DASHBOARD_APP_ID) && !currentUrl.includes('#')) {
+      await this.retry.waitFor('dashboard route redirect to complete', async () => {
+        currentUrl = await this.browser.getCurrentUrl();
+        return currentUrl.includes('#');
+      });
+    }
+
+    return currentUrl.includes(`${DASHBOARD_APP_ID}#/list`);
   }
 
   public async expectExistsDashboardLandingPage() {
@@ -239,9 +248,11 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    await this.common.navigateToApp(DASHBOARD_APP_ID, {
-      hash: '/list',
-    });
+    const breadcrumbLink = this.config.get('serverless')
+      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+      : 'breadcrumb dashboardListingBreadcrumb first';
+    await this.testSubjects.click(breadcrumbLink);
+    await this.expectExistsDashboardLandingPage();
   }
 
   public async duplicateDashboard(dashboardNameOverride?: string) {
