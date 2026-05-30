@@ -404,8 +404,22 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     }
   });
 
-  // Skipped: requires preconfigured 'Serverlog' connector not available in Scout stateful/classic.
-  test.skip('should not be able to delete a preconfigured connector', async () => {});
+  test('should not be able to delete a preconfigured connector', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await navigateAndWait(page, kbnUrl);
+    await searchConnector(page, 'Serverlog');
+
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await expect(page.testSubj.locator('deleteConnector')).toBeHidden();
+    await expect(page.testSubj.locator('preConfiguredTitleMessage')).toBeVisible();
+    await expect(
+      page.locator('[data-test-subj="checkboxSelectRow-preconfigured_my-server-log"]')
+    ).toBeDisabled();
+  });
 
   // Skipped: requires preconfigured 'test-preconfigured-email' connector not available in Scout.
   test.skip('should not be able to edit a preconfigured connector', async () => {});
