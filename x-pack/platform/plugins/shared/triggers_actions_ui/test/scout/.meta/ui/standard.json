@@ -1,88 +1,88 @@
 {
-  "sha1": "3a5c2c2ee72b3eba4ba84842504c9662ccf000d2",
+  "sha1": "c5e02f2db86b00d846aa8b50a9b3e65f335799b6",
   "tests": [
     {
       "id": "7f4d24df5ef863e-6b9d865caafbc3b",
       "title": "Alert create flyout should delete the right action when the same action has been added twice",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 94,
-        "column": 8
+        "line": 156,
+        "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-00f2bcd3cc24c5c",
       "title": "Alert create flyout should create an alert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 96,
-        "column": 8
+        "line": 204,
+        "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-af5965fcd8fdaf6",
       "title": "Alert create flyout should create an alert with composite query in filter for conditional action",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 98,
-        "column": 8
+        "line": 282,
+        "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-793414ff4288a57",
       "title": "Alert create flyout should create an alert with DSL filter for conditional action",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 100,
-        "column": 8
+        "line": 360,
+        "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-423c19d1919af7e",
       "title": "Alert create flyout should create an alert with actions in multiple groups",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 103,
-        "column": 8
+        "line": 430,
+        "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-e8fe79b1100cedc",
       "title": "Alert create flyout should show save confirmation before creating alert with no actions",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 105,
-        "column": 8
+        "line": 472,
+        "column": 7
       }
     },
     {
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 107,
+        "line": 517,
         "column": 7
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 128,
+        "line": 538,
         "column": 7
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 146,
+        "line": 556,
         "column": 7
       }
     },
@@ -137,22 +137,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 173,
+        "line": 583,
         "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-b5cd8064c58d131",
       "title": "Alert create flyout should successfully show the APM error count rule flyout",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 194,
-        "column": 8
+        "line": 603,
+        "column": 7
       }
     },
     {
@@ -165,22 +165,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 196,
+        "line": 615,
         "column": 7
       }
     },
     {
       "id": "7f4d24df5ef863e-1a8e97a4c704f8b",
       "title": "Alert create flyout should add filter",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 215,
-        "column": 8
+        "line": 633,
+        "column": 7
       }
     },
     {
@@ -291,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 96,
+        "line": 93,
         "column": 7
       }
     },
@@ -305,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 135,
+        "line": 132,
         "column": 7
       }
     },
@@ -319,7 +319,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 176,
+        "line": 173,
         "column": 7
       }
     },
@@ -333,7 +333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 190,
+        "line": 187,
         "column": 7
       }
     },
@@ -347,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 214,
+        "line": 211,
         "column": 7
       }
     },
@@ -361,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 247,
+        "line": 244,
         "column": 7
       }
     },
@@ -375,7 +375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 281,
+        "line": 278,
         "column": 7
       }
     },
@@ -389,7 +389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 315,
+        "line": 312,
         "column": 7
       }
     },
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 346,
+        "line": 343,
         "column": 7
       }
     },
@@ -417,50 +417,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 376,
+        "line": 373,
         "column": 7
       }
     },
     {
       "id": "1a25d6294359785-0d8be81cd1254e2",
       "title": "General connector functionality should not be able to delete a preconfigured connector",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 408,
-        "column": 8
+        "line": 404,
+        "column": 7
       }
     },
     {
       "id": "1a25d6294359785-d99b757aa9caed8",
       "title": "General connector functionality should not be able to edit a preconfigured connector",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 411,
-        "column": 8
+        "line": 421,
+        "column": 7
       }
     },
     {
       "id": "1a25d6294359785-444be4c61cbf2d6",
       "title": "General connector functionality Execution log - renders the event log list and can filter/sort",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_general.spec.ts",
-        "line": 414,
-        "column": 8
+        "line": 441,
+        "column": 7
       }
     },
     {
@@ -1164,6 +1164,20 @@
       }
     },
     {
+      "id": "9390be6d28f2e22-6c7e872dd2560a7",
+      "title": "Rule Details - Legacy notify values should convert rule-level params to action-level params and save the rule successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_edit_legacy_notify.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
       "id": "1e5991e2e9c6383-69ac6df8bd331d6",
       "title": "Rule Details - Edit rule button should open edit rule flyout",
       "expectedStatus": "passed",
@@ -1467,7 +1481,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 126,
+        "line": 210,
         "column": 7
       }
     },
@@ -1481,7 +1495,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 148,
+        "line": 232,
         "column": 7
       }
     },
@@ -1495,7 +1509,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 164,
+        "line": 248,
         "column": 7
       }
     },
@@ -1509,7 +1523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 194,
+        "line": 278,
         "column": 7
       }
     },
@@ -1523,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 211,
+        "line": 295,
         "column": 7
       }
     },
@@ -1537,7 +1551,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 225,
+        "line": 309,
         "column": 7
       }
     },
@@ -1551,7 +1565,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 240,
+        "line": 324,
         "column": 7
       }
     },
@@ -1565,7 +1579,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 262,
+        "line": 346,
         "column": 7
       }
     },
@@ -1579,7 +1593,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 285,
+        "line": 369,
         "column": 7
       }
     },
@@ -1593,7 +1607,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 302,
+        "line": 386,
         "column": 7
       }
     },
@@ -1607,7 +1621,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 317,
+        "line": 401,
         "column": 7
       }
     },
@@ -1621,7 +1635,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 337,
+        "line": 421,
         "column": 7
       }
     },
@@ -1635,50 +1649,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 368,
+        "line": 452,
         "column": 7
       }
     },
     {
       "id": "147307e33c87398-5a041634f786217",
       "title": "Rules list should filter alerts by the status",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 392,
-        "column": 8
+        "line": 475,
+        "column": 7
       }
     },
     {
       "id": "147307e33c87398-c04e54195ed37f5",
       "title": "Rules list should display total alerts by status and error banner only when exists alerts with status error",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 395,
-        "column": 8
+        "line": 507,
+        "column": 7
       }
     },
     {
       "id": "147307e33c87398-07e22d8c1efb1ab",
       "title": "Rules list Expand error in rules table when there is rule with an error associated",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 398,
-        "column": 8
+        "line": 567,
+        "column": 7
       }
     },
     {
@@ -1691,7 +1705,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 400,
+        "line": 607,
         "column": 7
       }
     },
@@ -1705,7 +1719,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 442,
+        "line": 649,
         "column": 7
       }
     },
@@ -1719,7 +1733,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 489,
+        "line": 696,
         "column": 7
       }
     },
@@ -1733,7 +1747,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 564,
+        "line": 771,
         "column": 7
       }
     },
@@ -1747,36 +1761,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 617,
+        "line": 824,
         "column": 7
       }
     },
     {
       "id": "147307e33c87398-14494f15655aa7d",
       "title": "Rules list should untrack disable rule if untrack switch is true",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 647,
-        "column": 8
+        "line": 853,
+        "column": 7
       }
     },
     {
       "id": "147307e33c87398-78854574d5e4c82",
       "title": "Rules list should not untrack disable rule if untrack switch if false",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 650,
-        "column": 8
+        "line": 890,
+        "column": 7
       }
     },
     {
@@ -1789,7 +1803,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 652,
+        "line": 929,
         "column": 7
       }
     },
@@ -1803,7 +1817,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 671,
+        "line": 948,
         "column": 7
       }
     },
@@ -1817,7 +1831,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 692,
+        "line": 969,
         "column": 7
       }
     },
