@@ -83,8 +83,9 @@ gh pr comment NUM -b "<text>"
 ## Example: Create a Pending Review
 
 Run payload creation and review creation as separate shell commands. The
-`strip-review-event` hook denies review-creation commands that appear together
-with heredocs because that shape is ambiguous without a shell parser.
+`strip-review-event` hook reads the `--input` file to strip any stray `event`
+key before `gh` runs, so the payload file must already exist on disk when the
+review-creation command executes.
 
 ```bash
 cat > /tmp/review-payload.json <<'JSON'
