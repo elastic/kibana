@@ -49,21 +49,22 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 /**
- * Detects an `event=` flag pair on `gh api .../reviews` regardless of how the
- * field NAME is quoted. The matched prefix is
- * `(-f|-F|--field|--raw-field …)(?:$?['"]|\)?event=`, covering pflag's attached
- * shorthand (`-fevent=...`, `-f=event=...`) and the name-side quoting the shell
- * strips before `gh` sees argv: bare, single/double quotes, ANSI-C
- * (`$'event=...'`) and locale (`$"event=..."`) quoting, and a leading backslash
- * escape (`\event=...`) — all of which bash passes to `gh` as `event=...`. The
- * regex never consumes the value, so every value-side shell-quoting /
- * expansion shape (`$(…)`, backticks, `${VAR:-…}`) is covered without
- * alternation. The match drives a `deny` pointing the agent at the canonical
- * `--input <file>` path; quote-aware iteration in `hasEventFlagOutsideQuotes`
- * ignores literal `event=` text inside a `-f body="…"` argument.
+ * Detects any field flag (`-f`, `-F`, `--field`, `--raw-field`, including
+ * pflag's attached shorthand `-ffield=...` / `-f=field=...` / `--field=...`) on
+ * a `gh api .../reviews` review-creation command. On the creation endpoint the
+ * only sanctioned body shape is `--input <file>`; a field flag is never needed
+ * there. Crucially, the hook cannot tell whether a field value is `event=...`:
+ * it can be hidden by shell quoting/escaping the name (`$'event=...'`,
+ * `\event=...`) or produced entirely by an expansion the hook cannot evaluate
+ * (`$(printf event=APPROVE)`, `` `…` ``, `${VAR:-event=APPROVE}`). Rather than
+ * chase each shape with a value-aware regex, fail closed: deny any field flag
+ * on the creation endpoint and point the agent at `--input <file>`. The
+ * submission endpoint (`/reviews/{id}/events`) is a different path and is not
+ * matched as a creation call, so `-f event=APPROVE` there stays allowed.
+ * Quote-aware iteration in `hasFieldFlagOutsideQuotes` ignores a `-f`/`--field`
+ * token that appears only as literal text inside another argument's quotes.
  */
-const eventFlag =
-  /\s(?:-[fF](?:=|\s+)?|--(?:raw-)?field(?:=|\s+))(?:\$?['"]|\\)?event=/g;
+const fieldFlag = /(?:^|\s)(?:-[fF]|--(?:raw-)?field(?:[=\s]|$))/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
@@ -171,17 +172,20 @@ const isInsideAnyRange = (idx, ranges) => {
 };
 
 /**
- * Returns `true` if any `eventFlag` match in `segment` lies outside a
- * shell-quoted region. Matches inside quoted regions are ignored so that a
- * body argument like `-f body='example -f event=test'` does not
+ * Returns `true` if any `fieldFlag` match in `segment` lies outside a
+ * shell-quoted region. The flag may be matched at the very start of the
+ * segment or after whitespace; the offset of that boundary (not the leading
+ * whitespace) is what gets quote-checked, so a `-f` appearing only as literal
+ * text inside another argument like `-b "see -f event=test"` does not
  * false-trigger a deny.
  */
-const hasEventFlagOutsideQuotes = (segment) => {
+const hasFieldFlagOutsideQuotes = (segment) => {
   const ranges = getQuotedRanges(segment);
-  eventFlag.lastIndex = 0;
+  fieldFlag.lastIndex = 0;
   let m;
-  while ((m = eventFlag.exec(segment)) !== null) {
-    if (!isInsideAnyRange(m.index, ranges)) return true;
+  while ((m = fieldFlag.exec(segment)) !== null) {
+    const dashIdx = m.index + m[0].indexOf('-');
+    if (!isInsideAnyRange(dashIdx, ranges)) return true;
   }
   return false;
 };
@@ -324,9 +328,9 @@ const analyzeCreationSegment = (segment, raw) => {
     };
   }
 
-  if (hasEventFlagOutsideQuotes(segment)) {
+  if (hasFieldFlagOutsideQuotes(segment)) {
     return {
-      deny: 'Passing `event` on the `gh api .../reviews` command line publishes the review immediately. Write the request body to a JSON file (omitting `event`) and submit it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`. The hook reads the file and strips any stray `event` key before `gh` runs. Submit the review explicitly later via `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
+      deny: 'Passing fields via `-f`/`-F`/`--field`/`--raw-field` on the `gh api .../reviews` creation command is not allowed: a field value can be (or expand to) `event=...` — directly, through name quoting/escaping (`$\'event=...\'`, `\\event=...`), or through an expansion the hook cannot evaluate (`$(...)`, backticks, `${VAR:-...}`) — which publishes the review immediately. Write the entire request body to a JSON file (omitting `event`) and submit it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`. The hook strips any stray `event` key before `gh` runs. Submit the review explicitly later via `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
     };
   }
 
