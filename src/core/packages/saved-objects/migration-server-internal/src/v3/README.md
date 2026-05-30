@@ -27,8 +27,8 @@ v3 expresses the same machine differently:
   for legal transitions.
 - **Type-constrained transitions** — a step physically cannot return a state
   outside its row in `SUCCESSORS` without a compile error.
-- **Explicit correctness apparatus** — runtime invariants asserted in the loop
-  driver, plus property-based test scaffolding (planned; skeleton in
+- **Explicit correctness apparatus** — runtime invariants asserted in the loop,
+  plus property-based test scaffolding (planned; skeleton in
   `successor_graph.test.ts`) over arbitrary `(state, response)` pairs.
 
 ---
@@ -42,7 +42,7 @@ Five concepts, each named for its call-site role:
 | `State`   | discriminated union, one variant per state | `state.ts`, `steps/*.ts` | The migration's current control point plus the data it carries.            |
 | `IO`      | interface of async functions      | `io.ts`                 | The side-effecting operations the machine can perform (ES calls).          |
 | `Step`    | `{ action, transition }`          | `types.ts`, `steps/*.ts` | A recipe: which IO call to run, and how to interpret the response.         |
-| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Looks up the step factory in the `STEPS` table (in `successors.ts`) using `state.name`, runs it, and returns the next state. The `satisfies Record<NonTerminalState['name'], …>` on `STEPS` is the single point of compile-time enforcement that every non-terminal state has a wired-up factory. |
+| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Dispatch function: looks up the step factory in the `STEPS` table (in `successors.ts`) using `state.name`, runs it, and returns the next state. The `satisfies Record<NonTerminalState['name'], …>` on `STEPS` is the single point of compile-time enforcement that every non-terminal state has a wired-up factory. |
 | `runStep` | `(step) => Promise<State>`        | `types.ts`              | Awaits `action()`, feeds the response to `transition()`.                   |
 
 The loop, in pseudocode:
@@ -135,51 +135,57 @@ show as a one-line diff in PR review.
 
 ## File layout
 
+> **Curated highlights** — not every file is listed. The directory itself is the
+> full index; run `ls v3/` for the complete picture.
+
 ```
 v3/
-├── README.md                        ← this file
 ├── index.ts                         ← public API: runV3Migration + types
-├── run_v3_migration.ts              ← loop driver
-├── next.ts                          ← tiny loop driver; looks up STEPS[state.name]
-├── state.ts                         ← State union, BaseState, transition helpers
-├── types.ts                         ← Step, runStep, re-exports from successors
+├── run_v3_migration.ts              ← loop driver (the pseudocode above, realized)
+├── next.ts                          ← dispatch function; STEPS[state.name] lookup
+├── state.ts                         ← State union, transition helpers (transitionTo, appendLog, resetRetry)
+├── migration_state.ts               ← layered state types: BaseState, MigrationBaseState, PostInitState, SourceExistsState
 ├── successors.ts                    ← SUCCESSORS, STEPS, STATE_INVARIANTS dispatch tables
+├── types.ts                         ← Step, runStep, re-exports from successors
 ├── io.ts                            ← IO interface + response unions
-├── invariant_helper.ts              ← MigrationInvariantViolation, assertInvariant, clause
+├── retry.ts                         ← centralised retry helpers (handleRetryableFailure, delayRetryTransition)
 ├── invariants.ts                    ← assertInvariants dispatcher + cross-cutting checks
-├── assert_never.ts                  ← exhaustiveness helper
-├── steps/
-│   ├── init.ts                      ← Name, State, step factory
-│   ├── check_source.ts
-│   ├── create_target.ts             ← the self-loop retry pattern
-│   ├── mark_ready.ts
-│   ├── done.ts                      ← terminal: no step factory
-│   └── fatal.ts                     ← terminal: no step factory
-├── run_v3_migration.test.ts         ← end-to-end happy + retry + exhaustion
+├── invariant_helper.ts              ← MigrationInvariantViolation, assertInvariant, clause
+├── steps/                           ← 26 step files, one per control point
+│   ├── init.ts                      ← canonical step pattern (Name, State, step)
+│   ├── create_new_target.ts         ← retry self-loop pattern (with handleRetryableFailure)
+│   └── done.ts / fatal.ts           ← terminal: Name + State only, no step factory
 ├── invariants.test.ts               ← negative assertInvariants cases
-├── successor_graph.test.ts          ← SUCCESSORS snapshot + table + PBT
-└── test_helpers.ts                  ← shared IO stub, factories, transitionCases
+├── successor_graph.test.ts          ← SUCCESSORS snapshot + table coverage + PBT skeleton
+├── run_v3_migration.test.ts         ← placeholder (describe.skip + it.todo)
+├── __type_tests__/                  ← compile-time regression tests for type constraints
+├── __snapshots__/                   ← Jest snapshot of the successor graph
+├── STRESS_TEST_REPORT.md            ← sibling doc: stress-test methodology & results
+└── TYPE_TESTING_PLAN.md             ← sibling doc: type-level testing strategy
 ```
 
 ---
 
 ## Anatomy of a step file
 
-Every non-terminal step exports four things, in this order. `check_source.ts`
-end-to-end:
+> **Illustrative skeleton** — names are fictional to foreground the pattern. For
+> a real step see `steps/init.ts` (canonical pattern) or `steps/create_new_target.ts`
+> (with retry via `handleRetryableFailure`).
+
+Every non-terminal step exports four things, in this order:
 
 ```ts
 // 1. Discriminant value — what state.name compares against.
 export const Name = 'CHECK_SOURCE' as const;
 
-// 2. State variant — BaseState plus any step-specific fields.
+// 2. State variant — extends a layer from migration_state.ts.
 //    Joined into `State` (the union) in state.ts.
-export interface State extends BaseState {
+export interface State extends PostInitState {
   readonly name: typeof Name;
 }
 
-// 3. Successors derived from SUCCESSORS — constrains transition's return type.
-type Successors = SuccessorsOf<typeof Name>;
+// 3. (optional) Per-step invariant — registered in STATE_INVARIANTS.
+export const assertInvariants = (state: State) => { /* … */ };
 
 // 4. Step factory — bundles action + transition with the current state.
 export const step = (state: State, io: IO): Step<Successors, CheckSourceResponse> => ({
@@ -238,10 +244,11 @@ transitionTo(
 )
 ```
 
-It carries `BaseState` (retry counters, logs) from the current state, sets the
-new `name`, and lets you supply exactly the step-specific fields the target
-state needs. The type of `extras` is
-`Omit<StateOf<TName>, keyof BaseState | 'name'>`, so:
+It carries every field from the current state that also belongs on the target,
+sets the new `name`, and lets you supply exactly the step-specific fields the
+target state needs. The type of `extras` is
+`Omit<StateOf<TTo>, keyof TFrom | 'name'>` — subtracting the from-state's
+fields means anything already carried forward doesn't need repeating:
 
 - Adding a field to a target's `State` interface produces a TS error at every
   transition into it until the field is supplied — **no missing-field drift.**
@@ -251,7 +258,8 @@ Three small companions in `state.ts`:
 
 - `appendLog(state, message)` — append to `state.logs`. Generic in `TState`, so
   it preserves the variant type.
-- `resetRetry(state)` — zero `state.retryCount`.
+- `resetRetry(state)` — zero `retryCount` unless `state.skipRetryReset` is set
+  (used by polling states to preserve their counter across transitions).
 - `incrementRetry(state)` — `retryCount + 1`.
 
 All three are pure and composable: `incrementRetry(appendLog(state, '…'))` is
@@ -259,25 +267,23 @@ the idiomatic shape for a retry self-loop.
 
 ### Retries are self-loops
 
-The retry pattern lives in `create_target.ts`:
+Step files delegate retry logic to `handleRetryableFailure` (from `retry.ts`),
+which encapsulates exhaustion checks, exponential back-off delay, and the
+transition to either self (retry) or `FATAL` (exhausted):
 
 ```ts
 case 'retryable_failure':
-  if (state.retryCount >= state.retryAttempts) {
-    return transitionTo(
-      appendLog(state, `v3 CREATE_TARGET exhausted retries: ${response.message}`),
-      FATAL.Name,
-      { reason: response.message }
-    );
-  }
-  return transitionTo(
-    incrementRetry(appendLog(state, `v3 CREATE_TARGET retrying: ${response.message}`)),
-    Name,                                       // self-loop
-    { sourceIndex: state.sourceIndex }
-  );
+  return handleRetryableFailure(state, response, {
+    sourceIndex: state.sourceIndex,   // self-loop extras
+  });
 ```
 
-Retries are **explicit transitions** in the graph (`CREATE_TARGET → CREATE_TARGET`),
+Under the hood this is equivalent to:
+
+1. If `retryCount >= maxAttempts` → `transitionTo(…, FATAL.Name, { reason })`.
+2. Otherwise → `transitionTo(incrementRetry(appendLog(state, …)), Name, selfExtras)`.
+
+Retries are **explicit transitions** in the graph (`CREATE_NEW_TARGET → CREATE_NEW_TARGET`),
 not a decorator that hides them. Every retry attempt:
 
 - Appears in the `logs` trace.
@@ -285,13 +291,17 @@ not a decorator that hides them. Every retry attempt:
 - Is checked by `assertInvariants`.
 - Is sampled by PBT.
 
-The cost is ~10 extra lines per retry-capable step. The payoff is total
-transparency: a `withRetry(action)` wrapper would make retries invisible to
-the trace and harder to test. We chose the lines.
+The cost is ~4 extra lines per retry-capable step (the `handleRetryableFailure`
+call plus the self-extras object). The payoff is total transparency: a
+`withRetry(action)` wrapper would make retries invisible to the trace and harder
+to test. We chose the lines.
 
 ---
 
 ## IO
+
+> **Illustrative subset** — the real interface has ~20 methods (one per IO call
+> in the migration). This shows the shape, not the full surface.
 
 ```ts
 export interface IO {
@@ -354,6 +364,10 @@ while (!isTerminalState(state)) {
 **Cross-cutting checks** stay in `invariants.ts`: **base** (retry integers and
 bounds), **migration-base** (non-empty config strings when `indexPrefix` is
 present), **post-init** (`targetIndex`, `SourceExistsState` `Option` checks).
+The dispatcher also guards against runtime-corrupted `state.name` via
+`isKnownStateName` — defense against `as unknown as` casts elsewhere in the
+codebase.
+
 **Per-control-point checks** live beside each step's `Name` / `State` / `step`
 as an exported `assertInvariants(state: State)` and are dispatched via
 `STATE_INVARIANTS` in `successors.ts` (mirroring the `STEPS` table). Step
