@@ -25,14 +25,19 @@ export default function (providerContext: FtrProviderContext) {
   const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX_DEFAULT_NS);
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_INDEX_DEFAULT_NS);
 
-  // Failing: See https://github.com/elastic/kibana/issues/240000
-  describe.skip('GET /internal/cloud_security_posture/status', () => {
+  describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = INDEXING TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
