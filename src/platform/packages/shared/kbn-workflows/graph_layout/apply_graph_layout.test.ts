@@ -7,10 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyGraphLayout } from './apply_graph_layout';
+import { applyGraphLayout, resolveShiftedEdgePoints } from './apply_graph_layout';
 import { transformWorkflowToGraph } from './transform_workflow_to_graph';
-import type { ForeachGroup, PreLayoutForeachGroupNode } from './types';
+import type { ForeachGroup, LayoutedNode, PreLayoutForeachGroupNode } from './types';
 import type { WorkflowYaml } from '../spec/schema';
+
+const CENTER_TOLERANCE = 2;
+
+const nodeCenterX = (node: LayoutedNode): number => node.position.x + node.style.width / 2;
+const nodeCenterY = (node: LayoutedNode): number => node.position.y + node.style.height / 2;
+
+const findLaidNode = (nodes: LayoutedNode[], id: string): LayoutedNode => {
+  const node = nodes.find((n) => n.id === id);
+  if (!node) {
+    throw new Error(`Expected layout node "${id}"`);
+  }
+  return node;
+};
+
+const findLaidEdge = (
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    points: Array<{ x: number; y: number }>;
+  }>,
+  source: string,
+  target: string
+) => {
+  const edge = edges.find((e) => e.source === source && e.target === target);
+  if (!edge) {
+    throw new Error(`Expected edge ${source} → ${target}`);
+  }
+  return edge;
+};
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
   ({
@@ -139,6 +169,206 @@ describe('applyGraphLayout', () => {
       expect(Array.isArray(e.points)).toBe(true);
       expect(e.points!.length).toBeGreaterThanOrEqual(2);
     }
+  });
+
+  it('TB merge node is horizontally centered between parallel branch leaves', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'fork',
+            type: 'parallel',
+            branches: [
+              { steps: [{ name: 'a', type: 'http' }] },
+              { steps: [{ name: 'b', type: 'http' }] },
+            ],
+          },
+          { name: 'c', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid } = applyGraphLayout(nodes, edges, foreachGroups, { direction: 'TB' });
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    const c = findLaidNode(laid, 'c');
+    const expectedCenterX = (nodeCenterX(a) + nodeCenterX(b)) / 2;
+    expect(Math.abs(nodeCenterX(c) - expectedCenterX)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+
+  it('LR merge node is vertically centered between parallel branch leaves', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'fork',
+            type: 'parallel',
+            branches: [
+              { steps: [{ name: 'a', type: 'http' }] },
+              { steps: [{ name: 'b', type: 'http' }] },
+            ],
+          },
+          { name: 'c', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid } = applyGraphLayout(nodes, edges, foreachGroups, { direction: 'LR' });
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    const c = findLaidNode(laid, 'c');
+    const expectedCenterY = (nodeCenterY(a) + nodeCenterY(b)) / 2;
+    expect(Math.abs(nodeCenterY(c) - expectedCenterY)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+
+  it('TB linear chain shares center X across trigger and steps', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'a', type: 'http' },
+          { name: 'b', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid } = applyGraphLayout(nodes, edges, foreachGroups, { direction: 'TB' });
+    const trigger = laid.find((n) => n.type === 'trigger');
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    expect(trigger).toBeDefined();
+    const centers = [nodeCenterX(trigger!), nodeCenterX(a), nodeCenterX(b)];
+    expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+
+  it('TB linear chain edge waypoints share center X with nodes', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'a', type: 'http' },
+          { name: 'b', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups, {
+      direction: 'TB',
+    });
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    const edge = findLaidEdge(laidEdges, 'a', 'b');
+    for (const p of edge.points) {
+      expect(Math.abs(p.x - nodeCenterX(a))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+      expect(Math.abs(p.x - nodeCenterX(b))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+    }
+  });
+
+  it('TB if branch fan-out omits dagre waypoints for smooth-step routing', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'left_step', type: 'http' }],
+            else: [
+              {
+                name: 'wide_loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [
+                  { name: 'inner_a', type: 'http' },
+                  { name: 'inner_b', type: 'http' },
+                ],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups, {
+      direction: 'TB',
+    });
+    const thenEdge = findLaidEdge(laidEdges, 'gate', 'left-step');
+    expect(thenEdge.points.length).toBeLessThan(2);
+  });
+
+  it('drops co-linear spine waypoints when middle bus is laterally stale', () => {
+    const result = resolveShiftedEdgePoints({
+      shifted: [
+        { x: 175, y: 100 },
+        { x: 400, y: 150 },
+        { x: 175, y: 200 },
+      ],
+      sourceCenter: 175,
+      targetCenter: 175,
+      crossAxis: 'x',
+    });
+    expect(result).toEqual([]);
+  });
+
+  it('keeps shifted waypoints when middle bus stays within endpoint span', () => {
+    const shifted = [
+      { x: 175, y: 100 },
+      { x: 180, y: 150 },
+      { x: 175, y: 200 },
+    ];
+    expect(
+      resolveShiftedEdgePoints({
+        shifted,
+        sourceCenter: 175,
+        targetCenter: 175,
+        crossAxis: 'x',
+      })
+    ).toEqual(shifted);
+  });
+
+  it('shifts foreach inner edge points with inner node padding', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              { name: 'inner_a', type: 'http' },
+              { name: 'inner_b', type: 'http' },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups);
+    const loop = findLaidNode(laid, 'loop');
+    const innerA = findLaidNode(laid, 'inner-a');
+    const innerB = findLaidNode(laid, 'inner-b');
+    const innerEdge = findLaidEdge(laidEdges, 'inner-a', 'inner-b');
+    expect(innerA.position.x).toBeGreaterThanOrEqual(32);
+    expect(innerA.position.y).toBeGreaterThanOrEqual(70);
+    const innerAAbsX = loop.position.x + innerA.position.x;
+    const innerAAbsY = loop.position.y + innerA.position.y;
+    for (const p of innerEdge.points) {
+      expect(p.x).toBeGreaterThanOrEqual(innerAAbsX - 1);
+      expect(p.y).toBeGreaterThanOrEqual(innerAAbsY - 1);
+    }
+  });
+
+  it('TB parallel fan-out keeps sibling steps separated', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'fork',
+            type: 'parallel',
+            branches: [
+              { steps: [{ name: 'a', type: 'http' }] },
+              { steps: [{ name: 'b', type: 'http' }] },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid } = applyGraphLayout(nodes, edges, foreachGroups, { direction: 'TB' });
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    expect(Math.abs(nodeCenterX(a) - nodeCenterX(b))).toBeGreaterThan(a.style.width / 2);
   });
 
   it('throws on a cyclic foreach group graph', () => {

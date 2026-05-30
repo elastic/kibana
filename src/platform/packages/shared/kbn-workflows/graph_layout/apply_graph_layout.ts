@@ -9,6 +9,13 @@
 
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { Position } from '@xyflow/react';
+import {
+  alignDagreCrossAxisInPlace,
+  type CrossAxis,
+  shiftEdgePointsInterpolated,
+  snapshotDagreNodeCenters,
+  translateEdgePoints,
+} from './align_dagre_cross_axis';
 import type { ForeachGroup, GraphEdge, LayoutedEdge, LayoutedNode, PreLayoutNode } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
 
@@ -17,6 +24,33 @@ import { DEFAULT_NODE_STYLE } from './types';
 const GROUP_PADDING_TOP = 70;
 const GROUP_PADDING_X = 32;
 const GROUP_PADDING_BOTTOM = 32;
+
+/** When barycenter moves endpoints by unequal cross-axis deltas, Dagre waypoints are stale. */
+const CROSS_AXIS_DELTA_TOLERANCE = 1;
+/** Keep in sync with WorkflowGraphEdge STRAIGHT_X_THRESHOLD (workflow_graph_edge.tsx). */
+const STRAIGHT_X_THRESHOLD = 100;
+
+/** Drops Dagre waypoints when endpoints align but middle segments still spread laterally. */
+export const resolveShiftedEdgePoints = ({
+  shifted,
+  sourceCenter,
+  targetCenter,
+  crossAxis,
+}: {
+  shifted: Array<{ x: number; y: number }>;
+  sourceCenter: number;
+  targetCenter: number;
+  crossAxis: CrossAxis;
+}): Array<{ x: number; y: number }> => {
+  const endpointSpread = Math.abs(sourceCenter - targetCenter);
+  const crossCoord = (p: { x: number; y: number }): number => (crossAxis === 'x' ? p.x : p.y);
+  const allCrossCoords = [sourceCenter, targetCenter, ...shifted.map(crossCoord)];
+  const waypointSpread = Math.max(...allCrossCoords) - Math.min(...allCrossCoords);
+  if (endpointSpread < STRAIGHT_X_THRESHOLD && waypointSpread >= STRAIGHT_X_THRESHOLD) {
+    return [];
+  }
+  return shifted;
+};
 
 export type LayoutDirection = 'TB' | 'LR';
 
@@ -36,11 +70,11 @@ function applyDagre(
 ): { nodes: LayoutedNode[]; edges: LayoutedEdge[] } {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
+  const nodeSep = options.compact ? 8 : 50;
   g.setGraph({
     rankdir: direction,
-    align: 'UL',
     ranker: 'tight-tree',
-    nodesep: options.compact ? 8 : 50,
+    nodesep: nodeSep,
     ranksep: options.compact ? 16 : 70,
     edgesep: options.compact ? 8 : 40,
   });
@@ -53,6 +87,12 @@ function applyDagre(
   }
 
   dagre.layout(g);
+
+  const crossAxis: CrossAxis = direction === 'LR' ? 'y' : 'x';
+  const mainAxis: CrossAxis = direction === 'LR' ? 'x' : 'y';
+  const nodeIds = nodes.map((n) => n.id);
+  const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
+  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
 
   const isHorizontal = direction === 'LR';
   const layouted: LayoutedNode[] = nodes.map((node) => {
@@ -75,13 +115,51 @@ function applyDagre(
   const routedEdges: LayoutedEdge[] = edges.map((edge) => {
     const dagreEdge = g.edge(edge.source, edge.target);
     const rawPoints = dagreEdge?.points;
-    const points =
-      rawPoints && rawPoints.length >= 2
-        ? rawPoints.map((p) => ({ x: p.x, y: p.y }))
-        : [
-            { x: 0, y: 0 },
-            { x: 0, y: 0 },
-          ];
+    const beforeSource = centersBefore.get(edge.source);
+    const beforeTarget = centersBefore.get(edge.target);
+    const afterSource = g.node(edge.source);
+    const afterTarget = g.node(edge.target);
+
+    let points: Array<{ x: number; y: number }> = [];
+    if (
+      rawPoints &&
+      rawPoints.length >= 2 &&
+      beforeSource &&
+      beforeTarget &&
+      afterSource &&
+      afterTarget
+    ) {
+      const sourceDelta =
+        crossAxis === 'x' ? afterSource.x - beforeSource.x : afterSource.y - beforeSource.y;
+      const targetDelta =
+        crossAxis === 'x' ? afterTarget.x - beforeTarget.x : afterTarget.y - beforeTarget.y;
+      const successorCount = (g.successors(edge.source) ?? []).length;
+      const predecessorCount = (g.predecessors(edge.target) ?? []).length;
+      // Fan-out/fan-in edges keep stale multi-rank Dagre buses after barycenter; smooth-step instead.
+      const isBranchOrMergeEdge = successorCount > 1 || predecessorCount > 1;
+      const useDagreWaypoints =
+        !isBranchOrMergeEdge && Math.abs(sourceDelta - targetDelta) <= CROSS_AXIS_DELTA_TOLERANCE;
+      if (useDagreWaypoints) {
+        const shifted = shiftEdgePointsInterpolated({
+          points: rawPoints.map((p) => ({ x: p.x, y: p.y })),
+          crossAxis,
+          mainAxis,
+          sourceMain: mainAxis === 'x' ? afterSource.x : afterSource.y,
+          targetMain: mainAxis === 'x' ? afterTarget.x : afterTarget.y,
+          sourceDelta,
+          targetDelta,
+        });
+        const sourceCenter = crossAxis === 'x' ? afterSource.x : afterSource.y;
+        const targetCenter = crossAxis === 'x' ? afterTarget.x : afterTarget.y;
+        points = resolveShiftedEdgePoints({
+          shifted,
+          sourceCenter,
+          targetCenter,
+          crossAxis,
+        });
+      }
+    }
+
     return { ...edge, points };
   });
 
@@ -129,18 +207,26 @@ export function layoutForeachGroup(
   const maxX = Math.max(...innerLayouted.map((n) => n.position.x + n.style.width));
   const maxY = Math.max(...innerLayouted.map((n) => n.position.y + n.style.height));
 
+  const shiftX = -minX + padX;
+  const shiftY = -minY + padTop;
+
   // Shift all inner nodes so the bounding box starts at (padX, padTop)
   const shifted = innerLayouted.map((n) => ({
     ...n,
     position: {
-      x: n.position.x - minX + padX,
-      y: n.position.y - minY + padTop,
+      x: n.position.x + shiftX,
+      y: n.position.y + shiftY,
     },
+  }));
+
+  const shiftedInnerEdges = innerEdges.map((e) => ({
+    ...e,
+    points: translateEdgePoints(e.points, shiftX, shiftY),
   }));
 
   return {
     layoutedInnerNodes: shifted,
-    innerEdges,
+    innerEdges: shiftedInnerEdges,
     groupWidth: maxX - minX + padX * 2,
     groupHeight: maxY - minY + padTop + padBottom,
   };
@@ -241,13 +327,37 @@ export function applyGraphLayout(
 
   const outerLayout = applyDagre(outerNodes, edges, direction, { compact });
 
+  const getGroupAbsolutePosition = (groupId: string): { x: number; y: number } => {
+    const outerNode = outerLayout.nodes.find((n) => n.id === groupId);
+    if (outerNode) {
+      return outerNode.position;
+    }
+    for (const [parentGroupId, inner] of groupInnerById) {
+      const childInParent = inner.layoutedInnerNodes.find((n) => n.id === groupId);
+      if (childInParent) {
+        const parentAbs = getGroupAbsolutePosition(parentGroupId);
+        return {
+          x: parentAbs.x + childInParent.position.x,
+          y: parentAbs.y + childInParent.position.y,
+        };
+      }
+    }
+    return { x: 0, y: 0 };
+  };
+
   // 3. Splice inner nodes back in at absolute positions (React Flow uses
   //    relative-to-parent positions when `extent: 'parent'`, so keep relative).
   const finalNodes: LayoutedNode[] = [...outerLayout.nodes];
   const finalEdges: LayoutedEdge[] = [...outerLayout.edges];
-  for (const [, inner] of groupInnerById) {
+  for (const [groupId, inner] of groupInnerById) {
     finalNodes.push(...inner.layoutedInnerNodes);
-    finalEdges.push(...inner.innerEdges);
+    const groupAbs = getGroupAbsolutePosition(groupId);
+    finalEdges.push(
+      ...inner.innerEdges.map((e) => ({
+        ...e,
+        points: translateEdgePoints(e.points, groupAbs.x, groupAbs.y),
+      }))
+    );
   }
 
   return { nodes: finalNodes, edges: finalEdges };
