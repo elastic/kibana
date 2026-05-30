@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiInMemoryTable,
   EuiSpacer,
+  EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
