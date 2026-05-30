@@ -8,9 +8,7 @@
 // Migrated from:
 //   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/alert_create_flyout.ts
 //
-// 11 of 13 tests migrated. Skipped:
-//   - test 11: requires apm.error_rate rule type (APM plugin not available in Scout stateful/classic)
-//   - test 13: requires filterBar.addDslFilter (no Scout equivalent)
+// 13 of 13 tests migrated.
 //
 // Substitutions from original:
 //   - Slack#xyztest → Slack connector created via API in beforeAll
@@ -602,8 +600,17 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('ESQLEditor-errors-warnings-content')).toBeHidden();
   });
 
-  // Skipped: requires apm.error_rate rule type (APM plugin not available in Scout stateful/classic)
-  test.skip('should successfully show the APM error count rule flyout', async () => {});
+  test('should successfully show the APM error count rule flyout', async ({ page }) => {
+    await page.gotoApp('rules');
+    await page.testSubj.click('createRuleButton');
+    await page.testSubj.click('apm.error_rate-SelectOption');
+    await page.testSubj.locator('ruleDetailsNameInput').fill(`apm-error-${Date.now()}`);
+
+    await expect(page.testSubj.locator('apmServiceField')).toBeVisible({ timeout: 10_000 });
+    await expect(page.testSubj.locator('apmEnvironmentField')).toBeVisible();
+    await expect(page.testSubj.locator('apmErrorGroupingKeyField')).toBeVisible();
+    // afterEach cancelRuleCreation handles cleanup
+  });
 
   test('should successfully test valid es_query alert', async ({ page }) => {
     const alertName = `scout-es-query-${Date.now()}`;
@@ -623,6 +630,22 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  // Skipped: requires filterBar.addDslFilter (no Scout equivalent)
-  test.skip('should add filter', async () => {});
+  test('should add filter', async ({ page }) => {
+    await page.gotoApp('triggersActionsAlerts');
+
+    const filter = JSON.stringify({
+      bool: { filter: [{ term: { 'kibana.alert.status': 'active' } }] },
+    });
+
+    await page.testSubj.click('addFilter');
+    await page.testSubj.click('editQueryDSL');
+    const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
+    await dslTextarea.waitFor({ state: 'attached' });
+    await dslTextarea.click({ force: true });
+    await page.keyboard.press('Control+a');
+    await page.keyboard.type(filter);
+    await page.testSubj.click('saveFilter');
+
+    await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+  });
 });
