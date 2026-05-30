@@ -18,7 +18,6 @@ export const sigEventsJudgeAgent = {
   description:
     'Reviews proposed discoveries and decides whether to promote, acknowledge, or demote a significant event.',
   labels: ['observability', 'streams', 'significant-events', 'discovery', 'judge'],
-  avatar_color: '#CB4B16',
   avatar_icon: 'logoElastic',
   configuration: {
     instructions,
