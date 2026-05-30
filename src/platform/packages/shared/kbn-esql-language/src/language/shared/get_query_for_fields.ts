@@ -9,6 +9,7 @@
 
 import type { ESQLAstQueryExpression, ESQLAstForkCommand } from '@elastic/esql/types';
 import { getBracketsToClose } from '../../commands/definitions/utils/ast';
+import { endsWithComma } from '../../commands/definitions/utils/regex';
 import { expandEvals } from './expand_evals';
 
 /**
@@ -51,7 +52,7 @@ export function getQueryForFields(
 
   if (lastCommand && lastCommand.name === 'eval') {
     const hasTrailingSeparatorComma =
-      getBracketsToClose(queryString).length === 0 && queryString.trimEnd().endsWith(',');
+      getBracketsToClose(queryString).length === 0 && endsWithComma(queryString);
 
     if (lastCommand.args.length > 1 || hasTrailingSeparatorComma) {
       /**

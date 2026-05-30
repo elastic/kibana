@@ -11,7 +11,6 @@ import { Parser, PromQLParser, Walker } from '@elastic/esql';
 import type { ESQLAstItem, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
 import {
-  addAutocompleteMarker,
   correctPromqlQuerySyntax,
   correctQuerySyntax,
   getBracketsToClose,
@@ -47,33 +46,31 @@ describe('getBracketsToClose', () => {
   });
 });
 
-describe('addAutocompleteMarker', () => {
+describe('correctQuerySyntax', () => {
   it('appends marker after operator', () => {
     const query = 'FROM foo | EVAL field > ';
-    const result = addAutocompleteMarker(query);
+    const result = correctQuerySyntax(query);
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
   it('appends marker after comma', () => {
     const query = 'FROM foo | STATS field1, ';
-    const result = addAutocompleteMarker(query);
+    const result = correctQuerySyntax(query);
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
   it('appends marker if all brackets are closed and ends with operator', () => {
     const query = 'FROM index | STATS AVG(field1) != ';
-    const result = addAutocompleteMarker(query);
+    const result = correctQuerySyntax(query);
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
   it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
     const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
-    const result = addAutocompleteMarker(query);
+    const result = correctQuerySyntax(query);
     expect(result).toEqual(query);
   });
-});
 
-describe('correctQuerySyntax', () => {
   it('closes unclosed brackets', () => {
     const query = 'FROM foo | EVAL foo(bar[baz';
     const result = correctQuerySyntax(query);
@@ -91,8 +88,7 @@ describe('correctQuerySyntax', () => {
   it('handles incomplete function signature', () => {
     const query = 'FROM foo | EVAL foo(bar, ';
     const result = correctQuerySyntax(query);
-    expect(result.endsWith(')')).toBe(true);
-    expect(result).not.toContain(EDITOR_MARKER);
+    expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
   });
 });
 
@@ -139,7 +135,7 @@ describe('correctPromqlQuerySyntax', () => {
 
 describe('removeAutocompleteMarkers', () => {
   const parseAutocomplete = (innerText: string): ESQLAstQueryExpression => {
-    const corrected = correctQuerySyntax(addAutocompleteMarker(innerText));
+    const corrected = correctQuerySyntax(innerText);
     return Parser.parse(corrected, { withFormatting: true }).root;
   };
 

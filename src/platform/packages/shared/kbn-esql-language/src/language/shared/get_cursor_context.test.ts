@@ -9,7 +9,6 @@
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import {
-  addAutocompleteMarker,
   correctQuerySyntax,
   isMarkerNode,
   removeAutocompleteMarkers,
@@ -19,7 +18,7 @@ import { Parser, Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {
-  const query = correctQuerySyntax(addAutocompleteMarker(_query));
+  const query = correctQuerySyntax(_query);
   if (!query.includes(EDITOR_MARKER)) {
     throw new Error(`Query does not contain marker: ${query}`);
   }

@@ -225,29 +225,21 @@ export function getBracketsToClose(text: string) {
   return stack.reverse().map((bracket) => pairs[bracket]);
 }
 
-export function addAutocompleteMarker(query: string) {
-  if (
-    ENDS_WITH_BINARY_OPERATOR_REGEX.test(query) ||
-    ENDS_WITH_CASTING_OPERATOR_REGEX.test(query) ||
-    (endsWithComma(query) && endsWithWhitespace(query))
-  ) {
-    return `${query} ${EDITOR_MARKER}`;
-  }
-
-  return query;
-}
-
 /**
  * This function attempts to correct the syntax of a partial query to make it valid.
  *
  * We are generally dealing with incomplete queries when the user is typing. But,
  * having an AST is helpful so we heuristically correct the syntax so it can be parsed.
- *
- * @param _query
- * @param context
- * @returns
  */
 export function correctQuerySyntax(query: string) {
+  if (
+    ENDS_WITH_BINARY_OPERATOR_REGEX.test(query) ||
+    ENDS_WITH_CASTING_OPERATOR_REGEX.test(query) ||
+    (endsWithComma(query) && endsWithWhitespace(query))
+  ) {
+    query += ` ${EDITOR_MARKER}`;
+  }
+
   // check if all brackets are closed, otherwise close them
   return query + getBracketsToClose(query).join('');
 }
@@ -259,9 +251,7 @@ const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
  * It keeps the same marker semantics used in ES|QL correction, but only for trailing
  * separators relevant to PromQL argument/subquery contexts.
  */
-export function correctPromqlQuerySyntax(input: string): string {
-  let query = input;
-
+export function correctPromqlQuerySyntax(query: string): string {
   if (
     !query.includes(EDITOR_MARKER) &&
     (endsWithComma(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
