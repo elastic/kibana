@@ -88,6 +88,8 @@ export const generateExecutorFunction = ({
       fetchOptions?: FetchOptions;
     };
 
+    logger.debug(`[generateExecutorFunction] connectorId: ${connectorId}, subAction: ${subAction}`);
+
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,

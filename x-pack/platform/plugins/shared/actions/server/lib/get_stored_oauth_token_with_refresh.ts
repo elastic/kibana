@@ -148,7 +148,8 @@ export const getStoredTokenWithRefresh = async ({
       }
 
       // Check if access token is still valid (may have been refreshed by another request)
-      const now = Date.now();
+      // const now = Date.now();
+      const now = Date.now() + 7 * 24 * 60 * 60 * 1000;
       const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
       const extractedTokens = extractStoredOAuthTokens({
@@ -192,7 +193,12 @@ export const getStoredTokenWithRefresh = async ({
       }
 
       // Refresh the token
-      logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
+      logger.debug(
+        `Refreshing access token for connectorId: ${connectorId} — using stored refresh_token: ${storedRefreshToken} — caller: ${new Error().stack
+          ?.split('\n')
+          .slice(1, 5)
+          .join(' | ')}`
+      );
       try {
         const tokenResult = await refreshFn(storedRefreshToken);
 
@@ -200,6 +206,10 @@ export const getStoredTokenWithRefresh = async ({
 
         const updatedRefreshToken: string | undefined =
           tokenResult.refreshToken ?? storedRefreshToken;
+
+        logger.debug(
+          `Storing updated tokens for connectorId: ${connectorId} — refresh_token: ${updatedRefreshToken} (tokenResult.refreshToken=${tokenResult.refreshToken}, storedRefreshToken=${storedRefreshToken})`
+        );
 
         // Update stored token
         await connectorTokenClient.updateWithRefreshToken({

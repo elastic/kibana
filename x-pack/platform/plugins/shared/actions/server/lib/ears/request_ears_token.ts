@@ -51,6 +51,9 @@ export async function requestEarsToken(
   });
 
   if (res.status === 200) {
+    logger.debug(
+      `[EARS][${provider}] token exchange succeeded — access_token: ${res.data.access_token} refresh_token: ${res.data.refresh_token}`
+    );
     return {
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,
