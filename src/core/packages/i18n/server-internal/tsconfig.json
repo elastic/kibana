@@ -27,6 +27,7 @@
     "@kbn/repo-packages",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-common",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
