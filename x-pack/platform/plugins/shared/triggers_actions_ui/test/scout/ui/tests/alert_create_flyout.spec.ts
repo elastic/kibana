@@ -8,13 +8,16 @@
 // Migrated from:
 //   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/alert_create_flyout.ts
 //
-// 5 of 13 tests migrated. Skipped:
-//   - tests 1-4: require Slack#xyztest preconfigured connector
-//   - tests 5-6: require test.always-firing rule type (not registered in Scout stateful/classic)
+// 11 of 13 tests migrated. Skipped:
 //   - test 11: requires apm.error_rate rule type (APM plugin not available in Scout stateful/classic)
 //   - test 13: requires filterBar.addDslFilter (no Scout equivalent)
+//
+// Substitutions from original:
+//   - Slack#xyztest → Slack connector created via API in beforeAll
+//   - test.always-firing rule → .es-query rule (tests 5-6)
+//   - defineIndexThresholdAlert → Scout equivalent helper (tests 1-4)
 
-import type { ScoutPage } from '@kbn/scout';
+import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
@@ -67,15 +70,76 @@ const cancelRuleCreation = async (page: ScoutPage) => {
   }
 };
 
+// Equivalent of FTR rules.common.defineIndexThresholdAlert
+const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => {
+  await page.gotoApp('rules');
+  await page.testSubj.click('createRuleButton');
+  await page.testSubj.click('.index-threshold-SelectOption');
+  await page.testSubj.locator('selectIndexExpression').scrollIntoViewIfNeeded();
+  await page.testSubj.click('selectIndexExpression');
+  const indexInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
+  await indexInput.fill('.kibana');
+  await page.locator('[role="listbox"]').waitFor();
+  await page.locator('[role="listbox"] [role="option"]:first-child').click();
+  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
+  await timeFieldSelect.locator('option:nth-child(2)').waitFor();
+  await timeFieldSelect.selectOption({ index: 1 });
+  await page.testSubj.click('closePopover');
+  await page.testSubj.locator('ruleDetailsNameInput').scrollIntoViewIfNeeded();
+  await page.testSubj.locator('ruleDetailsNameInput').fill(alertName);
+};
+
+// Find and delete a rule by name via API
+const deleteRuleByName = async (kbnClient: KbnClient, name: string) => {
+  const resp = await kbnClient.request({
+    method: 'GET',
+    path: '/api/alerting/rules/_find',
+    headers: {},
+    query: { search: name, search_fields: 'name' },
+  });
+  for (const rule of (resp.data as any).data ?? []) {
+    if (rule.name === name) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/internal/alerting/rule/${rule.id}`,
+        headers: { 'kbn-xsrf': 'scout' },
+      });
+    }
+  }
+};
+
+// Click the Slack connector card in the actions connector modal
+const selectConnectorInModal = async (page: ScoutPage, connectorName: string) => {
+  await expect(page.testSubj.locator('ruleActionsConnectorsModal')).toBeVisible();
+  await page
+    .locator('[data-test-subj="ruleActionsConnectorsModalCard"]')
+    .filter({ hasText: connectorName })
+    .locator('button')
+    .click();
+};
+
 test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
   let esQueryRuleId: string;
   let esQueryRuleName: string;
+  let slackConnectorId: string;
+  let slackConnectorName: string;
 
   test.beforeAll(async ({ apiServices }) => {
     const rule = makeEsQueryRule('scout-alert-flyout');
     const resp = await apiServices.alerting.rules.create(rule);
     esQueryRuleId = resp.data.id;
     esQueryRuleName = resp.data.name;
+
+    slackConnectorName = `scout-slack-${Date.now()}`;
+    const connResp = await apiServices.alerting.connectors.create({
+      name: slackConnectorName,
+      connectorTypeId: '.slack',
+      config: {},
+      secrets: {
+        webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+      },
+    });
+    slackConnectorId = connResp.id;
   });
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -88,21 +152,369 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
   test.afterAll(async ({ apiServices }) => {
     if (esQueryRuleId) await apiServices.alerting.rules.delete(esQueryRuleId);
+    if (slackConnectorId) await apiServices.alerting.connectors.delete(slackConnectorId);
   });
 
-  // Skipped: requires Slack#xyztest preconfigured connector (not available in Scout stateful/classic)
-  test.skip('should delete the right action when the same action has been added twice', async () => {});
+  test('should delete the right action when the same action has been added twice', async ({
+    page,
+    kbnClient,
+  }) => {
+    const ruleName = `scout-flyout-del-${Date.now()}`;
+    await defineEsQueryAlert(page, ruleName);
 
-  test.skip('should create an alert', async () => {});
+    // Add Slack action with unique body text
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+    await page.testSubj.locator('messageTextArea').fill('myUniqueKey');
+    await page.testSubj.click('rulePageFooterSaveButton');
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+      `Created rule "${ruleName}"`,
+      { timeout: 15_000 }
+    );
 
-  test.skip('should create an alert with composite query in filter for conditional action', async () => {});
+    try {
+      // Navigate to rules list and open edit flyout
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, ruleName);
+      await page.testSubj.click('selectActionButton');
+      await page.testSubj.click('editRule');
 
-  test.skip('should create an alert with DSL filter for conditional action', async () => {});
+      // Add a second Slack action
+      await page.testSubj.click('ruleActionsAddActionButton');
+      await selectConnectorInModal(page, slackConnectorName);
 
-  // Skipped: requires test.always-firing rule type (not registered in Scout stateful/classic)
-  test.skip('should create an alert with actions in multiple groups', async () => {});
+      // Fill the second action's textarea (last of all messageTextArea elements)
+      const allTextAreas = await page.testSubj.locator('messageTextArea').all();
+      await allTextAreas[allTextAreas.length - 1].fill('myUniqueKey1');
 
-  test.skip('should show save confirmation before creating alert with no actions', async () => {});
+      // Delete the FIRST action item
+      await page
+        .locator(
+          '[data-test-subj="ruleActionsItem"]:first-child [data-test-subj="ruleActionsItemDeleteButton"]'
+        )
+        .click();
+
+      // Only one action remains; it should be 'myUniqueKey1' (the second action)
+      await expect(page.testSubj.locator('messageTextArea')).toHaveCount(1);
+      await expect(page.testSubj.locator('messageTextArea')).toHaveValue('myUniqueKey1');
+    } finally {
+      await deleteRuleByName(kbnClient, ruleName);
+    }
+  });
+
+  test('should create an alert', async ({ page, kbnClient }) => {
+    const alertName = `scout-flyout-create-${Date.now()}`;
+    await defineIndexThresholdAlert(page, alertName);
+
+    // filterKuery validation: invalid KQL should mark field as invalid
+    const filterKuery = page.testSubj.locator('filterKuery');
+    await filterKuery.fill('group:');
+    await filterKuery.blur();
+    await expect(filterKuery).toHaveClass(/euiFieldSearch-isInvalid/, { timeout: 5_000 });
+    await filterKuery.fill('group: group-0');
+    await filterKuery.blur();
+    await expect(filterKuery).not.toHaveClass(/euiFieldSearch-isInvalid/);
+
+    // Add Slack action
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+
+    // Default message template should be populated for Index Threshold rule
+    await expect(page.testSubj.locator('messageTextArea')).not.toBeEmpty({ timeout: 5_000 });
+
+    // Replace with test text then insert a variable
+    await page.testSubj.locator('messageTextArea').fill('test message ');
+    await page.testSubj.click('messageAddVariableButton');
+    await page.testSubj.click('variableMenuButton-alert.actionGroup');
+    await expect(page.testSubj.locator('messageTextArea')).toHaveValue(
+      'test message {{alert.actionGroup}}'
+    );
+
+    // Append more text, then insert another variable via search
+    await page.testSubj.locator('messageTextArea').press('End');
+    await page.keyboard.type(' some additional text ');
+    await page.testSubj.click('messageAddVariableButton');
+    await page.testSubj.locator('messageVariablesSelectableSearch').fill('rule.id');
+    await page.testSubj.click('variableMenuButton-rule.id');
+    await expect(page.testSubj.locator('messageTextArea')).toHaveValue(
+      'test message {{alert.actionGroup}} some additional text {{rule.id}}'
+    );
+
+    // Action settings: set throttle
+    await page.testSubj
+      .locator('ruleActionsItem')
+      .getByRole('button', { name: 'Settings' })
+      .click();
+    await page.testSubj.click('notifyWhenSelect');
+    await page.testSubj.click('onThrottleInterval');
+    await page.testSubj.locator('throttleInput').fill('10');
+
+    // Conditional action filter: toggle, add structured filter, add KQL query
+    await page.testSubj.click('alertsFilterQueryToggle');
+    await page.testSubj.click('addFilter');
+    await page.testSubj.locator('filterFieldSuggestionList').locator('input').fill('_id');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.locator('filterParams').fill('fake-rule-id');
+    await page.testSubj.click('saveFilter');
+    await page.testSubj.locator('queryInput').fill('_id: *');
+
+    try {
+      await page.testSubj.click('rulePageFooterSaveButton');
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Created rule "${alertName}"`,
+        { timeout: 15_000 }
+      );
+
+      // Verify rule appears in list
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, alertName);
+      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText('Index threshold');
+      await expect(row).toContainText('1 min');
+    } finally {
+      await deleteRuleByName(kbnClient, alertName);
+    }
+  });
+
+  test('should create an alert with composite query in filter for conditional action', async ({
+    page,
+    kbnClient,
+  }) => {
+    const alertName = `scout-flyout-composite-${Date.now()}`;
+    await defineIndexThresholdAlert(page, alertName);
+
+    // filterKuery validation
+    const filterKuery = page.testSubj.locator('filterKuery');
+    await filterKuery.fill('group:');
+    await filterKuery.blur();
+    await expect(filterKuery).toHaveClass(/euiFieldSearch-isInvalid/, { timeout: 5_000 });
+    await filterKuery.fill('group: group-0');
+    await filterKuery.blur();
+    await expect(filterKuery).not.toHaveClass(/euiFieldSearch-isInvalid/);
+
+    // Add Slack action and configure message
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+    await page.testSubj.locator('messageTextArea').fill('test message ');
+    await page.testSubj.click('messageAddVariableButton');
+    await page.testSubj.click('variableMenuButton-alert.actionGroup');
+    await page.testSubj.locator('messageTextArea').press('End');
+    await page.keyboard.type(' some additional text ');
+    await page.testSubj.click('messageAddVariableButton');
+    await page.testSubj.locator('messageVariablesSelectableSearch').fill('rule.id');
+    await page.testSubj.click('variableMenuButton-rule.id');
+
+    // Action settings: throttle
+    await page.testSubj
+      .locator('ruleActionsItem')
+      .getByRole('button', { name: 'Settings' })
+      .click();
+    await page.testSubj.click('notifyWhenSelect');
+    await page.testSubj.click('onThrottleInterval');
+    await page.testSubj.locator('throttleInput').fill('10');
+
+    // Conditional action filter: AND composite filter
+    await page.testSubj.click('alertsFilterQueryToggle');
+    await page.testSubj.click('addFilter');
+    // First condition: _id is not fake-rule-id
+    await page.testSubj.locator('filterFieldSuggestionList').locator('input').fill('_id');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.locator('filterParams').fill('fake-rule-id');
+    // Add AND condition
+    await page.testSubj.click('add-and-filter');
+    // Second condition: kibana.alert.action_group exists
+    const filter01 = page.testSubj.locator('filter-0.1');
+    await filter01
+      .locator('[data-test-subj="filterFieldSuggestionList"] input')
+      .fill('kibana.alert.action_group');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await filter01.locator('[data-test-subj="filterOperatorList"] input').fill('exists');
+    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.click('saveFilter');
+    await page.testSubj.locator('queryInput').fill('_id: *');
+
+    try {
+      await page.testSubj.click('rulePageFooterSaveButton');
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Created rule "${alertName}"`,
+        { timeout: 15_000 }
+      );
+
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, alertName);
+      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText('Index threshold');
+      await expect(row).toContainText('1 min');
+    } finally {
+      await deleteRuleByName(kbnClient, alertName);
+    }
+  });
+
+  test('should create an alert with DSL filter for conditional action', async ({
+    page,
+    kbnClient,
+  }) => {
+    const alertName = `scout-flyout-dsl-${Date.now()}`;
+    await defineIndexThresholdAlert(page, alertName);
+
+    // filterKuery validation
+    const filterKuery = page.testSubj.locator('filterKuery');
+    await filterKuery.fill('group:');
+    await filterKuery.blur();
+    await expect(filterKuery).toHaveClass(/euiFieldSearch-isInvalid/, { timeout: 5_000 });
+    await filterKuery.fill('group: group-0');
+    await filterKuery.blur();
+    await expect(filterKuery).not.toHaveClass(/euiFieldSearch-isInvalid/);
+
+    // Add Slack action
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+
+    // Action settings: throttle
+    await page.testSubj
+      .locator('ruleActionsItem')
+      .getByRole('button', { name: 'Settings' })
+      .click();
+    await page.testSubj.click('notifyWhenSelect');
+    await page.testSubj.click('onThrottleInterval');
+    await page.testSubj.locator('throttleInput').fill('10');
+
+    // Conditional action filter: add a DSL (Query DSL) filter
+    await page.testSubj.click('alertsFilterQueryToggle');
+    const dslFilter = JSON.stringify({
+      bool: { filter: [{ term: { 'kibana.alert.rule.name': alertName } }] },
+    });
+    await page.testSubj.click('addFilter');
+    await page.testSubj.click('editQueryDSL');
+    const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
+    await dslTextarea.waitFor({ state: 'attached' });
+    await dslTextarea.click({ force: true });
+    await page.keyboard.press('Control+a');
+    await page.keyboard.type(dslFilter);
+    await page.testSubj.click('saveFilter');
+    // A filter badge should now be present
+    await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+
+    try {
+      await page.testSubj.click('rulePageFooterSaveButton');
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Created rule "${alertName}"`,
+        { timeout: 15_000 }
+      );
+
+      // Re-open rule for editing and verify the DSL filter persists
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, alertName);
+      await page.testSubj.click('selectActionButton');
+      await page.testSubj.click('editRule');
+      await page.testSubj
+        .locator('ruleActionsItem')
+        .getByRole('button', { name: 'Settings' })
+        .click();
+      await page.testSubj.locator('globalQueryBar').scrollIntoViewIfNeeded();
+      // DSL filter badge should still be present
+      await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+    } finally {
+      await deleteRuleByName(kbnClient, alertName);
+    }
+  });
+
+  test('should create an alert with actions in multiple groups', async ({ page, kbnClient }) => {
+    const alertName = `scout-flyout-multigroup-${Date.now()}`;
+    await defineEsQueryAlert(page, alertName);
+
+    // Add Slack action for the default (active) group
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+    await page.testSubj.locator('messageTextArea').fill('test message');
+
+    // Switch to recovered group via settings
+    await page.testSubj
+      .locator('ruleActionsItem')
+      .getByRole('button', { name: 'Settings' })
+      .click();
+    await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
+    await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
+
+    // Add a second Slack action for the recovered group
+    await page.testSubj.click('ruleActionsAddActionButton');
+    await selectConnectorInModal(page, slackConnectorName);
+    const allTextAreas = await page.testSubj.locator('messageTextArea').all();
+    await allTextAreas[allTextAreas.length - 1].fill('recovery message');
+
+    try {
+      await page.testSubj.click('rulePageFooterSaveButton');
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Created rule "${alertName}"`,
+        { timeout: 15_000 }
+      );
+
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, alertName);
+      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText('Elasticsearch query');
+      await expect(row).toContainText('1 min');
+    } finally {
+      await deleteRuleByName(kbnClient, alertName);
+    }
+  });
+
+  test('should show save confirmation before creating alert with no actions', async ({
+    page,
+    kbnClient,
+  }) => {
+    const alertName = `scout-flyout-confirm-${Date.now()}`;
+    await defineEsQueryAlert(page, alertName);
+
+    // Save with no actions → confirmation modal should appear
+    await page.testSubj.click('rulePageFooterSaveButton');
+    await expect(page.testSubj.locator('confirmCreateRuleModal')).toBeVisible({ timeout: 5_000 });
+
+    // Cancel → modal closes, save button re-enabled
+    await page.testSubj
+      .locator('confirmCreateRuleModal')
+      .locator('[data-test-subj="confirmModalCancelButton"]')
+      .click();
+    await expect(page.testSubj.locator('confirmCreateRuleModal')).toBeHidden();
+    await expect(page.testSubj.locator('rulePageFooterSaveButton')).toBeEnabled();
+
+    // Confirm save → rule created
+    await page.testSubj.click('rulePageFooterSaveButton');
+    await expect(page.testSubj.locator('confirmCreateRuleModal')).toBeVisible();
+    await page.testSubj
+      .locator('confirmCreateRuleModal')
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click();
+    await expect(page.testSubj.locator('confirmCreateRuleModal')).toBeHidden();
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+      `Created rule "${alertName}"`,
+      { timeout: 15_000 }
+    );
+
+    try {
+      await page.gotoApp('rules');
+      await page.testSubj.click('rulesTab');
+      await searchRules(page, alertName);
+      const row = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: alertName });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText('Elasticsearch query');
+      await expect(row).toContainText('1 min');
+    } finally {
+      await deleteRuleByName(kbnClient, alertName);
+    }
+  });
 
   test('should show discard confirmation before closing flyout without saving', async ({
     page,
