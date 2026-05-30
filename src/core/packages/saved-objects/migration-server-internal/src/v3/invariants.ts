@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SUCCESSORS } from './types';
+import * as Option from 'fp-ts/Option';
+import { SUCCESSORS } from './successors';
 import type { State } from './state';
-import * as CREATE_TARGET from './steps/create_target';
-import * as DONE from './steps/done';
+import * as CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK from './steps/cleanup_unknown_and_excluded_wait_for_task';
 import * as FATAL from './steps/fatal';
-import * as MARK_READY from './steps/mark_ready';
+import * as MARK_VERSION_INDEX_READY from './steps/mark_version_index_ready';
+import * as OUTDATED_DOCUMENTS_SEARCH_READ from './steps/outdated_documents_search_read';
+import * as UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK from './steps/update_target_mappings_properties_wait_for_task';
 
 const assertInvariant = (condition: boolean, message: string): void => {
   if (!condition) {
@@ -20,7 +22,6 @@ const assertInvariant = (condition: boolean, message: string): void => {
   }
 };
 
-// Defensive: catches runtime states that reached us through casts or untyped inputs.
 const isKnownStateName = (name: State['name']): boolean =>
   Object.prototype.hasOwnProperty.call(SUCCESSORS, name);
 
@@ -34,20 +35,30 @@ export const assertInvariants = (state: State): void => {
     state.retryCount <= state.retryAttempts,
     'retryCount must not exceed retryAttempts'
   );
-  assertInvariant(
-    state.logs.every((log) => typeof log === 'string'),
-    'logs must contain only strings'
-  );
-
-  if (state.name === CREATE_TARGET.Name) {
-    assertInvariant(state.sourceIndex.length > 0, 'CREATE_TARGET requires sourceIndex');
-  }
-
-  if (state.name === MARK_READY.Name || state.name === DONE.Name) {
-    assertInvariant(state.targetIndex.length > 0, `${state.name} requires targetIndex`);
-  }
 
   if (state.name === FATAL.Name) {
     assertInvariant(state.reason.length > 0, 'FATAL requires reason');
+  }
+
+  if (state.name === CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.Name) {
+    assertInvariant(state.deleteByQueryTaskId.length > 0, 'deleteByQueryTaskId required');
+  }
+
+  if (state.name === UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.Name) {
+    assertInvariant(
+      state.updateTargetMappingsTaskId.length > 0,
+      'updateTargetMappingsTaskId required'
+    );
+  }
+
+  if (state.name === OUTDATED_DOCUMENTS_SEARCH_READ.Name) {
+    assertInvariant(state.pitId.length > 0, 'pitId required for OUTDATED_DOCUMENTS_SEARCH_READ');
+  }
+
+  if (state.name === MARK_VERSION_INDEX_READY.Name) {
+    assertInvariant(
+      Option.isSome(state.versionIndexReadyActions),
+      'versionIndexReadyActions required'
+    );
   }
 };

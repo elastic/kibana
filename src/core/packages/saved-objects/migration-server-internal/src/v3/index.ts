@@ -9,7 +9,8 @@
 
 export { runV3Migration } from './run_v3_migration';
 export { assertInvariants } from './invariants';
+export { createIO } from './io';
 export type { RunV3MigrationParams } from './run_v3_migration';
-export type { IO } from './io';
+export type { IO, CreateIOParams } from './io';
 export type { NonTerminalState, State, StateName, StateOf, TerminalState } from './state';
 export type { Step } from './types';

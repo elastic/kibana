@@ -10,6 +10,7 @@
 import type { IO } from './io';
 import { assertInvariants } from './invariants';
 import { next } from './next';
+import type { State as InitState } from './steps/init';
 import { createInitialState, isTerminalState, type State, type TerminalState } from './state';
 
 export interface RunV3MigrationParams {
@@ -21,7 +22,14 @@ export const runV3Migration = async ({
   io,
   retryAttempts = 3,
 }: RunV3MigrationParams): Promise<TerminalState> => {
-  let state: State = createInitialState(retryAttempts);
+  // POC runner: full INIT params are supplied by production wiring; retryAttempts-only is a stub.
+  let state: State = createInitialState({
+    retryAttempts,
+    retryCount: 0,
+    skipRetryReset: false,
+    retryDelay: 0,
+    logs: [],
+  } as unknown as Omit<InitState, 'name'>);
   // Keep invariants always-on in this POC. Migrations run once per upgrade, and
   // catching a malformed state is worth the tiny assertion cost.
   assertInvariants(state);

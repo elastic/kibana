@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState } from '../state';
+import type { PostInitState } from '../migration_state';
 
 export const Name = 'DONE' as const;
 
-export interface State extends BaseState {
+export interface State extends PostInitState {
   readonly name: typeof Name;
-  readonly targetIndex: string;
 }

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState } from '../state';
+import type { MigrationBaseState } from '../migration_state';
 
 export const Name = 'FATAL' as const;
 
-export interface State extends BaseState {
+export interface State extends MigrationBaseState {
   readonly name: typeof Name;
   readonly reason: string;
+  readonly throwDelayMillis?: number;
 }

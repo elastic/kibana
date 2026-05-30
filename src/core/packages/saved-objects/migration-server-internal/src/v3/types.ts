@@ -8,24 +8,14 @@
  */
 
 import type { StateName, StateOf } from './state';
-import * as CHECK_SOURCE from './steps/check_source';
-import * as CREATE_TARGET from './steps/create_target';
-import * as DONE from './steps/done';
-import * as FATAL from './steps/fatal';
-import * as INIT from './steps/init';
-import * as MARK_READY from './steps/mark_ready';
+
 export { assertNever } from './assert_never';
 
-export const SUCCESSORS = {
-  [INIT.Name]: [CHECK_SOURCE.Name],
-  [CHECK_SOURCE.Name]: [CREATE_TARGET.Name, FATAL.Name],
-  [CREATE_TARGET.Name]: [CREATE_TARGET.Name, MARK_READY.Name, FATAL.Name],
-  [MARK_READY.Name]: [DONE.Name, FATAL.Name],
-  [DONE.Name]: [],
-  [FATAL.Name]: [],
-} as const satisfies Record<StateName, readonly StateName[]>;
-
-export type SuccessorsOf<TName extends StateName> = (typeof SUCCESSORS)[TName][number];
+// The graph lives in `./successors`. Re-exported here so step files can keep
+// importing `{ Step, SuccessorsOf }` from a single place; direct consumers of
+// the table (the loop driver, invariants, tests) should import from
+// `./successors` to make the source of truth obvious.
+export { SUCCESSORS, type SuccessorsOf } from './successors';
 
 export interface Step<TNext extends StateName, TResponse> {
   /**
@@ -36,7 +26,9 @@ export interface Step<TNext extends StateName, TResponse> {
    */
   readonly action: () => Promise<TResponse>;
   /**
-   * Pure next-state function for this action's response.
+   * Pure next-state function for this action's response. Constrained to
+   * `StateOf<TNext>` so a transition that lands outside the SUCCESSORS row
+   * for this step is a compile error.
    */
   readonly transition: (response: TResponse) => StateOf<TNext>;
 }

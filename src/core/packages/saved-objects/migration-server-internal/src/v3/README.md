@@ -23,7 +23,7 @@ dispatch keyed by `controlState`.
 v3 expresses the same machine differently:
 
 - **One file per state** — each lives in `steps/`.
-- **Graph as data** — `SUCCESSORS` in `types.ts` is the single source of truth
+- **Graph as data** — `SUCCESSORS` in `successors.ts` is the single source of truth
   for legal transitions.
 - **Type-constrained transitions** — a step physically cannot return a state
   outside its row in `SUCCESSORS` without a compile error.
@@ -97,7 +97,7 @@ stateDiagram-v2
   FATAL --> [*]
 ```
 
-The graph lives as data in `types.ts`:
+The graph lives as data in `successors.ts`:
 
 ```ts
 export const SUCCESSORS = {
@@ -135,7 +135,8 @@ v3/
 ├── run_v3_migration.ts              ← loop driver
 ├── next.ts                          ← dispatch on state.name
 ├── state.ts                         ← State union, BaseState, transition helpers
-├── types.ts                         ← SUCCESSORS, Step, runStep
+├── types.ts                         ← Step, runStep, re-exports from successors
+├── successors.ts                    ← phase-grouped SUCCESSORS table + SuccessorsOf
 ├── io.ts                            ← IO interface + response unions
 ├── invariants.ts                    ← assertInvariants (§5.1.1 Inv predicate)
 ├── assert_never.ts                  ← exhaustiveness helper
@@ -398,9 +399,11 @@ Concrete checklist for a new control point called `MY_STEP`:
    union member).
 3. If your step makes a new IO call, add its response types and method to
    `io.ts`. Responses must be discriminated unions with a `type` field.
-4. Add a row to `SUCCESSORS` in `types.ts` with the new state's outgoing
+4. Add a row to `SUCCESSORS` in `successors.ts` with the new state's outgoing
    edges. Add the new state to any source state's row that should be able to
-   reach it.
+   reach it. **If your step calls `handleRetryableFailure` /
+   `delayRetryTransition`, include `MY_STEP.Name` in its own row** — a
+   retryable failure is a self-loop transition in the graph.
 5. Add a `case` to the switch in `next.ts`. The exhaustiveness check will
    force you to.
 6. If your state has step-specific fields with constraints
