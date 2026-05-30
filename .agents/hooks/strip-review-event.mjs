@@ -57,11 +57,13 @@ const GH_API_VALUE_FLAGS = new Set([
 const PR_REVIEW_PUBLISH = new Set(['--approve', '--request-changes', '--comment']);
 
 /**
- * Tokenise a shell segment into an approximate `argv`, resolving single quotes,
- * double quotes, and backslash escapes the way bash word-splitting would — so a
- * quoted flag like `'-f'` resolves to the token `-f`. Expansions are left as
- * literal text (not evaluated): catching a publish hidden in an expansion is an
- * explicit non-goal.
+ * Tokenise a shell segment into an APPROXIMATE `argv` — enough that a quoted
+ * flag like `'-f'` resolves to `-f`. Deliberately not a faithful shell:
+ * expansions are kept as literal text, and inside double quotes a backslash is
+ * dropped before any character (Bash only treats it as an escape before `$`,
+ * backtick, `"`, `\`, or newline). So an exotic double-quoted path with a
+ * literal backslash can resolve differently than Bash uses — an explicit
+ * non-goal, like other exotic quoting/expansion shapes.
  */
 const tokenize = (segment) => {
   const argv = [];
