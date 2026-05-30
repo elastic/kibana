@@ -421,8 +421,25 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     ).toBeDisabled();
   });
 
-  // Skipped: requires preconfigured 'test-preconfigured-email' connector not available in Scout.
-  test.skip('should not be able to edit a preconfigured connector', async () => {});
+  test('should not be able to edit a preconfigured connector', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await navigateAndWait(page, kbnUrl);
+    await searchConnector(page, 'test-preconfigured-email');
+
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await expect(page.testSubj.locator('preConfiguredTitleMessage')).toBeVisible();
+
+    await page.locator('[data-test-subj="connectorsTableCell-name"] button').click();
+
+    await expect(page.testSubj.locator('preconfiguredBadge')).toBeVisible();
+    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeHidden();
+
+    await page.testSubj.click('euiFlyoutCloseButton');
+  });
 
   // Skipped: requires test.always-firing rule type via createRuleWithActionsAndParams.
   test.skip('Execution log - renders the event log list and can filter/sort', async () => {});

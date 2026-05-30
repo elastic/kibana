@@ -180,6 +180,11 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
       `--xpack.actions.preconfigured=${JSON.stringify({
         'my-server-log': { actionTypeId: '.server-log', name: 'Serverlog' },
+        'my-email-connector': {
+          actionTypeId: '.email',
+          name: 'Email#test-preconfigured-email',
+          config: { from: 'me@example.com', host: 'localhost', port: '1025' },
+        },
       })}`,
       '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
