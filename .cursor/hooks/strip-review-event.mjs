@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * preToolUse hook (Cursor, matcher: Shell) that defers to the shared
- * analyzer in `.agents/hooks/strip-review-event.mjs` and emits Cursor's
- * native flat `{ permission, user_message, agent_message }` deny shape. See
- * the shared module for the policy, allowed/denied shapes, and known
- * limitations.
+ * beforeShellExecution hook (Cursor, matcher: `\bgh\b`) that defers to the
+ * shared analyzer in `.agents/hooks/strip-review-event.mjs` and emits Cursor's
+ * native flat `{ permission, user_message, agent_message }` deny shape. The
+ * matcher keeps the hook from spawning on every shell command — it only runs
+ * for commands mentioning `gh`. A loose matcher is harmless: a false match just
+ * runs the analyzer, which returns allow for non-review commands. See the
+ * shared module for the policy, allowed/denied shapes, and known limitations.
  *
  * @see .agents/hooks/strip-review-event.mjs
  * @see .claude/hooks/strip-review-event.mjs for the Claude Code wrapper.
@@ -22,7 +24,9 @@ try {
 }
 if (!input || typeof input !== 'object') process.exit(0);
 
-const result = analyzeReviewCommand(input?.tool_input?.command ?? '');
+// `beforeShellExecution` puts the command at the top level; fall back to the
+// `preToolUse` shape so the wrapper works regardless of which event fires.
+const result = analyzeReviewCommand(input?.command ?? input?.tool_input?.command ?? '');
 if (!result) process.exit(0);
 
 process.stdout.write(

@@ -3,6 +3,18 @@
  * and Cursor. Keeps PR review *creation* in PENDING state so a review is never
  * published without an explicit, separate submission step.
  *
+ * Status: BEST-EFFORT and intentionally FROZEN. This hook guards against the
+ * *accidental* publish by a cooperating agent — the common-case slip. It is NOT
+ * a security boundary. The shell has unbounded ways to spell the same call, so
+ * novel evasion shapes (wrapper `eval`/`bash -c`, an endpoint or mutation name
+ * hidden in a variable, exotic `env`/quoting tricks, …) will always exist; those
+ * are a documented NON-GOAL and are won't-fix. The real backstop is the
+ * kbn-github skill plus the AGENTS.md human-in-the-loop publication gate.
+ * Crucially the hook is deny-only and fails OPEN: a bug or an uncaught bypass
+ * only disables protection — it can never block unrelated work or cause a bad
+ * action — so a missed evasion is a no-op, never a regression versus no hook.
+ * Do not chase new evasion shapes; point at this note and resolve.
+ *
  * Design: allowlist, not blocklist.
  *
  * Earlier versions tried to enumerate every dangerous shape with regexes

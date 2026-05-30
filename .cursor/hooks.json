@@ -1,10 +1,10 @@
 {
   "version": 1,
   "hooks": {
-    "preToolUse": [
+    "beforeShellExecution": [
       {
         "command": ".cursor/hooks/strip-review-event.mjs",
-        "matcher": "Shell"
+        "matcher": "\\bgh\\b"
       }
     ]
   }
