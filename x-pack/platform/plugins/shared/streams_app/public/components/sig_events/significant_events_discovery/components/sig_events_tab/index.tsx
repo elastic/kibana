@@ -68,9 +68,10 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
+    // TODO: rename field binding to 'status' once the data stream field is renamed
     field: 'verdict',
-    name: i18n.translate('xpack.streams.sigEventsTab.verdictColumn', {
-      defaultMessage: 'Verdict',
+    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+      defaultMessage: 'Status',
     }),
     width: '110px',
     render: (verdict: string) => <EuiBadge color={getVerdictColor(verdict)}>{verdict}</EuiBadge>,
@@ -186,11 +187,11 @@ export const SigEventsTab = () => {
   const filters = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.verdict', {
-          defaultMessage: 'Verdict',
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.status', {
+          defaultMessage: 'Status',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
-          defaultMessage: 'Filter by verdict',
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
+          defaultMessage: 'Filter by status',
         }),
         options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
         numFilters: VERDICT_OPTIONS.length,

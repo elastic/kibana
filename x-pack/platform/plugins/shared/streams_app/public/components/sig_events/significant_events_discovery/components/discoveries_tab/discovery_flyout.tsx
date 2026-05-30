@@ -26,21 +26,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { CHANGE_TYPE_LABELS } from '../shared/translations';
+import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
-const KIND_LABELS: Record<string, string> = {
-  finding: i18n.translate('xpack.streams.discoveryFlyout.kind.finding', {
-    defaultMessage: 'Finding',
-  }),
-  clearance: i18n.translate('xpack.streams.discoveryFlyout.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-};
-
-const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'success' };
-
-// history is sorted @timestamp ASC.
-// finding after clearance → re-opened; finding after finding → updated (same episode, more detections added).
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
   switch (entry.kind) {
@@ -124,8 +112,8 @@ export const DiscoveryFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={KIND_COLORS[discovery.kind] ?? 'default'}>
-              {KIND_LABELS[discovery.kind] ?? discovery.kind}
+            <EuiBadge color={DISCOVERY_KIND_COLORS[discovery.kind] ?? 'default'}>
+              {DISCOVERY_KIND_LABELS[discovery.kind] ?? discovery.kind}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -200,6 +188,7 @@ export const DiscoveryFlyout = ({
                 </EuiText>
                 <EuiText size="xs" color="subdued">
                   {[
+                    det.detected_at ? formatTimestamp(det.detected_at) : null,
                     det.stream_name,
                     det.alert_count != null
                       ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {
@@ -237,23 +226,22 @@ export const DiscoveryFlyout = ({
           </EuiText>
         ) : (
           <EuiTimeline
-            aria-label={i18n.translate(
-              'xpack.streams.discoveryFlyout.euiTimeline.discoveryHistoryLabel',
-              { defaultMessage: 'Discovery history' }
-            )}
+            aria-label={i18n.translate('xpack.streams.discoveryFlyout.timeline.title', {
+              defaultMessage: 'Timeline',
+            })}
             gutterSize="m"
           >
             {history.map((entry, idx) => (
               <EuiTimelineItem
                 key={`${entry['@timestamp']}-${idx}`}
                 icon="dot"
-                iconAriaLabel={KIND_LABELS[entry.kind] ?? entry.kind}
+                iconAriaLabel={DISCOVERY_KIND_LABELS[entry.kind] ?? entry.kind}
                 verticalAlign="top"
               >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={KIND_COLORS[entry.kind] ?? 'hollow'}>
-                      {KIND_LABELS[entry.kind] ?? entry.kind}
+                    <EuiBadge color={DISCOVERY_KIND_COLORS[entry.kind] ?? 'hollow'}>
+                      {DISCOVERY_KIND_LABELS[entry.kind] ?? entry.kind}
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

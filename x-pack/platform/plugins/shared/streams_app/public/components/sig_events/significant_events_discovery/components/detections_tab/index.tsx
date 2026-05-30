@@ -36,9 +36,8 @@ const DISCOVERY_STATUS_LABELS = {
   }),
 };
 
-const kindLabel = (kind?: Detection['kind']) => (kind ? DETECTION_KIND_LABELS[kind] ?? kind : '-');
-const kindColor = (kind?: Detection['kind']) =>
-  (kind ? DETECTION_KIND_COLORS[kind] : undefined) ?? 'default';
+const kindLabel = (kind: Detection['kind']) => DETECTION_KIND_LABELS[kind] ?? kind;
+const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'default';
 
 // Unhandled detections older than this window are outside the discovery lookback
 // and won't be picked up automatically by the discovery pipeline.
@@ -59,7 +58,7 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
       defaultMessage: 'Kind',
     }),
     width: '100px',
-    render: (kind: Detection['kind'] | undefined) => (
+    render: (kind: Detection['kind']) => (
       <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
     ),
   },

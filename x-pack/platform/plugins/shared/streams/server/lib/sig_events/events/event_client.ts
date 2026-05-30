@@ -28,6 +28,7 @@ import {
   type eventsMappings,
 } from './data_stream';
 import { FIELD_EVENT_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { enrichFromEvidences } from '../utils';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
@@ -38,19 +39,6 @@ export interface EventsFilterOptions {
 }
 
 export interface EventsPaginatedSearchOptions extends PaginatedSearchOptions, EventsFilterOptions {}
-
-function enrichFromEvidences(e: SigEvent): SigEvent {
-  const evidences = e.evidences ?? [];
-  const streamNames = e.stream_names?.length
-    ? e.stream_names
-    : [...new Set(evidences.map((ev) => ev.stream_name).filter((s): s is string => !!s))];
-  const ruleNames = e.rule_names?.length
-    ? e.rule_names
-    : [...new Set(evidences.map((ev) => ev.rule_name).filter((s): s is string => !!s))];
-
-  if (streamNames === e.stream_names && ruleNames === e.rule_names) return e;
-  return { ...e, stream_names: streamNames, rule_names: ruleNames };
-}
 
 export class EventClient {
   constructor(

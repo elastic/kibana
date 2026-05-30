@@ -143,7 +143,7 @@ const eventsLifecycleRoute = createServerRoute({
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, verdicts, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
   },
   security: {
     authz: {

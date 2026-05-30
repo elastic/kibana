@@ -15,6 +15,7 @@ import { useFetchErrorToast } from '../use_fetch_error_toast';
 interface UseFetchSigEventsParams {
   from: string | number;
   to: string | number;
+  // TODO: rename to status once the data stream field and API param are renamed
   verdict?: string[];
   stream?: string[];
   search?: string;

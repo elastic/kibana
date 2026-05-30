@@ -37,7 +37,7 @@ interface LifecycleTimelineProps {
 const ENTITY_ICONS: Record<EntityType, string> = {
   detection: 'bell',
   discovery: 'inspect',
-  clearance: 'checkInCircleFilled',
+  clearance: 'check',
   event: 'documentEdit',
 };
 
@@ -97,9 +97,10 @@ const buildEventDescription = ({
   event: EventLifecycleResponse['events'][number];
 }): { description: string; detail?: string } => {
   const description = i18n.translate('xpack.streams.lifecycle.eventDesc', {
-    defaultMessage: 'Verdict: {verdict}, Criticality: {criticality}',
+    defaultMessage: 'Status: {status}, Criticality: {criticality}',
     values: {
-      verdict: event.verdict,
+      // TODO: rename to event.status once the data stream field is renamed
+      status: event.verdict ?? '-',
       criticality: event.criticality != null ? String(event.criticality) : '-',
     },
   });
@@ -132,8 +133,8 @@ function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
       type: 'event' as const,
       timestamp: event['@timestamp'],
       title: idx === 0 ? EVENT_CREATED_LABEL : EVENT_UPDATED_LABEL,
-      description,
-      detail,
+      description: idx === 0 ? event.title : description,
+      detail: idx === 0 ? description : detail,
     };
   });
 

@@ -7,6 +7,7 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -14,7 +15,7 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
+  andWhere,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -27,6 +28,7 @@ import {
   type StoredDetection,
   type detectionsMappings,
 } from './data_stream';
+import { FIELD_DETECTION_ID } from '../field_names';
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -47,14 +49,6 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
   rule_name?: string;
 }
 
-const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
-
-const GROUP_BY_FIELD = 'detection_id';
 const KIND_HANDLED = 'handled' satisfies Detection['kind'];
 const KIND_QUIET = 'quiet' satisfies Detection['kind'];
 const PROCESSED_IDS_CHUNK_SIZE = 250;
@@ -77,10 +71,8 @@ export class DetectionClient {
 
   // Exclude kind:handled from the main query — handled docs are pipeline stamps,
   // not anomaly state. processed is derived separately via getProcessedIds.
-  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition {
-    let where: LatestSourceWhereCondition = esql.exp`${esql.col('kind')} != ${esql.str(
-      KIND_HANDLED
-    )}`;
+  private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression {
+    let where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
 
     const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     if (ruleUuidLiterals?.length) {
@@ -136,7 +128,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
     const processedIds = await this.getProcessedIds(
       result.hits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
@@ -157,9 +149,10 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
-      sort: [['detected_at', 'DESC']],
+      groupBy: FIELD_DETECTION_ID,
+      sort: [['@timestamp', 'DESC']],
     });
+
     const processedIds = await this.getProcessedIds(
       result.hits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
@@ -176,7 +169,7 @@ export class DetectionClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DETECTION_ID,
       idValue: detectionId,
     });
     // History returns all doc kinds including kind:handled.

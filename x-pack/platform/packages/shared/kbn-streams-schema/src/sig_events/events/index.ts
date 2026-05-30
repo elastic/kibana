@@ -20,6 +20,7 @@ export const sigEventSchema = z.object({
   discovery_id: z.string(),
   discovery_slug: z.string(),
   previous_event_id: z.string().optional(),
+  // TODO: rename to status once the data stream field is renamed
   verdict: z.string(),
   workflow_execution_id: z.string(),
   rule_names: z.array(z.string()),
@@ -37,13 +38,10 @@ export const sigEventSchema = z.object({
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
   grouped_into: z.string().optional(),
-  grouped_discovery_ids: z.array(z.string()).optional(),
+  // TODO: rename once the data stream fields are renamed
   // Audit fields merged from verdict docs
   verdict_summary: z.string().optional(),
   assessment_note: z.string().optional(),
-  verdict_source: z.string().optional(),
-  original_verdict: z.string().optional(),
-  conversation_id: z.string().optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;

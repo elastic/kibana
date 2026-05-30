@@ -105,24 +105,23 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
-
 export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
-  detection: i18n.translate('xpack.streams.detectionsTab.kind.detection', {
+  detection: i18n.translate('xpack.streams.detection.kind.detected', {
     defaultMessage: 'Detected',
   }),
-  quiet: i18n.translate('xpack.streams.detectionsTab.kind.quiet', {
+  quiet: i18n.translate('xpack.streams.detection.kind.recovered', {
     defaultMessage: 'Recovered',
   }),
-  handled: i18n.translate('xpack.streams.detectionsTab.kind.handled', {
+  handled: i18n.translate('xpack.streams.detection.kind.investigated', {
     defaultMessage: 'Processed',
   }),
 };
 
 export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  finding: i18n.translate('xpack.streams.discoveriesTab.kind.finding', {
-    defaultMessage: 'Finding',
+  finding: i18n.translate('xpack.streams.discovery.kind.finding', {
+    defaultMessage: 'Open',
   }),
-  clearance: i18n.translate('xpack.streams.discoveriesTab.kind.clearance', {
+  clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
     defaultMessage: 'Cleared',
   }),
 };
