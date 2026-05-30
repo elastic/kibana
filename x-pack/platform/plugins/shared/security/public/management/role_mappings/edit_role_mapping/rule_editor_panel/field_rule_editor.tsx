@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiToolTip,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
