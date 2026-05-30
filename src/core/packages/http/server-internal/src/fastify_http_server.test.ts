@@ -1569,7 +1569,7 @@ describe('FastifyHttpServer', () => {
       const enhanceHandler = (handler: any) => async (req: any, res: any) =>
         handler({} as any, req, res);
 
-      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+      const router = new Router('', ctx.logger.get('router'), enhanceHandler, {
         env,
       });
       router.get(
@@ -1597,9 +1597,10 @@ describe('FastifyHttpServer', () => {
         brotli: { enabled: false, quality: 3 },
       });
 
-      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+      const res = await httpRequest(listenPort, '/', 'GET', {
         headers: { 'accept-encoding': 'gzip' },
       });
+      expect(res.statusCode).toBe(200);
       expect(res.headers['content-encoding']).toBe('gzip');
     });
 
@@ -1609,9 +1610,10 @@ describe('FastifyHttpServer', () => {
         brotli: { enabled: false, quality: 3 },
       });
 
-      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+      const res = await httpRequest(listenPort, '/', 'GET', {
         headers: { 'accept-encoding': 'gzip' },
       });
+      expect(res.statusCode).toBe(200);
       expect(res.headers['content-encoding']).toBeUndefined();
     });
 
@@ -1621,9 +1623,10 @@ describe('FastifyHttpServer', () => {
         brotli: { enabled: false, quality: 3 },
       });
 
-      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+      const res = await httpRequest(listenPort, '/', 'GET', {
         headers: { 'accept-encoding': 'br' },
       });
+      expect(res.statusCode).toBe(200);
       expect(res.headers['content-encoding']).not.toBe('br');
     });
 
@@ -1633,9 +1636,10 @@ describe('FastifyHttpServer', () => {
         brotli: { enabled: true, quality: 3 },
       });
 
-      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+      const res = await httpRequest(listenPort, '/', 'GET', {
         headers: { 'accept-encoding': 'br' },
       });
+      expect(res.statusCode).toBe(200);
       expect(res.headers['content-encoding']).toBe('br');
     });
 
@@ -1649,30 +1653,34 @@ describe('FastifyHttpServer', () => {
       });
 
       it('compresses when there is no referer', async () => {
-        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        const res = await httpRequest(listenPort, '/', 'GET', {
           headers: { 'accept-encoding': 'gzip' },
         });
+        expect(res.statusCode).toBe(200);
         expect(res.headers['content-encoding']).toBe('gzip');
       });
 
       it('compresses for a whitelisted referer', async () => {
-        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        const res = await httpRequest(listenPort, '/', 'GET', {
           headers: { 'accept-encoding': 'gzip', referer: 'http://foo:1234' },
         });
+        expect(res.statusCode).toBe(200);
         expect(res.headers['content-encoding']).toBe('gzip');
       });
 
       it('does not compress for a non-whitelisted referer', async () => {
-        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        const res = await httpRequest(listenPort, '/', 'GET', {
           headers: { 'accept-encoding': 'gzip', referer: 'http://bar:1234' },
         });
+        expect(res.statusCode).toBe(200);
         expect(res.headers['content-encoding']).toBeUndefined();
       });
 
       it('does not compress for an invalid referer', async () => {
-        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        const res = await httpRequest(listenPort, '/', 'GET', {
           headers: { 'accept-encoding': 'gzip', referer: 'http://asdf$%^' },
         });
+        expect(res.statusCode).toBe(200);
         expect(res.headers['content-encoding']).toBeUndefined();
       });
     });
