@@ -12,6 +12,11 @@ if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; the
   exit 1
 fi
 
+BAIL_ARG=""
+if [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]; then
+  BAIL_ARG="--bail"
+fi
+
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
 test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
 
@@ -53,7 +58,7 @@ while read -r config; do
     continue;
   fi
 
-  FULL_COMMAND="node scripts/functional_tests --config $config $EXTRA_ARGS"
+  FULL_COMMAND="node scripts/functional_tests $BAIL_ARG --config $config $EXTRA_ARGS"
 
   # see if this config has already been executed successfully
   CONFIG_EXECUTION_KEY="${config}_executed"
@@ -93,6 +98,7 @@ while read -r config; do
   node ./scripts/functional_tests \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
+    $BAIL_ARG \
     "$EXTRA_ARGS"
   lastCode=$?
   set -e;
