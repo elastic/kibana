@@ -451,10 +451,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await lens.switchToVisualization('lnsDatatable');
 
+      // Switching to a datatable applies the datatable's empty-rows default (on),
+      // so the first bucket is the (empty) start of the time range rather than
+      // the first bucket that contains data.
       expect(await lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
-      expect(await lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('2015-09-19 06:00');
       expect(await lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
-      expect(await lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
+      expect(await lens.getDatatableCellText(0, 1)).to.eql('(null)');
     });
 
     it('should create a heatmap chart and transition to barchart', async () => {
