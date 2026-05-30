@@ -623,14 +623,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
 
+      // Switching chart type re-applies the target type's empty-rows default, so
+      // the datatable turns "Include empty rows" back on. Turn it off again to
+      // assert the populated buckets only.
+      await lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger');
+      await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+      await lens.closeDimensionEditor();
+
       // Need to provide a fn for these
       //   expect(await lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
-      // Switching to a datatable applies the datatable's empty-rows default (on),
-      // so the first bucket is the (empty) start of the time range rather than
-      // the first bucket that contains data.
       expect(await lens.getDatatableHeaderText(1)).to.eql(termTranslator('average', 'bytes'));
-      expect(await lens.getDatatableCellText(0, 0)).to.eql('2015-09-19 06:00');
-      expect(await lens.getDatatableCellText(0, 1)).to.eql('(null)');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
+      expect(await lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
 
     it('should create a heatmap chart and transition to barchart', async () => {
