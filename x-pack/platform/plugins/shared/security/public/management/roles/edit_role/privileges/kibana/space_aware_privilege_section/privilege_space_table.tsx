@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiIconTip,
+  EuiToolTip,
   EuiInMemoryTable,
 } from '@elastic/eui';
 import React, { Component } from 'react';
