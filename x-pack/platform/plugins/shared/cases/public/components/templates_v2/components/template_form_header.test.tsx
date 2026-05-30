@@ -18,6 +18,7 @@ describe('TemplateFormHeader', () => {
     isLoading: false,
     isSaving: false,
     hasChanges: false,
+    hasValidationErrors: false,
     isEdit: false,
     submitError: null,
     isEnabled: true,
@@ -81,6 +82,22 @@ describe('TemplateFormHeader', () => {
     renderWithTestingProviders(<TemplateFormHeader {...defaultProps} isSaving={true} />);
 
     expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+  });
+
+  it('disables save button when yaml validation errors are present', () => {
+    renderWithTestingProviders(<TemplateFormHeader {...defaultProps} hasValidationErrors={true} />);
+
+    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+  });
+
+  it('shows validation tooltip on save button when yaml validation errors are present', async () => {
+    renderWithTestingProviders(<TemplateFormHeader {...defaultProps} hasValidationErrors={true} />);
+
+    await user.hover(screen.getByRole('button', { name: 'Create' }));
+
+    expect(
+      await screen.findByText('Please fix validation errors before saving.')
+    ).toBeInTheDocument();
   });
 
   it('shows loading state on save button when saving', () => {

@@ -9,6 +9,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
+import { QUERY_STALE_TIME } from '../constants';
 import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
@@ -72,6 +73,7 @@ export const useFetchSameGroupEpisodesQuery = ({
         expressions,
       }),
     enabled: Boolean(ruleId && excludeEpisodeId && groupHash),
+    staleTime: QUERY_STALE_TIME,
     onError: () => {
       toastDanger?.(RELATED_EPISODES_LOAD_ERROR);
     },
