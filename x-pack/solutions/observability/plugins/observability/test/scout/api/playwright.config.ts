@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
-import type { services } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
