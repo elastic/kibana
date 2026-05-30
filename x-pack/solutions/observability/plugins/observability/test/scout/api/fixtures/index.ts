@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { apiTest as baseApiTest, mergeTests } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 
-export default createTestConfig({
-  license: 'trial',
-  name: 'X-Pack Observability API integration tests (trial)',
-  testFiles: [require.resolve('./tests')],
-});
+export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
+
+export { ANNOTATIONS_INDEX_NAME } from './constants';
