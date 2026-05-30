@@ -15,7 +15,8 @@ spaceTest.describe(
   'Attacks page smoke',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
     });
 

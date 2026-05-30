@@ -53,6 +53,7 @@ export class DetectionsAttackDiscoveryPage {
   public attacksPageAssigneeFilter: Locator;
   public attacksPageConnectorFilter: Locator;
   public attacksKpisSection: Locator;
+  public kpisSectionToggleButton: Locator;
   public attacksSummaryView: Locator;
   public attacksListPanel: Locator;
   public attacksVolumePanel: Locator;
@@ -86,6 +87,9 @@ export class DetectionsAttackDiscoveryPage {
       ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID
     );
     this.attacksKpisSection = this.page.testSubj.locator(ATTACKS_KPIS_SECTION_TEST_ID);
+    this.kpisSectionToggleButton = this.attacksKpisSection.locator(
+      '[data-test-subj="query-toggle-header"]'
+    );
     this.attacksSummaryView = this.page.testSubj.locator(ATTACKS_SUMMARY_VIEW_TEST_ID);
     this.attacksListPanel = this.page.testSubj.locator(ATTACKS_LIST_PANEL_TEST_ID);
     this.attacksVolumePanel = this.page.testSubj.locator(ATTACKS_VOLUME_PANEL_TEST_ID);
@@ -167,6 +171,13 @@ export class DetectionsAttackDiscoveryPage {
     await this.detectionsNavItem.click();
   }
 
+  async collapseKpisSection() {
+    if (await this.attacksSummaryView.isVisible()) {
+      await this.kpisSectionToggleButton.click();
+      await this.attacksSummaryView.waitFor({ state: 'hidden' });
+    }
+  }
+
   async openScheduleFlyout() {
     await this.scheduleButton.click();
     await this.settingsFlyout.waitFor({ state: 'visible' });
@@ -180,7 +191,6 @@ export class DetectionsAttackDiscoveryPage {
       throw new Error('No attack details expand button found');
     }
 
-    await firstExpandAttackButton.scrollIntoViewIfNeeded();
     await firstExpandAttackButton.click();
     await this.attackDetailsFlyoutBody.waitFor({ state: 'visible' });
   }
@@ -192,7 +202,6 @@ export class DetectionsAttackDiscoveryPage {
       throw new Error('No schedule button found');
     }
 
-    await firstScheduleButton.scrollIntoViewIfNeeded();
     await firstScheduleButton.click();
     await this.scheduleDetailsFlyout.waitFor({ state: 'visible' });
   }
