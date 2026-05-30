@@ -86,7 +86,7 @@ describe('getContinuity', () => {
       const result = await getContinuity({ esClient, isServerless: false, logger });
       expect(result.actionableFindings).toHaveLength(1);
       expect(result.actionableFindings[0].resource).toBe('bad-pipeline');
-      expect(result.actionableFindings[0].severity).toBe('critical');
+      expect(result.actionableFindings[0].severity).toBe('CRITICAL');
     });
 
     it('finding message includes the pipeline name and counts', async () => {
