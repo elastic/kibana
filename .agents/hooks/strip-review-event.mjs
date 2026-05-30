@@ -50,18 +50,78 @@ const reviewCreationPath = /pulls\/\d+\/reviews(?!\/)/;
 
 /**
  * Review-creation path whose `{n}` is a shell expansion rather than a literal
- * number, e.g. `pulls/$PR/reviews`, `pulls/${PR}/reviews`,
- * `pulls/$(printf 1)/reviews`, `` pulls/`id`/reviews ``. The agent commonly
+ * number, e.g. `pulls/$PR/reviews`, `pulls/${PR}/reviews`. The agent commonly
  * stores the PR number in a variable, so this must still be recognised as a
  * review-creation call — otherwise `reviewCreationPath` (numeric only) misses
- * it and the segment is never gated, slipping past the `hadExpansion`
- * fail-closed check. The id segment is "anything up to the next `/` that
- * contains a `$` or backtick".
+ * it and the call is never gated. Checked against the resolved endpoint
+ * argument only (see `findApiEndpoint`), so a review path appearing in a flag
+ * value like `-f body='see pulls/1/reviews'` is not mistaken for the call.
  */
 const reviewCreationPathExpanded = /pulls\/[^/]*[$`][^/]*\/reviews(?!\/)/;
 
 /** Field-flag tokens (resolved argv): supplying a body inline instead of `--input`. */
 const FIELD_FLAGS = new Set(['-f', '-F', '--field', '--raw-field']);
+
+/**
+ * `gh api` flags that consume the following token as their value. Used by
+ * `findApiEndpoint` to skip flag values when locating the positional endpoint
+ * argument, so a review path inside a flag value (e.g. a `-H` header or a
+ * `-f body=` field) is not treated as the endpoint.
+ */
+const GH_API_VALUE_FLAGS = new Set([
+  '-f',
+  '-F',
+  '--field',
+  '--raw-field',
+  '-H',
+  '--header',
+  '-X',
+  '--method',
+  '--hostname',
+  '-q',
+  '--jq',
+  '-t',
+  '--template',
+  '--input',
+  '--cache',
+]);
+
+/**
+ * Find the positional endpoint argument of a `gh api` call from its resolved
+ * `argv` (prefix already stripped, so `argv[0..1] === ['gh','api']`). Skips
+ * flags and their values; `--flag=value` is self-contained. The first
+ * remaining bare token is the endpoint (the URL/path `gh api` acts on).
+ *
+ * A command-substitution id (`pulls/$(printf 1)/reviews`) contains a space the
+ * tokenizer splits into adjacent positionals (`pulls/$(printf`, `1)/reviews`),
+ * so the contiguous run of positional tokens is joined back with spaces — the
+ * rejoined string still matches the expanded-review path. Returns the joined
+ * endpoint string or `null`. Because only flag *values* are skipped, a review
+ * path inside a flag value (e.g. `-f body='…pulls/1/reviews…'`) is never the
+ * endpoint.
+ */
+const findApiEndpoint = (argv) => {
+  let i = 2;
+  while (i < argv.length) {
+    const t = argv[i];
+    if (t === '--') {
+      i += 1;
+      break;
+    }
+    if (t.startsWith('-')) {
+      if (!t.includes('=') && GH_API_VALUE_FLAGS.has(t)) i += 1;
+      i += 1;
+      continue;
+    }
+    break;
+  }
+  if (i >= argv.length) return null;
+  const positional = [];
+  for (let j = i; j < argv.length && !argv[j].startsWith('-'); j += 1) {
+    positional.push(argv[j]);
+  }
+  return positional.join(' ');
+};
 
 /** `gh pr review` flags that publish immediately. */
 const PR_REVIEW_PUBLISH_LONG = new Set(['--approve', '--request-changes', '--comment']);
@@ -339,16 +399,16 @@ export const analyzeReviewCommand = (raw) => {
     }
 
     if (isGh(argv, ['api'])) {
-      // An expanded PR id (`pulls/$PR/reviews`) is matched against the raw
-      // segment, not argv: a `$(… …)` id contains spaces that the tokenizer
-      // would split. Such a path is review creation but its real value is
-      // opaque, so fail closed immediately.
-      if (reviewCreationPathExpanded.test(segment)) {
+      // Check the review path against the resolved endpoint argument only, so
+      // a review path inside a flag value (e.g. `-f body='…pulls/1/reviews…'`)
+      // is not mistaken for the call.
+      const endpoint = findApiEndpoint(argv);
+      if (endpoint != null && reviewCreationPathExpanded.test(endpoint)) {
         return {
           deny: `The review-creation endpoint path contains a shell expansion (\`pulls/$VAR/reviews\` etc.) the hook cannot evaluate, so it cannot verify the request body. Use a literal PR number. ${PUBLISH_REASON}`,
         };
       }
-      if (argv.some((t) => reviewCreationPath.test(t))) {
+      if (endpoint != null && reviewCreationPath.test(endpoint)) {
         if (hasHeredoc) {
           return {
             deny: `The review-creation command appears with a heredoc, which the hook cannot separate from the real call. Write the JSON payload file in a separate command, then run \`gh api .../reviews --input <file>\`. ${PUBLISH_REASON}`,
