@@ -126,12 +126,19 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
         return null;
       }
       return (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedFeature(featureId)}
-          data-test-subj={`expandPrivilegeSummaryRow`}
-          aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-          iconType={expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'}
-        />
+        <EuiToolTip
+          content={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleExpandedFeature(featureId)}
+            data-test-subj={`expandPrivilegeSummaryRow`}
+            aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+            iconType={
+              expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'
+            }
+          />
+        </EuiToolTip>
       );
     },
   };
