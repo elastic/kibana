@@ -82,14 +82,45 @@ const inputFilePath =
  */
 const envPrefix = /(?:\w+=(?:"[^"]*"|'[^']*'|\S*)\s+)*/.source;
 
+/**
+ * Optional leading `env` command prefix: `env [flags] [NAME=value ...] gh ...`.
+ * The `env` utility execs the trailing command after setting variables, so
+ * `env GH_PAGER=cat gh api .../reviews -f event=APPROVE` runs the exact same
+ * publishing call as the bare form. The skill tells agents to set
+ * `GH_PAGER=cat`, and `env GH_PAGER=cat gh ...` is a natural way to write it,
+ * so without this the whole invocation slips past the review-creation /
+ * `gh pr review` detectors. Per env(1) the grammar is
+ * `env [-0iv] [-C dir] [-P path] [-S string] [-u name] [name=value ...] utility`,
+ * so consume `env`, then any flags (the arg-taking `-C/-P/-S/-u` swallow the
+ * following token), then any `NAME=value` assignments. The trailing `envPrefix`
+ * still handles the no-`env` form (`GH_PAGER=cat gh ...`).
+ */
+const envCmdPrefix = /(?:env\b(?:\s+(?:-[CPSu]\s+\S+|-[0iv]+|--\S+))*(?:\s+\w+=(?:"[^"]*"|'[^']*'|\S*))*\s+)?/
+  .source;
+
 /** Pipeline segment starts with an optional `gh api` invocation (allowing env prefixes). */
-const apiInvocation = new RegExp(`^\\s*${envPrefix}gh\\s+api\\b`);
+const apiInvocation = new RegExp(`^\\s*${envCmdPrefix}${envPrefix}gh\\s+api\\b`);
 
 /** Review-creation endpoint: `/pulls/{n}/reviews` not followed by another path segment. */
 const reviewCreation = /pulls\/\d+\/reviews(?!\/)/;
 
+/** GraphQL endpoint invocation: `gh api graphql ...`. */
+const graphqlInvocation = new RegExp(`^\\s*${envCmdPrefix}${envPrefix}gh\\s+api\\s+graphql\\b`);
+
+/**
+ * The only GraphQL mutation that creates (and can immediately publish) a PR
+ * review. `addPullRequestReview` accepts an `event` argument that publishes on
+ * submit, and the value can arrive literally (`event: APPROVE`), via a field
+ * flag (`-F event=APPROVE`), or via a GraphQL variable (`$event`). A
+ * value-aware check would miss the indirect forms, so — mirroring the
+ * fail-closed field-flag deny on the REST creation endpoint — deny on the mere
+ * presence of the mutation name. No sanctioned workflow uses it: reviews are
+ * created via REST `--input <file>` and published via REST `/reviews/{id}/events`.
+ */
+const addPullRequestReview = /addPullRequestReview\b/;
+
 /** Pipeline segment starts with an optional `gh pr review` invocation (allowing env prefixes). */
-const prReviewInvocation = new RegExp(`^\\s*${envPrefix}gh\\s+pr\\s+review\\b`);
+const prReviewInvocation = new RegExp(`^\\s*${envCmdPrefix}${envPrefix}gh\\s+pr\\s+review\\b`);
 
 /**
  * Publishing flags accepted by `gh pr review`. Any of them publishes the
@@ -126,6 +157,9 @@ const shellExpansionInPath = /[$`]/;
 
 const isReviewCreationCall = (segment) =>
   apiInvocation.test(segment) && reviewCreation.test(segment);
+
+const isGraphqlReviewCreation = (segment) =>
+  graphqlInvocation.test(segment) && addPullRequestReview.test(segment);
 
 const isPrReviewPublish = (segment) =>
   prReviewInvocation.test(segment) && hasPublishFlagOutsideQuotes(segment);
@@ -385,6 +419,12 @@ export const analyzeReviewCommand = (raw) => {
   if (findSegmentSlice(cmd, isPrReviewPublish)) {
     return {
       deny: '`gh pr review --approve | --request-changes | --comment` publishes the review immediately. Create the review in PENDING state by writing the request body to a JSON file (no `event` key) and submitting it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`, then submit the review explicitly with `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
+    };
+  }
+
+  if (findSegmentSlice(cmd, isGraphqlReviewCreation)) {
+    return {
+      deny: 'The GraphQL `addPullRequestReview` mutation creates a review and publishes it immediately when an `event` is set (and `event` can be supplied literally, via `-F event=...`, or via a `$event` variable the hook cannot evaluate). Create the review in PENDING state through the REST endpoint instead: write the request body to a JSON file (no `event` key) and run `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`, then submit it explicitly with `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.',
     };
   }
 
