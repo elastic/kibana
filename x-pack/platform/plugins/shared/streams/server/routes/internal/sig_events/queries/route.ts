@@ -496,7 +496,7 @@ const generateQueriesRoute = createServerRoute({
         featureClient,
         queryClient,
         esClient: scopedClusterClient.asCurrentUser,
-        uiSettingsClient,
+        featureFlags: server.core.featureFlags,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
         logger: logger.get('significant_events_queries_generation'),
@@ -535,8 +535,11 @@ const persistQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<PersistQueriesResult> => {
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
     const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });

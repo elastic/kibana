@@ -371,6 +371,23 @@ export function AddCisIntegrationFormPageProvider({
     await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
   };
 
+  /**
+   * Selects a GCP credential type from the credential type selector.
+   * This selector only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   * Use to switch away from the default 'cloud_connectors' type so that the Cloud Shell button is visible.
+   */
+  const selectGcpCredentials = async (credentialType: 'credentials-json' | 'cloud_connectors') => {
+    await selectValue('gcpCredentialTypeSelector', credentialType);
+  };
+
+  /**
+   * Returns true if the GCP credential type selector is present in the DOM.
+   * It only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   */
+  const isGcpCredentialSelectorVisible = async () => {
+    return testSubjects.exists('gcpCredentialTypeSelector');
+  };
+
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
     await optionToBeClicked.scrollIntoView();
@@ -703,6 +720,8 @@ export function AddCisIntegrationFormPageProvider({
     findOptionInPage,
     clickOptionButton,
     selectAwsCredentials,
+    selectGcpCredentials,
+    isGcpCredentialSelectorVisible,
     selectSetupTechnology,
     getSetupTechnologyRadio,
     clickSaveButton,
