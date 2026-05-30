@@ -30,14 +30,21 @@
  *     (`--input -`), an unreadable/non-JSON `--input` file, a heredoc, or any
  *     shell expansion (`$…`, `` `…` ``) the hook cannot evaluate.
  *
+ * Command substitutions (`id=$(gh pr review --approve 1)`, `` `gh api …` ``)
+ * ARE introspected: each substitution body is re-analysed with the same rules,
+ * so a publish captured into a variable is still caught (and a legitimate
+ * `id=$(gh api .../reviews --input <file>)` capture still works and is
+ * sanitised).
+ *
  * Known limitations (residual risk covered by skill + warn-github-mcp +
  * human-in-the-loop; this hook is best-effort against a cooperative agent, not
  * a security boundary against an adversary):
- *   - Nested shell evaluation (`bash -c '…'`, `eval …`) is not introspected;
- *     the Claude matcher (`Bash(gh *)`) does not even spawn the hook for these.
- *   - A GraphQL `addPullRequestReview` mutation whose name only appears after a
- *     shell expansion, or in an `--input` file created later in the same
- *     command, is not caught.
+ *   - Nested shell evaluation via a wrapper command (`bash -c '…'`, `eval …`)
+ *     is not introspected; the Claude matcher (`Bash(gh *)`) does not even
+ *     spawn the hook for these.
+ *   - An endpoint or GraphQL mutation name supplied entirely by a variable
+ *     (`gh api "$URL"`) or produced by an expansion the hook can't evaluate, or
+ *     written to an `--input` file later in the same command, is not caught.
  *
  * @see .claude/hooks/strip-review-event.mjs for the Claude Code wrapper.
  * @see .cursor/hooks/strip-review-event.mjs for the Cursor wrapper.
@@ -361,16 +368,88 @@ const isGh = (argv, sub) =>
   argv[0] === 'gh' && sub.every((tok, idx) => argv[idx + 1] === tok);
 
 /**
+ * Extract the inner command text of every command substitution — `$(…)`
+ * (depth-counted) and `` `…` `` — that the shell would execute. The agent
+ * commonly captures CLI output, e.g. `id=$(gh api … reviews …)` or
+ * `out=$(gh pr review --approve 1)`, and the nested `gh` runs and can publish.
+ * Single-quoted regions are skipped because substitution does not happen there.
+ * Returns the inner strings; callers re-analyse each so a publish nested in a
+ * substitution is caught by the same rules.
+ */
+const extractCommandSubstitutions = (src) => {
+  const bodies = [];
+  let i = 0;
+  let quote = null;
+  while (i < src.length) {
+    const c = src[i];
+    if (quote) {
+      if (c === '\\' && quote === '"' && i + 1 < src.length) {
+        i += 2;
+        continue;
+      }
+      if (c === quote) quote = null;
+      i += 1;
+      continue;
+    }
+    if (c === "'" || c === '"') {
+      quote = c;
+      i += 1;
+      continue;
+    }
+    if (c === '$' && src[i + 1] === '(') {
+      let depth = 1;
+      let j = i + 2;
+      let inner = null;
+      while (j < src.length && depth > 0) {
+        const cj = src[j];
+        if (cj === '(') depth += 1;
+        else if (cj === ')') {
+          depth -= 1;
+          if (depth === 0) {
+            inner = src.slice(i + 2, j);
+            break;
+          }
+        }
+        j += 1;
+      }
+      if (inner !== null) {
+        bodies.push(inner);
+        i = j + 1;
+        continue;
+      }
+    }
+    if (c === '`') {
+      const end = src.indexOf('`', i + 1);
+      if (end !== -1) {
+        bodies.push(src.slice(i + 1, end));
+        i = end + 1;
+        continue;
+      }
+    }
+    i += 1;
+  }
+  return bodies;
+};
+
+/**
  * Analyse a raw shell command. Returns `null` (allow, possibly after stripping
  * a stray `event` key from an `--input` file) or `{ deny: <reason> }`.
  */
-export const analyzeReviewCommand = (raw) => {
+export const analyzeReviewCommand = (raw, depth = 0) => {
   if (typeof raw !== 'string' || raw === '') return null;
+  if (depth > 8) return null; // guard against pathological nesting
 
   // Bash removes `\<newline>` entirely (line continuation), so do the same
   // before splitting; otherwise a continued command splits into bogus segments.
   const cmd = raw.replace(/\\\n/g, '');
   const hasHeredoc = heredoc.test(cmd);
+
+  // A publish hidden inside a command substitution (`id=$(gh pr review -a 1)`)
+  // still runs, so analyse each substitution body with the same rules.
+  for (const inner of extractCommandSubstitutions(cmd)) {
+    const result = analyzeReviewCommand(inner, depth + 1);
+    if (result) return result;
+  }
 
   for (const segment of splitSegments(cmd)) {
     const { argv: rawArgv, hadExpansion } = tokenize(segment);
@@ -392,17 +471,21 @@ export const analyzeReviewCommand = (raw) => {
       continue;
     }
 
-    if (isGh(argv, ['api', 'graphql'])) {
-      const result = analyzeGraphql(argv);
-      if (result) return result;
-      continue;
-    }
-
     if (isGh(argv, ['api'])) {
+      // Resolve the positional endpoint so global flags before it
+      // (`gh api -X POST graphql …`, `gh api -H … graphql …`) don't route
+      // GraphQL past this branch into the REST one.
+      const endpoint = findApiEndpoint(argv);
+
+      if (endpoint === 'graphql') {
+        const result = analyzeGraphql(argv);
+        if (result) return result;
+        continue;
+      }
+
       // Check the review path against the resolved endpoint argument only, so
       // a review path inside a flag value (e.g. `-f body='…pulls/1/reviews…'`)
       // is not mistaken for the call.
-      const endpoint = findApiEndpoint(argv);
       if (endpoint != null && reviewCreationPathExpanded.test(endpoint)) {
         return {
           deny: `The review-creation endpoint path contains a shell expansion (\`pulls/$VAR/reviews\` etc.) the hook cannot evaluate, so it cannot verify the request body. Use a literal PR number. ${PUBLISH_REASON}`,
