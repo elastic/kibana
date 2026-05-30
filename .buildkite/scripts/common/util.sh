@@ -213,9 +213,15 @@ download_tmp_artifact() {
     return 1
   fi
 
+  local download_args=()
+  if [[ "$artifact_name" == "kibana-default.tar.zst" && "${KIBANA_REUSABLE_BUILD_JOB_ID:-}" ]]; then
+    download_args+=(--step "$KIBANA_REUSABLE_BUILD_JOB_ID")
+  fi
+
   echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
-  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id" "${download_args[@]}"
 }
+
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
 
