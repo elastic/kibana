@@ -48,6 +48,18 @@ import { readFileSync, writeFileSync } from 'node:fs';
 /** Review-creation endpoint path: `/pulls/{n}/reviews` not followed by `/…`. */
 const reviewCreationPath = /pulls\/\d+\/reviews(?!\/)/;
 
+/**
+ * Review-creation path whose `{n}` is a shell expansion rather than a literal
+ * number, e.g. `pulls/$PR/reviews`, `pulls/${PR}/reviews`,
+ * `pulls/$(printf 1)/reviews`, `` pulls/`id`/reviews ``. The agent commonly
+ * stores the PR number in a variable, so this must still be recognised as a
+ * review-creation call — otherwise `reviewCreationPath` (numeric only) misses
+ * it and the segment is never gated, slipping past the `hadExpansion`
+ * fail-closed check. The id segment is "anything up to the next `/` that
+ * contains a `$` or backtick".
+ */
+const reviewCreationPathExpanded = /pulls\/[^/]*[$`][^/]*\/reviews(?!\/)/;
+
 /** Field-flag tokens (resolved argv): supplying a body inline instead of `--input`. */
 const FIELD_FLAGS = new Set(['-f', '-F', '--field', '--raw-field']);
 
@@ -306,11 +318,16 @@ export const analyzeReviewCommand = (raw) => {
     if (argv[0] !== 'gh') continue;
 
     if (isGh(argv, ['pr', 'review'])) {
-      const publishes = argv.slice(3).some(
-        (t) =>
-          PR_REVIEW_PUBLISH_LONG.has(t) ||
-          (/^-[a-zA-Z]+$/.test(t) && /[arc]/.test(t.slice(1)))
-      );
+      // cobra/pflag accept the `--flag=value` boolean form (`--approve=true`,
+      // `-a=1`), which publishes the same as the bare flag. Strip the `=value`
+      // suffix before matching so both shapes are caught.
+      const publishes = argv.slice(3).some((t) => {
+        const name = t.split('=', 1)[0];
+        return (
+          PR_REVIEW_PUBLISH_LONG.has(name) ||
+          (/^-[a-zA-Z]+$/.test(name) && /[arc]/.test(name.slice(1)))
+        );
+      });
       if (publishes) return { deny: PUBLISH_REASON };
       continue;
     }
@@ -321,14 +338,25 @@ export const analyzeReviewCommand = (raw) => {
       continue;
     }
 
-    if (isGh(argv, ['api']) && argv.some((t) => reviewCreationPath.test(t))) {
-      if (hasHeredoc) {
+    if (isGh(argv, ['api'])) {
+      // An expanded PR id (`pulls/$PR/reviews`) is matched against the raw
+      // segment, not argv: a `$(… …)` id contains spaces that the tokenizer
+      // would split. Such a path is review creation but its real value is
+      // opaque, so fail closed immediately.
+      if (reviewCreationPathExpanded.test(segment)) {
         return {
-          deny: `The review-creation command appears with a heredoc, which the hook cannot separate from the real call. Write the JSON payload file in a separate command, then run \`gh api .../reviews --input <file>\`. ${PUBLISH_REASON}`,
+          deny: `The review-creation endpoint path contains a shell expansion (\`pulls/$VAR/reviews\` etc.) the hook cannot evaluate, so it cannot verify the request body. Use a literal PR number. ${PUBLISH_REASON}`,
         };
       }
-      const result = analyzeRestCreation(argv, hadExpansion);
-      if (result) return result;
+      if (argv.some((t) => reviewCreationPath.test(t))) {
+        if (hasHeredoc) {
+          return {
+            deny: `The review-creation command appears with a heredoc, which the hook cannot separate from the real call. Write the JSON payload file in a separate command, then run \`gh api .../reviews --input <file>\`. ${PUBLISH_REASON}`,
+          };
+        }
+        const result = analyzeRestCreation(argv, hadExpansion);
+        if (result) return result;
+      }
     }
   }
 
