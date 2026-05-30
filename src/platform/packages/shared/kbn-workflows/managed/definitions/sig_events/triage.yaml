@@ -30,12 +30,12 @@ triggers:
         type: string
         default: "now-7d"
         required: false
-        description: "Lookback window for active discoveries and reviewed verdict IDs. Should match .significant_events-discoveries retention."
+        description: "Lookback window for active discoveries and reviewed discovery IDs. Should match .significant_events-discoveries retention."
       - name: knowledgeBaseLookback
         type: string
         default: "now-7d"
         required: false
-        description: "Lookback window for knowledge base calibration examples (promoted + demoted verdicts). Wider = more examples, larger context."
+        description: "Lookback window for knowledge base calibration examples (promoted + demoted significant events). Wider = more examples, larger context."
       - name: discoveryBatchMax
         type: number
         default: 5
@@ -58,10 +58,9 @@ consts:
   SEVERITY_CRITICAL: 76
   SEVERITY_HIGH: 51
   SEVERITY_MEDIUM: 25
-  VERDICTS_INDEX: ".significant_events-verdicts"
-  VERDICT_ACKNOWLEDGED: "acknowledged"
-  VERDICT_DEMOTED: "demoted"
-  VERDICT_PROMOTED: "promoted"
+  STATUS_ACKNOWLEDGED: "acknowledged"
+  STATUS_DEMOTED: "demoted"
+  STATUS_PROMOTED: "promoted"
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -107,7 +106,7 @@ steps:
   # Re-review: evidence-based (detection state changed) + 5m fallback (stale safety net).
   # -----------------------------------------------------------------------
   - name: get_all_event_docs
-    # No verdict filter — post-filtered in compute_promoted_context and compute_active_event_ids.
+    # No status filter — post-filtered in compute_promoted_context and compute_active_event_ids.
     type: elasticsearch.request
     with:
       method: POST
@@ -124,7 +123,7 @@ steps:
             - discovery_slug
             - event_id
             - title
-            - verdict
+            - status
         query:
           bool:
             filter:
@@ -137,8 +136,8 @@ steps:
   - name: compute_promoted_context
     type: data.set
     with:
-      promoted_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source' | default: [] }}"
-      acknowledged_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
+      promoted_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.status', 'promoted' | map: '_source' | default: [] }}"
+      acknowledged_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.status', 'acknowledged' | map: '_source' | default: [] }}"
 
   - name: get_latest_detection_ts
     # Latest evidence marker: if newer than an event's @timestamp, evidence changed.
@@ -167,7 +166,7 @@ steps:
       continue: true
 
   - name: get_promoted_with_cleared_signal
-    # No verdict filter — post-filtered in compute_cleared_signal_events.
+    # No status filter — post-filtered in compute_cleared_signal_events.
     type: elasticsearch.request
     if: "${{ steps.compute_cleared_slugs.output.slugs.size > 0 }}"
     with:
@@ -185,7 +184,7 @@ steps:
             - discovery_id
             - discovery_slug
             - title
-            - verdict
+            - status
             - summary
             - root_cause
             - impact
@@ -208,25 +207,25 @@ steps:
   - name: compute_cleared_signal_events
     type: data.set
     with:
-      cleared_promoted: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'promoted' | default: [] }}"
-      cleared_acknowledged: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'acknowledged' | default: [] }}"
+      cleared_promoted: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.status', 'promoted' | default: [] }}"
+      cleared_acknowledged: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.status', 'acknowledged' | default: [] }}"
 
   - name: compute_active_event_ids
     type: data.set
     with:
-      promoted_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source.event_id' | default: [] }}"
-      acknowledged_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source.event_id' | default: [] }}"
+      promoted_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.status', 'promoted' | map: '_source.event_id' | default: [] }}"
+      acknowledged_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.status', 'acknowledged' | map: '_source.event_id' | default: [] }}"
 
   # -----------------------------------------------------------------------
   # Step 1: Find unreviewed discoveries.
   # -----------------------------------------------------------------------
 
   - name: get_reviewed_ids
-    # Per-ID exclusion avoids missing recurrences when another slug has a newer verdict.
+    # Per-ID exclusion avoids missing recurrences when another slug has a newer event.
     type: elasticsearch.request
     with:
       method: POST
-      path: '/{{ consts.VERDICTS_INDEX }}/_search?ignore_unavailable=true'
+      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
       body:
         size: 0
         query:
@@ -243,7 +242,7 @@ steps:
               field: discovery_slug
               size: "${{ consts.REVIEWED_IDS_MAX }}"
             aggs:
-              latest_verdict_ts:
+              latest_status_ts:
                 max:
                   field: "@timestamp"
           reviewed_ids:
@@ -263,7 +262,7 @@ steps:
     type: data.set
     with:
       flag: "${{ steps.compute_reviewed_ids.output.reviewed_discovery_ids.size > 0 }}"
-
+      
   - name: get_unreviewed_discoveries
     # Guards against empty-array terms queries (ES rejects terms: [] at parse time).
     # Four branches cover the cross-product of (has_reviewed_ids) × (has_cleared_slugs).
@@ -685,7 +684,7 @@ steps:
             - discovery_id
             - discovery_slug
             - title
-            - verdict
+            - status
             - summary
             - root_cause
             - impact
@@ -778,19 +777,19 @@ steps:
       active_evidence: "${{ steps.get_detection_evidence.output.hits.hits | where: '_source.kind', 'detection' | default: [] }}"
 
   # -----------------------------------------------------------------------
-  # Step 3: Knowledge base — promoted + demoted verdicts for judge calibration.
+  # Step 3: Knowledge base — promoted + demoted events for judge calibration.
   # -----------------------------------------------------------------------
   - name: get_knowledge_base
-    # acknowledged/grouped verdicts excluded — promoted/demoted pattern data is
-    # what calibrates the judge; older promoted/demoted verdicts for a slug are
-    # exactly the desired signal even if the latest verdict is acknowledged.
-    # evidences excluded from KB — the judge calibrates from verdict/criticality/title;
+    # acknowledged/grouped events excluded — promoted/demoted pattern data is
+    # what calibrates the judge; older promoted/demoted events for a slug are
+    # exactly the desired signal even if the latest status is acknowledged.
+    # evidences excluded from KB — the judge calibrates from status/criticality/title;
     # full evidence payloads add ~50KB per entry for no calibration gain.
     # Slug-scoped should omitted — terms with an empty array causes an ES parse error.
     type: elasticsearch.request
     with:
       method: POST
-      path: '/{{ consts.VERDICTS_INDEX }}/_search?ignore_unavailable=true'
+      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
       body:
         size: '${{ consts.KB_BATCH_MAX }}'
         sort:
@@ -802,17 +801,17 @@ steps:
           includes:
             - "@timestamp"
             - discovery_slug
-            - verdict
+            - status
             - criticality
             - title
-            - verdict_summary
+            - analysis_summary
         query:
           bool:
             filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - terms:
-                  verdict: ["promoted", "demoted"]
+                  status: ["promoted", "demoted"]
               - range:
                   "@timestamp":
                     gte: '{{ inputs.knowledgeBaseLookback }}'
@@ -848,7 +847,7 @@ steps:
 
         {{ steps.compute_active_detection_evidence.output.active_evidence | map: '_source' | json }}
 
-        ## Knowledge Base (recent promoted + demoted verdicts)
+        ## Knowledge Base (recent promoted + demoted events)
 
         {{ steps.get_knowledge_base.output.hits.hits | map: '_source' | json }}
 
@@ -874,7 +873,7 @@ steps:
       schema:
         type: object
         properties:
-          verdicts:
+          significant_events:
             type: array
             items:
               type: object
@@ -889,8 +888,8 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: "For new group verdicts: populate with the discovery_ids of all grouped discoveries. For re-reviewed group verdicts: echo verbatim from the group discovery — do not add or modify entries."
-                verdict:
+                  description: "For new group events: populate with the discovery_ids of all grouped discoveries. For re-reviewed group events: echo verbatim from the group discovery — do not add or modify entries."
+                status:
                   type: string
                   enum: [acknowledged, demoted, promoted]
                 criticality:
@@ -905,8 +904,8 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: "Top 3 operator action items. Required for promoted and acknowledged verdicts."
-                verdict_summary:
+                  description: "Top 3 operator action items. Required for promoted and acknowledged events."
+                analysis_summary:
                   type: string
                 assessment_note:
                   type: string
@@ -949,138 +948,48 @@ steps:
                       confirmed:
                         type: boolean
                   description: "Inherit all discovery evidences unchanged, then append one entry per tool call made during this evaluation."
-              required: [discovery_id, discovery_slug, verdict, criticality, confidence, verdict_summary, assessment_note, title, evidences]
-        required: [verdicts]
+              required: [discovery_id, discovery_slug, status, criticality, confidence, analysis_summary, assessment_note, title, evidences]
+        required: [significant_events]
     on-failure:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Step 5: Process each verdict — write to events + verdicts indices.
+  # Step 5: Process each significant event — write to events index.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
   - name: check_judge_agent_output
     type: if
-    condition: "${{ steps.run_judge_agent.error == null and steps.run_judge_agent.output.structured_output.verdicts != null }}"
+    condition: "${{ steps.run_judge_agent.error == null and steps.run_judge_agent.output.structured_output.significant_events != null }}"
     steps:
-      - name: store_verdicts
+      - name: store_significant_events
         type: data.set
         with:
-          verdicts: "${{ steps.run_judge_agent.output.structured_output.verdicts }}"
+          significant_events: "${{ steps.run_judge_agent.output.structured_output.significant_events }}"
           conversation_id: "{{ steps.run_judge_agent.output.conversation_id }}"
 
-  - name: foreach_verdict
+  - name: foreach_significant_event
     type: foreach
     if: >-
-      ${{ steps.store_verdicts.output != null
-      and steps.store_verdicts.output.verdicts != null }}
-    foreach: "${{ steps.store_verdicts.output.verdicts }}"
+      ${{ steps.store_significant_events.output != null
+      and steps.store_significant_events.output.significant_events != null }}
+    foreach: "${{ steps.store_significant_events.output.significant_events }}"
     steps:
 
-      # Phase 1: Read state
-      - name: check_existing_event_doc
-        # No verdict filter — post-filtered in compute_verdict_meta.
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: 1
-            collapse:
-              field: event_id
-            _source:
-              includes:
-                - verdict
-                - event_id
-                - created_at
-                - previous_event_id
-                - discovery_id
-                - discovery_slug
-                - recommended_action
-                - verdict_id
-                - title
-                - summary
-                - root_cause
-                - dependency_edges
-                - infra_components
-                - cause_kis
-            sort:
-              - "@timestamp":
-                  order: desc
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: "{{ variables.spaceId }}"
-                  - term:
-                      discovery_slug: "${{ foreach.item.discovery_slug }}"
-        on-failure:
-          continue: true
-
-      - name: check_latest_verdict_doc
-        # Detect actual verdict transitions — avoids infinite writes when a discovery
-        # is consistently demoted ("not has_active_event" is insufficient for that).
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.VERDICTS_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: 1
-            sort:
-              - "@timestamp":
-                  order: desc
-            _source:
-              includes:
-                - verdict
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: "{{ variables.spaceId }}"
-                  - term:
-                      discovery_id: "${{ foreach.item.discovery_id }}"
-        on-failure:
-          continue: true
-
-      # Phase 2: Compute signals
-      - name: compute_verdict_meta
+      # Phase 1: Compute signals
+      - name: compute_significant_event_meta
         type: data.set
         with:
-          recommended_action: "{% if foreach.item.verdict == consts.VERDICT_DEMOTED %}monitor{% elsif foreach.item.verdict == consts.VERDICT_ACKNOWLEDGED and foreach.item.criticality < consts.SEVERITY_CRITICAL %}monitor{% elsif foreach.item.criticality >= consts.SEVERITY_CRITICAL %}escalate{% elsif foreach.item.criticality >= consts.SEVERITY_HIGH %}investigate{% else %}monitor{% endif %}"
+          recommended_action: "{% if foreach.item.status == consts.STATUS_DEMOTED %}monitor{% elsif foreach.item.status == consts.STATUS_ACKNOWLEDGED and foreach.item.criticality < consts.SEVERITY_CRITICAL %}monitor{% elsif foreach.item.criticality >= consts.SEVERITY_CRITICAL %}escalate{% elsif foreach.item.criticality >= consts.SEVERITY_HIGH %}investigate{% else %}monitor{% endif %}"
           impact: "{% if foreach.item.criticality >= consts.SEVERITY_CRITICAL %}critical{% elsif foreach.item.criticality >= consts.SEVERITY_HIGH %}high{% elsif foreach.item.criticality >= consts.SEVERITY_MEDIUM %}medium{% else %}low{% endif %}"
-          has_active_event: >-
-            ${{ steps.check_existing_event_doc.output.hits.total.value > 0
-            and steps.check_existing_event_doc.output.hits.hits[0]._source.verdict == consts.VERDICT_PROMOTED
-            or steps.check_existing_event_doc.output.hits.total.value > 0
-            and steps.check_existing_event_doc.output.hits.hits[0]._source.verdict == consts.VERDICT_ACKNOWLEDGED }}
 
-      - name: compute_changes
-        # verdict_changed compares the last verdict doc (not the event doc) so
-        # consistently-demoted discoveries don't generate redundant verdict writes.
-        type: data.set
-        with:
-          event_changed: >-
-            ${{ not steps.compute_verdict_meta.output.has_active_event
-            or steps.check_existing_event_doc.output.hits.hits[0]._source.verdict != foreach.item.verdict
-            or steps.check_existing_event_doc.output.hits.hits[0]._source.recommended_action != steps.compute_verdict_meta.output.recommended_action
-            or steps.check_existing_event_doc.output.hits.hits[0]._source.discovery_id != foreach.item.discovery_id
-            or steps.check_existing_event_doc.output.hits.hits[0]._source.verdict_id == null }}
-          verdict_changed: >-
-            ${{ steps.check_latest_verdict_doc.error != null
-            or steps.check_latest_verdict_doc.output.hits.total.value < 1
-            or steps.check_latest_verdict_doc.output.hits.hits[0]._source.verdict != foreach.item.verdict }}
-          has_event_doc: >-
-            ${{ steps.compute_verdict_meta.output.has_active_event
-            or steps.check_existing_event_doc.error != null }}
-
-      # Phase 3: Compute content
+      # Phase 2: Compute content
       - name: resolve_discovery_source
         # New discoveries: look up from pre-judge unreviewed_hits by slug.
-        # Re-reviews: slug not in unreviewed_hits — fall back to existing event doc
-        # (carries cause_kis, dependency_edges, infra_components from creation time).
+        # Re-reviews: slug not in unreviewed_hits — source from foreach item directly.
         type: data.set
         with:
-          src: "${{ steps.check_has_unreviewed.output.unreviewed_hits | default: [] | map: '_source' | where: 'discovery_slug', foreach.item.discovery_slug | first | default: steps.check_existing_event_doc.output.hits.hits[0]._source }}"
+          src: "${{ steps.check_has_unreviewed.output.unreviewed_hits | default: [] | map: '_source' | where: 'discovery_slug', foreach.item.discovery_slug | first }}"
 
       - name: compute_event_content
         type: data.set
@@ -1095,7 +1004,6 @@ steps:
           title: "{{ foreach.item.title | default: steps.resolve_discovery_source.output.src.title }}"
 
       - name: get_prior_event_doc
-        # Any verdict, including demoted — chains previous_event_id for new events.
         type: elasticsearch.request
         with:
           method: POST
@@ -1143,40 +1051,21 @@ steps:
         with:
           cleared: "${{ steps.check_discovery_cleared.error == null and steps.check_discovery_cleared.output.count > 0 }}"
 
-      - name: compute_write_gates
-        type: data.set
-        with:
-          needs_new_event: >-
-            ${{ not steps.compute_verdict_meta.output.has_active_event
-            and foreach.item.verdict != consts.VERDICT_DEMOTED
-            and not steps.compute_is_cleared.output.cleared }}
-          needs_revision: >-
-            ${{ steps.compute_changes.output.has_event_doc
-            and steps.compute_changes.output.verdict_changed }}
-
       - name: compute_event_write
-        # Unifies create and append paths: event_id, created_at, previous_event_id
-        # preserve existing values on the append path; content falls back to the prior doc.
         type: data.set
         with:
-          should_write: >-
-            ${{ steps.compute_write_gates.output.needs_new_event
-            or steps.compute_write_gates.output.needs_revision }}
-          event_id: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.event_id }}{% else %}{{ steps.compute_event_content.output.discovery_id }}-event{% endif %}"
-          created_at: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
-          previous_event_id: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.previous_event_id }}{% else %}{{ steps.get_prior_event_doc.output.hits.hits[0]._source.event_id }}{% endif %}"
-          title: "{{ steps.compute_event_content.output.title | default: steps.check_existing_event_doc.output.hits.hits[0]._source.title }}"
-          summary: "{{ steps.compute_event_content.output.summary | default: steps.check_existing_event_doc.output.hits.hits[0]._source.summary }}"
-          root_cause: "{{ steps.compute_event_content.output.root_cause | default: steps.check_existing_event_doc.output.hits.hits[0]._source.root_cause }}"
-          dependency_edges: "${{ steps.compute_event_content.output.dependency_edges | default: steps.check_existing_event_doc.output.hits.hits[0]._source.dependency_edges | default: [] }}"
-          infra_components: "${{ steps.compute_event_content.output.infra_components | default: steps.check_existing_event_doc.output.hits.hits[0]._source.infra_components | default: [] }}"
-          cause_kis: "${{ steps.compute_event_content.output.cause_kis | default: steps.check_existing_event_doc.output.hits.hits[0]._source.cause_kis }}"
-          discovery_slug: "{{ steps.compute_event_content.output.discovery_slug | default: steps.check_existing_event_doc.output.hits.hits[0]._source.discovery_slug }}"
-          discovery_id: "{{ steps.compute_event_content.output.discovery_id | default: steps.check_existing_event_doc.output.hits.hits[0]._source.discovery_id }}"
-          verdict_id: "{% if steps.compute_changes.output.event_changed %}{{ execution.id }}-{{ steps.compute_event_content.output.discovery_id }}{% else %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.verdict_id }}{% endif %}"
+          should_write: "${{ not steps.compute_is_cleared.output.cleared }}"
+          event_id: "{{ execution.id }}-{{ foreach.item.discovery_id }}"
+          created_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+          previous_event_id: "{{ steps.get_prior_event_doc.output.hits.hits[0]._source.event_id }}"
+          title: "{{ steps.compute_event_content.output.title }}"
+          summary: "{{ steps.compute_event_content.output.summary }}"
+          root_cause: "{{ steps.compute_event_content.output.root_cause }}"
+          discovery_slug: "{{ foreach.item.discovery_slug }}"
+          discovery_id: "{{ foreach.item.discovery_id }}"
 
-      # Phase 4: Write
-      - name: write_event_doc
+      # Phase 3: Write
+      - name: write_significant_event_doc
         type: elasticsearch.request
         if: "${{ steps.compute_event_write.output.should_write }}"
         with:
@@ -1187,64 +1076,30 @@ steps:
             kibana:
               space_ids:
                 - "{{ variables.spaceId }}"
-            cause_kis: "${{ steps.compute_event_write.output.cause_kis }}"
+            cause_kis: "${{ steps.compute_event_content.output.cause_kis }}"
             confidence: "${{ foreach.item.confidence }}"
             created_at: "{{ steps.compute_event_write.output.created_at }}"
             criticality: "${{ foreach.item.criticality }}"
-            dependency_edges: "${{ steps.compute_event_write.output.dependency_edges }}"
+            dependency_edges: "${{ steps.compute_event_content.output.dependency_edges }}"
             discovery_id: "{{ steps.compute_event_write.output.discovery_id }}"
             discovery_slug: "{{ steps.compute_event_write.output.discovery_slug }}"
             event_id: "{{ steps.compute_event_write.output.event_id }}"
             evidences: "${{ foreach.item.evidences | where: 'result', 'found' }}"
-            impact: "{{ steps.compute_verdict_meta.output.impact }}"
-            infra_components: "${{ steps.compute_event_write.output.infra_components }}"
+            impact: "{{ steps.compute_significant_event_meta.output.impact }}"
+            infra_components: "${{ steps.compute_event_content.output.infra_components }}"
             previous_event_id: "{{ steps.compute_event_write.output.previous_event_id }}"
             recommendations: "${{ foreach.item.recommendations | default: [] }}"
-            recommended_action: "{{ steps.compute_verdict_meta.output.recommended_action }}"
+            recommended_action: "{{ steps.compute_significant_event_meta.output.recommended_action }}"
             stream_names: "${{ foreach.item.evidences | map: 'stream_name' | compact | uniq }}"
             root_cause: "{{ steps.compute_event_write.output.root_cause }}"
             summary: "{{ steps.compute_event_write.output.summary }}"
             title: "{{ steps.compute_event_write.output.title }}"
-            verdict: "${{ foreach.item.verdict }}"
-            verdict_id: "{{ steps.compute_event_write.output.verdict_id }}"
+            status: "${{ foreach.item.status }}"
+            analysis_summary: "${{ foreach.item.analysis_summary }}"
+            assessment_note: "${{ foreach.item.assessment_note }}"
+            analysis_source: judge_agent
+            conversation_id: "{{ steps.store_significant_events.output.conversation_id }}"
+            grouped_discovery_ids: "${{ foreach.item.grouped_discovery_ids }}"
             workflow_execution_id: "{{ execution.id }}"
         on-failure:
           continue: true
-
-      - name: write_verdict_doc
-        # POST _doc — PUT _create/{id} unavailable on data streams.
-        type: elasticsearch.request
-        if: "${{ steps.compute_changes.output.verdict_changed }}"
-        with:
-          method: POST
-          path: '/{{ consts.VERDICTS_INDEX }}/_doc'
-          body:
-            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - "{{ variables.spaceId }}"
-            assessment_note: "${{ foreach.item.assessment_note }}"
-            cause_kis: "${{ steps.compute_event_content.output.cause_kis | default: [] }}"
-            confidence: "${{ foreach.item.confidence }}"
-            conversation_id: "{{ steps.store_verdicts.output.conversation_id }}"
-            criticality: "${{ foreach.item.criticality }}"
-            dependency_edges: "${{ steps.compute_event_content.output.dependency_edges }}"
-            discovery_id: "{{ steps.compute_event_content.output.discovery_id }}"
-            discovery_slug: "{{ steps.compute_event_content.output.discovery_slug }}"
-            evidences: "${{ foreach.item.evidences | where: 'result', 'found' }}"
-            grouped_discovery_ids: "${{ foreach.item.grouped_discovery_ids }}"
-            impact: "{{ steps.compute_verdict_meta.output.impact }}"
-            infra_components: "${{ steps.compute_event_content.output.infra_components }}"
-            recommendations: "${{ foreach.item.recommendations }}"
-            recommended_action: "{{ steps.compute_verdict_meta.output.recommended_action }}"
-            stream_names: "${{ foreach.item.evidences | map: 'stream_name' | compact | uniq }}"
-            root_cause: "{{ steps.compute_event_content.output.root_cause }}"
-            summary: "{{ steps.compute_event_content.output.summary }}"
-            title: "{{ steps.compute_event_content.output.title }}"
-            verdict: "${{ foreach.item.verdict }}"
-            verdict_id: "{{ execution.id }}-{{ steps.compute_event_content.output.discovery_id }}"
-            verdict_source: judge_discoveries
-            verdict_summary: "${{ foreach.item.verdict_summary }}"
-            workflow_execution_id: "{{ execution.id }}"
-        on-failure:
-          continue: false

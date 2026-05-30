@@ -58,8 +58,8 @@ consts:
   SEVERITY_HIGH: 51
   SEVERITY_MEDIUM: 25
   UNHANDLED_RULES_MAX: 500
-  VERDICT_ACKNOWLEDGED: "acknowledged"
-  VERDICT_PROMOTED: "promoted"
+  STATUS_ACKNOWLEDGED: "acknowledged"
+  STATUS_PROMOTED: "promoted"
 
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -280,7 +280,7 @@ steps:
 
   # -----------------------------------------------------------------------
   # Step 3: Unhandled detection docs → correlation agent → index discoveries.
-  # -----------------------------------------------------------------------
+  # -----------------------------------------------------------------------      
   - name: get_active_unhandled_rules
     type: elasticsearch.request
     with:
@@ -405,7 +405,7 @@ steps:
       continue: true
 
   - name: get_active_events
-    # No verdict filter — ES filters BEFORE collapse; post-filtered in compute_active_events_context.
+    # No status filter — ES filters BEFORE collapse; post-filtered in compute_active_events_context.
     type: elasticsearch.request
     with:
       method: POST
@@ -421,7 +421,7 @@ steps:
           includes:
             - discovery_slug
             - title
-            - verdict
+            - status
         query:
           bool:
             filter:
@@ -436,8 +436,8 @@ steps:
   - name: compute_active_events_context
     type: data.set
     with:
-      promoted_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source' | default: [] }}"
-      acknowledged_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
+      promoted_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.status', 'promoted' | map: '_source' | default: [] }}"
+      acknowledged_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.status', 'acknowledged' | map: '_source' | default: [] }}"
 
   - name: run_investigator_agent
     # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
@@ -630,7 +630,7 @@ steps:
           is_not_group: "${{ foreach.item.grouped_discovery_ids == null or foreach.item.grouped_discovery_ids.size == 0 }}"
 
       - name: get_active_event_for_slug
-        # No verdict filter — post-filtered in compute_active_event_for_slug.
+        # No status filter — post-filtered in compute_active_event_for_slug.
         type: elasticsearch.request
         with:
           method: POST
@@ -644,7 +644,7 @@ steps:
                   order: desc
             _source:
               includes:
-                - verdict
+                - status
             query:
               bool:
                 filter:
@@ -660,9 +660,9 @@ steps:
         with:
           has_active_event: >-
             ${{ steps.get_active_event_for_slug.output.hits.total.value > 0
-            and steps.get_active_event_for_slug.output.hits.hits[0]._source.verdict == consts.VERDICT_PROMOTED
+            and steps.get_active_event_for_slug.output.hits.hits[0]._source.status == consts.STATUS_PROMOTED
             or steps.get_active_event_for_slug.output.hits.total.value > 0
-            and steps.get_active_event_for_slug.output.hits.hits[0]._source.verdict == consts.VERDICT_ACKNOWLEDGED }}
+            and steps.get_active_event_for_slug.output.hits.hits[0]._source.status == consts.STATUS_ACKNOWLEDGED }}
 
       - name: check_recent_finding
         if: "${{ foreach.item.detections != null and foreach.item.detections.size > 0 }}"
