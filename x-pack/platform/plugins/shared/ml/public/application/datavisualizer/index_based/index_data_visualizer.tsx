@@ -236,7 +236,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.ml.indexDataVisualizer.noDataViewTitle"
+                      id="xpack.ml.common.noDataViewTitle"
                       defaultMessage="No data view selected"
                     />
                   </h2>
@@ -244,7 +244,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                 body={
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.indexDataVisualizer.noDataViewBody"
+                      id="xpack.ml.common.noDataViewBody"
                       defaultMessage="Select a data view or Discover session to get started."
                     />
                   </p>

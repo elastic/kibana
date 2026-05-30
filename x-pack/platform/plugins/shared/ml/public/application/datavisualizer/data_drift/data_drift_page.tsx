@@ -66,7 +66,7 @@ export const DataDriftPage: FC = () => {
             title={
               <h2>
                 <FormattedMessage
-                  id="xpack.ml.dataDrift.noDataViewTitle"
+                  id="xpack.ml.common.noDataViewTitle"
                   defaultMessage="No data view selected"
                 />
               </h2>
@@ -74,7 +74,7 @@ export const DataDriftPage: FC = () => {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.ml.dataDrift.noDataViewBody"
+                  id="xpack.ml.common.noDataViewBody"
                   defaultMessage="Select a data view or Discover session to get started."
                 />
               </p>

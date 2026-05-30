@@ -15,7 +15,7 @@ export const NoDataViewPrompt: FC = () => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.ml.aiops.noDataViewPrompt.title"
+          id="xpack.ml.common.noDataViewTitle"
           defaultMessage="No data view selected"
         />
       </h2>
@@ -23,7 +23,7 @@ export const NoDataViewPrompt: FC = () => (
     body={
       <p>
         <FormattedMessage
-          id="xpack.ml.aiops.noDataViewPrompt.body"
+          id="xpack.ml.common.noDataViewBody"
           defaultMessage="Select a data view or Discover session to get started."
         />
       </p>
