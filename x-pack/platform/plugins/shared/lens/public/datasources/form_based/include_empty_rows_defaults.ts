@@ -168,34 +168,38 @@ function getPersistedFormBasedLayers(
 }
 
 /**
- * Re-applies the target visualization's opinionated `includeEmptyRows` default
- * when switching chart type (or XY series type) on a saved visualization.
+ * Applies the target visualization type's `includeEmptyRows` default to every
+ * bucket column when switching chart type (or XY series type).
  *
- * The default is only forced onto a column whose live value diverges from the
- * value stored in the saved object — i.e. a value the chart-type switch itself
- * carried over rather than one the user persisted. A column matching its
- * persisted value, or any column without a persisted baseline (a brand-new,
- * never-saved visualization, or a column the user configured this session), is
- * left untouched so a deliberate switch never silently overwrites a user choice.
+ * The opinionated default always wins, overriding any value carried over from
+ * the previous type. The single exception is switching a layer back to its
+ * saved type: a column whose layer's persisted visualization type id equals the
+ * target type restores its saved value instead, so a round trip returns to the
+ * configuration the user explicitly saved.
  *
  * Returns the state reference unchanged when nothing needs to be rewritten.
  */
 export function applyEmptyRowsDefaultsOnTypeSwitch(
   suggestionState: FormBasedPrivateState,
   persistedDoc: LensDocument | undefined,
-  targetVisualizationTypeId: string | undefined
+  targetVisualizationTypeId: string | undefined,
+  getPersistedVisualizationTypeId?: (layerId: string) => string | undefined
 ): FormBasedPrivateState {
   const targetDefault = getDefaultIncludeEmptyRows(targetVisualizationTypeId);
   const persistedLayers = getPersistedFormBasedLayers(persistedDoc);
 
   return mapBucketColumns(suggestionState, (layerId, columnId, column) => {
     const persistedColumn = persistedLayers?.[layerId]?.columns?.[columnId];
-    if (!persistedColumn || !BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(persistedColumn.operationType)) {
-      return undefined;
-    }
-    const persistedValue = normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn));
-    if (persistedValue === normalizeIncludeEmptyRows(getIncludeEmptyRows(column))) {
-      return undefined;
+    const restoresSavedType =
+      persistedColumn !== undefined &&
+      targetVisualizationTypeId !== undefined &&
+      getPersistedVisualizationTypeId?.(layerId) === targetVisualizationTypeId;
+
+    if (
+      restoresSavedType &&
+      BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(persistedColumn!.operationType)
+    ) {
+      return normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn!));
     }
     return targetDefault;
   });

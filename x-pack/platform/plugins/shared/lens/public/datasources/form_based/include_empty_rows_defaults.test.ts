@@ -234,100 +234,116 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
     } as unknown as LensDocument;
   }
 
-  it('retains a session-set value when there is no persisted baseline (never-saved viz)', () => {
-    // The user deliberately turned empty rows off; a type switch must not flip it
-    // back on just because the visualization was never saved.
+  // Resolves a persisted visualization type id per layer (subtype aware).
+  const persistedTypeMap = (map: Record<string, string | undefined>) => (layerId: string) =>
+    map[layerId];
+
+  it('applies the target default on a never-saved chart, overriding the live value', () => {
+    // No saved object: the target type's default always wins, even over a value
+    // the user toggled this session.
     const suggestion = makeState({
       first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
     });
 
     const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, LENS_DATATABLE_ID);
 
-    expect(next).toBe(suggestion);
+    expect(
+      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
+        ?.includeEmptyRows
+    ).toBe(true);
+  });
+
+  it('applies the OFF target default when a never-saved chart switches to an OFF type', () => {
+    const suggestion = makeState({
+      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+    });
+
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, SeriesTypes.BAR);
+
     expect(
       (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
     ).toBe(false);
   });
 
-  it('retains the column when its value equals the persisted (stored) value', () => {
+  it('applies the target default when switching a saved layer to a different type', () => {
+    // Saved as datatable (ON); switching to bar applies bar's OFF default even
+    // though a saved value exists, because bar !== the saved type.
     const suggestion = makeState({
       first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
     });
     const persistedDoc = makePersistedDoc({
       first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
-    });
-
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
-
-    expect(next).toBe(suggestion);
-    expect(
-      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
-        ?.includeEmptyRows
-    ).toBe(true);
-  });
-
-  it('treats a missing persisted value as the historical default of true', () => {
-    const suggestion = makeState({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
-    });
-    // Persisted column omits includeEmptyRows -> normalized to true, equal to live value.
-    const persistedDoc = makePersistedDoc({
-      first: { col1: { operationType: 'date_histogram' } },
-    });
-
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
-
-    expect(next).toBe(suggestion);
-  });
-
-  it('overwrites with the target default when the live value diverges from the persisted value', () => {
-    const suggestion = makeState({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
-    });
-    const persistedDoc = makePersistedDoc({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
-    });
-
-    // Datatable defaults to ON; the diverged live value (false) is overwritten back to true.
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, LENS_DATATABLE_ID);
-
-    expect(next).not.toBe(suggestion);
-    expect(
-      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
-        ?.includeEmptyRows
-    ).toBe(true);
-  });
-
-  it('overrides a diverged value with the target default when switching to a datatable', () => {
-    // Saved as OFF, live value flipped to ON only by carrying over a previous
-    // series type's default -> datatable forces it back to its ON default.
-    const suggestion = makeState({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
-    });
-    const persistedDoc = makePersistedDoc({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
-    });
-
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, LENS_DATATABLE_ID);
-
-    expect(
-      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
-        ?.includeEmptyRows
-    ).toBe(true);
-  });
-
-  it('applies the same divergence rule to range (histogram) columns', () => {
-    const suggestion = makeState({
-      first: { col1: { operationType: 'range', params: { includeEmptyRows: true } } },
-    });
-    const persistedDoc = makePersistedDoc({
-      first: { col1: { operationType: 'range', params: { includeEmptyRows: false } } },
     });
 
     const next = applyEmptyRowsDefaultsOnTypeSwitch(
       suggestion,
       persistedDoc,
+      SeriesTypes.BAR,
+      persistedTypeMap({ first: LENS_DATATABLE_ID })
+    );
+
+    expect(
+      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
+        ?.includeEmptyRows
+    ).toBe(false);
+  });
+
+  it('restores the saved value when switching a layer back to its saved type', () => {
+    // Saved as datatable with empty rows explicitly OFF (against the datatable
+    // default). After leaving and returning to datatable, the saved OFF must be
+    // restored rather than reset to the datatable ON default.
+    const suggestion = makeState({
+      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+    });
+    const persistedDoc = makePersistedDoc({
+      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+    });
+
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(
+      suggestion,
+      persistedDoc,
+      LENS_DATATABLE_ID,
+      persistedTypeMap({ first: LENS_DATATABLE_ID })
+    );
+
+    expect(
+      (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
+        ?.includeEmptyRows
+    ).toBe(false);
+  });
+
+  it('applies the target default to a new column even when switching back to the saved type', () => {
+    // A column with no persisted baseline gets the target default; only persisted
+    // columns are restored on a round trip.
+    const suggestion = makeState({
+      first: { added: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+    });
+    const persistedDoc = makePersistedDoc({
+      first: { saved: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+    });
+
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(
+      suggestion,
+      persistedDoc,
+      LENS_DATATABLE_ID,
+      persistedTypeMap({ first: LENS_DATATABLE_ID })
+    );
+
+    expect(
+      (next.layers.first.columns.added as { params?: { includeEmptyRows?: boolean } }).params
+        ?.includeEmptyRows
+    ).toBe(true);
+  });
+
+  it('applies the same rules to range (histogram) columns', () => {
+    const suggestion = makeState({
+      first: { col1: { operationType: 'range', params: { includeEmptyRows: true } } },
+    });
+
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(
+      suggestion,
+      undefined,
       PARTITION_CHART_TYPES.PIE
     );
 
@@ -347,28 +363,31 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
     expect(next).toBe(suggestion);
   });
 
-  it('retains a session-added column while overriding a diverged persisted column in the same layer', () => {
-    // `saved` was persisted ON but its live value diverged to OFF (carried over),
-    // so it is forced to bar's OFF default. `added` has no persisted baseline, so
-    // its session value is kept.
+  it('reconciles layers independently by their saved type', () => {
+    // `restored` is switching back to its saved datatable type -> saved OFF kept.
+    // `switched` was saved as datatable too but its layer is now a bar -> OFF default.
     const suggestion = makeState({
-      first: {
-        saved: { operationType: 'date_histogram', params: { includeEmptyRows: true } },
-        added: { operationType: 'date_histogram', params: { includeEmptyRows: true } },
-      },
+      restored: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+      switched: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
     });
     const persistedDoc = makePersistedDoc({
-      first: { saved: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+      restored: { col: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+      switched: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(
+      suggestion,
+      persistedDoc,
+      LENS_DATATABLE_ID,
+      persistedTypeMap({ restored: LENS_DATATABLE_ID, switched: SeriesTypes.BAR })
+    );
 
     expect(
-      (next.layers.first.columns.saved as { params?: { includeEmptyRows?: boolean } }).params
+      (next.layers.restored.columns.col as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
     ).toBe(false);
     expect(
-      (next.layers.first.columns.added as { params?: { includeEmptyRows?: boolean } }).params
+      (next.layers.switched.columns.col as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
     ).toBe(true);
   });

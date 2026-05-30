@@ -50,7 +50,7 @@ import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
 import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
-import { applyOpinionatedDatasourceDefaults } from '../../datasources/form_based/opinionated_defaults';
+import { applyVizTypeDatasourceDefaults } from '../../datasources/form_based/viz_type_defaults';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -120,7 +120,7 @@ export function EditorFrame(props: EditorFrameProps) {
         const adjustedSuggestion = targetVisualization
           ? {
               ...suggestion,
-              datasourceState: applyOpinionatedDatasourceDefaults({
+              datasourceState: applyVizTypeDatasourceDefaults({
                 kind: 'suggestion',
                 datasourceId: suggestion.datasourceId,
                 datasourceState: suggestion.datasourceState,

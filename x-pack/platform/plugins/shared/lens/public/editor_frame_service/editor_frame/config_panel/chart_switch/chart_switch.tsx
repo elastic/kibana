@@ -11,6 +11,7 @@ import type {
   DatasourceMap,
   DatasourcePublicAPI,
   FramePublicAPI,
+  LensDocument,
   Visualization,
   VisualizationMap,
   VisualizationState,
@@ -32,7 +33,7 @@ import {
   selectDatasourceStates,
   selectPersistedDoc,
 } from '../../../../state_management';
-import { applyOpinionatedDatasourceDefaults } from '../../../../datasources/form_based/opinionated_defaults';
+import { applyVizTypeDatasourceDefaults } from '../../../../datasources/form_based/viz_type_defaults';
 import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
@@ -109,6 +110,8 @@ export const ChartSwitch = memo(function ChartSwitch({
       newVisualizationState,
       layerId
     );
+    const getPersistedVisualizationTypeId = (lId: string) =>
+      getPersistedLayerVisualizationTypeId(persistedDoc, visualizationMap, lId);
 
     switchToSuggestion(
       dispatchLens,
@@ -116,31 +119,33 @@ export const ChartSwitch = memo(function ChartSwitch({
         ...selection,
         visualizationState: newVisualizationState,
         // A cross-visualization switch carries new datasource state; reconcile
-        // the target type's opinionated defaults against the saved object.
-        datasourceState: applyOpinionatedDatasourceDefaults({
+        // it with the target visualization type's defaults.
+        datasourceState: applyVizTypeDatasourceDefaults({
           kind: 'typeSwitch',
           datasourceId: selection.datasourceId,
           datasourceState: selection.datasourceState,
           persistedDoc,
           targetVisualizationTypeId,
+          getPersistedVisualizationTypeId,
         }),
       },
       { clearStagedPreview: true }
     );
 
     // A same-visualization subtype switch (e.g. XY bar -> line) reuses the
-    // existing datasource state, so opinionated defaults are reconciled through
-    // a follow-up datasource update.
+    // existing datasource state, so the defaults are reconciled through a
+    // follow-up datasource update.
     if (selection.sameDatasources && !selection.datasourceState) {
       const currentState = activeDatasourceId
         ? datasourceStates[activeDatasourceId]?.state
         : undefined;
-      const nextState = applyOpinionatedDatasourceDefaults({
+      const nextState = applyVizTypeDatasourceDefaults({
         kind: 'typeSwitch',
         datasourceId: activeDatasourceId ?? undefined,
         datasourceState: currentState,
         persistedDoc,
         targetVisualizationTypeId,
+        getPersistedVisualizationTypeId,
       });
       if (currentState && nextState !== currentState) {
         dispatchLens(
@@ -395,6 +400,25 @@ const getVisualizationTypeId = (
     () => activeVisualization.getVisualizationTypeId(visualizationState, layerId),
     undefined
   );
+
+/**
+ * Resolves the subtype-aware visualization type id a layer was saved with, or
+ * `undefined` when the visualization was never saved.
+ */
+const getPersistedLayerVisualizationTypeId = (
+  persistedDoc: LensDocument | undefined,
+  visualizationMap: VisualizationMap,
+  layerId: string
+): string | undefined => {
+  const persistedVisualizationId = persistedDoc?.visualizationType;
+  const persistedVisualization = persistedVisualizationId
+    ? visualizationMap[persistedVisualizationId]
+    : undefined;
+  if (!persistedVisualization) {
+    return undefined;
+  }
+  return getVisualizationTypeId(persistedVisualization, persistedDoc!.state.visualization, layerId);
+};
 
 const findSubtypeId = (visType: VisualizationType, subtypeId?: string) => {
   if (visType.subtypes) {

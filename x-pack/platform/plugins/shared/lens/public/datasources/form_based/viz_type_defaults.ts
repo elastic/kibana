@@ -26,7 +26,7 @@ interface BaseContext {
 
 /**
  * A field drop produces a suggestion that may contain freshly created columns.
- * Opinionated defaults apply to those new columns only.
+ * Visualization-type defaults apply to those new columns only.
  */
 export interface SuggestionDropContext extends BaseContext {
   kind: 'suggestion';
@@ -35,26 +35,29 @@ export interface SuggestionDropContext extends BaseContext {
 }
 
 /**
- * A chart-type / series-type switch keeps existing columns. Opinionated
- * defaults reconcile carried-over values against the saved object.
+ * A chart-type / series-type switch keeps existing columns. The target type's
+ * defaults are applied, except for a layer switched back to its saved type.
  */
 export interface TypeSwitchContext extends BaseContext {
   kind: 'typeSwitch';
-  /** Loaded saved object, the baseline for "what did the user persist". */
+  /** Loaded saved object, the source of each layer's persisted configuration. */
   persistedDoc: LensDocument | undefined;
+  /** Resolves a layer's persisted visualization type id (subtype aware). */
+  getPersistedVisualizationTypeId?: (layerId: string) => string | undefined;
 }
 
-export type OpinionatedDefaultsContext = SuggestionDropContext | TypeSwitchContext;
+export type VizTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
 
 /**
- * Applies every datasource-owned opinionated default that should react to a
- * visualization switch (field drop, chart type, series type, or layer).
+ * Applies every datasource-owned default that should track the active
+ * visualization type when the user switches chart type, series type, or adds a
+ * layer.
  *
  * This is the single seam shared by all switch entry points: introducing a new
- * opinionated default means extending this function rather than touching each
- * call site. Non form-based datasources are returned untouched.
+ * visualization-type default means extending this function rather than touching
+ * each call site. Non form-based datasources are returned untouched.
  */
-export function applyOpinionatedDatasourceDefaults(context: OpinionatedDefaultsContext): unknown {
+export function applyVizTypeDatasourceDefaults(context: VizTypeDefaultsContext): unknown {
   const { datasourceId, datasourceState, targetVisualizationTypeId } = context;
 
   if (datasourceId !== LENS_DATASOURCE_ID.FORM_BASED || !datasourceState) {
@@ -71,5 +74,10 @@ export function applyOpinionatedDatasourceDefaults(context: OpinionatedDefaultsC
     );
   }
 
-  return applyEmptyRowsDefaultsOnTypeSwitch(state, context.persistedDoc, targetVisualizationTypeId);
+  return applyEmptyRowsDefaultsOnTypeSwitch(
+    state,
+    context.persistedDoc,
+    targetVisualizationTypeId,
+    context.getPersistedVisualizationTypeId
+  );
 }
