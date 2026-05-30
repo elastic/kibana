@@ -19,7 +19,7 @@ export const sigEventsInvestigatorAgent = {
     'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
   labels: ['observability', 'streams', 'significant-events', 'discovery', 'investigator'],
   avatar_color: '#268BD2',
-  avatar_symbol: 'SD',
+  avatar_icon: 'logoElastic',
   configuration: {
     instructions,
     tools: [

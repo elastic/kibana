@@ -69,25 +69,10 @@ steps:
     with:
       spaceId: "{{ workflow.spaceId }}"
 
-  - name: health_check_discoveries_stream
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DISCOVERIES_INDEX }}/_count'
-      body:
-        query:
-          bool:
-            filter:
-              - match_all: {}
-              - term:
-                  kibana.space_ids: "{{ variables.spaceId }}"
-    on-failure:
-      continue: false
-
   # -----------------------------------------------------------------------
   # Pre-pass: Fetch cleared discovery slugs for judge context.
   # -----------------------------------------------------------------------
-  - name: fetch_cleared_discovery_slugs
+  - name: get_cleared_discovery_slugs
     # Lookback matches discovery_lookback — a shorter window would miss clearances for
     # events promoted long after resolution.
     type: elasticsearch.request
@@ -103,7 +88,7 @@ steps:
           field: discovery_slug
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - term:
@@ -117,11 +102,11 @@ steps:
   - name: compute_cleared_slugs
     type: data.set
     with:
-      slugs: "${{ steps.fetch_cleared_discovery_slugs.output.hits.hits | map: '_source' | map: 'discovery_slug' | default: [] }}"
+      slugs: "${{ steps.get_cleared_discovery_slugs.output.hits.hits | map: '_source' | map: 'discovery_slug' | default: [] }}"
   # -----------------------------------------------------------------------
   # Re-review: evidence-based (detection state changed) + 5m fallback (stale safety net).
   # -----------------------------------------------------------------------
-  - name: fetch_all_promoted_events
+  - name: get_all_event_docs
     # No verdict filter — post-filtered in compute_promoted_context and compute_active_event_ids.
     type: elasticsearch.request
     with:
@@ -142,7 +127,7 @@ steps:
             - verdict
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - match_all: {}
@@ -152,10 +137,10 @@ steps:
   - name: compute_promoted_context
     type: data.set
     with:
-      promoted_events: "${{ steps.fetch_all_promoted_events.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source' | default: [] }}"
-      acknowledged_events: "${{ steps.fetch_all_promoted_events.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
+      promoted_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source' | default: [] }}"
+      acknowledged_events: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
 
-  - name: fetch_latest_detection_ts
+  - name: get_latest_detection_ts
     # Latest evidence marker: if newer than an event's @timestamp, evidence changed.
     type: elasticsearch.request
     with:
@@ -169,7 +154,7 @@ steps:
         _source: ["@timestamp"]
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - range:
@@ -181,7 +166,7 @@ steps:
     on-failure:
       continue: true
 
-  - name: fetch_promoted_with_cleared_signal
+  - name: get_promoted_with_cleared_signal
     # No verdict filter — post-filtered in compute_cleared_signal_events.
     type: elasticsearch.request
     if: "${{ steps.compute_cleared_slugs.output.slugs.size > 0 }}"
@@ -212,7 +197,7 @@ steps:
             - event_id
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - terms:
@@ -223,20 +208,20 @@ steps:
   - name: compute_cleared_signal_events
     type: data.set
     with:
-      cleared_promoted: "${{ steps.fetch_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'promoted' | default: [] }}"
-      cleared_acknowledged: "${{ steps.fetch_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'acknowledged' | default: [] }}"
+      cleared_promoted: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'promoted' | default: [] }}"
+      cleared_acknowledged: "${{ steps.get_promoted_with_cleared_signal.output.hits.hits | where: '_source.verdict', 'acknowledged' | default: [] }}"
 
   - name: compute_active_event_ids
     type: data.set
     with:
-      promoted_ids: "${{ steps.fetch_all_promoted_events.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source.event_id' | default: [] }}"
-      acknowledged_ids: "${{ steps.fetch_all_promoted_events.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source.event_id' | default: [] }}"
+      promoted_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source.event_id' | default: [] }}"
+      acknowledged_ids: "${{ steps.get_all_event_docs.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source.event_id' | default: [] }}"
 
   # -----------------------------------------------------------------------
   # Step 1: Find unreviewed discoveries.
   # -----------------------------------------------------------------------
 
-  - name: fetch_reviewed_ids
+  - name: get_reviewed_ids
     # Per-ID exclusion avoids missing recurrences when another slug has a newer verdict.
     type: elasticsearch.request
     with:
@@ -246,7 +231,7 @@ steps:
         size: 0
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - range:
@@ -271,27 +256,27 @@ steps:
   - name: compute_reviewed_ids
     type: data.set
     with:
-      reviewed_slugs: "${{ steps.fetch_reviewed_ids.output.aggregations.by_slug.buckets | map: 'key' | default: [] }}"
-      reviewed_discovery_ids: "${{ steps.fetch_reviewed_ids.output.aggregations.reviewed_ids.buckets | map: 'key' | default: [] }}"
+      reviewed_slugs: "${{ steps.get_reviewed_ids.output.aggregations.by_slug.buckets | map: 'key' | default: [] }}"
+      reviewed_discovery_ids: "${{ steps.get_reviewed_ids.output.aggregations.reviewed_ids.buckets | map: 'key' | default: [] }}"
 
   - name: compute_has_reviewed
     type: data.set
     with:
       flag: "${{ steps.compute_reviewed_ids.output.reviewed_discovery_ids.size > 0 }}"
 
-  - name: fetch_unreviewed_discoveries
+  - name: get_unreviewed_discoveries
     # Guards against empty-array terms queries (ES rejects terms: [] at parse time).
     # Four branches cover the cross-product of (has_reviewed_ids) × (has_cleared_slugs).
     type: if
     condition: "${{ steps.compute_has_reviewed.output.flag }}"
     steps:
-      - name: fetch_unreviewed_excluding_gate
+      - name: get_unreviewed_excluding_gate
         # Filter-before-collapse on kind:finding — a slug whose latest doc is a clearance
         # still surfaces its older finding. Clearance propagation belongs to Discovery.
         type: if
         condition: "${{ steps.compute_cleared_slugs.output.slugs.size > 0 }}"
         steps:
-          - name: fetch_unreviewed_excluding_ids_and_slugs
+          - name: get_unreviewed_excluding_ids_and_slugs
             type: elasticsearch.request
             with:
               method: POST
@@ -324,7 +309,7 @@ steps:
                     - change_point_occurrence
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - term:
@@ -340,7 +325,7 @@ steps:
             on-failure:
               continue: true
         else:
-          - name: fetch_unreviewed_excluding_ids_only
+          - name: get_unreviewed_excluding_ids_only
             type: elasticsearch.request
             with:
               method: POST
@@ -373,7 +358,7 @@ steps:
                     - change_point_occurrence
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - term:
@@ -387,11 +372,11 @@ steps:
             on-failure:
               continue: true
     else:
-      - name: fetch_unreviewed_all_gate
+      - name: get_unreviewed_all_gate
         type: if
         condition: "${{ steps.compute_cleared_slugs.output.slugs.size > 0 }}"
         steps:
-          - name: fetch_unreviewed_all_excluding_slugs
+          - name: get_unreviewed_all_excluding_slugs
             type: elasticsearch.request
             with:
               method: POST
@@ -424,7 +409,7 @@ steps:
                     - change_point_occurrence
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - term:
@@ -438,7 +423,7 @@ steps:
             on-failure:
               continue: true
         else:
-          - name: fetch_unreviewed_all_no_exclusions
+          - name: get_unreviewed_all_no_exclusions
             type: elasticsearch.request
             with:
               method: POST
@@ -471,7 +456,7 @@ steps:
                     - change_point_occurrence
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - term:
@@ -487,26 +472,26 @@ steps:
     type: data.set
     with:
       unreviewed_hits: >-
-        ${{ steps.fetch_unreviewed_excluding_ids_and_slugs.output.hits.hits
-          | default: steps.fetch_unreviewed_excluding_ids_only.output.hits.hits
-          | default: steps.fetch_unreviewed_all_excluding_slugs.output.hits.hits
-          | default: steps.fetch_unreviewed_all_no_exclusions.output.hits.hits
+        ${{ steps.get_unreviewed_excluding_ids_and_slugs.output.hits.hits
+          | default: steps.get_unreviewed_excluding_ids_only.output.hits.hits
+          | default: steps.get_unreviewed_all_excluding_slugs.output.hits.hits
+          | default: steps.get_unreviewed_all_no_exclusions.output.hits.hits
           | default: [] }}
       unreviewed_count: >-
-        ${{ steps.fetch_unreviewed_excluding_ids_and_slugs.output.hits.hits
-          | default: steps.fetch_unreviewed_excluding_ids_only.output.hits.hits
-          | default: steps.fetch_unreviewed_all_excluding_slugs.output.hits.hits
-          | default: steps.fetch_unreviewed_all_no_exclusions.output.hits.hits
+        ${{ steps.get_unreviewed_excluding_ids_and_slugs.output.hits.hits
+          | default: steps.get_unreviewed_excluding_ids_only.output.hits.hits
+          | default: steps.get_unreviewed_all_excluding_slugs.output.hits.hits
+          | default: steps.get_unreviewed_all_no_exclusions.output.hits.hits
           | default: [] | size | default: 0 }}
 
-  - name: fetch_cleared_unreviewed_stubs
+  - name: get_cleared_unreviewed_stubs
     # Minimal fields only — cleared items go through the judge's fast-path; heavy
     # fields (evidences, summary, root_cause, etc.) are not needed.
     # Guards against empty-array terms query (ES parse error on []).
     type: if
     condition: "${{ steps.compute_cleared_slugs.output.slugs.size > 0 }}"
     steps:
-      - name: fetch_cleared_stubs_excluding_reviewed
+      - name: get_cleared_stubs_excluding_reviewed
         type: elasticsearch.request
         if: "${{ steps.compute_has_reviewed.output.flag }}"
         with:
@@ -533,7 +518,7 @@ steps:
                 - grouped_discovery_ids
             query:
               bool:
-                must:
+                filter:
                   - term:
                       kibana.space_ids: "{{ variables.spaceId }}"
                   - term:
@@ -548,7 +533,7 @@ steps:
                       discovery_id: "${{ steps.compute_reviewed_ids.output.reviewed_discovery_ids }}"
         on-failure:
           continue: true
-      - name: fetch_cleared_stubs_all
+      - name: get_cleared_stubs_all
         type: elasticsearch.request
         if: "${{ steps.compute_has_reviewed.output.flag == false }}"
         with:
@@ -575,7 +560,7 @@ steps:
                 - grouped_discovery_ids
             query:
               bool:
-                must:
+                filter:
                   - term:
                       kibana.space_ids: "{{ variables.spaceId }}"
                   - term:
@@ -591,27 +576,27 @@ steps:
   - name: compute_cleared_stubs
     type: data.set
     with:
-      hits: "${{ steps.fetch_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.fetch_cleared_stubs_all.output.hits.hits | default: [] | map: '_source' }}"
-      count: "${{ steps.fetch_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.fetch_cleared_stubs_all.output.hits.hits | default: [] | size }}"
-      slugs: "${{ steps.fetch_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.fetch_cleared_stubs_all.output.hits.hits | default: [] | map: '_source' | map: 'discovery_slug' | default: [] }}"
+      hits: "${{ steps.get_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.get_cleared_stubs_all.output.hits.hits | default: [] | map: '_source' }}"
+      count: "${{ steps.get_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.get_cleared_stubs_all.output.hits.hits | default: [] | size }}"
+      slugs: "${{ steps.get_cleared_stubs_excluding_reviewed.output.hits.hits | default: steps.get_cleared_stubs_all.output.hits.hits | default: [] | map: '_source' | map: 'discovery_slug' | default: [] }}"
 
   - name: compute_unreviewed_slugs
     type: data.set
     with:
       discovery_slugs: "${{ steps.check_has_unreviewed.output.unreviewed_hits | default: [] | map: '_source' | map: 'discovery_slug' | concat: steps.compute_cleared_stubs.output.slugs }}"
 
-  - name: fetch_rereview_candidates
+  - name: get_rereview_candidates
     # Inner if/else guards against empty-array terms query (ES parse error on []).
     type: if
     condition: >-
       ${{ steps.compute_active_event_ids.output.promoted_ids.size > 0
       or steps.compute_active_event_ids.output.acknowledged_ids.size > 0 }}
     steps:
-      - name: fetch_rereview_slug_gate
+      - name: get_rereview_slug_gate
         type: if
         condition: "${{ steps.compute_unreviewed_slugs.output.discovery_slugs.size > 0 }}"
         steps:
-          - name: fetch_rereview_with_slug_exclusion
+          - name: get_rereview_with_slug_exclusion
             type: elasticsearch.request
             with:
               method: POST
@@ -627,7 +612,7 @@ steps:
                 fields: ["event_id"]
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - terms:
@@ -638,7 +623,7 @@ steps:
                     should:
                       - range:
                           "@timestamp":
-                            lt: "{{ steps.fetch_latest_detection_ts.output.hits.hits[0]._source['@timestamp'] | default: '2000-01-01T00:00:00Z' }}"
+                            lt: "{{ steps.get_latest_detection_ts.output.hits.hits[0]._source['@timestamp'] | default: '2000-01-01T00:00:00Z' }}"
                       - range:
                           "@timestamp":
                             lte: '{{ inputs.rereviewFallbackInterval }}'
@@ -646,7 +631,7 @@ steps:
             on-failure:
               continue: true
         else:
-          - name: fetch_rereview_no_exclusion
+          - name: get_rereview_no_exclusion
             type: elasticsearch.request
             with:
               method: POST
@@ -662,7 +647,7 @@ steps:
                 fields: ["event_id"]
                 query:
                   bool:
-                    must:
+                    filter:
                       - term:
                           kibana.space_ids: "{{ variables.spaceId }}"
                       - terms:
@@ -670,7 +655,7 @@ steps:
                     should:
                       - range:
                           "@timestamp":
-                            lt: "{{ steps.fetch_latest_detection_ts.output.hits.hits[0]._source['@timestamp'] | default: '2000-01-01T00:00:00Z' }}"
+                            lt: "{{ steps.get_latest_detection_ts.output.hits.hits[0]._source['@timestamp'] | default: '2000-01-01T00:00:00Z' }}"
                       - range:
                           "@timestamp":
                             lte: '{{ inputs.rereviewFallbackInterval }}'
@@ -680,9 +665,9 @@ steps:
   - name: compute_rereview_event_ids
     type: data.set
     with:
-      ids: "${{ steps.fetch_rereview_with_slug_exclusion.output.hits.hits | default: steps.fetch_rereview_no_exclusion.output.hits.hits | default: [] | map: 'fields' | map: 'event_id' | map: 'first' | default: [] }}"
+      ids: "${{ steps.get_rereview_with_slug_exclusion.output.hits.hits | default: steps.get_rereview_no_exclusion.output.hits.hits | default: [] | map: 'fields' | map: 'event_id' | map: 'first' | default: [] }}"
 
-  - name: fetch_rereview_events
+  - name: get_rereview_events
     type: elasticsearch.request
     if: "${{ steps.compute_rereview_event_ids.output.ids.size > 0 }}"
     with:
@@ -714,7 +699,7 @@ steps:
             - previous_event_id
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - terms:
@@ -722,33 +707,35 @@ steps:
     on-failure:
       continue: true
 
-  - name: evaluate_rereview
-    type: data.set
-    with:
-      promoted_rereview: "${{ steps.compute_rereview_event_ids.output.ids.size | default: 0 }}"
-      promoted_cleared: "${{ steps.compute_cleared_signal_events.output.cleared_promoted.size | plus: steps.compute_cleared_signal_events.output.cleared_acknowledged.size | default: 0 }}"
-
-  - name: evaluate_work_needed
+  - name: compute_work_needed
     type: data.set
     with:
       has_unreviewed: >-
         ${{ steps.check_has_unreviewed.output.unreviewed_count > 0
         or steps.compute_cleared_stubs.output.count > 0 }}
       has_rereview_work: >-
-        ${{ steps.evaluate_rereview.output.promoted_rereview > 0
-        or steps.evaluate_rereview.output.promoted_cleared > 0 }}
+        ${{ steps.compute_rereview_event_ids.output.ids.size > 0
+        or steps.compute_cleared_signal_events.output.cleared_promoted.size > 0
+        or steps.compute_cleared_signal_events.output.cleared_acknowledged.size > 0 }}
       should_run: >-
         ${{ steps.check_has_unreviewed.output.unreviewed_count > 0
         or steps.compute_cleared_stubs.output.count > 0
-        or steps.evaluate_rereview.output.promoted_rereview > 0
-        or steps.evaluate_rereview.output.promoted_cleared > 0 }}
+        or steps.compute_rereview_event_ids.output.ids.size > 0
+        or steps.compute_cleared_signal_events.output.cleared_promoted.size > 0
+        or steps.compute_cleared_signal_events.output.cleared_acknowledged.size > 0 }}
+
+  - name: exit_idle
+    type: workflow.output
+    if: "${{ steps.compute_work_needed.output.should_run == false }}"
+    status: cancelled
+    with:
+      reason: "No unreviewed findings or re-review work — nothing to triage"
 
   # -----------------------------------------------------------------------
   # Step 2: Fetch detection evidence for all unreviewed discoveries.
   # -----------------------------------------------------------------------
-  - name: fetch_detection_evidence
+  - name: get_detection_evidence
     type: elasticsearch.request
-    if: "${{ steps.evaluate_work_needed.output.should_run }}"
     with:
       method: POST
       path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
@@ -772,7 +759,7 @@ steps:
             - "@timestamp"
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - range:
@@ -784,20 +771,16 @@ steps:
     on-failure:
       continue: true
 
-  - name: filter_active_evidence
+  - name: compute_active_detection_evidence
     # Post-filter to kind:detection — avoids filter-before-collapse surfacing stale docs.
-    type: if
-    condition: "${{ steps.evaluate_work_needed.output.should_run }}"
-    steps:
-      - name: compute_active_detection_evidence
-        type: data.set
-        with:
-          active_evidence: "${{ steps.fetch_detection_evidence.output.hits.hits | where: '_source.kind', 'detection' | default: [] }}"
+    type: data.set
+    with:
+      active_evidence: "${{ steps.get_detection_evidence.output.hits.hits | where: '_source.kind', 'detection' | default: [] }}"
 
   # -----------------------------------------------------------------------
   # Step 3: Knowledge base — promoted + demoted verdicts for judge calibration.
   # -----------------------------------------------------------------------
-  - name: fetch_knowledge_base
+  - name: get_knowledge_base
     # acknowledged/grouped verdicts excluded — promoted/demoted pattern data is
     # what calibrates the judge; older promoted/demoted verdicts for a slug are
     # exactly the desired signal even if the latest verdict is acknowledged.
@@ -805,7 +788,6 @@ steps:
     # full evidence payloads add ~50KB per entry for no calibration gain.
     # Slug-scoped should omitted — terms with an empty array causes an ES parse error.
     type: elasticsearch.request
-    if: "${{ steps.evaluate_work_needed.output.should_run }}"
     with:
       method: POST
       path: '/{{ consts.VERDICTS_INDEX }}/_search?ignore_unavailable=true'
@@ -826,7 +808,7 @@ steps:
             - verdict_summary
         query:
           bool:
-            must:
+            filter:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - terms:
@@ -837,19 +819,15 @@ steps:
     on-failure:
       continue: true
 
-  - name: build_batch
-    type: if
-    condition: "${{ steps.evaluate_work_needed.output.should_run }}"
-    steps:
-      - name: compute_batch
-        type: data.set
-        with:
-          unreviewed_json: |
-            {{ steps.check_has_unreviewed.output.unreviewed_hits | map: '_source' | concat: steps.compute_cleared_stubs.output.hits | sort: 'criticality' | reverse | json }}
-          rereview_json: |
-            {{ steps.fetch_rereview_events.output.hits.hits | map: '_source' | sort: 'criticality' | reverse | json }}
-          rereview_cleared_json: |
-            {{ steps.compute_cleared_signal_events.output.cleared_promoted | concat: steps.compute_cleared_signal_events.output.cleared_acknowledged | map: '_source' | sort: 'criticality' | reverse | json }}
+  - name: compute_batch
+    type: data.set
+    with:
+      unreviewed_json: |
+        {{ steps.check_has_unreviewed.output.unreviewed_hits | map: '_source' | concat: steps.compute_cleared_stubs.output.hits | sort: 'criticality' | reverse | json }}
+      rereview_json: |
+        {{ steps.get_rereview_events.output.hits.hits | map: '_source' | sort: 'criticality' | reverse | json }}
+      rereview_cleared_json: |
+        {{ steps.compute_cleared_signal_events.output.cleared_promoted | concat: steps.compute_cleared_signal_events.output.cleared_acknowledged | map: '_source' | sort: 'criticality' | reverse | json }}
 
   # -----------------------------------------------------------------------
   # Step 4: Judge — unreviewed discoveries and re-review active events.
@@ -861,7 +839,6 @@ steps:
     type: ai.agent
     agent-id: "platform.streams.sigevents.discovery.judge"
     connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
-    if: "${{ steps.evaluate_work_needed.output.should_run }}"
     create-conversation: true
     with:
       message: |
@@ -873,7 +850,7 @@ steps:
 
         ## Knowledge Base (recent promoted + demoted verdicts)
 
-        {{ steps.fetch_knowledge_base.output.hits.hits | map: '_source' | json }}
+        {{ steps.get_knowledge_base.output.hits.hits | map: '_source' | json }}
 
         ## Unreviewed Discoveries
 
@@ -980,10 +957,9 @@ steps:
   # -----------------------------------------------------------------------
   # Step 5: Process each verdict — write to events + verdicts indices.
   # -----------------------------------------------------------------------
-  # -----------------------------------------------------------------------
+
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
-  # -----------------------------------------------------------------------
-  - name: snapshot_verdicts
+  - name: check_judge_agent_output
     type: if
     condition: "${{ steps.run_judge_agent.error == null and steps.run_judge_agent.output.structured_output.verdicts != null }}"
     steps:
@@ -1118,7 +1094,7 @@ steps:
           summary: "{{ foreach.item.summary | default: steps.resolve_discovery_source.output.src.summary }}"
           title: "{{ foreach.item.title | default: steps.resolve_discovery_source.output.src.title }}"
 
-      - name: find_prior_event_doc
+      - name: get_prior_event_doc
         # Any verdict, including demoted — chains previous_event_id for new events.
         type: elasticsearch.request
         with:
@@ -1152,7 +1128,7 @@ steps:
           body:
             query:
               bool:
-                must:
+                filter:
                   - term:
                       kibana.space_ids: "{{ variables.spaceId }}"
                   - term:
@@ -1188,7 +1164,7 @@ steps:
             or steps.compute_write_gates.output.needs_revision }}
           event_id: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.event_id }}{% else %}{{ steps.compute_event_content.output.discovery_id }}-event{% endif %}"
           created_at: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
-          previous_event_id: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.previous_event_id }}{% else %}{{ steps.find_prior_event_doc.output.hits.hits[0]._source.event_id }}{% endif %}"
+          previous_event_id: "{% if steps.compute_verdict_meta.output.has_active_event %}{{ steps.check_existing_event_doc.output.hits.hits[0]._source.previous_event_id }}{% else %}{{ steps.get_prior_event_doc.output.hits.hits[0]._source.event_id }}{% endif %}"
           title: "{{ steps.compute_event_content.output.title | default: steps.check_existing_event_doc.output.hits.hits[0]._source.title }}"
           summary: "{{ steps.compute_event_content.output.summary | default: steps.check_existing_event_doc.output.hits.hits[0]._source.summary }}"
           root_cause: "{{ steps.compute_event_content.output.root_cause | default: steps.check_existing_event_doc.output.hits.hits[0]._source.root_cause }}"

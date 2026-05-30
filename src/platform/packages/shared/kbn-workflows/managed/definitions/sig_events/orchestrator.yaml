@@ -13,6 +13,10 @@ settings:
     key: "sigevents-orchestrator"
     strategy: drop
     max: 1
+  on-failure:
+    # Sub-workflows exit cancelled (idle) or may fail transiently — always continue
+    # so detection failure never blocks discovery/triage and vice-versa.
+    continue: true
 triggers:
   - type: manual
 steps:

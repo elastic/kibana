@@ -28,10 +28,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsConfig } from '../common/config';
-import {
-  installWorkflows,
-  type ManagedWorkflowsClient,
-} from './lib/workflows/setup/install_workflows';
+import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -115,7 +112,6 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
-  private managedWorkflowsClient?: ManagedWorkflowsClient;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -655,6 +651,7 @@ export class StreamsPlugin
 
     try {
       await installWorkflows({ client });
+      this.logger.info('Streams managed workflows installed');
     } catch (error) {
       this.logger.warn(
         `Failed to install streams managed workflows: ${
@@ -664,8 +661,6 @@ export class StreamsPlugin
     }
 
     await client.ready();
-    this.managedWorkflowsClient = client;
-    this.logger.info('Streams managed workflows installed');
   }
 
   public async stop() {
