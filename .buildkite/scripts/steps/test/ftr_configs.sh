@@ -141,8 +141,11 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-store_failing_tests  # attempt 1: record what failed so the retry can verify recovery
-apply_smart_retry    # attempt 2: mark green if all previously-failing tests explicitly passed
+
+if [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]; then
+  store_failing_tests  # attempt 1: record what failed so the retry can verify recovery
+  apply_smart_retry    # attempt 2: mark green if all previously-failing tests explicitly passed
+fi
 
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
