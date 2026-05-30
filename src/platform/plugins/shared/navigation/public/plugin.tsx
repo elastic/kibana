@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense } from 'react';
 import type { Observable } from 'rxjs';
-import { of, ReplaySubject, take, map, switchMap, takeUntil } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -19,13 +18,8 @@ import type {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { type SolutionId, type NavigationCustomization } from '@kbn/core-chrome-browser';
-import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
+import { type SolutionId } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { i18n } from '@kbn/i18n';
-import { computeMoves } from './compute_moves';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -35,17 +29,7 @@ import type {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import {
-  NAV_CUSTOMIZATION_STORAGE_KEY,
-  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-} from '../common/constants';
-
-const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
-  const { CustomizeNavigationUserMenuLink } = await import(
-    '@kbn/navigation-customization-components'
-  );
-  return { default: CustomizeNavigationUserMenuLink };
-});
+import { NavigationCustomizationService } from './navigation_customization';
 
 export class NavigationPublicPlugin
   implements
@@ -60,6 +44,7 @@ export class NavigationPublicPlugin
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
+  private readonly customizationService = new NavigationCustomizationService();
   private chrome?: InternalChromeStart;
   private activeSolutionId: SolutionId | null = null;
   private isSolutionNavEnabled = false;
@@ -85,6 +70,7 @@ export class NavigationPublicPlugin
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
+    const isUnauthenticated = this.getIsUnauthenticated(core.http);
 
     /**
      * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
@@ -98,10 +84,6 @@ export class NavigationPublicPlugin
       customExtensions?: RegisteredTopNavMenuData[]
     ) => {
       return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
-    };
-
-    const openCustomizeNavigationModal = () => {
-      this.openCustomizeNavigationModal(core, chrome);
     };
 
     const initSolutionNavigation = (activeSpace?: Space) => {
@@ -121,71 +103,39 @@ export class NavigationPublicPlugin
         });
       }
 
+      // Add the "Customize navigation" user-menu link once the active space
+      // confirms a project-nav solution. The handler may have already been
+      // registered synchronously below; enableUi's per-capability idempotency
+      // guards prevent double-registration.
       if (
         security &&
         !isServerless &&
         getIsProjectNav(activeSpace?.solution) &&
         core.userStorage.isAvailable()
       ) {
-        security.navControlService.addUserMenuLinks([
-          {
-            iconType: 'controls',
-            label: i18n.translate('navigation.userMenuLinkLabel', {
-              defaultMessage: 'Customize navigation',
-            }),
-            href: '',
-            order: 500,
-            content: ({ closePopover }) => {
-              return (
-                <Suspense fallback={null}>
-                  <LazyCustomizeNavigationUserMenuLink
-                    closePopover={closePopover}
-                    onClick={openCustomizeNavigationModal}
-                  />
-                </Suspense>
-              );
-            },
-          },
-        ]);
+        this.customizationService.enableUi({ core, chrome, security });
       }
     };
 
-    if (this.getIsUnauthenticated(core.http)) {
+    if (isUnauthenticated) {
       // Don't fetch the active space if the user is not authenticated
       initSolutionNavigation();
     } else {
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
+    // Register the chrome customize-navigation handler synchronously so it is
+    // available before the active-space observable resolves. The menu link is
+    // added separately (above) once the space is confirmed as project-nav.
     if (this.isSolutionNavEnabled && core.userStorage.isAvailable()) {
-      chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
+      this.customizationService.enableUi({ core, chrome });
     }
 
-    // Reactively apply stored customization to the navigation.
-    //
-    // The initial emission is synchronous because NAV_CUSTOMIZATION_STORAGE_KEY is
-    // registered with preload: true on the server (see navigation/server/plugin.ts),
-    // so the value is server-injected at page load and the seed reaches
-    // customization$ before the first render and before any later
-    // chrome.project.initNavigation() call from solution plugins.
-    //
-    // This synchrony, plus the conditional write in initNavigation, is what keeps
-    // startup ordering between the navigation plugin and solution plugins from
-    // turning into a race that wipes the user's saved customization. If this
-    // storage key ever loses preload: true, the seed becomes async and the race
-    // returns.
-    //
-    // Subsequent emissions also handle multi-tab sync.
-    if (!this.getIsUnauthenticated(core.http)) {
-      core.userStorage
-        .get$<NavigationCustomization>(NAV_CUSTOMIZATION_STORAGE_KEY)
-        .pipe(takeUntil(this.stop$))
-        .subscribe((customization) => {
-          chrome.project.setNavigationCustomization(customization);
-        });
-    }
+    // Sync stored customization to chrome. Initial emission is synchronous
+    // (preload: true on the server), keeping startup ordering safe.
+    this.customizationService.start({ core, chrome, isUnauthenticated });
 
-    if (isServerless && !this.getIsUnauthenticated(core.http) && core.userStorage.isAvailable()) {
+    if (isServerless && !isUnauthenticated && core.userStorage.isAvailable()) {
       // In serverless, the serverless plugin initializes project navigation directly,
       // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
       // to become available, then enable customization support.
@@ -194,31 +144,7 @@ export class NavigationPublicPlugin
         .pipe(take(1))
         .subscribe(({ solutionId }) => {
           this.activeSolutionId = solutionId;
-
-          chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
-
-          if (security) {
-            security.navControlService.addUserMenuLinks([
-              {
-                iconType: 'controls',
-                label: i18n.translate('navigation.serverless.userMenuLinkLabel', {
-                  defaultMessage: 'Customize navigation',
-                }),
-                href: '',
-                order: 500,
-                content: ({ closePopover }) => {
-                  return (
-                    <Suspense fallback={null}>
-                      <LazyCustomizeNavigationUserMenuLink
-                        closePopover={closePopover}
-                        onClick={openCustomizeNavigationModal}
-                      />
-                    </Suspense>
-                  );
-                },
-              },
-            ]);
-          }
+          this.customizationService.enableUi({ core, chrome, security });
         });
     }
 
@@ -241,9 +167,9 @@ export class NavigationPublicPlugin
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
       },
-      isSolutionNavEnabled$: of(this.getIsUnauthenticated(core.http)).pipe(
-        switchMap((isUnauthenticated) => {
-          if (isUnauthenticated) return of(false);
+      isSolutionNavEnabled$: of(isUnauthenticated).pipe(
+        switchMap((unauth) => {
+          if (unauth) return of(false);
           return activeSpace$.pipe(
             map((activeSpace) => {
               return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
@@ -256,6 +182,7 @@ export class NavigationPublicPlugin
 
   public stop() {
     this.stop$.next();
+    this.customizationService.stop();
   }
 
   private addSolutionNavigation(def: AddSolutionNavigationArg) {
@@ -291,98 +218,6 @@ export class NavigationPublicPlugin
   private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
-  }
-
-  private openCustomizeNavigationModal(core: CoreStart, chrome: InternalChromeStart) {
-    const openModal = async () => {
-      // Lazy-load the modal package — it pulls in heavy dnd + EUI dependencies that
-      // shouldn't be in the page-load bundle.
-      const { CustomizeNavigationModal } = await import('@kbn/navigation-customization-components');
-
-      const { items, defaultItemIds } = this.getNavigationItems(chrome);
-
-      const savedCustomization = core.userStorage.get<NavigationCustomization>(
-        NAV_CUSTOMIZATION_STORAGE_KEY
-      );
-      const isCalloutDismissed = core.userStorage.get<boolean>(
-        NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-        false
-      );
-
-      const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
-        moves: computeMoves(defaultItemIds, order),
-        hidden: hiddenIds as AppDeepLinkId[],
-      });
-
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          core.rendering.addContext(
-            <CustomizeNavigationModal
-              items={items}
-              isCalloutDismissed={isCalloutDismissed}
-              onChange={(order, hiddenIds) => {
-                chrome.project.setNavigationCustomization(toCustomization(order, hiddenIds));
-              }}
-              onSave={(order, hiddenIds) => {
-                core.userStorage.set(
-                  NAV_CUSTOMIZATION_STORAGE_KEY,
-                  toCustomization(order, hiddenIds)
-                );
-                modal.close();
-              }}
-              onReset={() => {
-                chrome.project.setNavigationCustomization(undefined);
-                core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
-                return this.getNavigationItems(chrome).items;
-              }}
-              onClose={() => {
-                chrome.project.setNavigationCustomization(savedCustomization);
-                modal.close();
-              }}
-              onDismissCallout={() => {
-                core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
-              }}
-            />
-          ),
-          core
-        )
-      );
-    };
-
-    openModal();
-  }
-
-  private getNavigationItems(chrome: InternalChromeStart): {
-    items: Array<{ id: string; title: string; hidden: boolean; icon?: string }>;
-    defaultItemIds: string[];
-  } {
-    let renderableNodes: ChromeProjectNavigationNode[] = [];
-    let overflowItemIds: string[] = [];
-    // The true default order, captured by the service from the raw nav definition
-    // before any customization moves are applied. Deriving the default order from
-    // `renderableNodes` here would be wrong: those nodes are already in the user's
-    // customized order, so the modal would diff the customized order against itself
-    // and silently wipe the saved customization on the first onChange.
-    let defaultItemIds: string[] = [];
-
-    chrome.project
-      .getNavigation$()
-      .subscribe((nav) => {
-        renderableNodes = nav.renderableNodes;
-        overflowItemIds = nav.overflowItemIds;
-        defaultItemIds = nav.defaultItemIds;
-      })
-      .unsubscribe();
-
-    const overflowSet = new Set(overflowItemIds);
-    const items = renderableNodes.map((node) => ({
-      id: node.id,
-      title: (node.title ?? node.id) as string,
-      hidden: overflowSet.has(node.id),
-      icon: getNavigationNodeIcon(node),
-    }));
-
-    return { items, defaultItemIds };
   }
 }
 
