@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Detection, Discovery } from '@kbn/streams-schema';
 
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
@@ -104,3 +105,24 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
+
+export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
+  detection: i18n.translate('xpack.streams.detectionsTab.kind.detection', {
+    defaultMessage: 'Detected',
+  }),
+  quiet: i18n.translate('xpack.streams.detectionsTab.kind.quiet', {
+    defaultMessage: 'Recovered',
+  }),
+  handled: i18n.translate('xpack.streams.detectionsTab.kind.handled', {
+    defaultMessage: 'Processed',
+  }),
+};
+
+export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
+  finding: i18n.translate('xpack.streams.discoveriesTab.kind.finding', {
+    defaultMessage: 'Finding',
+  }),
+  clearance: i18n.translate('xpack.streams.discoveriesTab.kind.clearance', {
+    defaultMessage: 'Cleared',
+  }),
+};

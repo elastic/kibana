@@ -15,34 +15,25 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { DiscoveryFlyout } from './discovery_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
-
-const KIND_LABELS: Record<string, string> = {
-  finding: i18n.translate('xpack.streams.discoveriesTab.kind.finding', {
-    defaultMessage: 'Finding',
-  }),
-  clearance: i18n.translate('xpack.streams.discoveriesTab.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-};
-
-const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'success' };
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
     field: 'discovered_at',
-    name: i18n.translate('xpack.streams.discoveriesTab.foundColumn', {
-      defaultMessage: 'Found',
+    name: i18n.translate('xpack.streams.discoveriesTab.timestampColumn', {
+      defaultMessage: 'Timestamp',
     }),
     width: '200px',
     render: (discoveredAt: string | undefined, discovery: Discovery) =>
@@ -50,12 +41,12 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
   },
   {
     field: 'kind',
-    name: i18n.translate('xpack.streams.discoveriesTab.statusColumn', {
-      defaultMessage: 'Status',
+    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
+      defaultMessage: 'Kind',
     }),
     width: '90px',
-    render: (kind: string) => (
-      <EuiBadge color={KIND_COLORS[kind] ?? 'default'}>{KIND_LABELS[kind] ?? kind}</EuiBadge>
+    render: (kind: Discovery['kind']) => (
+      <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
     ),
   },
   {
@@ -113,15 +104,8 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
 const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
 
 export const DiscoveriesTab = () => {
-  const [pickerRange, setPickerRange] = useState(DEFAULT_DISCOVERIES_RANGE);
-  const [absoluteRange, setAbsoluteRange] = useState(() =>
-    getAbsoluteTimeRange(DEFAULT_DISCOVERIES_RANGE, { forceNow: new Date() })
-  );
-
-  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
-    setPickerRange({ from: s, to: e });
-    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
-  };
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
     from: absoluteRange.from,
@@ -156,7 +140,7 @@ export const DiscoveriesTab = () => {
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
               onRefresh={() => {
-                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refreshAbsoluteRange();
                 refetch();
               }}
               compressed

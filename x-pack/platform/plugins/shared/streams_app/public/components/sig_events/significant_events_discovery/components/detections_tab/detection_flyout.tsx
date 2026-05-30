@@ -17,16 +17,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
-  EuiLoadingSpinner,
-  EuiTimeline,
-  EuiTimelineItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { changeTypeLabel } from '../shared/translations';
-
+import { changeTypeLabel, DETECTION_KIND_LABELS } from '../shared/translations';
+import { DETECTION_KIND_COLORS } from '../shared/constants';
 const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
   const n = Number(pValue);
@@ -44,79 +41,13 @@ const formatPValue = (pValue?: number | string): string => {
   });
 };
 
-const KIND_LABELS: Record<string, string> = {
-  detection: i18n.translate('xpack.streams.detectionFlyout.status.active', {
-    defaultMessage: 'Active',
-  }),
-  quiet: i18n.translate('xpack.streams.detectionFlyout.status.quiet', {
-    defaultMessage: 'Quiet',
-  }),
-  handled: i18n.translate('xpack.streams.detectionFlyout.status.investigated', {
-    defaultMessage: 'Investigated',
-  }),
-};
-
-const KIND_COLORS: Record<string, string> = {
-  detection: 'warning',
-  quiet: 'default',
-  handled: 'success',
-};
-
-// history is sorted @timestamp ASC — a kind:detection after another kind:detection is a type revision.
-const timelineLabel = (entry: Detection, prev: Detection | undefined): string => {
-  const type = changeTypeLabel(entry.detection_evidence?.change_point_type);
-  switch (entry.kind) {
-    case 'detection':
-      if (prev?.kind === 'detection') {
-        return i18n.translate('xpack.streams.detectionFlyout.transition.typeChanged', {
-          defaultMessage: 'Type changed — {type}',
-          values: { type },
-        });
-      }
-      return i18n.translate('xpack.streams.detectionFlyout.transition.detected', {
-        defaultMessage: 'Detected — {type}',
-        values: { type },
-      });
-    case 'quiet':
-      return i18n.translate('xpack.streams.detectionFlyout.transition.quiet', {
-        defaultMessage: 'Returned to baseline',
-      });
-    case 'handled':
-      return i18n.translate('xpack.streams.detectionFlyout.transition.handled', {
-        defaultMessage: 'Investigated by discovery',
-      });
-    default:
-      return entry.kind;
-  }
-};
-
 interface DetectionFlyoutProps {
   detection: Detection;
-  history: Detection[];
-  isHistoryLoading: boolean;
   onClose: () => void;
 }
 
-export const DetectionFlyout = ({
-  detection,
-  history,
-  isHistoryLoading,
-  onClose,
-}: DetectionFlyoutProps) => {
+export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
-
-  // The episode is processed when the latest kind:handled doc is on or after
-  // the latest kind:detection/quiet doc — mirrors getProcessedIds server logic.
-  const isProcessed = isHistoryLoading
-    ? detection.processed
-    : (() => {
-        const latestStateTs = [...history]
-          .reverse()
-          .find((e) => e.kind === 'detection' || e.kind === 'quiet')?.['@timestamp'];
-        return latestStateTs
-          ? history.some((e) => e.kind === 'handled' && e['@timestamp'] >= latestStateTs)
-          : history.some((e) => e.kind === 'handled');
-      })();
 
   const diagnostics = useMemo(
     () => [
@@ -159,17 +90,13 @@ export const DetectionFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={KIND_COLORS[detection.kind] ?? 'default'}>
-              {KIND_LABELS[detection.kind] ?? detection.kind}
+            <EuiBadge color={DETECTION_KIND_COLORS[detection.kind] ?? 'default'}>
+              {DETECTION_KIND_LABELS[detection.kind] ?? detection.kind}
             </EuiBadge>
           </EuiFlexItem>
-          {isProcessed && (
+          {detection.processed && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success">
-                {i18n.translate('xpack.streams.detectionFlyout.investigated', {
-                  defaultMessage: 'Investigated',
-                })}
-              </EuiBadge>
+              <EuiBadge color="success">{DETECTION_KIND_LABELS.handled}</EuiBadge>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -189,54 +116,6 @@ export const DetectionFlyout = ({
           listItems={diagnostics}
           compressed
         />
-
-        <EuiSpacer size="l" />
-
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.streams.detectionFlyout.timeline', {
-              defaultMessage: 'Timeline',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
-        {isHistoryLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          <EuiTimeline
-            aria-label={i18n.translate(
-              'xpack.streams.detectionFlyout.euiTimeline.detectionHistoryLabel',
-              { defaultMessage: 'Detection history' }
-            )}
-            gutterSize="m"
-          >
-            {history.map((entry, idx) => (
-              <EuiTimelineItem
-                key={`${entry['@timestamp']}-${idx}`}
-                icon="dot"
-                iconAriaLabel={KIND_LABELS[entry.kind] ?? entry.kind}
-                verticalAlign="top"
-              >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={KIND_COLORS[entry.kind] ?? 'hollow'}>
-                      {KIND_LABELS[entry.kind] ?? entry.kind}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {formatTimestamp(entry['@timestamp'])}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiText size="s">
-                  <p>{timelineLabel(entry, history[idx - 1])}</p>
-                </EuiText>
-              </EuiTimelineItem>
-            ))}
-          </EuiTimeline>
-        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
