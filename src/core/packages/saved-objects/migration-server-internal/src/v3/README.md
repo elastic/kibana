@@ -28,7 +28,8 @@ v3 expresses the same machine differently:
 - **Type-constrained transitions** — a step physically cannot return a state
   outside its row in `SUCCESSORS` without a compile error.
 - **Explicit correctness apparatus** — runtime invariants asserted in the loop
-  driver, plus property-based tests over arbitrary `(state, response)` pairs.
+  driver, plus property-based test scaffolding (planned; skeleton in
+  `successor_graph.test.ts`) over arbitrary `(state, response)` pairs.
 
 ---
 
@@ -78,21 +79,26 @@ For readers familiar with the paper:
 
 ## The state graph
 
-States are: `INIT → CHECK_SOURCE → CREATE_TARGET → MARK_READY → DONE`, with
-`FATAL` reachable from every non-terminal state, and `CREATE_TARGET` looping
-back to itself on retryable failures.
+> **Illustrative skeleton** — the actual graph has 26 states. See `successors.ts`
+> (`SUCCESSORS` export) as the source of truth.
+
+The simplified example below shows the pattern; the real graph includes
+`WAIT_FOR_MIGRATION_COMPLETION`, `WAIT_FOR_YELLOW_SOURCE`,
+`OUTDATED_DOCUMENTS_*`, `TRANSFORMED_DOCUMENTS_BULK_INDEX`, target mappings
+states, and more:
 
 ```mermaid
 stateDiagram-v2
   [*] --> INIT
-  INIT --> CHECK_SOURCE
-  CHECK_SOURCE --> CREATE_TARGET
-  CHECK_SOURCE --> FATAL
-  CREATE_TARGET --> CREATE_TARGET : retryable_failure
-  CREATE_TARGET --> MARK_READY
-  CREATE_TARGET --> FATAL
-  MARK_READY --> DONE
-  MARK_READY --> FATAL
+  INIT --> WAIT_FOR_YELLOW_SOURCE
+  INIT --> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
+  INIT --> FATAL
+  WAIT_FOR_YELLOW_SOURCE --> UPDATE_SOURCE_MAPPINGS_PROPERTIES
+  CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION --> CREATE_NEW_TARGET
+  CREATE_NEW_TARGET --> CHECK_VERSION_INDEX_READY_ACTIONS
+  CHECK_VERSION_INDEX_READY_ACTIONS --> MARK_VERSION_INDEX_READY
+  MARK_VERSION_INDEX_READY --> DONE
+  MARK_VERSION_INDEX_READY --> FATAL
   DONE --> [*]
   FATAL --> [*]
 ```
@@ -100,11 +106,12 @@ stateDiagram-v2
 The graph lives as data in `successors.ts`:
 
 ```ts
+// Illustrative subset — see successors.ts for the full 26-state table.
 export const SUCCESSORS = {
-  [INIT.Name]: [CHECK_SOURCE.Name],
-  [CHECK_SOURCE.Name]: [CREATE_TARGET.Name, FATAL.Name],
-  [CREATE_TARGET.Name]: [CREATE_TARGET.Name, MARK_READY.Name, FATAL.Name],
-  [MARK_READY.Name]: [DONE.Name, FATAL.Name],
+  [INIT.Name]: [WAIT_FOR_MIGRATION_COMPLETION.Name, WAIT_FOR_YELLOW_SOURCE.Name, ...],
+  [WAIT_FOR_YELLOW_SOURCE.Name]: [UPDATE_SOURCE_MAPPINGS_PROPERTIES.Name, ...FATAL.Name],
+  [CREATE_NEW_TARGET.Name]: [CHECK_VERSION_INDEX_READY_ACTIONS.Name, ...FATAL.Name],
+  [MARK_VERSION_INDEX_READY.Name]: [DONE.Name, MARK_VERSION_INDEX_READY_CONFLICT.Name, FATAL.Name],
   [DONE.Name]: [],
   [FATAL.Name]: [],
 } as const satisfies Record<StateName, readonly StateName[]>;
@@ -136,9 +143,10 @@ v3/
 ├── next.ts                          ← tiny loop driver; looks up STEPS[state.name]
 ├── state.ts                         ← State union, BaseState, transition helpers
 ├── types.ts                         ← Step, runStep, re-exports from successors
-├── successors.ts                    ← phase-grouped SUCCESSORS table + SuccessorsOf
+├── successors.ts                    ← SUCCESSORS, STEPS, STATE_INVARIANTS dispatch tables
 ├── io.ts                            ← IO interface + response unions
-├── invariants.ts                    ← assertInvariants (§5.1.1 Inv predicate)
+├── invariant_helper.ts              ← MigrationInvariantViolation, assertInvariant, clause
+├── invariants.ts                    ← assertInvariants dispatcher + cross-cutting checks
 ├── assert_never.ts                  ← exhaustiveness helper
 ├── steps/
 │   ├── init.ts                      ← Name, State, step factory
@@ -324,8 +332,10 @@ Three layers, each catching a different class of bug.
 - `transitionTo`'s `extras` type forces every required field on the target
   state to be supplied and rejects unknown fields.
 - `assertNever` forces exhaustive handling of response variants.
+- Type-level regression tests in `__type_tests__/` lock these constraints; run
+  package `type_check` after graph or `State` union edits.
 
-### 2. Runtime — `invariants.ts`
+### 2. Runtime — `invariants.ts` + `steps/*.ts`
 
 `assertInvariants(state: State)` encodes Lamport's §5.1.1 inductive invariant.
 It's called by `run_v3_migration.ts` once on the initial state and after every
@@ -341,22 +351,37 @@ while (!isTerminalState(state)) {
 }
 ```
 
-Clauses include:
+**Cross-cutting checks** stay in `invariants.ts`: **base** (retry integers and
+bounds), **migration-base** (non-empty config strings when `indexPrefix` is
+present), **post-init** (`targetIndex`, `SourceExistsState` `Option` checks).
+**Per-control-point checks** live beside each step's `Name` / `State` / `step`
+as an exported `assertInvariants(state: State)` and are dispatched via
+`STATE_INVARIANTS` in `successors.ts` (mirroring the `STEPS` table). Step
+files import `assertInvariant` / `clause` from `invariant_helper.ts`, not from
+`invariants.ts`, to avoid import cycles.
 
-- `retryCount` and `retryAttempts` are non-negative integers,
-- `retryCount ≤ retryAttempts`,
-- `CREATE_TARGET ⇒ sourceIndex.length > 0`,
-- `MARK_READY | DONE ⇒ targetIndex.length > 0`,
-- `FATAL ⇒ reason.length > 0`.
+Runtime invariants encode contracts TypeScript cannot express (non-empty
+strings, positive integers, `Option.isSome` at a given PC, cross-field
+relations). Pure type duplicates (`Array.isArray(logs)`, unknown `state.name`)
+are omitted. Graph shape (terminal empty rows, `FATAL` on non-terminals) is
+compile-time (`SUCCESSORS satisfies …`) plus `successor_graph.test.ts` — not
+re-checked in the loop.
+
+**`retryCount ≤ retryAttempts` is skipped** for states that poll with
+`delayRetryTransition(..., Number.MAX_SAFE_INTEGER, ...)` (task-wait /
+shard-unavailable loops).
 
 Always-on in this POC — migrations run once per Kibana upgrade, assertion cost
 is microseconds, and the payoff is "fail fast on impossible state" rather than
 "succeed silently with garbage."
 
-### 3. Generative — property-based tests
+### 3. Generative — property-based tests (planned)
 
-`successor_graph.test.ts` uses `@fast-check/jest` to sample `Inv`-satisfying
-states and arbitrary responses, then checks properties of the transition:
+`successor_graph.test.ts` has a skeleton for `@fast-check/jest` to sample
+`Inv`-satisfying states and arbitrary responses, then check properties of the
+transition. The PBT suite is not yet active (`describe.skip` / `it.todo`) —
+the arbitraries and properties below describe the **intended** coverage once
+test helpers cover the full V2-port graph:
 
 | Property                                                                       | Asserts                                                                |
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
@@ -382,8 +407,10 @@ this pattern as the package grows.
 | Transition into a non-successor state            | Type checker                       |
 | Forgot a required field on the target state     | Type checker (`transitionTo`)      |
 | Forgot a response variant                        | Type checker (`assertNever`)       |
-| `retryCount > retryAttempts`                     | `assertInvariants`                 |
+| `retryCount > retryAttempts` (bounded states)    | `assertInvariants`                 |
+| Empty `indexPrefix` / `targetIndex` / task IDs   | `assertInvariants`                 |
 | `FATAL` without a reason                         | `assertInvariants`                 |
+| Missing `FATAL` successor on a control point     | `successor_graph.test.ts`          |
 | Lost a log entry across a transition             | PBT (logs monotonicity)            |
 | Mutated `retryAttempts` mid-flight               | PBT (retry budget)                 |
 | Lost `targetIndex` between MARK_READY and DONE   | PBT (propagation)                  |
@@ -406,9 +433,9 @@ Concrete checklist for a new control point called `MY_STEP`:
    retryable failure is a self-loop transition in the graph.
 5. Add a row to the `STEPS` table in `successors.ts` mapping the new state's
    `Name` to its `step` factory. The `satisfies` check will force you to.
-6. If your state has step-specific fields with constraints
-   (e.g. `targetIndex.length > 0`), add a clause to `assertInvariants` in
-   `invariants.ts`.
+6. If your state has step-specific runtime refinements (e.g. non-empty `pitId`),
+   export `assertInvariants` from `steps/my_step.ts` and register it in
+   `STATE_INVARIANTS` in `successors.ts`.
 7. Add an arbitrary + at least one property to `successor_graph.test.ts` for
    any new transition shapes.
 8. Update the snapshot in `successor_graph.test.ts` — Jest's

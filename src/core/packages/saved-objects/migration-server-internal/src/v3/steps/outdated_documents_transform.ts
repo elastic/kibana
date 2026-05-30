@@ -9,6 +9,7 @@
 
 import * as E from 'fp-ts/Either';
 import type { PostInitState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, TransformDocsResponse } from '../io';
 import { transitionTo } from '../state';
 import { handleRetryableFailure } from '../retry';
@@ -34,6 +35,14 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.pitId.length > 0, clause(Name, 'pitId required'));
+  assertInvariant(
+    state.outdatedDocuments.length > 0,
+    clause(Name, 'outdatedDocuments must be non-empty')
+  );
+};
 
 export const step = (state: State, io: IO): Step<Successors, TransformDocsResponse> => ({
   action: () => io.transformDocs(state),

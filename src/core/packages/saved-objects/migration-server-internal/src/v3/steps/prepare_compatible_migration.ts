@@ -8,6 +8,7 @@
  */
 
 import type { SourceExistsState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, UpdateAliasesResponse } from '../io';
 import { resetRetry, transitionTo } from '../state';
 import { handleRetryableFailure } from '../retry';
@@ -25,6 +26,13 @@ export interface State extends SourceExistsState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(
+    state.preTransformDocsActions.length > 0,
+    clause(Name, 'preTransformDocsActions must be non-empty')
+  );
+};
 
 export const step = (state: State, io: IO): Step<Successors, UpdateAliasesResponse> => ({
   action: () => io.updateAliases(state),

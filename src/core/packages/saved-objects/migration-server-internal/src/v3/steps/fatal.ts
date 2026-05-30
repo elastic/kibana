@@ -8,6 +8,7 @@
  */
 
 import type { MigrationBaseState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 
 export const Name = 'FATAL' as const;
 
@@ -16,3 +17,7 @@ export interface State extends MigrationBaseState {
   readonly reason: string;
   readonly throwDelayMillis?: number;
 }
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.reason.length > 0, clause(Name, 'requires reason'));
+};

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as Option from 'fp-ts/Option';
+import * as Option from 'fp-ts/Option';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { AliasAction } from '../../actions';
 import type { PostInitState } from '../migration_state';
 import type { IO, MarkVersionIndexReadyResponse } from '../io';
@@ -25,6 +26,22 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  // Not type-duplicate: the dispatcher passes `state: State` (broad union where
+  // PostInitState declares `Option.Option<...>`), so Option.none can reach here
+  // despite this interface declaring `Option.Some`. Guards dispatcher-erasure path.
+  assertInvariant(
+    Option.isSome(state.versionIndexReadyActions),
+    clause(Name, 'versionIndexReadyActions must be Some')
+  );
+  if (Option.isSome(state.versionIndexReadyActions)) {
+    assertInvariant(
+      state.versionIndexReadyActions.value.length > 0,
+      clause(Name, 'versionIndexReadyActions must be non-empty')
+    );
+  }
+};
 
 export const step = (state: State, io: IO): Step<Successors, MarkVersionIndexReadyResponse> => ({
   action: () => io.updateAliases(state),

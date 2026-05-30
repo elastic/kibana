@@ -8,6 +8,7 @@
  */
 
 import type { PostInitState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, BulkIndexResponse } from '../io';
 import { transitionTo } from '../state';
 import { handleRetryableFailure, delayRetryTransition } from '../retry';
@@ -30,6 +31,24 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.pitId.length > 0, clause(Name, 'pitId required'));
+  assertInvariant(
+    state.bulkOperationBatches.length > 0,
+    clause(Name, 'bulkOperationBatches must be non-empty')
+  );
+  assertInvariant(state.currentBatch >= 0, clause(Name, 'currentBatch must be non-negative'));
+  assertInvariant(
+    state.currentBatch < state.bulkOperationBatches.length,
+    clause(Name, 'currentBatch must index into bulkOperationBatches')
+  );
+  const currentBatchOps = state.bulkOperationBatches[state.currentBatch];
+  assertInvariant(
+    currentBatchOps !== undefined && currentBatchOps.length > 0,
+    clause(Name, 'current bulk batch must be non-empty')
+  );
+};
 
 export const step = (state: State, io: IO): Step<Successors, BulkIndexResponse> => ({
   action: () => io.bulkIndex(state),

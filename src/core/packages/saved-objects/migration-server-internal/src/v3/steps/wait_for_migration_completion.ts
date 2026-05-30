@@ -9,6 +9,7 @@
 
 import * as E from 'fp-ts/Either';
 import type { PostInitState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, FetchIndicesResponse } from '../io';
 import { resetRetry, transitionTo } from '../state';
 import { handleRetryableFailure } from '../retry';
@@ -25,6 +26,10 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.retryDelay > 0, clause(Name, 'retryDelay must be positive while waiting'));
+};
 
 export const step = (state: State, io: IO): Step<Successors, FetchIndicesResponse> => ({
   action: () => io.fetchIndices(state),

@@ -20,7 +20,7 @@
  * is the only thing the rest of the code (and tests) reads.
  */
 
-import type { NonTerminalState, StateName } from './state';
+import type { NonTerminalState, StateName, StateOf } from './state';
 import * as CHECK_TARGET_MAPPINGS from './steps/check_target_mappings';
 import * as CHECK_VERSION_INDEX_READY_ACTIONS from './steps/check_version_index_ready_actions';
 import * as CLEANUP_UNKNOWN_AND_EXCLUDED from './steps/cleanup_unknown_and_excluded';
@@ -216,6 +216,36 @@ export type SuccessorsOf<TName extends StateName> = (typeof SUCCESSORS)[TName][n
  * `step` factory here will not compile. Terminal states (DONE, FATAL) do not
  * export a `step` and so cannot accidentally be listed.
  */
+/**
+ * Per-control-point invariant checks. Dispatched from `assertInvariants` in
+ * `invariants.ts` after cross-cutting base / migration-base / post-init checks.
+ *
+ * Only states with step-specific runtime refinements appear here; others rely
+ * on centralized helpers alone.
+ */
+// Sparse over StateName (only states with step-specific runtime refinements).
+// Annotation (not `satisfies`) is intentional: it widens the inferred type so
+// the dispatcher in `invariants.ts` can index by `state.name: StateName` and
+// receive `((state) => void) | undefined`. `satisfies` alone would narrow the
+// type to just the listed keys, breaking dispatch. The annotation still catches
+// key typos via structural assignability against `StateName`.
+export const STATE_INVARIANTS: Partial<{
+  [K in StateName]: (state: StateOf<K>) => void;
+}> = {
+  [FATAL.Name]: FATAL.assertInvariants,
+  [WAIT_FOR_MIGRATION_COMPLETION.Name]: WAIT_FOR_MIGRATION_COMPLETION.assertInvariants,
+  [CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.Name]:
+    CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.assertInvariants,
+  [UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.Name]:
+    UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.assertInvariants,
+  [OUTDATED_DOCUMENTS_SEARCH_READ.Name]: OUTDATED_DOCUMENTS_SEARCH_READ.assertInvariants,
+  [OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.Name]: OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.assertInvariants,
+  [OUTDATED_DOCUMENTS_TRANSFORM.Name]: OUTDATED_DOCUMENTS_TRANSFORM.assertInvariants,
+  [TRANSFORMED_DOCUMENTS_BULK_INDEX.Name]: TRANSFORMED_DOCUMENTS_BULK_INDEX.assertInvariants,
+  [PREPARE_COMPATIBLE_MIGRATION.Name]: PREPARE_COMPATIBLE_MIGRATION.assertInvariants,
+  [MARK_VERSION_INDEX_READY.Name]: MARK_VERSION_INDEX_READY.assertInvariants,
+};
+
 export const STEPS = {
   [INIT.Name]: INIT.step,
   [WAIT_FOR_MIGRATION_COMPLETION.Name]: WAIT_FOR_MIGRATION_COMPLETION.step,

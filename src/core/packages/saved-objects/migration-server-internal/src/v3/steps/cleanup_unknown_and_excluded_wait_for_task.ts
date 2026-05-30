@@ -8,6 +8,7 @@
  */
 
 import type { SourceExistsState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, CleanupWaitForTaskResponse } from '../io';
 import { transitionTo } from '../state';
 import { handleRetryableFailure, delayRetryTransition } from '../retry';
@@ -25,6 +26,13 @@ export interface State extends SourceExistsState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(
+    state.deleteByQueryTaskId.length > 0,
+    clause(Name, 'deleteByQueryTaskId required')
+  );
+};
 
 export const step = (state: State, io: IO): Step<Successors, CleanupWaitForTaskResponse> => ({
   action: () => io.waitForDeleteByQueryTask(state),

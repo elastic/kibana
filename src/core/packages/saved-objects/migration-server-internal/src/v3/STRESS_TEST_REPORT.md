@@ -47,7 +47,7 @@ Branch: `so/migration-v3-state-machine-poc` (not committed). Scope: **legacy V2 
 | **`LEGACY_*` control states** | **Not present** in current `src/.../state.ts`. Comments in V2 `model.ts` refer to removed reindex/ZDT steps (`LEGACY_DELETE`, `LEGACY_CREATE_REINDEX_TARGET`), not live control tags |
 | **~40 states** | Task brief assumed a larger graph; actual legacy union is **26** states today (post PR #260815-style pruning) |
 | **Exhaustive invariants** | Only load-bearing clauses (FATAL reason, task IDs, pitId, versionIndexReadyActions) |
-| **Tests** | `describe.skip` on `run_v3_migration.test.ts`, `successor_graph.test.ts`, `invariants.test.ts` — toy POC helpers incompatible with full `State` |
+| **Tests** | `describe.skip` on `run_v3_migration.test.ts`; `successor_graph.test.ts` main suite active (transition-cases `describe.skip` + `it.todo` for PBT); `invariants.test.ts` active (~31 cases) |
 
 ### Supporting files (stress-test additions)
 
@@ -210,8 +210,8 @@ POC README/examples use `string[]` logs; V2 uses `{ level, message }[]`. Porting
 | File | Action |
 |------|--------|
 | `run_v3_migration.test.ts` | `describe.skip` + TODO |
-| `successor_graph.test.ts` | Wrapped in `describe.skip` |
-| `invariants.test.ts` | `describe.skip` |
+| `successor_graph.test.ts` | Main suite active; transition-cases `describe.skip` + `it.todo` for PBT |
+| `invariants.test.ts` | Active (~31 cases); per-state invariants in `steps/*.ts`, dispatched via `STATE_INVARIANTS` in `successors.ts`; graph checks in `successor_graph.test.ts` |
 
 ---
 

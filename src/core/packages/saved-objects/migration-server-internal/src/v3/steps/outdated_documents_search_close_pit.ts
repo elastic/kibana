@@ -8,6 +8,7 @@
  */
 
 import type { PostInitState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, ClosePitResponse } from '../io';
 import { transitionTo } from '../state';
 import { handleRetryableFailure } from '../retry';
@@ -24,6 +25,10 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.pitId.length > 0, clause(Name, 'pitId required'));
+};
 
 export const step = (state: State, io: IO): Step<Successors, ClosePitResponse> => ({
   action: () => io.closePit(state),

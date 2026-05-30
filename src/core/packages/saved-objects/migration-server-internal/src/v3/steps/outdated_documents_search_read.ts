@@ -8,6 +8,7 @@
  */
 
 import type { PostInitState } from '../migration_state';
+import { assertInvariant, clause } from '../invariant_helper';
 import type { IO, ReadWithPitResponse } from '../io';
 import { resetRetry, transitionTo } from '../state';
 import { handleRetryableFailure } from '../retry';
@@ -34,6 +35,16 @@ export interface State extends PostInitState {
 }
 
 type Successors = SuccessorsOf<typeof Name>;
+
+export const assertInvariants = (state: State): void => {
+  assertInvariant(state.pitId.length > 0, clause(Name, 'pitId required'));
+  if (state.progress.total !== undefined && state.progress.processed !== undefined) {
+    assertInvariant(
+      state.progress.processed <= state.progress.total,
+      clause(Name, 'progress.processed must not exceed progress.total')
+    );
+  }
+};
 
 export const step = (state: State, io: IO): Step<Successors, ReadWithPitResponse> => ({
   action: () => io.readWithPit(state),

@@ -8,7 +8,7 @@
  */
 
 export { runV3Migration } from './run_v3_migration';
-export { assertInvariants } from './invariants';
+export { assertInvariants, MigrationInvariantViolation } from './invariants';
 export { createIO } from './io';
 export type { RunV3MigrationParams } from './run_v3_migration';
 export type { IO, CreateIOParams } from './io';
