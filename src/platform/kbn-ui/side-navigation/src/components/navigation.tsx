@@ -151,7 +151,9 @@ export const Navigation = ({
                   <SideNav.Popover
                     key={item.id}
                     hasContent={getHasSubmenu(item)}
-                    isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    isSidePanelOpen={
+                      !isCollapsed && item.id === openerNode?.id && !item.popoverOnly
+                    }
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     trigger={
