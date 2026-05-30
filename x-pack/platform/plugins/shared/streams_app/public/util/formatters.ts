@@ -16,12 +16,13 @@ export function getPercentageFormatter(opts?: { precision: number }): Intl.Numbe
 
 export function formatTimestamp(value: string | number): string {
   const date = new Date(value);
-  const formattedDate = date.toLocaleDateString('en-US', {
+  const locale = i18n.getLocale();
+  const formattedDate = date.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
-  const formattedTime = date.toLocaleTimeString('en-US', {
+  const formattedTime = date.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',

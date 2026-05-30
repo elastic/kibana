@@ -128,10 +128,12 @@ describe('RelatedDashboardSelector', () => {
       expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
     });
 
-    await userEvent.click(screen.getByText(DASHBOARD_TITLE));
+    fireEvent.click(screen.getByRole('option', { name: DASHBOARD_TITLE }));
 
-    expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ARTIFACT_TYPE);
-    expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
+    await waitFor(() => {
+      expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ARTIFACT_TYPE);
+      expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
+    });
   });
 
   it('debounces dashboard searches after the initial load', async () => {
