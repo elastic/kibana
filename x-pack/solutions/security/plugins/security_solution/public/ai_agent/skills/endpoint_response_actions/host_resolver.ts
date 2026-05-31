@@ -6,17 +6,37 @@
  */
 
 import type { HostRef } from './types';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import type { MetadataListResponse } from '../../../../common/endpoint/types';
+import { KibanaServices } from '../../../common/lib/kibana';
 
-/**
- * Resolve hostname to Fleet agent ID.
- * Exact match → single result.
- * Fuzzy match → clarification with top-3 candidates.
- * No match → null.
- */
-export async function resolveHost(hostname: string): Promise<HostRef | null> {
-  // TODO: implement Fleet API query
-  if (!hostname || hostname.trim() === '') {
-    return null;
-  }
-  throw new Error('Not implemented');
+export interface ResolveHostOptions {
+  searchString: string;
 }
+
+export const resolveHost = async ({ searchString }: ResolveHostOptions): Promise<HostRef[]> => {
+  const trimmed = searchString.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const http = KibanaServices.get().http;
+
+  // Search by hostname using the endpoint metadata list API.
+  const kuery = `united.endpoint.host.hostname:*${trimmed}*`;
+
+  const response = await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+    version: '2023-10-31',
+    query: {
+      page: 0,
+      pageSize: 10,
+      kuery,
+    },
+  });
+
+  return response.data.map((hostInfo) => ({
+    hostName: hostInfo.metadata.host.hostname,
+    agentId: hostInfo.metadata.agent.id,
+    isIsolated: hostInfo.metadata.Endpoint.state?.isolation ?? false,
+  }));
+};
