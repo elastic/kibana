@@ -72,8 +72,8 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
   });
 
   describe('route shape', () => {
-    it('uses PATCH on the bulk update path', () => {
-      expect(route.method).toBe('PATCH');
+    it('uses PUT on the bulk update path', () => {
+      expect(route.method).toBe('PUT');
       expect(route.path).toBe(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE);
     });
   });
@@ -111,7 +111,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       );
     });
 
-    it('treats a missing attributes field as an empty patch — handler enforces non-empty', () => {
+    it('treats a missing attributes field as an empty update — handler enforces non-empty', () => {
       const value = bodySchema.validate({ ids: ['monitor-id-1'] }) as {
         ids: string[];
         attributes: Record<string, unknown>;

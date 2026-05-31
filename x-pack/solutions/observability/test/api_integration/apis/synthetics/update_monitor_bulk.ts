@@ -19,7 +19,7 @@ import {
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 /**
- * api_integration coverage for `PATCH /internal/synthetics/monitors/_bulk_update`.
+ * api_integration coverage for `PUT /api/synthetics/monitors/_bulk_update`.
  *
  * The unit tests in `update_monitor_bulk.test.ts` and
  * `update_monitor_api.test.ts` cover the merge / classification logic with
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const bulkUpdate = (body: { ids: string[]; attributes: Record<string, unknown> }) =>
       supertest
-        .patch(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE)
         .set('kbn-xsrf', 'true')
         .send(body);
 

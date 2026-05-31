@@ -14,6 +14,7 @@ export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
   GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
   LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
@@ -22,7 +23,6 @@ export enum SYNTHETICS_API_URLS {
   // Service end points
   SYNTHETICS_MONITOR_RESET = '/internal/synthetics/monitors/{monitorId}/_reset',
   SYNTHETICS_MONITORS_BULK_RESET = '/internal/synthetics/monitors/_bulk_reset',
-  SYNTHETICS_MONITORS_BULK_UPDATE = '/internal/synthetics/monitors/_bulk_update',
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',

@@ -6,8 +6,8 @@
  */
 
 /**
- * Pre-processing service for the bulk PATCH endpoint
- * (`PATCH /internal/synthetics/monitors/_bulk_update`).
+ * Pre-processing service for the bulk update endpoint
+ * (`PUT /api/synthetics/monitors/_bulk_update`).
  *
  * Mirrors the per-monitor pipeline that `editSyntheticsMonitorRoute` runs
  * for a single PUT, but produces a list of "survivors" and a per-id error

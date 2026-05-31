@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
 import { UpdateMonitorAPI } from './update_monitor_api';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
@@ -53,7 +53,6 @@ const mockDecryptedMonitor = (overrides: Partial<Record<string, unknown>> = {}) 
     [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
     [ConfigKey.REVISION]: 3,
     [ConfigKey.CONFIG_HASH]: 'old-hash',
-    [ConfigKey.MONITOR_TYPE]: 'http',
     secrets: '{}',
     ...(overrides.attributes as Record<string, unknown>),
   };
@@ -237,7 +236,7 @@ describe('UpdateMonitorAPI', () => {
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
         ids: ['mon-1'],
-        attributes: { schedule: { number: '7', unit: 'm' } },
+        attributes: { schedule: { number: '7', unit: ScheduleUnit.MINUTES } },
       });
 
       expect(result.survivors).toHaveLength(0);
@@ -388,7 +387,9 @@ describe('UpdateMonitorAPI', () => {
       const api = new UpdateMonitorAPI(routeContext);
       await api.execute({
         ids: ['mon-1', 'mon-2'],
-        attributes: { locations: [{ id: 'us_central', isServiceManaged: true }] },
+        attributes: {
+          locations: [{ id: 'us_central', label: 'US Central', isServiceManaged: true }],
+        },
       });
 
       expect(getPrivateLocations).toHaveBeenCalledTimes(1);

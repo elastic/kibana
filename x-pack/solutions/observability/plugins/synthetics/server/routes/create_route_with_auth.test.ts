@@ -8,7 +8,7 @@
 import { createSyntheticsRouteWithAuth } from './create_route_with_auth';
 import type { SupportedMethod } from './types';
 
-const methods: SupportedMethod[][] = [['GET'], ['POST'], ['PUT'], ['PATCH'], ['DELETE']];
+const methods: SupportedMethod[][] = [['GET'], ['POST'], ['PUT'], ['DELETE']];
 
 describe('createSyntheticsRouteWithAuth', () => {
   it.each(

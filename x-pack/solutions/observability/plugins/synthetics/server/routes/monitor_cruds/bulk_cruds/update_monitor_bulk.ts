@@ -6,7 +6,7 @@
  */
 
 /**
- * Bulk PATCH endpoint for Synthetics monitors.
+ * Bulk update (PUT) endpoint for Synthetics monitors.
  *
  * Named `update_monitor_bulk` to mirror the URL path word `_bulk_update`,
  * matching the file→path convention used by `delete_monitor_bulk.ts` /
@@ -58,7 +58,7 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   Record<string, string>,
   { ids: string[]; attributes: Record<string, unknown> }
 > = () => ({
-  method: 'PATCH',
+  method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE,
   validate: {},
   validation: {
@@ -76,7 +76,7 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     if (isEmpty(attributes)) {
       return response.badRequest({
         body: {
-          message: '`attributes` is required and must contain at least one field to patch.',
+          message: '`attributes` is required and must contain at least one field to update.',
         },
       });
     }

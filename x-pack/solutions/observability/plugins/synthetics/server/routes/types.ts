@@ -33,7 +33,7 @@ export type SyntheticsRequest = KibanaRequest<
   Record<string, any>
 >;
 
-export type SupportedMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type SupportedMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 /**
  * Defines the basic properties employed by Uptime routes.
