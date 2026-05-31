@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -336,9 +337,6 @@
       "createdBy": {
         "type": "keyword"
       },
-      "createdByUsername": {
-        "type": "keyword"
-      },
       "description": {
         "fields": {
           "keyword": {
@@ -377,6 +375,9 @@
         },
         "type": "text"
       },
+      "ruleId": {
+        "type": "keyword"
+      },
       "snoozedUntil": {
         "type": "date"
       },
@@ -391,13 +392,13 @@
         },
         "type": "object"
       },
+      "type": {
+        "type": "keyword"
+      },
       "updatedAt": {
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "updatedByUsername": {
         "type": "keyword"
       }
     }
@@ -1476,10 +1477,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1623,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,
@@ -2320,6 +2321,15 @@
         "type": "date"
       },
       "verification_status": {
+        "type": "keyword"
+      }
+    }
+  },
+  "fleet-cloud-onboarding-deployment": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "ignore_above": 1024,
         "type": "keyword"
       }
     }
@@ -3539,6 +3549,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "interval": {
+        "type": "integer"
+      },
       "name": {
         "type": "text"
       },
@@ -3568,6 +3581,14 @@
             "type": "keyword"
           }
         }
+      },
+      "rrule_schedule": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "schedule_type": {
+        "ignore_above": 1024,
+        "type": "keyword"
       },
       "shards": {
         "dynamic": false,
@@ -3944,6 +3965,65 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:endpoint-scripts-library": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "example": {
+        "type": "keyword"
+      },
+      "file_hash_sha256": {
+        "type": "keyword"
+      },
+      "file_id": {
+        "type": "keyword"
+      },
+      "file_name": {
+        "type": "keyword"
+      },
+      "file_size": {
+        "type": "long"
+      },
+      "file_type": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "instructions": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "path_to_executable": {
+        "type": "keyword"
+      },
+      "platform": {
+        "type": "keyword"
+      },
+      "requires_input": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
       }
     }
   },
@@ -4381,6 +4461,60 @@
       }
     }
   },
+  "slo-composite": {
+    "dynamic": false,
+    "properties": {
+      "budgetingMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "members": {
+        "properties": {
+          "instanceId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "sloId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "slo-settings": {
     "dynamic": false,
     "properties": {}
@@ -4706,6 +4840,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-settings-multi-space": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "color": {
@@ -4813,6 +4951,9 @@
       "entityType": {
         "type": "keyword"
       },
+      "errorCode": {
+        "type": "keyword"
+      },
       "message": {
         "type": "text"
       },
@@ -4901,6 +5042,22 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
         "type": "keyword"
       }
     }

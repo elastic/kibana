@@ -267,6 +267,7 @@ export const getNavigationTreeDefinition = ({
                           { link: 'management:rules' as const },
                           { link: 'management:episodes' as const },
                           { link: 'management:action_policies' as const },
+                          { link: 'management:execution_history' as const },
                         ],
                       },
                     ]
@@ -274,7 +275,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
-                    { link: 'rules' },
+                    { link: 'management:triggersActions' },
                     { link: 'management:triggersActionsConnectors' },
                     { link: 'management:reporting' },
                     { link: 'management:jobsListLink' },

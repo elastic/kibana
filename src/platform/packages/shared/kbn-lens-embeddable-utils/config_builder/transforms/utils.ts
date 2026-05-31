@@ -118,10 +118,8 @@ export function isFormBasedLayer(
   return 'columnOrder' in layer;
 }
 
-export function isTextBasedLayer(
-  layer: LensApiConfig | DataSourceStateLayer
-): layer is TextBasedLayer {
-  return 'index' in layer && 'query' in layer;
+export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
+  return 'columns' in layer && Array.isArray(layer.columns) && 'query' in layer;
 }
 
 function sha256Sync(str: string): string {
@@ -133,9 +131,9 @@ function normalizeWhitespace(str: string): string {
   return str.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-function generateAdHocDataViewId(
+export function generateAdHocDataViewId(
   dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
-) {
+): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
@@ -147,7 +145,7 @@ function generateAdHocDataViewId(
   return base;
 }
 
-function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
+export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),

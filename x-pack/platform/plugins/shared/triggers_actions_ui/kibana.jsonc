@@ -32,8 +32,8 @@
       "security",
       "share"
     ],
-    "optionalPlugins": ["cloud", "features", "home", "spaces", "serverless", "cps"],
-    "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions"],
+    "optionalPlugins": ["cloud", "features", "home", "spaces", "serverless", "cps", "inspector"],
+    "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions", "inspector"],
     "extraPublicDirs": ["public/common", "public/common/constants"],
     "runtimePluginDependencies": [
       "cases",

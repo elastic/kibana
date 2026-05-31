@@ -11,7 +11,6 @@ import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts/count';
 import { AlertDetails } from './alerts/details';
-import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import type { GetCaseMetricsParams, MetricsHandler } from './types';
@@ -30,7 +29,7 @@ export const buildHandlers = (
   let handlers: Array<MetricsHandler<unknown>> = [];
 
   if (isSingleCaseMetrics(params)) {
-    handlers = [AlertsCount, AlertDetails, Actions, Connectors, Lifespan].map(
+    handlers = [AlertsCount, AlertDetails, Connectors, Lifespan].map(
       (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
     );
   } else {

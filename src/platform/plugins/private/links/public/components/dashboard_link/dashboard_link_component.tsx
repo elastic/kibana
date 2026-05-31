@@ -149,7 +149,6 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
 
   return (
     <EuiListGroupItem
-      size="s"
       color="text"
       {...onClickProps}
       id={id}
@@ -160,7 +159,6 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         content: tooltipMessage,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
         'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
@@ -185,9 +183,14 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         color: euiTheme.colors.textPrimary,
       },
+    },
+
+    // vertical layout - current dashboard border offset styles
+    '.verticalLayoutWrapper & .euiListItemLayout__text': {
+      paddingInlineStart: euiTheme.size.s,
     },
 
     // vertical layout - current dashboard link styles
@@ -206,7 +209,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     // horizontal layout - current dashboard link styles
     '.horizontalLayoutWrapper &.linkCurrent': {
       padding: `0 ${euiTheme.size.s}`,
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
@@ -215,7 +218,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
 
     // dashboard not found error styles
     '&.dashboardLinkError': {
-      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
+      '&.dashboardLinkError--noLabel .euiListItemLayout__text': {
         fontStyle: 'italic',
       },
 

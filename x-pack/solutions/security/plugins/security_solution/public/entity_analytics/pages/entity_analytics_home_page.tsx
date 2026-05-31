@@ -8,12 +8,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -63,6 +64,7 @@ import type { HuntingLead } from '../components/threat_hunting/top_threat_huntin
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
+import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
@@ -88,6 +90,10 @@ const anomaliesPanelFlexItemStyle = css`
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
+  const isEnterprise = useLicense().isEnterprise();
+  const leadGenerationEnabled =
+    useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
+  const leadGenerationPrivilegesQuery = useLeadGenerationPrivileges(leadGenerationEnabled);
 
   if (entityEnginePrivilegesQuery.isLoading || riskEngineReadPrivileges.isLoading) {
     return <PageLoader />;
@@ -101,6 +107,7 @@ export const EntityAnalyticsHomePage = () => {
       <EntityAnalyticsReadPrivilegesCallout
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+        leadGenerationPrivileges={leadGenerationPrivilegesQuery.data}
       />
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
         {noPrivileges ? (
@@ -180,11 +187,6 @@ const EntityAnalyticsHomePageContent = () => {
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
-  }, [search]);
-
-  const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(search);
-    return params.get('watchlistName') || undefined;
   }, [search]);
 
   const setSelectedWatchlist = useCallback(
@@ -268,19 +270,27 @@ const EntityAnalyticsHomePageContent = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="gear"
-                size="m"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
                   { defaultMessage: 'Watchlists settings' }
                 )}
-                href={getSecuritySolutionUrl({
-                  deepLinkId: SecurityPageName.entityAnalyticsManagement,
-                  path: `/${TabId.Watchlists}`,
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  iconType="gear"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
+                    { defaultMessage: 'Watchlists settings' }
+                  )}
+                  href={getSecuritySolutionUrl({
+                    deepLinkId: SecurityPageName.entityAnalyticsManagement,
+                    path: `/${TabId.Watchlists}`,
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}
@@ -320,7 +330,6 @@ const EntityAnalyticsHomePageContent = () => {
                 <EuiPanel hasBorder>
                   <DynamicRiskLevelPanel
                     watchlistId={selectedWatchlistId}
-                    watchlistName={selectedWatchlistName}
                     entityDataView={entityDataView}
                   />
                 </EuiPanel>
@@ -336,7 +345,6 @@ const EntityAnalyticsHomePageContent = () => {
           <EuiPanel hasBorder>
             <EntityAnalyticsEntitiesTable
               watchlistId={selectedWatchlistId}
-              watchlistName={selectedWatchlistName}
               entityDataView={entityDataView}
               entityDataViewLoading={entityDataViewLoading}
             />
@@ -353,12 +361,10 @@ const EntityAnalyticsHomePageContent = () => {
 
 const EntityAnalyticsEntitiesTable = ({
   watchlistId,
-  watchlistName,
   entityDataView,
   entityDataViewLoading,
 }: {
   watchlistId?: string;
-  watchlistName?: string;
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
@@ -376,20 +382,10 @@ const EntityAnalyticsEntitiesTable = ({
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            {watchlistId ? (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
-                defaultMessage="{watchlistName} entities"
-                values={{
-                  watchlistName: watchlistName ?? watchlistId,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-                defaultMessage="Entities"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+              defaultMessage="Entities"
+            />
           </h3>
         </EuiTitle>
       </EuiFlexItem>

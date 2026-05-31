@@ -180,6 +180,17 @@ WiredStream.Definition.is = (
       'wired' in stream.ingest
   );
 
+// Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+WiredStream.GetResponse.is = (
+  response: BaseStream.Model['GetResponse']
+): response is WiredStream.GetResponse =>
+  WiredStream.Definition.is(response.stream) &&
+  'privileges' in response &&
+  typeof response.privileges === 'object' &&
+  response.privileges !== null &&
+  'read_failure_store' in response.privileges &&
+  'manage_failure_store' in response.privileges;
+
 /**
  * A wired stream definition where `draft` is narrowed to `true`.
  */
@@ -194,4 +205,13 @@ export function isDraftStream(
   definition: BaseStream.Model['Definition']
 ): definition is DraftStreamDefinition {
   return WiredStream.Definition.is(definition) && definition.ingest.wired.draft === true;
+}
+
+/**
+ * Checks whether a GetResponse represents a draft wired stream.
+ */
+export function isDraftGetResponse(
+  response: BaseStream.Model['GetResponse']
+): response is WiredStream.GetResponse {
+  return WiredStream.GetResponse.is(response) && isDraftStream(response.stream);
 }

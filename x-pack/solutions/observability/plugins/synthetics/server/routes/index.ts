@@ -19,6 +19,10 @@ import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import {
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
+} from './settings/multi_space_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
@@ -72,7 +76,10 @@ import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
 import { getMonitorsHealthRoute } from './monitor_health/get_monitor_health';
 import { getMonitorHealthRoute } from './monitor_health/get_monitor_health_single';
+import { getErrorGroupsRoute } from './errors/get_error_groups';
+import { getErrorStatsRoute } from './errors/get_error_stats';
 import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
+import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -108,6 +115,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
@@ -121,7 +130,10 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,
+  getErrorGroupsRoute,
+  getErrorStatsRoute,
   getMonitorSummaryStatsRoute,
+  getSyntheticsDiagnosticsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

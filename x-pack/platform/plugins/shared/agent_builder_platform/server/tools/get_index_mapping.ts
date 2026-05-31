@@ -20,12 +20,25 @@ const getIndexMappingsSchema = z.object({
   raw: z
     .boolean()
     .default(false)
-    .describe('Whether to return the raw mapping tree instead of the summarized fields.'),
+    .describe(
+      '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
+    ),
 });
+
+const renderTypeSegment = (field: MappingField): string => {
+  const parts: string[] = [field.type];
+  if (field.tsDimension === true) {
+    parts.push('ts_dimension');
+  }
+  if (field.tsMetric != null) {
+    parts.push(`ts_metric=${field.tsMetric}`);
+  }
+  return parts.join(', ');
+};
 
 const formatField = (field: MappingField): string => {
   const description = field.meta.description ? ` ${field.meta.description}` : '';
-  return `- ${field.path} [${field.type}]${description}`;
+  return `- ${field.path} [${renderTypeSegment(field)}]${description}`;
 };
 
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
@@ -51,7 +64,15 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           if (raw) {
             return [
               name,
-              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
+              {
+                type: v.type,
+                fields: v.fields.map(({ path, type, tsDimension, tsMetric }) => ({
+                  path,
+                  type,
+                  ...(tsDimension === true ? { tsDimension: true } : {}),
+                  ...(tsMetric != null ? { tsMetric } : {}),
+                })),
+              },
             ];
           }
           return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];

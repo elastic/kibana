@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { DeleteScritpedFieldConfirmationModal } from './confirmation_modal';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('DeleteScritpedFieldConfirmationModal', () => {
-  test('should render normally', () => {
-    const component = shallow(
+  it('should render normally', () => {
+    renderWithI18n(
       <DeleteScritpedFieldConfirmationModal
-        field={{ name: '', script: '', lang: '' }}
-        deleteField={() => {}}
-        hideDeleteConfirmationModal={() => {}}
+        deleteField={jest.fn()}
+        field={{ lang: '', name: '', script: '' }}
+        hideDeleteConfirmationModal={jest.fn()}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText("Delete scripted field ''?")).toBeVisible();
   });
 });

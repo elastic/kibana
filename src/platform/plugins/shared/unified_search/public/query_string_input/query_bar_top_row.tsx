@@ -991,7 +991,6 @@ export const QueryBarTopRow = React.memo(
           data-test-subj="querySubmitButton"
           toolTipProps={{
             content: buttonAriaLabel,
-            delay: 'long',
             position: 'bottom',
           }}
         >
@@ -1255,10 +1254,12 @@ export const QueryBarTopRow = React.memo(
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
                   <EuiFlexItem
-                    grow={false}
+                    grow={true}
                     css={css`
+                      min-width: 0;
                       @media (max-width: ${euiTheme.breakpoint.xl}px) {
                         order: 1;
+                        flex-basis: 100%;
                       }
                     `}
                   >

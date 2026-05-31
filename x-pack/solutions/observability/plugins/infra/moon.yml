@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -100,7 +102,6 @@ dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/react-hooks'
   - '@kbn/search-types'
-  - '@kbn/router-utils'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/deeplinks-observability'
@@ -157,6 +158,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -115,6 +115,7 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
@@ -335,6 +336,18 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes (public)
+ */
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+export const DETECTION_ENGINE_ATTACKS_SEARCH_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/_search` as const;
+export const DETECTION_ENGINE_ATTACKS_STATUS_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/status` as const;
+export const DETECTION_ENGINE_ATTACKS_TAGS_URL = `${DETECTION_ENGINE_ATTACKS_URL}/tags` as const;
+export const DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/assignees` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -538,12 +551,6 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Max notes count per document in security solution
  */
 export const MAX_NOTES_PER_DOCUMENT = 100;
-
-/**
- * Cases attachment IDs
- */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
-export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps

@@ -8,10 +8,10 @@
 /* eslint-disable max-classes-per-file */
 
 import type { KbnClient } from '@kbn/test';
+import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import type { AxiosError } from 'axios';
 import { cloneDeep } from 'lodash';
 import { dump } from './utils';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
@@ -19,8 +19,8 @@ import { getAllEndpointSecurityRoles } from './roles_users';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { COMMON_API_HEADERS } from './constants';
 
-const ignoreHttp409Error = (error: AxiosError) => {
-  if (error?.response?.status === 409) {
+const ignoreHttp409Error = (error: KbnClientRequesterError) => {
+  if (error?.status === 409) {
     return;
   }
 

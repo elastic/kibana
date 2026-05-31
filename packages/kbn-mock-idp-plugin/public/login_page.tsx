@@ -187,7 +187,15 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty aria-label="Show alternative login methods" size="xs" href="/login">
+                <EuiButtonEmpty
+                  aria-label="Show alternative login methods"
+                  size="xs"
+                  href={
+                    services.http.basePath.publicBaseUrl
+                      ? `${services.http.basePath.publicBaseUrl.replace(/\/+$/, '')}/login`
+                      : services.http.basePath.prepend('/login')
+                  }
+                >
                   More login options
                 </EuiButtonEmpty>,
               ]}

@@ -155,7 +155,8 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
   useWorkflowEditorStyles: jest.fn(() => ({})),
 }));
 
-jest.mock('../styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
 }));
 
@@ -197,6 +198,10 @@ const mockCompletionProvider = {
   triggerCharacters: ['@', '.', ' ', '|', '{'],
   provideCompletionItems: jest.fn(),
 };
+
+jest.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => ({
+  useWorkflowEsqlCallbacks: () => ({}),
+}));
 
 jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),

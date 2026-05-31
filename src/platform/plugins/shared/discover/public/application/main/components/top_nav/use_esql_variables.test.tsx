@@ -204,6 +204,67 @@ describe('useESQLVariables', () => {
       expect(mockUnsubscribeInput).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps input subscription stable when currentEsqlVariables changes', async () => {
+      const { toolkit } = await setup();
+      const getInputSpy = jest.spyOn(mockControlGroupAPI, 'getInput$');
+      const tabId = toolkit.getCurrentTab().id;
+      const mockOnUpdateESQLQuery = jest.fn();
+
+      const hook = renderHook(
+        ({ currentEsqlVariables }: { currentEsqlVariables: ESQLControlVariable[] }) =>
+          useESQLVariables({
+            isEsqlMode: true,
+            controlGroupApi: mockControlGroupAPI as unknown as ControlGroupRendererApi,
+            currentEsqlVariables,
+            onUpdateESQLQuery: mockOnUpdateESQLQuery,
+          }),
+        {
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
+          initialProps: { currentEsqlVariables: [] as ESQLControlVariable[] },
+        }
+      );
+
+      await act(() => setTimeout(() => {}, 0));
+
+      const initialControlState = {
+        '123': { type: 'esqlControl' },
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: initialControlState });
+      });
+
+      await waitFor(() => {
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.attributes.controlGroupState).toEqual(initialControlState);
+      });
+
+      const getInputCallsBeforeVariableRerender = getInputSpy.mock.calls.length;
+
+      hook.rerender({
+        currentEsqlVariables: [{ key: 'foo', type: 'values', value: 'bar' } as ESQLControlVariable],
+      });
+
+      await act(() => setTimeout(() => {}, 0));
+
+      const updatedControlState = {
+        '456': { type: 'esqlControl' },
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: updatedControlState });
+      });
+
+      await waitFor(() => {
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.attributes.controlGroupState).toEqual(updatedControlState);
+      });
+
+      expect(getInputSpy.mock.calls.length).toBe(getInputCallsBeforeVariableRerender);
+    });
+
     it('should reset control panels when tab attributes change', async () => {
       const { toolkit } = await setup();
 

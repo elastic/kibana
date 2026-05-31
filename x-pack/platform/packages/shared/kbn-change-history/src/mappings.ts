@@ -45,7 +45,7 @@ export const changeHistoryMappings = {
         },
       }),
 
-      transaction: mappings.object({
+      span: mappings.object({
         properties: {
           id: mappings.keyword(),
         },
@@ -56,7 +56,7 @@ export const changeHistoryMappings = {
           id: mappings.keyword(),
           type: mappings.keyword(),
           hash: mappings.keyword(),
-          sequence: mappings.integer(),
+          sequence: mappings.long(),
           fields: mappings.object({
             properties: {
               hashed: mappings.keyword(),

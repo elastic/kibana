@@ -6,7 +6,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/public';
+import type {
+  SmlSearchFilters,
+  SmlSearchHttpResponse,
+} from '@kbn/agent-context-layer-plugin/public';
 import { smlSearchPath } from '@kbn/agent-context-layer-plugin/public';
 
 /** Browser client for SML search (`/internal/agent_context_layer/sml/_search`). */
@@ -21,12 +24,14 @@ export class SmlService {
     query: string;
     size: number;
     skipContent?: boolean;
+    filters?: SmlSearchFilters;
   }): Promise<SmlSearchHttpResponse> {
     return await this.http.post<SmlSearchHttpResponse>(smlSearchPath, {
       body: JSON.stringify({
         query: params.query,
         size: params.size,
         ...(params.skipContent === true ? { skip_content: true } : {}),
+        ...(params.filters ? { filters: params.filters } : {}),
       }),
     });
   }

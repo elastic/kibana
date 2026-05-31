@@ -30,7 +30,6 @@ const compositeSloResponse = {
       weight: 2,
       normalisedWeight: 0.67,
       sliValue: 0.99,
-      contribution: 0.66,
     },
     {
       id: 'slo-2',
@@ -38,7 +37,6 @@ const compositeSloResponse = {
       weight: 1,
       normalisedWeight: 0.33,
       sliValue: 0.98,
-      contribution: 0.32,
     },
   ],
   timeWindow: { duration: '30d', type: 'rolling' },
@@ -214,7 +212,6 @@ describe('useFetchCompositeSlo', () => {
           weight: 1,
           normalisedWeight: 0.5,
           sliValue: 0.99,
-          contribution: 0.5,
         },
         {
           id: 'slo-1',
@@ -223,7 +220,6 @@ describe('useFetchCompositeSlo', () => {
           weight: 1,
           normalisedWeight: 0.5,
           sliValue: 0.99,
-          contribution: 0.5,
         },
       ],
     };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowDisabledError } from './workflow_disabled_error';
 import { WorkflowExecutionInvalidStatusError } from './workflow_execution_invalid_status_error';
 import { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
 import { WorkflowNotFoundError } from './workflow_not_found_error';
@@ -27,6 +28,11 @@ describe('workflow error classes', () => {
       create: () => new WorkflowExecutionInvalidStatusError('exec-1', 'running', 'pending'),
       expectedName: 'WorkflowExecutionInvalidStatusError',
       expectedMessage: 'Workflow execution "exec-1" is in status "running" but expected "pending".',
+    },
+    {
+      create: () => new WorkflowDisabledError('wf-123'),
+      expectedName: 'WorkflowDisabledError',
+      expectedMessage: 'Workflow is disabled: wf-123. Enable the workflow to run it.',
     },
   ])(
     '$expectedName sets name, message, and extends Error',

@@ -120,6 +120,18 @@ describe('PublicTriggerRegistry', () => {
       expect(registry.get(triggerId)).toEqual(defaultDefinition);
     });
 
+    it('should not resolve loader until whenReady is called', async () => {
+      const mockLoader = jest.fn().mockResolvedValue(defaultDefinition);
+      registry.register(mockLoader);
+
+      expect(registry.has(triggerId)).toBe(false);
+      expect(mockLoader).not.toHaveBeenCalled();
+
+      await registry.whenReady();
+      expect(registry.has(triggerId)).toBe(true);
+      expect(mockLoader).toHaveBeenCalled();
+    });
+
     it('should throw when resolved definition duplicates an existing trigger id', async () => {
       registry.register(defaultDefinition);
       const loader = () =>

@@ -10,9 +10,15 @@
 export type {
   AppDeepLinkId,
   AppId,
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderTab,
   ChromeBadge,
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
+  ChromeNext,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
@@ -54,4 +60,5 @@ export type {
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
+  GlobalSearchConfig,
 } from './src';

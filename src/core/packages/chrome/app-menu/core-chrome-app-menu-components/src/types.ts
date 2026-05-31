@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiHideForProps, IconType } from '@elastic/eui';
-import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
+import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
  * Parameters passed to AppMenuRunAction
@@ -43,15 +43,11 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {
@@ -233,6 +229,14 @@ export type AppMenuItemType = AppMenuItemCommon & {
   separator?: 'above' | 'below';
 };
 
+export type AppMenuStaticItem = AppMenuItemType & {
+  /**
+   * Global static items are singleton items that are registered once
+   * and are shared across all app menus.
+   */
+  global?: boolean;
+};
+
 /**
  * Popover item type for use in `items` arrays.
  */
@@ -251,19 +255,64 @@ export type AppMenuPopoverItem = Omit<
   labelBadgeText?: string;
 };
 
+export interface AppMenuSwitch {
+  id: string;
+  label: string;
+  labelProps: EuiSwitchProps['labelProps'];
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  'data-test-subj'?: string;
+}
+
+interface AppMenuPrimaryActionBase extends AppMenuItemBase {
+  /**
+   * Width of the popover in pixels. Used when `items` or `splitButtonProps.items` is provided.
+   */
+  popoverWidth?: number;
+  /**
+   * A unique identifier for the popover, used for testing purposes. Maps to `data-test-subj` attribute.
+   */
+  popoverTestId?: string;
+  /**
+   * Subset of SplitButtonWithNotificationProps.
+   */
+  splitButtonProps?: AppMenuSplitButtonProps;
+}
+
+type AppMenuPrimaryActionButton = AppMenuPrimaryActionBase & {
+  href?: string;
+  target?: string;
+  run: AppMenuRunAction;
+  items?: never;
+};
+
+type AppMenuPrimaryActionLink = AppMenuPrimaryActionBase & {
+  href: string;
+  target?: string;
+  run?: AppMenuRunAction;
+  items?: never;
+};
+
+type AppMenuPrimaryActionPopover = AppMenuPrimaryActionBase & {
+  href?: never;
+  target?: never;
+  run?: never;
+  items: AppMenuPopoverItem[];
+};
+
 /**
- * Primary action button type. Can be either a simple button or a split button.
+ * Primary action button type. Can be a simple button, a button with a popover, or a split button.
+ *
+ * - Simple button: provide `run` to execute an action on click.
+ * - Button with popover: provide `items` to open a popover menu on click.
+ * - Split button: provide `run` together with `splitButtonProps` to combine a primary action
+ *   with a secondary dropdown.
  */
 export type AppMenuPrimaryActionItem =
-  /**
-   * The main part of the button should never open a popover.
-   */
-  Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
-    /**
-     * Subset of SplitButtonWithNotificationProps.
-     */
-    splitButtonProps?: AppMenuSplitButtonProps;
-  };
+  | AppMenuPrimaryActionButton
+  | AppMenuPrimaryActionLink
+  | AppMenuPrimaryActionPopover;
 
 /**
  * Configuration object for the AppMenu component.
@@ -279,6 +328,12 @@ export interface AppMenuConfig {
   items?: AppMenuItemType[];
   /**
    * Primary action button to display in the app menu.
+   * Can be a simple button, a button with a popover, or a split button.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
+  /**
+   * App menu switch. Only one switch is available per app menu
+   * and it is rendered to the left of the menu items.
+   */
+  switch?: AppMenuSwitch;
 }
