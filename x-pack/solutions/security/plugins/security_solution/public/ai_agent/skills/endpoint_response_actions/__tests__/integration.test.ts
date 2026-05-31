@@ -75,20 +75,20 @@ const makeResponseActionResponse = (actionId: string) => ({
 /** Minimal action-details response for a given status. */
 const makeActionDetailsResponse = (
   actionId: string,
-  status: 'pending' | 'completed' | 'failed',
+  status: 'pending' | 'successful' | 'failed',
   error?: string
 ) => ({
   data: {
     id: actionId,
     status,
-    ...(error ? { error } : {}),
-    hosts: [
-      {
-        id: AGENT_ID,
-        status,
-        ...(error ? { error } : {}),
+    agentState: {
+      [AGENT_ID]: {
+        isCompleted: status !== 'pending',
+        wasSuccessful: status === 'successful',
+        errors: error ? [error] : undefined,
+        completedAt: status !== 'pending' ? new Date().toISOString() : undefined,
       },
-    ],
+    },
   },
 });
 
@@ -244,7 +244,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
 
     it('returns completed status when the action finishes', async () => {
       getMockHttp().get.mockResolvedValueOnce(
-        makeActionDetailsResponse(ACTION_ID, 'completed')
+        makeActionDetailsResponse(ACTION_ID, 'successful')
       );
 
       const result = await pollActionStatus(ACTION_ID);
@@ -283,7 +283,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
       // Arrange
       getMockHttp().get
         .mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID)) // resolve host
-        .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'completed')); // poll
+        .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful')); // poll
 
       getMockHttp().post.mockResolvedValueOnce(makeResponseActionResponse(ACTION_ID)); // execute
 
@@ -319,7 +319,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
       // Arrange: host is currently isolated
       getMockHttp().get
         .mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID, true)) // resolve host
-        .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'completed')); // poll
+        .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful')); // poll
 
       getMockHttp().post.mockResolvedValueOnce(makeResponseActionResponse(ACTION_ID)); // execute
 
