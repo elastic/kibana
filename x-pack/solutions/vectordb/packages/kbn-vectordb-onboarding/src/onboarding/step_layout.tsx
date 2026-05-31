@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { hasSeenOnboarding } from '../first_load';
 import { useKibana } from '../services';
 import { StepRail } from './step_rail';
 import type { VectorPath, WizardStep } from './types';
@@ -55,16 +54,10 @@ export const StepLayout = ({
 }: StepLayoutProps) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { chrome, notifications },
+    services: { notifications },
   } = useKibana();
 
   const telemetryIdPrefix = `vectordbOnboarding-${path}-${step}`;
-
-  useEffect(() => {
-    const onboardingSeen = hasSeenOnboarding();
-    chrome.setIsVisible(onboardingSeen);
-    return () => chrome.setIsVisible(true);
-  }, [chrome]);
 
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>

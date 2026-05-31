@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { hasSeenOnboarding, markOnboardingSeen } from '../first_load';
-import { useKibana } from '../services';
+import { markOnboardingSeen } from '../first_load';
 import SearchLakeSvg from '../assets/search_lake.svg';
 import VectorSearchSvg from '../assets/vector_search.svg';
 import { ConnectToProject } from './connect_to_project';
@@ -45,16 +44,10 @@ export const PathSelection = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
-  const {
-    services: { chrome },
-  } = useKibana();
 
   useEffect(() => {
-    const onboardingSeen = hasSeenOnboarding();
-    chrome.setIsVisible(onboardingSeen);
     markOnboardingSeen();
-    return () => chrome.setIsVisible(true);
-  }, [chrome]);
+  }, []);
 
   const choose = (path: VectorPath) => history.push(`/onboarding/ingest${pathQuery(path)}`);
 
