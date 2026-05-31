@@ -322,9 +322,11 @@ describe('Editor actions provider', () => {
         mockPosition,
         mockContext
       );
-      expect(completionItems?.suggestions.length).toBe(2);
+      // The Kibana API entry point (`kbn:`) is advertised at the start of the url
+      // alongside the Elasticsearch endpoints so users can discover it.
+      expect(completionItems?.suggestions.length).toBe(3);
       const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);
-      expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
+      expect((endpoints as string[]).sort()).toEqual(['_cat', '_search', 'kbn:']);
     });
   });
 

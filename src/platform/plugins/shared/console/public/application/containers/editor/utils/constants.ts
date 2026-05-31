@@ -39,6 +39,16 @@ export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
  */
 export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
 /*
+ * This regex matches a request line whose url targets the Kibana API (prefixed
+ * with `kbn:`) and is currently being typed or edited, for example `GET kbn:`,
+ * `GET kbn:/api/synthetics/`, or `GET kbn:/api/synthetics/monit`. Unlike
+ * `methodWithUrlRegex`, it does not require the line to end at a path separator,
+ * so suggestions re-open while the user edits (e.g. after deleting characters)
+ * anywhere inside a Kibana url. The `kbn:` colon is intentionally part of the
+ * match since it isn't included in the generic url character class above.
+ */
+export const methodWithKibanaUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+kbn:\S*$/i;
+/*
  * This regex matches a string that has
  * optional whitespace characters and a double quote, for example `  "` or `  "cate`.
  * In this case autocomplete suggestions should be triggered for a property name.

@@ -202,6 +202,100 @@ test('allows router registration after server is listening via `registerRouterAf
   expect(() => registerRouterAfterListening(router2)).not.toThrowError();
 });
 
+test('exposes lightweight metadata for all registered routes via `getRegisteredRoutes`', async () => {
+  const { registerRouter, getRegisteredRoutes } = await server.setup({ config$ });
+
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  const security = { authz: { requiredPrivileges: ['foo'] } };
+  router.get(
+    {
+      path: '/public',
+      validate: false,
+      security,
+      options: { access: 'public', description: 'A public route' },
+    },
+    (context, req, res) => res.ok()
+  );
+  router.post(
+    { path: '/internal', validate: false, security, options: { access: 'internal' } },
+    (context, req, res) => res.ok()
+  );
+  router.versioned
+    .get({ path: '/versioned', access: 'public', security })
+    .addVersion({ version: '2023-10-31', validate: false }, (context, req, res) => res.ok());
+
+  registerRouter(router);
+
+  expect(getRegisteredRoutes()).toEqual(
+    expect.arrayContaining([
+      {
+        path: '/foo/public',
+        method: 'get',
+        access: 'public',
+        description: 'A public route',
+        isVersioned: false,
+      },
+      { path: '/foo/internal', method: 'post', access: 'internal', isVersioned: false },
+      { path: '/foo/versioned', method: 'get', access: 'public', isVersioned: true },
+    ])
+  );
+});
+
+test('defaults route access to `internal` in `getRegisteredRoutes` when not declared', async () => {
+  const { registerRouter, getRegisteredRoutes } = await server.setup({ config$ });
+
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/no-access',
+      validate: false,
+      security: { authz: { requiredPrivileges: ['foo'] } },
+    },
+    (context, req, res) => res.ok()
+  );
+  registerRouter(router);
+
+  expect(getRegisteredRoutes()).toEqual([
+    { path: '/foo/no-access', method: 'get', access: 'internal', isVersioned: false },
+  ]);
+});
+
+test('extracts query parameters in `getRegisteredRoutes` only when requested', async () => {
+  const { registerRouter, getRegisteredRoutes } = await server.setup({ config$ });
+
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/with-query',
+      validate: {
+        query: schema.object({
+          perPage: schema.number(),
+          sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          internal: schema.boolean(),
+        }),
+      },
+      security: { authz: { requiredPrivileges: ['foo'] } },
+      options: { access: 'public' },
+    },
+    (context, req, res) => res.ok()
+  );
+  registerRouter(router);
+
+  // Omitted by default to keep enumeration cheap.
+  expect(getRegisteredRoutes()).toEqual([
+    { path: '/foo/with-query', method: 'get', access: 'public', isVersioned: false },
+  ]);
+
+  const [routeWithQuery] = getRegisteredRoutes({ includeQueryParameters: true });
+  expect(routeWithQuery.queryParams).toEqual(
+    expect.arrayContaining([
+      { name: 'perPage', required: true },
+      { name: 'sortOrder', required: true, options: ['asc', 'desc'] },
+      { name: 'internal', required: true, flag: true },
+    ])
+  );
+});
+
 test('valid params', async () => {
   const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 

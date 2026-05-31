@@ -12,9 +12,12 @@ import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provi
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
+  getKibanaEndpointMethods,
+  getKibanaTopLevelUrlCompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
+import { KIBANA_API_PREFIX } from '../../../../../common/constants';
 import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import { type DataAutoCompleteRulesOneOf } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
@@ -25,6 +28,7 @@ import {
   END_OF_URL_TOKEN,
   i18nTexts,
   methodWhitespaceRegex,
+  methodWithKibanaUrlRegex,
   methodWithUrlRegex,
   newLineRegex,
   propertyNameRegex,
@@ -68,6 +72,21 @@ const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
  * the most destructive, so we pin GET first and DELETE last.
  */
 const autocompleteMethods = ['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE'];
+
+/*
+ * Formats the HTTP methods a route supports for display in a suggestion's detail,
+ * normalized to uppercase and ordered using the same canonical verb order as the
+ * method autocomplete (e.g. `['POST', 'GET']` -> `GET POST`).
+ */
+const formatSupportedMethods = (methods: string[]): string => {
+  const rank = (method: string) => {
+    const index = autocompleteMethods.indexOf(method);
+    return index === -1 ? autocompleteMethods.length : index;
+  };
+  return [...new Set(methods.map((method) => method.toUpperCase()))]
+    .sort((a, b) => rank(a) - rank(b))
+    .join(' ');
+};
 export const getMethodCompletionItems = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
@@ -92,20 +111,50 @@ export const getMethodCompletionItems = (
 };
 
 /*
+ * Whether the given token marks the request as targeting the Kibana API, i.e. it
+ * starts with the `kbn:` prefix. The prefix can either be its own token
+ * (`kbn:/api/...` -> `kbn:`) or fused with the first path segment
+ * (`kbn:api/...` -> `kbn:api`).
+ */
+const startsWithKibanaApiPrefix = (token: string | undefined): boolean =>
+  typeof token === 'string' && token.startsWith(KIBANA_API_PREFIX);
+
+/*
+ * Removes the `kbn:` prefix from the url path tokens so they can be matched
+ * against the Kibana API definitions (which are stored without the prefix).
+ * Handles both `kbn:` as a standalone token and `kbn:` fused with the first
+ * segment.
+ */
+const stripKibanaApiPrefix = (urlPathTokens: string[]): string[] => {
+  if (urlPathTokens.length === 0) {
+    return urlPathTokens;
+  }
+  const [first, ...rest] = urlPathTokens;
+  const strippedFirst = first.slice(KIBANA_API_PREFIX.length);
+  return strippedFirst ? [strippedFirst, ...rest] : rest;
+};
+
+/*
  * This function initializes the autocomplete context for the provided method and url token path.
+ * When the url targets the Kibana API (prefixed with `kbn:`), the Kibana url
+ * matcher is used and the prefix is stripped from the token path before matching.
  */
 const populateContextForMethodAndUrl = (method: string, urlTokenPath: string[]) => {
-  // get autocomplete components for the request method
-  const components = getTopLevelUrlCompleteComponents(method);
+  const isKibanaApi = startsWithKibanaApiPrefix(urlTokenPath[0]);
+  const tokenPath = isKibanaApi ? stripKibanaApiPrefix(urlTokenPath) : urlTokenPath;
+  // get autocomplete components for the request method from the matching source
+  const components = isKibanaApi
+    ? getKibanaTopLevelUrlCompleteComponents(method)
+    : getTopLevelUrlCompleteComponents(method);
   // this object will contain the information later, it needs to be initialized with some data
   // similar to the old ace editor context
   const context: AutoCompleteContext = {
     method,
-    urlTokenPath,
+    urlTokenPath: tokenPath,
   };
 
   // mutate the context object and put the autocomplete information there
-  populateContext(urlTokenPath, context, undefined, true, components);
+  populateContext(tokenPath, context, undefined, true, components);
 
   return context;
 };
@@ -134,12 +183,19 @@ export const getUrlPathCompletionItems = (
   let alreadySelectedIndices: string[] = [];
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
+  // Detect whether we are completing a Kibana API url (prefixed with `kbn:`).
+  // The prefix can live in an already-typed token (`kbn:api/...`, `kbn:/api/...`)
+  // or in the token currently being typed (`kbn:ap`).
+  const endsWithSlash = lineContent.trim().endsWith('/');
+  const lastTokenBeingTyped = endsWithSlash ? undefined : urlPathTokens[urlPathTokens.length - 1];
+  const isKibanaApi =
+    startsWithKibanaApiPrefix(urlPathTokens[0]) || startsWithKibanaApiPrefix(lastTokenBeingTyped);
   // if the line ends with /, then we use all url path tokens for autocomplete suggestions
   // otherwise, we don't use the last token for populating the autocomplete context
-  if (!lineContent.trim().endsWith('/')) {
+  if (!endsWithSlash) {
     const lastToken = urlPathTokens.pop();
-    // if the last token contains a comma, only suggest index names
-    if (lastToken?.includes(',')) {
+    // if the last token contains a comma, only suggest index names (Elasticsearch only)
+    if (!isKibanaApi && lastToken?.includes(',')) {
       onlyIndexNames = true;
       // For comma-separated indices, only filter by the part after the last comma
       const parts = lastToken.split(',');
@@ -151,8 +207,29 @@ export const getUrlPathCompletionItems = (
       partialToken = lastToken || '';
     }
   }
-  let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
-  autoCompleteSet = autoCompleteSet ?? [];
+  // The text used for prefix filtering and for the replace range. When the user
+  // is typing the very first Kibana segment the `kbn:` prefix is part of the
+  // partial token but must stay in place, so only the text after the prefix is
+  // completed (e.g. `kbn:ap` -> complete `ap` -> `kbn:api`).
+  const completionPrefix = startsWithKibanaApiPrefix(partialToken)
+    ? partialToken.slice(KIBANA_API_PREFIX.length)
+    : partialToken;
+
+  const tokenPath = isKibanaApi ? stripKibanaApiPrefix(urlPathTokens) : urlPathTokens;
+  const components = isKibanaApi
+    ? getKibanaTopLevelUrlCompleteComponents(method)
+    : getTopLevelUrlCompleteComponents(method);
+  const context: AutoCompleteContext = { method, urlTokenPath: tokenPath };
+  populateContext(tokenPath, context, undefined, true, components);
+
+  let autoCompleteSet = context.autoCompleteSet ?? [];
+  // Advertise the Kibana API entry point at the very start of the url (the first
+  // path segment) so users discover that `kbn:`-prefixed routes are completable
+  // too. It's added to the candidate set so the existing prefix/index filters
+  // below still apply (e.g. it's hidden once an unrelated prefix is typed).
+  if (!isKibanaApi && tokenPath.length === 0) {
+    autoCompleteSet = [{ name: KIBANA_API_PREFIX, meta: i18nTexts.api }, ...autoCompleteSet];
+  }
   // filter out non index names items if needed
   if (onlyIndexNames) {
     autoCompleteSet = autoCompleteSet.filter((term) => term.meta === 'index');
@@ -160,7 +237,7 @@ export const getUrlPathCompletionItems = (
   const range = {
     startLineNumber: lineNumber,
     // replace the partial token with the suggestion
-    startColumn: column - partialToken.length,
+    startColumn: column - completionPrefix.length,
     endLineNumber: lineNumber,
     endColumn: column,
   };
@@ -169,7 +246,7 @@ export const getUrlPathCompletionItems = (
       .filter((term) => {
         // Only keep dot-prefixed terms if the user typed a dot
         const isDotPrefixed = typeof term.name === 'string' && term.name.startsWith('.');
-        if (isDotPrefixed && !partialToken.startsWith('.')) {
+        if (isDotPrefixed && !completionPrefix.startsWith('.')) {
           return false;
         }
 
@@ -183,24 +260,64 @@ export const getUrlPathCompletionItems = (
         }
 
         // Filter by prefix: only show suggestions that start with what user typed
-        if (partialToken && typeof term.name === 'string') {
-          return term.name.toLowerCase().startsWith(partialToken.toLowerCase());
+        if (completionPrefix && typeof term.name === 'string') {
+          return term.name.toLowerCase().startsWith(completionPrefix.toLowerCase());
         }
 
         return true;
       })
       // map autocomplete items to completion items
       .map((item) => {
+        // The synthetic Kibana API entry point is pinned to the top of the list
+        // and re-opens suggestions on accept, so the Kibana routes appear right
+        // after `kbn:` is inserted.
+        const isKibanaApiEntryPoint = !isKibanaApi && item.name === KIBANA_API_PREFIX;
         return {
           label: item.name + '',
           insertText: item.name + '',
-          detail: item.meta ?? i18nTexts.endpoint,
+          // For Kibana routes, surface the HTTP methods the route supports (e.g.
+          // `GET POST`) so users can see which verbs are valid before committing
+          // to a url. Falls back to the generic `endpoint` label for trunks that
+          // don't resolve to a single endpoint.
+          detail:
+            getKibanaSuggestionDetail(isKibanaApi, tokenPath, item) ??
+            item.meta ??
+            i18nTexts.endpoint,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
           range,
+          ...(isKibanaApiEntryPoint
+            ? {
+                sortText: '0',
+                command: {
+                  id: 'editor.action.triggerSuggest',
+                  title: i18nTexts.api,
+                },
+              }
+            : {}),
         };
       })
   );
+};
+
+/*
+ * Resolves the supported HTTP methods for a Kibana url path suggestion. The
+ * suggestion name is relative to the already-typed token path, so the two are
+ * joined to reconstruct the full route pattern (e.g. `['api', 'spaces']` + `space`
+ * -> `api/spaces/space`) before looking the methods up. Returns `undefined` for
+ * Elasticsearch suggestions or when the pattern is not a registered endpoint.
+ */
+const getKibanaSuggestionDetail = (
+  isKibanaApi: boolean,
+  tokenPath: string[],
+  item: ResultTerm
+): string | undefined => {
+  if (!isKibanaApi || typeof item.name !== 'string') {
+    return undefined;
+  }
+  const pattern = [...tokenPath, item.name].filter(Boolean).join('/');
+  const methods = getKibanaEndpointMethods(pattern);
+  return methods && methods.length > 0 ? formatSupportedMethods(methods) : undefined;
 };
 
 /*
@@ -542,6 +659,9 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
   return (
     methodWhitespaceRegex.test(lineContent) ||
     methodWithUrlRegex.test(lineContent) ||
+    // Kibana (`kbn:`) urls re-open suggestions while being edited, not just at
+    // path boundaries, so deleting characters mid-segment still surfaces routes.
+    methodWithKibanaUrlRegex.test(lineContent) ||
     propertyNameRegex.test(lineContent) ||
     propertyValueRegex.test(lineContent)
   );

@@ -25,6 +25,10 @@ import { Api } from './api';
 import { isRecord } from '../../../common/utils/record_utils';
 
 let ACTIVE_API = new Api();
+// Holds the Kibana API definitions used for `kbn:`-prefixed url autocompletion.
+// It is kept separate from the Elasticsearch definitions (ACTIVE_API) so the two
+// url matchers don't bleed into each other.
+let KIBANA_API = new Api();
 let apiLoaded = false;
 
 type ParamComponentFactory = (name: string, parent?: SharedComponent) => SharedComponent;
@@ -85,6 +89,21 @@ export function getTopLevelUrlCompleteComponents(method: string) {
   return ACTIVE_API.getTopLevelUrlCompleteComponents(method);
 }
 
+export function getKibanaTopLevelUrlCompleteComponents(method: string) {
+  return KIBANA_API.getTopLevelUrlCompleteComponents(method);
+}
+
+export function getKibanaEndpointDescriptionByEndpoint(endpoint: string) {
+  return KIBANA_API.getEndpointDescriptionByEndpoint(endpoint);
+}
+
+// Returns the HTTP methods a Kibana route supports, when the given url pattern
+// resolves to a registered endpoint. Used to surface the supported verbs in the
+// autocomplete suggestion details.
+export function getKibanaEndpointMethods(endpoint: string): string[] | undefined {
+  return KIBANA_API.getEndpointDescriptionByEndpoint(endpoint)?.methods;
+}
+
 export function getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
   return ACTIVE_API.getGlobalAutocompleteComponents(term, throwOnMissing);
 }
@@ -143,6 +162,14 @@ function setActiveApi(api: Api | undefined) {
   ACTIVE_API = api;
 }
 
+function setKibanaApi(api: Api | undefined) {
+  if (!api) {
+    return;
+  }
+
+  KIBANA_API = api;
+}
+
 export async function loadActiveApi(http: HttpSetup) {
   // Only load the API data once
   if (apiLoaded) return;
@@ -150,7 +177,13 @@ export async function loadActiveApi(http: HttpSetup) {
 
   try {
     const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
-    setActiveApi(loadApisFromJson(data));
+    // The response is shaped as `{ es: {...}, kibana: {...} }`. Each source is
+    // loaded into its own Api so the Elasticsearch and Kibana url matchers stay
+    // independent.
+    const es = isRecord(data) ? data.es : undefined;
+    const kibana = isRecord(data) ? data.kibana : undefined;
+    setActiveApi(loadApisFromJson({ es }));
+    setKibanaApi(loadApisFromJson({ kibana }));
   } catch (err) {
     const responseText =
       isRecord(err) && typeof err.responseText === 'string' ? err.responseText : String(err);
@@ -164,4 +197,5 @@ export async function loadActiveApi(http: HttpSetup) {
 export const _test = {
   loadApisFromJson,
   setActiveApi,
+  setKibanaApi,
 };

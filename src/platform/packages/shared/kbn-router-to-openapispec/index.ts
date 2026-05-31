@@ -12,4 +12,6 @@ export {
   type GenerateOpenApiDocumentOptionsFilters,
 } from './src/generate_oas';
 
+export { extractRouteQueryParameters } from './src/extract_route_query_parameters';
+
 export type { OasMetaExtensions } from './src/oas_converter/zod/lib';

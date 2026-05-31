@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 
 import type { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import type { ESConfigForProxy } from '../types';
@@ -27,6 +27,18 @@ export interface RouteDependencies {
   router: IRouter;
   log: Logger;
   proxy: ProxyDependencies;
+  /**
+   * Enumerates the routes registered with core's HTTP service. Used to power
+   * Kibana API autocomplete in Console. Evaluated lazily so late route
+   * registrations are reflected.
+   */
+  getRegisteredRoutes: CoreSetup['http']['getRegisteredRoutes'];
+  /**
+   * Whether Kibana is running in development mode. When true, internal Kibana
+   * routes are also included in the Kibana API autocomplete definitions, since
+   * Dev Tools power users frequently call `/internal/...` endpoints via `kbn:`.
+   */
+  isDevMode: boolean;
   services: {
     esLegacyConfigService: EsLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;

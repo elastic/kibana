@@ -38,6 +38,8 @@ describe('ES Config Route', () => {
     routeDeps = {
       router: mockRouter,
       log: coreMock.createPluginInitializerContext().logger.get(),
+      getRegisteredRoutes: jest.fn(() => []),
+      isDevMode: false,
       proxy: {
         readLegacyESConfig: mockReadLegacyESConfig,
       },
