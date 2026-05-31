@@ -7,98 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ResizableLayout } from './resizable_layout';
-import { PanelsResizable } from './panels_resizable';
-import { PanelsStatic } from './panels_static';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
-}));
-
 describe('ResizableLayout component', () => {
-  const mountComponent = ({
-    mode = ResizableLayoutMode.Resizable,
+  const renderComponent = ({
+    fixedPanel = <div>Fixed panel</div>,
+    flexPanel = <div>Flex panel</div>,
     initialFixedPanelSize = 200,
     minFixedPanelSize = 100,
     minFlexPanelSize = 100,
-    fixedPanel = <></>,
-    flexPanel = <></>,
+    mode = ResizableLayoutMode.Resizable,
   }: {
-    mode?: ResizableLayoutMode;
+    fixedPanel?: ReactElement;
+    flexPanel?: ReactElement;
     initialFixedPanelSize?: number;
     minFixedPanelSize?: number;
     minFlexPanelSize?: number;
-    flexPanel?: ReactElement;
-    fixedPanel?: ReactElement;
-  }) => {
-    return mount(
+    mode?: ResizableLayoutMode;
+  } = {}) => {
+    return render(
       <ResizableLayout
-        mode={mode}
         direction={ResizableLayoutDirection.Vertical}
+        fixedPanel={fixedPanel}
         fixedPanelSize={initialFixedPanelSize}
+        flexPanel={flexPanel}
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}
-        fixedPanel={fixedPanel}
-        flexPanel={flexPanel}
+        mode={mode}
         onFixedPanelSizeChange={jest.fn()}
       />
     );
   };
 
-  it('should show PanelsFixed when mode is ResizableLayoutMode.Single', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Single, fixedPanel, flexPanel });
-    expect(component.find(PanelsStatic).exists()).toBe(true);
-    expect(component.find(PanelsResizable).exists()).toBe(false);
-    expect(component.contains(fixedPanel)).toBe(false);
-    expect(component.contains(flexPanel)).toBe(true);
+  it('should show only the flex panel when mode is ResizableLayoutMode.Single', () => {
+    renderComponent({ mode: ResizableLayoutMode.Single });
+
+    expect(screen.queryByText('Fixed panel')).not.toBeInTheDocument();
+    expect(screen.getByText('Flex panel')).toBeVisible();
+    expect(screen.queryByTestId('resizableLayoutResizableButton')).not.toBeInTheDocument();
   });
 
-  it('should show PanelsFixed when mode is ResizableLayoutMode.Static', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Static, fixedPanel, flexPanel });
-    expect(component.find(PanelsStatic).exists()).toBe(true);
-    expect(component.find(PanelsResizable).exists()).toBe(false);
-    expect(component.contains(fixedPanel)).toBe(true);
-    expect(component.contains(flexPanel)).toBe(true);
+  it('should show both panels without resize controls when mode is ResizableLayoutMode.Static', () => {
+    renderComponent({ mode: ResizableLayoutMode.Static });
+
+    expect(screen.getByText('Fixed panel')).toBeVisible();
+    expect(screen.getByText('Flex panel')).toBeVisible();
+    expect(screen.queryByTestId('resizableLayoutResizableButton')).not.toBeInTheDocument();
   });
 
-  it('should show PanelsResizable when mode is ResizableLayoutMode.Resizable', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({
-      mode: ResizableLayoutMode.Resizable,
-      fixedPanel,
-      flexPanel,
-    });
-    expect(component.find(PanelsStatic).exists()).toBe(false);
-    expect(component.find(PanelsResizable).exists()).toBe(true);
-    expect(component.contains(fixedPanel)).toBe(true);
-    expect(component.contains(flexPanel)).toBe(true);
-  });
+  it('should show both panels with resize controls when mode is ResizableLayoutMode.Resizable', () => {
+    renderComponent({ mode: ResizableLayoutMode.Resizable });
 
-  it('should pass true for hideFixedPanel when mode is ResizableLayoutMode.Single', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Single, fixedPanel, flexPanel });
-    expect(component.find(PanelsStatic).prop('hideFixedPanel')).toBe(true);
-    expect(component.contains(fixedPanel)).toBe(false);
-    expect(component.contains(flexPanel)).toBe(true);
-  });
-
-  it('should pass false for hideFixedPanel when mode is ResizableLayoutMode.Static', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Static, fixedPanel, flexPanel });
-    expect(component.find(PanelsStatic).prop('hideFixedPanel')).toBe(false);
-    expect(component.contains(fixedPanel)).toBe(true);
-    expect(component.contains(flexPanel)).toBe(true);
+    expect(screen.getByText('Fixed panel')).toBeVisible();
+    expect(screen.getByText('Flex panel')).toBeVisible();
+    expect(screen.getByTestId('resizableLayoutResizableButton')).toBeVisible();
   });
 });
