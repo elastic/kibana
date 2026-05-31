@@ -18,8 +18,8 @@ plugins:
     - dashboard_markdown
     - data
     - data_view_editor
-    - data_views
     - data_view_management
+    - data_views
     - dev_tools
     - discover
     - discover_enhanced
@@ -40,6 +40,7 @@ plugins:
     - ingest_pipelines
     - intercepts
     - kibana_overview
+    - kql
     - lens
     - logstash
     - management
