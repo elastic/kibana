@@ -35,7 +35,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_edit_params'));
     loadTestFile(require.resolve('./private_location_apis'));
     loadTestFile(require.resolve('./list_monitors'));
-    loadTestFile(require.resolve('./sync_maintenance_windows'));
-    loadTestFile(require.resolve('./sync_maintenance_windows_non_default_space'));
+    // sync_maintenance_windows + sync_maintenance_windows_non_default_space migrated to Scout:
+    // x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows.spec.ts
   });
 }

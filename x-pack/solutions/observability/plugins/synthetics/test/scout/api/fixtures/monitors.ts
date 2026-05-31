@@ -45,14 +45,16 @@ export async function addMonitor(
     savedObjectType?: string;
     id?: string;
     statusCode?: number;
+    spaceId?: string;
   } = {}
 ) {
-  const { gettingStarted, savedObjectType, id, statusCode = 200 } = opts;
+  const { gettingStarted, savedObjectType, id, statusCode = 200, spaceId } = opts;
   const qs: string[] = [];
   if (gettingStarted) qs.push('gettingStarted=true');
   if (savedObjectType) qs.push(`savedObjectType=${savedObjectType}`);
   if (id) qs.push(`id=${id}`);
-  const path = `api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
+  const prefix = spaceId && spaceId !== 'default' ? `s/${spaceId}/` : '';
+  const path = `${prefix}api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
 
   const res = await apiClient.post(path, {
     headers: { ...headers, 'elastic-api-version': PUBLIC_API_VERSION },
