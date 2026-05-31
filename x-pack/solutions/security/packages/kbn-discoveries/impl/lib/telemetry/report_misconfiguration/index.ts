@@ -14,11 +14,16 @@ import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 interface ReportMisconfigurationParams {
   analytics?: AnalyticsServiceSetup;
   logger: Logger;
+  // space_id / workflow_id are filled in by the real telemetry-event impl
+  // (later PR in the stack). PR3 callers (plugin startup misconfiguration
+  // reports) only have detail + misconfiguration_type at hand, so the
+  // optional fields keep the stub forward-compatible. FF-off prod safety
+  // is preserved because no caller is reached unless the FF is on.
   params: {
     detail: string;
     misconfiguration_type: string;
-    space_id: string;
-    workflow_id: string;
+    space_id?: string;
+    workflow_id?: string;
   };
 }
 
