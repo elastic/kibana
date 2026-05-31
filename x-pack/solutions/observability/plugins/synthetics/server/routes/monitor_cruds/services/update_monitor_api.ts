@@ -41,7 +41,8 @@ import {
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
 import { validateMonitor } from '../monitor_validation';
-import { validatePermissions } from '../edit_monitor';
+import { validateLocationPermissions } from '../edit_monitor';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from '../project_monitor/add_monitor_project';
 import type { RouteContext } from '../../types';
 import {
   ConfigKey,
@@ -79,6 +80,17 @@ interface ExecuteParams {
 export class UpdateMonitorAPI {
   routeContext: RouteContext;
   result: UpdateMonitorPreprocessResult = { survivors: [], perIdErrors: {} };
+
+  /*
+   * Request-scoped permission caches. A new instance is created per request,
+   * so these turn the previous per-monitor permission round-trips into a
+   * single resolution (capabilities) / one-per-distinct-space-set (privileges).
+   */
+  private locationPermissionsPromise?: ReturnType<typeof validateLocationPermissions>;
+  private readonly spacePermissionCache = new Map<
+    string,
+    ReturnType<typeof assertCanUpdateMonitorInAllSpaces>
+  >();
 
   constructor(routeContext: RouteContext) {
     this.routeContext = routeContext;
@@ -211,16 +223,28 @@ export class UpdateMonitorAPI {
     return { prevAttrs, merged };
   }
 
+  /**
+   * Per-monitor permission gate. Both underlying checks are request-scoped
+   * (they depend on the caller and the target spaces, not on the individual
+   * monitor), so each resolves at most once per bulk request:
+   *   - Elastic-managed-locations capability: cached for the whole request
+   *     via `getLocationPermissions` (the first survivor with a public
+   *     location pays for `resolveCapabilities`; the rest reuse it).
+   *   - Saved-objects `bulk_update` privilege: cached per unique space set
+   *     via `assertCanUpdateInSpaces`.
+   * This turns the previous O(N) capability/privilege calls into O(1) /
+   * O(distinct space sets).
+   */
   private async checkPermissions(
     decodedMonitor: SyntheticsMonitor,
     savedObjectType: string
   ): Promise<UpdateMonitorPerIdError | undefined> {
-    const elasticManagedError = await validatePermissions(
-      this.routeContext,
-      decodedMonitor.locations
-    );
-    if (elasticManagedError) {
-      return { code: 'forbidden', message: elasticManagedError };
+    const hasPublicLocations = (decodedMonitor.locations ?? []).some((loc) => loc.isServiceManaged);
+    if (hasPublicLocations) {
+      const { elasticManagedLocationsEnabled } = await this.getLocationPermissions();
+      if (!elasticManagedLocationsEnabled) {
+        return { code: 'forbidden', message: ELASTIC_MANAGED_LOCATIONS_DISABLED };
+      }
     }
 
     const editedMonitorSpaces = (decodedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? [];
@@ -236,15 +260,41 @@ export class UpdateMonitorAPI {
      * message. The privilege itself was already audit-logged by core when
      * `checkSavedObjectsPrivileges` ran inside the assertion.
      */
-    const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
-      this.routeContext,
-      editedMonitorSpaces,
-      savedObjectType
-    );
+    const spaceAuthError = await this.assertCanUpdateInSpaces(editedMonitorSpaces, savedObjectType);
     if (spaceAuthError) {
       return { code: 'forbidden', message: insufficientSpacePermissionsMessage() };
     }
     return undefined;
+  }
+
+  /**
+   * Resolve (and cache) the caller's Elastic-managed-locations capability.
+   * The answer is request-scoped, so we only pay for the underlying
+   * `resolveCapabilities` round-trip once per bulk request.
+   */
+  private getLocationPermissions(): ReturnType<typeof validateLocationPermissions> {
+    if (!this.locationPermissionsPromise) {
+      this.locationPermissionsPromise = validateLocationPermissions(this.routeContext);
+    }
+    return this.locationPermissionsPromise;
+  }
+
+  /**
+   * Memoize the saved-objects `bulk_update` privilege check per unique
+   * `(savedObjectType, sorted space set)` key, so monitors shared to the
+   * same spaces resolve to a single `checkSavedObjectsPrivileges` call.
+   */
+  private assertCanUpdateInSpaces(
+    spaceIds: string[],
+    savedObjectType: string
+  ): ReturnType<typeof assertCanUpdateMonitorInAllSpaces> {
+    const key = `${savedObjectType}::${[...new Set(spaceIds)].sort().join(',')}`;
+    let cached = this.spacePermissionCache.get(key);
+    if (!cached) {
+      cached = assertCanUpdateMonitorInAllSpaces(this.routeContext, spaceIds, savedObjectType);
+      this.spacePermissionCache.set(key, cached);
+    }
+    return cached;
   }
 
   /**

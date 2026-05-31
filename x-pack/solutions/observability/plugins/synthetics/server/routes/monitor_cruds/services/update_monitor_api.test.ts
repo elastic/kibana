@@ -13,7 +13,13 @@ jest.mock('../../../synthetics_service/get_private_locations', () => ({
 }));
 
 jest.mock('../edit_monitor', () => ({
-  validatePermissions: jest.fn().mockResolvedValue(undefined),
+  validateLocationPermissions: jest
+    .fn()
+    .mockResolvedValue({ elasticManagedLocationsEnabled: true, canManagePrivateLocations: true }),
+}));
+
+jest.mock('../project_monitor/add_monitor_project', () => ({
+  ELASTIC_MANAGED_LOCATIONS_DISABLED: 'Elastic managed locations are disabled',
 }));
 
 jest.mock('../monitor_locations_utils', () => ({
@@ -101,8 +107,11 @@ describe('UpdateMonitorAPI', () => {
     const { validateMonitor } = jest.requireMock('../monitor_validation');
     validateMonitor.mockImplementation((m: Record<string, unknown>) => mockValidationResultFor(m));
 
-    const { validatePermissions } = jest.requireMock('../edit_monitor');
-    validatePermissions.mockResolvedValue(undefined);
+    const { validateLocationPermissions } = jest.requireMock('../edit_monitor');
+    validateLocationPermissions.mockResolvedValue({
+      elasticManagedLocationsEnabled: true,
+      canManagePrivateLocations: true,
+    });
 
     const { assertCanUpdateMonitorInAllSpaces, validateMonitorPrivateLocationSpaces } =
       jest.requireMock('../monitor_locations_utils');
@@ -250,8 +259,8 @@ describe('UpdateMonitorAPI', () => {
 
   describe('forbidden', () => {
     it('records elastic-managed-locations permission failures', async () => {
-      const { validatePermissions } = jest.requireMock('../edit_monitor');
-      validatePermissions.mockResolvedValue('Elastic managed locations are disabled');
+      const { validateLocationPermissions } = jest.requireMock('../edit_monitor');
+      validateLocationPermissions.mockResolvedValue({ elasticManagedLocationsEnabled: false });
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
@@ -355,6 +364,76 @@ describe('UpdateMonitorAPI', () => {
       expect(result.perIdErrors['mon-project'].code).toBe('invalid_origin');
       expect(result.perIdErrors['mon-bad'].code).toBe('validation_failed');
       expect(result.perIdErrors['mon-missing'].code).toBe('not_found');
+    });
+  });
+
+  describe('permission checks resolve once per request', () => {
+    it('resolves the elastic-managed-locations capability once for N public-location monitors', async () => {
+      const { validateLocationPermissions } = jest.requireMock('../edit_monitor');
+
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ id: 'mon-1' }),
+        mockDecryptedMonitor({ id: 'mon-2' }),
+        mockDecryptedMonitor({ id: 'mon-3' }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        ids: ['mon-1', 'mon-2', 'mon-3'],
+        attributes: { enabled: false },
+      });
+
+      expect(result.survivors).toHaveLength(3);
+      expect(validateLocationPermissions).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the location-capability check when no monitor has a public location', async () => {
+      const { validateLocationPermissions } = jest.requireMock('../edit_monitor');
+
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          id: 'mon-1',
+          attributes: { locations: [{ id: 'pl-1', isServiceManaged: false }] },
+        }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+
+      expect(validateLocationPermissions).not.toHaveBeenCalled();
+    });
+
+    it('checks bulk_update space privileges once per unique space set', async () => {
+      const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
+
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          id: 'mon-1',
+          attributes: { [ConfigKey.KIBANA_SPACES]: ['default', 'team-b'] },
+        }),
+        mockDecryptedMonitor({
+          id: 'mon-2',
+          // same set, different order -> same cache key, no extra call
+          attributes: { [ConfigKey.KIBANA_SPACES]: ['team-b', 'default'] },
+        }),
+        mockDecryptedMonitor({
+          id: 'mon-3',
+          attributes: { [ConfigKey.KIBANA_SPACES]: ['default', 'team-c'] },
+        }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        ids: ['mon-1', 'mon-2', 'mon-3'],
+        attributes: { enabled: false },
+      });
+
+      expect(result.survivors).toHaveLength(3);
+      // two distinct space sets -> two privilege checks, not three
+      expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledTimes(2);
     });
   });
 
