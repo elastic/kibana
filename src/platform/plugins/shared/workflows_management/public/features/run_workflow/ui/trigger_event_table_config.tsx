@@ -40,11 +40,11 @@ import type {
   UseTriggerEventTableConfigOptions,
   UseTriggerEventTableConfigResult,
 } from './trigger_event_table_config_types';
+import { WorkflowExecuteDataGridCellPopover } from './workflow_execute_data_grid_cell_popover';
 import {
   TriggerEventRunPayloadSelectionSync,
   TriggerEventTableSelectionCountSync,
 } from './workflow_execute_event_selection_sync';
-import { WorkflowExecuteDataGridCellPopover } from './workflow_execute_data_grid_cell_popover';
 import {
   buildUnifiedDataTableServices,
   getNoUnifiedDataTableCellActions,
