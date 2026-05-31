@@ -36,6 +36,9 @@ import {
 
 const extractWorkflowMetadataMock = jest.mocked(extractWorkflowMetadata);
 const extractStepInfoFromWorkflowYamlMock = jest.mocked(extractStepInfoFromWorkflowYaml);
+const { extractWorkflowMetadata: extractWorkflowMetadataActual } = jest.requireActual(
+  '../lib/telemetry/utils/extract_workflow_metadata'
+) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
 
 const createMockTelemetryClient = (): TelemetryServiceClient => ({
   reportEvent: jest.fn(),
@@ -201,22 +204,8 @@ describe('WorkflowsBaseTelemetry', () => {
 
     it('includes concurrency fields when present in metadata', () => {
       extractWorkflowMetadataMock.mockReturnValueOnce({
-        enabled: false,
-        stepCount: 0,
-        connectorTypes: [],
-        stepTypes: [],
-        stepTypeCounts: {},
-        triggerTypes: [],
-        inputCount: 0,
-        constCount: 0,
-        triggerCount: 0,
-        hasTriggerConditions: false,
-        hasTriggerWorkflowEventsIgnore: false,
-        hasTriggerWorkflowEventsAllow: false,
-        hasTriggerWorkflowEventsAvoidLoop: false,
+        ...extractWorkflowMetadataActual(null),
         settingsUsed: ['concurrency'],
-        hasDescription: false,
-        tagCount: 0,
         concurrencyMax: 10,
         concurrencyStrategy: 'drop',
       });
