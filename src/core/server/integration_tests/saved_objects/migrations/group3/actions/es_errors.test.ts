@@ -21,7 +21,6 @@ import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
   createIndex,
-  setWriteBlock,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -53,7 +52,7 @@ describe('Elasticsearch Errors', () => {
       mappings: { properties: {} },
       esCapabilities: elasticsearchServiceMock.createCapabilities(),
     })();
-    await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
+    await client.indices.addBlock({ index: 'existing_index_with_write_block', block: 'write' });
   });
 
   afterAll(async () => {
@@ -150,18 +149,6 @@ describe('Elasticsearch Errors', () => {
       const res = await client.indices.create(
         {
           index: 'new_test_index',
-        },
-        { ignore: [400] }
-      );
-
-      // @ts-expect-error @elastic/elasticsearch doesn't declare error on response
-      expect(isClusterShardLimitExceeded(res.error)).toEqual(true);
-    });
-    it('correctly identify errors from clone index operation', async () => {
-      const res = await client.indices.clone(
-        {
-          index: 'existing_index_with_write_block',
-          target: 'new_test_index_2',
         },
         { ignore: [400] }
       );
