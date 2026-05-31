@@ -7,29 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
-import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import type { CustomGridColumnsConfiguration, SortOrder } from '@kbn/unified-data-table';
+import {
+  buildWorkflowExecuteHitSearchIdentityKey,
+  useWorkflowExecuteHitSearch,
+} from './use_workflow_execute_hit_search';
 import {
   useWorkflowExecuteHitTableConfig,
   type UseWorkflowExecuteHitTableConfigResult,
 } from './use_workflow_execute_hit_table_config';
 import {
-  mergeEsHitPages,
   parseSearchTotalHits,
-  resolveHitSearchHasMoreHits,
-  resolveHitSearchTableLoadingState,
   WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
 } from './workflow_execute_hit_search_pagination';
+import {
+  buildWorkflowExecuteHitSearchEsSort,
+  DEFAULT_WORKFLOW_EXECUTE_HIT_SORT,
+} from './workflow_execute_hit_search_sort';
 import { buildAlertTriggerInputFromRecords } from './workflow_execute_hit_selection_payload';
 import { createAlertMessageCellRenderer } from './workflow_execute_hit_table_cells';
 import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
@@ -73,27 +76,100 @@ export const WorkflowExecuteAlertForm = ({
   const { services } = useKibana();
   const { http, notifications, data: dataService, unifiedSearch } = services;
   const { SearchBar } = unifiedSearch.ui;
-  const [hits, setHits] = useState<EsHitRecord[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
   });
-
-  const [alertsFetching, setAlertsFetching] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [totalHits, setTotalHits] = useState(0);
-  const [lastPageHitsLength, setLastPageHitsLength] = useState(0);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [dataView, setDataView] = useState<DataView | null>(null);
+  const [tableSortForSearch, setTableSortForSearch] = useState<SortOrder[]>(
+    DEFAULT_WORKFLOW_EXECUTE_HIT_SORT
+  );
   const dataViewCreatingRef = useRef(false);
 
   const submittedQueryString = typeof submittedQuery.query === 'string' ? submittedQuery.query : '';
 
-  const alertSearchIdentityKey = useMemo(
-    () => `${dataView?.id ?? ''}|${submittedQueryString}|${timeRange.from}|${timeRange.to}`,
-    [dataView?.id, submittedQueryString, timeRange.from, timeRange.to]
+  const resolveFetchError = useCallback(
+    (error: unknown) =>
+      error instanceof Error
+        ? error.message
+        : i18n.translate('workflows.workflowExecuteEventForm.fetchError', {
+            defaultMessage: 'Failed to fetch alerts',
+          }),
+    []
   );
+
+  const fetchAlertsPage = useCallback(
+    async (pageIndex: number) => {
+      if (!dataService || !dataView) {
+        return { pageHits: [], total: 0 };
+      }
+
+      const searchSource = await dataService.search.searchSource.create();
+
+      searchSource.setField('index', dataView);
+
+      if (submittedQueryString) {
+        searchSource.setField('query', {
+          query: submittedQueryString,
+          language: 'kuery',
+        });
+      }
+
+      const timeFilter: Filter = {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: timeRange.from,
+              lte: timeRange.to,
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+        meta: {
+          type: 'custom',
+        },
+      };
+
+      searchSource.setField('filter', [timeFilter]);
+      searchSource.setField(
+        'sort',
+        buildWorkflowExecuteHitSearchEsSort(tableSortForSearch, dataView)
+      );
+      searchSource.setField('from', pageIndex * WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
+      searchSource.setField('size', WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
+      searchSource.setField('trackTotalHits', true);
+
+      const response = await searchSource.fetch$().pipe(take(1)).toPromise();
+      const pageHits = (response?.rawResponse?.hits?.hits ?? []) as EsHitRecord[];
+
+      return {
+        pageHits,
+        total: parseSearchTotalHits(response?.rawResponse?.hits?.total),
+      };
+    },
+    [dataService, dataView, submittedQueryString, timeRange.from, timeRange.to, tableSortForSearch]
+  );
+
+  const searchIdentityKey = useMemo(
+    () =>
+      buildWorkflowExecuteHitSearchIdentityKey({
+        dataViewId: dataView?.id,
+        submittedQueryString,
+        timeRange,
+        tableSort: tableSortForSearch,
+      }),
+    [dataView?.id, submittedQueryString, timeRange, tableSortForSearch]
+  );
+
+  const hitSearch = useWorkflowExecuteHitSearch({
+    enabled: Boolean(dataView),
+    searchIdentityKey,
+    fetchPage: fetchAlertsPage,
+    setErrors,
+    resolveFetchError,
+  });
 
   // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
   // Empty ruleTypeIds + enabled → returns indices for all authorized rule types.
@@ -154,123 +230,6 @@ export const WorkflowExecuteAlertForm = ({
     createDataView();
   }, [dataService, indexPattern, notifications.toasts, setErrors]);
 
-  useEffect(() => {
-    setPageIndex(0);
-    setHits([]);
-    setTotalHits(0);
-    setLastPageHitsLength(0);
-  }, [alertSearchIdentityKey]);
-
-  const fetchAlerts = useCallback(async () => {
-    if (!dataService || !dataView) {
-      return;
-    }
-
-    setAlertsFetching(true);
-    setErrors(null);
-
-    try {
-      const searchSource = await dataService.search.searchSource.create();
-
-      searchSource.setField('index', dataView);
-
-      if (submittedQueryString) {
-        searchSource.setField('query', {
-          query: submittedQueryString,
-          language: 'kuery',
-        });
-      }
-
-      const timeFilter: Filter = {
-        query: {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-              lte: timeRange.to,
-              format: 'strict_date_optional_time',
-            },
-          },
-        },
-        meta: {
-          type: 'custom',
-        },
-      };
-
-      searchSource.setField('filter', [timeFilter]);
-
-      const sortWithUnmappedType = [
-        {
-          '@timestamp': {
-            order: SortDirection.desc,
-            format: 'strict_date_optional_time||epoch_millis',
-            unmapped_type: 'boolean',
-          },
-        },
-        {
-          _doc: {
-            order: SortDirection.desc,
-            unmapped_type: 'boolean',
-          },
-        },
-      ] as estypes.SortCombinations[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      searchSource.setField('sort', sortWithUnmappedType as any);
-
-      searchSource.setField('from', pageIndex * WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
-      searchSource.setField('size', WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
-      searchSource.setField('trackTotalHits', true);
-
-      const response = await searchSource.fetch$().pipe(take(1)).toPromise();
-
-      const pageHits = (response?.rawResponse?.hits?.hits ?? []) as EsHitRecord[];
-      const total = parseSearchTotalHits(response?.rawResponse?.hits?.total);
-
-      setTotalHits(total);
-      setLastPageHitsLength(pageHits.length);
-      setHits((previousHits) => mergeEsHitPages(previousHits, pageHits, pageIndex));
-    } catch (err) {
-      setErrors(
-        err instanceof Error
-          ? err.message
-          : i18n.translate('workflows.workflowExecuteEventForm.fetchError', {
-              defaultMessage: 'Failed to fetch alerts',
-            })
-      );
-      if (pageIndex === 0) {
-        setHits([]);
-        setTotalHits(0);
-        setLastPageHitsLength(0);
-      }
-    } finally {
-      setAlertsFetching(false);
-    }
-  }, [
-    dataService,
-    setErrors,
-    submittedQueryString,
-    timeRange.from,
-    timeRange.to,
-    dataView,
-    pageIndex,
-  ]);
-
-  useEffect(() => {
-    if (dataView) {
-      void fetchAlerts();
-    }
-  }, [dataView, pageIndex, alertSearchIdentityKey, fetchAlerts]);
-
-  const hasMoreHits = resolveHitSearchHasMoreHits({
-    totalHits,
-    accumulatedHitsLength: hits.length,
-    currentPageHitsLength: lastPageHitsLength,
-  });
-
-  const onFetchMoreRecords = useMemo(
-    () => (hasMoreHits && !alertsFetching ? () => setPageIndex((page) => page + 1) : undefined),
-    [hasMoreHits, alertsFetching]
-  );
-
   const handleAlertSelection = useCallback(
     (selectedRecords: DataTableRecord[]) => {
       const payload = buildAlertTriggerInputFromRecords(selectedRecords);
@@ -314,13 +273,28 @@ export const WorkflowExecuteAlertForm = ({
   const tableConfig: UseWorkflowExecuteHitTableConfigResult = useWorkflowExecuteHitTableConfig({
     services,
     dataView,
-    hits,
+    hits: hitSearch.hits,
     defaultColumns: DEFAULT_ALERT_TABLE_COLUMNS,
     externalCustomRenderers: alertMessageRenderer,
     customGridColumnsConfiguration,
     onSelectionChange: handleAlertSelection,
     setErrors,
   });
+
+  useEffect(() => {
+    setTableSortForSearch(tableConfig.sort);
+  }, [tableConfig.sort]);
+
+  const handleTableSortChange = tableConfig.handleSortChange;
+  const { resetPageIndex } = hitSearch;
+
+  const handleSortChange = useCallback(
+    (nextSort: string[][]) => {
+      resetPageIndex();
+      handleTableSortChange(nextSort);
+    },
+    [handleTableSortChange, resetPageIndex]
+  );
 
   const handleQueryChange = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
@@ -343,13 +317,11 @@ export const WorkflowExecuteAlertForm = ({
     []
   );
 
-  const tableLoadingState = resolveHitSearchTableLoadingState(alertsFetching, hits.length);
-
   useEffect(() => {
-    if (hits.length === 0 && isTableGridFullScreen) {
+    if (hitSearch.hits.length === 0 && isTableGridFullScreen) {
       onTableGridFullScreenChange?.(false);
     }
-  }, [hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
+  }, [hitSearch.hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return (
     <EuiFlexGroup
@@ -415,24 +387,24 @@ export const WorkflowExecuteAlertForm = ({
         euiTheme={euiTheme}
         tableSurfaceColor={tableSurfaceColor}
         timestampCellTypography={tableConfig.timestampCellTypography}
-        tableLoadingState={tableLoadingState}
+        tableLoadingState={hitSearch.tableLoadingState}
         dataView={dataView}
         getNoCellActions={tableConfig.getNoCellActions}
         visibleTableColumns={tableConfig.visibleTableColumns}
         columnsMeta={tableConfig.columnsMeta}
         dataTableRows={tableConfig.dataTableRows}
-        rowsLength={hits.length}
+        rowsLength={hitSearch.hits.length}
         unifiedDataTableServices={tableConfig.unifiedDataTableServices}
         handleUnifiedDataTableSetColumns={tableConfig.handleUnifiedDataTableSetColumns}
         showTimeColumn={tableConfig.showTimeColumn}
         sort={tableConfig.sort}
-        handleSortChange={tableConfig.handleSortChange}
+        handleSortChange={handleSortChange}
         customGridColumnsConfiguration={tableConfig.customGridColumnsConfiguration}
         renderCustomToolbar={tableConfig.renderCustomToolbar}
         renderCellPopover={tableConfig.renderCellPopover}
         externalCustomRenderers={tableConfig.externalCustomRenderers}
-        totalHits={totalHits}
-        onFetchMoreRecords={onFetchMoreRecords}
+        totalHits={hitSearch.totalHits}
+        onFetchMoreRecords={hitSearch.onFetchMoreRecords}
         isTableGridFullScreen={isTableGridFullScreen}
         onDataGridFullScreenChange={onTableGridFullScreenChange}
       />

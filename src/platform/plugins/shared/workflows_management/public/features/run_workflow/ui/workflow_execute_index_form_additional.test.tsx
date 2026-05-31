@@ -10,6 +10,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   createCommonMockServices,
@@ -60,7 +61,7 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       },
       dataViews: { ...baseMock.dataViews, ...mockDataViews },
       data: { ...baseMock.data, ...mockData },
-      fieldFormats: { ...baseMock.fieldFormats, ...mockData.fieldFormats },
+      fieldFormats: fieldFormatsMock,
       ...overrides,
     };
 
@@ -138,13 +139,10 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
     it('should call setErrors when search subscription emits an error', async () => {
       const { mockData } = setupMocks();
 
-      // Override the search mock to emit an error
+      // Override the search mock to reject the fetch promise
       mockData.search.search.mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ error: errorCb }: { error: (err: Error) => void }) => {
-            errorCb(new Error('Search failed'));
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockRejectedValue(new Error('Search failed')),
         }),
       });
 
@@ -292,10 +290,7 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
 
       mockData.search.search.mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ error: errorCb }: { error: (err: unknown) => void }) => {
-            errorCb('string error');
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockRejectedValue('string error'),
         }),
       });
 

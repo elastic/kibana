@@ -24,6 +24,14 @@ export function parseSearchTotalHits(total: unknown): number {
   return 0;
 }
 
+export function getEsHitRecordDedupKey(hit: EsHitRecord): string | undefined {
+  if (!hit._id || !hit._index) {
+    return undefined;
+  }
+
+  return `${hit._index}::${hit._id}`;
+}
+
 export function mergeEsHitPages(
   previousHits: EsHitRecord[],
   pageHits: EsHitRecord[],
@@ -32,8 +40,21 @@ export function mergeEsHitPages(
   if (pageIndex === 0) {
     return pageHits;
   }
-  const seen = new Set(previousHits.map((hit) => hit._id));
-  const appended = pageHits.filter((hit) => hit._id && !seen.has(hit._id));
+
+  const seen = new Set(
+    previousHits
+      .map(getEsHitRecordDedupKey)
+      .filter((dedupKey): dedupKey is string => dedupKey !== undefined)
+  );
+
+  const appended = pageHits.filter((hit) => {
+    const dedupKey = getEsHitRecordDedupKey(hit);
+    if (!dedupKey) {
+      return true;
+    }
+    return !seen.has(dedupKey);
+  });
+
   return appended.length === 0 ? previousHits : previousHits.concat(appended);
 }
 

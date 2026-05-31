@@ -118,6 +118,11 @@ const createMockSearchHitsResponse = (
   },
 });
 
+export const mockFieldFormatter = {
+  convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
+  convertToReact: jest.fn((value: unknown) => String(value ?? '')),
+};
+
 /**
  * Creates mock Kibana services for event form tests
  */
@@ -126,9 +131,7 @@ export const createEventFormKibanaMocks = () => {
     getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
   };
 
-  const mockFormatter = {
-    convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
-  };
+  const mockFormatter = mockFieldFormatter;
 
   const mockDataView = {
     id: 'test-data-view',
@@ -211,9 +214,7 @@ export const createEventFormKibanaMocks = () => {
  * Creates mock Kibana services for index form tests
  */
 export const createIndexFormKibanaMocks = () => {
-  const mockFormatter = {
-    convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
-  };
+  const mockFormatter = mockFieldFormatter;
 
   const createMockDataView = () => ({
     id: 'test-data-view-id',
@@ -264,11 +265,7 @@ export const createIndexFormKibanaMocks = () => {
     search: {
       search: jest.fn().mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ next, complete }) => {
-            next(createMockSearchHitsResponse(mockDocumentHits));
-            complete();
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockDocumentHits)),
         }),
       }),
     },

@@ -9,6 +9,7 @@
 
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
+  getEsHitRecordDedupKey,
   mergeEsHitPages,
   parseSearchTotalHits,
   resolveHitSearchHasMoreHits,
@@ -25,6 +26,18 @@ describe('workflow_execute_hit_search_pagination', () => {
     const first: EsHitRecord[] = [{ _id: '1', _index: 'a', _source: {} }];
     const second: EsHitRecord[] = [{ _id: '2', _index: 'a', _source: {} }];
     expect(mergeEsHitPages(first, second, 0)).toEqual(second);
+    expect(mergeEsHitPages(first, second, 1)).toEqual([...first, ...second]);
+  });
+
+  it('getEsHitRecordDedupKey uses index and id', () => {
+    expect(getEsHitRecordDedupKey({ _id: '1', _index: '.alerts-default', _source: {} })).toBe(
+      '.alerts-default::1'
+    );
+  });
+
+  it('mergeEsHitPages keeps hits with the same id in different indices', () => {
+    const first: EsHitRecord[] = [{ _id: '1', _index: 'logs-a', _source: {} }];
+    const second: EsHitRecord[] = [{ _id: '1', _index: 'logs-b', _source: {} }];
     expect(mergeEsHitPages(first, second, 1)).toEqual([...first, ...second]);
   });
 

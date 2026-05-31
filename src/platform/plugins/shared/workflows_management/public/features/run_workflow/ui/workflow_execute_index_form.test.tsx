@@ -17,6 +17,7 @@ import {
   createCommonMockServices,
   createIndexFormKibanaMocks,
   MockDataViewPicker,
+  mockFieldFormatter,
   MockSearchBar,
 } from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
@@ -208,9 +209,7 @@ describe('WorkflowExecuteIndexForm', () => {
       name: 'logs-*',
       timeFieldName: '@timestamp',
       getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFormatterForField: jest.fn().mockReturnValue({
-        convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
-      }),
+      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
       getFieldByName: jest.fn((name: string) => ({
         name,
         type: name === '@timestamp' ? 'date' : 'string',
@@ -270,9 +269,7 @@ describe('WorkflowExecuteIndexForm', () => {
       name: 'logs-*',
       timeFieldName: '@timestamp',
       getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFormatterForField: jest.fn().mockReturnValue({
-        convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
-      }),
+      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
       getFieldByName: jest.fn((name: string) => ({
         name,
         type: name === '@timestamp' ? 'date' : 'string',

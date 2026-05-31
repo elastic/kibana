@@ -43,6 +43,12 @@ export const WorkflowExecuteHitSelectionSync = ({
       .map((docId) => dataTableRows.find((row) => row.id === docId))
       .filter((row): row is DataTableRecord => row !== undefined);
 
+    if (selectedRecords.length !== docIds.length) {
+      onSelectionChange([]);
+      setErrors?.(null);
+      return;
+    }
+
     onSelectionChange(selectedRecords);
     setErrors?.(null);
   }, [dataTableRows, docIdsKey, onSelectionChange, setErrors]);
