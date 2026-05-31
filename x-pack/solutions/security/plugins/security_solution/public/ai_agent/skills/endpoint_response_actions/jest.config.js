@@ -7,18 +7,23 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../../..',
+  rootDir: '../../../../../../../../..',
   testMatch: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/__tests__/**/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.test.{js,mjs,ts,tsx}',
   ],
-  roots: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/*.{ts,tsx}',
-    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/index.ts',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/*mock*.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.d.ts',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.config.ts',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/index.{js,ts,tsx}',
   ],
+
+  moduleNameMapper: require('../../../../server/__mocks__/module_name_map'),
 };
