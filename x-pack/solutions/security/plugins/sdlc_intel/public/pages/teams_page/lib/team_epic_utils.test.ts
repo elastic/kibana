@@ -98,6 +98,7 @@ describe('team_epic_utils', () => {
         key: 'siem',
         name: 'SIEM',
         membersCount: 10,
+        subteams: [],
         epicCount: 1,
         gatesPct: 80,
         ticketsDone: 1,

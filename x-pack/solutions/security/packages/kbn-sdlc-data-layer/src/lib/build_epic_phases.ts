@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
-import { resolveRoadmapFromInitiative } from '../config/roadmap_mapping';
+import { getDeckFeatureForGithubEpicKey } from '../config/workflows_deck_epic_correlation';
+import { resolveRoadmapForEpic } from '../config/roadmap_mapping';
 import {
   buildPhasePayload,
   computeDeliveryCoveragePct,
@@ -14,7 +15,12 @@ import {
   rollupPullRequests,
   rollupTickets,
 } from './phase_gates';
-import { attributeTeam } from './team_attribution';
+import {
+  attributeTeam,
+  resolveContributingOrgTeams,
+  resolveOrgTeamsFromLabels,
+  resolveOrgTeamsFromProjectTeam,
+} from './team_attribution';
 import type { GitHubIssueLike } from './types';
 
 export interface BuildEpicPhaseInput {
@@ -50,8 +56,15 @@ export interface BuildEpicPhaseInput {
 
 const notStartedPhase = (): Record<string, unknown> => ({ gate: 'ns' });
 
+const getDeckFeatureLabel = (epicKey: string): string | undefined =>
+  getDeckFeatureForGithubEpicKey(epicKey)?.deckFeature;
+
 export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<string, unknown> => {
-  const roadmap = resolveRoadmapFromInitiative(input.fields['Product Initiative']);
+  const roadmap = resolveRoadmapForEpic({
+    epicKey: input.epicKey,
+    initiative: input.fields['Product Initiative'],
+    projectNumber: input.projectNumber,
+  });
   const ticketRollup = rollupTickets(input.childIssues);
   const prRollup = rollupPullRequests(input.childPullRequests);
   const p4Gate = computeP4Gate(ticketRollup);
@@ -59,26 +72,35 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
   const deliveryCoveragePct = computeDeliveryCoveragePct(ticketRollup, prRollup);
   const gateRollup = computeGateRollup([p4Gate, p5Gate]);
 
+  const ownOrgTeamOrder = [
+    ...resolveOrgTeamsFromProjectTeam(input.fields.Team),
+    ...resolveOrgTeamsFromLabels(input.epicLabels),
+    ...resolveOrgTeamsFromLabels(input.childIssues[0]?.labels),
+  ];
+  const ownOrgTeams = [...new Set(ownOrgTeamOrder)];
+
   const ownAttribution = attributeTeam({
     projectTeam: input.fields.Team,
-    labels: input.childIssues[0]?.labels,
+    labels: input.epicLabels ?? input.childIssues[0]?.labels,
   });
 
-  const contributingOrgTeams = new Set<string>(ownAttribution.orgTeams);
+  const contributingOrgTeams = new Set<string>([
+    ...resolveContributingOrgTeams({
+      projectTeam: input.fields.Team,
+      labels: input.epicLabels,
+    }),
+  ]);
   const contributingEngineeringTeams = new Set<string>();
   if (input.fields.Team) {
     contributingEngineeringTeams.add(input.fields.Team);
   }
   for (const issue of input.childIssues) {
-    const attribution = attributeTeam({
-      projectTeam: input.fields.Team,
-      labels: issue.labels,
-    });
-    for (const orgTeam of attribution.orgTeams) {
+    for (const orgTeam of resolveContributingOrgTeams({ labels: issue.labels })) {
       contributingOrgTeams.add(orgTeam);
     }
-    if (attribution.engineeringTeam) {
-      contributingEngineeringTeams.add(attribution.engineeringTeam);
+    const labelAttribution = attributeTeam({ labels: issue.labels });
+    if (labelAttribution.engineeringTeam) {
+      contributingEngineeringTeams.add(labelAttribution.engineeringTeam);
     }
   }
 
@@ -108,7 +130,7 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
       issue_ref: input.issueRef,
     },
     teams: {
-      own_org_team: ownAttribution.orgTeams[0],
+      own_org_team: ownOrgTeams[0],
       own_engineering_team: input.fields.Team ?? ownAttribution.engineeringTeam,
       contributing_org_teams: [...contributingOrgTeams],
       contributing_engineering_teams: [...contributingEngineeringTeams],
@@ -121,6 +143,7 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
       roadmap_stage: input.fields['Product Roadmap Stage'],
       initiative: input.fields['Product Initiative'],
       serverless_iteration: input.fields.Serverless,
+      deck_feature: getDeckFeatureLabel(input.epicKey),
     },
     links: {
       project_url: input.links?.project_url ?? input.projectUrl,

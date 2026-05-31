@@ -17,8 +17,6 @@ const TEAM_ACCENTS: Record<string, TeamAccent> = {
   sde: { background: '#E1F5EE', color: '#085041', icon: 'database' },
   xdr: { background: '#FAECE7', color: '#712B13', icon: 'compute' },
   pds: { background: '#FAEEDA', color: '#633806', icon: 'launch' },
-  prod: { background: '#FBEAF0', color: '#72243E', icon: 'bullhorn' },
-  ux: { background: '#F1EFE8', color: '#444441', icon: 'palette' },
 };
 
 const DEFAULT_ACCENT: TeamAccent = {

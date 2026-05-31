@@ -38,6 +38,12 @@ export const TEAM_DIMENSION_SEED: readonly TeamDimensionRecord[] = [
         'One Workflow',
         'Contextual Security Apps',
         'Templates',
+        'Rules Management',
+        'Detections and Resp',
+        'D&R',
+        'Detection Rule Management',
+        'ResponseOps',
+        'SecuritySolution',
       ],
       github_labels: [
         'Team:Core Analysis',
@@ -46,6 +52,14 @@ export const TEAM_DIMENSION_SEED: readonly TeamDimensionRecord[] = [
         'Team:One Workflow',
         'Team:Cloud Security',
         'Team: SecuritySolution',
+        'Team:Detection Rule Management',
+        'Team:Detections and Resp',
+        'Team:Detection Engine',
+        'Team:ResponseOps',
+        'Team:Threat Hunting',
+        'Team:Threat Hunting:Investigations',
+        'Team:SIEM',
+        'Team:Contextual Security',
       ],
       github_org_slugs: [
         'core-analysis',
@@ -90,8 +104,14 @@ export const TEAM_DIMENSION_SEED: readonly TeamDimensionRecord[] = [
       'Service Integrations',
     ],
     aliases: {
-      project_team_values: ['Cloud Services', 'Cloud Risk Analysis'],
-      github_labels: ['Team:Cloud Services', 'Team:Ingest'],
+      project_team_values: ['Cloud Services', 'Cloud Risk Analysis', 'SDE'],
+      github_labels: [
+        'Team:Cloud Services',
+        'Team:Ingest',
+        'Team:Security-Cloud Services',
+        'Team:Ingest-EngProd',
+        'Team:Security-Service Integrations',
+      ],
       github_org_slugs: ['cloud-services', 'ingest'],
     },
   },
@@ -106,8 +126,23 @@ export const TEAM_DIMENSION_SEED: readonly TeamDimensionRecord[] = [
       'CI/Releases/Telemetry',
     ],
     aliases: {
-      project_team_values: [],
-      github_labels: ['Team:Endpoint', 'Team:Defend'],
+      project_team_values: ['Fleet'],
+      github_labels: [
+        'Team:Endpoint',
+        'Team:Defend',
+        'Team:Defend Workflows',
+        'Team:Fleet',
+        'Team: Endpoint',
+        'Team: Endpoint Platforms',
+        'Team: Endpoint Protections',
+        'Team:Security-Linux Platform',
+        'Team:Security-Windows Platform',
+        'Team: EDR Workflows',
+        'Team:Endpoint Response',
+        'Team: Endpoint Foundations',
+        'Team:Linux Platform',
+        'Team:Elastic-Agent',
+      ],
       github_org_slugs: ['endpoint', 'defend'],
     },
   },
@@ -121,34 +156,26 @@ export const TEAM_DIMENSION_SEED: readonly TeamDimensionRecord[] = [
       'Data Analytics',
     ],
     aliases: {
-      project_team_values: ['Customer Support'],
-      github_labels: ['Team:Platform', 'Team:Build'],
-      github_org_slugs: ['platform', 'build'],
-    },
-  },
-  {
-    org_team: { key: 'prod', name: 'Product', members_count: 19 },
-    subteams: [
-      'SIEM Analytics & Core Workflows',
-      'XDR CDR & Endpoint Security',
-      'Innovation & Agentic Security',
-      'Platform Delivery & Growth',
-      'Data Platform & Ecosystem',
-      'Product Operations',
-    ],
-    aliases: {
-      project_team_values: [],
-      github_labels: ['Team:Product'],
-      github_org_slugs: ['product'],
-    },
-  },
-  {
-    org_team: { key: 'ux', name: 'UX', members_count: 18 },
-    subteams: ['Cross-team', 'Team 1', 'Team 2'],
-    aliases: {
-      project_team_values: [],
-      github_labels: ['Team:UX', 'Team:Design'],
-      github_org_slugs: ['ux', 'design'],
+      project_team_values: [
+        'Customer Support',
+        'Security Deployment',
+        'Infrastructure',
+        'Data Analytics',
+        'Engineering Productivity',
+        'Quality',
+      ],
+      github_labels: [
+        'Team:Platform',
+        'Team:Build',
+        'Team: Sec Eng Productivity',
+        'Team:Platform-Billing',
+        'Team:Security Solution Platform',
+        'Team:Security-Deployment and Devices',
+        'Team:Security Deployment',
+        'Team:Deployment Management',
+        'Team:Deployment Monitoring',
+      ],
+      github_org_slugs: ['platform', 'build', 'sec-eng-productivity', 'security-pds-deployment'],
     },
   },
 ];
@@ -157,11 +184,16 @@ export const ENGINEERING_TEAM_LABEL_NORMALIZATION: Readonly<Record<string, strin
   'Team:Core analysis': 'Team:Core Analysis',
   'Team: SecuritySolution': 'Team:Cloud Security',
   'Team: GenAI': 'Team:GenAI',
+  'Team: Detection Rule Management': 'Team:Detection Rule Management',
+  'Team: Detections/Response': 'Team:Detections and Resp',
+  'Team: Threat Hunting': 'Team:Threat Hunting',
+  'Team: Contextual Security': 'Team:Contextual Security',
 };
 
 /** GitHub labels without a Team: prefix that map to a canonical Team: label for lookup. */
 export const BARE_TEAM_LABEL_NORMALIZATION: Readonly<Record<string, string>> = {
   GenAI: 'Team:GenAI',
+  'security-pds-deployment': 'Team:Security Deployment',
 };
 
 export const PROJECT_TEAM_TO_ENGINEERING: Readonly<Record<string, string>> = {

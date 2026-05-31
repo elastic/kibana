@@ -19,6 +19,7 @@ export const SDLC_INDEX_NAMES = {
   GITHUB_INTEL_RELATIONSHIPS: 'github-intel-relationships',
   SDLC_EPIC_PHASES: 'sdlc-epic-phases',
   SDLC_TEAM_DIMENSION: 'sdlc-team-dimension',
+  SDLC_RELEASE_CALENDAR: 'sdlc-release-calendar',
 } as const;
 
 export type SdlcIndexName = (typeof SDLC_INDEX_NAMES)[keyof typeof SDLC_INDEX_NAMES];

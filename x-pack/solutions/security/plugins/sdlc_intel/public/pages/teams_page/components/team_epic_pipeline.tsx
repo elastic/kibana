@@ -13,13 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiProgress,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SdlcEpicPhaseSummary, SdlcTeamCard } from '../../../../common/api/types';
+import type { SdlcEpicPhaseSummary, SdlcSubteamCard, SdlcTeamCard } from '../../../../common/api/types';
 import { getOwnerInitials } from '../../executive_page/lib/coverage_utils';
 import { getTeamAccent } from '../lib/team_accents';
 import { getMiniPhaseGates, readTicketRollup, resolveTeamName } from '../lib/team_epic_utils';
@@ -54,14 +55,18 @@ const miniGateStyles = (
 
 export const TeamEpicPipeline = ({
   team,
+  subteam,
   epics,
   teams,
   onClearSelection,
+  onClearOrgTeam,
 }: {
   team: SdlcTeamCard;
+  subteam?: SdlcSubteamCard;
   epics: readonly SdlcEpicPhaseSummary[];
   teams: readonly SdlcTeamCard[];
   onClearSelection: () => void;
+  onClearOrgTeam?: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const accent = getTeamAccent(team.key);
@@ -90,17 +95,25 @@ export const TeamEpicPipeline = ({
             <EuiFlexItem>
               <EuiText size="s">
                 <strong>
-                  <FormattedMessage
-                    id="xpack.sdlcIntel.teams.pipeline.title"
-                    defaultMessage="{teamName} — epic pipeline"
-                    values={{ teamName: team.name }}
-                  />
+                  {subteam ? (
+                    <FormattedMessage
+                      id="xpack.sdlcIntel.teams.pipeline.subteamTitle"
+                      defaultMessage="{orgTeam} › {subteamName} — epic pipeline"
+                      values={{ orgTeam: team.name, subteamName: subteam.name }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.sdlcIntel.teams.pipeline.title"
+                      defaultMessage="{teamName} — epic pipeline"
+                      values={{ teamName: team.name }}
+                    />
+                  )}
                 </strong>
               </EuiText>
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="xpack.sdlcIntel.teams.pipeline.subtitle"
-                  defaultMessage="{count, plural, one {# epic} other {# epics}} · {members} members"
+                  defaultMessage="{count, plural, one {# epic} other {# epics}} · {members} org members"
                   values={{ count: epics.length, members: team.membersCount }}
                 />
               </EuiText>
@@ -108,19 +121,44 @@ export const TeamEpicPipeline = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          {onClearOrgTeam ? (
+            <EuiButtonEmpty size="s" onClick={onClearOrgTeam}>
+              <FormattedMessage
+                id="xpack.sdlcIntel.teams.pipeline.backToOrg"
+                defaultMessage="All org teams"
+              />
+            </EuiButtonEmpty>
+          ) : null}
           <EuiButtonEmpty size="s" iconType="cross" onClick={onClearSelection}>
             <FormattedMessage id="xpack.sdlcIntel.teams.pipeline.clear" defaultMessage="Clear" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {subteam ? <SubteamLinksPanel subteam={subteam} /> : null}
+
       {epics.length === 0 ? (
-        <EuiText size="s" color="subdued" css={css`margin-top: ${euiTheme.size.m};`}>
-          <FormattedMessage
-            id="xpack.sdlcIntel.teams.pipeline.empty"
-            defaultMessage="No epics assigned to this team."
-          />
-        </EuiText>
+        <div css={css`margin-top: ${euiTheme.size.m};`}>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.sdlcIntel.teams.pipeline.empty"
+              defaultMessage="No epics are attributed to {teamName} yet. Epics appear here when synced GitHub project items use the matching Team field (e.g. {projectTeams})."
+              values={{
+                teamName: subteam?.name ?? team.name,
+                projectTeams: (subteam?.projectTeamValues ?? []).join(', ') || '—',
+              }}
+            />
+          </EuiText>
+          {team.subteams.length > 0 ? (
+            <EuiText size="xs" color="subdued" css={css`margin-top: ${euiTheme.size.s};`}>
+              <FormattedMessage
+                id="xpack.sdlcIntel.teams.pipeline.emptySubteams"
+                defaultMessage="Subteams: {subteams}"
+                values={{ subteams: team.subteams.join(', ') }}
+              />
+            </EuiText>
+          ) : null}
+        </div>
       ) : (
         <div
           css={css`
@@ -217,6 +255,54 @@ const EpicPipelineCard = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+};
+
+const SubteamLinksPanel = ({ subteam }: { subteam: SdlcSubteamCard }) => {
+  const { euiTheme } = useEuiTheme();
+  const hasLinks =
+    subteam.githubTeamUrls.length > 0 || subteam.githubProjects.length > 0;
+
+  if (!hasLinks) {
+    return null;
+  }
+
+  return (
+    <EuiFlexGroup
+      gutterSize="m"
+      responsive={false}
+      wrap
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
+      {subteam.githubTeamUrls.map((url) => (
+        <EuiFlexItem grow={false} key={url}>
+          <EuiLink href={url} target="_blank" external>
+            <EuiIcon type="users" size="s" /> GitHub team
+          </EuiLink>
+        </EuiFlexItem>
+      ))}
+      {subteam.githubProjects.map((project) => (
+        <EuiFlexItem grow={false} key={project.url}>
+          <EuiLink href={project.url} target="_blank" external>
+            <EuiIcon type="calendar" size="s" />{' '}
+            {project.title ?? `Project ${project.number}`}
+          </EuiLink>
+        </EuiFlexItem>
+      ))}
+      {subteam.projectTeamValues.map((value) => (
+        <EuiFlexItem grow={false} key={value}>
+          <EuiBadge color="hollow">
+            <FormattedMessage
+              id="xpack.sdlcIntel.teams.pipeline.projectTeam"
+              defaultMessage="Project team: {value}"
+              values={{ value }}
+            />
+          </EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
 

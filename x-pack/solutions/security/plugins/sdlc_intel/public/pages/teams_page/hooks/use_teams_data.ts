@@ -6,9 +6,10 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { SdlcTeamsResponse } from '../../../../common/api/types';
+import type { SdlcSubteamCard, SdlcTeamsResponse } from '../../../../common/api/types';
 import { useSdlcApi } from '../../../context/sdlc_api_context';
 import { computeAverageTeamsPerEpic } from '../lib/team_epic_utils';
+import { formatSubteamSelectionKey } from '@kbn/sdlc-data-layer';
 
 interface TeamsDataState {
   readonly loading: boolean;
@@ -20,6 +21,7 @@ export const useTeamsData = () => {
   const api = useSdlcApi();
   const [state, setState] = useState<TeamsDataState>({ loading: true });
   const [selectedTeamKey, setSelectedTeamKey] = useState<string | undefined>();
+  const [selectedSubteamKey, setSelectedSubteamKey] = useState<string | undefined>();
 
   useEffect(() => {
     let isMounted = true;
@@ -55,13 +57,38 @@ export const useTeamsData = () => {
     [state.data?.epicsByTeam]
   );
 
+  const subteamsForSelectedOrg = useMemo((): readonly SdlcSubteamCard[] => {
+    if (!selectedTeamKey || !state.data?.subteamsByOrgTeam) {
+      return [];
+    }
+    return state.data.subteamsByOrgTeam[selectedTeamKey] ?? [];
+  }, [selectedTeamKey, state.data?.subteamsByOrgTeam]);
+
+  const selectedSubteam = useMemo(
+    () => subteamsForSelectedOrg.find((subteam) => subteam.key === selectedSubteamKey),
+    [subteamsForSelectedOrg, selectedSubteamKey]
+  );
+
   const selectedEpics = useMemo(() => {
     if (!selectedTeamKey || !state.data) {
       return [];
     }
 
+    if (selectedSubteamKey) {
+      const selectionKey = formatSubteamSelectionKey({
+        orgTeamKey: selectedTeamKey,
+        subteamKey: selectedSubteamKey,
+      });
+      return state.data.epicsBySubteam[selectionKey] ?? [];
+    }
+
     return state.data.epicsByTeam[selectedTeamKey] ?? [];
-  }, [selectedTeamKey, state.data]);
+  }, [selectedTeamKey, selectedSubteamKey, state.data]);
+
+  const handleSelectTeam = (teamKey: string) => {
+    setSelectedTeamKey(teamKey);
+    setSelectedSubteamKey(undefined);
+  };
 
   return {
     loading: state.loading,
@@ -72,8 +99,16 @@ export const useTeamsData = () => {
     membersTotal,
     averageTeamsPerEpic,
     selectedTeamKey,
+    selectedSubteamKey,
+    selectedSubteam,
+    subteamsForSelectedOrg,
     selectedEpics,
-    setSelectedTeamKey,
-    clearSelectedTeam: () => setSelectedTeamKey(undefined),
+    setSelectedTeamKey: handleSelectTeam,
+    setSelectedSubteamKey,
+    clearSelectedTeam: () => {
+      setSelectedTeamKey(undefined);
+      setSelectedSubteamKey(undefined);
+    },
+    clearSelectedSubteam: () => setSelectedSubteamKey(undefined),
   };
 };

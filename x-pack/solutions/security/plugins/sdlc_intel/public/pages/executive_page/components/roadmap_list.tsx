@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SdlcRoadmapGroup } from '../../../../common/api/types';
-import { groupRoadmapsByProduct } from '../lib/executive_filters';
-import { ProductGroup } from './product_group';
+import { groupRoadmapsByOrgTeamSubteam } from '../lib/executive_filters';
+import { OrgTeamGroup } from './org_team_group';
 
 export const RoadmapList = ({
   roadmaps,
@@ -19,9 +19,9 @@ export const RoadmapList = ({
   roadmaps: readonly SdlcRoadmapGroup[];
   expandAll: boolean;
 }) => {
-  const productGroups = useMemo(() => groupRoadmapsByProduct(roadmaps), [roadmaps]);
+  const orgTeamGroups = useMemo(() => groupRoadmapsByOrgTeamSubteam(roadmaps), [roadmaps]);
 
-  if (productGroups.length === 0) {
+  if (orgTeamGroups.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="search"
@@ -35,7 +35,7 @@ export const RoadmapList = ({
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.sdlcIntel.executive.empty.body"
-              defaultMessage="Try clearing search or coverage filters."
+              defaultMessage="Try clearing search or coverage filters. This view shows Security org teams only."
             />
           </EuiText>
         }
@@ -45,13 +45,8 @@ export const RoadmapList = ({
 
   return (
     <>
-      {productGroups.map((group) => (
-        <ProductGroup
-          key={group.product}
-          product={group.product}
-          roadmaps={group.roadmaps}
-          expandAll={expandAll}
-        />
+      {orgTeamGroups.map((orgTeam) => (
+        <OrgTeamGroup key={orgTeam.orgTeamKey} orgTeam={orgTeam} expandAll={expandAll} />
       ))}
       <EuiSpacer size="l" />
     </>

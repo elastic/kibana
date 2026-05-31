@@ -16,6 +16,8 @@ export const ListGithubProjectsToSyncStepTypeId = 'sdlc.listGithubProjectsToSync
 export const SyncGithubOrgCatalogStepTypeId = 'sdlc.syncGithubOrgCatalog';
 export const BuildRelationshipsStepTypeId = 'sdlc.buildRelationships';
 export const BuildEpicPhasesStepTypeId = 'sdlc.buildEpicPhases';
+export const SyncReleaseCalendarSlackStepTypeId = 'sdlc.syncReleaseCalendarSlack';
+export const SyncReleaseCalendarSpreadsheetStepTypeId = 'sdlc.syncReleaseCalendarSpreadsheet';
 
 const emptyInput = z.object({});
 const countOutput = z.object({
@@ -97,6 +99,21 @@ export const BuildRelationshipsOutputSchema = countOutput.extend({
   projectNumbers: z.array(z.number()),
 });
 
+export const SyncReleaseCalendarSlackInputSchema = z.object({
+  slackConnectorId: z.string(),
+  channelName: z.string().default('kibana-mission-control'),
+  lookbackHours: z.number().default(48),
+});
+
+export const SyncReleaseCalendarSpreadsheetInputSchema = z.object({
+  googleDriveConnectorId: z.string(),
+  spreadsheetId: z.string(),
+  sheetGid: z.string(),
+  sheetName: z.string().optional(),
+});
+
+export const SyncReleaseCalendarOutputSchema = countOutput;
+
 const createDefinition = <TInput extends z.ZodTypeAny, TOutput extends z.ZodTypeAny>({
   id,
   label,
@@ -136,7 +153,7 @@ export const seedReferenceDataStepCommonDefinition = createDefinition({
     defaultMessage: 'Seed SDLC reference data',
   }),
   description: i18n.translate('sdlcIntel.seedReferenceDataStep.description', {
-    defaultMessage: 'Seeds sdlc-team-dimension and other reference documents.',
+    defaultMessage: 'Seeds sdlc-team-dimension reference documents.',
   }),
   inputSchema: SeedReferenceDataInputSchema,
   outputSchema: SeedReferenceDataOutputSchema,
@@ -204,4 +221,30 @@ export const buildRelationshipsStepCommonDefinition = createDefinition({
   }),
   inputSchema: BuildRelationshipsInputSchema,
   outputSchema: BuildRelationshipsOutputSchema,
+});
+
+export const syncReleaseCalendarSlackStepCommonDefinition = createDefinition({
+  id: SyncReleaseCalendarSlackStepTypeId,
+  label: i18n.translate('sdlcIntel.syncReleaseCalendarSlackStep.label', {
+    defaultMessage: 'Sync release calendar from Slack',
+  }),
+  description: i18n.translate('sdlcIntel.syncReleaseCalendarSlackStep.description', {
+    defaultMessage:
+      'Polls a Slack channel for Kibana Serverless release announcements and indexes normalized milestones into sdlc-release-calendar.',
+  }),
+  inputSchema: SyncReleaseCalendarSlackInputSchema,
+  outputSchema: SyncReleaseCalendarOutputSchema,
+});
+
+export const syncReleaseCalendarSpreadsheetStepCommonDefinition = createDefinition({
+  id: SyncReleaseCalendarSpreadsheetStepTypeId,
+  label: i18n.translate('sdlcIntel.syncReleaseCalendarSpreadsheetStep.label', {
+    defaultMessage: 'Sync release calendar from spreadsheet',
+  }),
+  description: i18n.translate('sdlcIntel.syncReleaseCalendarSpreadsheetStep.description', {
+    defaultMessage:
+      'Fetches the Elastic Stack release schedule Google Sheet and indexes milestone dates into sdlc-release-calendar.',
+  }),
+  inputSchema: SyncReleaseCalendarSpreadsheetInputSchema,
+  outputSchema: SyncReleaseCalendarOutputSchema,
 });

@@ -42,6 +42,39 @@ describe('team attribution', () => {
     expect(result.orgTeams).toEqual(['si']);
     expect(result.attributionSource).toBe('project_field');
   });
+
+  it('maps Team:Defend Workflows label to XDR org team', () => {
+    const result = attributeTeam({ labels: ['Team:Defend Workflows'] });
+    expect(result.orgTeams).toEqual(['xdr']);
+  });
+
+  it('maps Rules Management project team field to SIEM org team', () => {
+    const result = attributeTeam({ projectTeam: 'Rules Management' });
+    expect(result.orgTeams).toEqual(['siem']);
+  });
+
+  it('maps spaced Detections/Response label to SIEM org team', () => {
+    const result = attributeTeam({ labels: ['Team: Detections/Response'] });
+    expect(result.orgTeams).toEqual(['siem']);
+  });
+
+  it('maps Customer Support label to Platform Delivery org team', () => {
+    const result = attributeTeam({ labels: ['Customer Support', 'severity:high'] });
+    expect(result.orgTeams).toEqual(['pds']);
+    expect(result.engineeringTeam).toBe('Customer Support');
+  });
+
+  it('maps Team: Sec Eng Productivity label to Platform Delivery org team', () => {
+    const result = attributeTeam({ labels: ['Team: Sec Eng Productivity'] });
+    expect(result.orgTeams).toEqual(['pds']);
+  });
+
+  it('maps Security Deployment labels to Platform Delivery org team', () => {
+    expect(attributeTeam({ labels: ['Team:Security-Deployment and Devices'] }).orgTeams).toEqual([
+      'pds',
+    ]);
+    expect(attributeTeam({ labels: ['security-pds-deployment'] }).orgTeams).toEqual(['pds']);
+  });
 });
 
 describe('phase gates', () => {
@@ -96,7 +129,7 @@ describe('buildEpicPhaseDocument', () => {
       ticketsByRepo: [],
     });
 
-    expect(doc.roadmap).toMatchObject({ id: 'dlvp' });
+    expect(doc.roadmap).toMatchObject({ id: 'workflows', title: 'Elastic Workflows (Automation) Roadmap' });
     expect(doc.teams).toMatchObject({ own_org_team: 'siem', cross_team: false });
     expect(doc.phases).toMatchObject({
       p4_tickets: expect.objectContaining({ gate: 'warn', total: 2 }),
@@ -105,6 +138,116 @@ describe('buildEpicPhaseDocument', () => {
     expect(doc.rollup).toMatchObject({
       delivery_coverage_pct: expect.any(Number),
       status: 'in-progress',
+    });
+  });
+
+  it('tags release.deck_feature when a GitHub epic key matches the Workflows deck correlation', () => {
+    const doc = buildEpicPhaseDocument({
+      epicKey: '[Epic] Workflow Versioning',
+      displayId: 'WF-V',
+      title: 'Workflow Versioning',
+      projectItemId: 'PVT_item_wf',
+      projectNumber: 705,
+      fields: { Team: 'One Workflow', Epic: '[Epic] Workflow Versioning', Status: 'In Progress' },
+      childIssues: [],
+      childPullRequests: [],
+      ticketsByRepo: [],
+    });
+
+    expect(doc.roadmap).toMatchObject({ id: 'workflows' });
+    expect(doc.release).toMatchObject({ deck_feature: 'Workflow Versioning' });
+  });
+
+  it('includes Security Intelligence when child issues carry GenAI labels alongside SIEM labels', () => {
+    const doc = buildEpicPhaseDocument({
+      epicKey: 'Agentic search for detection rules',
+      displayId: 'Agentic search for detection rules',
+      title: 'Agentic search for detection rules',
+      projectItemId: 'PVT_item_1',
+      projectNumber: 705,
+      fields: {
+        Team: 'Rules Management',
+        Epic: 'Agentic search for detection rules',
+        'Product Initiative': 'Improve detection rules discovery, selection and search',
+        Status: 'In Progress',
+      },
+      childIssues: [
+        {
+          state: 'OPEN',
+          labels: [
+            'Team: SecuritySolution',
+            'GenAI',
+            'Team:Detection Engineering',
+            'Team:Detections and Resp',
+          ],
+          assignees: ['dev1'],
+          projectStatus: 'In Progress',
+        },
+      ],
+      childPullRequests: [],
+      ticketsByRepo: [],
+    });
+
+    expect(doc.teams).toMatchObject({
+      contributing_org_teams: expect.arrayContaining(['si', 'siem']),
+      cross_team: true,
+      team_count: 2,
+    });
+  });
+
+  it('includes XDR when child issues carry Defend Workflows labels', () => {
+    const doc = buildEpicPhaseDocument({
+      epicKey: 'Functionality',
+      displayId: 'Functionality',
+      title: 'Functionality',
+      projectItemId: 'PVT_item_1',
+      projectNumber: 705,
+      fields: {
+        Epic: 'Functionality',
+        Status: 'In Progress',
+      },
+      childIssues: [
+        {
+          state: 'OPEN',
+          labels: ['Team:Fleet', 'Team:Defend Workflows', 'Team:Security'],
+          assignees: ['dev1'],
+          projectStatus: 'In Progress',
+        },
+      ],
+      childPullRequests: [],
+      ticketsByRepo: [],
+    });
+
+    expect(doc.teams).toMatchObject({
+      contributing_org_teams: expect.arrayContaining(['xdr']),
+    });
+  });
+
+  it('includes Platform Delivery when child issues carry Sec Eng Productivity labels', () => {
+    const doc = buildEpicPhaseDocument({
+      epicKey: 'Support Shift Duties',
+      displayId: 'Support Shift Duties',
+      title: 'Support Shift Duties',
+      projectItemId: 'PVT_item_1',
+      projectNumber: 705,
+      fields: {
+        Epic: 'Support Shift Duties',
+        Status: 'In Progress',
+      },
+      childIssues: [
+        {
+          state: 'OPEN',
+          labels: ['Team: Sec Eng Productivity'],
+          assignees: ['dev1'],
+          projectStatus: 'Todo',
+        },
+      ],
+      childPullRequests: [],
+      ticketsByRepo: [],
+    });
+
+    expect(doc.teams).toMatchObject({
+      contributing_org_teams: expect.arrayContaining(['pds']),
     });
   });
 });

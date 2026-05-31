@@ -488,6 +488,34 @@ export const SDLC_INDEX_DEFINITIONS: Record<SdlcIndexName, IndexDefinition> = {
       },
     },
   },
+  [SDLC_INDEX_NAMES.SDLC_RELEASE_CALENDAR]: {
+    index: SDLC_INDEX_NAMES.SDLC_RELEASE_CALENDAR,
+    settings: defaultSettings,
+    mappings: {
+      properties: {
+        ...SYNC_META_PROPERTIES,
+        release_line: { type: 'keyword' },
+        product: { type: 'keyword' },
+        version: { type: 'keyword' },
+        milestone: { type: 'keyword' },
+        target_date: { type: 'date' },
+        status: { type: 'keyword' },
+        release_manager: { type: 'keyword' },
+        source: {
+          properties: {
+            type: { type: 'keyword' },
+            spreadsheet_id: { type: 'keyword' },
+            sheet_gid: { type: 'keyword' },
+            sheet_name: { type: 'keyword' },
+            slack_channel: { type: 'keyword' },
+            message_ts: { type: 'keyword' },
+            permalink: { type: 'keyword' },
+            raw_text: { type: 'text' },
+          },
+        },
+      },
+    },
+  },
 };
 
 export const getIndexDefinition = (indexName: SdlcIndexName): IndexDefinition =>

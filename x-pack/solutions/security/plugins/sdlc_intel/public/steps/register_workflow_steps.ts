@@ -13,6 +13,8 @@ import {
   setupIndicesStepDefinition,
   syncGithubOrgCatalogStepDefinition,
   syncGithubProjectsStepDefinition,
+  syncReleaseCalendarSlackStepDefinition,
+  syncReleaseCalendarSpreadsheetStepDefinition,
 } from './sdlc_steps';
 
 export const registerSdlcWorkflowSteps = (
@@ -25,4 +27,6 @@ export const registerSdlcWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(syncGithubOrgCatalogStepDefinition);
   workflowsExtensions.registerStepDefinition(buildRelationshipsStepDefinition);
   workflowsExtensions.registerStepDefinition(buildEpicPhasesStepDefinition);
+  workflowsExtensions.registerStepDefinition(syncReleaseCalendarSlackStepDefinition);
+  workflowsExtensions.registerStepDefinition(syncReleaseCalendarSpreadsheetStepDefinition);
 };

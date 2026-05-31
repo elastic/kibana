@@ -17,11 +17,43 @@ export {
 } from './mappings/index';
 export { TEAM_DIMENSION_SEED, type TeamDimensionRecord } from './config/team_dimension';
 export {
+  ELASTIC_WORKFLOWS_ROADMAP,
+  SDLC_VISIBILITY_ROADMAP,
   PRODUCT_INITIATIVE_ROADMAP_MAP,
   VIEW_ROADMAP_MAP,
   resolveRoadmapFromInitiative,
+  resolveRoadmapForEpic,
   type RoadmapMappingEntry,
 } from './config/roadmap_mapping';
+export {
+  ORG_TEAM_SUBTEAM_DEFINITIONS,
+  buildGithubProjectViewUrl,
+  buildGithubTeamUrl,
+  resolveSubteamDefinitionsForOrg,
+  slugifySubteamKey,
+  type GitHubProjectLink,
+  type SubteamDefinition,
+} from './config/team_subteam_definitions';
+export {
+  buildSubteamCards,
+  epicBelongsToOrgTeam,
+  epicBelongsToSubteam,
+  formatSubteamSelectionKey,
+  groupEpicsBySubteam,
+  parseSubteamSelectionKey,
+  type EpicSubteamMatchInput,
+  type SubteamCardMetrics,
+} from './lib/team_subteams';
+export {
+  WORKFLOWS_DECK_EPIC_CORRELATIONS,
+  WORKFLOWS_ROADMAP_GITHUB_PROJECT_NUMBER,
+  WORKFLOWS_ROADMAP_GITHUB_VIEW_NUMBER,
+  WORKFLOWS_SUPPLEMENTAL_GITHUB_EPIC_KEYS,
+  getDeckFeatureForGithubEpicKey,
+  isWorkflowsGithubEpicKey,
+  type WorkflowsDeckBucket,
+  type WorkflowsDeckEpicCorrelation,
+} from './config/workflows_deck_epic_correlation';
 export {
   attributeTeam,
   normalizeTeamLabel,
@@ -73,6 +105,25 @@ export {
   type RelationshipEdge,
   type TeamForRelationships,
 } from './lib/build_relationships';
+export {
+  parseReleaseScheduleDate,
+  parseStackReleaseSpreadsheet,
+  type ParseStackReleaseSpreadsheetInput,
+} from './lib/parse_stack_release_spreadsheet';
+export {
+  parseServerlessSlackMessage,
+  parseServerlessSlackMessages,
+} from './lib/parse_serverless_slack_messages';
+export {
+  buildSlackReleaseDocumentId,
+  buildSpreadsheetReleaseDocumentId,
+  type ReleaseCalendarEvent,
+  type ReleaseCalendarSource,
+  type ReleaseCalendarStatus,
+  type ReleaseLine,
+  type ReleaseMilestone,
+  type SlackMessageForReleaseParse,
+} from './lib/release_calendar_types';
 export {
   PROJECTS_QUERY,
   ORG_PROJECTS_LIST_QUERY,

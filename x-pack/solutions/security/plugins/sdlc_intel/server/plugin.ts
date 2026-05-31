@@ -25,6 +25,7 @@ import type {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
   SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW_ID,
+  SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW_ID,
   SDLC_SETUP_INDICES_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { SDLC_INTEL_MANAGED_WORKFLOW_OWNER } from '../common/constants';
@@ -103,6 +104,9 @@ export class SdlcIntelPlugin
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
       await client.install(SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      await client.install(SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
 

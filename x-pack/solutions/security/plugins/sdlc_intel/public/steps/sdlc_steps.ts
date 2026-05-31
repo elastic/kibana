@@ -13,6 +13,8 @@ import {
   setupIndicesStepCommonDefinition,
   syncGithubOrgCatalogStepCommonDefinition,
   syncGithubProjectsStepCommonDefinition,
+  syncReleaseCalendarSlackStepCommonDefinition,
+  syncReleaseCalendarSpreadsheetStepCommonDefinition,
 } from '../../common/steps/sdlc_steps';
 
 export const setupIndicesStepDefinition = createPublicStepDefinition({
@@ -41,4 +43,12 @@ export const buildEpicPhasesStepDefinition = createPublicStepDefinition({
 
 export const buildRelationshipsStepDefinition = createPublicStepDefinition({
   ...buildRelationshipsStepCommonDefinition,
+});
+
+export const syncReleaseCalendarSlackStepDefinition = createPublicStepDefinition({
+  ...syncReleaseCalendarSlackStepCommonDefinition,
+});
+
+export const syncReleaseCalendarSpreadsheetStepDefinition = createPublicStepDefinition({
+  ...syncReleaseCalendarSpreadsheetStepCommonDefinition,
 });

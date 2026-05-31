@@ -21,6 +21,7 @@ import type {
 import {
   buildPortfolioSummary,
   buildTeamCards,
+  buildSubteamsResponse,
   buildTeamMatrixRows,
   groupEpicsByRoadmap,
   groupEpicsByTeam,
@@ -236,6 +237,7 @@ export const getTeamsResponse = async (
   const roadmapIds = [...new Set(epics.map((epic) => epic.roadmap.id))].sort();
   const teamCards = buildTeamCards({ epics, teamRecords });
   const epicsByTeam = groupEpicsByTeam(epics, teamRecords);
+  const { subteamsByOrgTeam, epicsBySubteam } = buildSubteamsResponse({ epics, teamRecords });
 
   const totalTickets = teamCards.reduce((sum, team) => sum + team.ticketsTotal, 0);
   const totalDone = teamCards.reduce((sum, team) => sum + team.ticketsDone, 0);
@@ -264,5 +266,7 @@ export const getTeamsResponse = async (
       rows: buildTeamMatrixRows({ epics, teamRecords, roadmapIds }),
     },
     epicsByTeam,
+    subteamsByOrgTeam,
+    epicsBySubteam,
   };
 };

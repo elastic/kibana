@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { TeamDimensionRecord } from '@kbn/sdlc-data-layer';
+import {
+  buildSubteamCards,
+  formatSubteamSelectionKey,
+  groupEpicsBySubteam,
+  type TeamDimensionRecord,
+} from '@kbn/sdlc-data-layer';
 import type {
   SdlcEpicPhaseSummary,
   SdlcPortfolioSummary,
   SdlcRoadmapGroup,
+  SdlcSubteamCard,
   SdlcTeamCard,
   SdlcTeamMatrixCell,
   SdlcTeamMatrixRow,
@@ -46,7 +52,9 @@ export interface EpicPhaseSource {
   };
   readonly teams?: {
     readonly own_org_team?: string;
+    readonly own_engineering_team?: string;
     readonly contributing_org_teams?: string[];
+    readonly contributing_engineering_teams?: string[];
     readonly cross_team?: boolean;
     readonly team_count?: number;
   };
@@ -130,7 +138,9 @@ export const mapEpicPhaseDocument = (
     },
     teams: {
       ownOrgTeam: source.teams?.own_org_team,
+      ownEngineeringTeam: source.teams?.own_engineering_team,
       contributingOrgTeams: source.teams?.contributing_org_teams ?? [],
+      contributingEngineeringTeams: source.teams?.contributing_engineering_teams ?? [],
       crossTeam: source.teams?.cross_team ?? false,
       teamCount: source.teams?.team_count ?? 0,
     },
@@ -322,6 +332,7 @@ export const buildTeamCards = ({
       key: teamKey,
       name: teamRecord.org_team.name,
       membersCount: teamRecord.org_team.members_count,
+      subteams: teamRecord.subteams,
       epicCount: teamEpics.length,
       gatesPct,
       ticketsDone,
@@ -347,4 +358,67 @@ export const groupEpicsByTeam = (
   }
 
   return grouped;
+};
+
+const toSubteamEpicInput = (epic: SdlcEpicPhaseSummary) => ({
+  epicKey: epic.epicKey,
+  projectNumber: epic.projectNumber,
+  ownOrgTeam: epic.teams.ownOrgTeam,
+  contributingOrgTeams: epic.teams.contributingOrgTeams,
+  ownEngineeringTeam: epic.teams.ownEngineeringTeam,
+  contributingEngineeringTeams: epic.teams.contributingEngineeringTeams,
+  gatesPassedPct: epic.gatesPassedPct,
+  phases: epic.phases,
+});
+
+export const buildSubteamsResponse = ({
+  epics,
+  teamRecords,
+}: {
+  epics: readonly SdlcEpicPhaseSummary[];
+  teamRecords: readonly TeamDimensionRecord[];
+}): {
+  subteamsByOrgTeam: Record<string, SdlcSubteamCard[]>;
+  epicsBySubteam: Record<string, SdlcEpicPhaseSummary[]>;
+} => {
+  const subteamsByOrgTeam: Record<string, SdlcSubteamCard[]> = {};
+  const epicsBySubteam: Record<string, SdlcEpicPhaseSummary[]> = {};
+
+  for (const teamRecord of teamRecords) {
+    const orgTeamKey = teamRecord.org_team.key;
+    const subteamCards = buildSubteamCards({
+      epics: epics.map(toSubteamEpicInput),
+      teamRecord,
+    });
+
+    subteamsByOrgTeam[orgTeamKey] = subteamCards.map((card) => ({
+      key: card.key,
+      name: card.name,
+      orgTeamKey: card.orgTeamKey,
+      epicCount: card.epicCount,
+      gatesPct: card.gatesPct,
+      ticketsDone: card.ticketsDone,
+      ticketsTotal: card.ticketsTotal,
+      toProdPct: card.toProdPct,
+      aiPct: card.aiPct,
+      githubTeamUrls: card.githubTeamUrls,
+      githubProjects: card.githubProjects.map((project) => ({
+        number: project.number,
+        title: project.title,
+        url: project.url,
+        viewNumber: project.view_number,
+      })),
+      projectTeamValues: card.projectTeamValues,
+    }));
+
+    const grouped = groupEpicsBySubteam(epics.map(toSubteamEpicInput), teamRecord);
+    for (const [subteamKey, subteamEpics] of Object.entries(grouped)) {
+      const selectionKey = formatSubteamSelectionKey({ orgTeamKey, subteamKey });
+      epicsBySubteam[selectionKey] = epics.filter((epic) =>
+        subteamEpics.some((match) => match.epicKey === epic.epicKey)
+      );
+    }
+  }
+
+  return { subteamsByOrgTeam, epicsBySubteam };
 };

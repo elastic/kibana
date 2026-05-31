@@ -16,7 +16,13 @@ import {
   setupIndicesStepCommonDefinition,
   syncGithubOrgCatalogStepCommonDefinition,
   syncGithubProjectsStepCommonDefinition,
+  syncReleaseCalendarSlackStepCommonDefinition,
+  syncReleaseCalendarSpreadsheetStepCommonDefinition,
 } from '../../common/steps/sdlc_steps';
+import {
+  syncReleaseCalendarFromSlack,
+  syncReleaseCalendarFromSpreadsheet,
+} from '../services/release_calendar_service';
 import {
   buildEpicPhases,
   buildRelationships,
@@ -231,6 +237,59 @@ export const buildRelationshipsStepDefinition = createServerStepDefinition({
       return {
         error: new Error(
           error instanceof Error ? error.message : 'Failed to build SDLC relationship graph'
+        ),
+      };
+    }
+  },
+});
+
+export const syncReleaseCalendarSlackStepDefinition = createServerStepDefinition({
+  ...syncReleaseCalendarSlackStepCommonDefinition,
+  handler: async (context) => {
+    try {
+      const { slackConnectorId, channelName, lookbackHours } = context.input;
+      const esClient = context.contextManager.getScopedEsClient();
+      const output = await syncReleaseCalendarFromSlack({
+        esClient,
+        request: context.contextManager.getFakeRequest(),
+        runId: resolveRunId(context),
+        slackConnectorId,
+        channelName,
+        lookbackHours,
+      });
+      return { output };
+    } catch (error) {
+      return {
+        error: new Error(
+          error instanceof Error ? error.message : 'Failed to sync release calendar from Slack'
+        ),
+      };
+    }
+  },
+});
+
+export const syncReleaseCalendarSpreadsheetStepDefinition = createServerStepDefinition({
+  ...syncReleaseCalendarSpreadsheetStepCommonDefinition,
+  handler: async (context) => {
+    try {
+      const { googleDriveConnectorId, spreadsheetId, sheetGid, sheetName } = context.input;
+      const esClient = context.contextManager.getScopedEsClient();
+      const output = await syncReleaseCalendarFromSpreadsheet({
+        esClient,
+        request: context.contextManager.getFakeRequest(),
+        runId: resolveRunId(context),
+        googleDriveConnectorId,
+        spreadsheetId,
+        sheetGid,
+        sheetName,
+      });
+      return { output };
+    } catch (error) {
+      return {
+        error: new Error(
+          error instanceof Error
+            ? error.message
+            : 'Failed to sync release calendar from spreadsheet'
         ),
       };
     }

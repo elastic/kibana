@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SyncStatusBanner } from '../../components/sync_status_banner';
 import { ContributionMatrix } from './components/contribution_matrix';
+import { SubteamHealthCards } from './components/subteam_health_cards';
 import { TeamEpicPipeline } from './components/team_epic_pipeline';
 import { TeamHealthCards } from './components/team_health_cards';
 import { TeamsSummaryMetrics } from './components/teams_summary_metrics';
@@ -36,9 +37,14 @@ export const TeamsPage = () => {
     membersTotal,
     averageTeamsPerEpic,
     selectedTeamKey,
+    selectedSubteamKey,
+    selectedSubteam,
+    subteamsForSelectedOrg,
     selectedEpics,
     setSelectedTeamKey,
+    setSelectedSubteamKey,
     clearSelectedTeam,
+    clearSelectedSubteam,
   } = useTeamsData();
 
   const selectedTeam = useMemo(
@@ -118,7 +124,7 @@ export const TeamsPage = () => {
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="xpack.sdlcIntel.teams.healthSubtitle"
-                  defaultMessage="Select a team to drill into epic pipeline details."
+                  defaultMessage="Select an org team, then a subteam (e.g. One Workflow) to see epics, GitHub teams, and planning boards."
                 />
               </EuiText>
               <EuiSpacer size="s" />
@@ -129,13 +135,37 @@ export const TeamsPage = () => {
               />
               <EuiSpacer size="l" />
 
-              {selectedTeam ? (
+              {selectedTeam && subteamsForSelectedOrg.length > 0 ? (
+                <>
+                  <EuiText size="s">
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.sdlcIntel.teams.subteamsTitle"
+                        defaultMessage="{teamName} — subteams"
+                        values={{ teamName: selectedTeam.name }}
+                      />
+                    </strong>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <SubteamHealthCards
+                    orgTeamKey={selectedTeam.key}
+                    subteams={subteamsForSelectedOrg}
+                    selectedSubteamKey={selectedSubteamKey}
+                    onSelectSubteam={setSelectedSubteamKey}
+                  />
+                  <EuiSpacer size="l" />
+                </>
+              ) : null}
+
+              {selectedTeam && selectedSubteam ? (
                 <>
                   <TeamEpicPipeline
                     team={selectedTeam}
+                    subteam={selectedSubteam}
                     epics={selectedEpics}
                     teams={teams}
-                    onClearSelection={clearSelectedTeam}
+                    onClearSelection={clearSelectedSubteam}
+                    onClearOrgTeam={clearSelectedTeam}
                   />
                   <EuiSpacer size="l" />
                 </>

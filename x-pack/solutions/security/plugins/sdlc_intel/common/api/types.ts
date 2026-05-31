@@ -44,7 +44,9 @@ export interface SdlcEpicPhaseSummary {
   };
   readonly teams: {
     readonly ownOrgTeam?: string;
+    readonly ownEngineeringTeam?: string;
     readonly contributingOrgTeams: readonly string[];
+    readonly contributingEngineeringTeams: readonly string[];
     readonly crossTeam: boolean;
     readonly teamCount: number;
   };
@@ -90,10 +92,33 @@ export interface SdlcEpicsResponse {
   readonly epics: readonly SdlcEpicPhaseSummary[];
 }
 
+export interface SdlcGitHubProjectLink {
+  readonly number: number;
+  readonly title?: string;
+  readonly url: string;
+  readonly viewNumber?: number;
+}
+
+export interface SdlcSubteamCard {
+  readonly key: string;
+  readonly name: string;
+  readonly orgTeamKey: string;
+  readonly epicCount: number;
+  readonly gatesPct: number;
+  readonly ticketsDone: number;
+  readonly ticketsTotal: number;
+  readonly toProdPct: number;
+  readonly aiPct: number;
+  readonly githubTeamUrls: readonly string[];
+  readonly githubProjects: readonly SdlcGitHubProjectLink[];
+  readonly projectTeamValues: readonly string[];
+}
+
 export interface SdlcTeamCard {
   readonly key: string;
   readonly name: string;
   readonly membersCount: number;
+  readonly subteams: readonly string[];
   readonly epicCount: number;
   readonly gatesPct: number;
   readonly ticketsDone: number;
@@ -127,4 +152,6 @@ export interface SdlcTeamsResponse {
     readonly rows: readonly SdlcTeamMatrixRow[];
   };
   readonly epicsByTeam: Readonly<Record<string, readonly SdlcEpicPhaseSummary[]>>;
+  readonly subteamsByOrgTeam: Readonly<Record<string, readonly SdlcSubteamCard[]>>;
+  readonly epicsBySubteam: Readonly<Record<string, readonly SdlcEpicPhaseSummary[]>>;
 }

@@ -20,9 +20,22 @@ export interface TeamAttribution {
 export const normalizeTeamLabel = (label: string): string =>
   ENGINEERING_TEAM_LABEL_NORMALIZATION[label] ?? label;
 
-export const canonicalTeamLabel = (label: string): string | undefined => {
+const toCanonicalTeamPrefixedLabel = (label: string): string | undefined => {
   if (label.startsWith('Team:')) {
     return normalizeTeamLabel(label);
+  }
+
+  if (/^team:/i.test(label)) {
+    return normalizeTeamLabel(`Team:${label.replace(/^team:\s?/i, '')}`);
+  }
+
+  return undefined;
+};
+
+export const canonicalTeamLabel = (label: string): string | undefined => {
+  const teamPrefixed = toCanonicalTeamPrefixedLabel(label);
+  if (teamPrefixed) {
+    return teamPrefixed;
   }
 
   const fromBare = BARE_TEAM_LABEL_NORMALIZATION[label];
@@ -74,11 +87,14 @@ export const resolveOrgTeamsFromLabels = (labels: readonly string[] | undefined)
   const orgTeams = new Set<string>();
   for (const label of labels) {
     const canonical = canonicalTeamLabel(label);
-    if (!canonical) {
-      continue;
+    if (canonical) {
+      const matches = LOOKUP.byLabel.get(canonical) ?? [];
+      for (const match of matches) {
+        orgTeams.add(match);
+      }
     }
-    const matches = LOOKUP.byLabel.get(canonical) ?? [];
-    for (const match of matches) {
+
+    for (const match of LOOKUP.byProjectTeam.get(label) ?? []) {
       orgTeams.add(match);
     }
   }
@@ -124,10 +140,13 @@ export const attributeTeam = ({
       if (resolved) {
         return resolved;
       }
-      if (label.startsWith('Team:')) {
-        return label.replace(/^Team:\s?/, '');
+      if (label.startsWith('Team:') || /^team:/i.test(label)) {
+        return label.replace(/^team:\s?/i, '').replace(/^Team:\s?/, '');
       }
       if (BARE_TEAM_LABEL_NORMALIZATION[label]) {
+        return label;
+      }
+      if (resolveOrgTeamsFromProjectTeam(label).length > 0) {
         return label;
       }
       return undefined;

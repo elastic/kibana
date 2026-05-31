@@ -118,5 +118,46 @@ describe('executive_filters', () => {
     expect(result.summary.epicCount).toBe(1);
     expect(result.derived.prdLinkedCount).toBe(1);
     expect(result.derived.openTicketCount).toBe(1);
+  it('excludes epics outside Security org teams', () => {
+    const roadmaps: SdlcRoadmapGroup[] = [
+      {
+        id: 'unmapped',
+        title: 'FIPS binaries',
+        product: 'Unknown',
+        coveragePct: 29,
+        epicCount: 1,
+        epics: [
+          sampleEpic({
+            id: 'epic:unmapped:fips',
+            epicKey: 'FIPS',
+            title: 'FIPS binaries',
+            teams: {
+              contributingOrgTeams: [],
+              crossTeam: false,
+              teamCount: 0,
+            },
+          }),
+        ],
+      },
+      {
+        id: 'dlvp',
+        title: 'Lifecycle visibility',
+        product: 'Sec AI Dev Accelerators',
+        coveragePct: 85,
+        epicCount: 1,
+        epics: [sampleEpic()],
+      },
+    ];
+
+    const filtered = filterRoadmaps(roadmaps, {
+      search: '',
+      product: '',
+      owner: '',
+      coverage: '',
+    });
+
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0]?.id).toBe('dlvp');
+    expect(filtered[0]?.epics).toHaveLength(1);
   });
 });

@@ -33,6 +33,7 @@ import {
   ORG_TEAMS_LIST_QUERY,
   PROJECTS_QUERY,
   resolveGithubProjectsToSync,
+  resolveRoadmapForEpic,
   resolveRoadmapFromInitiative,
   slugifyEpicKey,
   teamDimensionToBulkDocuments,
@@ -41,6 +42,15 @@ import {
   type ProjectItemForRelationships,
 } from '@kbn/sdlc-data-layer';
 import type { ElasticsearchClient } from '@kbn/core/server';
+
+const isIndexMissingError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const meta = (error as { meta?: { body?: { error?: { type?: string } } } }).meta;
+  return meta?.body?.error?.type === 'index_not_found_exception';
+};
 
 const ensureIndices = async (
   esClient: ElasticsearchClient
@@ -106,16 +116,38 @@ export const setupSdlcIndices = async (esClient: ElasticsearchClient) => {
 };
 
 export const seedSdlcReferenceData = async (esClient: ElasticsearchClient) => {
-  const operations = teamDimensionToBulkDocuments().flatMap(
-    ({ id, doc }: { id: string; doc: TeamDimensionRecord }) => [
-      { index: { _index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION, _id: id } },
-      doc,
-    ]
-  );
+  const documents = teamDimensionToBulkDocuments();
+  const keepIds = new Set(documents.map(({ id }) => id));
+
+  let staleDeleteOperations: Array<Record<string, unknown>> = [];
+  try {
+    const existing = await esClient.search({
+      index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION,
+      size: 100,
+      _source: false,
+    });
+    staleDeleteOperations = existing.hits.hits.flatMap((hit) =>
+      hit._id && !keepIds.has(hit._id)
+        ? [{ delete: { _index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION, _id: hit._id } }]
+        : []
+    );
+  } catch (error) {
+    if (!isIndexMissingError(error)) {
+      throw error;
+    }
+  }
+
+  const indexOperations = documents.flatMap(({ id, doc }: { id: string; doc: TeamDimensionRecord }) => [
+    { index: { _index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION, _id: id } },
+    doc,
+  ]);
+  const operations = [...staleDeleteOperations, ...indexOperations];
   if (operations.length) {
     await esClient.bulk({ refresh: 'wait_for', operations });
   }
-  return { processed: getTeamDimensionRecords().length, updated: getTeamDimensionRecords().length };
+
+  const teamCount = getTeamDimensionRecords().length;
+  return { processed: teamCount, updated: teamCount };
 };
 
 interface ProjectSyncResult {
@@ -1293,6 +1325,7 @@ const buildEpicPhasesForProject = async ({
           }
         : undefined,
       fields,
+      epicLabels: anchorSource?.labels,
       childIssues,
       childPullRequests,
       ticketsByRepo: buildTicketsByRepo(ticketChildItems, epicPullRequestItems),
@@ -1300,7 +1333,11 @@ const buildEpicPhasesForProject = async ({
 
     const roadmapId =
       (doc.roadmap as { id?: string } | undefined)?.id ??
-      resolveRoadmapFromInitiative(fields['Product Initiative'])?.id ??
+      resolveRoadmapForEpic({
+        epicKey,
+        initiative: fields['Product Initiative'],
+        projectNumber,
+      })?.id ??
       'unmapped';
 
     await esClient.index({

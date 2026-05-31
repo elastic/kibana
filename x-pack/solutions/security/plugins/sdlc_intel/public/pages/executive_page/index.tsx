@@ -58,7 +58,17 @@ export const ExecutivePage = () => {
               defaultMessage="Development lifecycle — executive view"
             />
           }
-          description={<SyncStatusBanner />}
+          description={
+            <>
+              <SyncStatusBanner />
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.sdlcIntel.executive.scopeHint"
+                  defaultMessage="Scoped to Security org teams (SIEM, Security Intelligence, SDE, XDR, Platform Delivery), grouped by subteam."
+                />
+              </EuiText>
+            </>
+          }
           bottomBorder
         />
 

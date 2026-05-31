@@ -27,7 +27,9 @@ describe('sdlc_api_transforms', () => {
     roadmap: { id: 'dlvp', title: 'Lifecycle visibility', product: 'Sec AI Dev Accelerators' },
     teams: {
       ownOrgTeam: 'siem',
+      ownEngineeringTeam: 'Core Analysis',
       contributingOrgTeams: ['siem', 'si'],
+      contributingEngineeringTeams: ['Core Analysis'],
       crossTeam: true,
       teamCount: 2,
     },
@@ -49,7 +51,14 @@ describe('sdlc_api_transforms', () => {
       epic: { key: 'Phase A', display_id: '#4401', title: 'Phase A — engineering core' },
       roadmap: { id: 'dlvp', product: 'Sec AI Dev Accelerators' },
       rollup: { coverage_pct: 85, status: 'in-progress', gates_passed_pct: 50 },
-      teams: { own_org_team: 'siem', contributing_org_teams: ['siem'], cross_team: false, team_count: 1 },
+      teams: {
+        own_org_team: 'siem',
+        own_engineering_team: 'Core Analysis',
+        contributing_org_teams: ['siem'],
+        contributing_engineering_teams: ['Core Analysis'],
+        cross_team: false,
+        team_count: 1,
+      },
     });
 
     expect(mapped?.epicKey).toBe('Phase A');

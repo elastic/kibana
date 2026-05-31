@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  TEAM_DIMENSION_SEED,
+  epicBelongsToOrgTeam,
+  groupEpicsBySubteam,
+  resolveSubteamDefinitionsForOrg,
+  slugifySubteamKey,
+} from '@kbn/sdlc-data-layer';
 import type {
   SdlcEpicPhaseSummary,
   SdlcPortfolioSummary,
@@ -12,6 +19,76 @@ import type {
   SdlcRoadmapsResponse,
 } from '../../../../common/api/types';
 import { getCoverageLevel } from './coverage_utils';
+
+/** Security org teams seeded in `sdlc-team-dimension` (SIEM, SI, SDE, XDR, PDS). */
+export const SECURITY_ORG_TEAM_KEYS = TEAM_DIMENSION_SEED.map((record) => record.org_team.key);
+
+export interface ExecutiveSubteamGroup {
+  readonly subteamKey: string;
+  readonly subteamName: string;
+  readonly roadmaps: readonly SdlcRoadmapGroup[];
+}
+
+export interface ExecutiveOrgTeamGroup {
+  readonly orgTeamKey: string;
+  readonly orgTeamName: string;
+  readonly subteams: readonly ExecutiveSubteamGroup[];
+}
+
+const toEpicSubteamMatchInput = (epic: SdlcEpicPhaseSummary) => ({
+  epicKey: epic.epicKey,
+  projectNumber: epic.projectNumber,
+  ownOrgTeam: epic.teams.ownOrgTeam,
+  contributingOrgTeams: epic.teams.contributingOrgTeams ?? [],
+  ownEngineeringTeam: epic.teams.ownEngineeringTeam,
+  contributingEngineeringTeams: epic.teams.contributingEngineeringTeams ?? [],
+  gatesPassedPct: epic.gatesPassedPct,
+  phases: epic.phases,
+});
+
+export const epicBelongsToSecurityOrg = (epic: SdlcEpicPhaseSummary): boolean =>
+  SECURITY_ORG_TEAM_KEYS.some((orgTeamKey) =>
+    epicBelongsToOrgTeam(toEpicSubteamMatchInput(epic), orgTeamKey)
+  );
+
+const groupEpicsIntoRoadmaps = (epics: readonly SdlcEpicPhaseSummary[]): SdlcRoadmapGroup[] => {
+  const groups = new Map<string, SdlcRoadmapGroup>();
+
+  for (const epic of epics) {
+    const roadmapId = epic.roadmap.id;
+    const existing = groups.get(roadmapId);
+    if (existing) {
+      groups.set(roadmapId, {
+        ...existing,
+        epics: [...existing.epics, epic],
+        epicCount: existing.epicCount + 1,
+      });
+      continue;
+    }
+
+    groups.set(roadmapId, {
+      id: roadmapId,
+      title: epic.roadmap.title ?? roadmapId,
+      product: epic.roadmap.product ?? 'Unknown',
+      coveragePct: 0,
+      epicCount: 1,
+      epics: [epic],
+    });
+  }
+
+  return [...groups.values()]
+    .map((group) => ({
+      ...group,
+      coveragePct:
+        group.epics.length > 0
+          ? Math.round(
+              group.epics.reduce((sum, epic) => sum + epic.coveragePct, 0) / group.epics.length
+            )
+          : 0,
+      epics: [...group.epics].sort((left, right) => left.title.localeCompare(right.title)),
+    }))
+    .sort((left, right) => left.title.localeCompare(right.title));
+};
 
 export type CoverageFilter = '' | 'risk' | 'amber' | 'good';
 
@@ -62,6 +139,10 @@ const epicMatchesCoverage = (epic: SdlcEpicPhaseSummary, coverage: CoverageFilte
 };
 
 const filterEpic = (epic: SdlcEpicPhaseSummary, filters: ExecutiveFilters): boolean => {
+  if (!epicBelongsToSecurityOrg(epic)) {
+    return false;
+  }
+
   if (filters.owner && epic.owner !== filters.owner) {
     return false;
   }
@@ -84,6 +165,73 @@ export const filterRoadmaps = (
     }))
     .filter((roadmap) => roadmap.epics.length > 0);
 
+export const applySecurityScopeToRoadmaps = (
+  roadmaps: readonly SdlcRoadmapGroup[]
+): SdlcRoadmapGroup[] =>
+  roadmaps
+    .map((roadmap) => ({
+      ...roadmap,
+      epics: roadmap.epics.filter((epic) => epicBelongsToSecurityOrg(epic)),
+    }))
+    .filter((roadmap) => roadmap.epics.length > 0);
+
+export const groupRoadmapsByOrgTeamSubteam = (
+  roadmaps: readonly SdlcRoadmapGroup[]
+): ExecutiveOrgTeamGroup[] => {
+  const allEpics = roadmaps.flatMap((roadmap) => roadmap.epics);
+  const orgTeamGroups: ExecutiveOrgTeamGroup[] = [];
+
+  for (const teamRecord of TEAM_DIMENSION_SEED) {
+    const orgTeamKey = teamRecord.org_team.key;
+    const orgEpics = allEpics.filter((epic) =>
+      epicBelongsToOrgTeam(toEpicSubteamMatchInput(epic), orgTeamKey)
+    );
+    if (orgEpics.length === 0) {
+      continue;
+    }
+
+    const subteamEpicsMap = groupEpicsBySubteam(orgEpics, teamRecord);
+    const subteamDefinitions = resolveSubteamDefinitionsForOrg(orgTeamKey, teamRecord.subteams);
+    const subteams: ExecutiveSubteamGroup[] = [];
+    const assignedEpicIds = new Set<string>();
+
+    for (const subteam of subteamDefinitions) {
+      const subteamKey = slugifySubteamKey(subteam.name);
+      const subteamEpics = subteamEpicsMap[subteamKey] ?? [];
+      if (subteamEpics.length === 0) {
+        continue;
+      }
+
+      for (const epic of subteamEpics) {
+        assignedEpicIds.add(epic.id);
+      }
+
+      subteams.push({
+        subteamKey,
+        subteamName: subteam.name,
+        roadmaps: groupEpicsIntoRoadmaps(subteamEpics),
+      });
+    }
+
+    const unassignedEpics = orgEpics.filter((epic) => !assignedEpicIds.has(epic.id));
+    if (unassignedEpics.length > 0) {
+      subteams.push({
+        subteamKey: 'unassigned',
+        subteamName: 'Unassigned',
+        roadmaps: groupEpicsIntoRoadmaps(unassignedEpics),
+      });
+    }
+
+    orgTeamGroups.push({
+      orgTeamKey,
+      orgTeamName: teamRecord.org_team.name,
+      subteams,
+    });
+  }
+
+  return orgTeamGroups;
+};
+
 export const groupRoadmapsByProduct = (
   roadmaps: readonly SdlcRoadmapGroup[]
 ): Array<{ product: string; roadmaps: SdlcRoadmapGroup[] }> => {
@@ -105,9 +253,10 @@ export const groupRoadmapsByProduct = (
 };
 
 export const collectOwners = (roadmaps: readonly SdlcRoadmapGroup[]): string[] => {
+  const securityRoadmaps = applySecurityScopeToRoadmaps(roadmaps);
   const owners = new Set<string>();
 
-  for (const roadmap of roadmaps) {
+  for (const roadmap of securityRoadmaps) {
     for (const epic of roadmap.epics) {
       if (epic.owner) {
         owners.add(epic.owner);
@@ -119,9 +268,10 @@ export const collectOwners = (roadmaps: readonly SdlcRoadmapGroup[]): string[] =
 };
 
 export const collectProducts = (roadmaps: readonly SdlcRoadmapGroup[]): string[] => {
+  const securityRoadmaps = applySecurityScopeToRoadmaps(roadmaps);
   const products = new Set<string>();
 
-  for (const roadmap of roadmaps) {
+  for (const roadmap of securityRoadmaps) {
     if (roadmap.product) {
       products.add(roadmap.product);
     }
