@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sdlc-intel-plugin",
+  "owner": ["@elastic/security-solution"],
+  "description": "SDLC intelligence data layer ingest and analytics workflows",
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "sdlcIntel",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["licensing", "workflowsExtensions", "actions", "encryptedSavedObjects"],
+    "optionalPlugins": ["spaces"],
+    "extraPublicDirs": ["common"]
+  }
+}
