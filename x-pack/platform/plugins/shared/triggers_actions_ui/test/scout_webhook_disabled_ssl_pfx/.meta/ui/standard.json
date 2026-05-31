@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "5265713ff6871cd-8cc11b25b79e2b6",
+      "title": "Webhook connector — PFX disabled config should not render the pfx tab for ssl auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_webhook_disabled_ssl_pfx/ui/tests/webhook_disabled_ssl_pfx.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    }
+  ]
+}

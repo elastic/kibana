@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "97ba3c699ad37ed-e3a775bd104626c",
+      "title": "Email connector — AWS SES Kibana config should use the kibana config for aws ses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_email_aws_ses/ui/tests/email_aws_ses.spec.ts",
+        "line": 35,
+        "column": 9
+      }
+    }
+  ]
+}

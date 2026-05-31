@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "e56478c67582de7-9521f7ef0fbe14e",
+      "title": "Email connector — services-enabled Kibana config should use the kibana config for enabled services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_email_services_enabled/ui/tests/email_services_enabled.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    }
+  ]
+}

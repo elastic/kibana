@@ -1,0 +1,145 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "ed0261a24d4f57d-4be5b3e734f9ecd",
+      "title": "Embeddable alerts panel Config editor: should show the solution picker when multiple solutions are available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 237,
+        "column": 8
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-a8b94989631d8e0",
+      "title": "Embeddable alerts panel Config editor: should ask for confirmation before resetting filters when switching solution",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 239,
+        "column": 8
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-b92cf708cbbf0ee",
+      "title": "Embeddable alerts panel should only be able to create panels with stack rule types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 243,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-5a3f598c03a12c1",
+      "title": "Embeddable alerts panel should only be able to create panels with observability rule types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 282,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-81e9dda205a2869",
+      "title": "Embeddable alerts panel should only be able to create panels with security rule types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 321,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-eac2e3ce722b1e7",
+      "title": "Embeddable alerts panel should only show alerts from the observability area (o11y+stack) when selecting it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 365,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-3adc2273c83496f",
+      "title": "Embeddable alerts panel should only show alerts from the security area when selecting it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 395,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-a0cd5f6fd1b7758",
+      "title": "Embeddable alerts panel should show a missing authz prompt when the user doesn't have access to a panel's rule types",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 427,
+        "column": 8
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-6ffb956b73b74f6",
+      "title": "Embeddable alerts panel should apply the global time filter to alert panels by default",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 429,
+        "column": 8
+      }
+    },
+    {
+      "id": "ed0261a24d4f57d-6be224401a6428c",
+      "title": "Embeddable alerts panel should override the time range for specific panels",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/embeddable_alerts_table.spec.ts",
+        "line": 431,
+        "column": 8
+      }
+    }
+  ]
+}
