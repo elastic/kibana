@@ -107,3 +107,6 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# TODO: remove
+xpack.evals.enabled: true
