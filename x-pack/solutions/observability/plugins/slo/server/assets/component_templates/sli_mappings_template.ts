@@ -97,6 +97,9 @@ export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             tags: {
               type: 'keyword',
             },
+            labels: {
+              type: 'flattened',
+            },
             revision: {
               type: 'long',
             },

@@ -30,6 +30,25 @@ import {
 } from '../constants';
 import type { CreateSLOForm } from '../types';
 
+type LabelsPairs = CreateSLOForm['labels'];
+
+export function labelsRecordToPairs(labels?: Record<string, string>): LabelsPairs {
+  if (!labels) {
+    return [];
+  }
+  return Object.entries(labels).map(([key, value]) => ({ key, value }));
+}
+
+export function labelsPairsToRecord(pairs: LabelsPairs = []): Record<string, string> {
+  return pairs.reduce<Record<string, string>>((acc, { key, value }) => {
+    const trimmedKey = key.trim();
+    if (trimmedKey) {
+      acc[trimmedKey] = value;
+    }
+    return acc;
+  }, {});
+}
+
 export function transformSloResponseToFormState(
   values?: GetSLOResponse
 ): CreateSLOForm | undefined {
@@ -57,6 +76,7 @@ export function transformSloResponseToFormState(
     },
     groupBy: [values.groupBy].flat(),
     tags: values.tags,
+    labels: labelsRecordToPairs(values.labels),
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
       syncDelay: values.settings?.syncDelay
@@ -95,6 +115,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
     },
     tags: values.tags,
+    labels: labelsPairsToRecord(values.labels),
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
@@ -130,6 +151,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
         }),
     },
     tags: values.tags,
+    labels: labelsPairsToRecord(values.labels),
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
@@ -223,6 +245,10 @@ export function transformPartialSLODataToFormState(
   }
   if (values.tags) {
     state.tags = [values.tags].flat().filter((tag) => !!tag) as string[];
+  }
+
+  if ('labels' in values && values.labels) {
+    state.labels = labelsRecordToPairs(values.labels as Record<string, string>);
   }
 
   if (values.objective) {

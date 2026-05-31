@@ -223,6 +223,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
     type: 'rolling',
   },
   tags: [],
+  labels: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
     target: 99,
@@ -240,6 +241,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     type: 'rolling',
   },
   tags: [],
+  labels: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
     target: 99,
@@ -257,6 +259,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm
     type: 'rolling',
   },
   tags: [],
+  labels: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
     target: 99,

@@ -92,6 +92,7 @@ describe('CreateSLO', () => {
           },
           revision: 1,
           tags: [],
+          labels: {},
           enabled: true,
           version: 2,
           createdAt: expect.any(Date),
@@ -135,6 +136,22 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
+        })
+      );
+    });
+
+    it('stores the structured labels when provided', async () => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+        labels: { team: 'platform', cost_center: 'engineering' },
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          labels: { team: 'platform', cost_center: 'engineering' },
         })
       );
     });

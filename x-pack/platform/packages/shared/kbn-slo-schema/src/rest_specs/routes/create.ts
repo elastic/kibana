@@ -9,6 +9,7 @@ import { indicatorSchema, timeWindowSchema } from '../../schema';
 import { allOrAnyStringOrArray } from '../../schema/common';
 import {
   budgetingMethodSchema,
+  labelsSchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloIdSchema,
@@ -29,6 +30,7 @@ const createSLOParamsSchema = t.type({
       id: sloIdSchema,
       settings: optionalSettingsSchema,
       tags: tagsSchema,
+      labels: labelsSchema,
       groupBy: allOrAnyStringOrArray,
       revision: t.number,
       artifacts: t.partial({

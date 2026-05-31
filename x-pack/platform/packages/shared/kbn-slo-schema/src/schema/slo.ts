@@ -47,6 +47,10 @@ const optionalSettingsSchema = t.partial({
 
 const tagsSchema = t.array(t.string);
 
+// Structured key/value labels to enrich SLO definitions with business context
+// (e.g. team, cost_center, product). Stored as a flattened field in Elasticsearch.
+const labelsSchema = t.record(t.string, t.string);
+
 // id cannot contain special characters and spaces
 const sloIdSchema = new t.Type<string, string, unknown>(
   'sloIdSchema',
@@ -89,6 +93,7 @@ const requiredSloFields = t.type({
   revision: t.number,
   enabled: t.boolean,
   tags: tagsSchema,
+  labels: labelsSchema,
   createdAt: dateType,
   updatedAt: dateType,
   groupBy: groupBySchema,
@@ -115,6 +120,7 @@ export {
   budgetingMethodSchema,
   dashboardsWithIdSchema,
   groupBySchema,
+  labelsSchema,
   objectiveSchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,

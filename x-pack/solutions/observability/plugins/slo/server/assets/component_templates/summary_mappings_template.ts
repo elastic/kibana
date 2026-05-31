@@ -102,6 +102,9 @@ export const SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             tags: {
               type: 'keyword',
             },
+            labels: {
+              type: 'flattened',
+            },
             indicator: {
               dynamic: false,
               properties: {

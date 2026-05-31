@@ -1,0 +1,83 @@
+{
+  "10.1.0": [
+    {
+      "id": "test-slo-fixture",
+      "name": "Test SLO",
+      "description": "SLO used by saved object migration fixtures",
+      "indicator": {
+        "type": "sli.apm.transactionDuration",
+        "params": {
+          "environment": "production",
+          "service": "my-service",
+          "transactionType": "request",
+          "transactionName": "GET /api",
+          "threshold": 500,
+          "index": "metrics-apm*"
+        }
+      },
+      "timeWindow": {
+        "duration": "7d",
+        "type": "rolling"
+      },
+      "budgetingMethod": "occurrences",
+      "objective": {
+        "target": 0.999
+      },
+      "settings": {
+        "syncDelay": "1m",
+        "frequency": "1m",
+        "preventInitialBackfill": false
+      },
+      "revision": 1,
+      "enabled": true,
+      "tags": ["production", "critical"],
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "groupBy": "*",
+      "version": 2
+    }
+  ],
+  "10.2.0": [
+    {
+      "id": "test-slo-fixture",
+      "name": "Test SLO",
+      "description": "SLO used by saved object migration fixtures",
+      "indicator": {
+        "type": "sli.apm.transactionDuration",
+        "params": {
+          "environment": "production",
+          "service": "my-service",
+          "transactionType": "request",
+          "transactionName": "GET /api",
+          "threshold": 500,
+          "index": "metrics-apm*"
+        }
+      },
+      "timeWindow": {
+        "duration": "7d",
+        "type": "rolling"
+      },
+      "budgetingMethod": "occurrences",
+      "objective": {
+        "target": 0.999
+      },
+      "settings": {
+        "syncDelay": "1m",
+        "frequency": "1m",
+        "preventInitialBackfill": false
+      },
+      "revision": 1,
+      "enabled": true,
+      "tags": ["production", "critical"],
+      "labels": {},
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "groupBy": "*",
+      "version": 2
+    }
+  ]
+}

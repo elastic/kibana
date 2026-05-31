@@ -25,6 +25,10 @@ Object {
       },
       "type": "sli.apm.transactionDuration",
     },
+    "labels": Object {
+      "cost_center": "engineering",
+      "team": "platform",
+    },
     "name": "irrelevant",
     "objective": Object {
       "target": 0.999,

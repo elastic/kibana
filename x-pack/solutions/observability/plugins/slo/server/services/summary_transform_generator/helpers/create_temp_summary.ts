@@ -47,6 +47,7 @@ export interface EsSummaryDocument {
     revision: number;
     objective: Objective;
     tags: string[];
+    labels?: Record<string, string>; // remote/older docs may not have it
     createdAt?: string; // >= 8.14
     updatedAt?: string; // >= 8.14
     createdBy?: string; // >= 8.18
@@ -133,6 +134,7 @@ export function createTempSummaryDocument(
         timesliceWindow: slo.objective.timesliceWindow?.format() ?? undefined,
       },
       tags: slo.tags,
+      labels: slo.labels ?? {},
       createdAt: slo.createdAt.toISOString(), // added in 8.14, i.e. might be undefined
       updatedAt: slo.updatedAt.toISOString(), // added in 8.14, i.e. might be undefined
       // Added in 8.18

@@ -22,6 +22,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import type { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
+import { SloEditFormLabelsField } from './slo_edit_form_labels_field';
 import { MAX_WIDTH } from '../constants';
 
 export function SloEditFormDescriptionSection() {
@@ -156,6 +157,7 @@ export function SloEditFormDescriptionSection() {
           )}
         />
       </EuiFormRow>
+      <SloEditFormLabelsField />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {

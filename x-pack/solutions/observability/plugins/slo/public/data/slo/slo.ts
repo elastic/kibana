@@ -76,6 +76,7 @@ export const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   groupings: {},
   instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
+  labels: { team: 'platform', cost_center: 'engineering' },
   enabled: true,
   createdAt: now,
   updatedAt: now,

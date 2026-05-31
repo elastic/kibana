@@ -8,8 +8,7 @@
 import { v4, v7 } from 'uuid';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-/** Matches @kbn/slo-plugin common/constants HEALTH_DATA_STREAM_NAME */
-const HEALTH_DATA_STREAM_NAME = '.slo-observability.health-v3.6';
+import { HEALTH_DATA_STREAM_NAME } from '../../../../common/constants';
 import { test } from '../fixtures';
 
 /** Exceeds scan results panel PAGE_SIZE (25) so pagination controls appear */

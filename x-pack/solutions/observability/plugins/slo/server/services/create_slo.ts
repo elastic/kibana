@@ -249,6 +249,7 @@ export class CreateSLO {
       revision: params.revision ?? 1,
       enabled: true,
       tags: params.tags ?? [],
+      labels: params.labels ?? {},
       createdAt: now,
       updatedAt: now,
       createdBy: this.username,

@@ -56,7 +56,7 @@ export const SUPPRESSED_PRIORITY_ACTION = {
 export const LOCK_ID_RESOURCE_INSTALLER = 'slo:resource_installer';
 
 export const SLO_MODEL_VERSION = 2;
-export const SLO_RESOURCES_VERSION = 3.6;
+export const SLO_RESOURCES_VERSION = 3.7;
 export const SLO_RESOURCES_VERSION_MAJOR = 3;
 
 export const SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME = `.slo-observability.sli-mappings-v${SLO_RESOURCES_VERSION}`;

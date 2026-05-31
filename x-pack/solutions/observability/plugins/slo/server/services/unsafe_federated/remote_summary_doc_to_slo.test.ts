@@ -229,4 +229,70 @@ describe('FromRemoteSummaryDocToSlo', () => {
       expect(slo).toMatchSnapshot();
     });
   });
+
+  describe('labels', () => {
+    const baseSummaryDoc = {
+      service: { environment: null, name: null },
+      transaction: { name: null, type: null },
+      monitor: { name: null, config_id: null },
+      observer: { name: null, geo: { name: null } },
+      goodEvents: 0,
+      totalEvents: 0,
+      errorBudgetEstimated: false,
+      errorBudgetRemaining: 1,
+      errorBudgetConsumed: 0,
+      errorBudgetInitial: 1 - 0.9999,
+      sliValue: -1,
+      statusCode: 0,
+      status: 'NO_DATA' as const,
+      isTempDoc: true,
+      spaceId: 'irrelevant',
+      summaryUpdatedAt: null,
+      latestSliTimestamp: null,
+    };
+
+    const baseSlo = {
+      indicator: {
+        type: 'sli.kql.custom' as const,
+        params: {
+          index: 'irrelevant',
+          good: 'irrelevant',
+          total: 'irrelevant',
+          timestampField: 'irrelevant',
+        },
+      },
+      timeWindow: { duration: '7d', type: 'rolling' as const },
+      groupBy: ALL_VALUE,
+      groupings: {},
+      instanceId: ALL_VALUE,
+      name: 'irrelevant',
+      description: 'irrelevant',
+      id: 'irrelevant',
+      budgetingMethod: 'occurrences' as const,
+      revision: 1,
+      objective: { target: 0.9999 },
+      tags: ['prod'],
+    };
+
+    it('passes through the structured labels when present', () => {
+      const slo = fromRemoteSummaryDocumentToSloDefinition(
+        {
+          ...baseSummaryDoc,
+          slo: { ...baseSlo, labels: { team: 'platform', cost_center: 'eng' } },
+        },
+        loggerMock
+      );
+
+      expect(slo?.labels).toEqual({ team: 'platform', cost_center: 'eng' });
+    });
+
+    it('defaults to an empty record when labels are missing (older/remote docs)', () => {
+      const slo = fromRemoteSummaryDocumentToSloDefinition(
+        { ...baseSummaryDoc, slo: baseSlo },
+        loggerMock
+      );
+
+      expect(slo?.labels).toEqual({});
+    });
+  });
 });

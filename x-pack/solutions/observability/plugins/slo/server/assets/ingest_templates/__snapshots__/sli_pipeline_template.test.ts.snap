@@ -6,7 +6,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.6,
+    "version": 3.7,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -46,6 +46,15 @@ Object {
     },
     Object {
       "set": Object {
+        "field": "slo.labels",
+        "value": Object {
+          "cost_center": "engineering",
+          "team": "platform",
+        },
+      },
+    },
+    Object {
+      "set": Object {
         "field": "slo.revision",
         "value": 1,
       },
@@ -65,7 +74,7 @@ Object {
         ],
         "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.6.",
+        "index_name_prefix": ".slo-observability.sli-v3.7.",
       },
     },
     Object {
@@ -108,7 +117,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.6,
+    "version": 3.7,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -148,6 +157,15 @@ Object {
     },
     Object {
       "set": Object {
+        "field": "slo.labels",
+        "value": Object {
+          "cost_center": "engineering",
+          "team": "platform",
+        },
+      },
+    },
+    Object {
+      "set": Object {
         "field": "slo.revision",
         "value": 1,
       },
@@ -167,7 +185,7 @@ Object {
         ],
         "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.6.",
+        "index_name_prefix": ".slo-observability.sli-v3.7.",
       },
     },
     Object {

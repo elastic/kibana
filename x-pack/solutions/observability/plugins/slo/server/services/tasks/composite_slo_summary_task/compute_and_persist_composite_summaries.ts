@@ -446,6 +446,7 @@ function decodeStoredSLO(
     ...stored,
     groupBy: stored.groupBy ?? ALL_VALUE,
     version: stored.version ?? 1,
+    labels: stored.labels ?? {},
     settings: merge(
       { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
       stored.settings

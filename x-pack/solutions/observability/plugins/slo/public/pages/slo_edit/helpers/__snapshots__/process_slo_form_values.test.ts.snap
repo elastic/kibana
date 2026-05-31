@@ -21,6 +21,7 @@ Object {
     },
     "type": "sli.histogram.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -72,6 +73,7 @@ Object {
     },
     "type": "sli.metric.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -105,6 +107,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -150,6 +153,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -183,6 +187,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 94.5,
@@ -218,6 +223,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -251,6 +257,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -284,6 +291,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -317,6 +325,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -351,6 +360,7 @@ Object {
     },
     "type": "sli.apm.transactionErrorRate",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -386,6 +396,7 @@ Object {
     },
     "type": "sli.apm.transactionDuration",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -419,6 +430,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,
@@ -452,6 +464,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "labels": Array [],
   "name": "",
   "objective": Object {
     "target": 99,

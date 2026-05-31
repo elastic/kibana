@@ -106,6 +106,7 @@ describe('GetSLO', () => {
           oneDayBurnRate: 0,
         },
         tags: ['critical', 'k8s'],
+        labels: { team: 'platform', cost_center: 'engineering' },
         createdAt: slo.createdAt.toISOString(),
         updatedAt: slo.updatedAt.toISOString(),
         enabled: slo.enabled,

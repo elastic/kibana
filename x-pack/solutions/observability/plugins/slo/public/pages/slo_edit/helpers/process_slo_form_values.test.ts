@@ -5,7 +5,57 @@
  * 2.0.
  */
 
-import { transformPartialSLODataToFormState as transform } from './process_slo_form_values';
+import {
+  labelsPairsToRecord,
+  labelsRecordToPairs,
+  transformPartialSLODataToFormState as transform,
+} from './process_slo_form_values';
+
+describe('labels form conversions', () => {
+  describe('labelsRecordToPairs', () => {
+    it('returns an empty array when labels is undefined', () => {
+      expect(labelsRecordToPairs(undefined)).toEqual([]);
+    });
+
+    it('maps a record into ordered key/value pairs', () => {
+      expect(labelsRecordToPairs({ team: 'platform', cost_center: 'eng' })).toEqual([
+        { key: 'team', value: 'platform' },
+        { key: 'cost_center', value: 'eng' },
+      ]);
+    });
+  });
+
+  describe('labelsPairsToRecord', () => {
+    it('returns an empty record for no pairs', () => {
+      expect(labelsPairsToRecord([])).toEqual({});
+      expect(labelsPairsToRecord()).toEqual({});
+    });
+
+    it('converts pairs into a record', () => {
+      expect(
+        labelsPairsToRecord([
+          { key: 'team', value: 'platform' },
+          { key: 'tier', value: 'gold' },
+        ])
+      ).toEqual({ team: 'platform', tier: 'gold' });
+    });
+
+    it('trims keys and drops entries with empty/whitespace keys', () => {
+      expect(
+        labelsPairsToRecord([
+          { key: '  team  ', value: 'platform' },
+          { key: '   ', value: 'ignored' },
+          { key: '', value: 'ignored-too' },
+        ])
+      ).toEqual({ team: 'platform' });
+    });
+  });
+
+  it('round-trips a record through pairs unchanged', () => {
+    const record = { team: 'platform', cost_center: 'eng' };
+    expect(labelsPairsToRecord(labelsRecordToPairs(record))).toEqual(record);
+  });
+});
 
 describe('Transform partial URL state into form state', () => {
   describe("with 'indicator' in URL state", () => {

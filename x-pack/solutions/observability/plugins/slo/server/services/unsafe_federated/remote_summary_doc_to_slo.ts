@@ -39,6 +39,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     revision: summaryDoc.slo.revision,
     enabled: true,
     tags: summaryDoc.slo.tags,
+    labels: summaryDoc.slo.labels ?? {},
     createdAt: summaryDoc.slo.createdAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
     updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
     groupBy: summaryDoc.slo.groupBy,

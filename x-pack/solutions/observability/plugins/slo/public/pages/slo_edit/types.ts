@@ -21,6 +21,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
     type: TimeWindowType;
   };
   tags: string[];
+  labels: Array<{ key: string; value: string }>;
   budgetingMethod: BudgetingMethod;
   objective: {
     target: number;

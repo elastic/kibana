@@ -16,6 +16,7 @@ describe('transformSloToCloneState', () => {
       'name',
       'description',
       'tags',
+      'labels',
       'objective',
       'indicator',
       'settings',

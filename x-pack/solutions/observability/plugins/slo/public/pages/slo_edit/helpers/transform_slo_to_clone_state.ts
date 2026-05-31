@@ -20,6 +20,7 @@ export function transformSloToCloneState(
     name: `[Copy] ${slo.name}`,
     description: slo.description,
     tags: slo.tags,
+    labels: slo.labels,
     objective: slo.objective,
     indicator: slo.indicator,
     settings: slo.settings,

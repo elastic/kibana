@@ -7,7 +7,13 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
+import {
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  SLI_DESTINATION_INDEX_NAME,
+  SLI_INDEX_TEMPLATE_PATTERN,
+  SUMMARY_DESTINATION_INDEX_NAME,
+} from '../../../../../common/constants';
 import {
   apiTest,
   createSloTransformAssertions,
@@ -143,7 +149,7 @@ apiTest.describe(
       };
       expect(rollup.transforms[0].source.index).toStrictEqual(['kbn-data-forge*']);
       expect(rollup.transforms[0].dest).toStrictEqual({
-        index: '.slo-observability.sli-v3.6',
+        index: SLI_DESTINATION_INDEX_NAME,
         pipeline: `.slo-observability.sli.pipeline-${id}-1`,
       });
       expect(rollup.transforms[0].pivot.group_by).toStrictEqual({
@@ -160,9 +166,9 @@ apiTest.describe(
           dest: { index: string; pipeline: string };
         }>;
       };
-      expect(summary.transforms[0].source.index).toStrictEqual(['.slo-observability.sli-v3.6*']);
+      expect(summary.transforms[0].source.index).toStrictEqual([SLI_INDEX_TEMPLATE_PATTERN]);
       expect(summary.transforms[0].dest).toStrictEqual({
-        index: '.slo-observability.summary-v3.6',
+        index: SUMMARY_DESTINATION_INDEX_NAME,
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
     });

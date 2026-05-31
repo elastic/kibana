@@ -167,6 +167,9 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       // if not present, we considered the version to be 1, e.g. not migrated.
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
+      // labels were added later. Safeguard against SO migration issues by
+      // defaulting to an empty record when not yet backfilled.
+      labels: storedSLO.labels ?? {},
       // settings.preventInitialBackfill was added in 8.15.0
       settings: merge(
         { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },

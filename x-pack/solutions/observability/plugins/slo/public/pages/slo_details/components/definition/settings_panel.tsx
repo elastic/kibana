@@ -41,6 +41,8 @@ export function SettingsPanel({ slo }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasTags = slo.tags && slo.tags.length > 0;
+  const labelsEntries = Object.entries(slo.labels ?? {});
+  const hasLabels = labelsEntries.length > 0;
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -165,6 +167,25 @@ export function SettingsPanel({ slo }: Props) {
                 {slo.tags.map((tag) => (
                   <EuiFlexItem key={tag} grow={false}>
                     <EuiBadge color="hollow">{tag}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        {hasLabels && (
+          <>
+            <EuiDescriptionListTitle>
+              {i18n.translate('xpack.slo.sloDetails.definition.labelsTitle', {
+                defaultMessage: 'Labels',
+              })}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {labelsEntries.map(([key, value]) => (
+                  <EuiFlexItem key={key} grow={false}>
+                    <EuiBadge color="hollow">{`${key}: ${value}`}</EuiBadge>
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>

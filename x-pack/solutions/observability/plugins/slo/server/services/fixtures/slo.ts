@@ -164,6 +164,7 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
     preventInitialBackfill: false,
   },
   tags: ['critical', 'k8s'],
+  labels: { team: 'platform', cost_center: 'engineering' },
   enabled: true,
   groupBy: ALL_VALUE,
 };

@@ -213,6 +213,21 @@ describe('UpdateSLO', () => {
         expectNonBreakingChangeUpdatedResources();
       });
 
+      it('persists updated labels as a non-breaking change without bumping the revision', async () => {
+        const slo = createSLO({ labels: { team: 'platform' } });
+        mockRepository.findById.mockResolvedValueOnce(slo);
+
+        await updateSLO.execute(slo.id, { labels: { team: 'observability', tier: 'gold' } });
+
+        expect(mockRepository.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            labels: { team: 'observability', tier: 'gold' },
+            revision: slo.revision,
+          })
+        );
+        expectNonBreakingChangeUpdatedResources();
+      });
+
       function expectNonBreakingChangeUpdatedResources() {
         expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
