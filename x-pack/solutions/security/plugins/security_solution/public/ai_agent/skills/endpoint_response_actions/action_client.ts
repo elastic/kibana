@@ -14,7 +14,7 @@ import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../common/api/endpoint';
-import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
+import type { ResponseActionApiResponse, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const executeAction = async (
@@ -52,21 +52,23 @@ export const pollActionStatus = async (actionId: string): Promise<ActionResult> 
 
   const path = resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId });
 
-  const response = await http.get(path, { version: '2023-10-31' });
+  const response = await http.get<ActionDetailsApiResponse>(path, { version: '2023-10-31' });
 
-  const isCompleted =
-    response.data?.hosts?.[0]?.status === 'completed' ||
-    response.data?.status === 'completed';
-  const isFailed =
-    response.data?.hosts?.[0]?.status === 'failed' ||
-    response.data?.status === 'failed';
+  const status = response.data.status;
+  const isCompleted = status === 'successful';
+  const isFailed = status === 'failed';
+
+  // Collect error messages from per-agent state when the action failed
+  const agentErrors = isFailed
+    ? Object.values(response.data.agentState)
+        .flatMap((agentState) => agentState.errors ?? [])
+        .filter(Boolean)
+    : [];
 
   return {
     actionId,
     status: isCompleted ? 'completed' : isFailed ? 'failed' : 'pending',
     timestamp: new Date().toISOString(),
-    errorMessage: isFailed
-      ? response.data?.hosts?.[0]?.error || response.data?.error || 'Action failed'
-      : undefined,
+    errorMessage: agentErrors.length > 0 ? agentErrors.join('; ') : undefined,
   };
 };

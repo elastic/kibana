@@ -7,15 +7,22 @@
 
 export type { ActionType, HostRef, ActionIntent, ActionResult } from './types';
 export type { ExecuteActionFn, PollActionStatusFn } from './use_execute_action';
+export type { SkillResponse, SkillContext, SkillStatus } from './isolate_skill';
 export { parseIntent } from './intent_parser';
 export { resolveHost } from './host_resolver';
 export { executeAction, pollActionStatus } from './action_client';
 export { useExecuteAction } from './use_execute_action';
-export { ConfirmationRenderer } from './confirmation_renderer';
-export { ResultRenderer } from './result_renderer';
+export { ConfirmationCard } from './confirmation_renderer';
+export { ResultCard } from './result_renderer';
 export { Semaphore } from './semaphore';
 export {
   MAX_CONCURRENT_ACTIONS,
   POLL_INTERVAL_MS,
   MAX_POLL_DURATION_MS,
 } from './constants';
+export {
+  isolateSkill,
+  handleIsolateSkill,
+  ISOLATE_SKILL_ID,
+  ISOLATE_SKILL_NAME,
+} from './isolate_skill';
