@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
@@ -33,36 +36,30 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => ({
   fetchAlertsIndexNames: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => {
-  const actual = jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks');
-  return {
-    ...actual,
-    useAlertsDataView: jest.fn(() => ({
-      isLoading: false,
-      dataView: {
-        id: 'test-data-view',
-        title: '.alerts-*-default',
-        timeFieldName: '@timestamp',
-        fields: [],
-      },
-    })),
-    useFetchUnifiedAlertsFields: jest.fn(() => ({
-      isLoading: false,
-      data: { fields: [] },
-    })),
-  };
-});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
+const mockUiSettings = {
+  get: jest.fn(),
+  isDefault: jest.fn(() => true),
+};
+const mockStorage = {
+  get: jest.fn(),
+  set: jest.fn(),
+  clear: jest.fn(),
+  remove: jest.fn(),
+};
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      <I18nProvider>{children}</I18nProvider>
+  <EuiProvider>
+    <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+        <I18nProvider>{children}</I18nProvider>
+      </QueryClientProvider>
     </QueryClientProvider>
-  </QueryClientProvider>
+  </EuiProvider>
 );
 
 describe('WorkflowExecuteAlertForm', () => {
@@ -81,7 +78,11 @@ describe('WorkflowExecuteAlertForm', () => {
           },
         },
         data: mockData as any,
-        fieldFormats: mockData.fieldFormats as any,
+        dataViews: mockData.dataViews as any,
+        fieldFormats: fieldFormatsMock,
+        theme: mockTheme,
+        uiSettings: mockUiSettings,
+        storage: mockStorage,
         ...createCommonMockServices(),
       },
     } as any);
@@ -168,8 +169,8 @@ describe('WorkflowExecuteAlertForm', () => {
     });
   });
 
-  it('fetches and displays alerts in table', async () => {
-    const { getByText } = render(
+  it('fetches and displays alerts in unified data table', async () => {
+    const { getByText, findByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -184,13 +185,15 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
 
+    await findByTestId('workflowAlertsTable');
+
     await waitFor(() => {
       expect(getByText('Test Rule')).toBeInTheDocument();
     });
   });
 
-  it('displays message column in table', async () => {
-    const { getByRole } = render(
+  it('displays timestamp, rule, and message columns only', async () => {
+    const { findByTestId, getByText } = render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -202,7 +205,16 @@ describe('WorkflowExecuteAlertForm', () => {
     );
 
     await waitFor(() => {
-      expect(getByRole('columnheader', { name: 'Message' })).toBeInTheDocument();
+      expect(mockSearchSource.fetch$).toHaveBeenCalled();
+    });
+
+    await findByTestId('workflowAlertsTable');
+
+    await waitFor(() => {
+      expect(getByText('Rule')).toBeInTheDocument();
+      expect(getByText('Message')).toBeInTheDocument();
+      expect(getByText('Test Rule')).toBeInTheDocument();
+      expect(getByText('Test message')).toBeInTheDocument();
     });
   });
 
@@ -240,8 +252,8 @@ describe('WorkflowExecuteAlertForm', () => {
     expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
   });
 
-  it('calls setValue when alerts are selected', async () => {
-    const { getByRole, getByTestId } = render(
+  it('calls setValue when an alert row is selected', async () => {
+    const { findByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -256,12 +268,10 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
 
-    await waitFor(() => {
-      expect(getByRole('table')).toBeInTheDocument();
-    });
+    await findByTestId('workflowAlertsTable');
 
-    const checkbox = getByTestId('checkboxSelectRow-1');
-    fireEvent.click(checkbox);
+    const selectButton = await findByTestId('dscGridSelectDoc-.alerts-default::1::');
+    fireEvent.click(selectButton);
 
     await waitFor(() => {
       expect(mockSetValue).toHaveBeenCalled();

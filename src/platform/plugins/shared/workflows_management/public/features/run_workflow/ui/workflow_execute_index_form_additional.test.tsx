@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,6 +32,12 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </EuiProvider>
+);
 
 describe('WorkflowExecuteIndexForm - additional coverage', () => {
   const mockSetValue = jest.fn();
@@ -74,13 +81,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors="Something went wrong"
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -92,13 +99,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -114,13 +121,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       mockDataViews.getIdsWithTitle.mockRejectedValueOnce(new Error('Network error'));
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -142,13 +149,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -160,13 +167,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       const { mockDataViews } = setupMocks();
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Wait for initial load
@@ -200,13 +207,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       ]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -224,13 +231,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       ]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -244,13 +251,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       mockDataViews.getIdsWithTitle.mockResolvedValueOnce([]);
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -265,13 +272,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks({ dataViews: undefined });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Should render without crashing
@@ -293,13 +300,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -311,13 +318,13 @@ describe('WorkflowExecuteIndexForm - additional coverage', () => {
       setupMocks({ data: undefined });
 
       render(
-        <I18nProvider>
+        <TestWrapper>
           <WorkflowExecuteIndexForm
             setValue={mockSetValue}
             errors={null}
             setErrors={mockSetErrors}
           />
-        </I18nProvider>
+        </TestWrapper>
       );
 
       // Should render without crash

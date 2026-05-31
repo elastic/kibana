@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   createCommonMockServices,
@@ -26,6 +29,23 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
+const mockUiSettings = {
+  get: jest.fn(),
+  isDefault: jest.fn(() => true),
+};
+const mockStorage = {
+  get: jest.fn(),
+  set: jest.fn(),
+  clear: jest.fn(),
+  remove: jest.fn(),
+};
+
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </EuiProvider>
+);
 
 describe('WorkflowExecuteIndexForm', () => {
   const mockSetValue = jest.fn();
@@ -43,7 +63,10 @@ describe('WorkflowExecuteIndexForm', () => {
         },
         dataViews: mockDataViews as any,
         data: mockData as any,
-        fieldFormats: mockData.fieldFormats as any,
+        fieldFormats: fieldFormatsMock,
+        theme: mockTheme,
+        uiSettings: mockUiSettings,
+        storage: mockStorage,
         ...createCommonMockServices(),
       },
     } as any);
@@ -51,9 +74,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('renders search bar and data view picker', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -68,9 +91,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('loads data views on mount', async () => {
     render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -80,9 +103,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('refreshes fields when data view is selected', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -103,9 +126,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('triggers search on query submission', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -127,9 +150,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('fetches documents on data view selection', async () => {
     render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -147,9 +170,9 @@ describe('WorkflowExecuteIndexForm', () => {
 
   it('does not trigger fetch on query change without submit', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -183,11 +206,24 @@ describe('WorkflowExecuteIndexForm', () => {
       id: 'test-data-view-id',
       title: 'logs-*',
       name: 'logs-*',
+      timeFieldName: '@timestamp',
       getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFieldByName: jest.fn().mockReturnValue(null),
+      getFormatterForField: jest.fn().mockReturnValue({
+        convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
+      }),
+      getFieldByName: jest.fn((name: string) => ({
+        name,
+        type: name === '@timestamp' ? 'date' : 'string',
+        esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+      })),
       fields: {
+        replaceAll: jest.fn(),
         getByName: jest.fn().mockReturnValue(null),
         getAll: jest.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
+        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: jest.fn(),
+        remove: jest.fn(),
+        update: jest.fn(),
         length: 2, // Has fields - should skip refresh
         filter: jest.fn().mockReturnValue([]),
       },
@@ -196,9 +232,9 @@ describe('WorkflowExecuteIndexForm', () => {
     mockDataViews.get.mockResolvedValue(dataViewWithFields);
 
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -232,11 +268,24 @@ describe('WorkflowExecuteIndexForm', () => {
       id: 'test-data-view-id',
       title: 'logs-*',
       name: 'logs-*',
+      timeFieldName: '@timestamp',
       getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFieldByName: jest.fn().mockReturnValue(null),
+      getFormatterForField: jest.fn().mockReturnValue({
+        convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
+      }),
+      getFieldByName: jest.fn((name: string) => ({
+        name,
+        type: name === '@timestamp' ? 'date' : 'string',
+        esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+      })),
       fields: {
+        replaceAll: jest.fn(),
         getByName: jest.fn().mockReturnValue(null),
         getAll: jest.fn().mockReturnValue([]),
+        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: jest.fn(),
+        remove: jest.fn(),
+        update: jest.fn(),
         length: 0, // No fields - triggers refresh
         filter: jest.fn().mockReturnValue([]),
       },
@@ -257,16 +306,19 @@ describe('WorkflowExecuteIndexForm', () => {
         },
         dataViews: mockDataViews as any,
         data: mockData as any,
-        fieldFormats: mockData.fieldFormats as any,
+        fieldFormats: fieldFormatsMock,
+        theme: mockTheme,
+        uiSettings: mockUiSettings,
+        storage: mockStorage,
         notifications: mockNotifications,
         http: { get: jest.fn(), post: jest.fn() },
       },
     } as any);
 
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     // Wait for initial load to complete

@@ -61,13 +61,13 @@ const baseWorkflowDefinition = {
 } as WorkflowYaml;
 
 // Mock the form components
-const mockWorkflowExecuteAlertForm = jest.fn(() => null);
+const mockWorkflowExecuteAlertForm = jest.fn((_props?: Record<string, unknown>) => null);
 jest.mock('./workflow_execute_alert_form', () => ({
-  WorkflowExecuteAlertForm: () => mockWorkflowExecuteAlertForm(),
+  WorkflowExecuteAlertForm: (props: Record<string, unknown>) => mockWorkflowExecuteAlertForm(props),
 }));
-const mockWorkflowExecuteIndexForm = jest.fn(() => null);
+const mockWorkflowExecuteIndexForm = jest.fn((_props?: Record<string, unknown>) => null);
 jest.mock('./workflow_execute_index_form', () => ({
-  WorkflowExecuteIndexForm: () => mockWorkflowExecuteIndexForm(),
+  WorkflowExecuteIndexForm: (props: Record<string, unknown>) => mockWorkflowExecuteIndexForm(props),
 }));
 const mockWorkflowExecuteManualForm = jest.fn(() => null);
 jest.mock('./workflow_execute_manual_form', () => ({
@@ -761,6 +761,71 @@ describe('WorkflowExecuteModal', () => {
       expect(executeButton).toBeDisabled();
     });
 
+    it('hides trigger tabs and applies fullscreen modal class when the alert grid enters fullscreen', () => {
+      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Alert').closest('button')!);
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      expect(lastAlertFormProps?.onTableGridFullScreenChange).toBeDefined();
+
+      act(() => {
+        lastAlertFormProps!.onTableGridFullScreenChange!(true);
+      });
+
+      expect(queryByTestId('workflowExecuteModalTriggerTabs')).not.toBeInTheDocument();
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+    });
+
+    it('exits table fullscreen instead of closing the modal when X is pressed', () => {
+      const { getByTestId, getByText, getByLabelText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Alert').closest('button')!);
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      act(() => {
+        lastAlertFormProps!.onTableGridFullScreenChange!(true);
+      });
+
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+
+      act(() => {
+        fireEvent.click(getByLabelText('Closes this modal window'));
+      });
+
+      expect(mockOnClose).not.toHaveBeenCalled();
+      expect(getByTestId('workflowExecuteModal').className).not.toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+      expect(getByTestId('workflowExecuteModalTriggerTabs')).toBeInTheDocument();
+    });
+
     it('hides trigger tabs and applies fullscreen modal class when the event grid enters fullscreen', () => {
       const { getByTestId, getByText, queryByTestId } = renderWithProviders(
         <WorkflowExecuteModal
@@ -775,18 +840,18 @@ describe('WorkflowExecuteModal', () => {
 
       const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
       const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
-        | { onEventGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
         | undefined;
 
-      expect(lastEventFormProps?.onEventGridFullScreenChange).toBeDefined();
+      expect(lastEventFormProps?.onTableGridFullScreenChange).toBeDefined();
 
       act(() => {
-        lastEventFormProps!.onEventGridFullScreenChange!(true);
+        lastEventFormProps!.onTableGridFullScreenChange!(true);
       });
 
       expect(queryByTestId('workflowExecuteModalTriggerTabs')).not.toBeInTheDocument();
       expect(getByTestId('workflowExecuteModal').className).toContain(
-        'workflowExecuteModal--eventGridFullScreen'
+        'workflowExecuteModal--tableGridFullScreen'
       );
     });
 

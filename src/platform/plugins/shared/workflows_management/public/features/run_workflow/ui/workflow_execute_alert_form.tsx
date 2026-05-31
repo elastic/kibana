@@ -8,39 +8,43 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
-import { AlertsSearchBar, useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
+import type { CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import {
+  useWorkflowExecuteHitTableConfig,
+  type UseWorkflowExecuteHitTableConfigResult,
+} from './use_workflow_execute_hit_table_config';
+import {
+  mergeEsHitPages,
+  parseSearchTotalHits,
+  resolveHitSearchHasMoreHits,
+  resolveHitSearchTableLoadingState,
+  WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
+} from './workflow_execute_hit_search_pagination';
+import { buildAlertTriggerInputFromRecords } from './workflow_execute_hit_selection_payload';
+import { createAlertMessageCellRenderer } from './workflow_execute_hit_table_cells';
+import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
+import { WorkflowExecuteUnifiedDataTable } from './workflow_execute_unified_data_table';
 import { useKibana } from '../../../hooks/use_kibana';
 
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    'kibana.alert.rule.name': string;
-    'kibana.alert.rule.uuid': string;
-    'kibana.alert.severity': string;
-    'kibana.alert.status': string;
-    'kibana.alert.reason': string;
-    [key: string]: unknown;
-  };
-}
+/** Timestamp, rule name, and alert message/reason. */
+export const DEFAULT_ALERT_TABLE_COLUMNS = [
+  '@timestamp',
+  'kibana.alert.rule.name',
+  'kibana.alert.reason',
+] as const;
+
+/** Isolates KQL recent-search history from other run-workflow tabs. */
+export const WORKFLOW_EXECUTE_ALERT_SEARCH_APP_NAME = 'workflow_management_alerts';
 
 export interface WorkflowExecuteAlertFormProps {
   value: string;
@@ -51,6 +55,8 @@ export interface WorkflowExecuteAlertFormProps {
    * When false, RAC alert index/fields HTTP calls are not made
    */
   racQueriesEnabled?: boolean;
+  isTableGridFullScreen?: boolean;
+  onTableGridFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
 export const WorkflowExecuteAlertForm = ({
@@ -59,22 +65,35 @@ export const WorkflowExecuteAlertForm = ({
   errors,
   setErrors,
   racQueriesEnabled = true,
+  isTableGridFullScreen = false,
+  onTableGridFullScreenChange,
 }: WorkflowExecuteAlertFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const tableSurfaceColor = euiTheme.colors.backgroundBasePlain;
   const { services } = useKibana();
   const { http, notifications, data: dataService, unifiedSearch } = services;
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
+  const { SearchBar } = unifiedSearch.ui;
+  const [hits, setHits] = useState<EsHitRecord[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
   });
 
-  const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState<string>('');
-  const [submittedQuery, setSubmittedQuery] = useState<string>('');
-  const [filters, setFilters] = useState<Filter[]>([]);
+  const [alertsFetching, setAlertsFetching] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalHits, setTotalHits] = useState(0);
+  const [lastPageHitsLength, setLastPageHitsLength] = useState(0);
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [dataView, setDataView] = useState<DataView | null>(null);
   const dataViewCreatingRef = useRef(false);
+
+  const submittedQueryString = typeof submittedQuery.query === 'string' ? submittedQuery.query : '';
+
+  const alertSearchIdentityKey = useMemo(
+    () => `${dataView?.id ?? ''}|${submittedQueryString}|${timeRange.from}|${timeRange.to}`,
+    [dataView?.id, submittedQueryString, timeRange.from, timeRange.to]
+  );
 
   // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
   // Empty ruleTypeIds + enabled → returns indices for all authorized rule types.
@@ -91,7 +110,6 @@ export const WorkflowExecuteAlertForm = ({
     [alertIndexNames]
   );
 
-  // Create and cache data view when alert index names are available
   useEffect(() => {
     if (!dataService || !indexPattern) {
       return;
@@ -109,6 +127,18 @@ export const WorkflowExecuteAlertForm = ({
           title: indexPattern,
           timeFieldName: '@timestamp',
         });
+        try {
+          await dataService.dataViews.refreshFields(newDataView, false, true);
+        } catch {
+          notifications.toasts.addWarning({
+            title: i18n.translate('workflows.workflowExecuteAlertForm.refreshFieldsErrorTitle', {
+              defaultMessage: 'Failed to refresh fields',
+            }),
+            text: i18n.translate('workflows.workflowExecuteAlertForm.refreshFieldsError', {
+              defaultMessage: 'Some alert fields may be missing from KQL suggestions.',
+            }),
+          });
+        }
         setDataView(newDataView);
       } catch (err) {
         setErrors(
@@ -122,31 +152,35 @@ export const WorkflowExecuteAlertForm = ({
     };
 
     createDataView();
-  }, [dataService, indexPattern, setErrors]);
+  }, [dataService, indexPattern, notifications.toasts, setErrors]);
+
+  useEffect(() => {
+    setPageIndex(0);
+    setHits([]);
+    setTotalHits(0);
+    setLastPageHitsLength(0);
+  }, [alertSearchIdentityKey]);
 
   const fetchAlerts = useCallback(async () => {
     if (!dataService || !dataView) {
       return;
     }
 
-    setAlertsLoading(true);
+    setAlertsFetching(true);
     setErrors(null);
 
     try {
-      // Use SearchSource to match Discovery's behavior - this handles fields API, date formats, etc.
       const searchSource = await dataService.search.searchSource.create();
 
       searchSource.setField('index', dataView);
 
-      // Set query
-      if (submittedQuery) {
+      if (submittedQueryString) {
         searchSource.setField('query', {
-          query: submittedQuery,
+          query: submittedQueryString,
           language: 'kuery',
         });
       }
 
-      // Set time range filter with proper format (matching Discovery)
       const timeFilter: Filter = {
         query: {
           range: {
@@ -162,12 +196,8 @@ export const WorkflowExecuteAlertForm = ({
         },
       };
 
-      // Set filters
-      searchSource.setField('filter', [...filters, timeFilter]);
+      searchSource.setField('filter', [timeFilter]);
 
-      // Set sort (matching Discovery's format)
-      // Using type assertion because unmapped_type is a valid ES parameter
-      // but not included in SearchSource's EsQuerySortValue type
       const sortWithUnmappedType = [
         {
           '@timestamp': {
@@ -186,23 +216,18 @@ export const WorkflowExecuteAlertForm = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       searchSource.setField('sort', sortWithUnmappedType as any);
 
-      // Set size and track_total_hits (matching Discovery)
-      searchSource.setField('size', 50);
-      searchSource.setField('trackTotalHits', false);
+      searchSource.setField('from', pageIndex * WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
+      searchSource.setField('size', WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
+      searchSource.setField('trackTotalHits', true);
 
-      // Fetch using SearchSource (this will use fields API like Discovery)
       const response = await searchSource.fetch$().pipe(take(1)).toPromise();
 
-      if (
-        response &&
-        response.rawResponse &&
-        response.rawResponse.hits &&
-        response.rawResponse.hits.hits
-      ) {
-        setAlerts(response.rawResponse.hits.hits as Alert[]);
-      } else {
-        setAlerts([]);
-      }
+      const pageHits = (response?.rawResponse?.hits?.hits ?? []) as EsHitRecord[];
+      const total = parseSearchTotalHits(response?.rawResponse?.hits?.total);
+
+      setTotalHits(total);
+      setLastPageHitsLength(pageHits.length);
+      setHits((previousHits) => mergeEsHitPages(previousHits, pageHits, pageIndex));
     } catch (err) {
       setErrors(
         err instanceof Error
@@ -211,46 +236,95 @@ export const WorkflowExecuteAlertForm = ({
               defaultMessage: 'Failed to fetch alerts',
             })
       );
-      setAlerts([]);
+      if (pageIndex === 0) {
+        setHits([]);
+        setTotalHits(0);
+        setLastPageHitsLength(0);
+      }
     } finally {
-      setAlertsLoading(false);
+      setAlertsFetching(false);
     }
-  }, [dataService, setErrors, submittedQuery, timeRange.from, timeRange.to, filters, dataView]);
+  }, [
+    dataService,
+    setErrors,
+    submittedQueryString,
+    timeRange.from,
+    timeRange.to,
+    dataView,
+    pageIndex,
+  ]);
 
   useEffect(() => {
     if (dataView) {
-      fetchAlerts();
+      void fetchAlerts();
     }
-    // Only trigger fetch when dataView is ready and query/time/filters change
-  }, [dataView, submittedQuery, timeRange.from, timeRange.to, filters, fetchAlerts]);
+  }, [dataView, pageIndex, alertSearchIdentityKey, fetchAlerts]);
 
-  const updateEventData = (selectedAlerts: Alert[]) => {
-    if (selectedAlerts.length > 0) {
-      const alertIds: AlertSelection[] = selectedAlerts.map((alert: Alert) => ({
-        _id: alert._id,
-        _index: alert._index,
-      }));
+  const hasMoreHits = resolveHitSearchHasMoreHits({
+    totalHits,
+    accumulatedHitsLength: hits.length,
+    currentPageHitsLength: lastPageHitsLength,
+  });
 
-      const workflowEvent: AlertTriggerInput = {
-        event: {
-          alertIds,
-          triggerType: 'alert',
-        },
-      };
+  const onFetchMoreRecords = useMemo(
+    () => (hasMoreHits && !alertsFetching ? () => setPageIndex((page) => page + 1) : undefined),
+    [hasMoreHits, alertsFetching]
+  );
 
-      setValue(JSON.stringify(workflowEvent, null, 2));
+  const handleAlertSelection = useCallback(
+    (selectedRecords: DataTableRecord[]) => {
+      const payload = buildAlertTriggerInputFromRecords(selectedRecords);
+      if (payload) {
+        setValue(JSON.stringify(payload, null, 2));
+      } else {
+        setValue('');
+      }
+    },
+    [setValue]
+  );
+
+  const alertMessageRenderer = useMemo(() => createAlertMessageCellRenderer(), []);
+
+  const ruleColumnLabel = i18n.translate('workflows.workflowExecuteAlertForm.ruleColumn', {
+    defaultMessage: 'Rule',
+  });
+  const messageColumnLabel = i18n.translate(
+    'workflows.workflowExecuteEventForm.messageColumnHeader',
+    {
+      defaultMessage: 'Message',
     }
-  };
+  );
+
+  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
+    () => ({
+      'kibana.alert.rule.name': ({ column }) => ({
+        ...column,
+        displayAsText: ruleColumnLabel,
+        display: ruleColumnLabel,
+      }),
+      'kibana.alert.reason': ({ column }) => ({
+        ...column,
+        displayAsText: messageColumnLabel,
+        display: messageColumnLabel,
+      }),
+    }),
+    [messageColumnLabel, ruleColumnLabel]
+  );
+
+  const tableConfig: UseWorkflowExecuteHitTableConfigResult = useWorkflowExecuteHitTableConfig({
+    services,
+    dataView,
+    hits,
+    defaultColumns: DEFAULT_ALERT_TABLE_COLUMNS,
+    externalCustomRenderers: alertMessageRenderer,
+    customGridColumnsConfiguration,
+    onSelectionChange: handleAlertSelection,
+    setErrors,
+  });
 
   const handleQueryChange = useCallback(
-    ({
-      query: newQuery,
-      dateRange,
-    }: {
-      query?: string;
-      dateRange: { from: string; to: string };
-    }) => {
-      if (newQuery !== undefined) {
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      if (newQuery) {
         setQuery(newQuery);
       }
       setTimeRange(dateRange);
@@ -259,91 +333,59 @@ export const WorkflowExecuteAlertForm = ({
   );
 
   const handleQuerySubmit = useCallback(
-    ({
-      query: newQuery,
-      dateRange,
-    }: {
-      query?: string;
-      dateRange: { from: string; to: string };
-    }) => {
-      // Update both draft and submitted query on submit
-      if (newQuery !== undefined) {
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      if (newQuery) {
         setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
-      // fetchAlerts will be triggered by useEffect when submittedQuery changes
     },
     []
   );
 
-  const handleFiltersUpdated = useCallback((newFilters: Filter[]) => {
-    setFilters(newFilters);
-  }, []);
+  const tableLoadingState = resolveHitSearchTableLoadingState(alertsFetching, hits.length);
 
-  const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
-
-  const columns: EuiBasicTableColumn<Alert>[] = [
-    {
-      field: '_source.@timestamp',
-      name: '@timestamp',
-      sortable: true,
-      width: '250px',
-      render: (timestamp: string) => fmt.convertToText(new Date(timestamp)),
-    },
-    {
-      field: '_source.kibana.alert.rule.name',
-      name: i18n.translate('workflows.workflowExecuteEventForm.ruleColumnHeader', {
-        defaultMessage: 'Rule',
-      }),
-      sortable: true,
-      render: (name: string, item: Alert) => item._source['kibana.alert.rule.name'],
-    },
-    {
-      field: '_source.message',
-      name: i18n.translate('workflows.workflowExecuteEventForm.messageColumnHeader', {
-        defaultMessage: 'Message',
-      }),
-      sortable: true,
-      render: (message: string, item: Alert) => {
-        const originalMessage = item._source.message;
-        if (originalMessage) {
-          return typeof originalMessage === 'string' ? originalMessage : String(originalMessage);
-        }
-        return item._source['kibana.alert.reason'] || '-';
-      },
-    },
-  ];
+  useEffect(() => {
+    if (hits.length === 0 && isTableGridFullScreen) {
+      onTableGridFullScreenChange?.(false);
+    }
+  }, [hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <AlertsSearchBar
-          appName="workflow_management"
-          showDatePicker
-          onQueryChange={handleQueryChange}
-          onQuerySubmit={handleQuerySubmit}
-          onFiltersUpdated={handleFiltersUpdated}
-          query={query}
-          filters={filters}
-          rangeFrom={timeRange.from}
-          rangeTo={timeRange.to}
-          showFilterBar={false}
-          showSubmitButton={true}
-          placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
-            defaultMessage:
-              'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
-          })}
-          ruleTypeIds={[]}
-          http={http}
-          toasts={notifications.toasts}
-          unifiedSearchBar={unifiedSearch.ui.SearchBar}
-          dataService={dataService}
-          fetchUnifiedAlertsFields={Boolean(
-            racQueriesEnabled && alertIndexNames && alertIndexNames.length > 0
-          )}
-        />
-      </EuiFlexItem>
+    <EuiFlexGroup
+      className={WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS}
+      direction="column"
+      gutterSize="s"
+      css={css({
+        flex: 1,
+        minHeight: 0,
+        height: '100%',
+      })}
+    >
+      {!isTableGridFullScreen ? (
+        <EuiFlexItem grow={false}>
+          <SearchBar
+            key={dataView?.id ?? 'no-alert-dataview'}
+            appName={WORKFLOW_EXECUTE_ALERT_SEARCH_APP_NAME}
+            useDefaultBehaviors={true}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
+            query={query}
+            indexPatterns={dataView ? [dataView] : []}
+            showDatePicker={true}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            showFilterBar={false}
+            showSubmitButton={true}
+            placeholder={i18n.translate('workflows.workflowExecuteAlertForm.searchPlaceholder', {
+              defaultMessage:
+                'Filter your data using KQL syntax (e.g., kibana.alert.rule.name:test)',
+            })}
+            data-test-subj="workflow-alert-query-input"
+            displayStyle="inPage"
+          />
+        </EuiFlexItem>
+      ) : null}
 
       {errors && (
         <EuiFlexItem grow={false}>
@@ -367,23 +409,33 @@ export const WorkflowExecuteAlertForm = ({
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <EuiBasicTable
-          itemId="_id"
-          rowHeader="@timestamp"
-          tableLayout="fixed"
-          items={alerts}
-          columns={columns}
-          loading={alertsLoading}
-          tableCaption={i18n.translate('workflows.workflowExecuteEventForm.tableCaption', {
-            defaultMessage: 'Alerts list for workflow execution',
-          })}
-          selection={{
-            onSelectionChange: updateEventData,
-          }}
-          css={{ border: euiTheme.border.thin, paddingTop: '1px' }}
-        />
-      </EuiFlexItem>
+      <WorkflowExecuteUnifiedDataTable
+        dataTestSubj="workflowAlertsTable"
+        fillHeight={true}
+        euiTheme={euiTheme}
+        tableSurfaceColor={tableSurfaceColor}
+        timestampCellTypography={tableConfig.timestampCellTypography}
+        tableLoadingState={tableLoadingState}
+        dataView={dataView}
+        getNoCellActions={tableConfig.getNoCellActions}
+        visibleTableColumns={tableConfig.visibleTableColumns}
+        columnsMeta={tableConfig.columnsMeta}
+        dataTableRows={tableConfig.dataTableRows}
+        rowsLength={hits.length}
+        unifiedDataTableServices={tableConfig.unifiedDataTableServices}
+        handleUnifiedDataTableSetColumns={tableConfig.handleUnifiedDataTableSetColumns}
+        showTimeColumn={tableConfig.showTimeColumn}
+        sort={tableConfig.sort}
+        handleSortChange={tableConfig.handleSortChange}
+        customGridColumnsConfiguration={tableConfig.customGridColumnsConfiguration}
+        renderCustomToolbar={tableConfig.renderCustomToolbar}
+        renderCellPopover={tableConfig.renderCellPopover}
+        externalCustomRenderers={tableConfig.externalCustomRenderers}
+        totalHits={totalHits}
+        onFetchMoreRecords={onFetchMoreRecords}
+        isTableGridFullScreen={isTableGridFullScreen}
+        onDataGridFullScreenChange={onTableGridFullScreenChange}
+      />
     </EuiFlexGroup>
   );
 };

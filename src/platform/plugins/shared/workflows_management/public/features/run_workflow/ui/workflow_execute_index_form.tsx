@@ -7,30 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiCallOut,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiText,
-  EuiToken,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { take } from 'rxjs';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { formatHitReact } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { SearchHit } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+import type { CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import {
+  useWorkflowExecuteHitTableConfig,
+  type UseWorkflowExecuteHitTableConfigResult,
+} from './use_workflow_execute_hit_table_config';
+import {
+  mergeEsHitPages,
+  parseSearchTotalHits,
+  resolveHitSearchHasMoreHits,
+  resolveHitSearchTableLoadingState,
+  WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
+} from './workflow_execute_hit_search_pagination';
+import { buildDocumentTriggerInputFromRecords } from './workflow_execute_hit_selection_payload';
+import { createDocumentSummaryCellRenderer } from './workflow_execute_hit_table_cells';
+import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
+import { WorkflowExecuteUnifiedDataTable } from './workflow_execute_unified_data_table';
 import { useKibana } from '../../../hooks/use_kibana';
 
-interface Document {
+interface DocumentSource {
   '@timestamp': string;
   agent?: string;
   user?: string;
@@ -41,38 +47,32 @@ interface WorkflowExecuteIndexFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
+  isTableGridFullScreen?: boolean;
+  onTableGridFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
-const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
-  const flattened: Record<string, unknown> = {};
-
-  for (const [key, val] of Object.entries(obj)) {
-    const fieldName = prefix ? `${prefix}.${key}` : key;
-
-    if (val && typeof val === 'object' && !Array.isArray(val)) {
-      // Recursively flatten nested objects
-      Object.assign(flattened, flattenObject(val as Record<string, unknown>, fieldName));
-    } else {
-      flattened[fieldName] = val;
-    }
-  }
-
-  return flattened;
-};
+/** Timestamp plus inline document preview in the `document` column. */
+export const DEFAULT_DOCUMENT_TABLE_COLUMNS = ['@timestamp', 'document'] as const;
 
 export const WorkflowExecuteIndexForm = ({
   setValue,
   errors,
   setErrors,
+  isTableGridFullScreen = false,
+  onTableGridFullScreenChange,
 }: WorkflowExecuteIndexFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const tableSurfaceColor = euiTheme.colors.backgroundBasePlain;
   const { services } = useKibana();
   const { unifiedSearch, notifications } = services;
   const { SearchBar } = unifiedSearch.ui;
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
-  const [documents, setDocuments] = useState<SearchHit<Document>[]>([]);
-  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [hits, setHits] = useState<EsHitRecord[]>([]);
+  const [documentsFetching, setDocumentsFetching] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalHits, setTotalHits] = useState(0);
+  const [lastPageHitsLength, setLastPageHitsLength] = useState(0);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -80,22 +80,28 @@ export const WorkflowExecuteIndexForm = ({
     to: 'now',
   });
 
-  // Load data views
+  const submittedQueryString = typeof submittedQuery.query === 'string' ? submittedQuery.query : '';
+
+  const documentSearchIdentityKey = useMemo(
+    () => `${selectedDataView?.id ?? ''}|${submittedQueryString}|${timeRange.from}|${timeRange.to}`,
+    [selectedDataView?.id, submittedQueryString, timeRange.from, timeRange.to]
+  );
+
   useEffect(() => {
     const loadDataViews = async () => {
-      if (!services.dataViews) return;
+      if (!services.dataViews) {
+        return;
+      }
 
       try {
         const dataViewsList = await services.dataViews.getIdsWithTitle();
         setDataViews(dataViewsList);
 
-        // Set default data view (logs-* or first available)
         const defaultDataView =
           dataViewsList.find((dv: DataViewListItem) => dv.title.startsWith('logs-')) ||
           dataViewsList[0];
         if (defaultDataView) {
           const dataView = await services.dataViews.get(defaultDataView.id);
-          // Refresh fields to ensure they're up to date and properly loaded
           await services.dataViews.refreshFields(dataView, false, true);
           setSelectedDataView(dataView);
         }
@@ -111,14 +117,20 @@ export const WorkflowExecuteIndexForm = ({
     loadDataViews();
   }, [services.dataViews, setErrors]);
 
-  // Fetch documents based on selected data view and query
-  const fetchDocuments = useCallback(async () => {
+  useEffect(() => {
+    setPageIndex(0);
+    setHits([]);
+    setTotalHits(0);
+    setLastPageHitsLength(0);
+  }, [documentSearchIdentityKey]);
+
+  const fetchDocuments = useCallback(() => {
     if (!selectedDataView || !services.data) {
-      setDocumentsLoading(false);
+      setDocumentsFetching(false);
       return;
     }
 
-    setDocumentsLoading(true);
+    setDocumentsFetching(true);
     setErrors(null);
 
     try {
@@ -146,23 +158,28 @@ export const WorkflowExecuteIndexForm = ({
         params: {
           index: selectedDataView.getIndexPattern(),
           query: searchQuery,
-          size: 50,
+          from: pageIndex * WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
+          size: WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
+          track_total_hits: true,
           sort: [{ '@timestamp': { order: 'desc' } }],
-          _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
         },
       };
 
       services.data.search
-        .search<IEsSearchRequest, IEsSearchResponse<Document>>(request)
+        .search<IEsSearchRequest, IEsSearchResponse<DocumentSource>>(request)
         .pipe(take(1))
         .subscribe({
           next: (response) => {
-            const hits: SearchHit<Document>[] =
+            const pageHits: EsHitRecord[] =
               response?.rawResponse?.hits?.hits.filter(
-                (hit): hit is SearchHit<Document> => !!hit._source
+                (hit): hit is SearchHit<DocumentSource> => !!hit._source
               ) ?? [];
-            setDocuments(hits);
-            setDocumentsLoading(false);
+            const total = parseSearchTotalHits(response?.rawResponse?.hits?.total);
+
+            setTotalHits(total);
+            setLastPageHitsLength(pageHits.length);
+            setHits((previousHits) => mergeEsHitPages(previousHits, pageHits, pageIndex));
+            setDocumentsFetching(false);
           },
           error: (err) => {
             setErrors(
@@ -172,12 +189,16 @@ export const WorkflowExecuteIndexForm = ({
                     defaultMessage: 'Failed to fetch documents',
                   })
             );
-            setDocuments([]);
-            setDocumentsLoading(false);
+            if (pageIndex === 0) {
+              setHits([]);
+              setTotalHits(0);
+              setLastPageHitsLength(0);
+            }
+            setDocumentsFetching(false);
           },
         });
     } catch (err) {
-      setDocumentsLoading(false);
+      setDocumentsFetching(false);
       setErrors(
         err instanceof Error
           ? err.message
@@ -185,35 +206,52 @@ export const WorkflowExecuteIndexForm = ({
               defaultMessage: 'Failed to build query',
             })
       );
-      setDocuments([]);
+      if (pageIndex === 0) {
+        setHits([]);
+        setTotalHits(0);
+        setLastPageHitsLength(0);
+      }
     }
-  }, [selectedDataView, submittedQuery, services.data, setErrors, timeRange?.from, timeRange?.to]);
+  }, [
+    selectedDataView,
+    submittedQuery,
+    services.data,
+    setErrors,
+    timeRange?.from,
+    timeRange?.to,
+    pageIndex,
+  ]);
 
-  // Fetch documents when data view, query, or time range changes
   useEffect(() => {
     if (selectedDataView) {
       fetchDocuments();
     }
-    // Only include stable dependencies to avoid infinite loops
-    // fetchDocuments is stable due to useCallback with proper deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataView?.id, submittedQuery?.query, timeRange?.from, timeRange?.to]);
+  }, [selectedDataView, pageIndex, documentSearchIdentityKey, fetchDocuments]);
 
-  // Handle data view selection - refreshes fields inline like Discovery does
+  const hasMoreHits = resolveHitSearchHasMoreHits({
+    totalHits,
+    accumulatedHitsLength: hits.length,
+    currentPageHitsLength: lastPageHitsLength,
+  });
+
+  const onFetchMoreRecords = useMemo(
+    () => (hasMoreHits && !documentsFetching ? () => setPageIndex((page) => page + 1) : undefined),
+    [hasMoreHits, documentsFetching]
+  );
+
   const handleDataViewChange = useCallback(
     async (dataViewId: string) => {
-      if (!services.dataViews) return;
+      if (!services.dataViews) {
+        return;
+      }
 
       try {
         const dataView = await services.dataViews.get(dataViewId);
 
-        // Refresh fields if needed (following Discovery's pattern)
-        // Only refresh if the data view has no fields loaded
         if (!dataView.fields.length) {
           try {
             await services.dataViews.refreshFields(dataView, false, true);
           } catch (refreshError) {
-            // Log but don't block - fields may be partially available
             notifications.toasts.addWarning({
               title: i18n.translate('workflows.workflowExecuteIndexForm.refreshFieldsErrorTitle', {
                 defaultMessage: 'Failed to refresh fields',
@@ -239,12 +277,9 @@ export const WorkflowExecuteIndexForm = ({
 
   const handleQueryChange = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      // Only update the draft query for the SearchBar input (for autocomplete)
-      // Don't trigger fetch - that happens only on submit
       if (newQuery) {
         setQuery(newQuery);
       }
-      // Update time range immediately as it doesn't cause blinking
       setTimeRange(dateRange);
     },
     []
@@ -252,165 +287,133 @@ export const WorkflowExecuteIndexForm = ({
 
   const handleQuerySubmit = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      // Update both draft and submitted query on submit
       if (newQuery) {
         setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
-      // fetchDocuments will be triggered by useEffect when submittedQuery changes
     },
     []
   );
 
-  // Handle document selection
-  const handleDocumentSelection = (selectedItems: SearchHit<Document>[]) => {
-    if (selectedItems.length > 0) {
-      // Create workflow event from selected documents
-      const eventData = {
-        event: {
-          documents: selectedItems.map((doc) => ({
-            id: doc._id,
-            index: doc._index,
-            timestamp: doc._source['@timestamp'],
-            data: doc._source,
-          })),
-          query: submittedQuery.query,
-          dataView: selectedDataView?.title,
-        },
-      };
+  const handleDocumentSelection = useCallback(
+    (selectedRecords: DataTableRecord[]) => {
+      const payload = buildDocumentTriggerInputFromRecords(selectedRecords, {
+        submittedQuery: submittedQueryString,
+        dataViewTitle: selectedDataView?.title,
+      });
+      if (payload) {
+        setValue(JSON.stringify(payload, null, 2));
+      } else {
+        setValue('');
+      }
+    },
+    [selectedDataView?.title, setValue, submittedQueryString]
+  );
 
-      setValue(JSON.stringify(eventData, null, 2));
-    } else {
-      setValue('');
-    }
-  };
-
-  // Table columns configuration
-  const columns = useMemo(
-    () => [
-      {
-        field: '_source.@timestamp',
-        name: i18n.translate('workflows.workflowExecuteIndexForm.timestampColumn', {
-          defaultMessage: 'Timestamp',
-        }),
-        width: '200px',
-        sortable: true,
-        render: (timestamp: string) => (
-          <EuiText size="s">{new Date(timestamp).toLocaleString()}</EuiText>
-        ),
-      },
-      {
-        field: '_source',
-        name: i18n.translate('workflows.workflowExecuteIndexForm.documentColumn', {
-          defaultMessage: 'Document',
-        }),
-        render: (source: Document) => {
-          const flattened = flattenObject(source as Record<string, unknown>);
-
-          // Create a mock DataTableRecord-like object for formatHitReact
-          const mockRecord = {
-            raw: { _source: source },
-            flattened,
-            id: '',
-            isAnchor: false,
-          };
-
-          // Use formatHitReact to get properly formatted field pairs as ReactNodes
-          const formattedPairs =
-            selectedDataView && typeof selectedDataView.getFieldByName === 'function'
-              ? formatHitReact(
-                  mockRecord,
-                  selectedDataView,
-                  () => true, // Show all fields
-                  10, // Max entries
-                  services.fieldFormats,
-                  undefined
-                )
-              : [];
-
-          return (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiToken iconType="tokenString" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiDescriptionList type="inline">
-                  {formattedPairs.map(([title, description], index) => (
-                    <React.Fragment key={index}>
-                      <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        {description ?? '-'}
-                      </EuiDescriptionListDescription>
-                    </React.Fragment>
-                  ))}
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-    ],
+  const documentSummaryRenderer = useMemo(
+    () =>
+      createDocumentSummaryCellRenderer({
+        dataView: selectedDataView,
+        fieldFormats: services.fieldFormats,
+      }),
     [selectedDataView, services.fieldFormats]
   );
 
-  // Table selection configuration
-  const selection = {
+  const documentColumnLabel = i18n.translate('workflows.workflowExecuteIndexForm.documentColumn', {
+    defaultMessage: 'Document',
+  });
+
+  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
+    () => ({
+      document: ({ column }) => ({
+        ...column,
+        displayAsText: documentColumnLabel,
+        display: documentColumnLabel,
+      }),
+    }),
+    [documentColumnLabel]
+  );
+
+  const tableConfig: UseWorkflowExecuteHitTableConfigResult = useWorkflowExecuteHitTableConfig({
+    services,
+    dataView: selectedDataView,
+    hits,
+    defaultColumns: DEFAULT_DOCUMENT_TABLE_COLUMNS,
+    externalCustomRenderers: documentSummaryRenderer,
+    customGridColumnsConfiguration,
+    ensureColumnWhenOnlyTimeField: 'document',
     onSelectionChange: handleDocumentSelection,
-    selectable: () => true,
-    selectableMessage: (selectable: boolean) =>
-      !selectable
-        ? i18n.translate('workflows.workflowExecuteIndexForm.documentNotSelectable', {
-            defaultMessage: 'Document not selectable',
-          })
-        : '',
-  };
+    setErrors,
+  });
+
+  const tableLoadingState = resolveHitSearchTableLoadingState(documentsFetching, hits.length);
+
+  useEffect(() => {
+    if (hits.length === 0 && isTableGridFullScreen) {
+      onTableGridFullScreenChange?.(false);
+    }
+  }, [hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <DataViewPicker
-              trigger={{
-                'data-test-subj': 'workflow-data-view-selector',
-                label:
-                  selectedDataView?.name ||
-                  selectedDataView?.title ||
-                  i18n.translate('workflows.workflowExecuteIndexForm.selectDataView', {
-                    defaultMessage: 'Select data view',
-                  }),
-                fullWidth: true,
-                size: 's',
-              }}
-              savedDataViews={dataViews}
-              currentDataViewId={selectedDataView?.id}
-              onChangeDataView={handleDataViewChange}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SearchBar
-              key={selectedDataView?.id || 'no-dataview'}
-              appName="workflow_management"
-              useDefaultBehaviors={true}
-              onQueryChange={handleQueryChange}
-              onQuerySubmit={handleQuerySubmit}
-              query={query}
-              indexPatterns={selectedDataView ? [selectedDataView] : []}
-              showDatePicker={true}
-              dateRangeFrom={timeRange?.from || 'now-15m'}
-              dateRangeTo={timeRange?.to || 'now'}
-              showFilterBar={false}
-              showSubmitButton={true}
-              placeholder={i18n.translate('workflows.workflowExecuteIndexForm.searchPlaceholder', {
-                defaultMessage: 'Filter your data using KQL syntax',
-              })}
-              data-test-subj="workflow-query-input"
-              displayStyle="inPage"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    <EuiFlexGroup
+      className={WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS}
+      direction="column"
+      gutterSize="s"
+      css={css({
+        flex: 1,
+        minHeight: 0,
+        height: '100%',
+      })}
+    >
+      {!isTableGridFullScreen ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <DataViewPicker
+                trigger={{
+                  'data-test-subj': 'workflow-data-view-selector',
+                  label:
+                    selectedDataView?.name ||
+                    selectedDataView?.title ||
+                    i18n.translate('workflows.workflowExecuteIndexForm.selectDataView', {
+                      defaultMessage: 'Select data view',
+                    }),
+                  fullWidth: true,
+                  size: 's',
+                }}
+                savedDataViews={dataViews}
+                currentDataViewId={selectedDataView?.id}
+                onChangeDataView={handleDataViewChange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SearchBar
+                key={selectedDataView?.id || 'no-dataview'}
+                appName="workflow_management"
+                useDefaultBehaviors={true}
+                onQueryChange={handleQueryChange}
+                onQuerySubmit={handleQuerySubmit}
+                query={query}
+                indexPatterns={selectedDataView ? [selectedDataView] : []}
+                showDatePicker={true}
+                dateRangeFrom={timeRange?.from || 'now-15m'}
+                dateRangeTo={timeRange?.to || 'now'}
+                showFilterBar={false}
+                showSubmitButton={true}
+                placeholder={i18n.translate(
+                  'workflows.workflowExecuteIndexForm.searchPlaceholder',
+                  {
+                    defaultMessage: 'Filter your data using KQL syntax',
+                  }
+                )}
+                data-test-subj="workflow-query-input"
+                displayStyle="inPage"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
 
       {errors && (
         <EuiFlexItem grow={false}>
@@ -428,27 +431,33 @@ export const WorkflowExecuteIndexForm = ({
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <EuiInMemoryTable
-          items={documents}
-          columns={columns}
-          selection={selection}
-          loading={documentsLoading}
-          sorting={{
-            sort: {
-              field: '_source.@timestamp',
-              direction: 'desc',
-            },
-          }}
-          tableLayout="fixed"
-          itemId="_id"
-          tableCaption={i18n.translate('workflows.workflowExecuteIndexForm.tableCaption', {
-            defaultMessage: 'Documents list for workflow execution',
-          })}
-          data-test-subj="workflow-documents-table"
-          css={{ border: euiTheme.border.thin, paddingTop: '1px' }}
-        />
-      </EuiFlexItem>
+      <WorkflowExecuteUnifiedDataTable
+        dataTestSubj="workflowDocumentsTable"
+        fillHeight={true}
+        euiTheme={euiTheme}
+        tableSurfaceColor={tableSurfaceColor}
+        timestampCellTypography={tableConfig.timestampCellTypography}
+        tableLoadingState={tableLoadingState}
+        dataView={selectedDataView}
+        getNoCellActions={tableConfig.getNoCellActions}
+        visibleTableColumns={tableConfig.visibleTableColumns}
+        columnsMeta={tableConfig.columnsMeta}
+        dataTableRows={tableConfig.dataTableRows}
+        rowsLength={hits.length}
+        unifiedDataTableServices={tableConfig.unifiedDataTableServices}
+        handleUnifiedDataTableSetColumns={tableConfig.handleUnifiedDataTableSetColumns}
+        showTimeColumn={tableConfig.showTimeColumn}
+        sort={tableConfig.sort}
+        handleSortChange={tableConfig.handleSortChange}
+        customGridColumnsConfiguration={tableConfig.customGridColumnsConfiguration}
+        renderCustomToolbar={tableConfig.renderCustomToolbar}
+        renderCellPopover={tableConfig.renderCellPopover}
+        externalCustomRenderers={tableConfig.externalCustomRenderers}
+        totalHits={totalHits}
+        onFetchMoreRecords={onFetchMoreRecords}
+        isTableGridFullScreen={isTableGridFullScreen}
+        onDataGridFullScreenChange={onTableGridFullScreenChange}
+      />
     </EuiFlexGroup>
   );
 };
