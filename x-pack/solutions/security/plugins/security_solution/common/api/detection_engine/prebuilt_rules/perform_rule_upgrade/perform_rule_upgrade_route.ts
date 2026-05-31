@@ -111,17 +111,17 @@ export const RuleUpgradeSpecifier = z.object({
   fields: RuleFieldsToUpgrade.optional(),
 });
 
-export type UpgradeConflictResolution = z.infer<typeof UpgradeConflictResolution>;
-export const UpgradeConflictResolution = z.enum(['SKIP', 'UPGRADE_SOLVABLE']);
-export type UpgradeConflictResolutionEnum = typeof UpgradeConflictResolution.enum;
-export const UpgradeConflictResolutionEnum = UpgradeConflictResolution.enum;
+export type UpgradeConflictResolutionStrategy = z.infer<typeof UpgradeConflictResolutionStrategy>;
+export const UpgradeConflictResolutionStrategy = z.enum(['SKIP', 'UPGRADE_SOLVABLE']);
+export type UpgradeConflictResolutionStrategyEnum = typeof UpgradeConflictResolutionStrategy.enum;
+export const UpgradeConflictResolutionStrategyEnum = UpgradeConflictResolutionStrategy.enum;
 
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
   rules: z.array(RuleUpgradeSpecifier).min(1),
   pick_version: PickVersionValues.optional(),
-  on_conflict: UpgradeConflictResolution.optional(),
+  on_conflict: UpgradeConflictResolutionStrategy.optional(),
   dry_run: z.boolean().optional(),
 });
 
@@ -130,7 +130,7 @@ export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
   pick_version: PickVersionValues.optional(),
   filter: PrebuiltRulesFilter.optional(),
-  on_conflict: UpgradeConflictResolution.optional(),
+  on_conflict: UpgradeConflictResolutionStrategy.optional(),
   dry_run: z.boolean().optional(),
 });
 

@@ -13,7 +13,7 @@ import { isRuleCustomized } from '../../../../../../../common/detection_engine/r
 import {
   SkipRuleUpgradeReasonEnum,
   ThreeWayDiffConflict,
-  UpgradeConflictResolutionEnum,
+  UpgradeConflictResolutionStrategyEnum,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   SkippedRuleUpgrade,
@@ -21,6 +21,8 @@ import type {
   FullThreeWayRuleDiff,
   RuleUpgradeSpecifier,
   ThreeWayDiff,
+  PickVersionValues,
+  UpgradeConflictResolutionStrategy,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../../common/constants';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
@@ -34,13 +36,10 @@ import { calculateRuleDiff } from '../../../../prebuilt_rules/logic/diff/calcula
 import { zipRuleVersions } from '../../../../prebuilt_rules/logic/rule_versions/zip_rule_versions';
 import type { RuleTriad } from '../../../../prebuilt_rules/model/rule_groups/get_rule_groups';
 import type { RuleUpgradeContext } from '../../../../prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
-import { upgradePrebuiltRule as upgradePrebuiltRuleSingle } from './upgrade_prebuilt_rule';
-import type {
-  UpgradePrebuiltRulesArgs,
-  UpgradePrebuiltRulesResult,
-} from '../detection_rules_client_interface';
+import { applyPrebuiltRuleAsset } from '../util_methods/apply_prebuilt_rule_asset';
+import type { UpgradePrebuiltRulesResult } from '../detection_rules_client_interface';
 
-interface UpgradePrebuiltRulesOptions extends UpgradePrebuiltRulesArgs {
+interface UpgradePrebuiltRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
@@ -48,17 +47,21 @@ interface UpgradePrebuiltRulesOptions extends UpgradePrebuiltRulesArgs {
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
 }
 
-export const upgradePrebuiltRules = async ({
+interface UpgradePrebuiltRulesParams {
+  ruleSpecifiers: RuleUpgradeSpecifier[];
+  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  defaultPickVersion: PickVersionValues;
+  isDryRun: boolean;
+  deps: UpgradePrebuiltRulesDeps;
+}
+
+export async function upgradePrebuiltRules({
   ruleSpecifiers,
-  onConflict,
+  conflictResolutionStrategy,
   defaultPickVersion,
   isDryRun,
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  ruleAssetsClient,
-  ruleObjectsClient,
-}: UpgradePrebuiltRulesOptions): Promise<UpgradePrebuiltRulesResult> => {
+  deps: { actionsClient, rulesClient, mlAuthz, ruleAssetsClient, ruleObjectsClient },
+}: UpgradePrebuiltRulesParams): Promise<UpgradePrebuiltRulesResult> {
   const upgradeSpecifiers = new Map(ruleSpecifiers.map((r) => [r.rule_id, r]));
   const ruleUpgradeQueue = [...ruleSpecifiers];
 
@@ -118,7 +121,7 @@ export const upgradePrebuiltRules = async ({
         return;
       }
 
-      if (onConflict === UpgradeConflictResolutionEnum.SKIP) {
+      if (conflictResolutionStrategy === UpgradeConflictResolutionStrategyEnum.SKIP) {
         const ruleUpgradeSpecifier = upgradeSpecifiers.get(targetRule.rule_id);
         const { ruleDiff } = calculateRuleDiff(ruleVersions);
         const conflict = getRuleUpgradeConflictState(ruleDiff, ruleUpgradeSpecifier);
@@ -150,7 +153,7 @@ export const upgradePrebuiltRules = async ({
     } = createModifiedPrebuiltRuleAssets({
       upgradeableRules,
       globalPickVersion: defaultPickVersion,
-      onConflict,
+      conflictResolutionStrategy,
       upgradeSpecifiers,
     });
 
@@ -175,12 +178,14 @@ export const upgradePrebuiltRules = async ({
         concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
         items: modifiedPrebuiltRuleAssets,
         executor: async (rule) => {
-          return upgradePrebuiltRuleSingle({
-            actionsClient,
-            rulesClient,
-            ruleAsset: rule,
-            mlAuthz,
-            prebuiltRuleAssetClient: ruleAssetsClient,
+          return applyPrebuiltRuleAsset({
+            asset: rule,
+            deps: {
+              actionsClient,
+              rulesClient,
+              mlAuthz,
+              prebuiltRuleAssetClient: ruleAssetsClient,
+            },
             changeTracking,
           });
         },
@@ -199,7 +204,7 @@ export const upgradePrebuiltRules = async ({
   }
 
   return { updatedRules, skippedRules, errors, ruleUpgradeContexts: ruleUpgradeContextsMap };
-};
+}
 
 function getRuleUpgradeConflictState(
   ruleDiff: FullThreeWayRuleDiff,

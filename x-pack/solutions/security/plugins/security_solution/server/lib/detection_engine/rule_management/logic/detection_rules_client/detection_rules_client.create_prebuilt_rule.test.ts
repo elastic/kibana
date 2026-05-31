@@ -8,7 +8,7 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-
+import type { RuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   getCreateRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
@@ -32,12 +32,10 @@ describe('createPrebuiltRule behavior (via createRule with prebuilt params)', ()
     isSystemAction: jest.fn(() => false),
   } as unknown as jest.Mocked<ActionsClient>;
 
-  const callCreatePrebuiltRule = (params: Parameters<typeof createRule>[0]['rule']) =>
+  const callCreatePrebuiltRule = (params: RuleCreateProps) =>
     createRule({
-      actionsClient,
-      rulesClient,
-      mlAuthz,
       rule: { ...params, immutable: true },
+      deps: { actionsClient, rulesClient, mlAuthz },
       changeTracking: { action: SecurityRuleChangeTrackingAction.ruleInstall },
     });
 

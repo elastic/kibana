@@ -6,7 +6,10 @@
  */
 
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
-import type { PickVersionValues, RuleUpgradeSpecifier } from '../../../../../../common/api/detection_engine';
+import type {
+  PickVersionValues,
+  RuleUpgradeSpecifier,
+} from '../../../../../../common/api/detection_engine';
 
 describe('assertPickVersionIsTarget', () => {
   const ruleId = 'test-rule-id';
@@ -28,9 +31,7 @@ describe('assertPickVersionIsTarget', () => {
         pick_version: 'TARGET',
       };
 
-      expect(() =>
-        assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })
-      ).not.toThrow();
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).not.toThrow();
     });
 
     it('should not throw when all pick_version values are TARGET', () => {
@@ -56,9 +57,9 @@ describe('assertPickVersionIsTarget', () => {
       const pickVersions: PickVersionValues[] = ['BASE', 'CURRENT', 'MERGED'];
 
       pickVersions.forEach((globalPickVersion) => {
-        expect(() =>
-          assertPickVersionIsTarget({ ruleId, globalPickVersion })
-        ).toThrowError(createExpectedError(ruleId));
+        expect(() => assertPickVersionIsTarget({ ruleId, globalPickVersion })).toThrowError(
+          createExpectedError(ruleId)
+        );
       });
     });
 
@@ -70,9 +71,9 @@ describe('assertPickVersionIsTarget', () => {
         pick_version: 'BASE',
       };
 
-      expect(() =>
-        assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })
-      ).toThrowError(createExpectedError(ruleId));
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrowError(
+        createExpectedError(ruleId)
+      );
     });
 
     it('should throw when any field-specific pick_version is not TARGET', () => {
@@ -86,9 +87,9 @@ describe('assertPickVersionIsTarget', () => {
         },
       };
 
-      expect(() =>
-        assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })
-      ).toThrowError(createExpectedError(ruleId));
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrowError(
+        createExpectedError(ruleId)
+      );
     });
 
     it('should throw when pick_version is missing (defaults to MERGED)', () => {
@@ -98,9 +99,7 @@ describe('assertPickVersionIsTarget', () => {
         version: 1,
       };
 
-      expect(() =>
-        assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })
-      ).toThrow();
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrow();
     });
   });
 });

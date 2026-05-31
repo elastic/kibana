@@ -60,17 +60,11 @@ describe('revertPrebuiltRule', () => {
     },
   ];
 
-  const callRevertPrebuiltRule = (
-    asset: PrebuiltRuleAsset = ruleAsset,
-    existing = existingRule
-  ) =>
+  const callRevertPrebuiltRule = (asset: PrebuiltRuleAsset = ruleAsset, existing = existingRule) =>
     revertPrebuiltRule({
-      actionsClient,
-      rulesClient,
       ruleAsset: asset,
       existingRule: existing,
-      mlAuthz,
-      prebuiltRuleAssetClient,
+      deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
     });
 
   beforeEach(() => {

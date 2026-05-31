@@ -26,7 +26,7 @@ import {
   type PerformRuleUpgradeRequestBody,
   ThreeWayDiffConflict,
   SkipRuleUpgradeReasonEnum,
-  UpgradeConflictResolutionEnum,
+  UpgradeConflictResolutionStrategyEnum,
 } from '../../../../common/api/detection_engine';
 import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
@@ -485,7 +485,7 @@ function useRulesUpgradeWithDryRun(
       const dryRunResults = await upgradeRulesRequest({
         ...requestParams,
         dry_run: true,
-        on_conflict: UpgradeConflictResolutionEnum.SKIP,
+        on_conflict: UpgradeConflictResolutionStrategyEnum.SKIP,
       });
 
       const numOfRulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
@@ -503,7 +503,7 @@ function useRulesUpgradeWithDryRun(
         // There are no rule with conflicts
         await upgradeRulesRequest({
           ...requestParams,
-          on_conflict: UpgradeConflictResolutionEnum.SKIP,
+          on_conflict: UpgradeConflictResolutionStrategyEnum.SKIP,
         });
       } else {
         const result = await confirmConflictsUpgrade({
@@ -520,8 +520,8 @@ function useRulesUpgradeWithDryRun(
           ...requestParams,
           on_conflict:
             result === ConfirmRulesUpgrade.WithSolvableConflicts
-              ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
-              : UpgradeConflictResolutionEnum.SKIP,
+              ? UpgradeConflictResolutionStrategyEnum.UPGRADE_SOLVABLE
+              : UpgradeConflictResolutionStrategyEnum.SKIP,
         });
       }
     },

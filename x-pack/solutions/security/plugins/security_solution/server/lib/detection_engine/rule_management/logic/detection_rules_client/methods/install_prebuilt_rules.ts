@@ -22,12 +22,10 @@ import type { IPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logi
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { PREBUILT_RULE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
 import { createRule } from './create_rule';
-import type {
-  InstallPrebuiltRulesArgs,
-  InstallPrebuiltRulesResult,
-} from '../detection_rules_client_interface';
+import type { InstallPrebuiltRulesResult } from '../detection_rules_client_interface';
+import type { RuleVersionSpecifier } from '../../../../prebuilt_rules/logic/rule_versions/rule_version_specifier';
 
-interface InstallPrebuiltRulesOptions extends InstallPrebuiltRulesArgs {
+interface InstallPrebuiltRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
@@ -35,14 +33,15 @@ interface InstallPrebuiltRulesOptions extends InstallPrebuiltRulesArgs {
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
 }
 
-export const installPrebuiltRules = async ({
+interface InstallPrebuiltRulesParams {
+  ruleSpecifiers: Array<RuleVersionSpecifier>;
+  deps: InstallPrebuiltRulesDeps;
+}
+
+export async function installPrebuiltRules({
   ruleSpecifiers,
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  ruleAssetsClient,
-  ruleObjectsClient,
-}: InstallPrebuiltRulesOptions): Promise<InstallPrebuiltRulesResult> => {
+  deps: { actionsClient, rulesClient, mlAuthz, ruleAssetsClient, ruleObjectsClient },
+}: InstallPrebuiltRulesParams): Promise<InstallPrebuiltRulesResult> {
   const requestedRuleIds = ruleSpecifiers.map((ruleSpecifier) => ruleSpecifier.rule_id);
   const [latestVersions, installedVersions] = await Promise.all([
     ruleAssetsClient.fetchLatestVersions({ ruleIds: requestedRuleIds }),
@@ -92,10 +91,8 @@ export const installPrebuiltRules = async ({
       items: ruleAssets,
       executor: async (rule) => {
         return createRule({
-          actionsClient,
-          rulesClient,
-          mlAuthz,
           rule: { ...rule, immutable: true },
+          deps: { actionsClient, rulesClient, mlAuthz },
           changeTracking,
         });
       },
@@ -117,4 +114,4 @@ export const installPrebuiltRules = async ({
     skippedRules,
     errors: [...queueErrors, ...installErrors],
   };
-};
+}

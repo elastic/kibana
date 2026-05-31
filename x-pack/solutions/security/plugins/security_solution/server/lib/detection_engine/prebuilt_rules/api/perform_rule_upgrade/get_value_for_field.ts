@@ -8,7 +8,7 @@
 import type {
   PickVersionValues,
   AllThreeWayFieldsDiff,
-  UpgradeConflictResolution,
+  UpgradeConflictResolutionStrategy,
   RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -23,7 +23,7 @@ interface GetValueForFieldArgs {
   upgradeableRule: RuleTriad;
   globalPickVersion: PickVersionValues;
   upgradeSpecifier?: RuleUpgradeSpecifier;
-  onConflict?: UpgradeConflictResolution;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   ruleFieldsDiff: AllThreeWayFieldsDiff;
 }
 
@@ -32,7 +32,7 @@ export const getValueForField = ({
   upgradeableRule,
   globalPickVersion,
   upgradeSpecifier,
-  onConflict,
+  conflictResolutionStrategy,
   ruleFieldsDiff,
 }: GetValueForFieldArgs) => {
   const fieldStatus = getFieldPredefinedValue(fieldName, upgradeableRule);
@@ -51,7 +51,7 @@ export const getValueForField = ({
             pick_version: globalPickVersion,
           },
           ruleFieldsDiff,
-          onConflict,
+          conflictResolutionStrategy,
         })
       : getValueFromRuleTriad({
           fieldName,
@@ -81,7 +81,7 @@ export const getValueForField = ({
         upgradeableRule,
         fieldUpgradeSpecifier,
         ruleFieldsDiff,
-        onConflict,
+        conflictResolutionStrategy,
       })
     : getValueFromRuleTriad({
         fieldName,

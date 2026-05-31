@@ -14,27 +14,24 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleTriad } from '../../../../prebuilt_rules/model/rule_groups/get_rule_groups';
 import { revertPrebuiltRule } from './revert_prebuilt_rule';
-import type {
-  RevertPrebuiltRulesArgs,
-  RevertPrebuiltRulesResult,
-} from '../detection_rules_client_interface';
+import type { RevertPrebuiltRulesResult } from '../detection_rules_client_interface';
 
-interface RevertPrebuiltRulesOptions {
-  args: RevertPrebuiltRulesArgs;
+interface RevertPrebuiltRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
 }
 
-export const revertPrebuiltRules = async ({
-  args,
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  prebuiltRuleAssetClient,
-}: RevertPrebuiltRulesOptions): Promise<RevertPrebuiltRulesResult> => {
-  const { rules } = args;
+interface RevertPrebuiltRulesParams {
+  rules: RuleTriad[];
+  deps: RevertPrebuiltRulesDeps;
+}
+
+export async function revertPrebuiltRules({
+  rules,
+  deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
+}: RevertPrebuiltRulesParams): Promise<RevertPrebuiltRulesResult> {
   const changeTracking = { metadata: { bulkCount: rules.length } };
 
   return initPromisePool<RuleTriad, RuleResponse>({
@@ -42,14 +39,11 @@ export const revertPrebuiltRules = async ({
     items: rules,
     executor: async ({ current, target }) => {
       return revertPrebuiltRule({
-        actionsClient,
-        rulesClient,
         ruleAsset: target,
         existingRule: current,
-        mlAuthz,
-        prebuiltRuleAssetClient,
+        deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
         changeTracking,
       });
     },
   });
-};
+}

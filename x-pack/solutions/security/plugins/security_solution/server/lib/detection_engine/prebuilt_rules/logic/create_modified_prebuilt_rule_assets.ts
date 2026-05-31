@@ -14,10 +14,10 @@ import {
   MissingVersion,
 } from '../../../../../common/api/detection_engine';
 import type {
-  UpgradeConflictResolution,
+  UpgradeConflictResolutionStrategy,
   RuleUpgradeSpecifier,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
-import { UpgradeConflictResolutionEnum } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionStrategyEnum } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { convertRuleToDiffable } from '../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from '../api/perform_rule_upgrade/assert_pick_version_is_target';
@@ -31,7 +31,7 @@ import type { RuleUpgradeContext } from '../api/perform_rule_upgrade/update_rule
 export interface CreateModifiedPrebuiltRuleAssetsArgs {
   upgradeableRules: RuleTriad[];
   globalPickVersion: PickVersionValues;
-  onConflict?: UpgradeConflictResolution;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   upgradeSpecifiers?: Map<string, RuleUpgradeSpecifier>;
 }
 
@@ -44,7 +44,7 @@ interface ProcessedRules {
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   globalPickVersion,
-  onConflict,
+  conflictResolutionStrategy,
   upgradeSpecifiers,
 }: CreateModifiedPrebuiltRuleAssetsArgs) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
@@ -89,7 +89,7 @@ export const createModifiedPrebuiltRuleAssets = ({
             // For ALL_RULES mode with MERGED pick version, check for unresolvable conflicts
             if (upgradeSpecifiers === undefined && globalPickVersion === 'MERGED') {
               const fieldsWithConflicts = Object.keys(
-                getFieldsDiffConflicts(calculatedRuleDiff, onConflict)
+                getFieldsDiffConflicts(calculatedRuleDiff, conflictResolutionStrategy)
               );
               if (fieldsWithConflicts.length > 0) {
                 throw new Error(
@@ -105,7 +105,7 @@ export const createModifiedPrebuiltRuleAssets = ({
               fieldNames,
               globalPickVersion,
               upgradeSpecifier: upgradeSpecifiers?.get(ruleId),
-              onConflict,
+              conflictResolutionStrategy,
               calculatedRuleDiff,
             });
 
@@ -148,7 +148,7 @@ interface CreateModifiedPrebuiltRuleAssetParams {
   fieldNames: Array<keyof PrebuiltRuleAsset>;
   globalPickVersion: PickVersionValues;
   upgradeSpecifier?: RuleUpgradeSpecifier;
-  onConflict?: UpgradeConflictResolution;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   calculatedRuleDiff: AllThreeWayFieldsDiff;
 }
 
@@ -157,7 +157,7 @@ function createModifiedPrebuiltRuleAsset({
   fieldNames,
   globalPickVersion,
   upgradeSpecifier,
-  onConflict,
+  conflictResolutionStrategy,
   calculatedRuleDiff,
 }: CreateModifiedPrebuiltRuleAssetParams): PrebuiltRuleAsset {
   const modifiedPrebuiltRuleAsset = {} as Record<string, unknown>;
@@ -168,7 +168,7 @@ function createModifiedPrebuiltRuleAsset({
       upgradeableRule,
       globalPickVersion,
       upgradeSpecifier,
-      onConflict,
+      conflictResolutionStrategy,
       ruleFieldsDiff: calculatedRuleDiff,
     });
   }
@@ -178,10 +178,10 @@ function createModifiedPrebuiltRuleAsset({
 
 const getFieldsDiffConflicts = (
   ruleFieldsDiff: Partial<AllThreeWayFieldsDiff>,
-  onConflict?: UpgradeConflictResolution
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy
 ) =>
   pickBy(ruleFieldsDiff, (diff) =>
-    onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+    conflictResolutionStrategy === UpgradeConflictResolutionStrategyEnum.UPGRADE_SOLVABLE
       ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
       : diff.conflict !== 'NONE'
   );

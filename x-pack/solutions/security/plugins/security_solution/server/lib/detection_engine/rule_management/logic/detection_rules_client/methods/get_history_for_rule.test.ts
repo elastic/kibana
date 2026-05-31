@@ -22,7 +22,7 @@ describe('getHistoryForRule', () => {
   it('requests size = perPage + 1 with offset 0 for page 1', async () => {
     rulesClient.getHistory.mockResolvedValueOnce({ total: 0, items: buildItems(3) });
 
-    await getHistoryForRule({ rulesClient, ruleId: 'rule-1', page: 1, perPage: 2 });
+    await getHistoryForRule({ deps: { rulesClient }, ruleId: 'rule-1', page: 1, perPage: 2 });
 
     expect(rulesClient.getHistory).toHaveBeenCalledWith({
       module: 'security',
@@ -35,7 +35,7 @@ describe('getHistoryForRule', () => {
   it('requests size = perPage + 1 with the correct offset for page > 1', async () => {
     rulesClient.getHistory.mockResolvedValueOnce({ total: 0, items: buildItems(3) });
 
-    await getHistoryForRule({ rulesClient, ruleId: 'rule-1', page: 4, perPage: 2 });
+    await getHistoryForRule({ deps: { rulesClient }, ruleId: 'rule-1', page: 4, perPage: 2 });
 
     expect(rulesClient.getHistory).toHaveBeenCalledWith({
       module: 'security',
@@ -56,7 +56,7 @@ describe('getHistoryForRule', () => {
     });
 
     const result = await getHistoryForRule({
-      rulesClient,
+      deps: { rulesClient },
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -73,7 +73,7 @@ describe('getHistoryForRule', () => {
     rulesClient.getHistory.mockResolvedValueOnce({ total: 100, items: buildItems(3) });
 
     const result = await getHistoryForRule({
-      rulesClient,
+      deps: { rulesClient },
       ruleId: 'rule-1',
       page: 3,
       perPage: 2,
@@ -87,7 +87,7 @@ describe('getHistoryForRule', () => {
     rulesClient.getHistory.mockResolvedValueOnce({ total: 2, items: buildItems(2) });
 
     const result = await getHistoryForRule({
-      rulesClient,
+      deps: { rulesClient },
       ruleId: 'rule-1',
       page: 1,
       perPage: 1,

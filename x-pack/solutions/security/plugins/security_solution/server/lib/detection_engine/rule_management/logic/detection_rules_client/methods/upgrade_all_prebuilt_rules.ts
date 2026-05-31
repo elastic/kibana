@@ -7,19 +7,21 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleUpgradeSpecifier } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  RuleUpgradeSpecifier,
+  PickVersionValues,
+  UpgradeConflictResolutionStrategy,
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { PrebuiltRulesFilter } from '../../../../../../../common/api/detection_engine';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { IPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { getPossibleUpgrades } from '../../../../prebuilt_rules/logic/utils';
-import type {
-  UpgradeAllPrebuiltRulesArgs,
-  UpgradePrebuiltRulesResult,
-} from '../detection_rules_client_interface';
+import type { UpgradePrebuiltRulesResult } from '../detection_rules_client_interface';
 import { upgradePrebuiltRules } from './upgrade_prebuilt_rules';
 
-interface UpgradeAllPrebuiltRulesOptions extends UpgradeAllPrebuiltRulesArgs {
+interface UpgradeAllPrebuiltRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
@@ -27,17 +29,22 @@ interface UpgradeAllPrebuiltRulesOptions extends UpgradeAllPrebuiltRulesArgs {
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
 }
 
-export const upgradeAllPrebuiltRules = async ({
+interface UpgradeAllPrebuiltRulesParams {
+  filter?: PrebuiltRulesFilter;
+  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  defaultPickVersion: PickVersionValues;
+  isDryRun: boolean;
+  deps: UpgradeAllPrebuiltRulesDeps;
+}
+
+export async function upgradeAllPrebuiltRules({
   filter,
-  onConflict,
+  conflictResolutionStrategy,
   defaultPickVersion,
   isDryRun,
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  ruleAssetsClient,
-  ruleObjectsClient,
-}: UpgradeAllPrebuiltRulesOptions): Promise<UpgradePrebuiltRulesResult> => {
+  deps,
+}: UpgradeAllPrebuiltRulesParams): Promise<UpgradePrebuiltRulesResult> {
+  const { mlAuthz, ruleAssetsClient, ruleObjectsClient } = deps;
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const latestVersionsMap = new Map(allLatestVersions.map((v) => [v.rule_id, v]));
   const kqlFilter = filter
@@ -54,13 +61,9 @@ export const upgradeAllPrebuiltRules = async ({
   // skipped when revision is absent (undefined != null is false), which is correct for ALL_RULES.
   return upgradePrebuiltRules({
     ruleSpecifiers: upgradableRules as unknown as RuleUpgradeSpecifier[],
-    onConflict,
+    conflictResolutionStrategy,
     defaultPickVersion,
     isDryRun,
-    actionsClient,
-    rulesClient,
-    mlAuthz,
-    ruleAssetsClient,
-    ruleObjectsClient,
+    deps,
   });
-};
+}

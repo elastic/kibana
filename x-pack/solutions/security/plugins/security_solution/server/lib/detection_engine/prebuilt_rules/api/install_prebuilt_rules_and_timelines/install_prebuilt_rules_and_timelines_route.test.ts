@@ -94,6 +94,11 @@ describe('add_prepackaged_rules_route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.installAllPrebuiltRules.mockResolvedValue({
+      installedRules: [],
+      skippedRules: [],
+      errors: [],
+    });
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -127,6 +132,12 @@ describe('add_prepackaged_rules_route', () => {
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.detectionRulesClient.installAllPrebuiltRules.mockResolvedValue({
+        installedRules: [{ id: 'rule-1', rule_id: 'rule-1', version: 2 }],
+        skippedRules: [],
+        errors: [],
+      });
+
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -250,6 +261,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        context.actions.getActionsClient(),
         clients.logger,
         mockExceptionsClient
       );
@@ -264,6 +276,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        context.actions.getActionsClient(),
         clients.logger,
         mockExceptionsClient
       );

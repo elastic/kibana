@@ -13,15 +13,15 @@ import type {
 import type { RuleParams } from '../../../../rule_schema';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 
-interface GethRuleByIdOptions {
-  rulesClient: RulesClient;
+interface GetRuleByIdParams {
   id: RuleObjectId;
+  rulesClient: RulesClient;
 }
 
-export const getRuleById = async ({
-  rulesClient,
+export async function getRuleById({
   id,
-}: GethRuleByIdOptions): Promise<RuleResponse | null> => {
+  rulesClient,
+}: GetRuleByIdParams): Promise<RuleResponse | null> {
   try {
     const rule = await rulesClient.resolve<RuleParams>({ id });
     return convertAlertingRuleToRuleResponse(rule);
@@ -31,4 +31,4 @@ export const getRuleById = async ({
     }
     throw err;
   }
-};
+}

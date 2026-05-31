@@ -95,8 +95,6 @@ export const createDetectionRulesClient = ({
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
         return createRule({
-          actionsClient,
-          rulesClient,
           rule: {
             ...args.params,
             // For backwards compatibility, we default to true if not provided.
@@ -105,7 +103,7 @@ export const createDetectionRulesClient = ({
             enabled: args.params.enabled ?? true,
             immutable: false,
           },
-          mlAuthz,
+          deps: { actionsClient, rulesClient, mlAuthz },
           changeTracking: args.changeTracking,
         });
       });
@@ -114,12 +112,8 @@ export const createDetectionRulesClient = ({
     async updateRule({ ruleUpdate, changeTracking }: UpdateRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
         return updateRule({
-          actionsClient,
-          rulesClient,
-          prebuiltRuleAssetClient,
-          mlAuthz,
-          rulesAuthz,
           ruleUpdate,
+          deps: { actionsClient, rulesClient, prebuiltRuleAssetClient, mlAuthz, rulesAuthz },
           changeTracking,
         });
       });
@@ -128,12 +122,8 @@ export const createDetectionRulesClient = ({
     async patchRule({ rulePatch, changeTracking }: PatchRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
         return patchRule({
-          actionsClient,
-          rulesClient,
-          prebuiltRuleAssetClient,
-          mlAuthz,
-          rulesAuthz,
           rulePatch,
+          deps: { actionsClient, rulesClient, prebuiltRuleAssetClient, mlAuthz, rulesAuthz },
           changeTracking,
         });
       });
@@ -141,7 +131,7 @@ export const createDetectionRulesClient = ({
 
     async deleteRule({ ruleId }: DeleteRuleArgs): Promise<void> {
       return withSecuritySpan('DetectionRulesClient.deleteRule', async () => {
-        return deleteRule({ rulesClient, ruleId });
+        return deleteRule({ ruleId, rulesClient });
       });
     },
 
@@ -150,19 +140,27 @@ export const createDetectionRulesClient = ({
       changeTracking,
     }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds, changeTracking });
+        return bulkDeleteRules({ ruleIds, rulesClient, changeTracking });
       });
     },
 
     async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
         return importRules({
-          ...args,
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-          savedObjectsClient,
+          rulesToImport: args.rules,
+          importOptions: {
+            overwriteRules: args.overwriteRules,
+            allowMissingConnectorSecrets: args.allowMissingConnectorSecrets,
+          },
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            prebuiltRuleAssetClient,
+            savedObjectsClient,
+            ruleSourceImporter: args.ruleSourceImporter,
+          },
+          changeTracking: args.changeTracking,
         });
       });
     },
@@ -173,11 +171,13 @@ export const createDetectionRulesClient = ({
       return withSecuritySpan('DetectionRulesClient.installPrebuiltRules', async () => {
         return installPrebuiltRules({
           ...args,
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          ruleAssetsClient: prebuiltRuleAssetClient,
-          ruleObjectsClient: prebuiltRuleObjectsClient,
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            ruleAssetsClient: prebuiltRuleAssetClient,
+            ruleObjectsClient: prebuiltRuleObjectsClient,
+          },
         });
       });
     },
@@ -185,11 +185,13 @@ export const createDetectionRulesClient = ({
     async installAllPrebuiltRules(): Promise<InstallPrebuiltRulesResult> {
       return withSecuritySpan('DetectionRulesClient.installAllPrebuiltRules', async () => {
         return installAllPrebuiltRules({
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          ruleAssetsClient: prebuiltRuleAssetClient,
-          ruleObjectsClient: prebuiltRuleObjectsClient,
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            ruleAssetsClient: prebuiltRuleAssetClient,
+            ruleObjectsClient: prebuiltRuleObjectsClient,
+          },
         });
       });
     },
@@ -200,11 +202,13 @@ export const createDetectionRulesClient = ({
       return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRules', async () => {
         return upgradePrebuiltRules({
           ...args,
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          ruleAssetsClient: prebuiltRuleAssetClient,
-          ruleObjectsClient: prebuiltRuleObjectsClient,
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            ruleAssetsClient: prebuiltRuleAssetClient,
+            ruleObjectsClient: prebuiltRuleObjectsClient,
+          },
         });
       });
     },
@@ -215,11 +219,13 @@ export const createDetectionRulesClient = ({
       return withSecuritySpan('DetectionRulesClient.upgradeAllPrebuiltRules', async () => {
         return upgradeAllPrebuiltRules({
           ...args,
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          ruleAssetsClient: prebuiltRuleAssetClient,
-          ruleObjectsClient: prebuiltRuleObjectsClient,
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            ruleAssetsClient: prebuiltRuleAssetClient,
+            ruleObjectsClient: prebuiltRuleObjectsClient,
+          },
         });
       });
     },
@@ -227,18 +233,20 @@ export const createDetectionRulesClient = ({
     async revertPrebuiltRules(args: RevertPrebuiltRulesArgs): Promise<RevertPrebuiltRulesResult> {
       return withSecuritySpan('DetectionRulesClient.revertPrebuiltRules', async () => {
         return revertPrebuiltRules({
-          args,
-          actionsClient,
-          rulesClient,
-          mlAuthz,
-          prebuiltRuleAssetClient,
+          rules: args.rules,
+          deps: {
+            actionsClient,
+            rulesClient,
+            mlAuthz,
+            prebuiltRuleAssetClient,
+          },
         });
       });
     },
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, ...args });
+        return getHistoryForRule({ ...args, deps: { rulesClient } });
       });
     },
   };

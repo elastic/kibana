@@ -8,11 +8,16 @@
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import { applyPrebuiltRuleAssets } from '../../../rule_management/logic/detection_rules_client/util_methods/apply_prebuilt_rule_assets';
+import { getRulesToUpdate } from '../../logic/get_rules_to_update';
+import { rulesToMap } from '../../logic/utils';
+import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 
 export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
@@ -30,6 +35,7 @@ export class PrepackagedRulesError extends Error {
 export const legacyCreatePrepackagedRules = async (
   context: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
+  actionsClient: ActionsClient,
   logger: Logger,
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
@@ -38,6 +44,7 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const mlAuthz = context.getMlAuthz();
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -49,6 +56,16 @@ export const legacyCreatePrepackagedRules = async (
   }
 
   await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
+
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  const installedPrebuiltRules = rulesToMap(
+    await getExistingPrepackagedRules({ rulesClient, logger })
+  );
+  const rulesToUpdate = await getRulesToUpdate(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
 
   const { installedRules, errors: installErrors } =
     await detectionRulesClient.installAllPrebuiltRules();
@@ -62,15 +79,14 @@ export const legacyCreatePrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  const { updatedRules } = await detectionRulesClient.upgradeAllPrebuiltRules({
-    onConflict: 'UPGRADE_SOLVABLE',
-    defaultPickVersion: 'TARGET',
-    isDryRun: false,
+  await applyPrebuiltRuleAssets({
+    assets: rulesToUpdate,
+    deps: { actionsClient, rulesClient, mlAuthz, ruleAssetsClient },
   });
 
   return {
     rules_installed: installedRules.length,
-    rules_updated: updatedRules.length,
+    rules_updated: rulesToUpdate.length,
     timelines_installed: timelinesResult?.timelines_installed ?? 0,
     timelines_updated: timelinesResult?.timelines_updated ?? 0,
   };

@@ -11,7 +11,10 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import { getCreateRulesSchemaMock, getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import {
+  getCreateRulesSchemaMock,
+  getRulesSchemaMock,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
@@ -117,7 +120,6 @@ describe('DetectionRulesClient change tracking', () => {
         })
       );
     });
-
   });
 
   describe('changeTracking.bulkCount', () => {

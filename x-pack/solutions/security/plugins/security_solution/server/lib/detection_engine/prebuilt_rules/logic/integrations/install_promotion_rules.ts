@@ -118,7 +118,7 @@ export async function installPromotionRules({
       version,
       revision: revisionMap.get(rule_id) ?? 0,
     })),
-    onConflict: 'UPGRADE_SOLVABLE',
+    conflictResolutionStrategy: 'UPGRADE_SOLVABLE',
     defaultPickVersion: 'TARGET',
     isDryRun: false,
   });

@@ -48,7 +48,7 @@ export const revertPrebuiltRuleHandler = async (
     const updated: RuleResponse[] = [];
     const errors: BulkActionError[] = [];
 
-    const ruleResponse = await getRuleById({ rulesClient, id });
+    const ruleResponse = await getRuleById({ id, rulesClient });
 
     if (!ruleResponse) {
       errors.push(

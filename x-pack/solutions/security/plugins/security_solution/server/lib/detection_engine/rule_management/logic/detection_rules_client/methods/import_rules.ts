@@ -28,34 +28,45 @@ import { importRule } from './import_rule';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-/**
- * Imports rules in batches of 50, setting bulkCount to the total number of rules.
- */
+interface ImportRulesParams {
+  rulesToImport: RuleToImport[];
+  importOptions: ImportOptions;
+  deps: ImportRulesDeps;
+  changeTracking?: SecurityRuleChangeTracking<never>;
+}
 
-export const importRules = async ({
-  allowMissingConnectorSecrets,
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  prebuiltRuleAssetClient,
-  overwriteRules,
-  ruleSourceImporter,
-  rules,
-  savedObjectsClient,
-  changeTracking,
-}: {
+interface ImportOptions {
+  overwriteRules: boolean;
   allowMissingConnectorSecrets?: boolean;
+}
+
+interface ImportRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  overwriteRules: boolean;
   ruleSourceImporter: IRuleSourceImporter;
-  rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
-  const bulkCount = rules.length;
+}
+
+/**
+ * Imports rules in batches of 50, setting bulkCount to the total number of rules.
+ */
+
+export async function importRules({
+  rulesToImport,
+  importOptions: { overwriteRules, allowMissingConnectorSecrets },
+  deps: {
+    actionsClient,
+    rulesClient,
+    mlAuthz,
+    prebuiltRuleAssetClient,
+    ruleSourceImporter,
+    savedObjectsClient,
+  },
+  changeTracking,
+}: ImportRulesParams): Promise<Array<RuleResponse | RuleImportErrorObject>> {
+  const bulkCount = rulesToImport.length;
   const trackingWithBulkCount: SecurityRuleChangeTracking<never> = {
     ...changeTracking,
     metadata: {
@@ -65,14 +76,14 @@ export const importRules = async ({
   };
 
   const existingLists = await getReferencedExceptionLists({
-    rules,
+    rules: rulesToImport,
     savedObjectsClient,
   });
-  await ruleSourceImporter.setup(rules);
+  await ruleSourceImporter.setup(rulesToImport);
 
   const allResults: Array<RuleResponse | RuleImportErrorObject> = [];
 
-  for (const rulesBatch of chunk(rules, CHUNK_PARSED_OBJECT_SIZE)) {
+  for (const rulesBatch of chunk(rulesToImport, CHUNK_PARSED_OBJECT_SIZE)) {
     const batchResults = await Promise.all(
       rulesBatch.map(async (rule) => {
         const errors: RuleImportErrorObject[] = [];
@@ -104,20 +115,16 @@ export const importRules = async ({
 
           const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
           const importedRule = await importRule({
-            actionsClient,
-            rulesClient,
-            mlAuthz,
-            prebuiltRuleAssetClient,
-            importRulePayload: {
-              ruleToImport: {
-                ...rule,
-                exceptions_list: [...exceptions],
-              },
-              changeTracking: trackingWithBulkCount,
-              overrideFields: { rule_source: ruleSource, immutable },
-              overwriteRules,
-              allowMissingConnectorSecrets,
+            ruleToImport: {
+              ...rule,
+              exceptions_list: [...exceptions],
             },
+            importOptions: {
+              overwriteRule: overwriteRules,
+              allowMissingConnectorSecrets,
+              overrideFields: { rule_source: ruleSource, immutable },
+            },
+            deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
             changeTracking: trackingWithBulkCount,
           });
 
@@ -141,4 +148,4 @@ export const importRules = async ({
   }
 
   return allResults;
-};
+}

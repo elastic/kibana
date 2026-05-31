@@ -45,10 +45,12 @@ export const installPrebuiltRulesAndTimelinesRoute = (
 
         try {
           const rulesClient = await (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const validated = await legacyCreatePrepackagedRules(
             await context.securitySolution,
             rulesClient,
+            actionsClient,
             logger,
             undefined
           );

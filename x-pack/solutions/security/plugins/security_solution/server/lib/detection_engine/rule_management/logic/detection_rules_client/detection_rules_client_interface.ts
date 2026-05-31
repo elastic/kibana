@@ -23,7 +23,7 @@ import type {
   UpgradedRuleBasicInfo,
   RuleUpgradeSpecifier,
   PickVersionValues,
-  UpgradeConflictResolution,
+  UpgradeConflictResolutionStrategy,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleChangesHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
@@ -108,14 +108,14 @@ export interface InstallPrebuiltRulesResult {
 
 export interface UpgradePrebuiltRulesArgs {
   ruleSpecifiers: RuleUpgradeSpecifier[];
-  onConflict: UpgradeConflictResolution;
+  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
 }
 
 export interface UpgradeAllPrebuiltRulesArgs {
   filter?: PrebuiltRulesFilter;
-  onConflict: UpgradeConflictResolution;
+  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
 }

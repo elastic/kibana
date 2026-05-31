@@ -14,7 +14,7 @@ import { excludeLicenseRestrictedRules } from '../../../../prebuilt_rules/logic/
 import type { InstallPrebuiltRulesResult } from '../detection_rules_client_interface';
 import { installPrebuiltRules } from './install_prebuilt_rules';
 
-interface InstallAllPrebuiltRulesOptions {
+interface InstallAllPrebuiltRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
@@ -22,13 +22,14 @@ interface InstallAllPrebuiltRulesOptions {
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
 }
 
-export const installAllPrebuiltRules = async ({
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  ruleAssetsClient,
-  ruleObjectsClient,
-}: InstallAllPrebuiltRulesOptions): Promise<InstallPrebuiltRulesResult> => {
+interface InstallAllPrebuiltRulesParams {
+  deps: InstallAllPrebuiltRulesDeps;
+}
+
+export async function installAllPrebuiltRules({
+  deps,
+}: InstallAllPrebuiltRulesParams): Promise<InstallPrebuiltRulesResult> {
+  const { mlAuthz, ruleAssetsClient, ruleObjectsClient } = deps;
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
   const currentRuleVersionsMap = new Map(currentRuleVersions.map((v) => [v.rule_id, v]));
@@ -39,10 +40,6 @@ export const installAllPrebuiltRules = async ({
 
   return installPrebuiltRules({
     ruleSpecifiers,
-    actionsClient,
-    rulesClient,
-    mlAuthz,
-    ruleAssetsClient,
-    ruleObjectsClient,
+    deps,
   });
-};
+}

@@ -10,48 +10,59 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleResponse,
+  RuleSource,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleToImport } from '../../../../../../../common/api/detection_engine';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import type { ImportRuleArgs } from '../detection_rules_client_interface';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { createRuleImportErrorObject } from '../../import/errors';
 
-interface ImportRuleOptions {
+interface ImportOptions {
+  overwriteRule?: boolean;
+  allowMissingConnectorSecrets?: boolean;
+  overrideFields?: { rule_source: RuleSource; immutable: boolean };
+}
+
+interface ImportRuleDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
+}
+
+interface ImportRuleParams {
+  ruleToImport: RuleToImport;
+  importOptions?: ImportOptions;
+  deps: ImportRuleDeps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
-export const importRule = async ({
-  actionsClient,
-  rulesClient,
-  importRulePayload,
-  prebuiltRuleAssetClient,
-  mlAuthz,
+export async function importRule({
+  ruleToImport,
+  importOptions,
+  deps: { actionsClient, rulesClient, prebuiltRuleAssetClient, mlAuthz },
   changeTracking,
-}: ImportRuleOptions): Promise<RuleResponse> => {
-  const { ruleToImport, overwriteRules, overrideFields, allowMissingConnectorSecrets } =
-    importRulePayload;
+}: ImportRuleParams): Promise<RuleResponse> {
+  const { overwriteRule, allowMissingConnectorSecrets, overrideFields } = importOptions ?? {};
   // For backwards compatibility, immutable is false by default
   const rule = { ...ruleToImport, immutable: false, ...overrideFields };
 
   await validateMlAuth(mlAuthz, ruleToImport.type);
 
   const existingRule = await getRuleByRuleId({
-    rulesClient,
     ruleId: rule.rule_id,
+    rulesClient,
   });
 
-  if (existingRule && !overwriteRules) {
+  if (existingRule && !overwriteRule) {
     throw createRuleImportErrorObject({
       ruleId: existingRule.rule_id,
       type: 'conflict',
@@ -59,7 +70,7 @@ export const importRule = async ({
     });
   }
 
-  if (existingRule && overwriteRules) {
+  if (existingRule && overwriteRule) {
     let ruleWithUpdates = await applyRuleUpdate({
       prebuiltRuleAssetClient,
       existingRule,
@@ -82,11 +93,9 @@ export const importRule = async ({
 
   /* Rule does not exist, so we'll create it */
   return createRule({
-    actionsClient,
-    rulesClient,
-    mlAuthz,
     rule,
     allowMissingConnectorSecrets,
+    deps: { actionsClient, rulesClient, mlAuthz },
     changeTracking: { ...changeTracking, action: SecurityRuleChangeTrackingAction.ruleImport },
   });
-};
+}
