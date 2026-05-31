@@ -16,6 +16,7 @@ export interface HostRef {
 export interface ActionIntent {
   type: ActionType;
   hostName: string;
+  rawInput?: string;
 }
 
 export interface ActionResult {
@@ -23,4 +24,9 @@ export interface ActionResult {
   status: 'pending' | 'completed' | 'failed';
   errorMessage?: string;
   timestamp: string;
+}
+
+export interface PendingActionState {
+  actionId: string;
+  status: 'pending' | 'completed' | 'failed';
 }

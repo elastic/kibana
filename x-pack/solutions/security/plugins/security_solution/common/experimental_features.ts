@@ -97,6 +97,12 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   * Release: TBD
+   */
+  endpointResponseActionsSkill: true,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,

@@ -33,6 +33,7 @@ import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { createDetectionCoverageSkill } from './detection_coverage';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
+import { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
@@ -126,6 +127,10 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.endpointForensicAnalysisSkill) {
     await agentBuilder.skills.register(endpointForensicAnalysisSkill);
+  }
+
+  if (experimentalFeatures.endpointResponseActionsSkill) {
+    agentBuilder.skills.register(endpointResponseActionsSkill);
   }
 
   if (experimentalFeatures.investigateRuleSkill) {

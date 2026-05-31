@@ -15,3 +15,4 @@ export { createFindRulesSkill } from './find_rules';
 export { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 export { createDetectionCoverageSkill } from './detection_coverage';
 export { registerSkills } from './register_skills';
+export { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';

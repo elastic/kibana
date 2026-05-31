@@ -19,7 +19,7 @@ export class Semaphore {
   private readonly queue: Array<() => void>;
 
   constructor(maxConcurrent = MAX_CONCURRENT_ACTIONS) {
-    this.max = maxConcurrent;
+    this.max = maxConcurrent > 0 ? maxConcurrent : MAX_CONCURRENT_ACTIONS;
     this.count = 0;
     this.queue = [];
   }
