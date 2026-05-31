@@ -7,7 +7,10 @@
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
+} from '@kbn/elastic-assistant-common';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
@@ -45,6 +48,7 @@ export const searchUnifiedAlertsRoute = (
           const indexPattern = [
             ...(alertsIndex ? [alertsIndex] : []), // Detection alerts
             `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Attack alerts
+            `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Adhoc attack alerts
           ];
           return indexPattern;
         };
