@@ -721,6 +721,22 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('disables execute button when there are errors', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Manual').closest('button')!);
+
+      const executeButton = getByTestId('executeWorkflowButton');
+      expect(executeButton).not.toBeDisabled();
+    });
+
+    it('disables execute button on the alert tab when no rows are selected', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -730,8 +746,68 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const executeButton = getByTestId('executeWorkflowButton');
-      expect(executeButton).not.toBeDisabled();
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('enables execute button on the alert tab when rows are selected', () => {
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { setValue?: (value: string) => void }
+        | undefined;
+
+      act(() => {
+        lastAlertFormProps!.setValue!('{"event":{"alertIds":[]}}');
+      });
+
+      expect(getByTestId('executeWorkflowButton')).not.toBeDisabled();
+    });
+
+    it('disables execute button on the document tab when no rows are selected', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Document').closest('button')!);
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('enables execute button on the document tab when rows are selected', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Document').closest('button')!);
+
+      const indexFormCalls = mockWorkflowExecuteIndexForm.mock.calls;
+      const lastIndexFormProps = indexFormCalls[indexFormCalls.length - 1]?.[0] as
+        | { setValue?: (value: string) => void }
+        | undefined;
+
+      act(() => {
+        lastIndexFormProps!.setValue!('{"event":{"documents":[]}}');
+      });
+
+      expect(getByTestId('executeWorkflowButton')).not.toBeDisabled();
     });
 
     it('disables execute button when the event trigger reports multiple table row selections', () => {

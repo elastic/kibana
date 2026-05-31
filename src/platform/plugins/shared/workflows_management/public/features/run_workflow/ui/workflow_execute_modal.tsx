@@ -163,6 +163,22 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         );
         return;
       }
+      if (selectedTrigger === 'alert' && trimmed === '') {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.alertSelectionRequired', {
+            defaultMessage: 'Select one or more alerts to use as the run input.',
+          })
+        );
+        return;
+      }
+      if (selectedTrigger === 'index' && trimmed === '') {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.documentSelectionRequired', {
+            defaultMessage: 'Select one or more documents to use as the run input.',
+          })
+        );
+        return;
+      }
       if (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1) {
         setExecutionInputErrors(
           i18n.translate('workflows.workflowExecuteModal.eventMultipleRowsSelected', {
@@ -326,10 +342,13 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       selectedTrigger === 'manual' ||
       selectedTrigger === 'historical';
 
+    const isHitTableTriggerTab =
+      selectedTrigger === 'alert' || selectedTrigger === 'index' || selectedTrigger === 'event';
+
     const runIsDisabled =
       !canExecuteWorkflow ||
       Boolean(executionInputErrors) ||
-      (selectedTrigger === 'event' && executionInput.trim() === '') ||
+      (isHitTableTriggerTab && executionInput.trim() === '') ||
       (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1);
 
     const renderRunWorkflowButton = () => (
