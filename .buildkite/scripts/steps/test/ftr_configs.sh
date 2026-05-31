@@ -12,9 +12,9 @@ if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; the
   exit 1
 fi
 
-BAIL_ARG=""
+BAIL_ARG="--bail"
 if [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]; then
-  BAIL_ARG="--bail"
+  BAIL_ARG=""
 fi
 
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
