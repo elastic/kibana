@@ -10,15 +10,9 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
-import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
-import { getRulesToInstall } from '../../logic/get_rules_to_install';
-import { getRulesToUpdate } from '../../logic/get_rules_to_update';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
-import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
-import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
-import { rulesToMap } from '../../logic/utils';
 
 export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
@@ -31,7 +25,7 @@ export class PrepackagedRulesError extends Error {
 /**
  * @deprecated This method is incompatible with prebuilt rules customization as
  * it upgrades prebuilt rules to their 'target' version erasing any
- * customizations. Use createPrebuiltRules instead.
+ * customizations. Use DetectionRulesClient.installPrebuiltRules instead.
  */
 export const legacyCreatePrepackagedRules = async (
   context: SecuritySolutionApiRequestHandlerContext,
@@ -44,7 +38,6 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-  const mlAuthz = context.getMlAuthz();
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -57,49 +50,27 @@ export const legacyCreatePrepackagedRules = async (
 
   await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
-  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
-  const installedPrebuiltRules = rulesToMap(
-    await getExistingPrepackagedRules({ rulesClient, logger })
-  );
-  const rulesToInstall = await getRulesToInstall(
-    latestPrebuiltRules,
-    installedPrebuiltRules,
-    mlAuthz
-  );
-  const rulesToUpdate = await getRulesToUpdate(
-    latestPrebuiltRules,
-    installedPrebuiltRules,
-    mlAuthz
-  );
+  const { installedRules, errors: installErrors } =
+    await detectionRulesClient.installAllPrebuiltRules();
 
-  const installChangeTracking = {
-    metadata: {
-      bulkCount: rulesToInstall.length,
-    },
-  };
-  const ruleCreationResult = await createPrebuiltRules(
-    detectionRulesClient,
-    rulesToInstall,
-    installChangeTracking,
-    logger
-  );
-
-  if (ruleCreationResult.errors.length > 0) {
-    throw new AggregateError(ruleCreationResult.errors, 'Error installing new prebuilt rules');
+  if (installErrors.length > 0) {
+    throw new AggregateError(
+      installErrors.map((e) => e.error),
+      'Error installing new prebuilt rules'
+    );
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  const upgradeChangeTracking = {
-    metadata: {
-      bulkCount: rulesToUpdate.length,
-    },
-  };
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
+  const { updatedRules } = await detectionRulesClient.upgradeAllPrebuiltRules({
+    onConflict: 'UPGRADE_SOLVABLE',
+    defaultPickVersion: 'TARGET',
+    isDryRun: false,
+  });
 
   return {
-    rules_installed: rulesToInstall.length,
-    rules_updated: rulesToUpdate.length,
+    rules_installed: installedRules.length,
+    rules_updated: updatedRules.length,
     timelines_installed: timelinesResult?.timelines_installed ?? 0,
     timelines_updated: timelinesResult?.timelines_updated ?? 0,
   };

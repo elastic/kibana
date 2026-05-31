@@ -12,15 +12,16 @@ export type DetectionRulesClientMock = jest.Mocked<IDetectionRulesClient>;
 const createDetectionRulesClientMock = () => {
   const mocked: DetectionRulesClientMock = {
     createCustomRule: jest.fn(),
-    createPrebuiltRule: jest.fn(),
     updateRule: jest.fn(),
     patchRule: jest.fn(),
     deleteRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
-    upgradePrebuiltRule: jest.fn(),
-    revertPrebuiltRule: jest.fn(),
-    importRule: jest.fn(),
     importRules: jest.fn(),
+    installPrebuiltRules: jest.fn(),
+    installAllPrebuiltRules: jest.fn(),
+    upgradePrebuiltRules: jest.fn(),
+    upgradeAllPrebuiltRules: jest.fn(),
+    revertPrebuiltRules: jest.fn(),
     getRuleCustomizationStatus: jest.fn(),
     getHistoryForRule: jest.fn(),
   };

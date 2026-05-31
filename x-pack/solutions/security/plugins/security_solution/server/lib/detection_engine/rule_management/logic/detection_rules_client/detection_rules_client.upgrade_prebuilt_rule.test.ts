@@ -21,42 +21,41 @@ import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { createDetectionRulesClient } from './detection_rules_client';
-import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
-import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 jest.mock('./methods/get_rule_by_rule_id');
+jest.mock('../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client');
 
-describe('DetectionRulesClient.upgradePrebuiltRule', () => {
+describe('upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let detectionRulesClient: IDetectionRulesClient;
+  let prebuiltRuleAssetClient: ReturnType<typeof createPrebuiltRuleAssetsClient>;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
     isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
+
+  const callUpgradePrebuiltRule = (ruleAsset: PrebuiltRuleAsset) =>
+    upgradePrebuiltRule({
+      actionsClient,
+      rulesClient,
+      ruleAsset,
+      mlAuthz,
+      prebuiltRuleAssetClient,
+    });
 
   beforeEach(() => {
     actionsClient = {
       isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
     } as unknown as jest.Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
-    const savedObjectsClient = savedObjectsClientMock.create();
-    detectionRulesClient = createDetectionRulesClient({
-      actionsClient,
-      rulesClient,
-      mlAuthz,
-      rulesAuthz,
-      savedObjectsClient,
-      license: licenseMock.createLicenseMock(),
-      productFeaturesService: createProductFeaturesServiceMock(),
-    });
+    prebuiltRuleAssetClient = (createPrebuiltRuleAssetsClient as jest.Mock)(
+      savedObjectsClientMock.create()
+    );
   });
 
   it('throws if no matching rule_id is found', async () => {
@@ -67,7 +66,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     };
 
     (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
-    await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
+    await expect(callUpgradePrebuiltRule(ruleAsset)).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`
     );
   });
@@ -83,9 +82,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
 
-    await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
-      'mocked MLAuth error'
-    );
+    await expect(callUpgradePrebuiltRule(ruleAsset)).rejects.toThrow('mocked MLAuth error');
 
     expect(rulesClient.create).not.toHaveBeenCalled();
     expect(rulesClient.delete).not.toHaveBeenCalled();
@@ -122,12 +119,12 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     });
 
     it('deletes the old rule', async () => {
-      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      await callUpgradePrebuiltRule(ruleAsset);
       expect(rulesClient.delete).toHaveBeenCalled();
     });
 
     it('creates a new rule with the new type and expected params of the original rules', async () => {
-      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      await callUpgradePrebuiltRule(ruleAsset);
       expect(rulesClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -199,7 +196,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     it('patches the existing rule with the new params from the rule asset', async () => {
       rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
 
-      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      await callUpgradePrebuiltRule(ruleAsset);
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -252,7 +249,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
         },
       ];
 
-      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      await callUpgradePrebuiltRule(ruleAsset);
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({

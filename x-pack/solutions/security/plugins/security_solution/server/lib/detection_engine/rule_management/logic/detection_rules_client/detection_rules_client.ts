@@ -11,38 +11,43 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { createPrebuiltRuleObjectsClient } from '../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
-  CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
   GetHistoryForRuleArgs,
   IDetectionRulesClient,
-  ImportRuleArgs,
   ImportRulesArgs,
+  InstallPrebuiltRulesArgs,
+  InstallPrebuiltRulesResult,
   PatchRuleArgs,
-  RevertPrebuiltRuleArgs,
+  RevertPrebuiltRulesArgs,
+  RevertPrebuiltRulesResult,
   UpdateRuleArgs,
-  UpgradePrebuiltRuleArgs,
+  UpgradeAllPrebuiltRulesArgs,
+  UpgradePrebuiltRulesArgs,
+  UpgradePrebuiltRulesResult,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
-import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
+import { installPrebuiltRules } from './methods/install_prebuilt_rules';
+import { installAllPrebuiltRules } from './methods/install_all_prebuilt_rules';
+import { upgradePrebuiltRules } from './methods/upgrade_prebuilt_rules';
+import { upgradeAllPrebuiltRules } from './methods/upgrade_all_prebuilt_rules';
+import { revertPrebuiltRules } from './methods/revert_prebuilt_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
-import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
-import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { getHistoryForRule } from './methods/get_history_for_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
@@ -66,6 +71,7 @@ export const createDetectionRulesClient = ({
   license,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const prebuiltRuleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
   return {
     getRuleCustomizationStatus() {
@@ -101,24 +107,6 @@ export const createDetectionRulesClient = ({
           },
           mlAuthz,
           changeTracking: args.changeTracking,
-        });
-      });
-    },
-
-    async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
-        return createRule({
-          actionsClient,
-          rulesClient,
-          rule: {
-            ...args.params,
-            immutable: true,
-          },
-          mlAuthz,
-          changeTracking: {
-            action: SecurityRuleChangeTrackingAction.ruleInstall,
-            ...args.changeTracking,
-          },
         });
       });
     },
@@ -166,59 +154,84 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async upgradePrebuiltRule({
-      ruleAsset,
-      changeTracking,
-    }: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
-        return upgradePrebuiltRule({
-          actionsClient,
-          rulesClient,
-          ruleAsset,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-          changeTracking,
-        });
-      });
-    },
-
-    async revertPrebuiltRule({
-      ruleAsset,
-      existingRule,
-      changeTracking,
-    }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
-        return revertPrebuiltRule({
-          actionsClient,
-          rulesClient,
-          ruleAsset,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-          existingRule,
-          changeTracking,
-        });
-      });
-    },
-
-    async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-        return importRule({
-          actionsClient,
-          rulesClient,
-          importRulePayload: args,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-          changeTracking: args.changeTracking,
-        });
-      });
-    },
-
     async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
         return importRules({
           ...args,
-          detectionRulesClient: this,
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          prebuiltRuleAssetClient,
           savedObjectsClient,
+        });
+      });
+    },
+
+    async installPrebuiltRules(
+      args: InstallPrebuiltRulesArgs
+    ): Promise<InstallPrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.installPrebuiltRules', async () => {
+        return installPrebuiltRules({
+          ...args,
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          ruleAssetsClient: prebuiltRuleAssetClient,
+          ruleObjectsClient: prebuiltRuleObjectsClient,
+        });
+      });
+    },
+
+    async installAllPrebuiltRules(): Promise<InstallPrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.installAllPrebuiltRules', async () => {
+        return installAllPrebuiltRules({
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          ruleAssetsClient: prebuiltRuleAssetClient,
+          ruleObjectsClient: prebuiltRuleObjectsClient,
+        });
+      });
+    },
+
+    async upgradePrebuiltRules(
+      args: UpgradePrebuiltRulesArgs
+    ): Promise<UpgradePrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRules', async () => {
+        return upgradePrebuiltRules({
+          ...args,
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          ruleAssetsClient: prebuiltRuleAssetClient,
+          ruleObjectsClient: prebuiltRuleObjectsClient,
+        });
+      });
+    },
+
+    async upgradeAllPrebuiltRules(
+      args: UpgradeAllPrebuiltRulesArgs
+    ): Promise<UpgradePrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.upgradeAllPrebuiltRules', async () => {
+        return upgradeAllPrebuiltRules({
+          ...args,
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          ruleAssetsClient: prebuiltRuleAssetClient,
+          ruleObjectsClient: prebuiltRuleObjectsClient,
+        });
+      });
+    },
+
+    async revertPrebuiltRules(args: RevertPrebuiltRulesArgs): Promise<RevertPrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRules', async () => {
+        return revertPrebuiltRules({
+          args,
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          prebuiltRuleAssetClient,
         });
       });
     },

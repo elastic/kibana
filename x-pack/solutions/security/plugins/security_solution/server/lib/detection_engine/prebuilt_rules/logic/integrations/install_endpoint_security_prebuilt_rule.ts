@@ -12,7 +12,6 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../ty
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../common';
 import { createPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
-import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
 import { ensureLatestRulesPackageInstalled } from './ensure_latest_rules_package_installed';
 
 export interface InstallEndpointSecurityPrebuiltRuleProps {
@@ -60,15 +59,11 @@ export const installEndpointSecurityPrebuiltRule = async ({
       // Elastic Defend rule already installed
       return;
     }
-    // Elastic Defend rule not installed, find the latest version in the
-    // prebuilt rule assets and install it
 
     // This will create the endpoint list if it does not exist yet
     await exceptionsListClient?.createEndpointList();
 
-    // Make sure the latest prebuilt rules package is installed (in case the
-    // user installs Elastic Defend integration without visiting Security
-    // Solution first)
+    // Make sure the latest prebuilt rules package is installed
     await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
     const latestRuleVersion = await ruleAssetsClient.fetchLatestVersions({
@@ -81,15 +76,10 @@ export const installEndpointSecurityPrebuiltRule = async ({
       );
       return;
     }
-    const { assets: ruleAssetsToInstall } = await ruleAssetsClient.fetchAssetsByVersion(
-      latestRuleVersion
-    );
-    const changeTracking = {
-      metadata: {
-        bulkCount: ruleAssetsToInstall.length,
-      },
-    };
-    await createPrebuiltRules(detectionRulesClient, ruleAssetsToInstall, changeTracking, logger);
+
+    await detectionRulesClient.installPrebuiltRules({
+      ruleSpecifiers: latestRuleVersion,
+    });
   } catch (err) {
     logger.error(
       `Unable to create Endpoint Security rule automatically (${err.statusCode}): ${err.message}`
