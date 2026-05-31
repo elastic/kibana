@@ -1,0 +1,156 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ResultCard completed status matches snapshot 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasBorder"
+    data-test-subj="endpoint-response-action-result-completed"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiBadge emotion-euiBadge-success"
+          title="Completed"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__icon emotion-euiBadge__icon-left"
+              color="inherit"
+              data-euiicon-type="checkInCircleFilled"
+            />
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              Completed
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiText emotion-euiText-xs-euiTextColor-subdued"
+        >
+          Action ID: 
+          action-abc-002
+           · 
+          2024-01-15T14:32:15.000Z
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResultCard failed status matches snapshot 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasBorder"
+    data-test-subj="endpoint-response-action-result-failed"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiBadge emotion-euiBadge-danger"
+          title="Failed"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__icon emotion-euiBadge__icon-left"
+              color="inherit"
+              data-euiicon-type="errorFilled"
+            />
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              Failed
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiText emotion-euiText-xs-euiTextColor-subdued"
+        >
+          Action ID: 
+          action-abc-003
+           · 
+          2024-01-15T14:32:08.000Z
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
+    />
+    <div
+      class="euiText emotion-euiText-xs-euiTextColor-danger"
+    >
+      Agent unreachable: connection timed out after 30s
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResultCard pending status matches snapshot 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasBorder"
+    data-test-subj="endpoint-response-action-result-pending"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiBadge emotion-euiBadge-default"
+          title="Pending"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__icon emotion-euiBadge__icon-left"
+              color="inherit"
+              data-euiicon-type="clock"
+            />
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              Pending
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiText emotion-euiText-xs-euiTextColor-subdued"
+        >
+          Action ID: 
+          action-abc-001
+           · 
+          2024-01-15T14:32:00.000Z
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
