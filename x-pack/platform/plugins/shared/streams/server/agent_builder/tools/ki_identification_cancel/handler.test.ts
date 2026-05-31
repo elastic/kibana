@@ -5,25 +5,64 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { ExecutionStatus } from '@kbn/workflows';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
-  it('cancels task and returns cancel acknowledgement payload', async () => {
-    const taskClient = {
-      cancel: jest.fn().mockResolvedValue(undefined),
+  it('cancels the latest workflow execution and returns cancel status', async () => {
+    const managementApi = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
+      }),
+      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+    });
+    const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
-      stream_name: 'logs.nginx',
-      task_client: taskClient as never,
+      streamName: 'logs.nginx',
+      streamsKIsOnboardingClient,
+      request,
     });
 
-    expect(taskClient.cancel).toHaveBeenCalledWith('streams_onboarding_logs.nginx');
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      request
+    );
     expect(result).toEqual({
       stream_name: 'logs.nginx',
-      task_id: 'streams_onboarding_logs.nginx',
-      status: TaskStatus.BeingCanceled,
+      execution_id: 'exec-1',
+      status: StreamsKIsOnboardingStatus.Canceled,
+    });
+  });
+
+  it('returns cancel status with null execution_id when no execution is found', async () => {
+    const managementApi = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
+      cancelWorkflowExecution: jest.fn(),
+    };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    const result = await cancelKiIdentificationToolHandler({
+      streamName: 'logs.nginx',
+      streamsKIsOnboardingClient,
+      request,
+    });
+
+    expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      stream_name: 'logs.nginx',
+      execution_id: null,
+      status: StreamsKIsOnboardingStatus.Canceled,
     });
   });
 });
