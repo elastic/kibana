@@ -14,6 +14,7 @@ import {
   buildDefaultTriggerEventSearchQuery,
   buildWorkflowTriggerScopeKql,
   getFallbackTriggerTab,
+  getVisibleWorkflowTriggerTabs,
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
   resolveInitialSelectedTrigger,
@@ -139,6 +140,57 @@ describe('buildDefaultTriggerEventSearchQuery', () => {
   });
 });
 
+describe('getVisibleWorkflowTriggerTabs', () => {
+  it('returns all tabs when the workflow has no triggers', () => {
+    expect(getVisibleWorkflowTriggerTabs(null, undefined)).toEqual([
+      'alert',
+      'index',
+      'event',
+      'manual',
+      'historical',
+    ]);
+  });
+
+  it('returns alert and historical for alert-only workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] }, undefined)
+    ).toEqual(['alert', 'historical']);
+  });
+
+  it('returns document and historical for manual-only workflows without inputs', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs(
+        { ...baseDefinition, triggers: [{ type: 'manual' }] },
+        undefined
+      )
+    ).toEqual(['index', 'historical']);
+  });
+
+  it('returns manual, document, and historical when manual trigger defines inputs', () => {
+    const normalizedWithOneField = normalizeFieldsToJsonSchema([
+      { name: 'x', type: 'string', required: true },
+    ]);
+    expect(
+      getVisibleWorkflowTriggerTabs(
+        {
+          ...baseDefinition,
+          triggers: [{ type: 'manual', inputs: [{ name: 'x', type: 'string', required: true }] }],
+        } as WorkflowYaml,
+        normalizedWithOneField
+      )
+    ).toEqual(['index', 'manual', 'historical']);
+  });
+
+  it('returns event and historical for custom event-driven workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs(
+        workflowWithExtensionTriggers([{ type: 'cases.created' }]),
+        undefined
+      )
+    ).toEqual(['event', 'historical']);
+  });
+});
+
 describe('getFallbackTriggerTab', () => {
   const normalizedWithOneField: NormalizedWorkflowInputs = normalizeFieldsToJsonSchema([
     { name: 'x', type: 'string', required: true },
@@ -174,9 +226,9 @@ describe('resolveInitialSelectedTrigger', () => {
     );
   });
 
-  it('falls back when custom triggers exist but execution read is denied', () => {
+  it('falls back to the first visible tab when custom triggers exist but execution read is denied', () => {
     expect(resolveInitialSelectedTrigger(customOnly, undefined, true, false, undefined)).toBe(
-      'index'
+      'event'
     );
   });
 

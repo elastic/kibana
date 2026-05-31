@@ -31,7 +31,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
 import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
@@ -41,7 +40,9 @@ import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { getWorkflowExecuteModalGlobalStyles } from './workflow_execute_modal_global_styles';
 import {
+  ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
+  getVisibleWorkflowTriggerTabs,
   hasCustomEventTrigger,
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
@@ -90,6 +91,11 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const normalizedInputs = useMemo(
       () => extractNormalizedInputsFromYaml(definition, yamlString),
       [definition, yamlString]
+    );
+
+    const visibleTriggerTabs = useMemo(
+      () => getVisibleWorkflowTriggerTabs(definition, normalizedInputs),
+      [definition, normalizedInputs]
     );
 
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
@@ -213,16 +219,18 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       setSelectedTrigger((current) => {
+        let next = current;
         if (current === 'alert' && !hasAlertRacAccess) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+        } else if (current === 'historical' && !canReadWorkflowExecution) {
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+        } else if (
+          current === 'event' &&
+          (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)
+        ) {
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
         }
-        if (current === 'historical' && !canReadWorkflowExecution) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-        }
-        if (current === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-        }
-        return current;
+        return ensureSelectedTriggerTabVisible(next, visibleTriggerTabs);
       });
     }, [
       hasAlertRacAccess,
@@ -230,6 +238,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       eventDrivenExecutionEnabled,
       normalizedInputs,
       definition,
+      visibleTriggerTabs,
     ]);
 
     if (shouldAutoRun) {
@@ -363,7 +372,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                   `}
                 >
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
-                    {ENABLED_TRIGGER_TABS.map((trigger) => {
+                    {visibleTriggerTabs.map((trigger) => {
                       let triggerDisabledTooltip: string | undefined;
                       if (trigger === 'alert' && !hasAlertRacAccess) {
                         triggerDisabledTooltip = alertTabDisabledTooltip;
