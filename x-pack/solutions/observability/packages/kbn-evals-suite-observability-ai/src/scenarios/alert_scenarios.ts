@@ -61,8 +61,7 @@ const AD_HIGH_CPU_ALERT_EXPECTED = `-   Summary: The ad service is experiencing 
 -   Next Steps:
 
     1.  Check logs and errors for the ad service for timeout patterns or exception spikes.
-    2.  Inspect host-level CPU, memory, and GC metrics for the underlying host(s) serving the ad service — navigate via the Service Map to identify the host.
-    3.  Consider scaling out the ad service (currently 1 instance) to handle the increased load.`;
+    2.  Consider scaling out the ad service (currently 1 instance) to handle the increased load.`;
 
 export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
   [PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID]: {
