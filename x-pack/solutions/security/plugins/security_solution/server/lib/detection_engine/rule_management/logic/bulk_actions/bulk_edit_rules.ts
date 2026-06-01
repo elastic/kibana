@@ -62,7 +62,7 @@ export const bulkEditRules = async ({
 
   // Check if there are any prebuilt rules and fetch their base versions
   const prebuiltRules = rules.filter((rule) => rule.params.immutable);
-  const baseVersions = await prebuiltRuleAssetClient.fetchAssetsByVersion(
+  const { assets: baseVersions } = await prebuiltRuleAssetClient.fetchAssetsByVersion(
     prebuiltRules.map((rule) => ({
       rule_id: rule.params.ruleId,
       version: rule.params.version,

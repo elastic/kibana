@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -22,9 +22,9 @@ const onboardingStatusSchema = z.object({
 });
 
 export const createKiIdentificationStatusTool = ({
-  getScopedClients,
+  streamsKIsOnboardingClient,
 }: {
-  getScopedClients: GetScopedClients;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   type: ToolType.builtin,
@@ -44,12 +44,11 @@ export const createKiIdentificationStatusTool = ({
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStatusSchema,
-  handler: async ({ stream_name: streamName }, { request }) => {
+  handler: async ({ stream_name: streamName }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const data = await getKiIdentificationStatusToolHandler({
         streamName,
-        taskClient,
+        streamsKIsOnboardingClient,
       });
 
       return {

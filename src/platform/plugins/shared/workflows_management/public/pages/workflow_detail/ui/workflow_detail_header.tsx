@@ -50,7 +50,11 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import {
+  getSaveWorkflowTooltipContent,
+  getTestRunTooltipContent,
+  ManagedWorkflowBadge,
+} from '../../../shared/ui';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
@@ -83,316 +87,397 @@ const Translations = {
 
 export interface WorkflowDetailHeaderProps {
   isLoading: boolean;
+  highlightDiff: boolean;
+  setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const WorkflowDetailHeader = React.memo(({ isLoading }: WorkflowDetailHeaderProps) => {
-  const { id: workflowId } = useParams<{ id?: string }>();
-  const styles = useMemoCss(componentStyles);
-  const dispatch = useDispatch();
-  const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
-    useWorkflowsCapabilities();
+interface GetSaveWorkflowButtonDisabledParams {
+  isExecutionsTab: boolean;
+  canSaveWorkflow: boolean;
+  isLoading: boolean;
+  isSaving: boolean;
+  isManagedWorkflow: boolean;
+  isYamlSynced: boolean;
+  hasUnsavedChanges: boolean;
+}
 
-  const { setActiveTab } = useWorkflowUrlState();
+const getSaveWorkflowButtonDisabled = ({
+  isExecutionsTab,
+  canSaveWorkflow,
+  isLoading,
+  isSaving,
+  isManagedWorkflow,
+  isYamlSynced,
+  hasUnsavedChanges,
+}: GetSaveWorkflowButtonDisabledParams) =>
+  isExecutionsTab ||
+  !canSaveWorkflow ||
+  isLoading ||
+  isSaving ||
+  isManagedWorkflow ||
+  !isYamlSynced ||
+  !hasUnsavedChanges;
 
-  const workflow = useSelector(selectWorkflow);
-  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
-  const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
-  const hasUnsavedChanges = useSelector(selectHasChanges);
-  const isExecutionsTab = useSelector(selectIsExecutionsTab);
-  const isYamlSynced = useSelector(selectIsYamlSynced);
+export const WorkflowDetailHeader = React.memo(
+  ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
+    const { id: workflowId } = useParams<{ id?: string }>();
+    const styles = useMemoCss(componentStyles);
+    const dispatch = useDispatch();
+    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
+      useWorkflowsCapabilities();
 
-  const { name, isEnabled, lastUpdatedAt } = useMemo(
-    () => ({
-      name: workflow?.name ?? 'New workflow',
-      isEnabled: workflow?.enabled ?? false,
-      lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
-    }),
-    [workflow]
-  );
+    const { setActiveTab } = useWorkflowUrlState();
 
-  const saveYaml = useSaveYaml();
-  const isSaving = useSelector(selectIsSavingYaml);
-  const handleSaveWorkflow = useCallback(() => {
-    saveYaml();
-  }, [saveYaml]);
+    const workflow = useSelector(selectWorkflow);
+    const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+    const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
+    const hasUnsavedChanges = useSelector(selectHasChanges);
+    const isExecutionsTab = useSelector(selectIsExecutionsTab);
+    const isYamlSynced = useSelector(selectIsYamlSynced);
 
-  const updateWorkflow = useUpdateWorkflow();
-  const openTestModal = useCallback(() => {
-    dispatch(setIsTestModalOpen(true));
-  }, [dispatch]);
+    const { name, isEnabled, lastUpdatedAt } = useMemo(
+      () => ({
+        name: workflow?.name ?? 'New workflow',
+        isEnabled: workflow?.enabled ?? false,
+        lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
+      }),
+      [workflow]
+    );
+    const isManagedWorkflow = workflow?.managed === true;
 
-  const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-  const [dontAskAgain, setDontAskAgain] = useState(false);
-  const [savedLabel, setSavedLabel] = useState<string>('');
+    const saveYaml = useSaveYaml();
+    const isSaving = useSelector(selectIsSavingYaml);
+    const handleSaveWorkflow = useCallback(() => {
+      saveYaml();
+    }, [saveYaml]);
 
-  useEffect(() => {
-    if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
-      return;
-    }
+    const updateWorkflow = useUpdateWorkflow();
+    const openTestModal = useCallback(() => {
+      dispatch(setIsTestModalOpen(true));
+    }, [dispatch]);
 
-    const formatter = new Intl.RelativeTimeFormat(i18n.getLocale(), {
-      numeric: 'auto',
-      style: 'short',
-    });
+    const [showRunConfirmation, setShowRunConfirmation] = useState(false);
+    const [dontAskAgain, setDontAskAgain] = useState(false);
+    const [savedLabel, setSavedLabel] = useState<string>('');
 
-    const updateLabel = () => {
-      const { value, unit } = selectUnit(lastUpdatedAt);
-      if (unit === 'second') {
-        setSavedLabel(
-          i18n.translate('workflows.savedJustNow', {
-            defaultMessage: 'Saved just now',
-          })
-        );
-      } else {
-        setSavedLabel(
-          i18n.translate('workflows.savedAgo', {
-            defaultMessage: 'Saved {relativeTime}',
-            values: { relativeTime: formatter.format(value, unit) },
-          })
-        );
+    useEffect(() => {
+      if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
+        return;
       }
-    };
 
-    updateLabel();
-    const interval = setInterval(updateLabel, 30_000);
+      const formatter = new Intl.RelativeTimeFormat(i18n.getLocale(), {
+        numeric: 'auto',
+        style: 'short',
+      });
 
-    return () => clearInterval(interval);
-  }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
+      const updateLabel = () => {
+        const { value, unit } = selectUnit(lastUpdatedAt);
+        if (unit === 'second') {
+          setSavedLabel(
+            i18n.translate('workflows.savedJustNow', {
+              defaultMessage: 'Saved just now',
+            })
+          );
+        } else {
+          setSavedLabel(
+            i18n.translate('workflows.savedAgo', {
+              defaultMessage: 'Saved {relativeTime}',
+              values: { relativeTime: formatter.format(value, unit) },
+            })
+          );
+        }
+      };
 
-  // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
-  // workflow?.valid !== false covers the initial page load before Monaco validates.
-  const isSchemaValid =
-    isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+      updateLabel();
+      const interval = setInterval(updateLabel, 30_000);
 
-  const runWorkflowTooltipContent = useMemo(() => {
-    return getTestRunTooltipContent({
+      return () => clearInterval(interval);
+    }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
+
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+
+    const runWorkflowTooltipContent = useMemo(() => {
+      return getTestRunTooltipContent({
+        isExecutionsTab,
+        isValid: isSyntaxValid,
+        canRunWorkflow: canExecuteWorkflow,
+        isSaving,
+      });
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
+
+    const saveWorkflowTooltipContent = useMemo(() => {
+      const isCreate = !workflowId;
+      return getSaveWorkflowTooltipContent({
+        isExecutionsTab,
+        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
+        isCreate,
+        hasUnsavedChanges,
+        isManagedWorkflow,
+      });
+    }, [
       isExecutionsTab,
-      isValid: isSyntaxValid,
-      canRunWorkflow: canExecuteWorkflow,
+      workflowId,
+      canCreateWorkflow,
+      canUpdateWorkflow,
+      hasUnsavedChanges,
+      isManagedWorkflow,
+    ]);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+
+    const saveWorkflowButtonDisabled = getSaveWorkflowButtonDisabled({
+      isExecutionsTab,
+      canSaveWorkflow,
+      isLoading,
       isSaving,
-    });
-  }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
-
-  const saveWorkflowTooltipContent = useMemo(() => {
-    const isCreate = !workflowId;
-    return getSaveWorkflowTooltipContent({
-      isExecutionsTab,
-      canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
-      isCreate,
+      isManagedWorkflow,
+      isYamlSynced,
       hasUnsavedChanges,
     });
-  }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow, hasUnsavedChanges]);
 
-  const canSaveWorkflow = useMemo(() => {
-    return workflowId ? canUpdateWorkflow : canCreateWorkflow;
-  }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+    const handleRunClickWithUnsavedCheck = useCallback(() => {
+      const shouldSkipUnsavedRunConfirmation =
+        localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
+      if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
+        setDontAskAgain(false);
+        setShowRunConfirmation(true);
+      } else {
+        openTestModal();
+      }
+    }, [hasUnsavedChanges, openTestModal]);
 
-  const handleRunClickWithUnsavedCheck = useCallback(() => {
-    const shouldSkipUnsavedRunConfirmation =
-      localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
-    if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
-      setDontAskAgain(false);
-      setShowRunConfirmation(true);
-    } else {
+    const handleConfirmRun = useCallback(() => {
+      if (dontAskAgain) {
+        localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+      }
+      setShowRunConfirmation(false);
       openTestModal();
-    }
-  }, [hasUnsavedChanges, openTestModal]);
+    }, [dontAskAgain, openTestModal]);
 
-  const handleConfirmRun = useCallback(() => {
-    if (dontAskAgain) {
-      localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-    }
-    setShowRunConfirmation(false);
-    openTestModal();
-  }, [dontAskAgain, openTestModal]);
+    const handleCancelRun = useCallback(() => {
+      setDontAskAgain(false);
+      setShowRunConfirmation(false);
+    }, []);
 
-  const handleCancelRun = useCallback(() => {
-    setDontAskAgain(false);
-    setShowRunConfirmation(false);
-  }, []);
+    const unsavedChangesToggleLabel = highlightDiff
+      ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
+          defaultMessage: 'Hide diff highlighting',
+        })
+      : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
+          defaultMessage: 'Show diff highlighting',
+        });
 
-  const badges = useMemo<AppHeaderBadge[]>(() => {
-    if (hasUnsavedChanges) {
-      return [
-        {
+    const badges = useMemo<AppHeaderBadge[]>(() => {
+      const result: AppHeaderBadge[] = [];
+
+      if (isManagedWorkflow) {
+        result.push({
+          label: i18n.translate('workflows.managedWorkflowBadge.label', {
+            defaultMessage: 'Managed',
+          }),
+          renderCustomBadge: () => (
+            <ManagedWorkflowBadge dataTestSubj="workflowDetailManagedBadge" />
+          ),
+        });
+      }
+
+      if (hasUnsavedChanges) {
+        result.push({
           label: i18n.translate('workflows.unsavedChangesBadge', {
             defaultMessage: 'Unsaved changes',
           }),
           color: 'primary',
           'data-test-subj': 'workflowUnsavedChangesBadge',
-        },
-      ];
-    }
-    if (workflowId && savedLabel) {
-      return [
-        {
+          onClick: () => setHighlightDiff((state) => !state),
+          onClickAriaLabel: unsavedChangesToggleLabel,
+        });
+      } else if (workflowId && savedLabel) {
+        result.push({
           label: savedLabel,
           color: 'primary',
           'data-test-subj': 'workflowSavedChangesBadge',
-        },
-      ];
-    }
-    return [];
-  }, [hasUnsavedChanges, workflowId, savedLabel]);
+        });
+      }
 
-  const appMenu = useMemo<AppMenuConfig>(
-    () => ({
-      primaryActionItem: {
-        id: 'saveWorkflow',
-        label: i18n.translate('keepWorkflows.buttonText', {
-          defaultMessage: 'Save',
-        }),
-        iconType: 'save',
-        run: handleSaveWorkflow,
-        disableButton:
-          isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced,
-        isLoading: isSaving,
-        tooltipContent: saveWorkflowTooltipContent ?? undefined,
-        testId: 'saveWorkflowHeaderButton',
-      },
-      switch: workflowId
-        ? {
-            id: 'enabledSwitch',
-            label: i18n.translate('workflows.workflowDetailHeader.enabled', {
-              defaultMessage: 'Enabled',
-            }),
-            labelProps: {},
-            checked: isEnabled,
-            onChange: (checked: boolean) => {
-              updateWorkflow({ workflow: { enabled: checked } });
-            },
-            disabled:
-              !workflowId || isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
-            'data-test-subj': 'workflowEnabledSwitch',
-          }
-        : undefined,
-      items: [
-        ...(workflowId
-          ? [
-              {
-                id: 'executions',
-                order: 1,
-                label: i18n.translate('workflows.workflowDetailHeader.executions', {
-                  defaultMessage: 'Executions',
-                }),
-                iconType: 'videoPlayer' as const,
-                run: () => setActiveTab('executions' as WorkflowUrlStateTabType),
-                disableButton: !canReadWorkflowExecution,
-                tooltipContent: !canReadWorkflowExecution
-                  ? executionsTabReadExecutionDisabledTooltip
-                  : undefined,
-                testId: 'executionsTabButton',
-              },
-            ]
-          : []),
-        {
-          id: 'runWorkflow',
-          order: 2,
-          label: Translations.runWorkflow,
-          iconType: 'play' as const,
-          overflow: true,
-          run: handleRunClickWithUnsavedCheck,
-          disableButton: isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid,
-          tooltipContent: runWorkflowTooltipContent ?? undefined,
-          testId: 'runWorkflowHeaderButton',
-        },
-      ],
-    }),
-    [
-      handleSaveWorkflow,
-      isExecutionsTab,
-      canSaveWorkflow,
-      isLoading,
-      isSaving,
-      isYamlSynced,
-      saveWorkflowTooltipContent,
-      workflowId,
-      isEnabled,
-      updateWorkflow,
-      canUpdateWorkflow,
-      isSchemaValid,
+      return result;
+    }, [
+      isManagedWorkflow,
       hasUnsavedChanges,
-      canReadWorkflowExecution,
-      setActiveTab,
-      handleRunClickWithUnsavedCheck,
-      canExecuteWorkflow,
-      isSyntaxValid,
-      runWorkflowTooltipContent,
-    ]
-  );
+      workflowId,
+      savedLabel,
+      highlightDiff,
+      setHighlightDiff,
+      unsavedChangesToggleLabel,
+    ]);
 
-  return (
-    <>
-      <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
-        <PageHeader
-          title={name}
-          back={{
-            href: `/app/${PLUGIN_ID}`,
-            label: i18n.translate('workflows.workflowDetailHeader.backLink', {
-              defaultMessage: 'Back to Workflows',
-            }),
-          }}
-          badges={badges}
-          menu={appMenu}
-          docLink={WORKFLOWS_DOCUMENTATION_URL}
-          showAddIntegrations
-        />
-      </EuiPageTemplate>
-      {showRunConfirmation && (
-        <EuiModal
-          className="euiModal--confirmation"
-          data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
-          onClose={handleCancelRun}
-          role="alertdialog"
-          initialFocus="[data-test-subj='confirmModalConfirmButton']"
-          aria-label={Translations.runWithUnsavedChangesQuestion}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-              {Translations.runWithUnsavedChangesQuestion}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText data-test-subj="confirmModalBodyText">
-              <p>
-                <FormattedMessage
-                  id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
-                  defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
-                />
-              </p>
-            </EuiText>
-          </EuiModalBody>
-          <EuiModalFooter css={styles.runConfirmationFooter}>
-            <EuiCheckbox
-              id="workflowsRunWithUnsavedChangesDontAskAgain"
-              data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
-              label={Translations.dontAskAgain}
-              checked={dontAskAgain}
-              onChange={(event) => setDontAskAgain(event.target.checked)}
-            />
-            <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="confirmModalCancelButton" onClick={handleCancelRun}>
-                  {Translations.runWorkflowCancel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="confirmModalConfirmButton"
-                  onClick={handleConfirmRun}
-                  fill
-                  color="success"
-                >
-                  {Translations.runWorkflow}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalFooter>
-        </EuiModal>
-      )}
-    </>
-  );
-});
+    const appMenu = useMemo<AppMenuConfig>(
+      () => ({
+        primaryActionItem: {
+          id: 'saveWorkflow',
+          label: i18n.translate('keepWorkflows.buttonText', {
+            defaultMessage: 'Save',
+          }),
+          iconType: 'save',
+          run: handleSaveWorkflow,
+          disableButton: saveWorkflowButtonDisabled,
+          isLoading: isSaving,
+          tooltipContent: saveWorkflowTooltipContent ?? undefined,
+          testId: 'saveWorkflowHeaderButton',
+        },
+        switch: workflowId
+          ? {
+              id: 'enabledSwitch',
+              label: i18n.translate('workflows.workflowDetailHeader.enabled', {
+                defaultMessage: 'Enabled',
+              }),
+              labelProps: {},
+              checked: isEnabled,
+              onChange: (checked: boolean) => {
+                updateWorkflow({ workflow: { enabled: checked } });
+              },
+              disabled:
+                !workflowId ||
+                isLoading ||
+                !canUpdateWorkflow ||
+                !isSchemaValid ||
+                hasUnsavedChanges,
+              'data-test-subj': 'workflowEnabledSwitch',
+            }
+          : undefined,
+        items: [
+          ...(workflowId
+            ? [
+                {
+                  id: 'executions',
+                  order: 1,
+                  label: i18n.translate('workflows.workflowDetailHeader.executions', {
+                    defaultMessage: 'Executions',
+                  }),
+                  iconType: 'videoPlayer' as const,
+                  run: () => setActiveTab('executions' as WorkflowUrlStateTabType),
+                  disableButton: !canReadWorkflowExecution,
+                  tooltipContent: !canReadWorkflowExecution
+                    ? executionsTabReadExecutionDisabledTooltip
+                    : undefined,
+                  testId: 'executionsTabButton',
+                },
+              ]
+            : []),
+          {
+            id: 'runWorkflow',
+            order: 2,
+            label: Translations.runWorkflow,
+            iconType: 'play' as const,
+            overflow: true,
+            run: handleRunClickWithUnsavedCheck,
+            disableButton:
+              isExecutionsTab || !canExecuteWorkflow || isLoading || isSaving || !isSyntaxValid,
+            tooltipContent: runWorkflowTooltipContent ?? undefined,
+            testId: 'runWorkflowHeaderButton',
+          },
+        ],
+      }),
+      [
+        handleSaveWorkflow,
+        saveWorkflowButtonDisabled,
+        isSaving,
+        saveWorkflowTooltipContent,
+        workflowId,
+        isEnabled,
+        updateWorkflow,
+        canUpdateWorkflow,
+        isSchemaValid,
+        hasUnsavedChanges,
+        canReadWorkflowExecution,
+        setActiveTab,
+        handleRunClickWithUnsavedCheck,
+        isExecutionsTab,
+        canExecuteWorkflow,
+        isLoading,
+        isSyntaxValid,
+        runWorkflowTooltipContent,
+      ]
+    );
+
+    return (
+      <>
+        <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
+          <PageHeader
+            title={name}
+            back={{
+              href: `/app/${PLUGIN_ID}`,
+              label: i18n.translate('workflows.workflowDetailHeader.backLink', {
+                defaultMessage: 'Back to Workflows',
+              }),
+            }}
+            badges={badges}
+            menu={appMenu}
+            docLink={WORKFLOWS_DOCUMENTATION_URL}
+            showAddIntegrations
+          />
+        </EuiPageTemplate>
+        {showRunConfirmation && (
+          <EuiModal
+            className="euiModal--confirmation"
+            data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
+            onClose={handleCancelRun}
+            role="alertdialog"
+            initialFocus="[data-test-subj='confirmModalConfirmButton']"
+            aria-label={Translations.runWithUnsavedChangesQuestion}
+          >
+            <EuiModalHeader>
+              <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+                {Translations.runWithUnsavedChangesQuestion}
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              <EuiText data-test-subj="confirmModalBodyText">
+                <p>
+                  <FormattedMessage
+                    id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
+                    defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
+                  />
+                </p>
+              </EuiText>
+            </EuiModalBody>
+            <EuiModalFooter css={styles.runConfirmationFooter}>
+              <EuiCheckbox
+                id="workflowsRunWithUnsavedChangesDontAskAgain"
+                data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
+                label={Translations.dontAskAgain}
+                checked={dontAskAgain}
+                onChange={(event) => setDontAskAgain(event.target.checked)}
+              />
+              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="confirmModalCancelButton"
+                    onClick={handleCancelRun}
+                  >
+                    {Translations.runWorkflowCancel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="confirmModalConfirmButton"
+                    onClick={handleConfirmRun}
+                    fill
+                    color="success"
+                  >
+                    {Translations.runWorkflow}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiModalFooter>
+          </EuiModal>
+        )}
+      </>
+    );
+  }
+);
 WorkflowDetailHeader.displayName = 'WorkflowDetailHeader';
 
 const componentStyles = {

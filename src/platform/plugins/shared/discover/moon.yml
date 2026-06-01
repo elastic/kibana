@@ -148,9 +148,10 @@ dependsOn:
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/reporting-public'
-  - '@kbn/core-chrome-feature-flags'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
+  - '@kbn/react-hooks'
+  - '@kbn/core-chrome-feature-flags'
   - '@kbn/app-header'
 tags:
   - plugin

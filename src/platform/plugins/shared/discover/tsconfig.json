@@ -143,10 +143,11 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",
-    "@kbn/core-chrome-feature-flags",
     "@kbn/logging",
     "@kbn/logging-mocks",
-    "@kbn/app-header",
+    "@kbn/react-hooks",
+    "@kbn/core-chrome-feature-flags",
+    "@kbn/app-header"
   ],
   "exclude": ["target/**/*"]
 }
