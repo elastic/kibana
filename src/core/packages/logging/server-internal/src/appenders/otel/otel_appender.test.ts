@@ -100,6 +100,47 @@ describe('OtelAppender.configSchema', () => {
   it('rejects config with wrong type', () => {
     expect(() => OtelAppender.configSchema.validate({ ...validConfig, type: 'console' })).toThrow();
   });
+
+  it('rejects ssl.certificate without ssl.key', () => {
+    expect(() =>
+      OtelAppender.configSchema.validate({
+        ...validConfig,
+        ssl: { certificate: '/path/to/cert.pem' },
+      })
+    ).toThrow(/ssl\.key/);
+  });
+
+  it('rejects ssl.key without ssl.certificate', () => {
+    expect(() =>
+      OtelAppender.configSchema.validate({
+        ...validConfig,
+        ssl: { key: '/path/to/key.pem' },
+      })
+    ).toThrow(/ssl\.certificate/);
+  });
+
+  it('rejects ssl.keyPassphrase without ssl.key', () => {
+    expect(() =>
+      OtelAppender.configSchema.validate({
+        ...validConfig,
+        ssl: { keyPassphrase: 'secret' },
+      })
+    ).toThrow(/ssl\.key/);
+  });
+
+  it('accepts optional ssl.tls settings', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      ssl: {
+        verificationMode: 'full',
+        certificateAuthorities: '/etc/ssl/custom-ca.pem',
+        certificate: '/etc/ssl/client.crt',
+        key: '/etc/ssl/client.key',
+      },
+    });
+    expect(result.ssl?.verificationMode).toBe('full');
+    expect(result.ssl?.certificateAuthorities).toBe('/etc/ssl/custom-ca.pem');
+  });
 });
 
 describe('OtelAppender constructor', () => {
@@ -110,6 +151,50 @@ describe('OtelAppender constructor', () => {
       url: validConfig.url,
       headers: validConfig.headers,
     });
+  });
+
+  it('passes httpAgentOptions when ssl is set (HTTP exporter)', () => {
+    new OtelAppender({
+      ...validConfig,
+      ssl: { verificationMode: 'none' },
+    });
+
+    expect(mockOTLPLogExporter).toHaveBeenCalledWith({
+      url: validConfig.url,
+      headers: validConfig.headers,
+      httpAgentOptions: expect.objectContaining({ rejectUnauthorized: false }),
+    });
+  });
+
+  it('passes httpAgentOptions for proto protocol when ssl is set', () => {
+    new OtelAppender({
+      ...validConfig,
+      protocol: 'proto',
+      ssl: { verificationMode: 'full' },
+    });
+
+    expect(mockOTLPLogExporter).toHaveBeenCalledWith({
+      url: validConfig.url,
+      headers: validConfig.headers,
+      httpAgentOptions: expect.objectContaining({ rejectUnauthorized: true }),
+    });
+  });
+
+  it('passes grpc channel credentials when ssl is set', () => {
+    new OtelAppender({
+      type: 'otel',
+      protocol: 'grpc',
+      url: 'https://collector:4317',
+      ssl: { verificationMode: 'none' },
+    });
+
+    expect(mockOTLPLogExporter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://collector:4317',
+        metadata: expect.anything(),
+        credentials: expect.anything(),
+      })
+    );
   });
 
   it('defaults to empty headers when none are provided', () => {

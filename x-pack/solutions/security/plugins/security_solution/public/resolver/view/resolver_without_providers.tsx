@@ -34,7 +34,7 @@ import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
+import { DocumentFlyoutWrapper } from '../../flyout_v2/document/main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export const ANALYZER_PREVIEW_BANNER = {

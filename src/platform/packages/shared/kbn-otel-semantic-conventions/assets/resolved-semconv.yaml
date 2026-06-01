@@ -434,7 +434,7 @@ groups:
           - - cmd/otecol
             - '--config=config.yaml'
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.name
         type: string
         brief: |
@@ -442,7 +442,7 @@ groups:
         examples:
           - otelcol
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.executable.path
         type: string
         brief: |
@@ -450,7 +450,7 @@ groups:
         examples:
           - /usr/bin/cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.exit.code
         type: int
         brief: |
@@ -458,7 +458,7 @@ groups:
         examples:
           - 127
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.pid
         type: int
         brief: |
@@ -466,7 +466,7 @@ groups:
         examples:
           - 1234
         requirement_level: required
-        stability: development
+        stability: release_candidate
     lineage:
       provenance:
         registry_id: main
@@ -12947,7 +12947,7 @@ groups:
         requirement_level: opt_in
         note: |
           This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.command
         type: string
@@ -12956,7 +12956,7 @@ groups:
         examples:
           - cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.command_args
         type: string[]
@@ -12966,7 +12966,7 @@ groups:
           - - cmd/otecol
             - '--config=config.yaml'
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.command_line
         type: string
@@ -12975,7 +12975,7 @@ groups:
         examples:
           - C:\cmd\otecol --config="my directory\config.yaml"
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.creation.time
         type: string
@@ -12984,14 +12984,14 @@ groups:
         examples:
           - 2023-11-21T09:25:34.853Z
         requirement_level: required
-        stability: development
+        stability: release_candidate
         role: identifying
       - name: process.interactive
         type: boolean
         brief: |
           Whether the process is connected to an interactive shell.
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.linux.cgroup
         type: string
@@ -13002,7 +13002,7 @@ groups:
         requirement_level: opt_in
         note: |
           Control groups (cgroups) are a kernel feature used to organize and manage process resources. This attribute provides the path(s) to the cgroup(s) associated with the process, which should match the contents of the [/proc/\[PID\]/cgroup](https://man7.org/linux/man-pages/man7/cgroups.7.html) file.
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.owner
         type: string
@@ -13011,7 +13011,7 @@ groups:
         examples:
           - root
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.parent_pid
         type: int
@@ -13020,7 +13020,7 @@ groups:
         examples:
           - 111
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.pid
         type: int
@@ -13029,7 +13029,7 @@ groups:
         examples:
           - 1234
         requirement_level: required
-        stability: development
+        stability: release_candidate
         role: identifying
       - name: process.title
         type: string
@@ -13042,7 +13042,7 @@ groups:
         requirement_level: opt_in
         note: |
           In many Unix-like systems, process title (proctitle), is the string that represents the name or command line of a running process, displayed by system monitoring tools like ps, top, and htop.
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.working_directory
         type: string
@@ -13051,7 +13051,7 @@ groups:
         examples:
           - /root
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
     name: process
     lineage:
@@ -13193,7 +13193,7 @@ groups:
         examples:
           - c89b11207f6479603b0d49bf291c092c2b719293
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.executable.build_id.go
         type: string
@@ -13202,7 +13202,7 @@ groups:
         examples:
           - foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.executable.build_id.htlhash
         type: string
@@ -13225,7 +13225,7 @@ groups:
 
           The result is the first 16 bytes (128 bits) of the SHA256 digest,
           represented as a hex string.
-        stability: development
+        stability: release_candidate
         role: identifying
       - name: process.executable.name
         type: string
@@ -13234,7 +13234,7 @@ groups:
         examples:
           - otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.executable.path
         type: string
@@ -13243,7 +13243,7 @@ groups:
         examples:
           - /usr/bin/cmd/otelcol
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
         role: descriptive
     name: process.executable
     lineage:
@@ -13313,7 +13313,7 @@ groups:
           An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.
         examples: Eclipse OpenJ9 Eclipse OpenJ9 VM openj9-0.21.0
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: descriptive
       - name: process.runtime.name
         type: string
@@ -13322,7 +13322,7 @@ groups:
         examples:
           - OpenJDK Runtime Environment
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: identifying
       - name: process.runtime.version
         type: string
@@ -13330,7 +13330,7 @@ groups:
           The version of the runtime of this process, as returned by the runtime without modification.
         examples: 14.0.2
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
         role: identifying
     name: process.runtime
     lineage:
@@ -29933,9 +29933,9 @@ groups:
         metric_value_type: int
   - id: metric.container.cpu.time
     type: metric
-    brief: Total CPU time consumed.
+    brief: CPU time consumed.
     note: |
-      Total CPU time consumed by the specific container on all available CPU cores
+      CPU time consumed by the specific container on all available CPU cores
     stability: release_candidate
     attributes:
       - name: cpu.mode
@@ -29971,15 +29971,24 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
         examples:
           - user
           - system
         requirement_level:
-          conditionally_required: Required if mode is available, i.e. metrics coming from the Docker Stats API.
-        note: 'Following states SHOULD be used: `user`, `system`, `kernel`'
+          conditionally_required: |
+            Required if mode is available, i.e. metrics coming from the Docker Stats API, containerd stats or cAdvisor.
+        note: |
+          Following modes SHOULD be used for containers if available: `user`, `system`.
+          In implementations like [`opencontainers/cgroup`](https://pkg.go.dev/github.com/opencontainers/cgroups@v0.0.6#CpuUsage), [Moby/Docker](https://pkg.go.dev/github.com/Moby/Moby@v28.5.2+incompatible/api/types/container#CPUUsage) or [cAdvisor](https://pkg.go.dev/github.com/google/cadvisor@v0.56.2/info/v1#CpuUsage), the respective states are retrieved from the cgroup stats directly. In cgroup v1 the user/system modes come from the [cpuacct.stat](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/cpuacct.html#cpu-accounting-controller) file and the `user`/`system` stats respectively. In cgroup v2 the user/system modes come from the [cpu.stat](https://docs.kernel.org/admin-guide/cgroup-v2.html#cpu-interface-files) file and the `user_usec`/`system_usec` stats respectively.
+          Kubernetes only exposes the total CPU time ([cpu.stat.usage_usec](https://docs.kernel.org/admin-guide/cgroup-v2.html#cpu-interface-files)) through Kubelet's stats API, hence the metric should be reported without the mode attribute implying it is the total of all modes.
+          In pure container environments the CPU's mode is usually available and cpu.mode should be reported. In that case summarising the CPU time over the different modes gives the total CPU time.
         stability: development
     metric_name: container.cpu.time
     instrument: counter
@@ -30043,15 +30052,21 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
         examples:
           - user
           - system
         requirement_level:
-          conditionally_required: Required if mode is available, i.e. metrics coming from the Docker Stats API.
-        note: 'Following states SHOULD be used: `user`, `system`, `kernel`'
+          conditionally_required: |
+            Required if mode is available, i.e. metrics coming from the Docker Stats API, containerd stats or cAdvisor.
+        note: |
+          Following modes SHOULD be used for containers if available: `user`, `system`.
         stability: development
     metric_name: container.cpu.usage
     instrument: gauge
@@ -30460,8 +30475,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -30546,8 +30565,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -33153,8 +33176,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -45150,6 +45177,7 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+        exclude: true
   - id: metric.k8s.container.cpu.limit.current
     type: metric
     brief: Maximum CPU resource limit currently configured for a running container.
@@ -45255,6 +45283,7 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+        exclude: true
   - id: metric.k8s.container.cpu.request.current
     type: metric
     brief: CPU resource requested currently configured for a running container.
@@ -55383,7 +55412,7 @@ groups:
     type: metric
     brief: Event loop maximum delay.
     note: |
-      Value can be retrieved from value `histogram.max` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.max` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.max
     instrument: gauge
@@ -55399,7 +55428,7 @@ groups:
     type: metric
     brief: Event loop mean delay.
     note: |
-      Value can be retrieved from value `histogram.mean` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.mean` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.mean
     instrument: gauge
@@ -55415,7 +55444,7 @@ groups:
     type: metric
     brief: Event loop minimum delay.
     note: |
-      Value can be retrieved from value `histogram.min` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.min` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.min
     instrument: gauge
@@ -55431,7 +55460,7 @@ groups:
     type: metric
     brief: Event loop 50 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(50)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(50)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p50
     instrument: gauge
@@ -55447,7 +55476,7 @@ groups:
     type: metric
     brief: Event loop 90 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(90)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(90)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p90
     instrument: gauge
@@ -55463,7 +55492,7 @@ groups:
     type: metric
     brief: Event loop 99 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(99)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(99)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p99
     instrument: gauge
@@ -55479,7 +55508,7 @@ groups:
     type: metric
     brief: Event loop standard deviation delay.
     note: |
-      Value can be retrieved from value `histogram.stddev` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.stddev` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.stddev
     instrument: gauge
@@ -59203,13 +59232,13 @@ groups:
           members:
             - id: voluntary
               value: voluntary
-              stability: development
+              stability: release_candidate
             - id: involuntary
               value: involuntary
-              stability: development
+              stability: release_candidate
         brief: Specifies whether the context switches for this data point were voluntary or involuntary.
         requirement_level: required
-        stability: development
+        stability: release_candidate
     metric_name: process.context_switches
     instrument: counter
     unit: '{context_switch}'
@@ -59269,8 +59298,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: |
           The CPU mode for this data point.
         examples:
@@ -59340,8 +59373,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: |
           The CPU mode for this data point.
         examples:
@@ -62275,8 +62312,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -62360,8 +62401,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -62792,6 +62837,100 @@ groups:
             - note
             - requirement_level
             - stability
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.filesystem.lock.count
+    type: metric
+    brief: Filesystem lock counts.
+    stability: development
+    attributes:
+      - name: file.lock.mechanism
+        type: string
+        brief: The lock mechanism such as noted by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)
+        examples:
+          - POSIX
+          - FLOCK
+          - DELEG
+          - LEASE
+        requirement_level: recommended
+        stability: development
+      - name: file.lock.mode
+        type: string
+        brief: |
+          Mode of lock or operation such as documented by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)
+        examples:
+          - ADVISORY
+          - MANDATORY
+          - BREAKING
+          - ACTIVE
+          - BREAKER
+        requirement_level: recommended
+        stability: development
+      - name: file.lock.type
+        type:
+          members:
+            - id: read
+              value: read
+              stability: development
+            - id: write
+              value: write
+              stability: development
+        brief: The lock type as represented by i.e. [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)'s l_type.
+        examples:
+          - read
+        requirement_level: recommended
+        stability: development
+      - name: system.device
+        type: string
+        brief: OS-specific identifier for the device where the file resides.
+        examples:
+          - '08:01'
+        requirement_level: recommended
+        stability: development
+    metric_name: system.filesystem.lock.count
+    instrument: updowncounter
+    unit: '{lock}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        file.lock.mechanism:
+          source_group: registry.file.lock
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        file.lock.mode:
+          source_group: registry.file.lock
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        file.lock.type:
+          source_group: registry.file.lock
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        system.device:
+          source_group: registry.system
+          inherited_fields:
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - brief
+            - examples
     entity_associations:
       - host
     annotations:
@@ -64347,22 +64486,22 @@ groups:
           members:
             - id: running
               value: running
-              stability: development
+              stability: release_candidate
             - id: sleeping
               value: sleeping
-              stability: development
+              stability: release_candidate
             - id: stopped
               value: stopped
-              stability: development
+              stability: release_candidate
             - id: defunct
               value: defunct
-              stability: development
+              stability: release_candidate
         brief: |
           The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
         examples:
           - running
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
     metric_name: system.process.count
     instrument: updowncounter
     unit: '{process}'
@@ -67546,7 +67685,7 @@ groups:
         brief: The command used to launch the process (i.e. the command name). On z/OS, SHOULD be set to the name of the job used to start the z/OS system software.
         examples: CICSSTRT
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.owner
         type: string
         brief: |
@@ -67554,7 +67693,7 @@ groups:
         examples: CICSUSR
         requirement_level: opt_in
         note: On z/OS, SHOULD be set to the user under which the z/OS system software is executed.
-        stability: development
+        stability: release_candidate
       - name: process.pid
         type: int
         brief: |
@@ -67562,28 +67701,28 @@ groups:
         examples: 008A
         requirement_level: required
         note: On z/OS, SHOULD be set to the Address Space Identifier.
-        stability: development
+        stability: release_candidate
       - name: process.runtime.description
         type: string
         brief: |
           An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.
         examples: IBM Customer Information Control System (CICS) Transaction Server for z/OS Version 5.6
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
       - name: process.runtime.name
         type: string
         brief: |
           The name of the runtime of this process.
         examples: CICS Transaction Server z/OS Version 5.6
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
       - name: process.runtime.version
         type: string
         brief: |
           The version of the runtime of this process, as returned by the runtime without modification.
         examples: '5.6'
         requirement_level: opt_in
-        stability: development
+        stability: release_candidate
     name: process.zos
     lineage:
       provenance:
@@ -67711,6 +67850,11 @@ groups:
               value: rust
               brief: |
                 [Rust](https://wikipedia.org/wiki/Rust_(programming_language))
+              stability: development
+            - id: luajit
+              value: luajit
+              brief: |
+                [LuaJIT](https://en.wikipedia.org/wiki/LuaJIT)
               stability: development
         brief: |
           Describes the interpreter or compiler of a single frame.
@@ -70668,8 +70812,12 @@ groups:
               stability: development
             - id: kernel
               value: kernel
-              brief: Kernel
+              brief: Deprecated. Use `system` instead.
               stability: development
+              deprecated:
+                reason: renamed
+                renamed_to: system
+                note: Replaced by `system`.
         brief: The mode of the CPU
         examples:
           - user
@@ -73027,6 +73175,52 @@ groups:
         registry_id: main
         path: /home/weaver/source/file/registry.yaml
     display_name: File Attributes
+  - id: registry.file.lock
+    type: attribute_group
+    brief: |
+      These attributes may be used for any filesystem lock or related operation
+    attributes:
+      - name: file.lock.mechanism
+        type: string
+        brief: The lock mechanism such as noted by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)
+        examples:
+          - POSIX
+          - FLOCK
+          - DELEG
+          - LEASE
+        requirement_level: recommended
+        stability: development
+      - name: file.lock.mode
+        type: string
+        brief: |
+          Mode of lock or operation such as documented by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)
+        examples:
+          - ADVISORY
+          - MANDATORY
+          - BREAKING
+          - ACTIVE
+          - BREAKER
+        requirement_level: recommended
+        stability: development
+      - name: file.lock.type
+        type:
+          members:
+            - id: read
+              value: read
+              stability: development
+            - id: write
+              value: write
+              stability: development
+        brief: The lock type as represented by i.e. [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)'s l_type.
+        examples:
+          - read
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/file/registry.yaml
+    display_name: File Lock Attributes
   - id: registry.gcp.apphub
     type: attribute_group
     brief: |
@@ -79806,7 +80000,7 @@ groups:
         requirement_level: recommended
         note: |
           This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
-        stability: development
+        stability: release_candidate
       - name: process.command
         type: string
         brief: |
@@ -79814,7 +80008,7 @@ groups:
         examples:
           - cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.command_args
         type: string[]
         brief: |
@@ -79823,7 +80017,7 @@ groups:
           - - cmd/otecol
             - '--config=config.yaml'
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.command_line
         type: string
         brief: |
@@ -79831,19 +80025,19 @@ groups:
         examples:
           - C:\cmd\otecol --config="my directory\config.yaml"
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.context_switch.type
         type:
           members:
             - id: voluntary
               value: voluntary
-              stability: development
+              stability: release_candidate
             - id: involuntary
               value: involuntary
-              stability: development
+              stability: release_candidate
         brief: Specifies whether the context switches for this data point were voluntary or involuntary.
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.creation.time
         type: string
         brief: |
@@ -79851,7 +80045,7 @@ groups:
         examples:
           - 2023-11-21T09:25:34.853Z
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.environment_variable
         type: template[string]
         brief: |
@@ -79869,7 +80063,7 @@ groups:
           - an environment variable `PATH` with value `"/usr/local/bin:/usr/bin"`
           SHOULD be recorded as the `process.environment_variable.PATH` attribute
           with value `"/usr/local/bin:/usr/bin"`.
-        stability: development
+        stability: release_candidate
       - name: process.executable.build_id.gnu
         type: string
         brief: |
@@ -79877,7 +80071,7 @@ groups:
         examples:
           - c89b11207f6479603b0d49bf291c092c2b719293
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.build_id.go
         type: string
         brief: |
@@ -79885,7 +80079,7 @@ groups:
         examples:
           - foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.build_id.htlhash
         type: string
         brief: |
@@ -79907,7 +80101,7 @@ groups:
 
           The result is the first 16 bytes (128 bits) of the SHA256 digest,
           represented as a hex string.
-        stability: development
+        stability: release_candidate
       - name: process.executable.name
         type: string
         brief: |
@@ -79915,7 +80109,7 @@ groups:
         examples:
           - otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.path
         type: string
         brief: |
@@ -79923,7 +80117,7 @@ groups:
         examples:
           - /usr/bin/cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.exit.code
         type: int
         brief: |
@@ -79931,7 +80125,7 @@ groups:
         examples:
           - 127
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.exit.time
         type: string
         brief: |
@@ -79939,7 +80133,7 @@ groups:
         examples:
           - 2023-11-21T09:26:12.315Z
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.group_leader.pid
         type: int
         brief: |
@@ -79947,13 +80141,13 @@ groups:
         examples:
           - 23
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.interactive
         type: boolean
         brief: |
           Whether the process is connected to an interactive shell.
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.owner
         type: string
         brief: |
@@ -79961,7 +80155,7 @@ groups:
         examples:
           - root
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.parent_pid
         type: int
         brief: |
@@ -79969,7 +80163,7 @@ groups:
         examples:
           - 111
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.pid
         type: int
         brief: |
@@ -79977,7 +80171,7 @@ groups:
         examples:
           - 1234
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.real_user.id
         type: int
         brief: |
@@ -79985,7 +80179,7 @@ groups:
         examples:
           - 1000
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.real_user.name
         type: string
         brief: |
@@ -79993,14 +80187,14 @@ groups:
         examples:
           - operator
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.runtime.description
         type: string
         brief: |
           An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.
         examples: Eclipse OpenJ9 Eclipse OpenJ9 VM openj9-0.21.0
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.runtime.name
         type: string
         brief: |
@@ -80008,14 +80202,14 @@ groups:
         examples:
           - OpenJDK Runtime Environment
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.runtime.version
         type: string
         brief: |
           The version of the runtime of this process, as returned by the runtime without modification.
         examples: 14.0.2
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.saved_user.id
         type: int
         brief: |
@@ -80023,7 +80217,7 @@ groups:
         examples:
           - 1002
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.saved_user.name
         type: string
         brief: |
@@ -80031,7 +80225,7 @@ groups:
         examples:
           - operator
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.session_leader.pid
         type: int
         brief: |
@@ -80039,28 +80233,28 @@ groups:
         examples:
           - 14
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.state
         type:
           members:
             - id: running
               value: running
-              stability: development
+              stability: release_candidate
             - id: sleeping
               value: sleeping
-              stability: development
+              stability: release_candidate
             - id: stopped
               value: stopped
-              stability: development
+              stability: release_candidate
             - id: defunct
               value: defunct
-              stability: development
+              stability: release_candidate
         brief: |
           The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
         examples:
           - running
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.title
         type: string
         brief: |
@@ -80072,7 +80266,7 @@ groups:
         requirement_level: recommended
         note: |
           In many Unix-like systems, process title (proctitle), is the string that represents the name or command line of a running process, displayed by system monitoring tools like ps, top, and htop.
-        stability: development
+        stability: release_candidate
       - name: process.user.id
         type: int
         brief: |
@@ -80080,7 +80274,7 @@ groups:
         examples:
           - 1001
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.user.name
         type: string
         brief: |
@@ -80088,7 +80282,7 @@ groups:
         examples:
           - root
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.vpid
         type: int
         brief: |
@@ -80098,7 +80292,7 @@ groups:
         requirement_level: recommended
         note: |
           The process ID within a PID namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
-        stability: development
+        stability: release_candidate
       - name: process.working_directory
         type: string
         brief: |
@@ -80106,7 +80300,7 @@ groups:
         examples:
           - /root
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
     lineage:
       provenance:
         registry_id: main
@@ -80201,7 +80395,7 @@ groups:
         requirement_level: recommended
         note: |
           Control groups (cgroups) are a kernel feature used to organize and manage process resources. This attribute provides the path(s) to the cgroup(s) associated with the process, which should match the contents of the [/proc/\[PID\]/cgroup](https://man7.org/linux/man-pages/man7/cgroups.7.html) file.
-        stability: development
+        stability: release_candidate
     lineage:
       provenance:
         registry_id: main
@@ -80273,6 +80467,11 @@ groups:
               value: rust
               brief: |
                 [Rust](https://wikipedia.org/wiki/Rust_(programming_language))
+              stability: development
+            - id: luajit
+              value: luajit
+              brief: |
+                [LuaJIT](https://en.wikipedia.org/wiki/LuaJIT)
               stability: development
         brief: |
           Describes the interpreter or compiler of a single frame.
@@ -87321,7 +87520,7 @@ groups:
     note: |
       For all pipeline runs, a span with kind `SERVER` SHOULD be created corresponding to the execution of the pipeline run.
 
-      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
+      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.57.0/specification/trace/api.md#span).
 
       The span name SHOULD be `{action} {pipeline}` if there is a (low-cardinality) pipeline name available.
       If the pipeline name is not available or is likely to have high cardinality, then the span name SHOULD be `{action}`.
@@ -87703,7 +87902,7 @@ groups:
           - - cmd/otecol
             - '--config=config.yaml'
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.name
         type: string
         brief: |
@@ -87711,7 +87910,7 @@ groups:
         examples:
           - otelcol
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.executable.path
         type: string
         brief: |
@@ -87719,7 +87918,7 @@ groups:
         examples:
           - /usr/bin/cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.exit.code
         type: int
         brief: |
@@ -87727,7 +87926,7 @@ groups:
         examples:
           - 127
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.pid
         type: int
         brief: |
@@ -87735,7 +87934,7 @@ groups:
         examples:
           - 1234
         requirement_level: required
-        stability: development
+        stability: release_candidate
     span_kind: client
     lineage:
       provenance:
@@ -87861,7 +88060,7 @@ groups:
           - - cmd/otecol
             - '--config=config.yaml'
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.executable.name
         type: string
         brief: |
@@ -87869,7 +88068,7 @@ groups:
         examples:
           - otelcol
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.executable.path
         type: string
         brief: |
@@ -87877,7 +88076,7 @@ groups:
         examples:
           - /usr/bin/cmd/otelcol
         requirement_level: recommended
-        stability: development
+        stability: release_candidate
       - name: process.exit.code
         type: int
         brief: |
@@ -87885,7 +88084,7 @@ groups:
         examples:
           - 127
         requirement_level: required
-        stability: development
+        stability: release_candidate
       - name: process.pid
         type: int
         brief: |
@@ -87893,7 +88092,7 @@ groups:
         examples:
           - 1234
         requirement_level: required
-        stability: development
+        stability: release_candidate
     span_kind: internal
     lineage:
       provenance:
@@ -97492,7 +97691,7 @@ groups:
     note: |
       **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.request.model}`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
-      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
+      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.57.0/specification/trace/api.md#span).
 
       **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind

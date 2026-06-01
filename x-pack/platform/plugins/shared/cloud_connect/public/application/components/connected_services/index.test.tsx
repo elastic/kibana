@@ -107,7 +107,7 @@ describe('ConnectedServicesPage', () => {
       await userEvent.click(actionsButton);
 
       // Click the rotate API key menu item
-      const rotateMenuItem = await screen.findByRole('button', { name: /rotate api key/i });
+      const rotateMenuItem = await screen.findByRole('menuitem', { name: /rotate api key/i });
       await userEvent.click(rotateMenuItem);
 
       await waitFor(() => {
@@ -133,7 +133,7 @@ describe('ConnectedServicesPage', () => {
       await userEvent.click(actionsButton);
 
       // Click the rotate API key menu item
-      const rotateMenuItem = await screen.findByRole('button', { name: /rotate api key/i });
+      const rotateMenuItem = await screen.findByRole('menuitem', { name: /rotate api key/i });
       await userEvent.click(rotateMenuItem);
 
       await waitFor(() => {

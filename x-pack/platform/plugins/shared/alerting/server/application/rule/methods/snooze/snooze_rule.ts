@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -27,7 +26,7 @@ import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
@@ -120,8 +119,14 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     }),
   });
 
-  await logBulkRuleChanges({
-    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+  await logRuleChanges({
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleSnooze,

@@ -28,6 +28,7 @@ export interface SyntheticsUrlParams {
   tags?: string[];
   locations?: string[];
   monitorTypes?: string[] | string;
+  statusCodes?: string[];
   configIds?: string[];
   status?: string[];
   locationId?: string;
@@ -40,6 +41,7 @@ export interface SyntheticsUrlParams {
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
+  remoteName?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -88,6 +90,7 @@ export const getSupportedUrlParams = (params: {
     query,
     tags,
     monitorTypes,
+    statusCodes,
     configIds,
     locations,
     locationId,
@@ -99,6 +102,7 @@ export const getSupportedUrlParams = (params: {
     spaceId,
     useLogicalAndFor,
     view,
+    remoteName,
   } = filteredParams;
 
   return {
@@ -125,6 +129,7 @@ export const getSupportedUrlParams = (params: {
     query: query || '',
     tags: parseFilters(tags),
     monitorTypes: parseFilters(monitorTypes),
+    statusCodes: parseFilters(statusCodes),
     configIds: parseFilters(configIds),
     locations: parseFilters(locations),
     projects: parseFilters(projects),
@@ -134,6 +139,7 @@ export const getSupportedUrlParams = (params: {
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
+    remoteName: remoteName || undefined,
   };
 };
 

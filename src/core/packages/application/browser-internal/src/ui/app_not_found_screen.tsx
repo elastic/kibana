@@ -20,7 +20,7 @@ export const AppNotFound = () => (
         <h2>
           <FormattedMessage
             id="core.application.appNotFound.title"
-            defaultMessage="Application Not Found"
+            defaultMessage="Application not found"
           />
         </h2>
       }

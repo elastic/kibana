@@ -18,6 +18,7 @@ module.exports = {
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
+    no_conditional_saved_object_type_registration: require('./rules/no_conditional_saved_object_type_registration'),
     no_unsafe_dynamic_http_path: require('./rules/no_unsafe_dynamic_http_path'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_hash: require('./rules/no_unsafe_hash'),
@@ -40,5 +41,6 @@ module.exports = {
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
+    no_npx_playwright: require('./rules/no_npx_playwright'),
   },
 };

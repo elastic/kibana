@@ -52,7 +52,7 @@ if [[ "${FORCE_ALL:-}" == "1" ]]; then
   affected="$(find src/platform/kbn-ui -mindepth 1 -maxdepth 1 -type d \
     ! -name '_*' -exec basename {} \;)"
 else
-  affected="$(src/platform/kbn-ui/_tooling/affected_packages.sh "$base_ref" HEAD)"
+  affected="$(ts-node src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
 fi
 
 if [[ -z "$affected" ]]; then

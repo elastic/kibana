@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Project } from '@playwright/test';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import {
   generateTestRunId,
@@ -16,6 +17,10 @@ import {
 } from '@kbn/scout-reporting';
 import { VALID_CONFIG_MARKER } from '../types';
 import { createPlaywrightConfig } from './create_config';
+
+// Playwright's `teardown` is a project-config option (Project<>) but isn't part of the
+// runtime `Project` interface used in expectations; cast to access it in assertions.
+type PlaywrightProject = Project & { teardown?: string };
 
 jest.mock('@kbn/scout-reporting', () => ({
   ...jest.requireActual('@kbn/scout-reporting'),
@@ -130,30 +135,53 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
-  it('should add global.setup.ts as pre-step when runGlobalSetup is true and apply default timeout', () => {
+  it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
-    const defaultGlobalSetupTimeout = 180000;
+    const defaultGlobalHookTimeout = 180000;
 
     const config = createPlaywrightConfig({ testDir, runGlobalSetup: true });
     expect(config.workers).toBe(1);
 
-    expect(config.projects).toHaveLength(6);
-    expect(config.projects![0].name).toEqual('setup-local');
-    expect(config.projects![0].testMatch).toEqual(/global.setup\.ts/);
-    expect(config.projects![0].timeout).toBe(defaultGlobalSetupTimeout);
-    expect(config.projects![1].name).toEqual('local');
-    expect(config.projects![1]).toHaveProperty('dependencies', ['setup-local']);
-    expect(config.projects![1]).not.toHaveProperty('timeout');
-    expect(config.projects![2].name).toEqual('setup-ech');
-    expect(config.projects![2].timeout).toBe(defaultGlobalSetupTimeout);
-    expect(config.projects![3].name).toEqual('ech');
-    expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
-    expect(config.projects![3]).not.toHaveProperty('timeout');
-    expect(config.projects![4].name).toEqual('setup-mki');
-    expect(config.projects![4].timeout).toBe(defaultGlobalSetupTimeout);
-    expect(config.projects![5].name).toEqual('mki');
-    expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
-    expect(config.projects![5]).not.toHaveProperty('timeout');
+    // 3 base projects (local/ech/mki) × 3 hook projects each (setup, main, teardown)
+    expect(config.projects).toHaveLength(9);
+
+    const projectNames = config.projects!.map((p) => p.name);
+    expect(projectNames).toEqual([
+      'setup-local',
+      'local',
+      'teardown-local',
+      'setup-ech',
+      'ech',
+      'teardown-ech',
+      'setup-mki',
+      'mki',
+      'teardown-mki',
+    ]);
+
+    for (const projectName of ['local', 'ech', 'mki']) {
+      const setup = config.projects!.find((p) => p.name === `setup-${projectName}`);
+      const main = config.projects!.find((p) => p.name === projectName);
+      const teardown = config.projects!.find((p) => p.name === `teardown-${projectName}`);
+
+      expect(setup).toBeDefined();
+      expect(setup!.testMatch).toEqual(/global.setup\.ts/);
+      expect(setup!.timeout).toBe(defaultGlobalHookTimeout);
+      // teardown is wired via Playwright's per-project `teardown` field, not `dependencies`,
+      // so it runs after setup AND every project depending on it has finished — even on
+      // test failure. https://playwright.dev/docs/test-projects#teardown
+      expect((setup as PlaywrightProject).teardown).toBe(`teardown-${projectName}`);
+
+      expect(main).toBeDefined();
+      expect(main).toHaveProperty('dependencies', [`setup-${projectName}`]);
+      expect(main).not.toHaveProperty('timeout');
+
+      expect(teardown).toBeDefined();
+      // The teardown project is always emitted; if a plugin doesn't ship `global.teardown.ts`,
+      // the regex matches no files and Playwright silently skips the project — opt-in by file
+      // presence with no extra config flag required.
+      expect(teardown!.testMatch).toEqual(/global.teardown\.ts/);
+      expect(teardown!.timeout).toBe(defaultGlobalHookTimeout);
+    }
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

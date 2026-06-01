@@ -9,12 +9,25 @@ import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { LateBindingSpanProcessor, ElasticsearchOtlpExporter } from '@kbn/tracing';
+import { buildOtelResources } from '@kbn/telemetry';
+import {
+  ElasticsearchOtlpExporter,
+  LateBindingSpanProcessor,
+  EvalSpanProcessor,
+} from '@kbn/tracing';
+import {
+  initInferenceTracerProvider,
+  shutdownInferenceTracerProvider,
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+} from '@kbn/inference-tracing';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import { GlobalBridgeProcessor } from './global_bridge_processor';
 import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
+import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
@@ -86,24 +99,41 @@ export const registerTracingExporter = async ({
 
   const { isEnabled, stopPolling } = await createCachedIsEnabled(core, logger);
 
-  // OpikDistributedTracingSpanProcessor must be registered before AgentBuilderSpanProcessor
-  // so that opik.* attributes are set on spans at onStart before the exporter reads them at onEnd.
-  const tearDowns = [
-    ...(tracingConfig.opik_distributed_tracing
-      ? [LateBindingSpanProcessor.register(new OpikDistributedTracingSpanProcessor())]
-      : []),
-    ...exporters.map((exporter) => {
-      const processor = new AgentBuilderSpanProcessor({
-        exporter,
-        scheduledDelayMillis: tracingConfig.scheduledDelay,
-        isEnabled,
-      });
-      return LateBindingSpanProcessor.register(processor);
-    }),
+  const processors: tracing.SpanProcessor[] = [
+    ...(tracingConfig.opik_distributed_tracing ? [new OpikDistributedTracingSpanProcessor()] : []),
+    ...exporters.map(
+      (exporter) =>
+        new AgentBuilderSpanProcessor({
+          exporter,
+          scheduledDelayMillis: tracingConfig.scheduledDelay,
+          isEnabled,
+        })
+    ),
   ];
+
+  processors.push(
+    new EvalSpanProcessor([
+      { baggageKey: EXECUTION_ID_BAGGAGE_KEY },
+      { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
+      { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: DATA_STREAM_NAMESPACE_ATTR },
+    ])
+  );
+
+  const lateBindingProcessor = LateBindingSpanProcessor.get();
+  if (lateBindingProcessor) {
+    processors.push(new GlobalBridgeProcessor(lateBindingProcessor));
+  }
+
+  const resource = buildOtelResources();
+  await resource.waitForAsyncAttributes?.();
+
+  initInferenceTracerProvider({
+    processors,
+    resource,
+  });
 
   return async () => {
     stopPolling();
-    await Promise.all(tearDowns.map((teardown) => teardown()));
+    await shutdownInferenceTracerProvider();
   };
 };

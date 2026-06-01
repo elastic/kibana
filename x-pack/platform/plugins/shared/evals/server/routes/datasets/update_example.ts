@@ -13,7 +13,7 @@ import {
   UpdateEvaluationDatasetExampleRequestParams,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -35,7 +35,7 @@ export const registerUpdateExampleRoute = ({
       path: EVALS_DATASET_EXAMPLE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Update evaluation dataset example',
     })
@@ -86,10 +86,8 @@ export const registerUpdateExampleRoute = ({
 
           const { datasetId, exampleId } = request.params;
           const { input, output, metadata } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { appPaths } from '../../../../../utils/app_paths';
+import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
@@ -44,6 +45,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
+  const { activeStreams } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
@@ -96,6 +98,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               title={conversation.title || conversation.id}
               isActive={isActive}
               routeConversationId={currentConversationId}
+              showActionsMenu={!activeStreams.has(conversation.id)}
               onItemClick={onItemClick}
             />
           </EuiFlexItem>

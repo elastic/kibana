@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { Header } from '../../flyout_v2/ioc/header';
+import { Header } from '../../flyout_v2/ioc/main/header';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import type { SecurityAppStore } from '../../common/store/types';

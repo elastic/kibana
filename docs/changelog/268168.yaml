@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268168
+issues:
+- https://github.com/elastic/kibana/issues/248467
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Dashboards and visualizations
+title: Fix gauge min/max/goal available operations
+description: "Updates gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas."

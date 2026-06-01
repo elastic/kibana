@@ -25,11 +25,12 @@ export const ChartSizes = {
 
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
-  Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
+  Omit<LensWrapperProps, 'lensProps' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: UnifiedMetricsGridProps['fetch$'];
     esqlQuery: string;
     title: string;
+    description?: string;
     chartLayers: LensSeriesLayer[];
     yBounds?: LensYBoundsConfig;
     isLoading?: boolean;
@@ -52,11 +53,13 @@ export const Chart = ({
   size = 'm',
   esqlQuery,
   title,
+  description,
   chartLayers,
   syncCursor,
   syncTooltips,
   yBounds,
   extraDisabledActions,
+  quickActionIds,
   isLoading = false,
   error,
   userMessages,
@@ -72,6 +75,7 @@ export const Chart = ({
   const lensProps = useLensProps({
     chartId: id,
     title,
+    description,
     query: esqlQuery,
     services,
     fetchParams,
@@ -108,6 +112,7 @@ export const Chart = ({
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
             extraDisabledActions={extraDisabledActions}
+            quickActionIds={quickActionIds}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

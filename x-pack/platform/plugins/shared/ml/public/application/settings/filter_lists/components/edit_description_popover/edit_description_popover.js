@@ -89,6 +89,12 @@ export class EditDescriptionPopover extends Component {
           isOpen={isPopoverOpen}
           closePopover={this.closePopover}
           initialFocus="#filter_list_edit_description_row"
+          aria-label={i18n.translate(
+            'xpack.ml.settings.filterLists.editDescriptionPopover.popoverAriaLabel',
+            {
+              defaultMessage: 'Edit filter list description',
+            }
+          )}
         >
           <div style={{ width: '300px' }}>
             <EuiForm>

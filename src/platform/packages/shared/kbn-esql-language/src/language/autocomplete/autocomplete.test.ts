@@ -13,6 +13,7 @@ import {
   withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
 } from '../../..';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
@@ -666,10 +667,12 @@ describe('autocomplete', () => {
         'FROM /',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
-          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
-          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          'index1',
+          'index2',
+          ...views.map((v) => v.name),
+          ...datasets.map((d) => d.name),
         ],
         undefined,
         [
@@ -740,18 +743,11 @@ describe('autocomplete', () => {
         'FROM index1, index2/',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 | ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2, ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 METADATA ',
-            filterText: 'index2',
-          } as ISuggestionItem),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 | ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2, ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 METADATA ', filterText: 'index2' } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
@@ -1144,6 +1140,28 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+
+    testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true }),
+    ]);
+
+    testSuggestions(
+      'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
+      ['AND $0', 'OR $0', '| ']
+    );
+  });
+
+  describe('ROW operator expressions', () => {
+    testSuggestions('ROW col0 = ABS(/)', [
+      ...getFunctionSignaturesByReturnType(
+        Location.ROW,
+        [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+        { scalar: true },
+        undefined,
+        ['abs']
+      ),
+    ]);
   });
 
   describe('Replacement ranges are attached when needed', () => {

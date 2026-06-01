@@ -177,7 +177,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
           data-test-subj="stepScreenshotImageUnavailable"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon color="subdued" size="xxl" type="image" />
+            <EuiIcon color="subdued" size="xxl" type="image" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText>

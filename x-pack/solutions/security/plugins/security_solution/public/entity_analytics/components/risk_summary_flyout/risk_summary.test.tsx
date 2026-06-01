@@ -452,6 +452,68 @@ describe('FlyoutRiskSummary', () => {
     );
   });
 
+  it('falls back to prefetchedResolutionRisk when the inner risk-index lookup returns no data', () => {
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: { entity: { id: 'host:target-entity' } },
+        aliases: [],
+        group_size: 2,
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    // Default mockUseRiskScore returns data: undefined, so the resolution lookup is empty
+    // and the component must rely on the prefetched value.
+    const prefetchedResolutionRisk = mockHostRiskScoreState.data?.[0];
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+          prefetchedResolutionRisk={prefetchedResolutionRisk}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+  });
+
+  it('does not render resolution risk block when neither the lookup nor prefetchedResolutionRisk has data', () => {
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: { entity: { id: 'host:target-entity' } },
+        aliases: [],
+        group_size: 2,
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
   it('does not render resolution risk score block for standalone entities', () => {
     mockUseResolutionGroup.mockReturnValue({
       data: {

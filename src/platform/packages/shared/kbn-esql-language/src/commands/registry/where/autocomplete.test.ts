@@ -32,6 +32,11 @@ const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
 
+const whereContext = {
+  ...mockContext,
+  subquerySupport: true,
+};
+
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
 export const EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS = [
@@ -45,7 +50,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = mockContext,
+  context = whereContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -297,8 +302,32 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IN', async () => {
-      await whereExpectSuggestions('from index | WHERE doubleField in ', ['($0)']);
-      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['($0)']);
+      await whereExpectSuggestions('from index | WHERE doubleField in ', [
+        '($0)',
+        '(FROM $0)',
+        '(ROW $0)',
+        '(TS $0)',
+      ]);
+      await whereExpectSuggestions('from index | WHERE doubleField not in ', [
+        '($0)',
+        '(FROM $0)',
+        '(ROW $0)',
+        '(TS $0)',
+      ]);
+
+      await whereExpectSuggestions(
+        'from index | WHERE doubleField in (FROM index | KEEP doubleField) ',
+        [...getOperatorSuggestions(logicalOperators), '| ']
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE doubleField not in (FROM index | KEEP doubleField) ',
+        [...getOperatorSuggestions(logicalOperators), '| ']
+      );
+      await whereExpectSuggestions('from index | WHERE doubleField in (ROW doubleField = 1) ', [
+        ...getOperatorSuggestions(logicalOperators),
+        '| ',
+      ]);
+
       const expectedFields = getFieldNamesByType(['double']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(

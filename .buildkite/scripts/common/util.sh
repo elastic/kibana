@@ -189,7 +189,7 @@ download_artifact() {
 
 GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
 download_tmp_artifact() {
-  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"
   local region use_gcs=false
 
   for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
@@ -209,6 +209,10 @@ download_tmp_artifact() {
     echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
   fi
 
+  if [[ "$fallback" != "true" ]]; then
+    return 1
+  fi
+
   echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
   download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
 }
@@ -218,7 +222,9 @@ upload_tmp_artifact() {
   "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
 
   printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
-    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
+    env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {

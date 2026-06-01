@@ -25,6 +25,7 @@ import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 
 /**
  * Resets the React Router v6 context so that nested `<Router>` components
@@ -57,12 +58,14 @@ export interface ApmEmbeddableContextProps {
   rangeFrom?: string;
   rangeTo?: string;
   kuery?: string;
+  /** Seeded into the in-memory router URL so hooks reading URL params get a concrete env. */
+  environment?: string;
 }
 
-function buildHistoryEntry(rangeFrom: string, rangeTo: string, kuery: string) {
+function buildHistoryEntry(rangeFrom: string, rangeTo: string, kuery: string, environment: string) {
   return `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
     kuery
-  )}&comparisonEnabled=false`;
+  )}&environment=${encodeURIComponent(environment)}&comparisonEnabled=false`;
 }
 
 /** Providers for dashboard/flyout embeddables. Uses `I18nProvider` for react-intl but omits Core `i18n.Context` (`EuiContext`) and `KibanaThemeProvider` so the DOM stays shallow for flyout flex layout; theme/CSS still comes from the host `KibanaRenderContextProvider`. */
@@ -70,6 +73,7 @@ export function ApmEmbeddableContext({
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   kuery = '',
+  environment = ENVIRONMENT_ALL.value,
   deps,
   children,
 }: ApmEmbeddableContextProps) {
@@ -82,7 +86,7 @@ export function ApmEmbeddableContext({
   const history = useRef<MemoryHistory | null>(null);
   if (history.current === null) {
     history.current = createMemoryHistory({
-      initialEntries: [buildHistoryEntry(rangeFrom, rangeTo, kuery)],
+      initialEntries: [buildHistoryEntry(rangeFrom, rangeTo, kuery, environment)],
     });
   }
 
@@ -93,8 +97,8 @@ export function ApmEmbeddableContext({
       return;
     }
 
-    history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery));
-  }, [history, rangeFrom, rangeTo, kuery]);
+    history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery, environment));
+  }, [history, rangeFrom, rangeTo, kuery, environment]);
 
   const services = {
     config: deps.config,

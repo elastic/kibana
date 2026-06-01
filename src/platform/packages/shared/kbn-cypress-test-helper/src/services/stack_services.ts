@@ -12,8 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
-import type { ReqOptions } from '@kbn/kbn-client';
-import { type AxiosResponse } from 'axios';
+import type { KbnClientResponse, ReqOptions } from '@kbn/kbn-client';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -92,7 +91,7 @@ class KbnClientExtended extends KbnClient {
     this.apiKey = apiKey;
   }
 
-  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
+  async request<T>(options: ReqOptions): Promise<KbnClientResponse<T>> {
     const headers: ReqOptions['headers'] = {
       ...(options.headers ?? {}),
     };

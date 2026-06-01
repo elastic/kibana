@@ -38,7 +38,6 @@ export type CspDirectiveName =
  * The default report only directives rules
  */
 export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'form-action': [`'report-sample'`, `'self'`],
   'default-src': [`'report-sample'`, `'none'`],
   'font-src': [`'report-sample'`, `'self'`],
   'img-src': [`'report-sample'`, `'self'`, 'data:', 'tiles.maps.elastic.co'], // Same as below for tiles.maps.elastic.co
@@ -64,6 +63,7 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'worker-src': [`'report-sample'`, `'self'`, `blob:`],
   'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
   'object-src': [`'report-sample'`, `'none'`],
+  'form-action': [`'report-sample'`, `'self'`],
 };
 
 /**
@@ -255,6 +255,9 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
   if (cspConfig.object_src?.length) {
     enforceDirectives.set('object-src', cspConfig.object_src);
   }
+  if (cspConfig.form_action?.length) {
+    enforceDirectives.set('form-action', cspConfig.form_action);
+  }
   if (cspConfig.frame_ancestors?.length) {
     enforceDirectives.set('frame-ancestors', cspConfig.frame_ancestors);
   }
@@ -267,12 +270,12 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
     reportOnlyDirectives.set('report-to', cspConfig.report_to);
   }
 
-  if (cspConfig.report_only?.form_action?.length) {
-    reportOnlyDirectives.set('form-action', cspConfig.report_only?.form_action);
-  }
-
   if (cspConfig.report_only?.object_src?.length) {
     reportOnlyDirectives.set('object-src', cspConfig.report_only?.object_src);
+  }
+
+  if (cspConfig.report_only?.connect_src?.length) {
+    reportOnlyDirectives.set('connect-src', cspConfig.report_only?.connect_src);
   }
 
   return {

@@ -335,6 +335,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             isOpen={isPopoverVisible}
             panelPaddingSize="none"
             anchorPosition="upCenter"
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.exploration.dataGridActions.popoverAriaLabel',
+              {
+                defaultMessage: 'Row actions',
+              }
+            )}
             button={
               <EuiButtonIcon
                 aria-label={i18n.translate(
@@ -350,7 +356,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             }
             closePopover={closePopover}
           >
-            <EuiContextMenuPanel items={actions} size="s" />
+            <EuiContextMenuPanel items={actions} />
           </EuiPopover>
         );
       },
