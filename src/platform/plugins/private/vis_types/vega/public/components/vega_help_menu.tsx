@@ -8,7 +8,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -21,13 +27,20 @@ function VegaHelpMenu() {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={onButtonClick}
-      aria-label={i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
         defaultMessage: 'Vega help',
       })}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="question"
+        onClick={onButtonClick}
+        aria-label={i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
+          defaultMessage: 'Vega help',
+        })}
+      />
+    </EuiToolTip>
   );
 
   const items = [
