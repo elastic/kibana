@@ -66,13 +66,13 @@ describe('test fetchDocuments', () => {
       body: { query: {} },
     }));
 
-    // Mock services.data.search.typed.searchDSL()
+    // Mock services.data.search.dslPaginated()
     const mockPagination = {
       hasNextPage: true,
       nextPage: jest.fn(),
       getAllPages: jest.fn(),
     };
-    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
+    deps.services.data.search.dslPaginated = jest.fn().mockResolvedValue({
       rawResponse: { hits: { hits } } as SearchResponse,
       pagination: mockPagination,
     });
@@ -100,8 +100,8 @@ describe('test fetchDocuments', () => {
       body: { query: {} },
     }));
 
-    // Mock services.data.search.typed.searchDSL() to throw error
-    deps.services.data.search.typed.searchDSL = jest.fn().mockRejectedValue(new Error('Oh noes!'));
+    // Mock services.data.search.dslPaginated() to throw error
+    deps.services.data.search.dslPaginated = jest.fn().mockRejectedValue(new Error('Oh noes!'));
 
     try {
       await fetchDocuments(savedSearchMock.searchSource, deps);
@@ -130,7 +130,7 @@ describe('test fetchDocuments', () => {
       getAllPages: jest.fn(),
     };
 
-    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
+    deps.services.data.search.dslPaginated = jest.fn().mockResolvedValue({
       rawResponse: { hits: { hits } } as SearchResponse,
       pagination: mockPagination,
     });
@@ -141,11 +141,11 @@ describe('test fetchDocuments', () => {
       pagination: mockPagination,
     });
 
-    expect(deps.services.data.search.typed.searchDSL).toHaveBeenCalledWith(
-      expect.objectContaining({ index: dataViewMock.getIndexPattern() }),
+    expect(deps.services.data.search.dslPaginated).toHaveBeenCalledWith(
+      expect.objectContaining({ index: dataViewMock }),
       expect.objectContaining({
         sessionId: deps.searchSessionId,
-        paginate: true,
+        executionContext: { description: 'fetch documents' },
       })
     );
   });
