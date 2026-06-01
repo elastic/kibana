@@ -57,7 +57,7 @@ export async function editMonitor(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   monitorId: string,
-  monitor: Record<string, unknown> | unknown,
+  monitor: unknown,
   opts: { statusCode?: number } = {}
 ) {
   const { statusCode = 200 } = opts;

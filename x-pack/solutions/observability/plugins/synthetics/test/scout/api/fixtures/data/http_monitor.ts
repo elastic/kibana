@@ -10,6 +10,10 @@
  * fixture `apis/synthetics/fixtures/http_monitor.json` (read there via
  * `getFixtureJson`). Kept as a typed module so Scout specs can import it
  * directly without filesystem reads.
+ *
+ * Callers must supply their own `locations` (e.g. a private location resolved
+ * at runtime); the fixture intentionally omits a default to avoid leaking a
+ * hardcoded location into tests that forget to override it.
  */
 export const httpMonitorFixture: Record<string, unknown> = {
   type: 'http',
@@ -61,17 +65,6 @@ export const httpMonitorFixture: Record<string, unknown> = {
   'ssl.verification_mode': 'certificate',
   'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
   name: 'test-monitor-name',
-  locations: [
-    {
-      id: 'dev',
-      label: 'Dev Service',
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      isServiceManaged: true,
-    },
-  ],
   namespace: 'testnamespace',
   revision: 1,
   origin: 'ui',

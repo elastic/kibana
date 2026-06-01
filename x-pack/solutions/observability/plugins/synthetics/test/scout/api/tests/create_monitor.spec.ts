@@ -32,7 +32,6 @@ apiTest.describe(
   () => {
     let editorHeaders: Record<string, string>;
     let privateLocation: { id: string; label: string };
-    let spaceToCleanUp: string | null = null;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
@@ -43,10 +42,6 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      if (spaceToCleanUp) {
-        await kbnClient.spaces.delete(spaceToCleanUp).catch(() => {});
-        spaceToCleanUp = null;
-      }
     });
 
     apiTest('returns the newly added monitor', async ({ apiClient }) => {
@@ -68,26 +63,29 @@ apiTest.describe(
         const SPACE_ID = `test-space-${uuidv4()}`;
         const SPACE_NAME = `test-space-name ${uuidv4()}`;
         const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
-        spaceToCleanUp = SPACE_ID;
 
         await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        const spacePrivateLocation =
-          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+        try {
+          const spacePrivateLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
 
-        const monitor = {
-          ...httpMonitorFixture,
-          namespace: 'default',
-          locations: [spacePrivateLocation],
-          spaces: [],
-        };
+          const monitor = {
+            ...httpMonitorFixture,
+            namespace: 'default',
+            locations: [spacePrivateLocation],
+            spaces: [],
+          };
 
-        const res = await apiClient.post(`s/${SPACE_ID}/api/synthetics/monitors`, {
-          headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
-          body: monitor,
-          responseType: 'json',
-        });
-        expect(res).toHaveStatusCode(200);
-        expect((res.body as Record<string, unknown>).namespace).toStrictEqual(EXPECTED_NAMESPACE);
+          const res = await apiClient.post(`s/${SPACE_ID}/api/synthetics/monitors`, {
+            headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+            body: monitor,
+            responseType: 'json',
+          });
+          expect(res).toHaveStatusCode(200);
+          expect((res.body as Record<string, unknown>).namespace).toStrictEqual(EXPECTED_NAMESPACE);
+        } finally {
+          await kbnClient.spaces.delete(SPACE_ID);
+        }
       }
     );
   }
