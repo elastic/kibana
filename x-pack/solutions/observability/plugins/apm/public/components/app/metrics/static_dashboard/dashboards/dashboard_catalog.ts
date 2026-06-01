@@ -192,6 +192,19 @@ export async function loadDashboardFile(filename: DashboardFileName) {
         './opentelemetry_dotnet.json'
       );
     }
+    case 'otel_native-edot-dotnet':
+    case 'otel_native-otel_other-dotnet': {
+      return import(
+        /* webpackChunkName: "lazyDotnetOtelNativeRuntimeDashboard" */
+        './otel_native-otel_other-dotnet.json'
+      );
+    }
+    case 'otel_native-edot-dotnet-lte-v8': {
+      return import(
+        /* webpackChunkName: "lazyDotnetOtelNativeRuntimeLteV8Dashboard" */
+        './otel_native-edot-dotnet-lte-v8.json'
+      );
+    }
     case 'otel_native-otel_other-python': {
       return import(
         /* webpackChunkName: "lazyPythonOtelNativeOtherDashboard" */
