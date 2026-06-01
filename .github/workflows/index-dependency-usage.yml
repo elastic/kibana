@@ -34,35 +34,9 @@ jobs:
       # Let all groups run even if one fails — partial data beats no data.
       fail-fast: false
       matrix:
-        include:
-          - group: platform-plugins
-            paths: >-
-              x-pack/platform/plugins/shared
-              x-pack/platform/plugins/private
-
-          - group: platform-packages
-            paths: >-
-              x-pack/platform/packages/shared
-              x-pack/platform/packages/private
-
-          - group: security
-            paths: >-
-              x-pack/solutions/security/plugins
-              x-pack/solutions/security/packages
-
-          - group: observability
-            paths: >-
-              x-pack/solutions/observability/plugins
-              x-pack/solutions/observability/packages
-
-          - group: search-and-chat
-            paths: >-
-              x-pack/solutions/search/plugins
-              x-pack/solutions/search/packages
-              x-pack/solutions/chat/plugins
-              x-pack/solutions/vectordb/plugins
-              x-pack/solutions/vectordb/packages
-              x-pack/solutions/workplaceai/plugins
+        group:
+          - platform
+          - solutions
 
     steps:
       - name: Checkout kibana
@@ -97,6 +71,5 @@ jobs:
           fi
 
           bash scripts/index_dependency_usage.sh \
-            --paths ${{ matrix.paths }} \
-            --setup-template
-
+            --group ${{ matrix.group }} \
+            $TEMPLATE_ARG

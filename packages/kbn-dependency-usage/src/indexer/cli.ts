@@ -9,8 +9,13 @@
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
+import { readdirSync, existsSync } from 'fs';
+import nodePath from 'path';
 import yargs from 'yargs';
 import chalk from 'chalk';
+
+// @ts-ignore
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
   discoverPackages,
@@ -26,6 +31,34 @@ import {
 const today = new Date().toISOString().slice(0, 10);
 
 // ---------------------------------------------------------------------------
+// Group → paths resolution
+// ---------------------------------------------------------------------------
+
+const PLATFORM_PATHS = [
+  'x-pack/platform/plugins/shared',
+  'x-pack/platform/plugins/private',
+  'x-pack/platform/packages/shared',
+  'x-pack/platform/packages/private',
+];
+
+function resolveGroupPaths(group: string): string[] {
+  if (group === 'platform') return PLATFORM_PATHS;
+
+  if (group === 'solutions') {
+    const solutionsDir = nodePath.join(REPO_ROOT, 'x-pack/solutions');
+    return readdirSync(solutionsDir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .flatMap(({ name }) =>
+        ['plugins', 'packages']
+          .map((sub) => `x-pack/solutions/${name}/${sub}`)
+          .filter((p) => existsSync(nodePath.join(REPO_ROOT, p)))
+      );
+  }
+
+  throw new Error(`Unknown group '${group}'. Use 'platform', 'solutions', or --paths.`);
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 yargs(process.argv.slice(2))
@@ -35,6 +68,14 @@ yargs(process.argv.slice(2))
     (y) =>
       y
         .version(false)
+        .option('group', {
+          alias: 'g',
+          describe: chalk.cyan(
+            "Named group to index: 'platform' (hardcoded x-pack/platform paths) or " +
+              "'solutions' (auto-discovered from x-pack/solutions/). Mutually exclusive with --paths."
+          ),
+          type: 'string',
+        })
         .option('paths', {
           alias: 'p',
           describe: chalk.cyan(
@@ -43,7 +84,6 @@ yargs(process.argv.slice(2))
           ),
           type: 'string',
           array: true,
-          demandOption: true,
         })
         .option('es-url', {
           describe: chalk.yellow('Elasticsearch base URL'),
@@ -94,6 +134,15 @@ yargs(process.argv.slice(2))
           ),
           type: 'string',
           default: DEFAULT_EXCLUDED_DEPS.join(','),
+        })
+        .check((argv) => {
+          if (!argv.group && !argv.paths?.length) {
+            throw new Error('Provide either --group or --paths.');
+          }
+          if (argv.group && argv.paths?.length) {
+            throw new Error('--group and --paths are mutually exclusive.');
+          }
+          return true;
         }),
     async (argv) => {
       const opts: IndexerOptions = {
@@ -105,14 +154,19 @@ yargs(process.argv.slice(2))
       };
 
       try {
-        // 1. Optionally set up the ES index template
+        // 1. Resolve paths from --group or --paths
+        const searchPaths = argv.group
+          ? resolveGroupPaths(argv.group)
+          : (argv.paths as string[]);
+
+        // 2. Optionally set up the ES index template
         if (!opts.dryRun && argv['setup-template']) {
           console.error(chalk.cyan('Putting index template…'));
           await ensureIndexTemplate(opts);
           console.error(chalk.green('Index template OK'));
         }
 
-        // 2. Build shared context once (reads CODEOWNERS, renovate.json, package.json)
+        // 3. Build shared context once (reads CODEOWNERS, renovate.json, package.json)
         const excludePatterns = (argv['exclude-deps'] as string)
           .split(',')
           .map((s) => s.trim())
@@ -122,10 +176,10 @@ yargs(process.argv.slice(2))
           console.error(chalk.gray(`Excluding deps matching: ${excludePatterns.join(', ')}`));
         }
 
-        // 3. Discover all packages under the supplied search paths, then
+        // 4. Discover all packages under the resolved search paths, then
         //    cruise each package individually, accumulating docs and flushing
         //    a single bulk request to ES every `batchSize` packages.
-        const packages = (argv.paths as string[]).flatMap(discoverPackages);
+        const packages = searchPaths.flatMap(discoverPackages);
         if (packages.length === 0) {
           console.error(chalk.red('No packages found under the given paths.'));
           process.exit(1);
@@ -170,7 +224,7 @@ yargs(process.argv.slice(2))
 
         if (opts.dryRun) await flush();
 
-        // 4. Summary
+        // 5. Summary
         const summary = `${totalDocs} docs across ${packages.length - failed} package(s)`;
         if (failed > 0) {
           console.error(chalk.yellow(`Done — ${summary} (${failed} package(s) failed)`));
