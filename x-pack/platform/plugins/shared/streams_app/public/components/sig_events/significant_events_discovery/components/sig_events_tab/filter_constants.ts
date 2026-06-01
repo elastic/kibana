@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-import {
-  SIG_EVENT_VERDICT_OPTIONS,
-  type SigEventImpact,
-  type SigEventVerdict,
-} from '@kbn/streams-schema';
+import { SIG_EVENT_STATUS_OPTIONS, type SigEventStatus } from '@kbn/streams-schema';
 
-export const VERDICT_COLORS: Record<SigEventVerdict, string> = {
+export const STATUS_COLORS: Record<SigEventStatus, string> = {
   promoted: 'success',
   acknowledged: 'warning',
   demoted: 'default',
 };
 
-export const IMPACT_COLORS: Record<SigEventImpact, string> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'primary',
-  low: 'hollow',
-};
+const isStatusOption = (v: string): v is SigEventStatus =>
+  (SIG_EVENT_STATUS_OPTIONS as ReadonlyArray<string>).includes(v);
 
-const isVerdict = (v: string): v is SigEventVerdict =>
-  (SIG_EVENT_VERDICT_OPTIONS as ReadonlyArray<string>).includes(v);
-
-export const getVerdictColor = (verdict: string): string =>
-  isVerdict(verdict) ? VERDICT_COLORS[verdict] : 'default';
+export const getStatusColor = (status: string): string =>
+  isStatusOption(status) ? STATUS_COLORS[status] : 'default';

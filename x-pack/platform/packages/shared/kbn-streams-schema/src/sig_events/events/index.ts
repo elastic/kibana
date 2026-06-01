@@ -12,6 +12,7 @@ import {
   causeKiSchema,
   evidenceSchema,
 } from '../common_schemas';
+import { MAX_TEXT_LENGTH } from '../constants';
 
 export const SIG_EVENT_VERDICT_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
 export const sigEventVerdictSchema = z.enum(SIG_EVENT_VERDICT_OPTIONS);
@@ -46,6 +47,10 @@ export const sigEventSchema = z.object({
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
   grouped_into: z.string().max(255).optional(),
+  // TODO: rename once the data stream fields are renamed
+  // Audit fields merged from verdict docs
+  verdict_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+  assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;
