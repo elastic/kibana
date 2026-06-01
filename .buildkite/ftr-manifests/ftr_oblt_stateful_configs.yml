@@ -35,7 +35,6 @@ enabled:
   - x-pack/solutions/observability/test/functional/apps/apm/config.ts
   - x-pack/solutions/observability/test/functional_with_es_ssl/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/cases/config.ts
-  - x-pack/solutions/observability/test/api_integration/apis/security/config.ts
   - x-pack/solutions/observability/test/accessibility/config.ts
   - x-pack/solutions/observability/test/functional/apps/infra/config.ts
   - x-pack/solutions/observability/test/functional/config.firefox.ts
