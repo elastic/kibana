@@ -75,10 +75,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('should install when not in default space, v1 is installed, and v2 is not installed', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockImplementation((key: string) => {
-      if (key === FF_ENABLE_ENTITY_STORE_V2) return true;
-      if (key === 'dateFormat:tz') return 'America/New_York';
-    });
+    mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get
       .mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed })
@@ -100,7 +97,7 @@ describe('useInstallEntityStoreV2', () => {
     });
     expect(mockServices.http.post).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.public.INSTALL,
-      body: JSON.stringify({ timezone: 'America/New_York' }),
+      body: JSON.stringify({}),
     });
   });
 
@@ -155,10 +152,7 @@ describe('useInstallEntityStoreV2', () => {
 
   it('when entity store is not installed and space is default, installs entity store (install API inits maintainers)', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockImplementation((key: string) => {
-      if (key === FF_ENABLE_ENTITY_STORE_V2) return true;
-      if (key === 'dateFormat:tz') return 'America/New_York';
-    });
+    mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.post.mockResolvedValue({});
@@ -175,7 +169,7 @@ describe('useInstallEntityStoreV2', () => {
     });
     expect(mockServices.http.post).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.public.INSTALL,
-      body: JSON.stringify({ timezone: 'America/New_York' }),
+      body: JSON.stringify({}),
     });
     expect(mockServices.http.post).not.toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
@@ -184,16 +178,12 @@ describe('useInstallEntityStoreV2', () => {
     });
   });
 
-  it('updates history snapshot cadence when entity store is running and historySnapshot has frequency but no timezone', async () => {
+  it('updates history snapshot cadence when entity store is running', async () => {
     const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockImplementation((key: string) => {
-      if (key === FF_ENABLE_ENTITY_STORE_V2) return true;
-      if (key === 'dateFormat:tz') return 'America/New_York';
-    });
+    mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({
       status: EntityStoreStatus.enum.running,
-      historySnapshot: { status: 'started', frequency: '24h' },
     });
     mockServices.http.post.mockResolvedValue({});
     mockServices.http.put.mockResolvedValue({});
@@ -206,32 +196,9 @@ describe('useInstallEntityStoreV2', () => {
 
     expect(mockServices.http.put).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPSHOT_TASK,
-      body: JSON.stringify({ timezone: 'America/New_York' }),
+      body: JSON.stringify({}),
       query: { apiVersion: '2' },
     });
-  });
-
-  it('does not update history snapshot cadence when entity store is running and timezone is already set, even if different from browser timezone', async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockImplementation((key: string) => {
-      if (key === FF_ENABLE_ENTITY_STORE_V2) return true;
-      if (key === 'dateFormat:tz') return 'America/New_York';
-    });
-    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({
-      status: EntityStoreStatus.enum.running,
-      historySnapshot: { status: 'started', frequency: '24h', timezone: 'America/Los_Angeles' },
-    });
-    mockServices.http.post.mockResolvedValue({});
-    mockServices.http.put.mockResolvedValue({});
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.http.post).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockServices.http.put).not.toHaveBeenCalled();
   });
 });
 

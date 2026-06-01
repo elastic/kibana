@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
-import { DEFAULT_ENTITY_STORE_PERMISSIONS, HistorySnapshotCadenceBodyParams } from '../constants';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 
@@ -28,18 +27,14 @@ export function registerUpdateHistorySnapshotCadence(router: EntityStorePluginRo
     .addVersion(
       {
         version: API_VERSIONS.internal.v2,
-        validate: {
-          request: {
-            body: buildRouteValidationWithZod(HistorySnapshotCadenceBodyParams),
-          },
-        },
+        validate: {},
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const { assetManagerClient, logger } = await ctx.entityStore;
         logger.debug('Update history snapshot cadence API called');
 
         try {
-          await assetManagerClient.updateHistorySnapshotCadence(req, req.body);
+          await assetManagerClient.updateHistorySnapshotCadence(req);
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });

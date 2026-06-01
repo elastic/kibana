@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EsClient } from '@kbn/scout-security';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
@@ -20,6 +21,23 @@ import {
   forceLogExtraction,
   normalizeKeywordList,
 } from '../fixtures/helpers';
+
+// task:entity_store:v2:history_snapshot_task:<namespace>
+const HISTORY_SNAPSHOT_TASK_DOC_ID = 'task:entity_store:v2:history_snapshot_task:default';
+
+const getHistorySnapshotTaskRunAt = async (esClient: EsClient): Promise<Date> => {
+  try {
+    const doc = await esClient.get({
+      index: '.kibana_task_manager',
+      id: HISTORY_SNAPSHOT_TASK_DOC_ID,
+    });
+    const { task } = doc._source as { task: { runAt: string } };
+    return new Date(task.runAt);
+  } catch {
+    // Task not yet created — return epoch so poll retries
+    return new Date(0);
+  }
+};
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -61,6 +79,26 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
   });
+
+  apiTest(
+    'after install task runAt is scheduled at midnight UTC (00:00:00)',
+    async ({ esClient }) => {
+      let runAt = new Date(0);
+      const now = Date.now();
+      await expect
+        .poll(
+          async () => {
+            runAt = await getHistorySnapshotTaskRunAt(esClient);
+            return runAt.getTime();
+          },
+          { timeout: 10_000, intervals: [50] }
+        )
+        .toBeGreaterThan(now);
+
+      expect(runAt.getUTCHours()).toBe(0);
+      expect(runAt.getUTCMinutes()).toBe(0);
+    }
+  );
 
   apiTest(
     'history snapshot: copies latest to history index and resets behaviors on latest',

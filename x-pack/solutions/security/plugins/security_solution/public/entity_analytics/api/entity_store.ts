@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import moment from 'moment-timezone';
 import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
@@ -30,8 +29,6 @@ const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 export const useEntityStoreRoutes = () => {
   const { http, uiSettings, notifications } = useKibana().services;
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const uiSettingsTimeZone: string = uiSettings.get('dateFormat:tz');
-  const timeZone = moment.tz.zone(uiSettingsTimeZone)?.name ?? moment.tz.guess(true);
 
   return useMemo(() => {
     const installPrebuiltWatchlists = async () =>
@@ -74,7 +71,7 @@ export const useEntityStoreRoutes = () => {
         return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
           version: API_VERSIONS.public.v1,
-          body: JSON.stringify({ timezone: timeZone }),
+          body: JSON.stringify({}),
         });
       }
       return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
@@ -178,5 +175,5 @@ export const useEntityStoreRoutes = () => {
       initEntityEngine,
       listEntityEngines,
     };
-  }, [http, isV2Enabled, notifications, timeZone]);
+  }, [http, isV2Enabled, notifications]);
 };

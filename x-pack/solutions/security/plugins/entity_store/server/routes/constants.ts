@@ -8,7 +8,6 @@
 import type { AuthzEnabled } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
-import { validateHistorySnapshotTimezone } from './apis/utils/history_snapshot_timezone_validator';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -66,11 +65,6 @@ export const LogExtractionUpdateParams = z.object({
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
-export const HistorySnapshotBodyParams = HistorySnapshotState.pick({ frequency: true }).partial();
-
-export type HistorySnapshotCadenceBodyParams = z.infer<typeof HistorySnapshotCadenceBodyParams>;
-export const HistorySnapshotCadenceBodyParams = z
-  .object({
-    timezone: z.string().max(100),
-  })
-  .superRefine(validateHistorySnapshotTimezone({ isOptional: false }));
+export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
+  frequency: true,
+}).partial();

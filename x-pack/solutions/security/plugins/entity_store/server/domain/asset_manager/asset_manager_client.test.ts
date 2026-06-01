@@ -14,10 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
-import {
-  DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
-  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-} from '../saved_objects/global_state/constants';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -339,83 +336,6 @@ describe('AssetManagerClient', () => {
     });
   });
 
-  describe('historySnapshot resolution on install', () => {
-    it('no params applies default frequency and no timezone', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init({} as KibanaRequest, ['host']);
-
-      const initCall = mockGlobalStateClient.init.mock.calls[0][0];
-      expect(initCall.historySnapshot.frequency).toBe(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY);
-      expect(initCall.historySnapshot.timezone).toBeUndefined();
-      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
-        expect.objectContaining({ frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY })
-      );
-      expect(mockScheduleHistorySnapshotTasks.mock.calls[0][0].timezone).toBeUndefined();
-    });
-
-    it('frequency param overrides default', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init({} as KibanaRequest, ['host'], undefined, { frequency: '12h' });
-
-      const initCall = mockGlobalStateClient.init.mock.calls[0][0];
-      expect(initCall.historySnapshot.frequency).toBe('12h');
-      expect(initCall.historySnapshot.timezone).toBeUndefined();
-      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
-        expect.objectContaining({ frequency: '12h' })
-      );
-      expect(mockScheduleHistorySnapshotTasks.mock.calls[0][0].timezone).toBeUndefined();
-    });
-
-    it('timezone param is stored and passed to scheduler', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init({} as KibanaRequest, ['host'], undefined, {}, 'America/New_York');
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          historySnapshot: expect.objectContaining({
-            frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
-            timezone: 'America/New_York',
-          }),
-        })
-      );
-      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
-        expect.objectContaining({
-          frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
-          timezone: 'America/New_York',
-        })
-      );
-    });
-
-    it('both frequency and timezone params are stored and passed to scheduler', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init(
-        {} as KibanaRequest,
-        ['host'],
-        undefined,
-        {
-          frequency: '12h',
-        },
-        'America/New_York'
-      );
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          historySnapshot: expect.objectContaining({
-            frequency: '12h',
-            timezone: 'America/New_York',
-          }),
-        })
-      );
-      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
-        expect.objectContaining({ frequency: '12h', timezone: 'America/New_York' })
-      );
-    });
-  });
-
   describe('updateHistorySnapshotCadence', () => {
     const mockRequest = {} as KibanaRequest;
     const currentHistorySnapshot = { status: 'started' as const, frequency: '24h' };
@@ -428,16 +348,10 @@ describe('AssetManagerClient', () => {
     });
 
     it('stores timezone and reschedules with timezone when timezone is provided', async () => {
-      await client.updateHistorySnapshotCadence(mockRequest, { timezone: 'America/New_York' });
+      await client.updateHistorySnapshotCadence(mockRequest);
 
-      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        historySnapshot: expect.objectContaining({
-          timezone: 'America/New_York',
-        }),
-      });
-      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
-        expect.objectContaining({ timezone: 'America/New_York' })
-      );
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalled();
     });
   });
 });

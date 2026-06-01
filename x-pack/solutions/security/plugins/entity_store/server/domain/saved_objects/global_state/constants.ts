@@ -65,7 +65,6 @@ export const HistorySnapshotState = z.object({
     .string()
     .regex(/[smdh]$/)
     .default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
-  timezone: z.string().max(100).optional(),
   lastExecutionTimestamp: z.string().optional(),
   lastError: z
     .object({
