@@ -31,6 +31,16 @@ const items: TransactionGroup[] = [
   },
 ];
 
+const itemsWithOther: TransactionGroup[] = [
+  ...items,
+  {
+    name: '_other',
+    latency: { value: 50000 },
+    throughput: { value: 5 },
+    errorRate: { value: 0.02 },
+  },
+];
+
 describe('TransactionsTable', () => {
   beforeEach(() => {
     (useIsWithinMaxBreakpoint as jest.Mock).mockReturnValue(false);
@@ -137,6 +147,42 @@ describe('TransactionsTable', () => {
       );
       fireEvent.click(screen.getByText('Go somewhere'));
       expect(onClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('remaining transactions row', () => {
+    it('renders "Remaining Transactions" for the _other item', () => {
+      renderWithIntl(
+        <TransactionsTable items={itemsWithOther} isLoading={false} maxCountExceeded={false} />
+      );
+      expect(screen.getByText('Remaining Transactions')).toBeInTheDocument();
+    });
+
+    it('opens the popover with default content when the warning button is clicked', () => {
+      renderWithIntl(
+        <TransactionsTable items={itemsWithOther} isLoading={false} maxCountExceeded={false} />
+      );
+      fireEvent.click(
+        screen.getByRole('button', { name: 'More information about remaining transactions' })
+      );
+      expect(
+        screen.getByText(/The maximum number of transaction groups has been reached/)
+      ).toBeInTheDocument();
+    });
+
+    it('shows custom tooltip content when remainingTransactionsCellTooltipContent is provided', () => {
+      renderWithIntl(
+        <TransactionsTable
+          items={itemsWithOther}
+          isLoading={false}
+          maxCountExceeded={false}
+          remainingTransactionsCellTooltipContent={<span>Custom content</span>}
+        />
+      );
+      fireEvent.click(
+        screen.getByRole('button', { name: 'More information about remaining transactions' })
+      );
+      expect(screen.getByText('Custom content')).toBeInTheDocument();
     });
   });
 

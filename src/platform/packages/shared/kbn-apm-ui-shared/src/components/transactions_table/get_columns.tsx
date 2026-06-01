@@ -146,17 +146,24 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
             { defaultMessage: 'Remaining transactions information' }
           )}
           button={
-            // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
-            <EuiButtonIcon
-              iconType="warning"
-              color="primary"
-              size="xs"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
                 { defaultMessage: 'More information about remaining transactions' }
               )}
-              onClick={() => setIsOpen(true)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="warning"
+                color="primary"
+                size="xs"
+                aria-label={i18n.translate(
+                  'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
+                  { defaultMessage: 'More information about remaining transactions' }
+                )}
+                onClick={() => setIsOpen(true)}
+              />
+            </EuiToolTip>
           }
           isOpen={isOpen}
           closePopover={() => setIsOpen(false)}
