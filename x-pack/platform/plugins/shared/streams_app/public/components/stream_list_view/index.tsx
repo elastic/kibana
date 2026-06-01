@@ -26,7 +26,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
@@ -53,7 +52,6 @@ export function StreamListView() {
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
 
-  useDefaultTimeRange({ from: 'now-24h', to: 'now' });
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) =>
