@@ -58,6 +58,7 @@ interface SubFeatureCardProps {
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
+  canManage?: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -71,6 +72,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
+  canManage = true,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -252,6 +254,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             )}
             checked={useRecommendedDefaults}
             onChange={(e) => handleToggleRecommendedDefaults(e.target.checked)}
+            disabled={!canManage}
           />
         </EuiFlexItem>
 
@@ -324,19 +327,26 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   data-test-subj={`endpoint-row-${endpointId}`}
                                 >
                                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                                    <EuiFlexItem grow={false}>
-                                      <EuiPanel
-                                        color="transparent"
-                                        paddingSize="none"
-                                        {...provided.dragHandleProps}
-                                        aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                          { defaultMessage: 'Drag to reorder' }
-                                        )}
-                                      >
-                                        <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
-                                      </EuiPanel>
-                                    </EuiFlexItem>
+                                    {canManage && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiPanel
+                                          color="transparent"
+                                          paddingSize="none"
+                                          {...provided.dragHandleProps}
+                                          aria-label={i18n.translate(
+                                            'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                            { defaultMessage: 'Drag to reorder' }
+                                          )}
+                                        >
+                                          <EuiIcon
+                                            type="grab"
+                                            size="s"
+                                            color="subdued"
+                                            aria-hidden
+                                          />
+                                        </EuiPanel>
+                                      </EuiFlexItem>
+                                    )}
                                     <EuiFlexItem grow={false}>
                                       {isInvalid ? (
                                         <EuiIconTip
@@ -390,22 +400,24 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         metadata={deprecationInfo.metadata}
                                       />
                                     )}
-                                    <EuiFlexItem grow={false}>
-                                      <EuiButtonIcon
-                                        iconType="cross"
-                                        aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.removeModel',
-                                          {
-                                            defaultMessage: 'Remove model',
-                                          }
-                                        )}
-                                        size="s"
-                                        color="text"
-                                        onClick={() => handleRemove(index)}
-                                        isDisabled={endpointIds.length <= 1}
-                                        data-test-subj={`remove-endpoint-${endpointId}`}
-                                      />
-                                    </EuiFlexItem>
+                                    {canManage && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiButtonIcon
+                                          iconType="cross"
+                                          aria-label={i18n.translate(
+                                            'xpack.searchInferenceEndpoints.settings.removeModel',
+                                            {
+                                              defaultMessage: 'Remove model',
+                                            }
+                                          )}
+                                          size="s"
+                                          color="text"
+                                          onClick={() => handleRemove(index)}
+                                          isDisabled={endpointIds.length <= 1}
+                                          data-test-subj={`remove-endpoint-${endpointId}`}
+                                        />
+                                      </EuiFlexItem>
+                                    )}
                                   </EuiFlexGroup>
                                 </EuiSplitPanel.Inner>
                                 {index !== visibleEndpoints.length - 1 && (
@@ -442,7 +454,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && canAddMore && (
+                  {canManage && (!hasOverflow || isExpanded) && canAddMore && (
                     <EuiFlexItem grow={false}>
                       <AddModelPopover
                         existingEndpointIds={endpointIds}
@@ -452,7 +464,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       />
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
+                  {canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         iconType="copy"

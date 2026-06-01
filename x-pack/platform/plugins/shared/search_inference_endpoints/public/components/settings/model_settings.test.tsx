@@ -124,7 +124,10 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToUrl: mockNavigateToUrl },
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
+        },
         http: { basePath: mockBasePath },
       },
     });

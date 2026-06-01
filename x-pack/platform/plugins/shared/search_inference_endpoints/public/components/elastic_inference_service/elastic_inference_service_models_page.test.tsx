@@ -17,6 +17,9 @@ jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+      application: {
+        capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
+      },
     },
   }),
 }));

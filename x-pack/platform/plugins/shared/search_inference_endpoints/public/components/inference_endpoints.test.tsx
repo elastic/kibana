@@ -37,6 +37,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         application: {
           capabilities: {
             cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },

@@ -154,6 +154,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
               show: true,
               configure: true,
             },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },
