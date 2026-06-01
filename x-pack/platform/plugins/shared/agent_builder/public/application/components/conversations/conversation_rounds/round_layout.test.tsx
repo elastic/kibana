@@ -10,14 +10,10 @@ import { render } from '@testing-library/react';
 import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
 import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response/round_response';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 
 jest.mock('./round_input', () => ({
   RoundInput: () => null,
-}));
-
-jest.mock('./round_thinking/round_thinking', () => ({
-  RoundThinking: () => null,
 }));
 
 jest.mock('./round_response/round_response', () => ({
@@ -36,11 +32,13 @@ jest.mock('./round_attachment_references', () => ({
   RoundAttachmentReferences: () => null,
 }));
 
-jest.mock('../../../context/send_message/send_message_context', () => ({
-  useSendMessage: jest.fn(),
+jest.mock('../../../hooks/use_conversation_stream', () => ({
+  useConversationStream: jest.fn(),
 }));
 
-const useSendMessageMock = useSendMessage as jest.MockedFunction<typeof useSendMessage>;
+const useConversationStreamMock = useConversationStream as jest.MockedFunction<
+  typeof useConversationStream
+>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
 
 const createRound = (version: number): ConversationRound =>
@@ -69,28 +67,22 @@ const createRound = (version: number): ConversationRound =>
 describe('RoundLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useSendMessageMock.mockReturnValue({
+    useConversationStreamMock.mockReturnValue({
       sendMessage: jest.fn(),
       isResponseLoading: false,
+      isStreaming: false,
       pendingMessage: undefined,
       error: null,
       errorSteps: [],
-      agentReasoning: null,
       retry: jest.fn(),
       canCancel: false,
       cancel: jest.fn(),
-      cleanConversation: jest.fn(),
       removeError: jest.fn(),
       resumeRound: jest.fn(),
       isResuming: false,
       regenerate: jest.fn(),
       isRegenerating: false,
-      connectorSelection: {
-        selectedConnector: undefined,
-        selectConnector: jest.fn(),
-        defaultConnectorOnly: false,
-      },
-    } as ReturnType<typeof useSendMessage>);
+    } as ReturnType<typeof useConversationStream>);
   });
 
   it('keeps equivalent attachmentRefs stable across unrelated allRounds identity changes', () => {
