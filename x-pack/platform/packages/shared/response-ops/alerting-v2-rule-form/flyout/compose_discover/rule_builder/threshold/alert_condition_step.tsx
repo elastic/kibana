@@ -32,6 +32,7 @@ import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
 import type { RuleBuilderStepProps } from '../types';
+import { useBuilderState } from '../builder_state_context';
 import type {
   ThresholdFormValues,
   StatDefinition,
@@ -48,7 +49,7 @@ import {
   nextEvalLabel,
   generateId,
 } from './form_types';
-import { buildThresholdEsql } from './build_esql';
+import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -56,13 +57,13 @@ import {
   CONDITION_OPERATOR_OPTIONS,
 } from './translations';
 
-export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<ThresholdFormValues>> = ({
+export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
   dispatch,
   services,
-  builderState: thresholdValues,
-  onBuilderStateChange: onThresholdValuesChange,
 }) => {
+  const { state: thresholdValues, setState: onThresholdValuesChange } =
+    useBuilderState<ThresholdFormValues>();
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
 
@@ -105,6 +106,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
   }, [fieldMap]);
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
+  const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
   const hasValidQuery = Boolean(esqlQuery);
 
   // Rebuild and commit ES|QL whenever form values change
@@ -118,7 +120,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
-      setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
+      setValue('query', {
+        format: 'composed',
+        base,
+        blocks: {
+          breach: alertBlock,
+          ...(recoveryBlock ? { recover: recoveryBlock } : {}),
+        },
+      });
     } else {
       setValue('query', { format: 'standalone', breach: esqlQuery });
     }
@@ -132,7 +141,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
     if (!state.queryCommitted) {
       dispatch({ type: 'COMMIT_QUERY' });
     }
-  }, [thresholdValues, esqlQuery, isAlert, setValue, dispatch, state.queryCommitted]);
+  }, [
+    thresholdValues,
+    esqlQuery,
+    recoveryBlock,
+    isAlert,
+    setValue,
+    dispatch,
+    state.queryCommitted,
+  ]);
 
   const update = useCallback(
     <K extends keyof ThresholdFormValues>(field: K, value: ThresholdFormValues[K]) => {
