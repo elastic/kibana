@@ -57,7 +57,11 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import {
+  getSaveWorkflowTooltipContent,
+  getTestRunTooltipContent,
+  ManagedWorkflowBadge,
+} from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
@@ -113,6 +117,33 @@ export interface WorkflowDetailHeaderProps {
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface GetSaveWorkflowButtonDisabledParams {
+  isExecutionsTab: boolean;
+  canSaveWorkflow: boolean;
+  isLoading: boolean;
+  isSaving: boolean;
+  isManagedWorkflow: boolean;
+  isYamlSynced: boolean;
+  hasUnsavedChanges: boolean;
+}
+
+const getSaveWorkflowButtonDisabled = ({
+  isExecutionsTab,
+  canSaveWorkflow,
+  isLoading,
+  isSaving,
+  isManagedWorkflow,
+  isYamlSynced,
+  hasUnsavedChanges,
+}: GetSaveWorkflowButtonDisabledParams) =>
+  isExecutionsTab ||
+  !canSaveWorkflow ||
+  isLoading ||
+  isSaving ||
+  isManagedWorkflow ||
+  !isYamlSynced ||
+  !hasUnsavedChanges;
+
 export const WorkflowDetailHeader = React.memo(
   ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
@@ -154,6 +185,7 @@ export const WorkflowDetailHeader = React.memo(
       }),
       [workflow]
     );
+    const isManagedWorkflow = workflow?.managed === true;
 
     const saveYaml = useSaveYaml();
     const isSaving = useSelector(selectIsSavingYaml);
@@ -194,12 +226,29 @@ export const WorkflowDetailHeader = React.memo(
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
         hasUnsavedChanges,
+        isManagedWorkflow,
       });
-    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow, hasUnsavedChanges]);
+    }, [
+      isExecutionsTab,
+      workflowId,
+      canCreateWorkflow,
+      canUpdateWorkflow,
+      hasUnsavedChanges,
+      isManagedWorkflow,
+    ]);
 
     const canSaveWorkflow = useMemo(() => {
       return workflowId ? canUpdateWorkflow : canCreateWorkflow;
     }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+    const saveWorkflowButtonDisabled = getSaveWorkflowButtonDisabled({
+      isExecutionsTab,
+      canSaveWorkflow,
+      isLoading,
+      isSaving,
+      isManagedWorkflow,
+      isYamlSynced,
+      hasUnsavedChanges,
+    });
 
     const handleRunClickWithUnsavedCheck = useCallback(() => {
       const shouldSkipUnsavedRunConfirmation =
@@ -265,6 +314,11 @@ export const WorkflowDetailHeader = React.memo(
                     </EuiTitle>
                   </EuiSkeletonTitle>
                 </EuiFlexItem>
+                {isManagedWorkflow ? (
+                  <EuiFlexItem grow={false}>
+                    <ManagedWorkflowBadge dataTestSubj="workflowDetailManagedBadge" />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiSkeletonLoading
                     isLoading={isLoading}
@@ -362,14 +416,7 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={
-                      isExecutionsTab ||
-                      !canSaveWorkflow ||
-                      isLoading ||
-                      isSaving ||
-                      !isYamlSynced ||
-                      !hasUnsavedChanges
-                    }
+                    disabled={saveWorkflowButtonDisabled}
                     isLoading={isSaving}
                     data-test-subj="saveWorkflowHeaderButton"
                   >
