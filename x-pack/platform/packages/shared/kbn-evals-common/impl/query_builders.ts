@@ -9,20 +9,22 @@
 // Shared types
 // ---------------------------------------------------------------------------
 
-interface RunFilterOptions {
+interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
+  filterField?: 'experiment_id' | 'metadata.execution_id';
 }
 
-interface RunsListingFilterOptions {
+interface ExperimentsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
   branch?: string;
   datasetId?: string;
   datasetName?: string;
+  buildId?: string;
 }
 
-interface RunsListingPaginationOptions {
+interface ExperimentsListingPaginationOptions {
   page: number;
   perPage: number;
 }
@@ -31,10 +33,12 @@ interface TermsBucket {
   buckets?: Array<{ key: string }>;
 }
 
-interface RunBucket {
+interface ExperimentBucket {
   key: string;
   doc_count: number;
   latest_timestamp?: { value_as_string?: string };
+  experiment_count?: { value?: number };
+  experiment_name?: TermsBucket;
   suite_id?: TermsBucket;
   dataset_id?: TermsBucket;
   dataset_name?: TermsBucket;
@@ -51,18 +55,21 @@ interface RunBucket {
   pull_request?: TermsBucket;
 }
 
-interface RunsListingAggregations {
-  total_runs?: { value: number };
-  runs?: { buckets?: RunBucket[] };
+interface ExperimentsListingAggregations {
+  total_experiments?: { value: number };
+  experiments?: { buckets?: ExperimentBucket[] };
 }
 
-export interface RunsListingResult {
-  runs: Array<{
-    run_id: string;
+export interface ExperimentsListingResult {
+  experiments: Array<{
+    execution_id: string;
+    experiment_id: string;
+    experiment_name: string | null;
+    experiment_count: number;
     timestamp: string | undefined;
     suite_id: string | undefined;
-    dataset_id: string | null;
-    dataset_name: string | null;
+    dataset_ids: string[];
+    dataset_names: string[];
     task_model: { id: string; family: string | undefined; provider: string | undefined };
     evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
     git_branch: string | null;
@@ -74,20 +81,21 @@ export interface RunsListingResult {
 }
 
 // ---------------------------------------------------------------------------
-// Single-run filter query
+// Single-experiment filter query
 // ---------------------------------------------------------------------------
 
 /**
- * Builds a bool/must query that filters evaluation score documents by run ID
+ * Builds a bool/must query that filters evaluation score documents by experiment ID
  * with optional suite and task model filters.
  */
-export const buildRunFilterQuery = (
-  runId: string,
-  options?: RunFilterOptions
+export const buildExperimentFilterQuery = (
+  experimentId: string,
+  options?: ExperimentFilterOptions
 ): { bool: { must: Array<Record<string, unknown>> } } => {
-  const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
+  const field = options?.filterField ?? 'experiment_id';
+  const must: Array<Record<string, unknown>> = [{ term: { [field]: experimentId } }];
   if (options?.suiteId) {
-    must.push({ term: { 'suite.id': options.suiteId } });
+    must.push({ term: { 'metadata.suite_id': options.suiteId } });
   }
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
@@ -108,19 +116,23 @@ export const buildExampleScoresQuery = (
 
 /**
  * Builds a bool/must query that filters evaluation score documents by
- * dataset ID and run ID.
+ * dataset ID and experiment ID (or metadata.execution_id when filterField is specified).
  */
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
-  runId: string
-): { bool: { must: Array<Record<string, unknown>> } } => ({
-  bool: {
-    must: [{ term: { 'example.dataset.id': datasetId } }, { term: { run_id: runId } }],
-  },
-});
+  experimentId: string,
+  options?: { filterField?: 'experiment_id' | 'metadata.execution_id' }
+): { bool: { must: Array<Record<string, unknown>> } } => {
+  const field = options?.filterField ?? 'experiment_id';
+  return {
+    bool: {
+      must: [{ term: { 'example.dataset.id': datasetId } }, { term: { [field]: experimentId } }],
+    },
+  };
+};
 
 // ---------------------------------------------------------------------------
-// Per-run stats aggregation
+// Per-experiment stats aggregation
 // ---------------------------------------------------------------------------
 
 /**
@@ -157,23 +169,23 @@ export const SCORES_SORT_ORDER: SortField[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Runs listing query, aggregation, and response parser
+// Experiments listing query, aggregation, and response parser
 // ---------------------------------------------------------------------------
 
-const PREFLIGHT_RUN_ID = 'kbn-evals-preflight';
+const PREFLIGHT_EXPERIMENT_ID = 'kbn-evals-preflight';
 
 /**
- * Builds the filter query for the runs listing endpoint.
+ * Builds the filter query for the experiments listing endpoint.
  * Supports optional suite, model, and branch filters.
- * Always excludes preflight check runs.
+ * Always excludes preflight check experiments.
  */
-export const buildRunsListingFilterQuery = (
-  options?: RunsListingFilterOptions
+export const buildExperimentsListingFilterQuery = (
+  options?: ExperimentsListingFilterOptions
 ): Record<string, unknown> => {
   const filters: Array<Record<string, unknown>> = [];
 
   if (options?.suiteId) {
-    filters.push({ term: { 'suite.id': options.suiteId } });
+    filters.push({ term: { 'metadata.suite_id': options.suiteId } });
   }
   if (options?.modelId) {
     filters.push({ term: { 'task.model.id': options.modelId } });
@@ -181,7 +193,10 @@ export const buildRunsListingFilterQuery = (
   if (options?.branch) {
     filters.push({
       wildcard: {
-        'run_metadata.git_branch': { value: `*${options.branch}*`, case_insensitive: true },
+        'metadata.git.branch': {
+          value: `*${options.branch}*`,
+          case_insensitive: true,
+        },
       },
     });
   }
@@ -191,84 +206,95 @@ export const buildRunsListingFilterQuery = (
   if (options?.datasetName) {
     filters.push({ term: { 'example.dataset.name': options.datasetName } });
   }
+  if (options?.buildId) {
+    filters.push({ term: { 'metadata.ci.build_id': options.buildId } });
+  }
   return {
     bool: {
-      must_not: [{ term: { run_id: PREFLIGHT_RUN_ID } }],
+      must_not: [{ term: { experiment_id: PREFLIGHT_EXPERIMENT_ID } }],
       ...(filters.length > 0 ? { filter: filters } : {}),
     },
   };
 };
 
 /**
- * Returns the aggregation definition for listing runs with summary metadata.
- * Groups score documents by run_id and extracts the latest timestamp,
- * model info, git metadata, and CI info for each run.
+ * Returns the aggregation definition for listing experiments with summary metadata.
+ * Groups score documents by experiment_id and extracts the latest timestamp,
+ * model info, git metadata, and CI info for each experiment.
  *
  * Terms aggregations don't support a native offset, so we over-fetch
- * (page * perPage buckets) and let `parseRunsListingResponse` slice the
+ * (page * perPage buckets) and let `parseExperimentsListingResponse` slice the
  * correct window.
  */
-export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPaginationOptions) => ({
-  total_runs: {
-    cardinality: { field: 'run_id' },
+export const buildExperimentsListingAggregation = ({
+  page,
+  perPage,
+}: ExperimentsListingPaginationOptions) => ({
+  total_experiments: {
+    cardinality: { field: 'metadata.execution_id' },
   },
-  runs: {
+  experiments: {
     terms: {
-      field: 'run_id',
+      field: 'metadata.execution_id',
       size: page * perPage,
       order: { latest_timestamp: 'desc' as const },
     },
     aggs: {
       latest_timestamp: { max: { field: '@timestamp' } },
-      suite_id: { terms: { field: 'suite.id', size: 1 } },
-      dataset_id: { terms: { field: 'example.dataset.id', size: 1 } },
-      dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+      experiment_count: { cardinality: { field: 'experiment_id' } },
+      experiment_name: { terms: { field: 'experiment_name', size: 1 } },
+      suite_id: { terms: { field: 'metadata.suite_id', size: 1 } },
+      dataset_id: { terms: { field: 'example.dataset.id', size: 50 } },
+      dataset_name: { terms: { field: 'example.dataset.name', size: 50 } },
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
       evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
       evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
       evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
-      git_branch: { terms: { field: 'run_metadata.git_branch', size: 1 } },
-      git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
-      total_repetitions: { max: { field: 'run_metadata.total_repetitions' } },
-      build_url: { terms: { field: 'ci.buildkite.build_url', size: 1 } },
-      pull_request: { terms: { field: 'ci.buildkite.pull_request', size: 1 } },
+      git_branch: { terms: { field: 'metadata.git.branch', size: 1 } },
+      git_commit_sha: { terms: { field: 'metadata.git.commit_sha', size: 1 } },
+      total_repetitions: { max: { field: 'metadata.total_repetitions' } },
+      build_url: { terms: { field: 'metadata.ci.build_url', size: 1 } },
+      pull_request: { terms: { field: 'metadata.ci.pull_request', size: 1 } },
     },
   },
 });
 
 /**
- * Parses the raw ES aggregation response from a runs listing query
- * into a typed array of run summaries with a total count.
+ * Parses the raw ES aggregation response from an experiments listing query
+ * into a typed array of experiment summaries with a total count.
  *
  * Because terms aggregations don't support offset, the aggregation
  * over-fetches and this function slices to the requested page window.
  */
-export const parseRunsListingResponse = (
+export const parseExperimentsListingResponse = (
   aggregations: Record<string, unknown> | undefined,
-  { page, perPage }: RunsListingPaginationOptions
-): RunsListingResult => {
-  const aggs: RunsListingAggregations | undefined = aggregations
-    ? (aggregations as RunsListingAggregations)
+  { page, perPage }: ExperimentsListingPaginationOptions
+): ExperimentsListingResult => {
+  const aggs: ExperimentsListingAggregations | undefined = aggregations
+    ? (aggregations as ExperimentsListingAggregations)
     : undefined;
-  const totalRuns = aggs?.total_runs?.value ?? 0;
-  const allBuckets = aggs?.runs?.buckets ?? [];
+  const totalExperiments = aggs?.total_experiments?.value ?? 0;
+  const allBuckets = aggs?.experiments?.buckets ?? [];
   const offset = (page - 1) * perPage;
-  const runBuckets = allBuckets.slice(offset, offset + perPage);
+  const experimentBuckets = allBuckets.slice(offset, offset + perPage);
 
-  const runs = runBuckets.map((bucket) => {
+  const experiments = experimentBuckets.map((bucket) => {
     const taskFamily = firstBucket(bucket.task_model_family);
     const taskProvider = firstBucket(bucket.task_model_provider);
     const evalFamily = firstBucket(bucket.evaluator_model_family);
     const evalProvider = firstBucket(bucket.evaluator_model_provider);
 
     return {
-      run_id: bucket.key,
+      execution_id: bucket.key,
+      experiment_id: bucket.key,
+      experiment_name: firstBucket(bucket.experiment_name) ?? null,
+      experiment_count: bucket.experiment_count?.value ?? 1,
       timestamp: bucket.latest_timestamp?.value_as_string,
       suite_id: firstBucket(bucket.suite_id),
-      dataset_id: firstBucket(bucket.dataset_id) ?? null,
-      dataset_name: firstBucket(bucket.dataset_name) ?? null,
+      dataset_ids: allBucketKeys(bucket.dataset_id),
+      dataset_names: allBucketKeys(bucket.dataset_name),
       task_model: {
         id: buildModelDisplayId(firstBucket(bucket.task_model_id), taskFamily, taskProvider),
         family: taskFamily,
@@ -289,11 +315,11 @@ export const parseRunsListingResponse = (
     };
   });
 
-  return { runs, total: totalRuns };
+  return { experiments, total: totalExperiments };
 };
 
 // ---------------------------------------------------------------------------
-// Run detail response parser
+// Experiment detail response parser
 // ---------------------------------------------------------------------------
 
 interface StatsAggregations {
@@ -318,7 +344,7 @@ interface StatsAggregations {
   };
 }
 
-export interface RunDetailEvaluatorStat {
+export interface ExperimentDetailEvaluatorStat {
   dataset_id: string;
   dataset_name: string;
   evaluator_name: string;
@@ -333,12 +359,12 @@ export interface RunDetailEvaluatorStat {
 }
 
 /**
- * Parses the stats aggregation response from a run detail query
+ * Parses the stats aggregation response from an experiment detail query
  * into a typed array of per-evaluator, per-dataset statistics.
  */
 export const parseStatsAggregationResponse = (
   aggregations: Record<string, unknown> | undefined
-): RunDetailEvaluatorStat[] => {
+): ExperimentDetailEvaluatorStat[] => {
   const aggs = aggregations as StatsAggregations | undefined;
   const datasetBuckets = aggs?.by_dataset?.buckets ?? [];
 
@@ -387,3 +413,5 @@ export const buildModelDisplayId = (id?: string, family?: string, provider?: str
 // ---------------------------------------------------------------------------
 
 const firstBucket = (agg: TermsBucket | undefined): string | undefined => agg?.buckets?.[0]?.key;
+const allBucketKeys = (agg: TermsBucket | undefined): string[] =>
+  agg?.buckets?.map((b) => b.key) ?? [];
