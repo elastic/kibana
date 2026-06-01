@@ -9,7 +9,17 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
+import {
+  NAV_CUSTOMIZATION_STORAGE_KEY,
+  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
+} from '../../../../common';
 import { test } from '../fixtures';
+
+// Internal-route headers required by Kibana for non-public APIs.
+const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'x-elastic-internal-origin': 'kibana',
+} as const;
 
 /**
  * Scenario A — User with full Kibana access to a custom es-solution space.
@@ -37,6 +47,23 @@ test.describe(
       await page.addInitScript(() => {
         window.localStorage.setItem('home:welcome:show', 'false');
       });
+    });
+
+    // Reset the per-user navigation customization after each test so saved
+    // moves/hidden items (and the dismissed callout) don't leak between tests.
+    // userStorage records are keyed by the logged-in user's profile id, so the
+    // delete must reuse the browser session's cookie via `page.request` rather
+    // than a superuser kbnClient. The customization key is space-scoped; the
+    // callout key is global.
+    test.afterEach(async ({ page, kbnUrl }) => {
+      await page.request.delete(
+        kbnUrl.get(`s/${SPACE_A.id}/internal/user_storage/${NAV_CUSTOMIZATION_STORAGE_KEY}`),
+        { headers: INTERNAL_HEADERS }
+      );
+      await page.request.delete(
+        kbnUrl.get(`internal/user_storage/${NAV_CALLOUT_DISMISSED_STORAGE_KEY}`),
+        { headers: INTERNAL_HEADERS }
+      );
     });
 
     test.afterAll(async ({ apiServices }) => {
