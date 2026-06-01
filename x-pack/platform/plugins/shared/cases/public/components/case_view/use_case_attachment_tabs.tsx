@@ -6,80 +6,30 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import { EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { ALERTS_TAB, EVENTS_TAB, FILES_TAB, OBSERVABLES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { AttachmentType } from '../../../common/types/domain';
-import {
-  isEventAttachmentType,
-  isLegacyAttachmentRequest,
-} from '../../../common/utils/attachments';
-import { isUnifiedEventAttachment } from '../../../common/utils/attachments/v2_type_guards';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { getAttachmentItemCount } from './components/helpers';
 
-const FilesBadge = ({
-  activeTab,
-  fileStatsData,
-  isLoading,
-  euiTheme,
-}: {
-  activeTab: string;
-  fileStatsData: { total: number } | undefined;
-  isLoading: boolean;
-  euiTheme: EuiThemeComputed<{}>;
-}) => (
-  <>
-    {!isLoading && fileStatsData && (
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-files-stats-badge"
-        color={activeTab === CASE_VIEW_PAGE_TABS.FILES ? 'accent' : 'subdued'}
-      >
-        {fileStatsData.total > 0 ? fileStatsData.total : 0}
-      </EuiNotificationBadge>
-    )}
-  </>
-);
-
-FilesBadge.displayName = 'FilesBadge';
-
-const ObservablesBadge = ({
-  activeTab,
-  isLoading,
-  euiTheme,
-  count,
-}: {
-  activeTab: string;
-  count: number;
-  isLoading: boolean;
-  euiTheme: EuiThemeComputed<{}>;
-}) => (
-  <>
-    {!isLoading && (
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-observables-stats-badge"
-        color={activeTab === CASE_VIEW_PAGE_TABS.OBSERVABLES ? 'accent' : 'subdued'}
-      >
-        {count}
-      </EuiNotificationBadge>
-    )}
-  </>
-);
-
-ObservablesBadge.displayName = 'ObservablesBadge';
+/**
+ * Tab ids that resolve to the consolidated attachments view. Includes the
+ * legacy per-type sub-tab ids so deep links from older URLs still work.
+ */
+export const ATTACHMENT_TAB_ALIASES: ReadonlySet<string> = new Set([
+  CASE_VIEW_PAGE_TABS.ATTACHMENTS,
+  CASE_VIEW_PAGE_TABS.ALERTS,
+  CASE_VIEW_PAGE_TABS.EVENTS,
+  CASE_VIEW_PAGE_TABS.FILES,
+  CASE_VIEW_PAGE_TABS.OBSERVABLES,
+]);
 
 export const SimilarCasesBadge = ({
   activeTab,
@@ -90,21 +40,16 @@ export const SimilarCasesBadge = ({
   count?: number;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
-  <>
-    {
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-similar-cases-badge"
-        color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
-      >
-        {count ?? 0}
-      </EuiNotificationBadge>
-    }
-  </>
+  <EuiNotificationBadge
+    css={css`
+      margin-left: ${euiTheme.size.xs};
+    `}
+    data-test-subj="case-view-similar-cases-badge"
+    color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
+  >
+    {count ?? 0}
+  </EuiNotificationBadge>
 );
-
 SimilarCasesBadge.displayName = 'SimilarCasesBadge';
 
 export const AttachmentsBadge = ({
@@ -116,226 +61,69 @@ export const AttachmentsBadge = ({
   count?: number;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
-  <>
-    {
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-attachments-badge"
-        color={isActive ? 'accent' : 'subdued'}
-      >
-        {count ?? 0}
-      </EuiNotificationBadge>
-    }
-  </>
-);
-
-AttachmentsBadge.displayName = 'AttachmentsBadge';
-
-const AlertsBadge = ({
-  activeTab,
-  totalAlerts,
-  isExperimental,
-  euiTheme,
-}: {
-  activeTab: string;
-  totalAlerts: number | undefined;
-  isExperimental: boolean;
-  euiTheme: EuiThemeComputed<{}>;
-}) => (
-  <>
-    <EuiNotificationBadge
-      css={css`
-        margin-left: ${euiTheme.size.xs};
-      `}
-      data-test-subj="case-view-alerts-stats-badge"
-      color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
-    >
-      {totalAlerts || 0}
-    </EuiNotificationBadge>
-    {isExperimental && (
-      <ExperimentalBadge compact data-test-subj="case-view-alerts-table-experimental-badge" />
-    )}
-  </>
-);
-
-AlertsBadge.displayName = 'AlertsBadge';
-
-const EventsBadge = ({
-  activeTab,
-  totalEvents,
-  euiTheme,
-}: {
-  activeTab: string;
-  totalEvents: number | undefined;
-  euiTheme: EuiThemeComputed<{}>;
-}) => (
   <EuiNotificationBadge
     css={css`
       margin-left: ${euiTheme.size.xs};
     `}
-    data-test-subj="case-view-events-stats-badge"
-    color={activeTab === CASE_VIEW_PAGE_TABS.EVENTS ? 'accent' : 'subdued'}
+    data-test-subj="case-view-attachments-badge"
+    color={isActive ? 'accent' : 'subdued'}
   >
-    {totalEvents || 0}
+    {count ?? 0}
   </EuiNotificationBadge>
 );
+AttachmentsBadge.displayName = 'AttachmentsBadge';
 
-EventsBadge.displayName = 'EventsBadge';
-
-export interface CaseViewTab {
-  badge?: ReactNode;
-  id: CASE_VIEW_PAGE_TABS;
-  name: string;
-}
-
-export interface UseCaseAttachmentTabsReturnValue {
-  tabs: CaseViewTab[];
-  totalAttachments: number;
-}
-
-export const useCaseAttachmentTabs = ({
+/**
+ * Computes the total count shown on the top-level "Attachments" tab badge.
+ * Reflects the active search filter so the badge tracks what the user actually
+ * sees: comments matching a registered type with a tab view, plus files (from
+ * `fileStatsData`) and — if licensed — observables.
+ */
+export const useCaseAttachmentsTotal = ({
   caseData,
-  activeTab,
   searchTerm,
 }: {
   caseData: CaseUI;
-  activeTab: CASE_VIEW_PAGE_TABS;
   searchTerm?: string;
-}): UseCaseAttachmentTabsReturnValue => {
-  const { features } = useCasesContext();
-  const { euiTheme } = useEuiTheme();
-  const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
-    caseId: caseData.id,
-    searchTerm,
-  });
-
-  const showAlertsTab = features.alerts.enabled;
-  const showEventsTab = features.events.enabled;
-
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
+}): number => {
+  const { unifiedAttachmentTypeRegistry } = useCasesContext();
+  const { data: fileStatsData } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
+  const { observables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
-  const stats = useMemo(() => {
-    if (!searchTerm) {
-      return {
-        totalAlerts: Number(caseData.totalAlerts),
-        totalEvents: Number(caseData.totalEvents),
-      };
-    }
-    return caseData.comments.reduce(
-      (acc, comment) => {
-        if (
-          isLegacyAttachmentRequest(comment) &&
-          comment.type === AttachmentType.alert &&
-          features.alerts.enabled
-        ) {
-          acc.totalAlerts = Array.isArray(comment.alertId)
-            ? acc.totalAlerts + comment.alertId.length
-            : acc.totalAlerts + 1;
-        } else if (isEventAttachmentType(comment.type) && features.events.enabled) {
-          if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.event) {
-            acc.totalEvents = Array.isArray(comment.eventId)
-              ? acc.totalEvents + comment.eventId.length
-              : acc.totalEvents + 1;
-          } else if (isUnifiedEventAttachment(comment)) {
-            acc.totalEvents = Array.isArray(comment.attachmentId)
-              ? acc.totalEvents + comment.attachmentId.length
-              : acc.totalEvents + 1;
-          }
-        }
-        return acc;
-      },
-      { totalEvents: 0, totalAlerts: 0 }
+  return useMemo(() => {
+    const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+    const typesWithTabView = new Set(
+      unifiedAttachmentTypeRegistry
+        .list()
+        .filter(
+          (type) =>
+            type.id !== FILE_ATTACHMENT_TYPE &&
+            type.getAttachmentTabViewObject?.()?.children != null
+        )
+        .map((type) => type.id)
     );
-  }, [searchTerm, features, caseData]);
 
-  const totalAttachments =
-    stats.totalAlerts +
-    stats.totalEvents +
-    Number(fileStatsData?.total ?? 0) +
-    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
+    let registryTotal = 0;
+    for (const comment of caseData.comments) {
+      if (typesWithTabView.has(toUnifiedAttachmentType(comment.type, owner))) {
+        registryTotal += getAttachmentItemCount(comment);
+      }
+    }
 
-  const tabsConfig = useMemo(
-    () => [
-      ...(showAlertsTab
-        ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.ALERTS,
-              name: ALERTS_TAB,
-              badge: (
-                <AlertsBadge
-                  isExperimental={features.alerts.isExperimental}
-                  totalAlerts={stats.totalAlerts}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
-        : []),
-      ...(showEventsTab
-        ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.EVENTS,
-              name: EVENTS_TAB,
-              badge: (
-                <EventsBadge
-                  totalEvents={stats.totalEvents}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
-        : []),
-      {
-        id: CASE_VIEW_PAGE_TABS.FILES,
-        name: FILES_TAB,
-        badge: (
-          <FilesBadge
-            isLoading={isLoadingFiles}
-            fileStatsData={fileStatsData}
-            activeTab={activeTab}
-            euiTheme={euiTheme}
-          />
-        ),
-      },
-      ...(canShowObservableTabs && isObservablesFeatureEnabled
-        ? [
-            {
-              id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
-              name: OBSERVABLES_TAB,
-              badge: (
-                <ObservablesBadge
-                  isLoading={isLoadingObservables}
-                  count={observables.length}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
-              ),
-            },
-          ]
-        : []),
-    ],
-    [
-      activeTab,
-      canShowObservableTabs,
-      stats.totalAlerts,
-      stats.totalEvents,
-      euiTheme,
-      showAlertsTab,
-      showEventsTab,
-      features.alerts.isExperimental,
-      fileStatsData,
-      isLoadingFiles,
-      isLoadingObservables,
-      isObservablesFeatureEnabled,
-      observables.length,
-    ]
-  );
-
-  return { tabs: tabsConfig, totalAttachments };
+    return (
+      registryTotal +
+      Number(fileStatsData?.total ?? 0) +
+      (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0)
+    );
+  }, [
+    caseData.owner,
+    caseData.comments,
+    unifiedAttachmentTypeRegistry,
+    fileStatsData?.total,
+    canShowObservableTabs,
+    isObservablesFeatureEnabled,
+    observables.length,
+  ]);
 };

@@ -123,7 +123,6 @@ enabled:
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
   - src/platform/test/functional/apps/management/group4/config.ts
-  - src/platform/test/functional/apps/saved_objects_management/config.ts
   - src/platform/test/functional/apps/status_page/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
@@ -235,7 +234,6 @@ enabled:
   - x-pack/platform/test/functional_basic/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
@@ -253,15 +251,11 @@ enabled:
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
-  - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
-  - x-pack/platform/test/functional/apps/graph/config.ts
-  - x-pack/platform/test/functional/apps/home/config.ts
-  - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
@@ -290,7 +284,6 @@ enabled:
   - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
-  - x-pack/platform/test/functional/apps/management/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts
   - x-pack/platform/test/functional/apps/maps/group2/config.ts
   - x-pack/platform/test/functional/apps/maps/group3/config.ts
@@ -319,7 +312,6 @@ enabled:
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
-  - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
@@ -329,7 +321,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
   - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/apps/watcher/config.ts
