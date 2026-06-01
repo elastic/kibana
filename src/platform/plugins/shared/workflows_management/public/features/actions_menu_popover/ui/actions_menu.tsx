@@ -417,12 +417,26 @@ const componentStyles = {
       '& .euiSelectableListItem.compactOption': {
         paddingBlock: euiTheme.size.s,
       },
+      // EUI 116 routes EuiSelectableListItem through EuiListItemLayout, which
+      // adds gap on __content and vertical padding on __text and drops the
+      // between-row border. renderActionOption owns its own spacing, so zero
+      // the new gap/padding out and re-add the row border to match the design.
+      '& .euiSelectableListItem__content': {
+        gap: 0,
+      },
+      '& .euiSelectableListItem__text': {
+        paddingBlock: 0,
+      },
+      '& .euiSelectableListItem:not(:last-of-type)': {
+        borderBottom: euiTheme.border.thin,
+      },
       '& .euiSelectableList': {
         maxHeight: '420px',
         overflowY: 'auto',
       },
       '& .euiSelectableList__groupLabel': {
         borderBottom: euiTheme.border.thin,
+        paddingInline: '16px',
       },
       '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
         marginTop: '24px',
@@ -435,7 +449,8 @@ const componentStyles = {
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.m,
+      paddingBlock: euiTheme.size.m,
+      paddingInline: '16px',
     }),
   actionOption: css({
     gap: '12px',
