@@ -485,6 +485,12 @@ echo "--- Disk usage before starting Scout"
 df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
 
+# Eval suites run rules + dashboard specs sequentially in one Kibana process. The rules eval
+# (6 migrations @ concurrency 3, ~408s) leaves the process near memory exhaustion, causing the
+# dashboard eval to OOM. Bump the heap beyond the repo-wide 4 GB default; the n2-standard-8 CI
+# agent has 32 GB RAM so 8 GB is safe. Allow per-run override via EVAL_KBN_MAX_OLD_SPACE_MB.
+export NODE_OPTIONS="--max-old-space-size=${EVAL_KBN_MAX_OLD_SPACE_MB:-8192}"
+
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
 if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then

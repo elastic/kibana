@@ -97,4 +97,50 @@ describe('withRetry', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ attempt: 1, label: 'upsert' }));
   });
+
+  // Connection-drop / OOM scenarios — the retry_utils shared layer should handle these
+  // so that the outer wrapKbnClientWithRetries wrapper retries on connection drops
+  // (when retries:0 is NOT set, i.e. the outer wrapper is active).
+
+  it('retries on "fetch failed" (Kibana OOM connection drop)', async () => {
+    const err = new Error('fetch failed');
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on "other side closed" (Kibana socket reset)', async () => {
+    const err = new Error('other side closed');
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on ECONNRESET buried in error.cause (undici pattern)', async () => {
+    const cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+    const err = Object.assign(new Error('fetch failed'), { cause });
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on UND_ERR_SOCKET in error.cause (undici socket drop)', async () => {
+    const cause = Object.assign(new Error('Socket closed'), { code: 'UND_ERR_SOCKET' });
+    const err = Object.assign(new Error('fetch failed'), { cause });
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on ECONNREFUSED', async () => {
+    const err = new Error('connect ECONNREFUSED 127.0.0.1:5620');
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
 });
