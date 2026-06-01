@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export { formatMillisecondsInUnit, parseInterval, toMilliseconds } from '../../shared';
+export {
+  formatDuration,
+  formatMillisecondsInUnit,
+  parseInterval,
+  parseIntervalWithDefaultUnit,
+  toMilliseconds,
+} from '../../shared';
 
 export function getRelativeBoundsInMs<P extends string>(
   orderedPhases: ReadonlyArray<P>,

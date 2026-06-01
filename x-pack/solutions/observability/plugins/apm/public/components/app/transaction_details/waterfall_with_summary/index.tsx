@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
+
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -32,6 +33,7 @@ import {
   getRootItemOrFallback,
   getSubtreeIds,
 } from '../../../shared/trace_waterfall/use_trace_waterfall';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../shared/trace_waterfall/ebt_constants';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
@@ -199,6 +201,9 @@ export function WaterfallWithSummary<TSample extends {}>({
                   queryParams={{
                     traceId,
                     sortDirection: 'ASC',
+                  }}
+                  ebt={{
+                    element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_HEADER,
                   }}
                 />
               </EuiFlexItem>

@@ -50,6 +50,7 @@ import {
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
   SECURITY_CELL_ACTIONS_ALERTS_COUNT,
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  FEATURED_ADD_PANEL_TRIGGER,
 } from '../common/trigger_ids';
 import type { Trigger } from './types';
 
@@ -117,6 +118,9 @@ export const triggers: { [key: string]: Trigger } = {
     description: i18n.translate('uiActions.triggers.dashboard.addPanelMenu.description', {
       defaultMessage: "A new action will appear to the dashboard's add panel menu",
     }),
+  },
+  [FEATURED_ADD_PANEL_TRIGGER]: {
+    id: FEATURED_ADD_PANEL_TRIGGER,
   },
   [ALERT_RULE_TRIGGER]: {
     id: ALERT_RULE_TRIGGER,

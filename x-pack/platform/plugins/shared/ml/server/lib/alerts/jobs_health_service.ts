@@ -77,8 +77,8 @@ export function jobsHealthServiceProvider(
     const dateFormat = fieldFormatsRegistry.deserialize({ id: 'date' });
     const bytesFormat = fieldFormatsRegistry.deserialize({ id: 'bytes' });
 
-    const dateFormatter = dateFormat.convert.bind(dateFormat);
-    const bytesFormatter = bytesFormat.convert.bind(bytesFormat);
+    const dateFormatter = (v: unknown) => dateFormat.convertToText(v);
+    const bytesFormatter = (v: unknown) => bytesFormat.convertToText(v);
 
     return {
       dateFormatter,

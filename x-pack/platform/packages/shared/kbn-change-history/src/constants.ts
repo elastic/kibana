@@ -34,5 +34,5 @@ export const DEFAULT_RESULT_SIZE = 100;
  * Remove this after General Availability
  * */
 export const FLAGS = {
-  FEATURE_ENABLED: false,
+  FEATURE_ENABLED: true,
 };

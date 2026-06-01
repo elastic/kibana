@@ -11,9 +11,14 @@ import Fs from 'fs';
 import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
+import { KBN_EVALS_VAULT_PATHS, type KbnEvalsVaultType } from '../../src/cli/utils';
+
+const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
+
+const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 
 /**
- * Vault-backed config used by @kbn/evals CI.
+ * Vault-backed config used by @kbn/evals CI and local development.
  *
  * This is intentionally minimal: we store only the LiteLLM key + base URL,
  * and credentials for the centralized Elasticsearch cluster where eval results
@@ -22,13 +27,7 @@ import { schema } from '@kbn/config-schema';
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
 
-type VaultType = 'ci-prod';
-
-const VAULT_PATHS: Record<VaultType, string> = {
-  'ci-prod': 'secret/ci/elastic-kibana/kbn-evals',
-};
-
-const getVaultPath = (vault: VaultType = 'ci-prod') => VAULT_PATHS[vault];
+export const getVaultPath = (vault: KbnEvalsVaultType): string => KBN_EVALS_VAULT_PATHS[vault];
 
 const KBN_EVALS_CONFIG_FIELD = 'config';
 
@@ -115,9 +114,9 @@ const configSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export type KbnEvalsCiConfig = ReturnType<typeof configSchema.validate>;
+export type KbnEvalsConfig = ReturnType<typeof configSchema.validate>;
 
-export const validateKbnEvalsCiConfig = (config: unknown): KbnEvalsCiConfig => {
+export const validateKbnEvalsConfig = (config: unknown): KbnEvalsConfig => {
   return configSchema.validate(config);
 };
 
@@ -137,43 +136,51 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string, fie
   const { stdout } = await execa('vault', ['read', `-field=${field}`, vaultPath], {
     cwd: REPO_ROOT,
     buffer: true,
+    env: {
+      ...process.env,
+      VAULT_ADDR: getVaultAddr(),
+    },
   });
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
-  const validated = validateKbnEvalsCiConfig(parsed);
+  const validated = validateKbnEvalsConfig(parsed);
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConfigFromVault = async (vault: VaultType = 'ci-prod') => {
+export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType) => {
   await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
 export const uploadToVault = async (vaultPath: string, filePath: string, field: string) => {
   ensureLocalConfigFileExists(filePath);
   const config = await readFile(filePath, 'utf-8');
-  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
+  const validated = validateKbnEvalsConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   await execa('vault', ['write', vaultPath, `${field}=${asB64}`], {
     cwd: REPO_ROOT,
     buffer: true,
+    env: {
+      ...process.env,
+      VAULT_ADDR: getVaultAddr(),
+    },
   });
 };
 
-export const uploadConfigToVault = async (vault: VaultType = 'ci-prod') => {
+export const uploadConfigToVault = async (vault: KbnEvalsVaultType) => {
   await uploadToVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
 export const getCommand = async (
   format: 'vault-write' | 'env-var' = 'vault-write',
-  vault: VaultType = 'ci-prod'
+  vault: KbnEvalsVaultType
 ) => {
   ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
   const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');
-  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
+  const validated = validateKbnEvalsConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   if (format === 'vault-write') {
@@ -183,7 +190,7 @@ export const getCommand = async (
   return `${KBN_EVALS_VAULT_ENV_VAR}=${asB64}`;
 };
 
-export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsCiConfig => {
+export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsConfig => {
   const configValue = process.env[KBN_EVALS_VAULT_ENV_VAR];
   if (!configValue) {
     throw new Error(`Environment variable ${KBN_EVALS_VAULT_ENV_VAR} does not exist!`);
@@ -200,5 +207,5 @@ export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsCiConfig => {
     );
   }
 
-  return validateKbnEvalsCiConfig(config);
+  return validateKbnEvalsConfig(config);
 };
