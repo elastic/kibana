@@ -7,18 +7,16 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { LENS_BASIC_FIXTURE_IDS } from '../../../fixtures/kbn_archives/lens/ids';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
-  const listingTable = getService('listingTable');
 
   // Add tests here when the main behavior is switching one visualization type
   // to another and verifying that Lens preserves or maps the configuration.
   describe('lens chart switching', () => {
     it('should transition from metric to table to metric', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.artistMetric, 'mtrVis');
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await lens.switchToVisualization('lnsDatatable');
@@ -29,9 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis);
 
       expect(await lens.hasChartSwitchWarning('pie')).to.eql(true);
       await lens.switchToVisualization('pie');
@@ -56,9 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from bar chart to line chart', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis);
 
       await lens.switchToVisualization('line');
       expect(await lens.getTitle()).to.eql('lnsXYvis');
@@ -72,9 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from pie chart to treemap chart', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsPieVis');
-      await lens.clickVisualizeListItemTitle('lnsPieVis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.pieVis);
 
       expect(await lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await lens.switchToVisualization('treemap');

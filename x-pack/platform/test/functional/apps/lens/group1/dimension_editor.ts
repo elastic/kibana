@@ -17,9 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
+  // Add tests here when the flow primarily changes a dimension, operation,
+  // label, format, reference, or incomplete configuration in the dimension editor.
   describe('lens dimension editor', () => {
-    // Add tests here when the flow primarily changes a dimension, operation,
-    // label, format, reference, or incomplete configuration in the dimension editor.
     it('should edit settings of xy line chart', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
