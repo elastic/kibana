@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 /**
  * Purpose: Full screen smoke test
  *
- * Migration: migrate to scout
+ * Migration: Remove and migrate to unit tests.
  */
 export default function ({ getService, getPageObjects }) {
   const { maps, common } = getPageObjects(['maps', 'common']);

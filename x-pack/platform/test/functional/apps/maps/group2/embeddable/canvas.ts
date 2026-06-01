@@ -11,7 +11,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 /**
  * Purpose: Canvas embeddable smoke test
  *
- * Migration: Migrate to scout. Remove "should not show draw controls" test case
+ * Migration: Remove test. There should be one canvas smoke test making sure lens embeddable loads
+ * but we don't need a smoke test for each embeddable type.
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { canvas, maps } = getPageObjects(['canvas', 'maps']);
