@@ -345,6 +345,13 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Whether the conversation has been marked as read.
+   * Any new or updated conversation has `read` set to `false` by default
+   */
+  read?: boolean;
+  /** current status of the conversation */
+  status?: ConversationRoundStatus;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
