@@ -48,5 +48,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./search_attacks'));
     loadTestFile(require.resolve('./search_attacks_ess'));
+    loadTestFile(require.resolve('./search_attacks_serverless'));
   });
 }

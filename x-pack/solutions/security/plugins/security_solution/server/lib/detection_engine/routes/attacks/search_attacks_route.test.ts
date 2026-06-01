@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ADHOC_ALERTS_INDEX_PREFIX,
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+} from '@kbn/elastic-assistant-common';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { DETECTION_ENGINE_ATTACKS_SEARCH_URL } from '../../../../../common/constants';
@@ -17,9 +20,6 @@ import {
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { searchAttacksRoute } from './search_attacks_route';
-
-const ADHOC_ATTACK_DISCOVERY_ALERTS_INDEX_PREFIX =
-  '.adhoc.alerts-security.attack.discovery.alerts' as const;
 
 const getAttacksSearchQueryRequest = () =>
   requestMock.create({
@@ -83,7 +83,7 @@ describe('search for attacks', () => {
         expect.objectContaining({
           index: [
             `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`,
-            `${ADHOC_ATTACK_DISCOVERY_ALERTS_INDEX_PREFIX}-default`,
+            `${ATTACK_DISCOVERY_ADHOC_ALERTS_INDEX_PREFIX}-default`,
           ],
           ignore_unavailable: true,
         })
@@ -103,7 +103,7 @@ describe('search for attacks', () => {
         expect.objectContaining({
           index: [
             `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-custom-space`,
-            `${ADHOC_ATTACK_DISCOVERY_ALERTS_INDEX_PREFIX}-custom-space`,
+            `${ATTACK_DISCOVERY_ADHOC_ALERTS_INDEX_PREFIX}-custom-space`,
           ],
         })
       );
