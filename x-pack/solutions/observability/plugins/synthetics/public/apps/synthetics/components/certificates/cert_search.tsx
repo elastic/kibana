@@ -18,10 +18,11 @@ const WrapFieldSearch = styled('div')`
 
 interface Props {
   setSearch: (val: string) => void;
+  initialValue?: string;
 }
 
-export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
-  const [debouncedValue, setDebouncedValue] = useState('');
+export const CertificateSearch: React.FC<Props> = ({ setSearch, initialValue = '' }) => {
+  const [debouncedValue, setDebouncedValue] = useState(initialValue);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDebouncedValue(e.target.value);
@@ -40,6 +41,7 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
       <EuiFieldSearch
         data-test-subj="uptimeCertSearch"
         placeholder={labels.SEARCH_CERTS}
+        defaultValue={initialValue}
         onChange={onChange}
         isClearable={true}
         aria-label={labels.SEARCH_CERTS}

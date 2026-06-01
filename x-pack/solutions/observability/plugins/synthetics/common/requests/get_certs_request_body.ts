@@ -36,6 +36,10 @@ export const DEFAULT_TO = 'now';
 export const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
 export const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
 
+// `synthetics.type` value stamped on browser monitor network events, which is
+// where browser TLS certificates are captured.
+export const BROWSER_NETWORK_INFO = 'journey/network_info';
+
 // Values used by the browser-cert "party" quick filter (first- vs third-party).
 // Shared with the UI control.
 export const FIRST_PARTY = 'first_party';
@@ -69,7 +73,7 @@ export const partyQuery = (
   },
 });
 
-function absoluteDate(relativeDate: string) {
+export function absoluteDate(relativeDate: string) {
   return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
 }
 
@@ -118,7 +122,7 @@ export const getCertsRequestBody = ({
   const hasResourceTypeFilter = Boolean(browserResourceTypes && browserResourceTypes.length > 0);
 
   const browserBranchFilter = [
-    { term: { 'synthetics.type': 'journey/network_info' } },
+    { term: { 'synthetics.type': BROWSER_NETWORK_INFO } },
     { exists: { field: CERT_SUBJECT_COMMON_NAME } },
     { exists: { field: 'tls.server.x509.not_after' } },
     ...(hasResourceTypeFilter ? [selectedMimeCategoriesQuery(browserResourceTypes ?? [])] : []),
@@ -166,6 +170,18 @@ export const getCertsRequestBody = ({
           order: direction,
         },
       },
+      // When browser certs are included the collapse key is the subject common
+      // name, which a lightweight summary ping and a browser network event can
+      // share. On a tie in the primary sort (e.g. same not_after) ES would
+      // otherwise pick the group representative by shard order — and picking the
+      // browser event hides a fingerprint the lightweight ping actually captured.
+      // Sorting fingerprinted docs first (browser events miss sha256, so they
+      // sort last) makes the representative deterministic and always surfaces the
+      // fingerprint when one exists. The lightweight-only query collapses on
+      // sha256 itself, so it needs no tiebreaker and keeps its lean sort.
+      ...(includeBrowserCerts
+        ? [{ [CERT_HASH_SHA256]: { order: 'asc' as const, missing: '_last' as const } }]
+        : []),
     ]) as estypes.SortCombinations[],
     query: {
       bool: {

@@ -16,6 +16,7 @@ import { CertificateSearch } from './cert_search';
 import { CertQuickFilter } from './cert_quick_filter';
 import type { QuickFilterOption } from './cert_quick_filter';
 import { useCertFacets } from './use_cert_facets';
+import { useCertFilters } from './use_cert_filters';
 import {
   BROWSER_RESOURCE_TYPE_OPTIONS,
   EXPIRY_WITHIN_OPTIONS,
@@ -63,12 +64,23 @@ export const CertificatesPage: React.FC = () => {
     field: 'not_after',
     direction: 'asc',
   });
-  const [search, setSearch] = useState('');
-  const [monitorTypes, setMonitorTypes] = useState<string[]>([]);
-  const [browserResourceTypes, setBrowserResourceTypes] = useState<string[]>([]);
-  const [party, setParty] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
-  const [expiringWithin, setExpiringWithin] = useState<string[]>([]);
+
+  // Quick filters and search are persisted in the URL so a filtered view
+  // survives a refresh and can be shared.
+  const {
+    search,
+    monitorTypes,
+    browserResourceTypes,
+    party,
+    tags,
+    expiringWithin,
+    setSearch,
+    setMonitorTypes,
+    setBrowserResourceTypes,
+    setParty,
+    setTags,
+    setExpiringWithin,
+  } = useCertFilters();
 
   const dispatch = useDispatch();
 
@@ -114,7 +126,7 @@ export const CertificatesPage: React.FC = () => {
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
     party: isBrowserIncluded ? party : undefined,
     tags,
-    notValidAfter: expiringWithin[0],
+    notValidAfter: expiringWithin,
   });
 
   useEffect(() => {
@@ -126,7 +138,13 @@ export const CertificatesPage: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem>
-          <CertificateSearch setSearch={setSearch} />
+          <CertificateSearch
+            initialValue={search}
+            setSearch={(value) => {
+              setSearch(value);
+              resetToFirstPage();
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
@@ -134,10 +152,10 @@ export const CertificatesPage: React.FC = () => {
               label={labels.EXPIRY_WITHIN_FILTER}
               dataTestSubj="certExpiryWithinFilterButton"
               options={expiryOptions}
-              selectedValues={expiringWithin}
+              selectedValues={expiringWithin ? [expiringWithin] : []}
               singleSelection
               onChange={(values) => {
-                setExpiringWithin(values);
+                setExpiringWithin(values[0]);
                 resetToFirstPage();
               }}
             />

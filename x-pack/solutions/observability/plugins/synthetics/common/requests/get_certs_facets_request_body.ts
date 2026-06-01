@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import DateMath from '@kbn/datemath';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
@@ -16,6 +15,8 @@ import type { CertFacets } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 import { MIME_TYPE_CATEGORIES, mimeCategoryQuery } from '../constants/mime_types';
 import {
+  absoluteDate,
+  BROWSER_NETWORK_INFO,
   CERT_HASH_SHA256,
   CERT_SUBJECT_COMMON_NAME,
   FIRST_PARTY,
@@ -26,7 +27,6 @@ import {
   DEFAULT_TO,
 } from './get_certs_request_body';
 
-const BROWSER_NETWORK_INFO = 'journey/network_info';
 const NOT_AFTER_FIELD = 'tls.server.x509.not_after';
 
 // Distinct certificates are deduped on the subject common name on the certificates
@@ -37,10 +37,6 @@ const CERT_ID_FIELD = CERT_SUBJECT_COMMON_NAME;
 // Cumulative "Expiring within" windows. Datemath is understood natively by ES range
 // queries, and the values must match the UI's EXPIRY_WITHIN_OPTIONS so counts line up.
 export const EXPIRY_WITHIN_WINDOWS = ['now+7d', 'now+30d', 'now+90d', 'now+1y'] as const;
-
-function absoluteDate(relativeDate: string) {
-  return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
-}
 
 interface GetCertsFacetsParams {
   monitorIds?: string[];
