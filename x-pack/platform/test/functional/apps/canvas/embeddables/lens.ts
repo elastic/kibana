@@ -36,7 +36,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     describe('by-value', () => {
       it('creates new lens embeddable', async () => {
-        await canvas.addNewPanel('Lens');
+        await canvas.addNewLensPanel();
         await lens.goToTimeRange();
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
