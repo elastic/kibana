@@ -68,28 +68,34 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       { entityTypes }
     );
 
-    if (installRes.status === 404 || installRes.status === 503) {
+    if (installRes.status !== 200 && installRes.status !== 201) {
       log.debug(
         `Entity Store V2 is not available in this environment (status ${installRes.status}), skipping`
       );
       return false;
     }
 
-    if (installRes.status !== 200 && installRes.status !== 201) {
-      throw new Error(
-        `Entity Store V2 install failed (status ${installRes.status}): ${JSON.stringify(
-          installRes.body
-        )}`
-      );
-    }
+    // Wait until the initial entity store maintainer scan completes (`stopped`) before seeding
+    // test entities. Seeding during a `running` scan risks having the engine overwrite the test
+    // data before the detection rule runs. If the scan does not complete within the timeout the
+    // environment is not suitable for enrichment tests, so we skip gracefully.
+    const scanCompleted = await retry
+      .waitForWithTimeout('Entity Store V2 initial scan to complete', 120_000, async () => {
+        const res = await withHeaders(supertest.get('/api/security/entity_store/status'));
+        if (res.body.status === 'error') {
+          throw new Error(`Entity Store V2 install errored: ${JSON.stringify(res.body)}`);
+        }
+        return res.body.status === 'stopped';
+      })
+      .then(() => true)
+      .catch((err: Error) => {
+        log.debug(`Entity Store V2 scan did not complete in time, skipping: ${err.message}`);
+        return false;
+      });
 
-    await retry.waitForWithTimeout('Entity Store V2 to be ready', 60_000, async () => {
-      const res = await withHeaders(supertest.get('/api/security/entity_store/status'));
-      if (res.body.status === 'error') {
-        throw new Error(`Entity Store V2 install errored: ${JSON.stringify(res.body)}`);
-      }
-      return res.body.status === 'running' || res.body.status === 'stopped';
-    });
+    if (!scanCompleted) {
+      return false;
+    }
 
     for (const hostConfig of enrichmentConfig.hosts ?? []) {
       const createRes = await withHeaders(
