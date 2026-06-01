@@ -28,7 +28,8 @@ export class SamlAuthManager {
     public readonly customRoleName: string,
     private readonly esClient: EsClient,
     private readonly kbnClient: KbnClient,
-    private readonly log: ScoutLogger
+    private readonly log: ScoutLogger,
+    private readonly isServerless: boolean
   ) {}
 
   async setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void> {
@@ -68,6 +69,13 @@ export class SamlAuthManager {
    * @param roleName - The name of the role to look up in Elasticsearch.
    */
   async setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+    if (this.isServerless) {
+      throw new Error(
+        `setBuiltinRole('${roleName}') is not supported on Serverless deployments. ` +
+          `Use a native realm role (e.g. loginAs() / getApiKey()) or define a custom role ` +
+          `with explicit privileges (loginWithCustomRole() / getApiKeyForCustomRole()) instead.`
+      );
+    }
     const response = await this.esClient.security.getRole({ name: roleName });
     const roleData = response[roleName];
     if (!roleData) {

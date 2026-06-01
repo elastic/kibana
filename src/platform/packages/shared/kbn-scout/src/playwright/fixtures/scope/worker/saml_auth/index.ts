@@ -130,7 +130,14 @@ export const samlAuthFixture = coreWorkerFixtures.extend<{}, { samlAuth: SamlAut
        */
       const customRoleName = `custom_role_worker_${workerInfo.parallelIndex + 1}`;
       const session = createSamlSessionManager(config, log, customRoleName);
-      const manager = new SamlAuthManager(session, customRoleName, esClient, kbnClient, log);
+      const manager = new SamlAuthManager(
+        session,
+        customRoleName,
+        esClient,
+        kbnClient,
+        log,
+        config.serverless
+      );
 
       // Hide the announcements (including the sidenav tour) in advance to prevent
       // it from interfering with test flows. Default Scout server config_sets do not set

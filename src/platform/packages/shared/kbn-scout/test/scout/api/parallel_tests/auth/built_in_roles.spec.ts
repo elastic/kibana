@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { apiTest, tags } from '../../../../../src/playwright';
+import { expect } from '../../../../../api';
+
+apiTest.describe(`Built-in ES roles`, { tag: tags.stateful.classic }, () => {
+  apiTest(
+    `setBuiltinRole should throw when the role does not exist in Elasticsearch`,
+    async ({ samlAuth }) => {
+      await expect(samlAuth.setBuiltinRole('this_role_does_not_exist_scout_test')).rejects.toThrow(
+        `Role 'this_role_does_not_exist_scout_test' not found in Elasticsearch`
+      );
+    }
+  );
+
+  apiTest(
+    `setBuiltinRole should throw when called on a Serverless deployment`,
+    { tag: [...tags.serverless.all] },
+    async ({ samlAuth }) => {
+      await expect(samlAuth.setBuiltinRole('kibana_admin')).rejects.toThrow(
+        `setBuiltinRole('kibana_admin') is not supported on Serverless deployments`
+      );
+    }
+  );
+
+  apiTest(
+    `setBuiltinRole should provision the custom role slot and return the descriptor`,
+    async ({ samlAuth }) => {
+      const descriptor = await samlAuth.setBuiltinRole('kibana_admin');
+      expect(descriptor).toBeDefined();
+      const credentials = await samlAuth.asInteractiveUser(samlAuth.customRoleName);
+      expect(credentials.cookieValue).toBeDefined();
+    }
+  );
+
+  apiTest(
+    `getApiKeyForBuiltinRole should create an API key scoped to a built-in ES role`,
+    async ({ requestAuth }) => {
+      const { apiKey, apiKeyHeader } = await requestAuth.getApiKeyForBuiltinRole('kibana_admin');
+      expect(apiKey.id).toBeDefined();
+      expect(apiKey.name).toBeDefined();
+      expect(apiKeyHeader.Authorization).toMatch(/^ApiKey /);
+    }
+  );
+});
