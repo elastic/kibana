@@ -27,6 +27,15 @@ export class FieldDefinitionsService {
     }
   ) {}
 
+  /**
+   * Returns field definitions for the given owner(s).
+   *
+   * `applyToAllCases: true`  — returns only definitions flagged as global.
+   * `applyToAllCases: false` — same as `undefined`: returns ALL definitions
+   *   (no applyToAllCases KQL filter is added). Pass `true` explicitly when
+   *   you need only global defs; omit the option (or pass `false`) for the
+   *   full set.
+   */
   async getFieldDefinitions(
     owner: string | string[],
     { applyToAllCases }: { applyToAllCases?: boolean } = {}

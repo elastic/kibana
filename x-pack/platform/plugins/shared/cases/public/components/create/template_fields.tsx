@@ -37,6 +37,9 @@ export const CreateCaseTemplateFields: React.FC = () => {
   const ownerStr = Array.isArray(owner) ? owner[0] : owner;
 
   // Fetch applyToAllCases field definitions for this owner.
+  // staleTime: Infinity — field definitions don't change during a user session, so we
+  // prevent background refetches that would create a new Set object reference, re-run the
+  // useTemplateFormSync effect, and unexpectedly reset the form.
   const {
     data: globalFieldDefsData,
     isLoading: isLoadingGlobalDefs,
@@ -44,6 +47,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   } = useGetFieldDefinitions({
     owner: ownerStr,
     applyToAllCases: true,
+    staleTime: Infinity,
   });
 
   // Resolve global field definitions to inline fields and compute their snake keys.

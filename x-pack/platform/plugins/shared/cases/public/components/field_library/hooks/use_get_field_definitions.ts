@@ -17,9 +17,13 @@ import * as i18n from '../translations';
 export const useGetFieldDefinitions = ({
   owner,
   applyToAllCases,
+  staleTime,
 }: {
   owner?: string | string[];
   applyToAllCases?: boolean;
+  /** Override React Query's default staleTime (ms). Pass `Infinity` for data that
+   * should be fetched once and never re-fetched during the session. */
+  staleTime?: number;
 } = {}): UseQueryResult<FieldDefinitionsFindResponse> => {
   const toasts = useToasts();
   const hasOwner = Array.isArray(owner) ? owner.length > 0 : owner !== undefined;
@@ -30,6 +34,7 @@ export const useGetFieldDefinitions = ({
     {
       enabled: hasOwner,
       keepPreviousData: true,
+      staleTime,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

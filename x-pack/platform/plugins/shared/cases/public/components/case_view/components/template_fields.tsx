@@ -229,12 +229,26 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
   )
     return null;
 
+  // When there's no active template, TemplateFields renders nothing (no heading).
+  // Provide the section heading here so global fields are labelled in the sidebar.
+  const showHeading = !caseData.template?.id;
+
   return (
-    <TemplateFieldsFormReady
-      resolvedFields={visibleGlobalFields}
-      extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
-      onUpdateField={onUpdateField}
-    />
+    <div>
+      {showHeading && (
+        <>
+          <EuiTitle size="xs">
+            <h3>{i18n.EXTENDED_FIELDS_TITLE}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <TemplateFieldsFormReady
+        resolvedFields={visibleGlobalFields}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
+        onUpdateField={onUpdateField}
+      />
+    </div>
   );
 });
 
