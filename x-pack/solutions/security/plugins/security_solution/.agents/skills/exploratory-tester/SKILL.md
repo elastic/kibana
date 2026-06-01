@@ -87,7 +87,8 @@ Environment:
 
 | If you're thinking this... | Reality |
 |---|---|
-| "This area looks fine — I didn't find anything" | Did you attempt every checklist step for every flow? |
+| "This area looks fine — I didn't find anything" | Did you attempt every checklist step for every flow? Did step 3 include testing with the noise index? |
+| "All my test data is well-formed ECS" | Real customer data often has non-ECS field types, missing fields, and unexpected mappings. Always test with the noise index when data views are involved. |
 | "Let me check the source to understand expected behavior" | **Hard stop.** Never read source code or component internals — the implementation may itself be wrong. Use the UI, official docs, or test files for user-flow understanding instead. |
 | "I'll look at the test file to find the right selector" | **Hard stop.** Selectors from test files are not allowed. Navigate from what's visible in the browser using `browser_snapshot` and visible labels, roles, and text. |
 | "I don't know how this feature is supposed to work" | Consult in order: live UI → official docs (https://www.elastic.co/docs/solutions/security) → test files for user flows. Then return to the browser. |
@@ -111,6 +112,7 @@ Environment:
 | Navigation times out when leaving a page with unsaved state | `browser_navigate` will time out if a `beforeunload` dialog is blocking it (e.g., a Timeline with unsaved changes). If a navigation times out, call `browser_snapshot` — if it reports a modal state with a `"beforeunload"` dialog, call `browser_handle_dialog` with `accept: true` and then retry the navigation. |
 | Spending more than 2 attempts on Monaco editor input | `fill()` and `pressSequentially()` do not propagate to Monaco's internal model. After 2 failed attempts to interact with a Monaco editor, log the observation as "partial interaction — Monaco editor prevented automated input" and move on rather than debugging the tooling. |
 | Creating Security Solution test alerts via direct ES indexing | Direct indexing into `.alerts-security.alerts-*` satisfies KPI aggregation queries but NOT the Alerts data grid — the grid requires the full signal schema (`kibana.alert.rule.uuid`, `kibana.alert.instance.id`, `kibana.alert.start`, etc.). To get rows in the Alerts table, create alerts by enabling and running a detection engine rule, not by direct indexing. |
+| Testing only with clean, ECS-compliant data | Features that work perfectly with well-formed data can silently break on real customer data that has non-ECS field types, missing fields, or unexpected mappings. The noise index created in Phase 1c exists to surface exactly these issues — use it in checklist step 3 for any flow that touches data views or index patterns. |
 
 ---
 
@@ -376,6 +378,45 @@ If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana
 { "step": "esArchiver:<fixture-name>", "reason": "not supported in serverless: <error>" }
 ```
 
+**Create a non-ECS noise index (all environment types):**
+
+Index a small set of documents with intentionally non-standard field types — the kind of data real customers have that often breaks features tested only against well-formed data:
+
+```bash
+# Create index with non-ECS mappings (source.ip as text, event.kind as integer)
+curl -s -u "<username>:<password>" -X PUT "<es_url>/logs-exploratory.noise-000001" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "source.ip":  { "type": "text" },
+        "destination.ip": { "type": "text" },
+        "event.kind": { "type": "integer" },
+        "host.name":  { "type": "keyword" },
+        "message":    { "type": "text" }
+      }
+    },
+    "aliases": { "logs-exploratory.noise": {} }
+  }'
+
+# Index a few documents — some missing fields, some with extra unknown fields
+curl -s -u "<username>:<password>" -X POST "<es_url>/logs-exploratory.noise-000001/_bulk" \
+  -H 'Content-Type: application/json' \
+  -d '
+{"index":{}}
+{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","source.ip":"not-an-ip","event.kind":1,"host.name":"noise-host-1","message":"non-ECS source.ip field"}
+{"index":{}}
+{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","destination.ip":"256.256.256.256","event.kind":99,"host.name":"noise-host-2","message":"out-of-range event.kind","custom_unmapped_field":"unexpected"}
+{"index":{}}
+{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","host.name":"noise-host-3","message":"missing source and destination fields entirely"}
+'
+```
+
+Substitute `<es_url>` with `http://localhost:9220` (agent-managed) or `environment.es_url` from `config.json` (user-provided/ECH). If index creation fails (e.g. cluster in read-only mode), add to `skipped_setup` and continue — but note it: noise-index testing will be skipped for this session.
+
+Record the noise index alias in `config.json` under `"noise_index": "logs-exploratory.noise"` so the Explore Loop can reference it.
+
 **Create test user (stateful only):**
 ```bash
 curl -s -u elastic:changeme -X POST http://localhost:5620/internal/security/users/exploratory-tester \
@@ -529,7 +570,7 @@ Record the flow end time when the checklist completes or the timebox fires. Both
 |---|---|
 | 1 | **Happy path** — execute the flow exactly as intended |
 | 2 | **Missing prerequisites** — remove one required setup item (e.g. delete the connector) and retry |
-| 3 | **Invalid/edge-case input** — empty strings, special characters (`'`, `"`, `<`, `>`), max length, wrong type |
+| 3 | **Invalid/edge-case input** — empty strings, special characters (`'`, `"`, `<`, `>`), max length, wrong type. **For flows that use data views or index patterns:** also switch the data source to the noise index (`logs-exploratory.noise` from `config.json → noise_index`) and repeat the key action — non-ECS field types and missing fields expose mapping assumptions that clean data never triggers. If the noise index was not created (skipped in 1c), skip this variation and note it. |
 | 4 | **Cancel / back-navigate mid-flow** — start the flow, then cancel or navigate away before completion |
 | 5 | **Refresh during in-flight operation** — start the flow, trigger a server call, call `browser_snapshot` to confirm the loading state is visible, then navigate to the same URL to simulate a refresh |
 
