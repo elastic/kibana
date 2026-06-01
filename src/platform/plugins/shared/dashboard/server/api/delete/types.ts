@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { servers as obltServerlessConfig } from '../../default/serverless/observability_complete.serverless.config';
+import type { DashboardState } from '../types';
 
-export const servers: ScoutServerConfig = {
-  ...obltServerlessConfig,
-  kbnTestServer: {
-    ...obltServerlessConfig.kbnTestServer,
-    serverArgs: [
-      ...obltServerlessConfig.kbnTestServer.serverArgs,
-      '--feature_flags.overrides.slo.compositeSloEnabled=true',
-    ],
-  },
-};
+export interface DashboardDeleteResponseBody {
+  id: string;
+  data: Pick<DashboardState, 'title' | 'tags'>;
+}

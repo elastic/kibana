@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
-
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--feature_flags.overrides.slo.compositeSloEnabled=true',
-    ],
-  },
-};
+export {
+  trackCreateDashboardAction,
+  trackUpdateDashboardAction,
+  trackDeleteDashboardAction,
+} from './user_actions';
