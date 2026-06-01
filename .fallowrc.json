@@ -3,8 +3,5 @@
   "ignoreDependencies": ["@kbn/*"],
   "rules": {
     "unresolved-imports": "off"
-  },
-  "workspaces": {
-    "patterns": ["x-pack/solutions/search/**"]
   }
 }
