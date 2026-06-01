@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asDuration, asMillisecondDuration, toMicroseconds } from './duration';
+import { asDuration, asMillisecondDuration, asTransactionRate, toMicroseconds } from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -50,6 +50,31 @@ describe('duration formatters', () => {
 
     it('formats large values as integers', () => {
       expect(asMillisecondDuration(1200000)).toEqual('1,200 ms');
+    });
+  });
+
+  describe('asTransactionRate', () => {
+    it('returns N/A for null, undefined, and non-finite values', () => {
+      expect(asTransactionRate(null)).toEqual('N/A');
+      expect(asTransactionRate(undefined)).toEqual('N/A');
+      expect(asTransactionRate(Infinity)).toEqual('N/A');
+    });
+
+    it('formats zero', () => {
+      expect(asTransactionRate(0)).toEqual('0 tpm');
+    });
+
+    it('formats values at or below 0.1 as "< 0.1 tpm"', () => {
+      expect(asTransactionRate(0.05)).toEqual('< 0.1 tpm');
+      expect(asTransactionRate(0.1)).toEqual('< 0.1 tpm');
+    });
+
+    it('formats decimal values above 0.1', () => {
+      expect(asTransactionRate(1.5)).toEqual('1.5 tpm');
+    });
+
+    it('formats integer values', () => {
+      expect(asTransactionRate(42)).toEqual('42 tpm');
     });
   });
 
