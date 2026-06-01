@@ -12,7 +12,6 @@ import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,
 } from '../constants/client_defaults';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../constants';
 import { selectedMimeCategoriesQuery } from '../constants/mime_types';
 import type { CertificatesResults } from '../../server/queries/get_certs';
 import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
@@ -35,6 +34,7 @@ export const DEFAULT_TO = 'now';
 
 export const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
 export const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
+export const CERT_ISSUER_COMMON_NAME = 'tls.server.x509.issuer.common_name';
 
 // `synthetics.type` value stamped on browser monitor network events, which is
 // where browser TLS certificates are captured.
@@ -93,8 +93,8 @@ export const getCertsRequestBody = ({
   browserResourceTypes,
   party,
   tags,
+  issuers,
   includeBrowserCerts = false,
-  includeStats = false,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
@@ -217,6 +217,12 @@ export const getCertsRequestBody = ({
           // pings and browser network events alike), so this applies uniformly
           // across both branches regardless of monitor type.
           ...(tags && tags.length > 0 ? [{ terms: { tags } }] : []),
+          // Issuer (the signing certificate authority) is recorded on both
+          // lightweight summary pings and browser network events, so this terms
+          // filter applies uniformly across both branches regardless of monitor type.
+          ...(issuers && issuers.length > 0
+            ? [{ terms: { [CERT_ISSUER_COMMON_NAME]: issuers } }]
+            : []),
           // fetch large enough date range to cover the last 7 days, no particular reason for 7 days
           getRangeFilter({
             from: 'now-7d',
@@ -304,33 +310,6 @@ export const getCertsRequestBody = ({
           field: certIdField,
         },
       },
-      // Distinct-cert counts for the page summary header. They run in the same
-      // filter context, so they reflect the active quick filters. `not_after`
-      // is fixed per certificate, so each cert falls into exactly one bucket.
-      //
-      // These two filter+cardinality aggregations add ~25% to the query's `took`
-      // at scale (see scripts/tasks/benchmark_certs_query.ts), so they are opt-in:
-      // only the certificates page requests them. The TLS alert rule discards
-      // stats, so it leaves `includeStats` false and keeps the query lean.
-      ...(includeStats
-        ? {
-            expired: {
-              filter: { range: { 'tls.server.x509.not_after': { lt: 'now' } } },
-              aggs: { count: { cardinality: { field: certIdField } } },
-            },
-            expiringSoon: {
-              filter: {
-                range: {
-                  'tls.server.x509.not_after': {
-                    gte: 'now',
-                    lt: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
-                  },
-                },
-              },
-              aggs: { count: { cardinality: { field: certIdField } } },
-            },
-          }
-        : {}),
     },
   });
 };
@@ -384,9 +363,5 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     };
   });
   const total = result.aggregations?.total?.value ?? 0;
-  const stats = {
-    expired: result.aggregations?.expired?.count?.value ?? 0,
-    expiringSoon: result.aggregations?.expiringSoon?.count?.value ?? 0,
-  };
-  return { certs, total, stats };
+  return { certs, total };
 };

@@ -40,10 +40,14 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       browserResourceTypes: schema.maybe(schema.string({ maxLength: 1024 })),
       party: schema.maybe(schema.string({ maxLength: 256 })),
       tags: schema.maybe(schema.string({ maxLength: 1024 })),
+      // Comma-separated issuer (certificate authority) common names; scopes the
+      // list to certs signed by the selected CA(s).
+      issuers: schema.maybe(schema.string({ maxLength: 4096 })),
     }),
   },
   handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {
-    const { monitorTypes, browserResourceTypes, party, tags, ...queryParams } = request.query;
+    const { monitorTypes, browserResourceTypes, party, tags, issuers, ...queryParams } =
+      request.query;
 
     const toList = (value?: string) => (value ? value.split(',').filter(Boolean) : undefined);
 
@@ -68,14 +72,12 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       browserResourceTypes: toList(browserResourceTypes),
       party: toList(party),
       tags: toList(tags),
+      issuers: toList(issuers),
       syntheticsEsClient,
       monitorIds: enabledMonitorQueryIds,
       // The certificates page lists certs from every enabled monitor, including
       // the certificate captured on a browser monitor's navigation request.
       includeBrowserCerts: true,
-      // The page header shows expired / expiring-soon counts, so request the
-      // (filter-aware) summary aggregations. The TLS rule leaves these off.
-      includeStats: true,
     });
     return { data };
   },

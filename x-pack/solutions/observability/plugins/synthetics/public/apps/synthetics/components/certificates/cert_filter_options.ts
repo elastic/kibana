@@ -42,13 +42,25 @@ export const BROWSER_RESOURCE_TYPE_OPTIONS: QuickFilterOption[] = MIME_FILTERS.m
   })
 );
 
-// Datemath windows passed to the `notValidAfter` param (cert `not_after <= now+N`).
-// These intentionally include already-expired certs, which are the most urgent.
-export const EXPIRY_WITHIN_OPTIONS: QuickFilterOption[] = [
-  { value: 'now+7d', label: labels.EXPIRY_WITHIN_7_DAYS },
-  { value: 'now+30d', label: labels.EXPIRY_WITHIN_30_DAYS },
-  { value: 'now+90d', label: labels.EXPIRY_WITHIN_90_DAYS },
-  { value: 'now+1y', label: labels.EXPIRY_WITHIN_1_YEAR },
+export interface ExpiryBucketOption {
+  // Datemath upper bound passed to the `notValidAfter` filter (cert
+  // `not_after <= value`); `now` means already-expired.
+  value: string;
+  label: string;
+  // EuiHealth dot color, ramped most→least urgent.
+  color: 'danger' | 'warning' | 'subdued';
+}
+
+// Cumulative urgency buckets rendered as clickable summary dots above the table.
+// Order and values mirror EXPIRY_WITHIN_WINDOWS (the facet aggregation), so each
+// dot's count equals what clicking it filters the table down to. Counts are
+// cumulative and include already-expired certs (the most urgent).
+export const EXPIRY_BUCKET_OPTIONS: ExpiryBucketOption[] = [
+  { value: 'now', label: labels.STAT_EXPIRED, color: 'danger' },
+  { value: 'now+1d', label: labels.EXPIRY_WITHIN_1_DAY, color: 'danger' },
+  { value: 'now+7d', label: labels.EXPIRY_WITHIN_7_DAYS, color: 'warning' },
+  { value: 'now+15d', label: labels.EXPIRY_WITHIN_15_DAYS, color: 'warning' },
+  { value: 'now+30d', label: labels.EXPIRY_WITHIN_30_DAYS, color: 'subdued' },
 ];
 
 export const PARTY_FILTER_OPTIONS: QuickFilterOption[] = [

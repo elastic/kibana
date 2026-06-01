@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
 import { CertStatus } from './cert_status';
-import { CertStats } from './cert_stats';
 import { CertMonitors } from './cert_monitors';
 import { CertMonitorTypes } from './cert_monitor_types';
 import * as labels from './translations';
@@ -200,9 +199,6 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
               }}
             />
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CertStats stats={certificates.stats} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />

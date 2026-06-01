@@ -18,6 +18,7 @@ import {
   absoluteDate,
   BROWSER_NETWORK_INFO,
   CERT_HASH_SHA256,
+  CERT_ISSUER_COMMON_NAME,
   CERT_SUBJECT_COMMON_NAME,
   FIRST_PARTY,
   THIRD_PARTY,
@@ -34,9 +35,12 @@ const NOT_AFTER_FIELD = 'tls.server.x509.not_after';
 // the same field for their cardinality to stay consistent with the listed totals.
 const CERT_ID_FIELD = CERT_SUBJECT_COMMON_NAME;
 
-// Cumulative "Expiring within" windows. Datemath is understood natively by ES range
-// queries, and the values must match the UI's EXPIRY_WITHIN_OPTIONS so counts line up.
-export const EXPIRY_WITHIN_WINDOWS = ['now+7d', 'now+30d', 'now+90d', 'now+1y'] as const;
+// Cumulative "expiring within" windows for the certificate summary dots, ordered
+// most→least urgent. `now` means already-expired (`not_after <= now`); the rest are
+// upper bounds that also include expired certs. Datemath is understood natively by ES
+// range queries, and the values must match the UI's EXPIRY_BUCKET_OPTIONS so the dot
+// counts equal what clicking them filters to.
+export const EXPIRY_WITHIN_WINDOWS = ['now', 'now+1d', 'now+7d', 'now+15d', 'now+30d'] as const;
 
 interface GetCertsFacetsParams {
   monitorIds?: string[];
@@ -86,6 +90,12 @@ export const getCertsFacetsRequestBody = ({
     },
     tags: {
       terms: { field: 'tags', size: 1000 },
+      aggs: distinctAgg,
+    },
+    // Distinct-cert counts per issuing certificate authority. Issuer is recorded
+    // on both lightweight and browser certs, so this spans both branches.
+    issuers: {
+      terms: { field: CERT_ISSUER_COMMON_NAME, size: 1000 },
       aggs: distinctAgg,
     },
     // Resource type and origin only exist on browser network events. Resource type
@@ -161,6 +171,7 @@ interface DistinctBucket {
 interface CertsFacetsAggs {
   monitorTypes: { buckets: DistinctBucket[] };
   tags: { buckets: DistinctBucket[] };
+  issuers: { buckets: DistinctBucket[] };
   resourceTypes: { byCategory: { buckets: Record<string, { distinct: { value: number } }> } };
   party: { byParty: { buckets: Record<string, { distinct: { value: number } }> } };
   expiringWithin: { buckets: Record<string, { distinct: { value: number } }> };
@@ -179,6 +190,7 @@ export const processCertsFacetsResult = (aggregations?: CertsFacetsAggs): CertFa
   return {
     monitorTypes: toCounts(aggregations?.monitorTypes.buckets),
     tags: toCounts(aggregations?.tags.buckets),
+    issuers: toCounts(aggregations?.issuers.buckets),
     resourceTypes: aggregations
       ? fromKeyedBuckets(aggregations.resourceTypes.byCategory.buckets, MIME_TYPE_CATEGORIES)
       : [],

@@ -12,6 +12,7 @@ import {
   getCertsRequestBody,
   BROWSER_NETWORK_INFO,
   CERT_HASH_SHA256,
+  CERT_ISSUER_COMMON_NAME,
   CERT_SUBJECT_COMMON_NAME,
   FIRST_PARTY,
   THIRD_PARTY,
@@ -53,9 +54,9 @@ describe('origin (party) query helpers', () => {
 describe('getCertsRequestBody', () => {
   // Representative params for the recurring TLS alert-rule query (see
   // tls_rule_executor.ts). The rule shares this builder with the certificates
-  // page but deliberately leaves `includeBrowserCerts`/`includeStats` off to
-  // keep its query lean; these tests lock that contract so a future page-side
-  // change cannot leak browser-cert machinery into the rule's hot path.
+  // page but deliberately leaves `includeBrowserCerts` off to keep its query
+  // lean; these tests lock that contract so a future page-side change cannot
+  // leak browser-cert machinery into the rule's hot path.
   const ruleParams: GetCertsParams = {
     pageIndex: 0,
     size: 1000,
@@ -64,7 +65,6 @@ describe('getCertsRequestBody', () => {
     notValidAfter: 'now+30d',
     notValidBefore: 'now-730d',
     monitorIds: ['monitor-1', 'monitor-2'],
-    includeStats: false,
   };
 
   describe('TLS alert-rule (lean) path', () => {
@@ -79,7 +79,7 @@ describe('getCertsRequestBody', () => {
       expect(body.sort).toEqual([{ [CERT_SUBJECT_COMMON_NAME]: { order: 'desc' } }]);
     });
 
-    it('does not request the page-only summary aggregations', () => {
+    it('requests only the distinct-cert total aggregation', () => {
       const body = getCertsRequestBody(ruleParams) as estypes.SearchRequest;
       expect(Object.keys(body.aggs ?? {})).toEqual(['total']);
     });
@@ -133,15 +133,37 @@ describe('getCertsRequestBody', () => {
       expect(withParty.runtime_mappings).toEqual(PARTY_RUNTIME_MAPPINGS);
     });
 
-    it('requests the summary aggregations only when includeStats is set', () => {
+    it('requests only the distinct-cert total aggregation (summary counts come from the facets endpoint)', () => {
       const body = getCertsRequestBody({
         ...ruleParams,
         includeBrowserCerts: true,
-        includeStats: true,
       }) as estypes.SearchRequest;
-      expect(Object.keys(body.aggs ?? {})).toEqual(
-        expect.arrayContaining(['total', 'expired', 'expiringSoon'])
-      );
+      expect(Object.keys(body.aggs ?? {})).toEqual(['total']);
+    });
+
+    it('adds an issuer (certificate authority) terms filter only when issuers is set', () => {
+      const issuerTerms = (body: estypes.SearchRequest) => {
+        const filter = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
+        return filter.find((clause) => {
+          const terms = clause?.terms;
+          return terms != null && CERT_ISSUER_COMMON_NAME in terms;
+        });
+      };
+
+      const withoutIssuer = getCertsRequestBody({
+        ...ruleParams,
+        includeBrowserCerts: true,
+      }) as estypes.SearchRequest;
+      expect(issuerTerms(withoutIssuer)).toBeUndefined();
+
+      const withIssuer = getCertsRequestBody({
+        ...ruleParams,
+        includeBrowserCerts: true,
+        issuers: ["Let's Encrypt", 'DigiCert'],
+      }) as estypes.SearchRequest;
+      expect(issuerTerms(withIssuer)).toEqual({
+        terms: { [CERT_ISSUER_COMMON_NAME]: ["Let's Encrypt", 'DigiCert'] },
+      });
     });
   });
 });

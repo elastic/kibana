@@ -23,7 +23,6 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface CertResultBody {
   total: number;
-  stats?: { expired: number; expiringSoon: number };
   certs: Array<{
     common_name?: string;
     issuer?: string;
@@ -41,6 +40,7 @@ interface CertFacetCount {
 interface CertFacetsBody {
   monitorTypes: CertFacetCount[];
   tags: CertFacetCount[];
+  issuers: CertFacetCount[];
   resourceTypes: CertFacetCount[];
   party: CertFacetCount[];
   expiringWithin: CertFacetCount[];
@@ -57,8 +57,8 @@ const certData = (res: { body: unknown }): CertResultBody =>
 /**
  * API coverage for the certificates route (`GET internal/synthetics/certs`),
  * focused on the changes that power the TLS Certificates page: browser-inclusive
- * querying, the summary-stats aggregation (`stats.expired` / `stats.expiringSoon`),
- * and the `monitorTypes` / `tags` quick-filter query params.
+ * querying, the cumulative "expiring within" facet windows that feed the summary
+ * dots, and the `monitorTypes` / `tags` quick-filter query params.
  *
  * Tests share worker-scoped Kibana/ES state and run sequentially, so the empty
  * assertion runs first and later tests build on the seeded certificates.
@@ -206,6 +206,7 @@ apiTest.describe(
       expect((facetsRes.body as { data: CertFacetsBody }).data).toStrictEqual({
         monitorTypes: [],
         tags: [],
+        issuers: [],
         resourceTypes: [],
         party: [],
         expiringWithin: [],
@@ -213,7 +214,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns lightweight certificates with expiry summary stats',
+      'returns lightweight certificates across the expiry spectrum',
       async ({ apiClient, apiServices, esClient }) => {
         const privateLocation =
           await apiServices.syntheticsPrivateLocations.getSharedPrivateLocation();
@@ -226,8 +227,9 @@ apiTest.describe(
         });
         monitorId = (created.body as { id: string }).id;
 
-        // One cert per expiry bucket so the stats aggregation is exercised:
-        // valid (far future), expiring within the 30d threshold, and expired.
+        // One cert per expiry bucket so the cumulative facet windows are
+        // exercised: valid (far future), expiring within the 30d window, and
+        // already-expired.
         await indexCertPing(esClient, {
           commonName: 'valid.scout.test',
           sha256: 'a'.repeat(64),
@@ -249,7 +251,6 @@ apiTest.describe(
         const body = certData(res);
 
         expect(body.total).toBe(3);
-        expect(body.stats).toStrictEqual({ expired: 1, expiringSoon: 1 });
 
         const validCert = body.certs.find((cert) => cert.common_name === 'valid.scout.test');
         expect(validCert).toBeDefined();
@@ -283,6 +284,17 @@ apiTest.describe(
       expect(certData(missRes).total).toBe(0);
     });
 
+    apiTest('filters certificates by issuer (CA)', async ({ apiClient }) => {
+      // All three seeded lightweight certs share the issuer `GTS CA 1C3`.
+      const matchRes = await getCerts(apiClient, `?issuers=${encodeURIComponent('GTS CA 1C3')}`);
+      expect(matchRes).toHaveStatusCode(200);
+      expect(certData(matchRes).total).toBe(3);
+
+      const missRes = await getCerts(apiClient, `?issuers=${encodeURIComponent('Nonexistent CA')}`);
+      expect(missRes).toHaveStatusCode(200);
+      expect(certData(missRes).total).toBe(0);
+    });
+
     apiTest('filters certificates by expiry window (notValidAfter)', async ({ apiClient }) => {
       // `notValidAfter` keeps certs with `not_after <= now+window`, including
       // already-expired ones. `encodeURIComponent` preserves the datemath `+`.
@@ -304,9 +316,11 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
       const facets = (res.body as { data: CertFacetsBody }).data;
 
-      // All three seeded certs come from one HTTP monitor and share TEST_TAG.
+      // All three seeded certs come from one HTTP monitor and share TEST_TAG and
+      // the same issuing CA.
       expect(findCount(facets.monitorTypes, 'http')).toBe(3);
       expect(findCount(facets.tags, TEST_TAG)).toBe(3);
+      expect(findCount(facets.issuers, 'GTS CA 1C3')).toBe(3);
 
       // Resource-type categories are always reported (derived from
       // `http.response.mime_type` via the shared mime taxonomy); with no browser
@@ -326,11 +340,13 @@ apiTest.describe(
       expect(findCount(facets.party, 'third_party')).toBe(0);
 
       // Cumulative "expiring within" windows over not_after of the seeded certs:
-      // expired (now-10d), expiring (now+10d), valid (now+60d).
+      // expired (now-10d), expiring (now+10d), valid (now+60d). `now` counts the
+      // already-expired cert; each later window includes the earlier ones.
+      expect(findCount(facets.expiringWithin, 'now')).toBe(1);
+      expect(findCount(facets.expiringWithin, 'now+1d')).toBe(1);
       expect(findCount(facets.expiringWithin, 'now+7d')).toBe(1);
+      expect(findCount(facets.expiringWithin, 'now+15d')).toBe(2);
       expect(findCount(facets.expiringWithin, 'now+30d')).toBe(2);
-      expect(findCount(facets.expiringWithin, 'now+90d')).toBe(3);
-      expect(findCount(facets.expiringWithin, 'now+1y')).toBe(3);
     });
 
     apiTest(
@@ -408,6 +424,10 @@ apiTest.describe(
       // Browser certs now appear alongside the three lightweight HTTP certs.
       expect(findCount(facets.monitorTypes, 'browser')).toBe(2);
       expect(findCount(facets.monitorTypes, 'http')).toBe(3);
+
+      // Issuer facet spans both branches: the lightweight CA plus the browser CA.
+      expect(findCount(facets.issuers, 'GTS CA 1C3')).toBe(3);
+      expect(findCount(facets.issuers, 'Browser Test CA')).toBe(2);
     });
   }
 );

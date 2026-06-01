@@ -34,6 +34,7 @@ export interface SyntheticsUrlParams {
   // Certificates page quick filters, persisted so a filtered view is shareable.
   browserResourceTypes?: string[];
   party?: string[];
+  issuers?: string[];
   expiringWithin?: string;
   locationId?: string;
   projects?: string[] | string;
@@ -109,6 +110,7 @@ export const getSupportedUrlParams = (params: {
     remoteName,
     browserResourceTypes,
     party,
+    issuers,
     expiringWithin,
   } = filteredParams;
 
@@ -149,6 +151,7 @@ export const getSupportedUrlParams = (params: {
     remoteName: remoteName || undefined,
     browserResourceTypes: parseFilters(browserResourceTypes),
     party: parseFilters(party),
+    issuers: parseFilters(issuers),
     expiringWithin: expiringWithin || undefined,
   };
 };

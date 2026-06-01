@@ -23,11 +23,8 @@ export const GetCertsParamsType = t.partial({
   browserResourceTypes: t.array(t.string),
   party: t.array(t.string),
   tags: t.array(t.string),
+  issuers: t.array(t.string),
   includeBrowserCerts: t.boolean,
-  // Opt-in for the `expired` / `expiringSoon` summary aggregations. Only the
-  // certificates page needs them (for the header badges); the TLS rule omits
-  // them so its query stays lean (see get_certs_request_body.ts).
-  includeStats: t.boolean,
 });
 
 export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
@@ -71,22 +68,10 @@ export const CertType = t.intersection([
   }),
 ]);
 
-export const CertStatsType = t.type({
-  expired: t.number,
-  expiringSoon: t.number,
+export const CertResultType = t.type({
+  certs: t.array(CertType),
+  total: t.number,
 });
-
-export const CertResultType = t.intersection([
-  t.type({
-    certs: t.array(CertType),
-    total: t.number,
-  }),
-  t.partial({
-    stats: CertStatsType,
-  }),
-]);
-
-export type CertStats = t.TypeOf<typeof CertStatsType>;
 
 // Global distinct-cert counts per quick-filter value, used to show counts next to
 // the certificates page filter options (independent of the active selection).
@@ -98,6 +83,7 @@ export const CertFacetCountType = t.type({
 export const CertFacetsType = t.type({
   monitorTypes: t.array(CertFacetCountType),
   tags: t.array(CertFacetCountType),
+  issuers: t.array(CertFacetCountType),
   resourceTypes: t.array(CertFacetCountType),
   party: t.array(CertFacetCountType),
   expiringWithin: t.array(CertFacetCountType),

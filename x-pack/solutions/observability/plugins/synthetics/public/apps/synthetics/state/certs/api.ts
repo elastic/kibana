@@ -22,6 +22,7 @@ export const getCertsList = async (queryParams: GetCertsParams): Promise<CertRes
     browserResourceTypes,
     party,
     tags,
+    issuers,
     notValidAfter,
   } = queryParams;
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS, {
@@ -34,6 +35,7 @@ export const getCertsList = async (queryParams: GetCertsParams): Promise<CertRes
     browserResourceTypes: toParam(browserResourceTypes),
     party: toParam(party),
     tags: toParam(tags),
+    issuers: toParam(issuers),
     notValidAfter,
   })) as {
     data: CertResult;

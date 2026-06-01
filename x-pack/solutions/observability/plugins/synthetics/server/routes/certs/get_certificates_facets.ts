@@ -17,6 +17,7 @@ import { getSyntheticsCertsFacets } from '../../queries/get_certs_facets';
 const EMPTY_FACETS: CertFacets = {
   monitorTypes: [],
   tags: [],
+  issuers: [],
   resourceTypes: [],
   party: [],
   expiringWithin: [],

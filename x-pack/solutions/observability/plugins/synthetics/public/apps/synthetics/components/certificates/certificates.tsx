@@ -13,13 +13,13 @@ import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
 import { CertificateSearch } from './cert_search';
+import { CertStats } from './cert_stats';
 import { CertQuickFilter } from './cert_quick_filter';
 import type { QuickFilterOption } from './cert_quick_filter';
 import { useCertFacets } from './use_cert_facets';
 import { useCertFilters } from './use_cert_filters';
 import {
   BROWSER_RESOURCE_TYPE_OPTIONS,
-  EXPIRY_WITHIN_OPTIONS,
   MONITOR_TYPE_FILTER_OPTIONS,
   PARTY_FILTER_OPTIONS,
 } from './cert_filter_options';
@@ -73,12 +73,14 @@ export const CertificatesPage: React.FC = () => {
     browserResourceTypes,
     party,
     tags,
+    issuers,
     expiringWithin,
     setSearch,
     setMonitorTypes,
     setBrowserResourceTypes,
     setParty,
     setTags,
+    setIssuers,
     setExpiringWithin,
   } = useCertFilters();
 
@@ -98,15 +100,17 @@ export const CertificatesPage: React.FC = () => {
     () => withCounts(PARTY_FILTER_OPTIONS, facets?.party),
     [facets?.party]
   );
-  const expiryOptions = useMemo(
-    () => withCounts(EXPIRY_WITHIN_OPTIONS, facets?.expiringWithin),
-    [facets?.expiringWithin]
-  );
   // The tag list itself is derived from the cert facets, so only tags that actually
   // appear on certificate-bearing documents are offered (each with its cert count).
   const tagOptions: QuickFilterOption[] = useMemo(
     () => (facets?.tags ?? []).map(({ value, count }) => ({ value, label: value, count })),
     [facets?.tags]
+  );
+  // Issuer (certificate authority) options are likewise derived from the facets, so
+  // only CAs that actually signed a listed certificate are offered, each with a count.
+  const issuerOptions: QuickFilterOption[] = useMemo(
+    () => (facets?.issuers ?? []).map(({ value, count }) => ({ value, label: value, count })),
+    [facets?.issuers]
   );
 
   // Browser-specific filters are only meaningful when browser certs can appear,
@@ -126,6 +130,7 @@ export const CertificatesPage: React.FC = () => {
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
     party: isBrowserIncluded ? party : undefined,
     tags,
+    issuers,
     notValidAfter: expiringWithin,
   });
 
@@ -149,17 +154,6 @@ export const CertificatesPage: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <CertQuickFilter
-              label={labels.EXPIRY_WITHIN_FILTER}
-              dataTestSubj="certExpiryWithinFilterButton"
-              options={expiryOptions}
-              selectedValues={expiringWithin ? [expiringWithin] : []}
-              singleSelection
-              onChange={(values) => {
-                setExpiringWithin(values[0]);
-                resetToFirstPage();
-              }}
-            />
-            <CertQuickFilter
               label={labels.MONITOR_TYPE_FILTER}
               dataTestSubj="certMonitorTypeFilterButton"
               options={monitorTypeOptions}
@@ -178,6 +172,18 @@ export const CertificatesPage: React.FC = () => {
               disabledTooltip={labels.TAGS_FILTER_NO_TAGS}
               onChange={(values) => {
                 setTags(values);
+                resetToFirstPage();
+              }}
+            />
+            <CertQuickFilter
+              label={labels.ISSUER_FILTER}
+              dataTestSubj="certIssuerFilterButton"
+              options={issuerOptions}
+              selectedValues={issuers}
+              isDisabled={issuerOptions.length === 0}
+              disabledTooltip={labels.ISSUER_FILTER_NO_ISSUERS}
+              onChange={(values) => {
+                setIssuers(values);
                 resetToFirstPage();
               }}
             />
@@ -208,6 +214,15 @@ export const CertificatesPage: React.FC = () => {
           </EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <CertStats
+        counts={facets?.expiringWithin}
+        selected={expiringWithin}
+        onSelect={(value) => {
+          setExpiringWithin(value);
+          resetToFirstPage();
+        }}
+      />
       <EuiSpacer size="m" />
       <CertificateList
         page={page}

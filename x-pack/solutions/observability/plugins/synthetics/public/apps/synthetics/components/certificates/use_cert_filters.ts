@@ -24,6 +24,7 @@ export interface CertFiltersState {
   browserResourceTypes: string[];
   party: string[];
   tags: string[];
+  issuers: string[];
   expiringWithin?: string;
 }
 
@@ -33,17 +34,18 @@ export interface CertFiltersActions {
   setBrowserResourceTypes: (values: string[]) => void;
   setParty: (values: string[]) => void;
   setTags: (values: string[]) => void;
+  setIssuers: (values: string[]) => void;
   setExpiringWithin: (value?: string) => void;
 }
 
 /**
  * Backs the Certificates page quick filters with the URL query string so a
  * filtered view survives a refresh and can be shared. Reuses the shared
- * `search`/`monitorTypes`/`tags` params and adds the browser-only
- * `browserResourceTypes`/`party`/`expiringWithin` ones.
+ * `search`/`monitorTypes`/`tags` params and adds the certificates-page
+ * `issuers`/`browserResourceTypes`/`party`/`expiringWithin` ones.
  */
 export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
-  const { search, monitorTypes, tags, browserResourceTypes, party, expiringWithin } =
+  const { search, monitorTypes, tags, issuers, browserResourceTypes, party, expiringWithin } =
     useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
 
@@ -67,6 +69,10 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
     (values: string[]) => updateUrlParams({ tags: serializeArray(values) }),
     [updateUrlParams]
   );
+  const setIssuers = useCallback(
+    (values: string[]) => updateUrlParams({ issuers: serializeArray(values) }),
+    [updateUrlParams]
+  );
   const setExpiringWithin = useCallback(
     (value?: string) => updateUrlParams({ expiringWithin: value || '' }),
     [updateUrlParams]
@@ -79,12 +85,14 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       browserResourceTypes: toArray(browserResourceTypes),
       party: toArray(party),
       tags: toArray(tags),
+      issuers: toArray(issuers),
       expiringWithin,
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
       setParty,
       setTags,
+      setIssuers,
       setExpiringWithin,
     }),
     [
@@ -93,12 +101,14 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       browserResourceTypes,
       party,
       tags,
+      issuers,
       expiringWithin,
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
       setParty,
       setTags,
+      setIssuers,
       setExpiringWithin,
     ]
   );

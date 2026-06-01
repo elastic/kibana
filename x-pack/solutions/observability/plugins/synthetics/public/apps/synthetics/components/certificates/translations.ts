@@ -176,24 +176,31 @@ export const TAGS_FILTER = i18n.translate('xpack.synthetics.certs.tagsFilter.lab
   defaultMessage: 'Tags',
 });
 
-export const EXPIRY_WITHIN_FILTER = i18n.translate('xpack.synthetics.certs.expiryFilter.label', {
-  defaultMessage: 'Expiring within',
+export const ISSUER_FILTER = i18n.translate('xpack.synthetics.certs.issuerFilter.label', {
+  defaultMessage: 'Certificate authority',
+});
+
+export const ISSUER_FILTER_NO_ISSUERS = i18n.translate(
+  'xpack.synthetics.certs.issuerFilter.noIssuers',
+  {
+    defaultMessage: 'No certificate authorities available',
+  }
+);
+
+export const EXPIRY_WITHIN_1_DAY = i18n.translate('xpack.synthetics.certs.expiryFilter.days1', {
+  defaultMessage: '1 day',
 });
 
 export const EXPIRY_WITHIN_7_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days7', {
   defaultMessage: '7 days',
 });
 
+export const EXPIRY_WITHIN_15_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days15', {
+  defaultMessage: '15 days',
+});
+
 export const EXPIRY_WITHIN_30_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days30', {
   defaultMessage: '30 days',
-});
-
-export const EXPIRY_WITHIN_90_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days90', {
-  defaultMessage: '90 days',
-});
-
-export const EXPIRY_WITHIN_1_YEAR = i18n.translate('xpack.synthetics.certs.expiryFilter.year1', {
-  defaultMessage: '1 year',
 });
 
 export const TAGS_FILTER_NO_TAGS = i18n.translate('xpack.synthetics.certs.tagsFilter.noTags', {
@@ -212,13 +219,28 @@ export const COLLAPSE_CERT_DETAILS = i18n.translate('xpack.synthetics.certs.list
   defaultMessage: 'Collapse certificate details',
 });
 
-export const STAT_EXPIRING_SOON = i18n.translate('xpack.synthetics.certs.stats.expiringSoon', {
-  defaultMessage: 'Expiring soon',
-});
-
 export const STAT_EXPIRED = i18n.translate('xpack.synthetics.certs.stats.expired', {
   defaultMessage: 'Expired',
 });
+
+export const EXPIRY_SUMMARY_ARIA = i18n.translate('xpack.synthetics.certs.stats.summaryAriaLabel', {
+  defaultMessage: 'Filter certificates by expiry window',
+});
+
+export const EXPIRY_SUMMARY_LABEL = i18n.translate('xpack.synthetics.certs.stats.summaryLabel', {
+  defaultMessage: 'Expiring within:',
+});
+
+export const EXPIRY_FILTER_TOOLTIP = i18n.translate('xpack.synthetics.certs.stats.filterTooltip', {
+  defaultMessage: 'Click to filter',
+});
+
+export const EXPIRY_CLEAR_FILTER_TOOLTIP = i18n.translate(
+  'xpack.synthetics.certs.stats.clearFilterTooltip',
+  {
+    defaultMessage: 'Click to clear filter',
+  }
+);
 
 export const FINGERPRINTS_COL = i18n.translate('xpack.synthetics.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
