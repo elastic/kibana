@@ -37,6 +37,7 @@ import {
 import {
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
   createChainServiceMap,
+  createHighFanOutServiceMap,
   createRichContextualServiceMap,
   filterServiceMapByHopDepth,
   countVisibleServices,
@@ -488,4 +489,140 @@ export const OPTION_A_HOP_DEPTH_LARGE_MAP: StoryObj = {
 export const OPTION_B_EXPAND_COLLAPSE: StoryObj = {
   name: 'Option B — Expand / collapse hidden dependencies',
   render: () => <ExpandCollapseExplorationPanel />,
+};
+
+function HighFanOutExplorationPanel() {
+  const [neighborCount, setNeighborCount] = useState(48);
+  const [viewMode, setViewMode] = useState<'full' | 'contextual'>('full');
+  const [maxVisibleNodes, setMaxVisibleNodes] = useState(CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES);
+  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => new Set());
+
+  const {
+    nodes: fullNodes,
+    edges: fullEdges,
+    focalServiceId,
+  } = useMemo(() => createHighFanOutServiceMap(neighborCount), [neighborCount]);
+
+  const onExpand = useCallback((nodeId: string) => {
+    setExpandedNodeIds((prev) => new Set(prev).add(nodeId));
+  }, []);
+
+  const onCollapse = useCallback((nodeId: string) => {
+    setExpandedNodeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(nodeId);
+      return next;
+    });
+  }, []);
+
+  const directNeighborCount = neighborCount;
+
+  return (
+    <div style={{ padding: 16 }}>
+      <EuiTitle size="s">
+        <h2>High fan-out — many direct (1-hop) neighbors</h2>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        <p>
+          Star topology around <strong>{focalServiceId}</strong>: {directNeighborCount} services at
+          hop 1 (like a dense service-map tab). Use <strong>Full map</strong> to match the global
+          map; use <strong>Contextual</strong> to see hop + node-cap behavior on the same dataset.
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup wrap alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="View"
+            options={[
+              { id: 'full', label: 'Full map (screenshot-like)' },
+              { id: 'contextual', label: 'Contextual (Option B)' },
+            ]}
+            idSelected={viewMode}
+            onChange={(id) => {
+              setViewMode(id as 'full' | 'contextual');
+              setExpandedNodeIds(new Set());
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFieldNumber
+            data-test-subj="highFanOutNeighborCount"
+            prepend="Direct neighbors"
+            value={neighborCount}
+            min={8}
+            max={80}
+            onChange={(e) => {
+              setNeighborCount(e.target.valueAsNumber || 48);
+              setExpandedNodeIds(new Set());
+            }}
+          />
+        </EuiFlexItem>
+        {viewMode === 'contextual' && (
+          <EuiFlexItem grow={false}>
+            <EuiFieldNumber
+              data-test-subj="highFanOutMaxVisibleNodes"
+              prepend="Max visible"
+              value={maxVisibleNodes}
+              min={3}
+              max={30}
+              onChange={(e) => {
+                setMaxVisibleNodes(
+                  e.target.valueAsNumber || CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES
+                );
+                setExpandedNodeIds(new Set());
+              }}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">Focal: {focalServiceId}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiCallOut size="s" title="Dataset" iconType="node">
+        <p>
+          {directNeighborCount + 1} nodes · {directNeighborCount} edges from focal · all neighbors
+          are exactly 1 hop away
+        </p>
+      </EuiCallOut>
+
+      <EuiSpacer size="m" />
+
+      {viewMode === 'full' ? (
+        <ServiceMapGraph
+          height={getHeight()}
+          nodes={fullNodes}
+          edges={fullEdges}
+          environment={defaultEnvironment}
+          kuery=""
+          start={defaultTimeRange.start}
+          end={defaultTimeRange.end}
+          highlightedServiceName={focalServiceId}
+        />
+      ) : (
+        <CollapsibleServiceMapGraph
+          height={getHeight()}
+          nodes={fullNodes}
+          edges={fullEdges}
+          focalServiceId={focalServiceId}
+          baseMaxHops={1}
+          maxVisibleNodes={maxVisibleNodes}
+          expandedNodeIds={expandedNodeIds}
+          onExpand={onExpand}
+          onCollapse={onCollapse}
+          highlightedServiceName={focalServiceId}
+        />
+      )}
+    </div>
+  );
+}
+
+export const HIGH_FAN_OUT_ONE_HOP_NEIGHBORS: StoryObj = {
+  name: 'High fan-out — many direct 1-hop neighbors',
+  render: () => <HighFanOutExplorationPanel />,
 };

@@ -479,3 +479,80 @@ export function createRichContextualServiceMap(): {
 export function createBranchingServiceMap(): ReturnType<typeof createRichContextualServiceMap> {
   return createRichContextualServiceMap();
 }
+
+const FAN_OUT_AGENT_NAMES: AgentName[] = [
+  'java',
+  'nodejs',
+  'go',
+  'python',
+  'dotnet',
+  'ruby',
+  'php',
+  'rum-js',
+];
+
+/**
+ * Star topology: one focal service with many direct (1-hop) service neighbors.
+ * Mimics dense production maps where a single service fans out to dozens of peers.
+ */
+export function createHighFanOutServiceMap(neighborCount = 48): {
+  nodes: ServiceMapNode[];
+  edges: ServiceMapEdge[];
+  focalServiceId: string;
+} {
+  const focalServiceId = 'product-page';
+
+  const mkService = (
+    id: string,
+    agentName: AgentName,
+    extra?: Partial<ServiceNodeData>
+  ): ServiceMapNode => ({
+    id,
+    type: 'service',
+    position: { x: 0, y: 0 },
+    data: {
+      id,
+      label: id,
+      isService: true,
+      agentName,
+      ...extra,
+    },
+  });
+
+  const mkEdge = (source: string, target: string): ServiceMapEdge =>
+    ({
+      id: `${source}~${target}`,
+      source,
+      target,
+      data: {
+        isBidirectional: false,
+        sourceData: { id: source },
+        targetData: { id: target },
+      },
+      type: 'default',
+      style: { stroke: '#c8c8c8', strokeWidth: 1 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 12,
+        height: 12,
+        color: '#c8c8c8',
+      },
+    } as ServiceMapEdge);
+
+  const nodes: ServiceMapNode[] = [mkService(focalServiceId, 'rum-js', { alertsCount: 1 })];
+  const edges: ServiceMapEdge[] = [];
+
+  for (let i = 0; i < neighborCount; i++) {
+    const neighborId = `downstream-${String(i + 1).padStart(2, '0')}`;
+    const agentName = FAN_OUT_AGENT_NAMES[i % FAN_OUT_AGENT_NAMES.length];
+    nodes.push(
+      mkService(neighborId, agentName, {
+        ...(i % 7 === 0 ? { alertsCount: 1 + (i % 4) } : {}),
+        ...(i % 11 === 0 ? { sloStatus: 'degrading', sloCount: 1 } : {}),
+      })
+    );
+    edges.push(mkEdge(focalServiceId, neighborId));
+  }
+
+  return { nodes, edges, focalServiceId };
+}
