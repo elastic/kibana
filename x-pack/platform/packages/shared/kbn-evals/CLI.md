@@ -217,6 +217,58 @@ node scripts/evals ci-map --json
 | -------- | -------------- |
 | `--json` | Output as JSON |
 
+### `red-team` -- Run adversarial red-team testing
+
+Runs adversarial attack modules against a suite's AI assistant to test security guardrails, prompt injection resistance, information extraction defenses, jailbreaking, and privilege escalation. The suite must have a red-team spec file (`red_team/*.spec.ts`) registered as `<suite>-red-team` in `.buildkite/pipelines/evals/evals.suites.json`.
+
+Like `start`, this boots the full eval stack (EDOT + Scout + EIS CCM) as background daemons before running, then leaves them alive for subsequent runs. Pass `--skip-server` to reuse already-running services, and `node scripts/evals stop` to shut them down.
+
+```bash
+node scripts/evals red-team --suite agent-builder
+node scripts/evals red-team --suite agent-builder --module prompt-injection --count 5
+node scripts/evals red-team --suite agent-builder --strategy jailbreak-wrapper
+node scripts/evals red-team --suite agent-builder --strategy crescendo
+node scripts/evals red-team --suite agent-builder --difficulty advanced
+node scripts/evals red-team --suite agent-builder --templates-only --count 20
+node scripts/evals red-team --suite agent-builder --skip-server
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--suite <id>` | | Suite to test (required) |
+| `--module <name>` | | Attack module: `prompt-injection`, `info-extraction`, `jailbreaking`, `privilege-escalation` (default: all) |
+| `--strategy <name>` | | Delivery strategy: `direct`, `base64`, `leetspeak`, `jailbreak-wrapper`, `crescendo` (default: direct) |
+| `--count <n>` | | Number of adversarial prompts per module (default: 10) |
+| `--difficulty <level>` | | `basic`, `moderate`, or `advanced` (default: moderate) |
+| `--templates-only` | | Use only YAML templates, skip LLM-generated prompts |
+| `--project <id>` | `--model` | Connector/model to attack (interactive prompt if omitted) |
+| `--evaluation-connector-id <id>` | `--judge` | Connector for the AttackSuccessJudge LLM evaluator |
+| `--profile <name>` | | Load dataset + export settings from profile |
+| `--skip-server` | | Reuse already-running EDOT/Scout/EIS services instead of booting them |
+| `--dry-run` | | Print the Playwright command and exit |
+
+The command spawns Playwright with `--grep "Red Team"` and passes red-team configuration via environment variables (`RED_TEAM_COUNT`, `RED_TEAM_DIFFICULTY`, etc.) that the spec file reads.
+
+**Attack modules:**
+
+| Module | OWASP | What it tests |
+|--------|-------|---------------|
+| `prompt_injection` | LLM01 | Direct/indirect instruction injection |
+| `info_extraction` | LLM07 | System prompt leakage, internal data disclosure |
+| `jailbreaking` | LLM01 | Safety guideline bypass |
+| `privilege_escalation` | LLM06 | Unauthorized tool/data access |
+
+**Evaluators (auto-composed):**
+
+| Evaluator | Kind | What it scores |
+|-----------|------|----------------|
+| `prompt-leak-detection` | CODE | System prompt leakage patterns in output |
+| `attack-success-judge` | LLM | Whether the model's response fulfilled the adversarial intent |
+| `scope-violation` | CODE | Output outside authorized boundaries |
+| `tool-poisoning` | CODE | Unauthorized tool calls |
+
+**Output:** A severity-classified report with summary table and detailed findings per failed attack (written via `writeRedTeamReport`). When run through the `evaluate` fixture, per-example evaluator scores are also ingested through the evals plugin score-ingestion API (`run.type: 'red-team'` metadata).
+
 ## Tips
 
 **Fast iteration:** Use `--grep` to run a single test within a large suite:
