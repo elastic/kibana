@@ -25,15 +25,7 @@ describe('JsonCodeEditor', () => {
 
     const editor = screen.getByLabelText('Read only JSON view of an elasticsearch document');
 
-    expect(editor).toHaveDisplayValue(`{
-    "_index": "test",
-    "_type": "doc",
-    "_id": "foo",
-    "_score": 1,
-    "_source": {
-      "test": 123
-    }
-  }`);
+    expect(editor).toHaveValue(JSON.stringify(value, null, 2));
     expect(screen.queryByText('Copy to clipboard')).not.toBeInTheDocument();
   });
 });
