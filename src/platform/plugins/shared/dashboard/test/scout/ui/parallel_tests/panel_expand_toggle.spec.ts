@@ -12,13 +12,21 @@ import { expect } from '@kbn/scout/ui';
 import {
   DASHBOARD_DEFAULT_INDEX_TITLE,
   DASHBOARD_SAVED_SEARCH_ARCHIVE,
-  FEW_PANELS_DASHBOARD_ID,
+  FEW_PANELS_DASHBOARD_TITLE,
 } from '../constants';
+import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
+
+let fewPanelsDashboardId = '';
 
 spaceTest.describe('Panel expand toggle', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+    const imported = await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+    fewPanelsDashboardId = findImportedSavedObjectId(
+      imported,
+      'dashboard',
+      FEW_PANELS_DASHBOARD_TITLE
+    );
     await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
   });
 
@@ -32,7 +40,7 @@ spaceTest.describe('Panel expand toggle', { tag: tags.deploymentAgnostic }, () =
   });
 
   spaceTest('expands and restores panels', async ({ pageObjects }) => {
-    await pageObjects.dashboard.openDashboardWithId(FEW_PANELS_DASHBOARD_ID);
+    await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
 
     const initialPanelCount = await pageObjects.dashboard.getPanelCount();
     expect(initialPanelCount).toBeGreaterThan(1);

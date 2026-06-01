@@ -7,69 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
+import {
+  DASHBOARD_DEFAULT_INDEX_TITLE,
+  DASHBOARD_SAVED_SEARCH_ARCHIVE,
+  FEW_PANELS_DASHBOARD_TITLE,
+} from '../constants';
+import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
 
-const SOURCE_DASHBOARD_TITLE = 'Dashboard Clone Test';
-let sourceDashboardId = '';
+const FEW_PANELS_PANEL_TITLES = [
+  'Rendering Test: heatmap',
+  'Rendering Test: guage',
+  'Rendering Test: datatable',
+] as const;
 
-// Each panel marker is unique so the test can assert every original panel
-// survived the clone, not just that the right count of panels exists.
-const PANEL_MARKERS = ['clone marker alpha', 'clone marker beta', 'clone marker gamma'] as const;
-
-const buildSourceDashboardAttributes = () => {
-  const panels = PANEL_MARKERS.map((content, index) => {
-    const panelIndex = uuidv4();
-    return {
-      type: 'markdown',
-      panelIndex,
-      gridData: { i: panelIndex, x: 0, y: index * 5, w: 24, h: 5 },
-      embeddableConfig: {
-        content,
-        settings: { open_links_in_new_tab: true },
-      },
-    };
-  });
-
-  return {
-    title: SOURCE_DASHBOARD_TITLE,
-    description: '',
-    panelsJSON: JSON.stringify(panels),
-    optionsJSON: JSON.stringify({
-      useMargins: true,
-      syncColors: false,
-      syncCursor: true,
-      syncTooltips: false,
-      hidePanelTitles: false,
-    }),
-    timeRestore: false,
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: JSON.stringify({
-        query: { query: '', language: 'kuery' },
-        filter: [],
-      }),
-    },
-  };
-};
+let fewPanelsDashboardId = '';
 
 spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+    const imported = await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+    fewPanelsDashboardId = findImportedSavedObjectId(
+      imported,
+      'dashboard',
+      FEW_PANELS_DASHBOARD_TITLE
+    );
     await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
-
-    // The cloning UX is what's under test; the source dashboard is pure setup,
-    // so seed it via the saved-objects API instead of paying ~15s of UI flake
-    // for openNewDashboard + 3x addMarkdownPanel + saveDashboard.
-    const sourceDashboard = await kbnClient.savedObjects.create({
-      type: 'dashboard',
-      space: scoutSpace.id,
-      overwrite: true,
-      attributes: buildSourceDashboardAttributes(),
-    });
-    sourceDashboardId = sourceDashboard.id;
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -84,7 +48,7 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
   spaceTest(
     'auto-increments titles, respects overrides, and preserves panels',
     async ({ pageObjects, page }) => {
-      const cloneOf = (n: number) => `${SOURCE_DASHBOARD_TITLE} (${n})`;
+      const cloneOf = (n: number) => `${FEW_PANELS_DASHBOARD_TITLE} (${n})`;
 
       const expectCurrentDashboardTitle = async (expectedTitle: string) => {
         await expect(page.testSubj.locator('breadcrumb last')).toContainText(expectedTitle);
@@ -99,18 +63,16 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
         return match![1];
       };
 
-      const expectAllMarkersVisible = async () => {
-        for (const marker of PANEL_MARKERS) {
-          await expect(
-            page.testSubj.locator('markdownRenderer').filter({ hasText: marker })
-          ).toBeVisible();
-        }
+      const expectSourcePanelTitles = async () => {
+        await expect
+          .poll(async () => [...(await pageObjects.dashboard.getPanelTitles())].sort())
+          .toStrictEqual([...FEW_PANELS_PANEL_TITLES].sort());
       };
 
       let clone1Id = '';
 
       await spaceTest.step('clone suggests "(1)"', async () => {
-        await pageObjects.dashboard.openDashboardWithId(sourceDashboardId);
+        await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
         await pageObjects.dashboard.ensureEditMode();
         await pageObjects.dashboard.saveDashboardAsCopy();
         clone1Id = getCurrentDashboardId();
@@ -119,8 +81,10 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
 
       await spaceTest.step('the clone contains every source panel', async () => {
         // Step 1's save-as-copy left us on clone (1) already; no nav needed.
-        await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(PANEL_MARKERS.length);
-        await expectAllMarkersVisible();
+        await expect
+          .poll(() => pageObjects.dashboard.getPanelCount())
+          .toBe(FEW_PANELS_PANEL_TITLES.length);
+        await expectSourcePanelTitles();
       });
 
       await spaceTest.step('cloning "(1)" suggests "(2)"', async () => {
