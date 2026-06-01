@@ -18,6 +18,7 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'endpointExceptionsMovedUnderManagement',
       'entityAnalyticsWatchlistEnabled',
+      'entityAnalyticsEntityStoreV2',
     ])}`,
   ],
   testFiles: [require.resolve('..')],

@@ -29,6 +29,9 @@
     "initialize-server:de": "node ./scripts/index.js server detections_response/detection_engine trial_license_complete_tier",
     "run-tests:de": "node ./scripts/index.js runner detections_response/detection_engine trial_license_complete_tier",
 
+    "initialize-server:de:rule_preview": "node ./scripts/index.js server detections_response/detection_engine/rule_preview .",
+    "run-tests:de:rule_preview": "node ./scripts/index.js runner detections_response/detection_engine/rule_preview .",
+
     "initialize-server:de:basic_essentials": "node ./scripts/index.js server detections_response/detection_engine basic_license_essentials_tier",
     "run-tests:de:basic_essentials": "node ./scripts/index.js runner detections_response/detection_engine basic_license_essentials_tier",
 
@@ -130,6 +133,10 @@
     "nlp_cleanup_task:essentials:qa:serverless": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless qaPeriodicEnv",
     "nlp_cleanup_task:essentials:qa:serverless:release": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless qaEnv",
 
+    "genai_startup:server:ess": "npm run initialize-server:genai:trial_complete startup ess",
+    "genai_startup:runner:ess": "npm run run-tests:genai:trial_complete startup ess essEnv",
+    "genai_startup:qa:serverless": "npm run run-tests:genai:trial_complete startup serverless qaPeriodicEnv",
+
     "entity_analytics:server:serverless": "npm run initialize-server:ea:trial_complete risk_engine serverless",
     "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv --",
     "entity_analytics:qa:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless qaPeriodicEnv",
@@ -144,6 +151,10 @@
     "entity_analytics:essentials:server:ess": "npm run initialize-server:ea:basic_essentials risk_engine ess",
     "entity_analytics:essentials:runner:ess": "npm run run-tests:ea:basic_essentials risk_engine ess essEnv",
 
+    "entity_analytics:entity_details:server:serverless": "npm run initialize-server:ea:trial_complete entity_details serverless",
+    "entity_analytics:entity_details:runner:serverless": "npm run run-tests:ea:trial_complete entity_details serverless serverlessEnv",
+    "entity_analytics:entity_details:qa:serverless": "npm run run-tests:ea:trial_complete entity_details serverless qaPeriodicEnv",
+
     "entity_analytics:entity_store:server:serverless": "npm run initialize-server:ea:trial_complete entity_store serverless",
     "entity_analytics:entity_store:runner:serverless": "npm run run-tests:ea:trial_complete entity_store serverless serverlessEnv",
     "entity_analytics:entity_store:qa:serverless": "npm run run-tests:ea:trial_complete entity_store serverless qaPeriodicEnv",
@@ -157,6 +168,10 @@
     "entity_analytics:monitoring:qa:serverless:release": "npm run run-tests:ea:trial_complete monitoring serverless qaEnv",
     "entity_analytics:monitoring:server:ess": "npm run initialize-server:ea:trial_complete monitoring ess",
     "entity_analytics:monitoring:runner:ess": "npm run run-tests:ea:trial_complete monitoring ess essEnv --",
+
+    "entity_analytics:risk_score:server:serverless": "npm run initialize-server:ea:trial_complete risk_score_maintainer serverless",
+    "entity_analytics:risk_score:runner:serverless": "npm run run-tests:ea:trial_complete risk_score_maintainer serverless serverlessEnv",
+    "entity_analytics:risk_score:qa:serverless": "npm run run-tests:ea:trial_complete risk_score_maintainer serverless qaPeriodicEnv",
 
     "edr_workflows:artifacts:server:serverless": "npm run initialize-server:edr-workflows artifacts serverless",
     "edr_workflows:artifacts:runner:serverless": "npm run run-tests:edr-workflows artifacts serverless serverlessEnv",
@@ -186,6 +201,10 @@
     "edr_workflows:package:server:ess": "npm run initialize-server:edr-workflows package ess",
     "edr_workflows:package:runner:ess": "npm run run-tests:edr-workflows package ess essEnv",
 
+    "edr_workflows:policy:server:serverless": "npm run initialize-server:edr-workflows policy serverless",
+    "edr_workflows:policy:runner:serverless": "npm run run-tests:edr-workflows policy serverless serverlessEnv",
+    "edr_workflows:policy:qa:serverless": "npm run run-tests:edr-workflows policy serverless qaPeriodicEnv",
+
     "edr_workflows:policy_response:server:serverless": "npm run initialize-server:edr-workflows policy_response serverless",
     "edr_workflows:policy_response:runner:serverless": "npm run run-tests:edr-workflows policy_response serverless serverlessEnv",
     "edr_workflows:policy_response:qa:serverless": "npm run run-tests:edr-workflows policy_response serverless qaPeriodicEnv",
@@ -206,6 +225,18 @@
     "edr_workflows:response_actions:qa:serverless:release": "npm run run-tests:edr-workflows response_actions serverless qaEnv",
     "edr_workflows:response_actions:server:ess": "npm run initialize-server:edr-workflows response_actions ess",
     "edr_workflows:response_actions:runner:ess": "npm run run-tests:edr-workflows response_actions ess essEnv",
+
+    "edr_workflows:role_migrations:server:serverless": "npm run initialize-server:edr-workflows role_migrations serverless",
+    "edr_workflows:role_migrations:runner:serverless": "npm run run-tests:edr-workflows role_migrations serverless serverlessEnv",
+    "edr_workflows:role_migrations:qa:serverless": "npm run run-tests:edr-workflows role_migrations serverless qaPeriodicEnv",
+
+    "edr_workflows:scripts_library:server:serverless": "npm run initialize-server:edr-workflows scripts_library serverless",
+    "edr_workflows:scripts_library:runner:serverless": "npm run run-tests:edr-workflows scripts_library serverless serverlessEnv",
+    "edr_workflows:scripts_library:qa:serverless": "npm run run-tests:edr-workflows scripts_library serverless qaPeriodicEnv",
+
+    "edr_workflows:spaces:server:serverless": "npm run initialize-server:edr-workflows spaces serverless",
+    "edr_workflows:spaces:runner:serverless": "npm run run-tests:edr-workflows spaces serverless serverlessEnv",
+    "edr_workflows:spaces:qa:serverless": "npm run run-tests:edr-workflows spaces serverless qaPeriodicEnv",
 
     "exception_lists:auth:lists:server:serverless": "npm run initialize-server:lists:essentials_only authorization/exceptions/lists serverless",
     "exception_lists:auth:lists:runner:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/lists serverless serverlessEnv",
@@ -355,15 +386,15 @@
     "rule_execution_logic:esql:server:ess": "npm run initialize-server:de rule_execution_logic/esql ess",
     "rule_execution_logic:esql:runner:ess": "npm run run-tests:de rule_execution_logic/esql ess essEnv",
 
+    "rule_execution_logic:frozen_indices_handling:server:ess": "npm run initialize-server:de rule_execution_logic/frozen_indices_handling ess",
+    "rule_execution_logic:frozen_indices_handling:runner:ess": "npm run run-tests:de rule_execution_logic/frozen_indices_handling ess essEnv",
+
     "rule_execution_logic:general_logic:server:serverless": "npm run initialize-server:de rule_execution_logic/general_logic serverless",
     "rule_execution_logic:general_logic:runner:serverless": "npm run run-tests:de rule_execution_logic/general_logic serverless serverlessEnv",
     "rule_execution_logic:general_logic:qa:serverless": "npm run run-tests:de rule_execution_logic/general_logic serverless qaPeriodicEnv",
     "rule_execution_logic:general_logic:qa:serverless:release": "npm run run-tests:de rule_execution_logic/general_logic serverless qaEnv",
     "rule_execution_logic:general_logic:server:ess": "npm run initialize-server:de rule_execution_logic/general_logic ess",
     "rule_execution_logic:general_logic:runner:ess": "npm run run-tests:de rule_execution_logic/general_logic ess essEnv",
-
-    "rule_execution_logic:frozen_indices_handling:server:ess": "npm run initialize-server:de rule_execution_logic/frozen_indices_handling ess",
-    "rule_execution_logic:frozen_indices_handling:runner:ess": "npm run run-tests:de rule_execution_logic/frozen_indices_handling ess essEnv",
 
     "rule_execution_logic:general_logic:essentials:server:serverless": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic serverless",
     "rule_execution_logic:general_logic:essentials:runner:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless serverlessEnv",
@@ -409,10 +440,14 @@
 
     "rule_gaps:server:serverless": "npm run initialize-server:de rule_gaps serverless",
     "rule_gaps:runner:serverless": "npm run run-tests:de rule_gaps serverless serverlessEnv",
-    "rule_gaps:qa:serverless": "npm run run-tests:rm rule_gaps serverless qaPeriodicEnv",
+    "rule_gaps:qa:serverless": "npm run run-tests:de rule_gaps serverless qaPeriodicEnv",
     "rule_gaps:qa:serverless:release": "npm run run-tests:de rule_gaps serverless qaEnv",
     "rule_gaps:server:ess": "npm run initialize-server:de rule_gaps ess",
     "rule_gaps:runner:ess": "npm run run-tests:de rule_gaps ess essEnv",
+
+    "rule_preview:server:serverless": "npm run initialize-server:de:rule_preview . serverless_complete_tier",
+    "rule_preview:runner:serverless": "npm run run-tests:de:rule_preview . serverless_complete_tier serverlessEnv",
+    "rule_preview:qa:serverless": "npm run run-tests:de:rule_preview . serverless_complete_tier qaPeriodicEnv",
 
     "rule_creation:server:serverless": "npm run initialize-server:rm rule_creation serverless",
     "rule_creation:runner:serverless": "npm run run-tests:rm rule_creation serverless serverlessEnv",
@@ -521,6 +556,13 @@
     "rule_management:server:ess": "npm run initialize-server:rm rule_management ess",
     "rule_management:runner:ess": "npm run run-tests:rm rule_management ess essEnv",
 
+    "rule_management:essentials:server:serverless": "npm run initialize-server:rm:basic_essentials rule_management serverless",
+    "rule_management:essentials:runner:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless serverlessEnv",
+    "rule_management:essentials:qa:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless qaPeriodicEnv",
+    "rule_management:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials rule_management serverless qaEnv",
+    "rule_management:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_management ess",
+    "rule_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_management ess essEnv",
+
     "rule_bulk_actions:server:serverless": "npm run initialize-server:rm rule_bulk_actions serverless",
     "rule_bulk_actions:runner:serverless": "npm run run-tests:rm rule_bulk_actions serverless serverlessEnv",
     "rule_bulk_actions:qa:serverless": "npm run run-tests:rm rule_bulk_actions serverless qaPeriodicEnv",
@@ -542,20 +584,12 @@
     "rule_read:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_read ess",
     "rule_read:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_read ess essEnv",
 
-    "rules_management:essentials:server:serverless": "npm run initialize-server:rm:basic_essentials rule_management serverless",
-    "rules_management:essentials:runner:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless serverlessEnv",
-    "rules_management:essentials:qa:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless qaPeriodicEnv",
-    "rules_management:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials rule_management serverless qaEnv",
-    "rules_management:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_management ess",
-    "rules_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_management ess essEnv",
-
     "investigations:timeline:server:serverless": "npm run initialize-server:investigations timeline serverless",
     "investigations:timeline:runner:serverless": "npm run run-tests:investigations timeline serverless serverlessEnv",
     "investigations:timeline:runner:qa:serverless": "npm run run-tests:investigations timeline serverless qaPeriodicEnv",
     "investigations:timeline:runner:qa:serverless:release": "npm run run-tests:investigations timeline serverless qaEnv",
     "investigations:timeline:server:ess": "npm run initialize-server:investigations timeline ess",
     "investigations:timeline:runner:ess": "npm run run-tests:investigations timeline ess essEnv",
-
 
     "investigations:basic:timeline:server:ess": "npm run initialize-server:investigations:basic_essentials timeline ess",
     "investigations:basic:timeline:server:serverless": "npm run initialize-server:investigations:basic_essentials timeline serverless",

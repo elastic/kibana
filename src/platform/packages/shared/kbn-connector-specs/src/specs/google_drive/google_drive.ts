@@ -8,6 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  setConnectorActionErrorMeta,
+  getConnectorActionErrorMeta,
+  getFinitePositiveNumber,
+  getEstimatedBase64OutputBytes,
+} from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -18,6 +24,12 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+interface GoogleDriveFileMetadata {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: string;
+}
 
 /**
  * Escapes special characters in a string for use in Google Drive query syntax.
@@ -39,7 +51,12 @@ function throwGoogleDriveError(error: unknown): void {
   };
   const googleError = axiosError.response?.data?.error;
   if (googleError) {
-    throw new Error(`Google Drive API error (${googleError.code})`);
+    const newError = new Error(`Google Drive API error (${googleError.code})`);
+    const meta = getConnectorActionErrorMeta(error);
+    if (meta) {
+      setConnectorActionErrorMeta(newError, meta);
+    }
+    throw newError;
   }
 }
 
@@ -76,6 +93,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
       },
       {
         type: 'ears',
+        isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },
@@ -280,6 +298,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         const typedInput = input as {
           fileId: string;
         };
+        let fileMetadataForError: GoogleDriveFileMetadata | undefined;
 
         try {
           // First, get file metadata to determine if it's a Google Workspace document
@@ -292,7 +311,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
             }
           );
 
-          const fileMetadata = metadataResponse.data;
+          const fileMetadata = metadataResponse.data as GoogleDriveFileMetadata;
+          fileMetadataForError = fileMetadata;
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
           let contentResponse;
@@ -340,6 +360,14 @@ export const GoogleDriveConnector: ConnectorSpec = {
             encoding: 'base64',
           };
         } catch (error: unknown) {
+          const rawFileSizeBytes = getFinitePositiveNumber(fileMetadataForError?.size);
+          if (rawFileSizeBytes !== undefined) {
+            setConnectorActionErrorMeta(error, {
+              contentLengthBytes: rawFileSizeBytes,
+              estimatedOutputBytes: getEstimatedBase64OutputBytes(rawFileSizeBytes),
+            });
+          }
+
           throwGoogleDriveError(error);
           throw error;
         }

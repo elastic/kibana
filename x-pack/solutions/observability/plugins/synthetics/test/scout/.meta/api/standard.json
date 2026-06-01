@@ -1,6 +1,19 @@
 {
-  "sha1": "38069c93eb2ea0f612e27c7486f67a9c6eb65af1",
+  "sha1": "2c9bd37f28a7c69ee2f5e6eb8f85da935f64e8cf",
   "tests": [
+    {
+      "id": "8ac308de9d7a2bf-019801460b8f6ef",
+      "title": "ApiKeys [POST] internal/security/api_key allows an API key to be created with kibana privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/api_keys.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
     {
       "id": "1592a89c4ddba37-f51682f5b9fe1da",
       "title": "getMonitorFilters get list of filters (empty)",

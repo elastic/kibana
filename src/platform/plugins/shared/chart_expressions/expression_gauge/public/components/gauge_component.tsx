@@ -225,8 +225,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
       const nextValue = bands[valueIndex + 1];
 
       return overrideColors[
-        `${formatter?.convert(curValue) ?? curValue} - ${
-          formatter?.convert(nextValue) ?? nextValue
+        `${formatter?.convertToText(curValue) ?? curValue} - ${
+          formatter?.convertToText(nextValue) ?? nextValue
         }`
       ];
     },
@@ -404,8 +404,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
                 subtitle: labelMinor,
                 domain: [min, max],
                 ticks: ticks ? () => ticks : undefined,
-                valueFormatter: (tickValue) => tickFormatter.convert(tickValue),
-                tickFormatter: (tickValue) => tickFormatter.convert(tickValue),
+                valueFormatter: (tickValue) => tickFormatter.convertToText(tickValue),
+                tickFormatter: (tickValue) => tickFormatter.convertToText(tickValue),
               },
             ],
           ]}

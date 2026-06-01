@@ -9,76 +9,82 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { scheduleResponseSchemaV1 } from '../../../../schedule';
 
-export const maintenanceWindowResponseSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the maintenance window.',
-    },
-  }),
-  title: schema.string({
-    meta: {
-      description: 'The name of the maintenance window.',
-    },
-  }),
-  enabled: schema.boolean({
-    meta: {
-      description:
-        'Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.',
-    },
-  }),
-  created_by: schema.nullable(
-    schema.string({
+export const maintenanceWindowResponseSchema = schema.object(
+  {
+    id: schema.string({
       meta: {
-        description: 'The identifier for the user that created the maintenance window.',
+        description: 'The identifier for the maintenance window.',
       },
-    })
-  ),
-  updated_by: schema.nullable(
-    schema.string({
+    }),
+    title: schema.string({
       meta: {
-        description: 'The identifier for the user that last updated this maintenance window.',
+        description: 'The name of the maintenance window.',
       },
-    })
-  ),
-  created_at: schema.string({
-    meta: {
-      description: 'The date and time when the maintenance window was created.',
-    },
-  }),
-  updated_at: schema.string({
-    meta: {
-      description: 'The date and time when the maintenance window was last updated.',
-    },
-  }),
+    }),
+    enabled: schema.boolean({
+      meta: {
+        description:
+          'Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.',
+      },
+    }),
+    created_by: schema.nullable(
+      schema.string({
+        meta: {
+          description: 'The identifier for the user that created the maintenance window.',
+        },
+      })
+    ),
+    updated_by: schema.nullable(
+      schema.string({
+        meta: {
+          description: 'The identifier for the user that last updated this maintenance window.',
+        },
+      })
+    ),
+    created_at: schema.string({
+      meta: {
+        description: 'The date and time when the maintenance window was created.',
+      },
+    }),
+    updated_at: schema.string({
+      meta: {
+        description: 'The date and time when the maintenance window was last updated.',
+      },
+    }),
 
-  status: schema.oneOf(
-    [
-      schema.literal(maintenanceWindowStatusV1.RUNNING),
-      schema.literal(maintenanceWindowStatusV1.UPCOMING),
-      schema.literal(maintenanceWindowStatusV1.FINISHED),
-      schema.literal(maintenanceWindowStatusV1.ARCHIVED),
-      schema.literal(maintenanceWindowStatusV1.DISABLED),
-    ],
-    {
-      meta: {
-        description: 'The current status of the maintenance window.',
-      },
-    }
-  ),
+    status: schema.oneOf(
+      [
+        schema.literal(maintenanceWindowStatusV1.RUNNING),
+        schema.literal(maintenanceWindowStatusV1.UPCOMING),
+        schema.literal(maintenanceWindowStatusV1.FINISHED),
+        schema.literal(maintenanceWindowStatusV1.ARCHIVED),
+        schema.literal(maintenanceWindowStatusV1.DISABLED),
+      ],
+      {
+        meta: {
+          description: 'The current status of the maintenance window.',
+        },
+      }
+    ),
 
-  scope: schema.maybe(
-    schema.object({
-      alerting: schema.object({
-        query: schema.object({
-          kql: schema.string({
-            meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+    scope: schema.maybe(
+      schema.object(
+        {
+          alerting: schema.object({
+            query: schema.object({
+              kql: schema.string({
+                meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+              }),
+            }),
           }),
-        }),
-      }),
-    })
-  ),
+        },
+        { meta: { id: 'maintenance_window_scope' } }
+      )
+    ),
 
-  schedule: schema.object({
-    custom: scheduleResponseSchemaV1,
-  }),
-});
+    schedule: schema.object({
+      custom: scheduleResponseSchemaV1,
+    }),
+  },
+  { meta: { id: 'maintenance_window_response' } }
+);

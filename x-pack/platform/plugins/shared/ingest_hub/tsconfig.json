@@ -5,7 +5,8 @@
   },
   "include": [
     "common/**/*",
-    "public/**/*"
+    "public/**/*",
+    "test/scout/**/*"
   ],
   "exclude": [
     "target/**/*"
@@ -17,6 +18,10 @@
     "@kbn/shared-ux-router",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/scout",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-query",
+    "@kbn/fleet-plugin"
   ]
 }

@@ -9,36 +9,29 @@ import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from './compose_form_types';
+import type { BuilderState, RuleBuilderRecoveryProps } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom' | 'none';
+export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
-
-/**
- * Editing buffer for the Sandbox flyout. Lives in the parent hook (`useSandboxDraft`),
- * above the Sandbox child, so edits persist across open/close cycles.
- * Date range is intentionally not connected to schedule.lookback — it is a
- * preview window for testing the query, not a rule configuration field.
- */
-export interface SandboxDraft {
-  base: string;
-  breach: string;
-  recover: string;
-  timeField: string;
-  dateStart: string;
-  dateEnd: string;
-}
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  /** Called when the user changes the recovery type selector. */
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
+  renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
 }
 
 export interface StepDefinition {
@@ -47,38 +40,25 @@ export interface StepDefinition {
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    state: ComposeDiscoverState,
+    services?: RuleFormServices,
+    builderState?: BuilderState
   ) => Promise<boolean> | boolean;
 }
 
 /**
- * Describes which tabs the Discover Sandbox should show.
- * Computed from state by getSandboxTabConfig().
- *
- * - 'single'        — no tracking; single editor
- * - 'base-alert'    — tracking on, Alert Condition step: locked base above editable alert block
- * - 'base-recovery' — tracking on, Recovery Condition step: locked base above editable recovery block
- */
-export type SandboxTabConfig =
-  | { type: 'single' }
-  | { type: 'base-alert' }
-  | { type: 'base-recovery' };
-
-/**
  * UI-only state for the ComposeDiscover flyout.
  *
- * Query content lives in RHF (committed state) and the SandboxDraft hook (editing buffer).
+ * Query content lives in RHF (committed state) and local useState in the parent flyout (editing buffer).
  * This reducer owns navigation, Sandbox open/close, tab selection, and mode flags only —
  * no query strings are stored here.
+ *
+ * Whether the rule is signal vs alert is read directly from RHF `kind` — it is NOT
+ * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  /**
-   * When false: a single editor is shown.
-   * When true: the query is split into base + breach block, with an optional recovery block.
-   */
-  tracking: boolean;
   /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
   recoveryType: RecoveryType;
   activeTab: QueryTab;
@@ -89,15 +69,15 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
-  | { type: 'ENABLE_TRACKING' }
-  | { type: 'DISABLE_TRACKING' }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
+  | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT' }
+  | { type: 'GO_NEXT'; isAlert: boolean }
   | { type: 'GO_BACK' }
-  | { type: 'OPEN_CHILD' }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
+  | { type: 'OPEN_CHILD'; isAlert: boolean }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
   | { type: 'SET_YAML_MODE'; enabled: boolean };
