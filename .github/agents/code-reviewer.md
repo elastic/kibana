@@ -67,12 +67,12 @@ On subsequent review mode runs, skip unchanged lines already covered by earlier 
 
 ## Resolving addressed AI feedback
 
-On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to identify prior same-reviewer AI feedback.
+On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to find this reviewer's own prior feedback, then resolve those threads once the concern is addressed.
 
-- Resolve only review threads from this AI reviewer when the current PR state demonstrates that the original concern is addressed.
-- Use `review_thread_id` from `pr-review-comments.json` with `resolve_pull_request_review_thread` to resolve addressed threads.
-- Do not resolve human reviewer threads, threads from other AI reviewers, already-resolved threads, or threads where the fix is ambiguous.
-- If the triggering follow-up asks this reviewer to re-check addressed feedback, verify the fix, optionally reply in the review thread, and resolve the thread when it is fixed.
+- A shared bot `user.login` cannot tell reviewers apart: a thread is this reviewer's own only when the `workflow_id` in its originating review's marker (`<!-- gh-aw-agentic-workflow: ..., workflow_id: ..., ... -->` in `pr-reviews.json`) equals the workflow id the importing workflow gives as this reviewer's own.
+- Resolve a matched, addressed thread with its `review_thread_id` via `resolve_pull_request_review_thread`.
+- Do not resolve unmatched threads, already-resolved threads, or ambiguous fixes.
+- If a follow-up asks this reviewer to re-check addressed feedback, verify the fix, optionally reply, and resolve when fixed.
 
 ## Follow-up response mode output
 
