@@ -17,7 +17,6 @@ export enum AgentActionType {
   ExecuteTool = 'execute_tool',
   ToolPrompt = 'tool_prompt',
   HandOver = 'hand_over',
-  Answer = 'answer',
   StructuredAnswer = 'structured_answer',
   BackgroundExecutionComplete = 'background_execution_complete',
 }
@@ -82,17 +81,12 @@ export type ResearchAgentAction =
 
 // answer phase actions
 
-export interface AnswerAction {
-  type: AgentActionType.Answer;
-  message: string;
-}
-
 export interface StructuredAnswerAction {
   type: AgentActionType.StructuredAnswer;
   data: object;
 }
 
-export type AnswerAgentAction = AnswerAction | StructuredAnswerAction | AgentErrorAction;
+export type AnswerAgentAction = StructuredAnswerAction | AgentErrorAction;
 
 // all possible actions for the agent flow
 
@@ -118,10 +112,6 @@ export function isToolPromptAction(action: AgentAction): action is ToolPromptAct
 
 export function isHandoverAction(action: AgentAction): action is HandoverAction {
   return action.type === AgentActionType.HandOver;
-}
-
-export function isAnswerAction(action: AgentAction): action is AnswerAction {
-  return action.type === AgentActionType.Answer;
 }
 
 export function isStructuredAnswerAction(action: AgentAction): action is StructuredAnswerAction {
@@ -187,13 +177,6 @@ export function handoverAction(message: string, forceful: boolean = false): Hand
     type: AgentActionType.HandOver,
     message,
     forceful,
-  };
-}
-
-export function answerAction(message: string): AnswerAction {
-  return {
-    type: AgentActionType.Answer,
-    message,
   };
 }
 
