@@ -55,8 +55,8 @@ describe('EditToolSuccess evaluator', () => {
 
   it('scores 1 when all edit results succeed', async () => {
     const output = mockOutput([
-      toolCall('workflow_modify_step', { success: true }),
-      toolCall('workflow_insert_step', { success: true }),
+      toolCall('generate_workflow', { success: true }),
+      toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output });
     expect(result.score).toBe(1);
@@ -64,8 +64,8 @@ describe('EditToolSuccess evaluator', () => {
 
   it('scores 1 when final edit result succeeds despite intermediate failures', async () => {
     const output = mockOutput([
-      toolCall('workflow_modify_step_property', { success: false, error: 'splice error' }),
-      toolCall('workflow_modify_step', { success: true }),
+      toolCall('generate_workflow', { success: false, error: 'splice error' }),
+      toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output });
     expect(result.score).toBe(1);
@@ -74,8 +74,8 @@ describe('EditToolSuccess evaluator', () => {
 
   it('scores 0 when final edit result fails', async () => {
     const output = mockOutput([
-      toolCall('workflow_modify_step', { success: true }),
-      toolCall('workflow_modify_step_property', { success: false, error: 'some error' }),
+      toolCall('generate_workflow', { success: true }),
+      toolCall('generate_workflow', { success: false, error: 'some error' }),
     ]);
     const result = await evaluator.evaluate({ output });
     expect(result.score).toBe(0);
@@ -92,7 +92,7 @@ describe('Efficiency evaluator', () => {
   const evaluator = createEfficiencyEvaluator();
 
   it('scores 1 when all tool calls succeed', async () => {
-    const output = mockOutput([toolCall('workflow_modify_step', { success: true })]);
+    const output = mockOutput([toolCall('generate_workflow', { success: true })]);
     const result = await evaluator.evaluate({ output, expected: {} });
     expect(result.score).toBe(1);
     expect(result.metadata.totalToolCalls).toBe(1);
@@ -100,8 +100,8 @@ describe('Efficiency evaluator', () => {
 
   it('penalizes when half of workflow calls fail', async () => {
     const output = mockOutput([
-      toolCall('workflow_modify_step', { success: false, error: 'error' }),
-      toolCall('workflow_modify_step', { success: true }),
+      toolCall('generate_workflow', { success: false, error: 'error' }),
+      toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output, expected: {} });
     // 0.4 * failedCallScore (0.5) + 0.35 * budgetScore (1) + 0.25 * redundantLookupScore (1)
@@ -115,7 +115,7 @@ describe('Efficiency evaluator', () => {
     const output = mockOutput([
       toolCall('get_step_definitions', {}),
       toolCall('get_connectors', {}),
-      toolCall('workflow_set_yaml', { success: true }),
+      toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output, expected: {} });
     expect(result.score).toBe(1);
@@ -124,9 +124,7 @@ describe('Efficiency evaluator', () => {
   });
 
   it('penalizes heavily when all workflow calls fail', async () => {
-    const output = mockOutput([
-      toolCall('workflow_modify_step', { success: false, error: 'error' }),
-    ]);
+    const output = mockOutput([toolCall('generate_workflow', { success: false, error: 'error' })]);
     const result = await evaluator.evaluate({ output, expected: {} });
     expect(result.score).toBe(0.6);
     expect(result.metadata.failedCalls).toBe(1);
@@ -139,7 +137,7 @@ describe('ToolTrajectory evaluator', () => {
   const evaluator = createToolTrajectoryEvaluator();
 
   it('returns N/A when expectedToolSequence is undefined', async () => {
-    const output = mockOutput([toolCall('workflow_set_yaml', { success: true })]);
+    const output = mockOutput([toolCall('generate_workflow', { success: true })]);
     const result = await evaluator.evaluate({
       input: {},
       output,
@@ -153,13 +151,13 @@ describe('ToolTrajectory evaluator', () => {
   it('delegates to inner evaluator when expectedToolSequence is provided', async () => {
     const output = mockOutput([
       toolCall('get_step_definitions', {}),
-      toolCall('workflow_set_yaml', { success: true }),
+      toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({
       input: {},
       output,
       expected: {
-        expectedToolSequence: ['get_step_definitions', 'workflow_set_yaml'],
+        expectedToolSequence: ['get_step_definitions', 'generate_workflow'],
       },
       metadata: null,
     });
@@ -167,7 +165,7 @@ describe('ToolTrajectory evaluator', () => {
   });
 
   it('scores 0 for empty expectedToolSequence when tools were called', async () => {
-    const output = mockOutput([toolCall('workflow_set_yaml', { success: true })]);
+    const output = mockOutput([toolCall('generate_workflow', { success: true })]);
     const result = await evaluator.evaluate({
       input: {},
       output,

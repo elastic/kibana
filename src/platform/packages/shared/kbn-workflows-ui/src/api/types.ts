@@ -14,6 +14,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
+  WorkflowsEventsLogDocumentSource,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -139,4 +140,24 @@ export interface ResumeExecutionParams {
 
 export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
+}
+
+export interface SearchTriggerEventLogParams {
+  kql?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface SearchTriggerEventLogHit {
+  id: string;
+  source: WorkflowsEventsLogDocumentSource;
+}
+
+export interface SearchTriggerEventLogResult {
+  hits: SearchTriggerEventLogHit[];
+  total: number;
+  page: number;
+  size: number;
 }

@@ -145,6 +145,7 @@
     "@kbn/reporting-public",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
 }

@@ -30,7 +30,6 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
@@ -107,10 +106,9 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: { http, application, cps, notifications, timelines },
+    services: { http, application, notifications, timelines },
   } = useKibana();
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -118,6 +116,7 @@ export const SharedLists = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+  const rawSearchInputRef = useRef('');
 
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
@@ -270,12 +269,20 @@ export const SharedLists = React.memo(() => {
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
 
+  const handleInputChange = useCallback((value: string): void => {
+    rawSearchInputRef.current = value;
+  }, []);
+
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
       setLastUpdated(Date.now());
-      refreshExceptions();
+      if (!rawSearchInputRef.current && filters) {
+        setFilters(undefined);
+      } else {
+        refreshExceptions();
+      }
     }
-  }, [refreshExceptions]);
+  }, [refreshExceptions, filters]);
 
   useEffect(() => {
     if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
@@ -632,7 +639,9 @@ export const SharedLists = React.memo(() => {
             <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
           )}
 
-        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
+        {!initLoading && (
+          <ListsSearchBar onSearch={handleSearch} onInputChange={handleInputChange} />
+        )}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (
           <EmptyViewerState
