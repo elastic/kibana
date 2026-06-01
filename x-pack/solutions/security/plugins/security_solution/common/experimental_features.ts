@@ -266,6 +266,16 @@ export const allowedExperimentalValues = Object.freeze({
    * records. Both must be enabled for the API to return non-empty results.
    */
   ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
+   */
+  securityClassicNavExternalLinks: false,
+  /**
+   * Enables public Detection Engine attacks REST APIs
+   * (`/api/detection_engine/attacks/*`).
+   */
+  publicAttacksApiEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
