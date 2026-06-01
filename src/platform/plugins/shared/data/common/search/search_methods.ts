@@ -10,20 +10,20 @@
 import { lastValueFrom, takeWhile } from 'rxjs';
 import type {
   ISearchMethods,
-  IDSLSearchParams,
-  IDSLSearchOptions,
-  IDSLSearchResult,
-  IDSLPaginatedSearchResult,
-  IDSLPagination,
-  IESQLSearchParams,
-  IESQLSearchOptions,
-  IESQLSearchResult,
-  IEQLSearchParams,
-  IEQLSearchOptions,
-  IEQLSearchResult,
-  ISQLSearchParams,
-  ISQLSearchOptions,
-  ISQLSearchResult,
+  IDslSearchParams,
+  IDslSearchOptions,
+  IDslSearchResult,
+  IDslPaginatedSearchResult,
+  IDslPagination,
+  IEsqlSearchParams,
+  IEsqlSearchOptions,
+  IEsqlSearchResult,
+  IEqlSearchParams,
+  IEqlSearchOptions,
+  IEqlSearchResult,
+  ISqlSearchParams,
+  ISqlSearchOptions,
+  ISqlSearchResult,
   IBaseSearchOptions,
   ISearchOptions,
   IEsSearchRequest,
@@ -52,7 +52,7 @@ export class SearchMethodsService implements ISearchMethods {
   /**
    * Execute an ES|QL search
    */
-  async esql(params: IESQLSearchParams, options?: IESQLSearchOptions): Promise<IESQLSearchResult> {
+  async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
     const request = this.buildESQLRequest(params, options);
     const response = await this.executeSearch(
       request,
@@ -64,7 +64,7 @@ export class SearchMethodsService implements ISearchMethods {
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
-  async dsl(params: IDSLSearchParams, options?: IDSLSearchOptions): Promise<IDSLSearchResult> {
+  async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
     const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
@@ -78,9 +78,14 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   async dslPaginated(
-    params: IDSLSearchParams,
-    options?: IDSLSearchOptions
-  ): Promise<IDSLPaginatedSearchResult> {
+    params: IDslSearchParams,
+    _options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+  ): Promise<IDslPaginatedSearchResult> {
+    const options = {
+      ..._options,
+      // trackTotalHits is required for pagination to determine if there are more pages
+      trackTotalHits: true,
+    };
     const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
@@ -94,7 +99,7 @@ export class SearchMethodsService implements ISearchMethods {
   /**
    * Execute an EQL (Event Query Language) search
    */
-  async eql(params: IEQLSearchParams, options?: IEQLSearchOptions): Promise<IEQLSearchResult> {
+  async eql(params: IEqlSearchParams, options?: IEqlSearchOptions): Promise<IEqlSearchResult> {
     const request = this.buildEQLRequest(params, options);
     const response = await this.executeSearch(
       request,
@@ -106,7 +111,7 @@ export class SearchMethodsService implements ISearchMethods {
   /**
    * Execute a SQL search
    */
-  async sql(params: ISQLSearchParams, options?: ISQLSearchOptions): Promise<ISQLSearchResult> {
+  async sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult> {
     const request = this.buildSQLRequest(params, options);
     const response = await this.executeSearch(
       request,
@@ -144,7 +149,7 @@ export class SearchMethodsService implements ISearchMethods {
   // DSL Search Helpers
   // ============================================================================
 
-  private buildDSLRequest(params: IDSLSearchParams, options?: IDSLSearchOptions): IEsSearchRequest {
+  private buildDSLRequest(params: IDslSearchParams, options?: IDslSearchOptions): IEsSearchRequest {
     const {
       index: _,
       query,
@@ -166,11 +171,11 @@ export class SearchMethodsService implements ISearchMethods {
       _source,
       runtime_mappings: runtimeMappings,
       highlight,
-      track_total_hits: options?.trackTotalHits,
       // Allow any additional parameters for safe backwards compatibility in the DSL expression function
       // It could make sense to lock this down further if we get more confident or if expression functions
       // can no longer be used directly in Canvas
       ...rest,
+      track_total_hits: options?.trackTotalHits,
     };
 
     return {
@@ -181,7 +186,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private mapDSLOptions(options?: IDSLSearchOptions, params?: IDSLSearchParams): ISearchOptions {
+  private mapDSLOptions(options?: IDslSearchOptions, params?: IDslSearchParams): ISearchOptions {
     return {
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
@@ -191,9 +196,9 @@ export class SearchMethodsService implements ISearchMethods {
 
   private buildDSLPagination(
     rawResponse: any,
-    originalParams: IDSLSearchParams,
-    options?: IDSLSearchOptions
-  ): IDSLPagination {
+    originalParams: IDslSearchParams,
+    options?: IDslSearchOptions
+  ): IDslPagination {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
     const currentCount = rawResponse.hits?.hits?.length ?? 0;
@@ -205,64 +210,28 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       hasNextPage,
-      nextPage: async (pageOptions): Promise<IDSLPaginatedSearchResult | null> => {
-        const { abortSignal, executionContext } = pageOptions ?? {};
-
+      nextPage: async (): Promise<IDslPaginatedSearchResult | null> => {
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
 
-        // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
-        const paginationOptions = {
-          ...options,
-          abortSignal,
-          executionContext: executionContext ?? options?.executionContext,
-          // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
-          sessionId: undefined,
-        };
-
         // Build next search with search_after
-        const nextParams: IDSLSearchParams = {
+        const nextParams: IDslSearchParams = {
           ...originalParams,
         };
 
-        const request = self.buildDSLRequest(nextParams, paginationOptions);
+        const request = self.buildDSLRequest(nextParams, options);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(
-          request,
-          self.mapDSLOptions(paginationOptions)
-        );
+        const nextResponse = await self.executeSearch(request, self.mapDSLOptions(options));
 
         return {
           rawResponse: nextResponse.rawResponse,
           requestParams: nextResponse.requestParams,
-          pagination: self.buildDSLPagination(
-            nextResponse.rawResponse,
-            nextParams,
-            paginationOptions
-          ),
+          pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
         };
-      },
-      async *getAllPages(maxPages = 100) {
-        let currentResult: IDSLPaginatedSearchResult = {
-          rawResponse,
-          requestParams: undefined,
-          pagination: self.buildDSLPagination(rawResponse, originalParams, options),
-        };
-        let pageCount = 1;
-
-        yield currentResult;
-
-        while (currentResult.pagination.hasNextPage && pageCount < maxPages) {
-          const nextResult = await currentResult.pagination.nextPage();
-          if (!nextResult) break;
-          currentResult = nextResult;
-          pageCount++;
-          yield currentResult;
-        }
       },
     };
   }
@@ -272,8 +241,8 @@ export class SearchMethodsService implements ISearchMethods {
   // ============================================================================
 
   private buildESQLRequest(
-    params: IESQLSearchParams,
-    options?: IESQLSearchOptions
+    params: IEsqlSearchParams,
+    options?: IEsqlSearchOptions
   ): IKibanaSearchRequest<ESQLSearchParams> {
     return {
       params: {
@@ -289,7 +258,7 @@ export class SearchMethodsService implements ISearchMethods {
   }
 
   private mapESQLOptions(
-    options: IESQLSearchOptions | undefined,
+    options: IEsqlSearchOptions | undefined,
     strategy: typeof ESQL_ASYNC_SEARCH_STRATEGY
   ): ISearchOptions {
     return {
@@ -302,7 +271,7 @@ export class SearchMethodsService implements ISearchMethods {
   // EQL Search Helpers
   // ============================================================================
 
-  private buildEQLRequest(params: IEQLSearchParams, options?: IEQLSearchOptions): IEsSearchRequest {
+  private buildEQLRequest(params: IEqlSearchParams, options?: IEqlSearchOptions): IEsSearchRequest {
     return {
       params: {
         index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
@@ -321,7 +290,7 @@ export class SearchMethodsService implements ISearchMethods {
   }
 
   private mapEQLOptions(
-    options: IEQLSearchOptions | undefined,
+    options: IEqlSearchOptions | undefined,
     strategy: typeof EQL_SEARCH_STRATEGY
   ): ISearchOptions {
     return {
@@ -334,7 +303,7 @@ export class SearchMethodsService implements ISearchMethods {
   // SQL Search Helpers
   // ============================================================================
 
-  private buildSQLRequest(params: ISQLSearchParams, options?: ISQLSearchOptions): IEsSearchRequest {
+  private buildSQLRequest(params: ISqlSearchParams, options?: ISqlSearchOptions): IEsSearchRequest {
     return {
       params: {
         body: {
@@ -349,7 +318,7 @@ export class SearchMethodsService implements ISearchMethods {
   }
 
   private mapSQLOptions(
-    options: ISQLSearchOptions | undefined,
+    options: ISqlSearchOptions | undefined,
     strategy: typeof SQL_SEARCH_STRATEGY
   ): ISearchOptions {
     return {

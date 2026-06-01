@@ -14,6 +14,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -29,6 +30,7 @@ import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
+import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
 export type GetScopedClients = (params: {
@@ -46,6 +48,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   getQueryClient: () => Promise<QueryClient>;
+  getAlertingV2RulesClient: () => Promise<RulesClientApi | undefined>;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;
@@ -63,6 +66,7 @@ export interface RouteDependencies {
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
   continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
+  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

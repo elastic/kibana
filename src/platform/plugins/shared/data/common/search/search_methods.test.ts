@@ -189,17 +189,6 @@ describe('SearchMethodsService', () => {
         })
       );
     });
-it('returns rawResponse', async () => {
-      const mockResponse = { hits: { hits: [], total: 0 } };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-      const result = await service.dsl({
-        index: 'logs-*',
-        query: { match_all: {} },
-      });
-
-      expect(result).toEqual({ rawResponse: mockResponse });
-    });
   });
 
   describe('dslPaginated', () => {
@@ -221,10 +210,20 @@ it('returns rawResponse', async () => {
         sort: [{ timestamp: 'desc' }],
       });
 
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              track_total_hits: true,
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+
       expect(result.pagination).toBeDefined();
       expect(result.pagination.hasNextPage).toBeDefined();
       expect(result.pagination.nextPage).toBeDefined();
-      expect(result.pagination.getAllPages).toBeDefined();
     });
 
     it('hasNextPage is true when hits remain', async () => {
@@ -357,78 +356,6 @@ it('returns rawResponse', async () => {
       const nextPage = await result.pagination.nextPage();
 
       expect(nextPage).toBeNull();
-    });
-
-    it('getAllPages() yields all pages', async () => {
-      const page1 = {
-        hits: {
-          hits: [{ _id: '1', sort: [1000] }],
-          total: { value: 3 },
-        },
-      };
-
-      const page2 = {
-        hits: {
-          hits: [{ _id: '2', sort: [2000] }],
-          total: { value: 3 },
-        },
-      };
-
-      const page3 = {
-        hits: {
-          hits: [
-            { _id: '3', sort: [3000] },
-            { _id: '4', sort: [4000] },
-            { _id: '5', sort: [5000] },
-          ],
-          total: { value: 3 },
-        },
-      };
-
-      mockSearch
-        .mockReturnValueOnce(createMockResponse(page1))
-        .mockReturnValueOnce(createMockResponse(page2))
-        .mockReturnValueOnce(createMockResponse(page3));
-
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
-      });
-
-      const pages = [];
-      for await (const page of result.pagination.getAllPages()) {
-        pages.push(page);
-      }
-
-      expect(pages).toHaveLength(3);
-      expect(pages[0].rawResponse.hits.hits[0]._id).toBe('1');
-      expect(pages[1].rawResponse.hits.hits[0]._id).toBe('2');
-      expect(pages[2].rawResponse.hits.hits[0]._id).toBe('3');
-    });
-
-    it('getAllPages() respects maxPages limit', async () => {
-      const pageResponse = {
-        hits: {
-          hits: [{ _id: '1', sort: [1000] }],
-          total: { value: 1000 },
-        },
-      };
-
-      mockSearch.mockReturnValue(createMockResponse(pageResponse));
-
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
-      });
-
-      const pages = [];
-      for await (const page of result.pagination.getAllPages(3)) {
-        pages.push(page);
-      }
-
-      expect(pages).toHaveLength(3);
     });
   });
   describe('eql', () => {
