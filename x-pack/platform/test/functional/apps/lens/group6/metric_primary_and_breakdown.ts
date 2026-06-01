@@ -329,6 +329,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
 
+      // Metric defaults "Include empty rows" off; keep the empty buckets so the
+      // breakdown produces enough tiles to make the visualization scrollable.
+      await retry.try(async () => {
+        await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'check');
+        expect(await testSubjects.isEuiSwitchChecked('indexPattern-include-empty-rows')).to.be(
+          true
+        );
+      });
+
       await testSubjects.setValue('lnsMetric_max_cols', '1');
 
       await lens.waitForVisualization('mtrVis');
