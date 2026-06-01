@@ -13,6 +13,7 @@ import {
   type EpisodeEventDataRow,
 } from '../queries/episode_event_data_query';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
+import { normalizeTags } from '../utils/normalize_tags';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -25,6 +26,8 @@ export interface UseFetchEpisodeEventDataQueryOptions {
 export interface EpisodeEventData {
   /** Parsed `data` object from the latest non-empty event. */
   data: Record<string, unknown>;
+  /** Field names that produced this episode's group_hash (stamped at write time); empty for pre-v4 events. */
+  groupingFields: string[];
   /** Timestamp of the event that produced `data`. */
   dataTimestamp: string;
   /**
@@ -73,6 +76,7 @@ export const useFetchEpisodeEventDataQuery = ({
 
       return {
         data: parsed,
+        groupingFields: normalizeTags(row.grouping_fields),
         dataTimestamp: row.last_data_timestamp,
         isStale: Boolean(
           row.last_event_timestamp && row.last_event_timestamp !== row.last_data_timestamp

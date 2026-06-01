@@ -63,7 +63,8 @@ export const AlertTimelineSection: React.FC = () => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));
   const rule = useRule();
-  const groupingFields = useMemo(() => rule.grouping?.fields ?? [], [rule.grouping?.fields]);
+  const groupingFields = rule.grouping?.fields;
+  const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ALERT_TIMELINE_TIME_RANGE);
@@ -135,7 +136,7 @@ export const AlertTimelineSection: React.FC = () => {
     () =>
       http.basePath.prepend(
         paths.alertEpisodesListHref({
-          filters: { ruleId: rule.id },
+          filters: { ruleId: rule.id, status: 'all' },
           timeRange: {
             from: new Date(gteMs).toISOString(),
             to: new Date(lteMs).toISOString(),
@@ -279,9 +280,8 @@ export const AlertTimelineSection: React.FC = () => {
             rows={timelineData.rows}
             gteMs={gteMs}
             lteMs={lteMs}
-            ruleId={rule.id}
-            basePath={http.basePath}
             timeZone={timeZone}
+            showLabelColumn={hasGroupingFields}
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />

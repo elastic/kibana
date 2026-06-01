@@ -5,154 +5,125 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  buildSeriesGroupingValuesQuery,
-  parseSeriesGroupingValuesResponse,
+  buildSeriesGroupingValuesEsqlQuery,
+  parseSeriesGroupingValuesRows,
+  type SeriesGroupingValuesRow,
 } from './series_grouping_values_query';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
 
 const RULE_ID = 'rule-abc';
-const GTE_MS = Date.UTC(2026, 3, 23);
-const LTE_MS = Date.UTC(2026, 3, 30);
 
-describe('buildSeriesGroupingValuesQuery', () => {
-  it('targets the alert events data stream with size 0', () => {
-    const request = buildSeriesGroupingValuesQuery({
+describe('buildSeriesGroupingValuesEsqlQuery', () => {
+  it('scopes to alert events, rule id and the requested group hashes', () => {
+    const queryString = buildSeriesGroupingValuesEsqlQuery({
       ruleId: RULE_ID,
       groupHashes: ['gh-1', 'gh-2'],
-      groupingFields: ['host'],
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
-    });
+    }).print('basic');
 
-    expect(request.index).toBe(ALERT_EVENTS_DATA_STREAM);
-    expect(request.size).toBe(0);
+    expect(queryString).toContain('.rule-events');
+    expect(queryString).toContain('type == "alert"');
+    expect(queryString).toContain('rule.id');
+    expect(queryString).toContain(RULE_ID);
+    expect(queryString).toContain('group_hash IN');
+    expect(queryString).toContain('gh-1');
+    expect(queryString).toContain('gh-2');
   });
 
-  it('filters by rule.id, type=alert, group_hash set, and timestamp window', () => {
-    const request = buildSeriesGroupingValuesQuery({
-      ruleId: RULE_ID,
-      groupHashes: ['gh-1', 'gh-2'],
-      groupingFields: ['host'],
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
-    });
-
-    const filters = request.query?.bool?.filter as object[];
-    expect(filters).toEqual(
-      expect.arrayContaining([
-        { term: { 'rule.id': RULE_ID } },
-        { term: { type: 'alert' } },
-        { terms: { group_hash: ['gh-1', 'gh-2'] } },
-        {
-          range: {
-            '@timestamp': {
-              gte: new Date(GTE_MS).toISOString(),
-              lte: new Date(LTE_MS).toISOString(),
-            },
-          },
-        },
-      ])
-    );
-  });
-
-  it('aggregates by group_hash with one terms sub-agg per grouping field', () => {
-    const request = buildSeriesGroupingValuesQuery({
+  it('reads the flattened data via _source/JSON_EXTRACT and keeps the latest non-empty blob per hash', () => {
+    const queryString = buildSeriesGroupingValuesEsqlQuery({
       ruleId: RULE_ID,
       groupHashes: ['gh-1'],
-      groupingFields: ['host', 'region'],
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
-    });
+    }).print('basic');
 
-    const byGroup = request.aggs?.by_group as {
-      terms: { field: string; size: number };
-      aggs: Record<string, { terms: { field: string; size: number } }>;
-    };
-
-    expect(byGroup.terms).toEqual({ field: 'group_hash', size: 1 });
-    expect(byGroup.aggs.host.terms).toEqual({ field: 'data.host', size: 1 });
-    expect(byGroup.aggs.region.terms).toEqual({ field: 'data.region', size: 1 });
+    expect(queryString).toContain('JSON_EXTRACT(_source, "data")');
+    expect(queryString).toContain('LAST(extracted_data, @timestamp)');
+    expect(queryString).toContain('extracted_data != "{}"');
+    expect(queryString).toContain('VALUES(grouping_fields)');
+    expect(queryString).toContain('BY group_hash');
+    expect(queryString).toContain('KEEP group_hash, episode_data, grouping_fields');
   });
 
-  it('sizes the by_group terms agg to fit all requested hashes (min 1)', () => {
-    const big = buildSeriesGroupingValuesQuery({
+  it('does not constrain the time window (grouping values are hash-invariant)', () => {
+    const queryString = buildSeriesGroupingValuesEsqlQuery({
       ruleId: RULE_ID,
-      groupHashes: Array.from({ length: 50 }, (_, i) => `gh-${i}`),
-      groupingFields: ['host'],
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
-    });
-    const empty = buildSeriesGroupingValuesQuery({
-      ruleId: RULE_ID,
-      groupHashes: [],
-      groupingFields: ['host'],
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
-    });
+      groupHashes: ['gh-1'],
+    }).print('basic');
 
-    expect((big.aggs?.by_group as { terms: { size: number } }).terms.size).toBe(50);
-    expect((empty.aggs?.by_group as { terms: { size: number } }).terms.size).toBe(1);
+    expect(queryString).not.toContain('@timestamp >=');
+    expect(queryString).not.toContain('@timestamp <=');
   });
 });
 
-describe('parseSeriesGroupingValuesResponse', () => {
-  const buildResponse = (
-    buckets: Array<{ key: string; fields: Record<string, string | null> }>
-  ): SearchResponse<unknown, Record<string, AggregationsAggregate>> =>
-    ({
-      aggregations: {
-        by_group: {
-          buckets: buckets.map(({ key, fields }) => ({
-            key,
-            doc_count: 1,
-            ...Object.fromEntries(
-              Object.entries(fields).map(([field, value]) => [
-                field,
-                {
-                  buckets: value == null ? [] : [{ key: value, doc_count: 1 }],
-                },
-              ])
-            ),
-          })),
-        },
-      },
-    } as unknown as SearchResponse<unknown, Record<string, AggregationsAggregate>>);
+describe('parseSeriesGroupingValuesRows', () => {
+  const row = (
+    group_hash: string,
+    data: Record<string, unknown> | null
+  ): SeriesGroupingValuesRow => ({
+    group_hash,
+    episode_data: data == null ? null : JSON.stringify(data),
+  });
 
-  it('maps each group_hash to its first-bucket value per field', () => {
-    const response = buildResponse([
-      { key: 'gh-1', fields: { host: 'web-01', region: 'us-east' } },
-      { key: 'gh-2', fields: { host: 'web-02', region: 'eu-west' } },
-    ]);
+  it('projects fallback fields from each hash episode_data when the row has no grouping_fields', () => {
+    const rows = [
+      row('gh-1', { 'host.name': 'web-01', region: 'us-east' }),
+      row('gh-2', { 'host.name': 'web-02', region: 'eu-west' }),
+    ];
 
-    const result = parseSeriesGroupingValuesResponse(response, ['host', 'region']);
+    const result = parseSeriesGroupingValuesRows(rows, ['host.name', 'region']);
 
     expect(result).toEqual({
-      'gh-1': { host: 'web-01', region: 'us-east' },
-      'gh-2': { host: 'web-02', region: 'eu-west' },
+      'gh-1': { 'host.name': 'web-01', region: 'us-east' },
+      'gh-2': { 'host.name': 'web-02', region: 'eu-west' },
     });
   });
 
-  it('returns null for fields with no bucket', () => {
-    const response = buildResponse([{ key: 'gh-1', fields: { host: null } }]);
+  it("projects each row's own grouping_fields over the fallback, surviving a config change", () => {
+    const rows: SeriesGroupingValuesRow[] = [
+      // Old series stamped under [host.name]; fallback (current rule config) is [region].
+      {
+        group_hash: 'gh-old',
+        episode_data: JSON.stringify({ 'host.name': 'web-01', region: 'us-east' }),
+        grouping_fields: ['host.name'],
+      },
+      // New series stamped under the current [region].
+      {
+        group_hash: 'gh-new',
+        episode_data: JSON.stringify({ region: 'eu-west' }),
+        grouping_fields: ['region'],
+      },
+    ];
 
-    const result = parseSeriesGroupingValuesResponse(response, ['host']);
+    const result = parseSeriesGroupingValuesRows(rows, ['region']);
 
-    expect(result).toEqual({ 'gh-1': { host: null } });
+    expect(result).toEqual({
+      'gh-old': { 'host.name': 'web-01' },
+      'gh-new': { region: 'eu-west' },
+    });
   });
 
-  it('returns an empty map when there are no buckets', () => {
-    const response = {
-      aggregations: { by_group: { buckets: [] } },
-    } as unknown as SearchResponse<unknown, Record<string, AggregationsAggregate>>;
+  it('maps absent or empty values to null', () => {
+    const rows = [row('gh-1', { 'host.name': 'web-01' })];
 
-    expect(parseSeriesGroupingValuesResponse(response, ['host'])).toEqual({});
+    const result = parseSeriesGroupingValuesRows(rows, ['host.name', 'region']);
+
+    expect(result).toEqual({ 'gh-1': { 'host.name': 'web-01', region: null } });
   });
 
-  it('returns an empty map when aggregations are missing', () => {
-    const response = {} as SearchResponse<unknown, Record<string, AggregationsAggregate>>;
+  it('maps every field to null when episode_data is missing or malformed', () => {
+    const rows: SeriesGroupingValuesRow[] = [
+      { group_hash: 'gh-1', episode_data: null },
+      { group_hash: 'gh-2', episode_data: 'not-json' },
+    ];
 
-    expect(parseSeriesGroupingValuesResponse(response, ['host'])).toEqual({});
+    const result = parseSeriesGroupingValuesRows(rows, ['host.name']);
+
+    expect(result).toEqual({
+      'gh-1': { 'host.name': null },
+      'gh-2': { 'host.name': null },
+    });
+  });
+
+  it('returns an empty map for no rows', () => {
+    expect(parseSeriesGroupingValuesRows([], ['host.name'])).toEqual({});
   });
 });

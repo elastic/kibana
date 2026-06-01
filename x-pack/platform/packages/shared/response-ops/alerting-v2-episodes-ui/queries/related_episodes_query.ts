@@ -23,6 +23,7 @@ export const RELATED_EPISODE_FIELDS = [
   'last_timestamp',
   'duration',
   'episode_data',
+  'grouping_fields',
 ] as const;
 
 const RELATED_EPISODE_LIMIT = 5;

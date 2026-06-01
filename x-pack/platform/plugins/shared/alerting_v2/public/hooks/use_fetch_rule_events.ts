@@ -146,13 +146,11 @@ export const useFetchRuleEvents = ({
     },
   });
 
-  // --- 4. Grouping values (depends on top-N hashes) ---
+  // --- 4. Grouping values (depends on top-N hashes; untimed — values are hash-invariant) ---
   const groupingValuesQuery = useFetchSeriesGroupingValues({
     ruleId,
     groupHashes: topNHashes,
     groupingFields,
-    gteMs,
-    lteMs,
     enabled: enabled && topNSeriesQuery.isSuccess,
     data,
   });

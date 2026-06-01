@@ -7,11 +7,13 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import { runDslSearch } from '../utils/run_dsl_search';
+import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
+import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
 import {
-  buildSeriesGroupingValuesQuery,
-  parseSeriesGroupingValuesResponse,
+  buildSeriesGroupingValuesEsqlQuery,
+  parseSeriesGroupingValuesRows,
   type SeriesGroupingValuesByHash,
+  type SeriesGroupingValuesRow,
 } from '../queries/alert_series_activity/series_grouping_values_query';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 
@@ -19,12 +21,12 @@ export interface UseFetchSeriesGroupingValuesOptions {
   ruleId: string | undefined;
   /** Group hashes returned by the summary query. */
   groupHashes: readonly string[];
-  /** Field names from `rule.grouping.fields`. */
+  /**
+   * Field names from the rule's **current** `grouping.fields`. Used to gate the
+   * request and as a fallback when an event predates per-event `grouping_fields`;
+   * post-v4 events carry their own field names so labels survive config changes.
+   */
   groupingFields: readonly string[];
-  /** Visible window start (epoch ms). */
-  gteMs: number;
-  /** Visible window end (epoch ms). */
-  lteMs: number;
   /** Set false to defer the request (e.g. while the summary query is still loading). */
   enabled?: boolean;
   data: DataPublicPluginStart;
@@ -34,52 +36,42 @@ const EMPTY_RESULT: SeriesGroupingValuesByHash = {};
 
 /**
  * Fetches the projected grouping field values per `group_hash` for a rule, used
- * to render row labels like `host=web-01` in the series activity heatmap.
+ * to render row labels like `host=web-01` next to each gantt series.
  *
- * No request is issued when there are no grouping fields configured or no
+ * The lookup is untimed (grouping values are invariant per hash) and reads the
+ * flattened `data` via ES|QL `_source` + `JSON_EXTRACT`, mirroring the episodes
+ * list. No request is issued when there are no grouping fields configured or no
  * group hashes to look up — both result in an empty map.
  */
 export const useFetchSeriesGroupingValues = ({
   ruleId,
   groupHashes,
   groupingFields,
-  gteMs,
-  lteMs,
   enabled = true,
   data,
 }: UseFetchSeriesGroupingValuesOptions) => {
   const isEnabled =
-    enabled &&
-    Boolean(ruleId) &&
-    groupingFields.length > 0 &&
-    groupHashes.length > 0 &&
-    Number.isFinite(gteMs) &&
-    Number.isFinite(lteMs) &&
-    lteMs > gteMs;
+    enabled && Boolean(ruleId) && groupingFields.length > 0 && groupHashes.length > 0;
 
   const query = useQuery({
-    queryKey: ruleOverviewQueryKeys.seriesGroupingValues(
-      ruleId ?? '',
-      gteMs,
-      lteMs,
-      groupHashes,
-      groupingFields
-    ),
+    queryKey: ruleOverviewQueryKeys.seriesGroupingValues(ruleId ?? '', groupHashes, groupingFields),
     enabled: isEnabled,
     refetchOnWindowFocus: false,
-    queryFn: ({ signal }) =>
-      runDslSearch({
+    queryFn: async ({ signal }) => {
+      const raw = await runEsqlAsyncSearch({
         data,
-        params: buildSeriesGroupingValuesQuery({
-          ruleId: ruleId!,
-          groupHashes: [...groupHashes],
-          groupingFields,
-          gteMs,
-          lteMs,
-        }),
+        params: {
+          query: buildSeriesGroupingValuesEsqlQuery({
+            ruleId: ruleId!,
+            groupHashes: [...groupHashes],
+          }).print('basic'),
+          time_zone: 'UTC',
+        },
         abortSignal: signal,
-      }),
-    select: (raw) => parseSeriesGroupingValuesResponse(raw, groupingFields),
+      });
+      return esqlResponseToObjectRows<SeriesGroupingValuesRow>(raw);
+    },
+    select: (rows) => parseSeriesGroupingValuesRows(rows, groupingFields),
   });
 
   return {

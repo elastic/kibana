@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStart } from '@kbn/core-di';
 import { useService } from '@kbn/core-di-browser';
@@ -18,16 +17,16 @@ import { AlertTimelineRow } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineSeriesLabel } from './alert_timeline_series_label';
 import { AlertTimelineTimeAxis } from './alert_timeline_time_axis';
 
-const META_COLUMN_WIDTH_PX = 240;
-const ROW_HEIGHT_PX = 36;
+const META_COLUMN_WIDTH_PX = 110;
+const ROW_HEIGHT_PX = 44;
 
 export interface AlertTimelineChartProps {
   rows: AlertTimelineSeries[];
   gteMs: number;
   lteMs: number;
-  ruleId: string;
-  basePath: IBasePath;
   timeZone?: string;
+  /** Render the per-series label column. Omitted for ungrouped rules, whose hashes carry no useful label. */
+  showLabelColumn: boolean;
   onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
 }
@@ -36,9 +35,8 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   rows,
   gteMs,
   lteMs,
-  ruleId,
-  basePath,
   timeZone,
+  showLabelColumn,
   onEpisodeClick,
   getEpisodeHref,
 }) => {
@@ -49,7 +47,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   return (
     <EuiFlexGroup
       direction="row"
-      gutterSize="m"
+      gutterSize="s"
       responsive={false}
       alignItems="stretch"
       aria-label={i18n.translate('xpack.alertingV2.alertTimeline.chart.ariaLabel', {
@@ -57,46 +55,56 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
       })}
       data-test-subj="alertTimelineChart"
     >
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          width: ${META_COLUMN_WIDTH_PX}px;
-        `}
-      >
-        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <div
-              css={css`
-                height: ${euiTheme.size.l};
-              `}
-            />
-          </EuiFlexItem>
-          {rows.map((row) => (
-            <EuiFlexItem grow={false} key={row.groupHash}>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="none"
-                responsive={false}
+      {showLabelColumn && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: ${META_COLUMN_WIDTH_PX}px;
+            min-width: 0;
+            overflow: hidden;
+          `}
+        >
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="xs"
+                color="subdued"
                 css={css`
-                  height: ${ROW_HEIGHT_PX}px;
+                  height: ${euiTheme.size.l};
+                  display: flex;
+                  align-items: flex-end;
                 `}
               >
-                <EuiFlexItem>
-                  <AlertTimelineSeriesLabel
-                    groupHash={row.groupHash}
-                    groupingValues={row.groupingValues}
-                    episodeCount={row.episodeCount}
-                    ruleId={ruleId}
-                    gteMs={gteMs}
-                    lteMs={lteMs}
-                    basePath={basePath}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <strong>
+                  {i18n.translate('xpack.alertingV2.alertTimeline.chart.seriesColumnHeader', {
+                    defaultMessage: 'Alert series',
+                  })}
+                </strong>
+              </EuiText>
             </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            {rows.map((row) => (
+              <EuiFlexItem grow={false} key={row.groupHash}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="none"
+                  responsive={false}
+                  css={css`
+                    height: ${ROW_HEIGHT_PX}px;
+                  `}
+                >
+                  <EuiFlexItem>
+                    <AlertTimelineSeriesLabel
+                      groupHash={row.groupHash}
+                      groupingValues={row.groupingValues}
+                      episodeCount={row.episodeCount}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem>
         <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} timeZone={timeZone} />

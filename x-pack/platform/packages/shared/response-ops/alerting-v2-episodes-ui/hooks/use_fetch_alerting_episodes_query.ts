@@ -76,6 +76,7 @@ export const useFetchAlertingEpisodesQuery = ({
       rows.map((ep) => ({
         ...ep,
         last_tags: normalizeTags(ep.last_tags),
+        grouping_fields: normalizeTags(ep.grouping_fields),
       })),
   });
 

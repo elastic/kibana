@@ -260,11 +260,15 @@ export function EpisodeDetailsPage() {
     );
   }
 
-  const ruleGroupingFields = rule?.grouping?.fields ?? [];
   const episodeGroupingData = episodeAlertDataPayload?.data ?? {};
+  // Prefer the field names stamped on the event so labels survive a later change to the
+  // rule's grouping config; fall back to the rule's current fields for pre-v4 events.
+  const eventGroupingFields = episodeAlertDataPayload?.groupingFields ?? [];
+  const groupingFields =
+    eventGroupingFields.length > 0 ? eventGroupingFields : rule?.grouping?.fields ?? [];
   const showHeaderGroupingBadges =
-    ruleGroupingFields.length > 0 &&
-    getNonEmptyGroupingFields(ruleGroupingFields, episodeGroupingData).length > 0;
+    groupingFields.length > 0 &&
+    getNonEmptyGroupingFields(groupingFields, episodeGroupingData).length > 0;
 
   const pageTitle = (
     <>
@@ -288,7 +292,7 @@ export function EpisodeDetailsPage() {
       </EuiFlexGroup>
       {showHeaderGroupingBadges ? (
         <AlertingEpisodeGroupingTags
-          fields={ruleGroupingFields}
+          fields={groupingFields}
           data={episodeGroupingData}
           data-test-subj="alertingV2EpisodeDetailsHeaderGroupingTags"
         />
@@ -378,7 +382,7 @@ export function EpisodeDetailsPage() {
               listItems={[
                 {
                   title: i18n.GROUPING_LABEL,
-                  description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
+                  description: <AlertEpisodeGroupingFields fields={groupingFields} />,
                 },
                 {
                   title: i18n.TRIGGERED_LABEL,

@@ -64,8 +64,10 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
           typeof update === 'function'
             ? (update as (p: EpisodesFilterState) => EpisodesFilterState)(prev)
             : update;
-        const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
-        void writeEpisodesListAppStateToUrlStorage(urlStateStorage, next, tr);
+        if (!deepEqual(next, prev)) {
+          const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
+          void writeEpisodesListAppStateToUrlStorage(urlStateStorage, next, tr);
+        }
         return next;
       });
     },

@@ -34,8 +34,6 @@ export const ruleOverviewQueryKeys = {
     [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, gteMs, lteMs] as const,
   seriesGroupingValues: (
     ruleId: string,
-    gteMs: number,
-    lteMs: number,
     groupHashes: readonly string[],
     groupingFields: readonly string[]
   ) =>
@@ -43,8 +41,6 @@ export const ruleOverviewQueryKeys = {
       ...ruleOverviewQueryKeys.all,
       'series-grouping-values',
       ruleId,
-      gteMs,
-      lteMs,
       [...groupHashes].sort(),
       [...groupingFields].sort(),
     ] as const,

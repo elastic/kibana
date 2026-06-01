@@ -52,7 +52,6 @@ import { paths } from '../../constants';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
-import { ActiveGroupChip } from './components/active_group_chip';
 
 const PAGE_SIZE = 1000;
 
@@ -319,22 +318,6 @@ export const AlertEpisodesListPage = () => {
             isLoading={isLoading}
             services={services}
           />
-          {filterState.groupHash && (
-            <>
-              <EuiSpacer size="s" />
-              <ActiveGroupChip
-                groupHash={filterState.groupHash}
-                groupingValues={filterState.groupingValues}
-                onClear={() =>
-                  setFilterState((prev) => ({
-                    ...prev,
-                    groupHash: null,
-                    groupingValues: null,
-                  }))
-                }
-              />
-            </>
-          )}
           <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem
