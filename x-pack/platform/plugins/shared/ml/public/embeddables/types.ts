@@ -15,6 +15,7 @@ import type {
   SeverityThreshold,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { AnomalySingleMetricViewerEmbeddableType } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -201,4 +202,6 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableState
+    : TEmbeddableType extends AnomalySingleMetricViewerEmbeddableType
+    ? SingleMetricViewerEmbeddableState
     : unknown;
