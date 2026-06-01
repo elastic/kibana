@@ -26,7 +26,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { IDSLPagination } from '@kbn/search-types';
+import type { IDslPagination } from '@kbn/search-types';
 import {
   DEFAULT_COLUMNS_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -80,7 +80,7 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
-  pagination?: IDSLPagination;
+  pagination?: IDslPagination;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

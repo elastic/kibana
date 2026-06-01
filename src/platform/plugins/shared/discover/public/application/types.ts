@@ -10,7 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { IDSLPagination } from '@kbn/search-types';
+import type { IDslPagination } from '@kbn/search-types';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -26,7 +26,7 @@ export interface RecordsFetchResponse {
   esqlQueryColumns?: DatatableColumn[];
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
-  pagination?: IDSLPagination;
+  pagination?: IDslPagination;
 }
 
 export interface SidebarToggleState {
