@@ -11,35 +11,10 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { ActionGroups } from './types';
 
-export interface ActionSubItem {
-  id: string;
-  name: string;
-  onClick?: () => void;
-  href?: string;
-  icon?: string;
-  ebt: EbtClickAttrs;
-}
-
-export interface Action {
-  id: string;
-  name: string;
-  onClick?: () => void;
-  href?: string;
-  icon?: string;
-  items?: ActionSubItem[];
-  ebt: EbtClickAttrs;
-}
-
-export interface ActionGroup {
-  id: string;
-  groupLabel?: string;
-  actions: Action[];
-}
-
-export type ActionGroups = ActionGroup[];
+export type { ActionBase, ActionSubItem, Action, ActionGroup, ActionGroups } from './types';
 
 interface ActionsMenuProps {
   actions: ActionGroups;
