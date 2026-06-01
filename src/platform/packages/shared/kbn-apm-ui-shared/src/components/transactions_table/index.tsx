@@ -44,15 +44,11 @@ interface TransactionsTableProps {
   latencyAggregationType?: LatencyAggregationType;
   columns?: Array<ColumnId | EuiBasicTableColumn<TransactionGroup>>;
   showMaxTransactionGroupsExceededWarning?: boolean;
-  numberOfTransactionsPerPage?: number;
-  showPerPageOptions?: boolean;
   columnInteractions?: {
     name?: TransactionGroupInteraction;
     alerts?: TransactionGroupInteraction;
   };
-  showSparklines?: boolean;
   onSearchQueryChange?: (query: string) => void;
-  onRenderedItemsChange?: (items: TransactionGroup[]) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
 }
 
@@ -79,12 +75,8 @@ export function TransactionsTable({
   latencyAggregationType,
   columns,
   showMaxTransactionGroupsExceededWarning = false,
-  numberOfTransactionsPerPage = 10,
-  showPerPageOptions = true,
   columnInteractions,
-  showSparklines,
   onSearchQueryChange,
-  onRenderedItemsChange,
   remainingTransactionsCellTooltipContent,
 }: TransactionsTableProps) {
   const searchQueryRef = useRef('');
@@ -99,7 +91,7 @@ export function TransactionsTable({
   useEffect(() => () => debouncedSearchQueryChange.current.cancel(), []);
 
   const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
-  const resolvedShowSparklines = showSparklines ?? !isWithinLBreakpoint;
+  const resolvedShowSparklines = !isWithinLBreakpoint;
 
   const resolvedColumns = useMemo(() => {
     const builtIn = getBuiltInColumns({
@@ -206,19 +198,14 @@ export function TransactionsTable({
                 })
           }
           pagination={{
-            initialPageSize: numberOfTransactionsPerPage,
-            showPerPageOptions,
+            initialPageSize: 10,
+            showPerPageOptions: true,
             pageSizeOptions: [10, 25, 50],
           }}
           sorting={{ sort: { field: 'latency' as keyof TransactionGroup, direction: 'desc' } }}
           search={{
             box: { incremental: true },
             onChange: onSearchChange,
-          }}
-          onTableChange={({ page }: { page?: { index: number; size: number } }) => {
-            if (!onRenderedItemsChange || !page) return;
-            const { index, size } = page;
-            onRenderedItemsChange(items.slice(index * size, (index + 1) * size));
           }}
         />
       </EuiFlexItem>
