@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
 export const FLIGHTS_DATASET_ID = 'flights';
 
 export const FLIGHTS_ES_INDEX = 'kibana_sample_data_flights';
@@ -16,7 +18,7 @@ export const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b7
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'kibana',
-  'x-elastic-internal-origin': 'kibana',
+  [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
 } as const;
 
 // Earliest-to-latest timestamp delta in the flights dataset; used to verify timestamps shift relative to install time.
