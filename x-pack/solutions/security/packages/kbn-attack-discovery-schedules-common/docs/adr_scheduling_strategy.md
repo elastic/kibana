@@ -47,12 +47,21 @@ We use the Kibana Alerting Framework as the scheduling mechanism and add a new e
 - The existing public schedule API in `elastic_assistant` continues to work unchanged.
 - The new internal schedule API in `discoveries` uses the same data client, field maps, and transforms extracted into `@kbn/attack-discovery-schedules-common`.
 - The only difference is the executor: the internal API registers a workflow-aware executor that calls `executeGenerationWorkflow`, while the public API retains its existing inline executor.
-- Tag-based isolation (`attack-discovery-schedule` tag) ensures that internal and public schedules do not interfere with each other.
+- Tag-based visibility (`attack-discovery-schedule` tag) is **asymmetric** by design (see "Asymmetric visibility" below): the public (legacy) API only sees its own untagged schedules, while the internal (workflow) API sees all schedules so that schedules created before the feature flag was enabled are never lost from the UI.
 
 ### Shared code reduces maintenance burden
 
 - `AttackDiscoveryScheduleDataClient`, transforms, field maps, and constants are extracted into `@kbn/attack-discovery-schedules-common` so both `elastic_assistant` and `discoveries` share the same infrastructure.
-- The `filterTags` option on the data client ensures each API only sees its own schedules.
+- The `filterTags` option on the data client controls each API's view of the shared `attack-discovery` rule type (see "Asymmetric visibility").
+
+### Asymmetric visibility (migration continuity)
+
+Both APIs read and write the same `attack-discovery` rule type, differentiated by the `attack-discovery-schedule` tag (applied at write time by the internal API only). Visibility is intentionally asymmetric:
+
+- **Public (legacy, feature-flag-off) API** — `filterTags.excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow']`. It only surfaces its own untagged schedules and hides workflow-tagged schedules, so enabling the workflow feature does not change the legacy view.
+- **Internal (workflow, feature-flag-on) API** — no `filterTags` include filter. It surfaces **all** attack discovery schedules (its own tagged rules **and** untagged schedules created by the public API).
+
+This guarantees **migration continuity**: schedules created while the feature flag was off remain visible (and manageable) once the flag is turned on, so users never "lose" schedules from the UI. We do not expect users to toggle the flag repeatedly, but this guarantee holds regardless.
 
 ## Consequences
 
@@ -72,7 +81,7 @@ We use the Kibana Alerting Framework as the scheduling mechanism and add a new e
 ### Neutral
 
 - The existing public schedule API is not modified. Both APIs can coexist.
-- Migration of existing schedules to workflow-oriented schedules is explicitly out of scope and would be handled by a separate effort if needed.
+- Schedules created via the public API remain visible from the internal (workflow) API for migration continuity (see "Asymmetric visibility"). Actively *migrating* a legacy schedule's tags/executor to the workflow model is still out of scope; editing a legacy schedule via the internal API will, however, adopt the workflow tag via the data client's tag-merge-on-update behavior.
 
 ## Conditions for Revisiting
 
