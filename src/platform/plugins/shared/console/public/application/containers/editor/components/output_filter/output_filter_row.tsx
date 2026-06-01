@@ -81,7 +81,7 @@ export const OutputFilterRow = () => {
     }
   };
 
-  const handleBlur = () => {
+  const handleApply = () => {
     setExpression(draftExpression);
     setInvertMatch(draftInvertMatch);
   };
@@ -108,8 +108,7 @@ export const OutputFilterRow = () => {
             data-test-subj={draftMode === 'regex' ? 'filterRegex' : 'filterJq'}
             value={draftExpression}
             onChange={(e) => handleExpressionChange(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
             isInvalid={isInvalid}
             placeholder={
               draftMode === 'regex'
@@ -146,7 +145,7 @@ export const OutputFilterRow = () => {
             color="primary"
             iconType="returnKey"
             iconSide="left"
-            onClick={handleBlur}
+            onClick={handleApply}
             data-test-subj="consoleOutputFilterApply"
           >
             {i18n.translate('console.outputFilter.applyButton', { defaultMessage: 'Apply' })}

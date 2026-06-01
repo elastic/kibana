@@ -593,4 +593,31 @@ export class ConsolePageObject extends FtrService {
   public async isOutputPanelEmptyStateVisible() {
     return await this.testSubjects.exists('consoleOutputPanelEmptyState');
   }
+
+  public async clickOutputFilterButton() {
+    await this.testSubjects.click('consoleOutputFilterButton');
+  }
+
+  public async isOutputFilterRowVisible() {
+    return await this.testSubjects.exists('filterJq');
+  }
+
+  public async typeInFilterInput(text: string) {
+    const input = await this.testSubjects.find('filterJq');
+    await input.clearValue();
+    await input.type(text);
+  }
+
+  public async submitFilter() {
+    await this.testSubjects.click('consoleOutputFilterApply');
+  }
+
+  public async isOutputFilterButtonActive() {
+    const button = await this.testSubjects.find('consoleOutputFilterButton');
+    const wrapper = await button.findByXpath('..');
+    const dot = await wrapper.findAllByClassName('euiButtonEmpty__text');
+    // The dot indicator is a sibling span inside the wrapper div
+    const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
+    return children.length > 0;
+  }
 }
