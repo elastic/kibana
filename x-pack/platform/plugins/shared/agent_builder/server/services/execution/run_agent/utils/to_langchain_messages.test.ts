@@ -865,6 +865,450 @@ describe('convertPreviousRounds', () => {
       expect(noticeMessages).toHaveLength(0);
     });
   });
+
+  describe('stale HITL form submission notices (from round steps)', () => {
+    const makeStaleStep = (
+      reason: 'workflow_already_resolved' | 'workflow_advanced' | 'concurrent_resume',
+      overrides: Partial<{
+        execution_id: string;
+        observed_status: string;
+        submitted_values: Record<string, unknown>;
+      }> = {}
+    ): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.other,
+        kind: 'hitl_form_response_stale',
+        reason,
+        execution_id: 'exec-stale-1',
+        step_execution_id: 'step-stale-1',
+        submitted_at: now,
+        submitted_values: { approved: true },
+        observed_status: 'completed',
+        ...overrides,
+      } as unknown as ConversationRoundStep);
+
+    it('injects a system_notice for a stale workflow_already_resolved audit step', async () => {
+      const round = createRound({
+        steps: [makeStaleStep('workflow_already_resolved')],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('workflow_already_resolved');
+    });
+
+    it('mentions that the submission was not applied', async () => {
+      const round = createRound({
+        steps: [makeStaleStep('workflow_already_resolved')],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect((noticeMessage as any).content).toContain('not applied');
+    });
+
+    it('includes the execution_id in the notice', async () => {
+      const round = createRound({
+        steps: [makeStaleStep('workflow_already_resolved', { execution_id: 'exec-xyz' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect((noticeMessage as any).content).toContain('exec-xyz');
+    });
+
+    it('emits a notice for workflow_advanced reason', async () => {
+      const round = createRound({
+        steps: [makeStaleStep('workflow_advanced', { observed_status: 'waiting_for_input' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('workflow_advanced');
+    });
+
+    it('emits a notice for concurrent_resume reason', async () => {
+      const round = createRound({
+        steps: [makeStaleStep('concurrent_resume', { observed_status: 'running' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('concurrent_resume');
+    });
+
+    it('emits a system_notice for a fresh (applied) hitl_form_response audit step', async () => {
+      const freshStep = {
+        type: ConversationRoundStepType.other,
+        kind: 'hitl_form_response',
+        execution_id: 'exec-fresh-1',
+        step_execution_id: 'step-fresh-1',
+        submitted_at: now,
+        values: { approved: true },
+      } as unknown as ConversationRoundStep;
+
+      const round = createRound({ steps: [freshStep] });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput('next'),
+          previousRounds: [round],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('exec-fresh-1');
+      expect((noticeMessage as any).content).toContain('approved');
+    });
+
+    it('uses [Form data submitted] placeholder (not lastRound.input) when nextInput.message is empty and the last round is awaitingPrompt with a non-empty original input', async () => {
+      // Scenario (Bug A): user starts a 2-step workflow ("run the workflow"),
+      // workflow pauses at step-1. Another actor approves step-1 via the UI,
+      // causing the workflow to advance to step-2. The user then submits the
+      // now-stale step-1 form from Agent Builder (nextInput.message is empty).
+      // The LLM must see "[Form data submitted]" — not "run the workflow" — so
+      // it understands the user submitted a form, not initiated a new workflow run.
+      const awaitingRound = createRound({
+        input: makeRoundInput('run the hitl-demo-two-step-approval workflow'),
+        response: makeAssistantResponse(''),
+        status: ConversationRoundStatus.awaitingPrompt,
+        steps: [makeStaleStep('workflow_advanced', { execution_id: 'exec-adv-1' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput(''), // empty — pure form submission
+          previousRounds: [awaitingRound],
+        }),
+      });
+
+      // The input message (not the notice) should be [Form data submitted].
+      // Notices now come AFTER the user input, so lastHumanMessage would be the notice;
+      // find the input message directly.
+      const formSubmitMsg = result.find(
+        (msg) => isHumanMessage(msg) && msg.content === '[Form data submitted]'
+      );
+      expect(formSubmitMsg).toBeDefined();
+      // Must NOT use the original "run the workflow" text as the user turn
+      expect((formSubmitMsg as any).content).not.toContain(
+        'run the hitl-demo-two-step-approval workflow'
+      );
+      // Must use the placeholder so the LLM understands this is a form submission
+      expect((formSubmitMsg as any).content).toBe('[Form data submitted]');
+    });
+
+    it('notice appears AFTER the [Form data submitted] user turn (not before) when the awaitingPrompt round has a stale step and nextInput is empty', async () => {
+      const awaitingRound = createRound({
+        input: makeRoundInput('run the hitl-demo-two-step-approval workflow'),
+        response: makeAssistantResponse(''),
+        status: ConversationRoundStatus.awaitingPrompt,
+        steps: [makeStaleStep('workflow_advanced', { execution_id: 'exec-order-1' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput(''),
+          previousRounds: [awaitingRound],
+        }),
+      });
+
+      const humanMsgs = result.filter(isHumanMessage);
+      const formSubmitIdx = humanMsgs.findIndex((m) => m.content === '[Form data submitted]');
+      const noticeIdx = humanMsgs.findIndex((m) => (m as any).content.includes('<system_notice>'));
+      // The form-submitted placeholder must come BEFORE the stale notice
+      expect(formSubmitIdx).toBeGreaterThanOrEqual(0);
+      expect(noticeIdx).toBeGreaterThanOrEqual(0);
+      expect(formSubmitIdx).toBeLessThan(noticeIdx);
+    });
+
+    it('emits a stale notice even when the stale audit lives in the last awaitingPrompt round (production scenario)', async () => {
+      const awaitingRound = createRound({
+        input: makeRoundInput('run the Agent HITL Test workflow'),
+        response: makeAssistantResponse(''),
+        status: ConversationRoundStatus.awaitingPrompt,
+        steps: [makeStaleStep('workflow_already_resolved', { execution_id: 'exec-awaiting-1' })],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput(''),
+          previousRounds: [awaitingRound],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('exec-awaiting-1');
+      expect((noticeMessage as any).content).toContain('workflow_already_resolved');
+    });
+  });
+
+  describe('fresh HITL form submission notices', () => {
+    const makeFreshStep = (
+      overrides: Partial<{
+        execution_id: string;
+        step_execution_id: string;
+        submitted_at: string;
+        values: Record<string, unknown>;
+      }> = {}
+    ): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.other,
+        kind: 'hitl_form_response',
+        execution_id: 'exec-fresh-1',
+        step_execution_id: 'step-fresh-1',
+        submitted_at: now,
+        values: { approved: true },
+        ...overrides,
+      } as unknown as ConversationRoundStep);
+
+    it('omits the trailing AIMessage when response.message is empty and the round has tool calls', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'workflow_tool', { id: 'wf-1' }, [
+        {
+          tool_result_id: 'r1',
+          type: ToolResultType.other,
+          data: { status: 'WAITING_FOR_INPUT' },
+        },
+      ]);
+      const round = createRound({
+        input: makeRoundInput('run the workflow'),
+        steps: [makeToolCallStep(toolCall)],
+        response: { message: '' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      // user + AI(tool_calls) + ToolMessage + user(next) = 4
+      // Before fix: user + AI(tool_calls) + ToolMessage + AIMessage('') + user(next) = 5
+      expect(result).toHaveLength(4);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(isAIMessage(result[1])).toBe(true);
+      expect((result[1] as AIMessage).tool_calls).toHaveLength(1);
+      expect(isHumanMessage(result[3])).toBe(true);
+      expect(result[3].content).toBe('next');
+    });
+
+    it('emits a system_notice and omits trailing empty AIMessage for a fresh step in a non-excluded round', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'workflow_tool', { id: 'wf-1' }, [
+        {
+          tool_result_id: 'r1',
+          type: ToolResultType.other,
+          data: { status: 'WAITING_FOR_INPUT' },
+        },
+      ]);
+      const round = createRound({
+        input: makeRoundInput('run the workflow'),
+        steps: [makeToolCallStep(toolCall), makeFreshStep({ values: { decision: 'approve' } })],
+        response: { message: '' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('exec-fresh-1');
+      expect((noticeMessage as any).content).toContain('decision');
+      expect((noticeMessage as any).content).toContain('approve');
+      // fresh notice is about an applied submission — does NOT say "not applied"
+      expect((noticeMessage as any).content).not.toContain('not applied');
+
+      // No trailing empty AIMessage with no tool_calls
+      const emptyTrailingAi = result.filter(
+        (msg) => isAIMessage(msg) && msg.content === '' && !(msg as AIMessage).tool_calls?.length
+      );
+      expect(emptyTrailingAi).toHaveLength(0);
+    });
+
+    it('lifts a fresh notice from the excluded last isFormSubmissionSealedRound', async () => {
+      const sealedRound = createRound({
+        status: ConversationRoundStatus.completed,
+        input: makeRoundInput('run the workflow'),
+        steps: [makeFreshStep({ execution_id: 'exec-sealed-1', values: { confirmed: true } })],
+        response: { message: '' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [sealedRound],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('exec-sealed-1');
+      expect((noticeMessage as any).content).toContain('confirmed');
+
+      // After reordering fix: formatRoundInput (user input) comes BEFORE the notice.
+      // nextInput.message='next' is truthy so input = lastRound.input = 'run the workflow'.
+      const humanMsgs = result.filter(isHumanMessage);
+      const inputMsg = humanMsgs.find((m) => !(m.content as string).includes('<system_notice>'));
+      expect(inputMsg).toBeDefined();
+      expect(inputMsg!.content).toBe('run the workflow');
+    });
+
+    it('emits both fresh and stale notices in step order when both appear in the same round', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'workflow_tool', { id: 'wf-1' }, [
+        {
+          tool_result_id: 'r1',
+          type: ToolResultType.other,
+          data: { status: 'WAITING_FOR_INPUT' },
+        },
+      ]);
+      const freshStep = makeFreshStep({ execution_id: 'exec-fresh-5', values: { v: 1 } });
+      const staleStep = {
+        type: ConversationRoundStepType.other,
+        kind: 'hitl_form_response_stale',
+        reason: 'workflow_already_resolved' as const,
+        execution_id: 'exec-stale-5',
+        step_execution_id: 'step-stale-5',
+        submitted_at: now,
+        submitted_values: { v: 2 },
+        observed_status: 'completed',
+      } as unknown as ConversationRoundStep;
+
+      const round = createRound({
+        input: makeRoundInput('run workflow'),
+        steps: [makeToolCallStep(toolCall), freshStep, staleStep],
+        response: { message: '' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessages = result.filter(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessages).toHaveLength(2);
+      // Fresh notice before stale notice (step order)
+      expect((noticeMessages[0] as any).content).toContain('exec-fresh-5');
+      expect((noticeMessages[1] as any).content).toContain('exec-stale-5');
+    });
+  });
+
+  describe('empty input message guard (HITL form submission with no text)', () => {
+    it('produces a non-empty HumanMessage when nextInput.message is empty and there are no previous rounds', async () => {
+      // When a user submits a HITL form with no text the chat payload has no
+      // `input` field, so nextInput.message is ''. The Anthropic API rejects
+      // HumanMessages whose content is the empty string with a 400 error.
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput(''),
+          previousRounds: [],
+        }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      // Uses the established HITL placeholder so the LLM has a semantic cue.
+      expect(result[0].content).toBe('[Form data submitted]');
+    });
+
+    it('produces a non-empty HumanMessage when a sealed form-submission round has an empty input', async () => {
+      // Scenario: two-step HITL flow. After form 1 is submitted (no text), the
+      // agent creates a prose round (round 1) with input.message=''. When form 2
+      // is submitted, round 1 is sealed as isFormSubmissionSealedRound and its
+      // empty input is used as the "current user message". Without the guard,
+      // formatRoundInput produces HumanMessage('') and the Anthropic API returns 400.
+      const sealedRound = createRound({
+        status: ConversationRoundStatus.completed,
+        input: makeRoundInput(''), // empty — form submitted with no text
+        steps: [
+          {
+            type: ConversationRoundStepType.other,
+            kind: 'hitl_form_response',
+            execution_id: 'exec-1',
+            step_execution_id: 'step-2',
+            submitted_at: new Date().toISOString(),
+            values: { confirmed: true },
+          } as unknown as ConversationRoundStep,
+        ],
+        response: { message: 'Second approval needed.' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput: makeRoundInput(''), // also empty — same form submission payload
+          previousRounds: [sealedRound],
+        }),
+      });
+
+      // After reordering fix: the [Form data submitted] input message comes BEFORE the
+      // submission notice, so it is no longer the last HumanMessage. Find it directly.
+      const formSubmitMsg = result.find(
+        (msg) => isHumanMessage(msg) && msg.content === '[Form data submitted]'
+      );
+      expect(formSubmitMsg).toBeDefined();
+      // Uses the established HITL placeholder so the LLM has a semantic cue.
+      expect(formSubmitMsg!.content).toBe('[Form data submitted]');
+    });
+  });
 });
 
 describe('groupToolCallSteps', () => {

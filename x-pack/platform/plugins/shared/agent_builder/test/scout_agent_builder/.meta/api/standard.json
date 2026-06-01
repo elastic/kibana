@@ -1,5 +1,5 @@
 {
-  "sha1": "5fd87a4964315c7d707ff5132e19a12eb6b4eb80",
+  "sha1": "a08e1f89225ffc06e16f736fedf2b92a6966f85f",
   "tests": [
     {
       "id": "23fa02f46a56f43-4512d1a251a937e",
@@ -953,6 +953,76 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
         "line": 235,
         "column": 14
+      }
+    },
+    {
+      "id": "014529210ead602-b0fbc9e6e441bc0",
+      "title": "Agent Builder — HITL chat-form path [S1] chat-form path: converse returns awaitingPrompt → submit form_prompts → completed + audit step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_hitl_chat_form.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "014529210ead602-42e466a38cd7a47",
+      "title": "Agent Builder — HITL chat-form path [S5/R3] workflow_already_resolved: User B resolves via inbox; User A stale submission surfaces audit step and LLM follow-up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_hitl_chat_form.spec.ts",
+        "line": 230,
+        "column": 10
+      }
+    },
+    {
+      "id": "74540aacdcaad9e-b598a4df8b42ff6",
+      "title": "Agent Builder — HITL inbox path [S3] inbox path: respond via Inbox API resumes the workflow and reaches completed status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_hitl_inbox.spec.ts",
+        "line": 124,
+        "column": 10
+      }
+    },
+    {
+      "id": "e03c7cb69eab255-156c88b71ad6bd3",
+      "title": "Agent Builder — HITL nested path [S4] outer workflow propagates WAITING_FOR_INPUT; inbox shows row for nested waitForInput",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_hitl_nested.spec.ts",
+        "line": 286,
+        "column": 10
+      }
+    },
+    {
+      "id": "e03c7cb69eab255-0284f591f7a8e86",
+      "title": "Agent Builder — HITL nested path [S6/R3] workflow_advanced_to_new_prompt: User B advances step-1; User A stale submission surfaces step-2 form and audit step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_hitl_nested.spec.ts",
+        "line": 392,
+        "column": 10
       }
     },
     {

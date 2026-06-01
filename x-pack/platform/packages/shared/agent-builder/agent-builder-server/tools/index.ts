@@ -26,8 +26,10 @@ export {
   type ToolHandlerCallContext,
   type ToolHandlerResult,
   type ToolHandlerPromptReturn,
+  type ToolHandlerResultsWithPromptReturn,
   type ToolHandlerStandardReturn,
   isToolHandlerInterruptReturn,
+  isToolHandlerResultsWithPromptReturn,
   isToolHandlerStandardReturn,
 } from './handler';
 export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './utils';

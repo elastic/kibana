@@ -146,6 +146,41 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
+
+    it('emits a [hitl-debug][wf] waitForInput.enter marker with schemaPresent=false messagePresent=true when only message is configured', async () => {
+      await underTest.run();
+
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('[hitl-debug][wf] waitForInput.enter'),
+        expect.objectContaining({ event: { action: 'hitl:stage2:enter' } })
+      );
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('schemaPresent=false'),
+        expect.anything()
+      );
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('messagePresent=true'),
+        expect.anything()
+      );
+    });
+
+    it('emits schemaPresent=true when schema is in withConfig', async () => {
+      const schema = { type: 'object', properties: { approved: { type: 'boolean' } } };
+      node.configuration.with = { message: 'Please approve', schema } as any;
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger
+      );
+
+      await underTest.run();
+
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('schemaPresent=true'),
+        expect.anything()
+      );
+    });
   });
 
   describe('resume run — exiting wait state with input', () => {
@@ -210,6 +245,15 @@ describe('WaitForInputStepImpl', () => {
             execution_id: 'exec-abc',
           }),
         })
+      );
+    });
+
+    it('emits a [hitl-debug][wf] waitForInput.resume marker', async () => {
+      await underTest.run();
+
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('[hitl-debug][wf] waitForInput.resume'),
+        expect.objectContaining({ event: { action: 'hitl:stage2:resume' } })
       );
     });
   });

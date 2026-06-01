@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRound, OtherStep } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isOtherStep } from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
-import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
+import {
+  AgentPromptType,
+  isConfirmationPrompt,
+  isFormPrompt,
+} from '@kbn/agent-builder-common/agents';
+import type { FormPromptRequest, FormPromptResponse } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
-import { RoundEvents } from './round_events/round_events';
+import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
-import { ConfirmationPrompt } from './round_prompt';
+import { ConfirmationPrompt, FormPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -41,7 +47,25 @@ const labels = {
   container: i18n.translate('xpack.agentBuilder.round.container', {
     defaultMessage: 'Conversation round',
   }),
+  formDataSubmitted: i18n.translate('xpack.agentBuilder.round.formDataSubmitted', {
+    defaultMessage: '[Form data submitted]',
+  }),
+  notApplied: i18n.translate('xpack.agentBuilder.formPrompt.notApplied', {
+    defaultMessage: 'Not applied',
+  }),
 };
+
+const toHistoryFormPrompt = (step: OtherStep): FormPromptRequest => ({
+  ...(step.agent_context !== undefined && { agent_context: step.agent_context }),
+  execution_id: step.execution_id,
+  id: step.step_execution_id,
+  message: step.message ?? '',
+  schema: step.schema ?? {},
+  step_execution_id: step.step_execution_id,
+  type: AgentPromptType.form,
+});
+
+const noop = () => {};
 
 /**
  * Computes cumulative attachment refs from all rounds up to and including the given index.
@@ -78,9 +102,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   allRounds,
   roundIndex,
 }) => {
+  const { inboxEnabled } = useAgentBuilderServices();
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
+  const [optimisticForms, setOptimisticForms] = useState<
+    Map<string, { prompt: FormPromptRequest; values: Record<string, unknown> }>
+  >(new Map());
   const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
   const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
@@ -92,6 +120,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useConversationStream();
+  // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
+  // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
+  // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the
+  // window where the send mutation has emitted `pending_prompt` (round is now
+  // `awaitingPrompt`) but `mutationFn` hasn't reached its `finally` yet — clicking
+  // Approve there would race the still-in-flight send mutation.
   const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
@@ -105,18 +139,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts.length > 0 &&
     !isResuming;
 
-  const hasMessage = Boolean(response?.message);
-
-  const { latestStep, displayedSteps } = useMemo(() => {
-    if (!isLoadingCurrentRound || hasMessage) {
-      return { latestStep: undefined, displayedSteps: steps };
-    }
-    const idx = steps.findLastIndex((s) => s.type !== ConversationRoundStepType.updateTodos);
-    return idx === -1
-      ? { latestStep: undefined, displayedSteps: steps }
-      : { latestStep: steps[idx], displayedSteps: steps.slice(0, idx) };
-  }, [steps, isLoadingCurrentRound, hasMessage]);
-
   const cumulativeAttachmentRefs = useMemo(() => {
     if (!response?.message) return undefined;
     return computeCumulativeRefs(allRounds, roundIndex);
@@ -126,6 +148,37 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
     [pendingPrompts]
   );
+
+  const formPrompts = useMemo(
+    () => (inboxEnabled ? (pendingPrompts ?? []).filter(isFormPrompt) : []),
+    [inboxEnabled, pendingPrompts]
+  );
+
+  const submittedFormHistory = useMemo(
+    () =>
+      inboxEnabled
+        ? steps.filter(isOtherStep).sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
+        : [],
+    [inboxEnabled, steps]
+  );
+
+  // Stale forms (CAS-failed submissions) were appended before the LLM generated this
+  // round's response — render them before the response so the narrative can reference them.
+  // Fresh forms were submitted after the LLM response — render them after the response.
+  const staleFormHistory = useMemo(
+    () => submittedFormHistory.filter((s) => s.kind === 'hitl_form_response_stale'),
+    [submittedFormHistory]
+  );
+
+  const freshFormHistory = useMemo(
+    () => submittedFormHistory.filter((s) => s.kind === 'hitl_form_response'),
+    [submittedFormHistory]
+  );
+
+  const pendingOptimisticForms = useMemo(() => {
+    const confirmedIds = new Set(submittedFormHistory.map((s) => s.step_execution_id));
+    return Array.from(optimisticForms.entries()).filter(([id]) => !confirmedIds.has(id));
+  }, [optimisticForms, submittedFormHistory]);
 
   const handlePromptResponse = useCallback(
     (promptId: string, allow: boolean) => {
@@ -141,6 +194,29 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     [confirmationPrompts, resumeRound]
   );
 
+  const handleFormSubmit = useCallback(
+    (formResponse: FormPromptResponse) => {
+      const matchedPrompt = formPrompts.find((p) => p.id === formResponse.id);
+      if (matchedPrompt) {
+        setOptimisticForms((prev) => {
+          const next = new Map(prev);
+          next.set(formResponse.id, { prompt: matchedPrompt, values: formResponse.values });
+          return next;
+        });
+      }
+      // Stamp expected_resume_seq so the server CAS rejects stale submissions
+      // (e.g. a second tab racing) atomically rather than producing contradictory
+      // ES state. Missing on legacy prompts; server falls back to unconditional
+      // resume in that case.
+      const responseWithSeq: FormPromptResponse =
+        matchedPrompt && typeof matchedPrompt.resume_seq === 'number'
+          ? { ...formResponse, expected_resume_seq: matchedPrompt.resume_seq + 1 }
+          : formResponse;
+      resumeRound({ form_prompts: [responseWithSeq] });
+    },
+    [formPrompts, resumeRound]
+  );
+
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
     if (isCurrentRound && isResponseLoading) {
@@ -149,14 +225,15 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   }, [isCurrentRound, isResponseLoading]);
 
   useEffect(() => {
-    // Keep min-height if:
-    // - Round is loading, errored, or awaiting prompt
-    // - Round has finished streaming but is still the current round (hasBeenLoading)
-    // Remove min-height when a new round starts (isCurrentRound becomes false)
+    // Keep min-height while loading/thinking so the UI doesn't jump.
+    // Remove it when prompts are visible (isAwaitingPrompt) — the content has stabilised
+    // and keeping min-height would push the form above the viewport when the scroll
+    // snaps to the bottom of the (otherwise empty) tall container.
     const shouldHaveMinHeight =
       isErrorCurrentRound ||
-      isAwaitingPrompt ||
-      (isCurrentRound && (isResponseLoading || hasBeenLoading));
+      (isCurrentRound &&
+        (isResponseLoading || hasBeenLoading) &&
+        (!inboxEnabled || !isAwaitingPrompt));
 
     setRoundContainerMinHeight(shouldHaveMinHeight ? scrollContainerHeight : 0);
   }, [
@@ -166,6 +243,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     scrollContainerHeight,
     isErrorCurrentRound,
     isAwaitingPrompt,
+    inboxEnabled,
   ]);
 
   const roundContainerStyles = css`
@@ -178,36 +256,31 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       aria-label={labels.container}
       css={roundContainerStyles}
     >
-      {/* Input Message */}
+      {/* Input Message — use a placeholder when the message is empty and
+          the round was triggered by a HITL form submission (empty message
+          is the server convention for form-only resume turns). */}
       <EuiFlexItem grow={false}>
         <RoundInput
-          input={input.message}
+          input={input.message || (submittedFormHistory.length > 0 ? labels.formDataSubmitted : '')}
           attachmentRefs={input.attachment_refs}
           conversationAttachments={conversationAttachments}
           fallbackAttachments={input.attachments}
         />
       </EuiFlexItem>
 
-      {/* Steps container — `latestStep` is held back from `displayedSteps`
-          and rendered inside `RoundResponse` as the live indicator instead.
-          Always rendered above the error block (when one exists) so the
-          steps stay anchored where the user last saw them and the error
-          appears below, rather than the error shoving them down. */}
-      {displayedSteps.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <RoundEvents
-            steps={displayedSteps}
-            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
-          />
-        </EuiFlexItem>
-      )}
-
-      {/* Error */}
-      {isErrorCurrentRound && (
-        <EuiFlexItem grow={false}>
+      {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
+      <EuiFlexItem grow={false}>
+        {isErrorCurrentRound ? (
           <RoundError error={error} onRetry={retrySendMessage} />
-        </EuiFlexItem>
-      )}
+        ) : (
+          <RoundThinking
+            isAwaitingPrompt={Boolean(isAwaitingPrompt)}
+            isLoading={isLoadingCurrentRound}
+            rawRound={rawRound}
+            steps={steps}
+          />
+        )}
+      </EuiFlexItem>
 
       {/* Todos */}
       {todosStep && (
@@ -216,47 +289,106 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
+      {/* Stale HITL form history (CAS-failed submissions, readonly, desaturated).
+          Rendered BEFORE the response: the LLM generated this round's response
+          after seeing the stale audit step, so the narrative naturally references it. */}
+      {staleFormHistory.map((step) => (
+        <EuiFlexItem grow={false} key={step.step_execution_id} style={{ filter: 'grayscale(1)' }}>
+          <EuiBadge color="warning" data-test-subj={`hitl-stale-badge-${step.step_execution_id}`}>
+            {labels.notApplied}
+          </EuiBadge>
+          <FormPrompt
+            answeredValues={step.submitted_values}
+            isAnswered
+            isDisabled
+            onSubmit={noop}
+            prompt={toHistoryFormPrompt(step)}
+          />
+        </EuiFlexItem>
+      ))}
+
+      {/* Response Message */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem>
+          <RoundResponse
+            hasError={isErrorCurrentRound}
+            response={response}
+            steps={steps}
+            isLoading={isLoadingCurrentRound}
+            isLastRound={isCurrentRound}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={cumulativeAttachmentRefs}
+            conversationId={conversationId}
+          />
+        </EuiFlexItem>
+        <EuiSpacer />
+        <RoundAttachmentReferences
+          attachmentRefs={input.attachment_refs}
+          conversationAttachments={conversationAttachments}
+          actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+        />
+      </EuiFlexItem>
+
+      {/* Fresh HITL form history (successful submissions, readonly, desaturated).
+          Rendered AFTER the response: the user submitted these forms after the LLM
+          generated this round's response, so they appear after the narrative. */}
+      {freshFormHistory.map((step) => (
+        <EuiFlexItem grow={false} key={step.step_execution_id} style={{ filter: 'grayscale(1)' }}>
+          <FormPrompt
+            answeredValues={step.values}
+            isAnswered
+            isDisabled
+            onSubmit={noop}
+            prompt={toHistoryFormPrompt(step)}
+          />
+        </EuiFlexItem>
+      ))}
+
+      {/* Optimistic history: submitted but not yet server-confirmed (desaturated).
+          Positioned after fresh history since it represents the most recent submission. */}
+      {pendingOptimisticForms.map(([id, { prompt, values: submittedValues }]) => (
+        <EuiFlexItem grow={false} key={`optimistic-${id}`} style={{ filter: 'grayscale(1)' }}>
+          <FormPrompt
+            answeredValues={submittedValues}
+            isAnswered
+            isDisabled
+            onSubmit={noop}
+            prompt={prompt}
+          />
+        </EuiFlexItem>
+      ))}
+
       {/* Confirmation Prompts */}
       {isAwaitingPrompt &&
         confirmationPrompts.map((prompt) => (
           <EuiFlexItem grow={false} key={prompt.id}>
             <ConfirmationPrompt
-              prompt={prompt}
-              onConfirm={() => handlePromptResponse(prompt.id, true)}
-              onCancel={() => handlePromptResponse(prompt.id, false)}
-              isLoading={isResuming}
-              isDisabled={isHitlDisabled}
-              isAnswered={promptResponses[prompt.id] !== undefined}
               answeredValue={promptResponses[prompt.id]?.allow}
+              isAnswered={promptResponses[prompt.id] !== undefined}
+              isDisabled={isHitlDisabled}
+              isLoading={isResuming}
+              onCancel={() => handlePromptResponse(prompt.id, false)}
+              onConfirm={() => handlePromptResponse(prompt.id, true)}
+              prompt={prompt}
             />
           </EuiFlexItem>
         ))}
 
-      {/* Response */}
-      {!isAwaitingPrompt && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexItem>
-            <RoundResponse
-              hasError={isErrorCurrentRound}
-              response={response}
-              steps={steps}
-              isLoading={isLoadingCurrentRound}
-              isLastRound={isCurrentRound}
-              latestStep={latestStep}
-              conversationAttachments={conversationAttachments}
-              attachmentRefs={cumulativeAttachmentRefs}
-              conversationId={conversationId}
-              rawRound={rawRound}
-            />
-          </EuiFlexItem>
-          <EuiSpacer />
-          <RoundAttachmentReferences
-            attachmentRefs={input.attachment_refs}
-            conversationAttachments={conversationAttachments}
-            actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
-          />
-        </EuiFlexItem>
-      )}
+      {/* Active Form Prompts (exclude any that have already been submitted optimistically) */}
+      {inboxEnabled &&
+        isAwaitingPrompt &&
+        formPrompts
+          .filter((prompt) => !optimisticForms.has(prompt.id))
+          .map((prompt) => (
+            <EuiFlexItem grow={false} key={prompt.id}>
+              <FormPrompt
+                isDisabled={isHitlDisabled}
+                isLoading={isResuming}
+                onSubmit={handleFormSubmit}
+                prompt={prompt}
+              />
+            </EuiFlexItem>
+          ))}
 
       {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
       {isCurrentRound && <EuiSpacer size="l" />}

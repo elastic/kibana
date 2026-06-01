@@ -5,32 +5,40 @@
  * 2.0.
  */
 
-import {
-  agentBuilderDefaultAgentId,
-  isConversationCreatedEvent,
-  isConversationUpdatedEvent,
-  isRoundCompleteEvent,
-  AgentExecutionMode,
-} from '@kbn/agent-builder-common';
+import type { Logger } from '@kbn/logging';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { firstValueFrom, toArray } from 'rxjs';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ServiceManager } from '../services';
 import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
+import { buildWaitingForInputResult } from './helpers/build_waiting_for_input_result';
+import { resumeInnerAgent } from './helpers/resume_inner_agent';
+import { runInnerAgent } from './helpers/run_inner_agent';
 
 /**
  * Server step definition for the "ai.agent" step.
  * This step executes an agentBuilder agent using the execution service.
  */
-export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
+export const getRunAgentStepDefinition = (
+  serviceManager: ServiceManager,
+  workflowsManagement?: WorkflowsServerPluginSetup,
+  inboxEnabled = false,
+  logger?: Logger
+) => {
   return createServerStepDefinition({
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { schema, message, conversation_id: conversationId, attachments } = context.input;
+        const {
+          schema,
+          message,
+          conversation_id: conversationIdFromInput,
+          attachments,
+        } = context.input;
 
         const {
           'agent-id': agentId,
@@ -40,69 +48,94 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         } = context.config;
 
         context.logger.debug('ai.agent step started');
+
         const request = context.contextManager.getFakeRequest();
         if (!request) {
           throw new Error('No request available in workflow context');
         }
 
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
+        context.logger.debug(
+          `[hitl-debug][ab] runAgent.start stepId=${
+            context.stepId
+          } agentId=${effectiveAgentId} isResuming=${context.isResuming ?? false}`
+        );
         const effectiveConnectorId = resolveConnectorOrInferenceId(
           { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
-
-        const storeConversation = createConversation || Boolean(conversationId);
 
         const executionService = serviceManager.internalStart?.execution;
         if (!executionService) {
           throw new Error('execution service is not available');
         }
 
-        context.logger.debug('Executing ai.agent step', {
-          agentId: effectiveAgentId,
-        });
-
-        const { events$ } = await executionService.executeAgent({
-          mode: AgentExecutionMode.conversation,
-          request,
-          abortSignal: context.abortSignal,
-          params: {
+        // Resume path: inner workflow was paused; resume it then re-run the agent
+        if (inboxEnabled && context.isResuming) {
+          context.logger.debug(
+            `[hitl-debug][ab] runAgent.resume stepId=${context.stepId} agentId=${effectiveAgentId}`
+          );
+          const conversations = serviceManager.internalStart?.conversations;
+          const conversationClient = conversations
+            ? await conversations.getScopedClient({ request })
+            : undefined;
+          return resumeInnerAgent({
+            abortSignal: context.abortSignal,
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
-            conversationId,
-            autoCreateConversationWithId: createConversation,
-            storeConversation,
-            structuredOutput: !!schema,
-            outputSchema: schema,
-            nextInput: {
-              message,
-              attachments,
-            },
-          },
-          // workflows already run as scheduled tasks
-          useTaskManager: false,
-        });
-
-        const events = await firstValueFrom(events$.pipe(toArray()));
-        const roundEvent = events.find(isRoundCompleteEvent);
-        if (!roundEvent) {
-          throw new Error('No round_complete event received from execution service');
+            conversationClient,
+            conversationIdFromInput,
+            createConversation,
+            executionService,
+            logger,
+            nextInput: { attachments, message },
+            request,
+            resumeInput: context.resumeInput ?? {},
+            schema,
+            spaceId: context.contextManager.getContext().workflow.spaceId,
+            stepState: (context.stepState ?? {}) as Record<string, unknown>,
+            workflowApi: workflowsManagement?.management,
+          });
         }
 
-        const round = roundEvent.data.round;
-        const outputMessage = schema
-          ? JSON.stringify(round.response.structured_output)
-          : round.response.message;
+        // Initial run path
+        context.logger.debug('Executing ai.agent step', { agentId: effectiveAgentId });
 
-        let outputConversationId: string | undefined;
-        if (storeConversation) {
-          const conversationEvent = events.find(
-            (e) => isConversationCreatedEvent(e) || isConversationUpdatedEvent(e)
-          );
-          if (!conversationEvent) {
-            throw new Error('No conversation_created / conversation_updated event received');
+        const storeConversation = createConversation || Boolean(conversationIdFromInput);
+
+        const { outputConversationId, outputMessage, round } = await runInnerAgent({
+          abortSignal: context.abortSignal,
+          executionService,
+          params: {
+            agentId: effectiveAgentId,
+            autoCreateConversationWithId: createConversation,
+            connectorId: effectiveConnectorId,
+            conversationId: conversationIdFromInput,
+            nextInput: { attachments, message },
+            outputSchema: schema,
+            storeConversation,
+            structuredOutput: !!schema,
+          },
+          request,
+          schema,
+          storeConversation,
+        });
+
+        if (inboxEnabled) {
+          const waitingResult = buildWaitingForInputResult({
+            logger: context.logger,
+            outputConversationId,
+            round,
+          });
+          if (waitingResult !== null) {
+            context.logger.debug(
+              `[hitl-debug][ab] runAgent.awaitingPrompt stepId=${
+                context.stepId
+              } schemaPresent=${!!waitingResult.waitingForInput
+                ?.schema} messagePresent=${!!waitingResult.waitingForInput?.message}`
+            );
+            return waitingResult;
           }
-          outputConversationId = conversationEvent.data.conversation_id;
         }
 
         return {

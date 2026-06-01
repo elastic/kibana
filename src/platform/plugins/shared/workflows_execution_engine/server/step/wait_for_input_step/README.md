@@ -98,3 +98,16 @@ steps:
 **Resume input:** Stored in `workflowExecution.context.resumeInput` by the resume API handler and cleared by the step after reading it, so subsequent `waitForInput` steps are not auto-completed.
 
 **Resume API:** [`post_resume_workflow_execution.ts`](../../../../workflows_management/server/workflows_management/routes/post_resume_workflow_execution.ts)
+
+---
+
+## Cross-surface HITL rendering
+
+When a `waitForInput` step is reached inside a workflow that was triggered from **Agent Builder**, **Inbox**, or the **Workflows execution view**, additional machinery activates on top of the single-surface resume described above:
+
+- **CAS concurrency safety** — every resume call site now stamps an `expectedResumeSeq` and the engine runs an Elasticsearch Painless compare-and-swap on `resume_seq`. Only one concurrent submitter wins; losers receive a typed `WorkflowExecutionStaleResumeError` and a surface-specific stale UX.
+- **Schema-driven form rendering** — when `with.schema` is set, Agent Builder chat and the Inbox flyout both render the same `SchemaForm` React component from `@kbn/workflows-hitl-form` instead of LLM-authored prose.
+- **Stale-resume handling** — the CAS losing submitter sees an audit entry ("Not applied") and, if the workflow advanced to a new `waitForInput` step, automatically receives the next step's form.
+- **Telemetry** — `hitl.created`, `hitl.responded`, and `hitl.timed_out` are dual-emitted to EBT and the workflow event log via `@kbn/workflows-hitl-telemetry`.
+
+For the full architecture, race-condition analysis, sequence diagrams, and debug traces, see the [HITL deep-dive](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#sequence-numbers--cas).

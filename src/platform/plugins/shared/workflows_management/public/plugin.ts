@@ -55,6 +55,7 @@ export class WorkflowsPlugin
   private cachedTelemetry: WorkflowsBaseTelemetry | null = null;
   private availabilityService: AvailabilityService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
+  private inboxEnabled = false;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
   private readonly pluginConfig: WorkflowsManagementConfig;
@@ -73,6 +74,8 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginSetup {
     // Initialize telemetry service
     this.telemetryService.setup({ analytics: core.analytics });
+
+    this.inboxEnabled = !!plugins.inbox;
 
     // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
@@ -251,10 +254,11 @@ export class WorkflowsPlugin
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
       workflowsManagement: {
-        availability: this.availabilityService,
-        telemetry: this.telemetryService.getClient(),
         agentBuilder,
+        availability: this.availabilityService,
         globalExecutionsView: this.pluginConfig.globalExecutionsView,
+        inboxEnabled: this.inboxEnabled,
+        telemetry: this.telemetryService.getClient(),
       },
     };
 

@@ -6,3 +6,4 @@
  */
 
 export { ConfirmationPrompt, type ConfirmationPromptProps } from './confirmation_prompt';
+export { FormPrompt, type FormPromptProps } from './form_prompt';

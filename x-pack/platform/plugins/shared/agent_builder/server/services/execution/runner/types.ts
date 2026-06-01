@@ -14,6 +14,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
@@ -25,6 +26,7 @@ import type { PluginsServiceStart } from '../../plugins/plugin_service';
 
 export interface RunnerFactoryDeps {
   // core services
+  inboxEnabled?: boolean;
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
@@ -46,6 +48,8 @@ export interface RunnerFactoryDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
+  /** Optional workflows management plugin, used to poll HITL workflow execution state. */
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface RunnerFactory {

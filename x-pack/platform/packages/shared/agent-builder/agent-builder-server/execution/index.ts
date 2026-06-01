@@ -21,4 +21,5 @@ export type {
   FindExecutionsFilter,
   FindExecutionsOptions,
   AgentExecutionService,
+  ResumedExecutionState,
 } from './types';

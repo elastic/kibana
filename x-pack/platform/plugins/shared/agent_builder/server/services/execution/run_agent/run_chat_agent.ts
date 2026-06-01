@@ -13,9 +13,16 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import type { Logger } from '@kbn/logging';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  AgentExecutionMode,
+  isHitlFormResponseFreshStepData,
+  isHitlFormResponseStaleStepData,
+  isOtherStep,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -37,14 +44,17 @@ import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { roundToActions } from './utils/round_to_actions';
+import { isExecuteToolAction } from './actions';
 import { computeContextBudget } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
+import type { ResumedFormPromptState } from '../runner/utils/resume_form_prompts';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
+import { createHitlWorkflowChecker } from './hitl_workflow_executions';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -83,6 +93,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     configurationOverrides,
     action,
     executionId,
+    resumedStates,
   },
   context
 ) => {
@@ -119,9 +130,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const roundId = uuidv4();
 
   // Create background execution service from conversation state
+  const hitlWorkflowChecker = context.workflowExecutionPoller
+    ? createHitlWorkflowChecker({ logger, poller: context.workflowExecutionPoller })
+    : undefined;
   const backgroundExecutionService = new BackgroundExecutionService({
-    subAgentExecutor: context.subAgentExecutor,
+    hitlWorkflowChecker,
     initialState: conversation?.state?.background_executions,
+    subAgentExecutor: context.subAgentExecutor,
   });
 
   const model = await modelProvider.getDefaultModel();
@@ -272,9 +287,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
-      conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
+      conversation: processedConversation,
       cycleLimit: CYCLE_LIMIT,
+      logger,
+      resumedStates,
     }),
     {
       version: 'v2',
@@ -316,6 +333,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
 
+  // Collect next-step form prompts from resumedStates (populated by pollForWorkflowAdvance).
+  const pendingFormPrompts = (resumedStates ?? [])
+    .map((s) => s.nextFormPrompt)
+    .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+  logger.debug(
+    () =>
+      `[hitl-debug][ab] runChat.collectPrompts count=${
+        pendingFormPrompts.length
+      } stepIds=${pendingFormPrompts.map((p) => p.step_execution_id).join(',')}`
+  );
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
@@ -327,6 +356,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           backgroundExecutionService,
           todoStateManager,
         }),
+      logger,
+      pendingFormPrompts: pendingFormPrompts.length > 0 ? pendingFormPrompts : undefined,
       pendingRound,
       startTime,
       modelProvider,
@@ -378,14 +409,18 @@ const getConversationState = ({
   };
 };
 
-const createInitializerCommand = ({
+export const createInitializerCommand = ({
+  agentBuilderToLangchainIdMap,
   conversation,
   cycleLimit,
-  agentBuilderToLangchainIdMap,
+  logger,
+  resumedStates,
 }: {
+  agentBuilderToLangchainIdMap: ToolIdMapping;
   conversation: ProcessedConversation;
   cycleLimit: number;
-  agentBuilderToLangchainIdMap: ToolIdMapping;
+  logger?: Logger;
+  resumedStates?: ResumedFormPromptState[];
 }): Command => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
@@ -394,17 +429,65 @@ const createInitializerCommand = ({
     ? conversation.previousRounds[conversation.previousRounds.length - 1]
     : undefined;
 
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    initialState.mainActions = roundToActions({
-      round: lastRound,
+  // Stage 2 HITL: a sealed form-submission round (status=completed + hitl_form_response[_stale]
+  // step) must be treated the same as an awaitingPrompt round for graph resumption purposes.
+  // handleFormPromptResponse seals the round before executeAgent runs, so lastRound.status is
+  // completed rather than awaitingPrompt at this point. The dual condition is the intentional
+  // sealed-round marker; a dedicated ConversationRound.sealed field is the right long-term fix
+  // but is deferred.
+  const isFormSubmissionSealedRound =
+    lastRound?.status === ConversationRoundStatus.completed &&
+    lastRound.steps.some(
+      (s) =>
+        isOtherStep(s) && (isHitlFormResponseFreshStepData(s) || isHitlFormResponseStaleStepData(s))
+    );
+
+  logger?.debug(
+    () =>
+      `[hitl-debug][ab] runChat.init isFormSubmissionSealedRound=${isFormSubmissionSealedRound} lastRoundStatus=${
+        lastRound?.status ?? '(none)'
+      } resumedCount=${resumedStates?.length ?? 0}`
+  );
+
+  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt || isFormSubmissionSealedRound) {
+    const actions = roundToActions({
+      logger,
+      resumedStates,
+      round: lastRound!,
       toolIdMapping: agentBuilderToLangchainIdMap,
     });
+    initialState.mainActions = actions;
 
-    startAt = steps.executeTool;
+    const lastAction = actions[actions.length - 1];
+    if (lastAction && isExecuteToolAction(lastAction)) {
+      // All tool calls in the pending round completed synchronously (e.g. a workflow
+      // tool that paused for a HITL form prompt). The form was answered out-of-band
+      // via resumeWorkflowExecution; resume the agent at checkBackgroundWork so the
+      // LLM can process the tool results and continue.
+      startAt = steps.checkBackgroundWork;
+    } else if (lastAction) {
+      // There are pending (un-executed) tool calls; resume at executeTool to run them.
+      startAt = steps.executeTool;
+    } else {
+      // The sealed round has no tool calls (e.g. a "text response + pending form
+      // prompts" round where the LLM generated prose instead of invoking tools).
+      // Start at checkBackgroundWork so any completed workflow executions are
+      // detected before the LLM generates its reply. Using checkBackgroundWork
+      // (not init) also keeps currentCycle at zero, preventing the
+      // background-execution throttle from skipping the first poll.
+      startAt = steps.checkBackgroundWork;
+    }
   }
 
   if (lastRound?.state) {
-    initialState.currentCycle = lastRound.state.agent.current_cycle;
+    // Don't restore currentCycle when starting at checkBackgroundWork (HITL resume).
+    // The throttle condition in checkBackgroundWork skips the check for non-zero cycles
+    // that aren't multiples of BACKGROUND_CHECK_CYCLE_INTERVAL. Restoring a saved cycle
+    // (typically 1) would cause the check to be skipped, sending stale WAITING_FOR_INPUT
+    // state to the LLM and triggering a "double ask".
+    if (startAt !== steps.checkBackgroundWork) {
+      initialState.currentCycle = lastRound.state.agent.current_cycle;
+    }
     initialState.errorCount = lastRound.state.agent.error_count;
   }
 

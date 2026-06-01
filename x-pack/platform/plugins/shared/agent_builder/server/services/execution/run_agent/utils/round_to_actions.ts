@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ConversationRound, ToolCallStep, ReasoningStep } from '@kbn/agent-builder-common';
 import { isReasoningStep } from '@kbn/agent-builder-common';
+import type { ResumedFormPromptState } from '../../runner/utils/resume_form_prompts';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
 import { toolCallAction, executeToolAction } from '../actions';
 import { groupToolCallSteps } from './to_langchain_messages';
+import { refreshStaleWorkflowExecution } from './refresh_stale_workflow_execution';
 
 export const roundToActions = ({
+  logger,
+  resumedStates = [],
   round,
   toolIdMapping,
 }: {
+  logger?: Logger;
+  resumedStates?: ResumedFormPromptState[];
   round: ConversationRound | ProcessedConversationRound;
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
@@ -43,11 +50,23 @@ export const roundToActions = ({
       );
       actions.push(
         executeToolAction({
-          toolResults: completed.map((step) => ({
-            toolCallId: step.tool_call_id,
-            content: JSON.stringify({ results: step.results }),
-            artifact: { results: step.results },
-          })),
+          toolResults: completed.map((step) => {
+            if (logger !== undefined) {
+              logger.debug(
+                () =>
+                  `[hitl-debug][ab] roundToActions.refresh toolCallId=${step.tool_call_id} resumedStatesCount=${resumedStates.length}`
+              );
+            }
+            const refreshedStep =
+              logger !== undefined
+                ? refreshStaleWorkflowExecution({ logger, resumedStates, step })
+                : step;
+            return {
+              toolCallId: refreshedStep.tool_call_id,
+              content: JSON.stringify({ results: refreshedStep.results }),
+              artifact: { results: refreshedStep.results },
+            };
+          }),
         })
       );
     }

@@ -171,6 +171,24 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
    * Current step's type
    */
   stepType: string;
+
+  /**
+   * True when the step is being resumed after a WAITING_FOR_INPUT pause.
+   * Use this to distinguish the initial run from the resume run.
+   */
+  isResuming?: boolean;
+
+  /**
+   * The values submitted by the user to resume the workflow.
+   * Only populated when `isResuming` is true.
+   */
+  resumeInput?: Record<string, unknown>;
+
+  /**
+   * The opaque step state saved via `waitingForInput.stepState` when the step
+   * entered WAITING_FOR_INPUT. Only populated when `isResuming` is true.
+   */
+  stepState?: Record<string, unknown>;
 }
 
 /**
@@ -213,4 +231,23 @@ export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
    * Optional error information if the step failed
    */
   error?: Error;
+  /**
+   * When set, signals the execution engine to pause this step and set the
+   * workflow execution status to WAITING_FOR_INPUT. The handler will be
+   * called again on resume with `context.isResuming === true`.
+   */
+  waitingForInput?: {
+    /** Human-readable description of what input is required */
+    message?: string;
+    /** JSON Schema describing the expected input fields */
+    schema?: Record<string, unknown>;
+    /** Opaque state persisted across the pause/resume cycle, available as `context.stepState` on resume */
+    stepState?: Record<string, unknown>;
+    /** Agent reasoning and intended tool call that caused this HITL pause (S5) */
+    agent_context?: {
+      reasoning: string;
+      intended_tool: string;
+      intended_tool_args: Record<string, unknown>;
+    };
+  };
 }

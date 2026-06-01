@@ -190,6 +190,83 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
   return error.meta.errCode === code;
 };
 
+const staleReasonGuidance: Record<
+  'workflow_already_resolved' | 'workflow_advanced' | 'concurrent_resume',
+  string
+> = {
+  concurrent_resume:
+    'Another resume is in flight for this workflow execution. Inform the user that their submission was not applied because the workflow is currently being resumed by another action, and they should check back shortly.',
+  workflow_advanced:
+    'The workflow has advanced to a new human-in-the-loop step. Inform the user that their previous submission was not applied because the workflow has moved on to a new question, and the new prompt has been surfaced to them.',
+  workflow_already_resolved:
+    'The workflow was already resolved (for example by another participant via the Inbox). Inform the user clearly that their submission was not applied because the workflow had already been resolved.',
+};
+
+export const formatFreshHitlSubmissionNotice = (step: {
+  execution_id: string;
+  step_execution_id: string;
+  submitted_at: string;
+  values: Record<string, unknown>;
+}): string => {
+  const {
+    execution_id: executionId,
+    step_execution_id: stepExecutionId,
+    submitted_at: submittedAt,
+    values,
+  } = step;
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The user submitted a human-in-the-loop form response, and it was applied to the workflow.',
+        ],
+      },
+      { tagName: 'execution-id', children: [executionId] },
+      { tagName: 'step-execution-id', children: [stepExecutionId] },
+      { tagName: 'submitted-at', children: [submittedAt] },
+      { tagName: 'submitted-values', children: [JSON.stringify(values)] },
+      {
+        tagName: 'guidance',
+        children: [
+          'The workflow continued with these values. Use them to inform any follow-up explanation or action.',
+        ],
+      },
+    ],
+  });
+};
+
+export const formatStaleHitlSubmissionNotice = (step: {
+  execution_id: string;
+  observed_status: string;
+  reason: 'workflow_already_resolved' | 'workflow_advanced' | 'concurrent_resume';
+  submitted_values: Record<string, unknown>;
+}): string => {
+  const {
+    execution_id: executionId,
+    observed_status: observedStatus,
+    reason,
+    submitted_values: submittedValues,
+  } = step;
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The user submitted a human-in-the-loop form response, but it was NOT applied to the workflow.',
+        ],
+      },
+      { tagName: 'execution-id', children: [executionId] },
+      { tagName: 'reason', children: [reason] },
+      { tagName: 'observed-status', children: [observedStatus] },
+      { tagName: 'submitted-values', children: [JSON.stringify(submittedValues)] },
+      { tagName: 'guidance', children: [staleReasonGuidance[reason]] },
+    ],
+  });
+};
+
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;
 

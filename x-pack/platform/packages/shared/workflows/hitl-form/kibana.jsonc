@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/workflows-hitl-form",
+  "owner": ["@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared"
+}

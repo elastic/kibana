@@ -38,6 +38,7 @@ export interface AgentBuilderInternalService {
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
+  inboxEnabled: boolean;
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;

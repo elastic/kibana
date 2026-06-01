@@ -92,6 +92,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private inboxEnabled = false;
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
@@ -109,6 +110,7 @@ export class AgentBuilderPlugin
     });
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
+    this.inboxEnabled = !!deps.inbox;
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
@@ -235,6 +237,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
+      inboxEnabled: this.inboxEnabled,
       isEarsEnabled: this.isEarsEnabled,
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {

@@ -9,6 +9,12 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
+import {
+  HITL_EVENT_TYPES,
+  type HitlAnalytics,
+  type HitlLogger,
+  reportHitlEvent,
+} from '@kbn/workflows-hitl-telemetry';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -19,7 +25,8 @@ export class WaitForInputStepImpl implements NodeImplementation {
     private node: WaitForInputGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private analytics?: HitlAnalytics
   ) {}
 
   async run(): Promise<void> {
@@ -36,6 +43,14 @@ export class WaitForInputStepImpl implements NodeImplementation {
         `Step '${this.node.stepId}' run aborted before wait-entry; skipping`,
         { event: { action: 'hitl:aborted' } }
       );
+      const { id: executionId, workflowId } = this.workflowRuntime.getWorkflowExecution();
+      reportHitlEvent(this.analytics, this.makeHitlLogger(), HITL_EVENT_TYPES.timedOut, {
+        execution_id: executionId,
+        source_app: 'workflows',
+        step_execution_id: this.stepExecutionRuntime.stepExecutionId,
+        responseSource: 'unknown',
+        workflow_id: workflowId,
+      });
       return;
     }
 
@@ -54,6 +69,22 @@ export class WaitForInputStepImpl implements NodeImplementation {
       }
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
         event: { action: 'hitl:waiting' },
+      });
+      const { id: executionId, workflowId } = this.workflowRuntime.getWorkflowExecution();
+      this.workflowLogger.logDebug(
+        `[hitl-debug][wf] waitForInput.enter exec=${executionId} seq=(none) stepId=${
+          this.stepExecutionRuntime.stepExecutionId
+        } workflowId=${workflowId} schemaPresent=${
+          withConfig?.schema !== undefined
+        } messagePresent=${withConfig?.message !== undefined}`,
+        { event: { action: 'hitl:stage2:enter' } }
+      );
+      reportHitlEvent(this.analytics, this.makeHitlLogger(), HITL_EVENT_TYPES.created, {
+        execution_id: executionId,
+        source_app: 'workflows',
+        step_execution_id: this.stepExecutionRuntime.stepExecutionId,
+        responseSource: 'unknown',
+        workflow_id: workflowId,
       });
       return;
     }
@@ -92,7 +123,22 @@ export class WaitForInputStepImpl implements NodeImplementation {
         execution_id: executionId,
       },
     });
+    this.workflowLogger.logDebug(
+      `[hitl-debug][wf] waitForInput.resume exec=${executionId} seq=(none) stepId=${this.stepExecutionRuntime.stepExecutionId} resumedBy=${resumedBy}`,
+      { event: { action: 'hitl:stage2:resume' } }
+    );
 
     this.workflowRuntime.navigateToNextNode();
+  }
+
+  /** Adapts IWorkflowEventLogger to the HitlLogger interface expected by reportHitlEvent. */
+  private makeHitlLogger(): HitlLogger {
+    const logger = this.workflowLogger;
+    return {
+      debug: (msg, meta) => {
+        const resolved = typeof msg === 'function' ? msg() : msg;
+        logger.logDebug(resolved, meta);
+      },
+    };
   }
 }

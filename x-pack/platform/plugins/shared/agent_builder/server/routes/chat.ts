@@ -24,6 +24,8 @@ import {
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import { buildFormPromptsRequestSchema } from '../services/execution/runner/utils/build_form_prompts_request_schema';
+import { resumeFormPrompts } from '../services/execution/runner/utils/resume_form_prompts';
 import {
   ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
@@ -41,7 +43,9 @@ export function registerChatRoutes({
   router,
   getInternalServices,
   coreSetup,
+  inboxEnabled,
   logger,
+  pluginsSetup,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -90,6 +94,7 @@ export function registerChatRoutes({
         meta: { description: 'Can be used to respond to a confirmation prompt.' },
       })
     ),
+    ...(inboxEnabled && buildFormPromptsRequestSchema()),
     attachments: schema.maybe(
       schema.arrayOf(
         schema.object(
@@ -285,15 +290,18 @@ export function registerChatRoutes({
     request,
     abortSignal,
     executionService,
+    resumedStates,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     abortSignal: AbortSignal;
     executionService: AgentExecutionService;
+    resumedStates?: import('../services/execution/runner/utils/resume_form_prompts').ResumedFormPromptState[];
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
+      form_prompts: formPrompts,
       input,
       prompts,
       attachments,
@@ -323,10 +331,12 @@ export function registerChatRoutes({
         browserApiTools,
         configurationOverrides,
         action,
+        resumedStates,
         nextInput: {
+          attachments,
+          form_prompts: formPrompts,
           message: input,
           prompts,
-          attachments,
         },
       },
     });
@@ -371,6 +381,29 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
+        if (inboxEnabled && payload.form_prompts?.length) {
+          logger.debug(
+            () =>
+              `[hitl-debug][ab] chat.resume.received count=${
+                payload.form_prompts!.length
+              } execs=${payload.form_prompts!.map((f) => f.execution_id).join(',')}`
+          );
+        }
+
+        const resumedStates = inboxEnabled
+          ? await resumeFormPrompts({
+              coreSetup,
+              getInternalServices,
+              logger,
+              payload,
+              pluginsSetup,
+              request,
+              spaceId,
+            })
+          : undefined;
+
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
@@ -381,6 +414,7 @@ export function registerChatRoutes({
           request,
           abortSignal: abortController.signal,
           executionService,
+          resumedStates,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -444,6 +478,29 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
+        if (inboxEnabled && payload.form_prompts?.length) {
+          logger.debug(
+            () =>
+              `[hitl-debug][ab] chat.resume.received count=${
+                payload.form_prompts!.length
+              } execs=${payload.form_prompts!.map((f) => f.execution_id).join(',')}`
+          );
+        }
+
+        const resumedStates = inboxEnabled
+          ? await resumeFormPrompts({
+              coreSetup,
+              getInternalServices,
+              logger,
+              payload,
+              pluginsSetup,
+              request,
+              spaceId,
+            })
+          : undefined;
+
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
@@ -454,6 +511,7 @@ export function registerChatRoutes({
           request,
           abortSignal: abortController.signal,
           executionService,
+          resumedStates,
         });
 
         return response.ok({

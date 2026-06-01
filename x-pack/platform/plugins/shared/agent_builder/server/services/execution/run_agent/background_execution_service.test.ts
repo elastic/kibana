@@ -8,6 +8,8 @@
 import { BackgroundExecutionService } from './background_execution_service';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { createHitlWorkflowChecker } from './hitl_workflow_executions';
+import type { WorkflowExecutionPoller } from './hitl_workflow_executions';
 
 const createMockExecutor = (overrides: Partial<SubAgentExecutor> = {}): SubAgentExecutor => ({
   executeSubAgent: jest.fn(),
@@ -142,6 +144,39 @@ describe('BackgroundExecutionService', () => {
         round_id: 'round-1',
         tool_call_group_id: 'group-abc',
       });
+    });
+
+    it('delegates to hitlWorkflowChecker and polls both subagent and hitl concurrently', async () => {
+      const executor = createMockExecutor({
+        getExecution: jest.fn().mockResolvedValue({
+          executionId: 'exec-agent-1',
+          status: ExecutionStatus.completed,
+          events: [
+            { type: 'round_complete', data: { round: { response: { message: 'agent done' } } } },
+          ],
+        }),
+      });
+      const poller: WorkflowExecutionPoller = jest
+        .fn()
+        .mockResolvedValue({ status: 'COMPLETED', output: { result: 'hitl done' } });
+      const hitlWorkflowChecker = createHitlWorkflowChecker({
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() } as never,
+        poller,
+      });
+      const service = new BackgroundExecutionService({
+        hitlWorkflowChecker,
+        subAgentExecutor: executor,
+        initialState: {
+          'exec-agent-1': { execution_id: 'exec-agent-1', status: ExecutionStatus.running },
+        },
+      });
+
+      service.registerWorkflowExecution('exec-hitl-1');
+      const completions = await service.checkForCompletions({ roundId: 'round-1' });
+
+      expect(completions).toHaveLength(2);
+      expect(executor.getExecution).toHaveBeenCalledWith('exec-agent-1');
+      expect(poller).toHaveBeenCalledWith('exec-hitl-1');
     });
   });
 

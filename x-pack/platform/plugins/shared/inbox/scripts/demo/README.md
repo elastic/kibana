@@ -9,9 +9,16 @@ six minimal workflows, one per field-type case from
 [security-team#16707](https://github.com/elastic/security-team/issues/16707):
 string, number, boolean, single-select enum, multi-select array of enum,
 and required + defaults.
+- `workflows/07_hitl_single_approval.yml`, `08_hitl_two_step_approval.yml`, `09_hitl_nested_agent.yml` —
+three HITL end-to-end scenarios: a single-step approval gate, a two-step approval chain (the
+canonical example for the CAS race walkthrough), and a nested `ai.agent` step that propagates
+`WAITING_FOR_INPUT` upward. These are the primary fixtures for verifying cross-surface
+concurrency safety across Agent Builder, Inbox, and the Workflows execution view.
 - `seed_inbox_demo.ts` — Imports each workflow into a running Kibana and
 triggers a manual run so they pause on `waitForInput` and surface in the
 Inbox.
+
+For the full HITL architecture and a step-by-step walkthrough of the two-step approval race these demos exercise, see the [HITL deep-dive — Walkthrough](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#walkthrough-two-step-approval-race).
 
 ## Pre-reqs
 

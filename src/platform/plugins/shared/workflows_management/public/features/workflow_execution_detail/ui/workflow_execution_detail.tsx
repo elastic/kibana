@@ -138,6 +138,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
     }, [pausedStepFullData]);
 
+    const expectedResumeSeq = useMemo(
+      () =>
+        workflowExecution?.status === ExecutionStatus.WAITING_FOR_INPUT
+          ? (workflowExecution.resume_seq ?? 0) + 1
+          : undefined,
+      [workflowExecution]
+    );
+
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
       selectedStepExecutionId &&
@@ -284,6 +292,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}
+              expectedResumeSeq={expectedResumeSeq}
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
               shouldAutoResume={shouldAutoResume}

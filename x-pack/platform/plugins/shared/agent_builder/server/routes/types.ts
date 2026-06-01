@@ -19,6 +19,7 @@ import type { AnalyticsService } from '../telemetry';
 
 export interface RouteDependencies {
   router: AgentBuilderRouter;
+  inboxEnabled: boolean;
   logger: Logger;
   coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
   getInternalServices: () => InternalStartServices;

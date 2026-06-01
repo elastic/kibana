@@ -44,6 +44,7 @@ import {
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
 import type { ElasticsearchGraphNode, KibanaGraphNode } from '@kbn/workflows/graph/types';
+import type { HitlAnalytics } from '@kbn/workflows-hitl-telemetry';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
@@ -101,7 +102,8 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
-    private stepIoService: StepIoService
+    private stepIoService: StepIoService,
+    private analytics?: HitlAnalytics
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -351,7 +353,8 @@ export class NodesFactory {
           node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.analytics
         );
       case 'atomic':
         return new AtomicStepImpl(

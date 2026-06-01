@@ -110,7 +110,10 @@
     "@kbn/esql-utils",
     "@kbn/inbox-plugin",
     "@kbn/inbox-common",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/workflows-hitl-common",
+    "@kbn/workflows-hitl-form",
+    "@kbn/workflows-hitl-telemetry"
   ],
   "exclude": ["target/**/*"]
 }

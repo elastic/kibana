@@ -207,6 +207,18 @@ export const createAgentGraph = ({
     if (!isToolPromptAction(lastAction)) {
       throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
     }
+
+    // Register workflow execution IDs so checkBackgroundWork can poll for
+    // their completion after the user submits the HITL form.
+    // Only form prompts carry an execution_id (ConfirmationPrompts do not).
+    if (backgroundExecutionService) {
+      for (const entry of lastAction.prompts) {
+        if (entry.prompt.type === 'form') {
+          backgroundExecutionService.registerWorkflowExecution(entry.prompt.execution_id);
+        }
+      }
+    }
+
     return {
       interrupted: true,
       prompts: lastAction.prompts.map((entry) => entry.prompt),

@@ -41,6 +41,7 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
+  expectedResumeSeq?: number;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
@@ -58,6 +59,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     workflowExecutionDuration,
     isLoadingStepData,
     workflowExecutionStatus,
+    expectedResumeSeq,
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
@@ -189,6 +191,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           workflowExecutionDuration={workflowExecutionDuration}
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
+          expectedResumeSeq={expectedResumeSeq}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
@@ -284,6 +287,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             executionId={workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
                             stepStartedAt={stepExecution?.startedAt}
+                            expectedResumeSeq={expectedResumeSeq}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}

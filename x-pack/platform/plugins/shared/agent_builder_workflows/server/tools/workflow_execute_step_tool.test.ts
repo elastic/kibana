@@ -6,7 +6,10 @@
  */
 
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents/prompts';
+import type {
+  ConfirmationPrompt,
+  ConfirmPromptDefinition,
+} from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type {
@@ -670,7 +673,8 @@ steps:
       tool: BuiltinToolDefinition,
       input: unknown,
       context: unknown
-    ) => (await tool.handler(input as never, context as never)) as ToolHandlerPromptReturn;
+    ): Promise<{ prompt: ConfirmationPrompt }> =>
+      (await tool.handler(input as never, context as never)) as { prompt: ConfirmationPrompt };
 
     it('returns a confirmation prompt the first time an unsafe step is executed', async () => {
       const context = createMockContext(VALID_WORKFLOW_YAML, {

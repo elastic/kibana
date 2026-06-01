@@ -43,12 +43,13 @@ export const createStartServicesMock = () => ({
   licensing: licensingMock.createStart(),
   cloud: cloudMock.createStart(),
   workflowsManagement: {
-    telemetry: {
-      reportEvent: jest.fn(),
-    },
     availability: createAvailabilityServiceMock(),
     globalExecutionsView: {
       enabled: false,
+    },
+    inboxEnabled: false,
+    telemetry: {
+      reportEvent: jest.fn(),
     },
   },
 });

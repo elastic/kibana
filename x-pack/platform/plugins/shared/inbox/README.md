@@ -10,6 +10,12 @@ Inbox is registered as a standalone Kibana app (`/app/inbox`). Solutions that wa
 it in their own navigation can reference the `inbox` deep link id - see the Security Solution
 wiring in `x-pack/solutions/security/plugins/security_solution_{ess,serverless}/public/navigation`.
 
+## HITL rendering integration
+
+The Inbox is one of three surfaces (alongside Agent Builder chat and the Workflows execution view) that can respond to a paused `waitForInput` workflow step. When a workflow pauses, the Inbox flyout renders the same schema-driven `SchemaForm` component from `@kbn/workflows-hitl-form` that Agent Builder uses — ensuring identical field controls and validation. Resume calls are CAS-protected via `WorkflowsInboxProvider`, which reads `resume_seq` from the execution document, stamps `expectedResumeSeq`, and maps a losing CAS (`WorkflowExecutionStaleResumeError`) to a 409 "already responded" toast.
+
+- For the full cross-surface architecture, sequence diagrams, concurrency model, and debug traces, see the [HITL deep-dive — Inbox Changes](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#inbox-changes).
+
 ## Architecture
 
 The feature spans two modules:

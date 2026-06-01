@@ -223,6 +223,13 @@ After hooks run in reverse order:
     hook_1 afterToolCall
 ```
 
+## Human-in-the-loop (HITL) forms
+
+When a `workflow` tool inside an Agent Builder conversation triggers a `waitForInput` step, the chat now renders a schema-driven `SchemaForm` (from `@kbn/workflows-hitl-form`) instead of LLM-authored prose — gated by the `inboxEnabled` feature flag. Every form submission is CAS-protected via `expectedResumeSeq` so concurrent submitters across Agent Builder chat, the Inbox, and the Workflows execution view cannot both advance the same paused step. Stale submissions receive a readonly "Not applied" audit entry; fresh submissions seal the current conversation round and automatically surface the next step's form when the workflow advances.
+
+- [HITL deep-dive — Agent Builder Changes](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#agent-builder-changes) — full server and client walkthrough, sequence diagrams, race-condition analysis, and golden debug traces.
+- [HITL server-helpers map](/x-pack/platform/plugins/shared/agent_builder/server/services/execution/README.md) — quick index of the new HITL helper modules under `server/services/execution/`.
+
 ## MCP Server
 
 The MCP server provides a standardized interface for external MCP clients to access agentBuilder tools. It's available on `/api/agent_builder/mcp` endpoint.

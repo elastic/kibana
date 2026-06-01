@@ -210,8 +210,14 @@ Public HTTP APIs live under `/api/workflows` (space-aware in docs as `/s/{space_
 | GET | `/api/workflows/executions/{executionId}/logs` | Execution logs. |
 | GET | `/api/workflows/executions/{executionId}/step/{stepExecutionId}` | Get a step execution. |
 | POST | `/api/workflows/executions/{executionId}/cancel` | Cancel an execution. |
-| POST | `/api/workflows/executions/{executionId}/resume` | Resume an execution. |
+| POST | `/api/workflows/executions/{executionId}/resume` | Resume an execution. Accepts an optional `expectedResumeSeq` body field for HITL concurrency safety — see note below. |
 | GET | `/api/workflows/executions/{executionId}/trigger_event_trace` | Trigger event trace for an execution. |
+
+### HITL cross-surface resume
+
+The resume route, `WorkflowsInboxProvider` (inbox path), and the execution-view `ResumeExecutionSchemaFormModal` all participate in the cross-surface HITL (Human-in-the-Loop) flow. When `expectedResumeSeq` is present, the engine runs an Elasticsearch Painless compare-and-swap on `resume_seq`; only the first concurrent submitter wins, and losers receive a 409 (`stale_resume` reason code) or a surface-specific stale UX. The `inboxEnabled` feature flag must be active for schema-driven form rendering and CAS protection to apply.
+
+- For the full architecture, concurrency model, and per-surface response behaviour, see the [HITL deep-dive — Workflows Changes](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#workflows-changes).
 
 ### Internal routes
 

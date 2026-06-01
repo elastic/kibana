@@ -8,6 +8,7 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
 import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -54,6 +55,7 @@ export type {
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
+  inbox?: InboxPluginSetup;
   usageApi?: UsageApiSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;

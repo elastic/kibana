@@ -10,17 +10,15 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { WaitForInputStep, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
+import { resolveWaitingInputContext } from './helpers/resolve_waiting_input';
+import type { WaitingInputContext } from './helpers/resolve_waiting_input';
+
+export type {
+  WaitingInputAgentContext,
+  WaitingInputContext,
+} from './helpers/resolve_waiting_input';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
-
-export interface WaitingInputContext {
-  /** Step execution document id for the paused `waitForInput` instance. Compare across status polls. */
-  step_execution_id: string;
-  /** Human-readable prompt from the waitForInput step's `with.message`. */
-  message?: string;
-  /** JSON Schema describing the expected input, from the step's `with.schema`. */
-  schema?: Record<string, unknown>;
-}
 
 export interface WorkflowExecutionState {
   execution_id: string;
@@ -34,6 +32,11 @@ export interface WorkflowExecutionState {
   error_message?: string;
   /** Present when status is WAITING_FOR_INPUT. */
   waiting_input?: WaitingInputContext;
+  /**
+   * Monotonic resume sequence number. Missing on pre-CAS executions; callers
+   * should treat undefined/missing as 0.
+   */
+  resume_seq?: number;
 }
 
 /**
@@ -50,6 +53,9 @@ export const toWorkflowExecutionState = (
     started_at: execution.startedAt,
     finished_at: execution.finishedAt,
     workflow_name: execution.workflowDefinition.name,
+    ...(typeof execution.resume_seq === 'number' && {
+      resume_seq: execution.resume_seq,
+    }),
   };
 
   if (execution.status === ExecutionStatus.COMPLETED) {
@@ -72,12 +78,13 @@ export const toWorkflowExecutionState = (
       );
       const stepConfig =
         step?.type === 'waitForInput' ? (step as WaitForInputStep).with : undefined;
-      const waitContext: WaitingInputContext = {
-        step_execution_id: waitingStep.id,
-        ...(stepConfig?.message && { message: stepConfig.message }),
-        ...(stepConfig?.schema && { schema: stepConfig.schema as Record<string, unknown> }),
-      };
-      state.waiting_input = waitContext;
+
+      state.waiting_input = resolveWaitingInputContext({
+        stepConfig: stepConfig as
+          | { message?: string; schema?: Record<string, unknown> }
+          | undefined,
+        waitingStep: waitingStep as unknown as { id: string; input?: Record<string, unknown> },
+      });
     }
   }
 
@@ -97,6 +104,9 @@ export const getExecutionState = async ({
   workflowApi: WorkflowApi;
 }): Promise<WorkflowExecutionState | null> => {
   const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
+    // includeInput is required so a WAITING_FOR_INPUT execution carries the paused step's input —
+    // the only source of schema/message/agent_context for nested ai.agent HITL steps.
+    includeInput: true,
     includeOutput: true,
   });
   if (!execution) {

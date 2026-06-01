@@ -50,22 +50,39 @@ export interface ToolHandlerStandardReturn<TResult extends ToolResult = ToolResu
 }
 
 /**
+ * Combined return: tool completes with results AND also emits a prompt for the round.
+ * Used when a tool needs to surface both a tool-call result (for MCP / history) and a
+ * HITL prompt (for the chat UI). The workflow tool uses this for WAITING_FOR_INPUT.
+ */
+export interface ToolHandlerResultsWithPromptReturn<TResult extends ToolResult = ToolResult> {
+  results: Array<ToolHandlerResult<TResult>>;
+  prompt: PromptRequest;
+}
+
+/**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
 export type ToolHandlerReturn<TResult extends ToolResult = ToolResult> =
   | ToolHandlerStandardReturn<TResult>
+  | ToolHandlerResultsWithPromptReturn<TResult>
   | ToolHandlerPromptReturn;
 
 export const isToolHandlerInterruptReturn = (
   toolReturn: ToolHandlerReturn
-): toolReturn is ToolHandlerPromptReturn => {
+): toolReturn is ToolHandlerPromptReturn | ToolHandlerResultsWithPromptReturn => {
   return 'prompt' in toolReturn;
+};
+
+export const isToolHandlerResultsWithPromptReturn = <TResult extends ToolResult = ToolResult>(
+  toolReturn: ToolHandlerReturn<TResult>
+): toolReturn is ToolHandlerResultsWithPromptReturn<TResult> => {
+  return 'prompt' in toolReturn && 'results' in toolReturn;
 };
 
 export const isToolHandlerStandardReturn = (
   toolReturn: ToolHandlerReturn
 ): toolReturn is ToolHandlerStandardReturn => {
-  return 'results' in toolReturn;
+  return 'results' in toolReturn && !('prompt' in toolReturn);
 };
 
 /**

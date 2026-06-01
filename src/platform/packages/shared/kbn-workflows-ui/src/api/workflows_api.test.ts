@@ -385,6 +385,25 @@ describe('WorkflowApi', () => {
         version: VERSION,
       });
     });
+
+    it('should include expected_resume_seq in body when expectedResumeSeq is provided', async () => {
+      const input = { answer: 'yes' };
+      await api.resumeExecution('exec-1', { expectedResumeSeq: 3, input });
+
+      expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/resume', {
+        body: JSON.stringify({ expected_resume_seq: 3, input }),
+        version: VERSION,
+      });
+    });
+
+    it('should omit expected_resume_seq from body when expectedResumeSeq is not provided', async () => {
+      const input = { answer: 'yes' };
+      await api.resumeExecution('exec-1', { input });
+
+      const callArgs = (http.post as jest.Mock).mock.calls[0][1];
+      const parsed = JSON.parse(callArgs.body);
+      expect(parsed).not.toHaveProperty('expected_resume_seq');
+    });
   });
 
   describe('getExecutionLogs', () => {

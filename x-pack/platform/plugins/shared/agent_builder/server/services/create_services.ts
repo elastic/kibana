@@ -7,6 +7,7 @@
 
 import type { Runner } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -47,17 +48,23 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
   private readonly config: AgentBuilderConfig;
+  private inboxEnabled = false;
+  private workflowsManagement?: WorkflowsServerPluginSetup;
 
   constructor(config: AgentBuilderConfig) {
     this.config = config;
   }
 
   setupServices({
+    inboxEnabled,
     logger,
     workflowsManagement,
     cloud,
     usageApi,
   }: ServiceSetupDeps): InternalSetupServices {
+    this.inboxEnabled = inboxEnabled ?? false;
+    this.workflowsManagement = workflowsManagement;
+
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -73,6 +80,7 @@ export class ServiceManager {
 
     this.internalSetup = {
       tools: this.services.tools.setup({
+        inboxEnabled: this.inboxEnabled,
         logger: logger.get('tools'),
         workflowsManagement,
         config: this.config,
@@ -172,6 +180,7 @@ export class ServiceManager {
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
+      inboxEnabled: this.inboxEnabled,
       security,
       elasticsearch,
       uiSettings,
@@ -189,6 +198,7 @@ export class ServiceManager {
       hooks,
       getExecutionService,
       searchInferenceEndpoints,
+      workflowsManagement: this.workflowsManagement,
     });
     runner = runnerFactory.getRunner();
 

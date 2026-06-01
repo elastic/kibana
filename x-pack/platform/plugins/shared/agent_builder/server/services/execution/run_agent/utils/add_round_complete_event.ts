@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -25,6 +26,7 @@ import type {
   BackgroundAgentCompleteStep,
   TodosStep,
 } from '@kbn/agent-builder-common';
+import type { FormPromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -33,7 +35,9 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   ConversationRoundStatus,
+  isHitlFormResponseStaleStepData,
   isMessageCompleteEvent,
+  isOtherStep,
   isThinkingCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
@@ -51,6 +55,7 @@ import type {
   ConversationInternalState,
   RoundModelUsageStats,
 } from '@kbn/agent-builder-common/chat';
+import type { Logger } from '@kbn/logging';
 import type {
   ConversationStateManager,
   ModelProvider,
@@ -72,6 +77,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 
 export const addRoundCompleteEvent = ({
   pendingRound,
+  pendingFormPrompts,
   userInput,
   startTime,
   endTime,
@@ -83,8 +89,15 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  logger,
 }: {
   pendingRound: ConversationRound | undefined;
+  /**
+   * FormPromptRequests for the next waitForInput steps collected from resumedStates
+   * (nextFormPrompt). These are merged into the new round's pending_prompts so
+   * the client renders the next form without waiting for another LLM round.
+   */
+  pendingFormPrompts?: FormPromptRequest[];
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
@@ -99,6 +112,8 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Optional logger for [hitl-debug] instrumentation. */
+  logger?: Logger;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -107,6 +122,13 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
+          logger?.debug(
+            () =>
+              `[hitl-debug][ab] addRound.start pendingFormPrompts=${
+                pendingFormPrompts?.length ?? 0
+              }`
+          );
+
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const round = pendingRound
             ? resumeRound({
@@ -132,6 +154,60 @@ export const addRoundCompleteEvent = ({
                 compactionResult,
                 initialTodos,
               });
+
+          // Evict any pending_prompts whose step_execution_id matches a hitl_form_response_stale
+          // audit step — the user submitted that form but it was rejected (CAS miss). Leaving
+          // the stale form in pending_prompts would cause it to re-appear as an active input
+          // alongside the freshly-advanced step, trapping the user in an infinite submit loop.
+          const staleStepIds = new Set(
+            round.steps
+              .filter((s) => isOtherStep(s) && isHitlFormResponseStaleStepData(s))
+              .map((s) => s.step_execution_id)
+          );
+          if (staleStepIds.size > 0 && round.pending_prompts?.length) {
+            round.pending_prompts = round.pending_prompts.filter((p) => !staleStepIds.has(p.id));
+            logger?.debug(
+              () =>
+                `[hitl-debug][ab] addRound.evictStale count=${staleStepIds.size} remaining=${
+                  round.pending_prompts?.length ?? 0
+                }`
+            );
+          }
+
+          // Merge server-polled next-step form prompts (from resumedStates.nextFormPrompt)
+          // into pending_prompts. Deduplicate by step_execution_id to avoid double-rendering
+          // when the tool call path and the poll path both see the same step.
+          if (pendingFormPrompts?.length) {
+            const existingIds = new Set((round.pending_prompts ?? []).map((p) => p.id));
+            const newPrompts = pendingFormPrompts.filter((p) => !existingIds.has(p.id));
+            const pre = round.pending_prompts?.length ?? 0;
+            if (newPrompts.length > 0) {
+              const merged = [...(round.pending_prompts ?? []), ...newPrompts];
+              round.pending_prompts = merged;
+              round.status = ConversationRoundStatus.awaitingPrompt;
+              logger?.debug(
+                () =>
+                  `[hitl-debug][ab] addRound.merge pre=${pre} post=${
+                    merged.length
+                  } dedupedIds=${newPrompts.map((p) => p.step_execution_id).join(',')}`
+              );
+              logger?.debug(
+                () => `[hitl-debug][ab] addRound.awaitingPrompt roundStatus=awaitingPrompt`
+              );
+            } else {
+              logger?.debug(
+                () =>
+                  `[hitl-debug][ab] addRound.merge pre=${pre} post=${pre} dedupedIds=(all_dupes)`
+              );
+            }
+          } else {
+            logger?.debug(
+              () =>
+                `[hitl-debug][ab] addRound.merge pre=${round.pending_prompts?.length ?? 0} post=${
+                  round.pending_prompts?.length ?? 0
+                } dedupedIds=(none)`
+            );
+          }
 
           round.state = buildRoundState({ round, events, stateManager });
 
@@ -205,6 +281,13 @@ const resumeRound = ({
   return mergeRounds(pendingRound, followUp);
 };
 
+const staleFormFallbackMessage = i18n.translate(
+  'xpack.agentBuilder.hitl.staleFormResponseFallback',
+  {
+    defaultMessage: 'Your input has been recorded. The workflow continued without it.',
+  }
+);
+
 const mergeRounds = (previous: ConversationRound, next: ConversationRound): ConversationRound => {
   let traceId: string[] | undefined;
   if (previous.trace_id || next.trace_id) {
@@ -218,10 +301,27 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     ];
   }
 
+  // When the agent run does not produce new prompt requests, inherit any pending_prompts
+  // that were written to the DB during resumeFormPrompts (e.g. a newly advanced HITL step).
+  const mergedPendingPrompts =
+    next.pending_prompts ??
+    (previous.pending_prompts?.length ? previous.pending_prompts : undefined);
+  const mergedStatus = mergedPendingPrompts?.length
+    ? ConversationRoundStatus.awaitingPrompt
+    : next.status;
+
+  // When the LLM produces no narration on the stale HITL path, use a deterministic
+  // fallback so slot 4 (RoundResponse) is never left blank after the refetch.
+  const hasStaleFormStep = previous.steps.some(
+    (step) => isOtherStep(step) && isHitlFormResponseStaleStepData(step)
+  );
+  const responseMessage =
+    next.response.message || (hasStaleFormStep ? staleFormFallbackMessage : '');
+
   const mergedRound: ConversationRound = {
     id: previous.id,
-    status: next.status,
-    pending_prompts: next.pending_prompts,
+    status: mergedStatus,
+    pending_prompts: mergedPendingPrompts,
     state: undefined, // state is recomputed after the merge
     input: mergeRoundInput(previous.input, next.input),
     steps: [...previous.steps, ...next.steps],
@@ -230,7 +330,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_first_token: previous.time_to_first_token + next.time_to_first_token,
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
-    response: next.response,
+    response: { ...next.response, message: responseMessage },
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 

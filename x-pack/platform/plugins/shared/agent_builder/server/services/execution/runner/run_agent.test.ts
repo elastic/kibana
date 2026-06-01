@@ -8,7 +8,7 @@
 import type { ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
 
 import { RunnerManager } from './runner';
-import { runAgent } from './run_agent';
+import { createAgentHandlerContext, runAgent } from './run_agent';
 import type {
   CreateScopedRunnerDepsMock,
   MockedInternalAgent,
@@ -136,5 +136,44 @@ describe('runAgent', () => {
     });
 
     expect(result).toEqual({ success: true, data: { foo: 'bar' } });
+  });
+});
+
+describe('createAgentHandlerContext', () => {
+  let runnerDeps: CreateScopedRunnerDepsMock;
+  const agentExecutionParams: ScopedRunnerRunAgentParams = {
+    agentId: 'test-agent',
+    agentParams: { nextInput: { message: 'hi' } },
+  };
+
+  beforeEach(() => {
+    runnerDeps = createScopedRunnerDepsMock();
+  });
+
+  it('sets workflowExecutionPoller when inboxEnabled is true and workflowsManagement is provided', async () => {
+    const workflowsManagement = { management: { getWorkflowExecution: jest.fn() } } as any;
+    const manager = new RunnerManager({ ...runnerDeps, inboxEnabled: true, workflowsManagement });
+
+    const context = await createAgentHandlerContext({ agentExecutionParams, manager });
+
+    expect(context.workflowExecutionPoller).toBeDefined();
+    expect(typeof context.workflowExecutionPoller).toBe('function');
+  });
+
+  it('leaves workflowExecutionPoller undefined when inboxEnabled is false', async () => {
+    const workflowsManagement = { management: { getWorkflowExecution: jest.fn() } } as any;
+    const manager = new RunnerManager({ ...runnerDeps, inboxEnabled: false, workflowsManagement });
+
+    const context = await createAgentHandlerContext({ agentExecutionParams, manager });
+
+    expect(context.workflowExecutionPoller).toBeUndefined();
+  });
+
+  it('leaves workflowExecutionPoller undefined when workflowsManagement is absent', async () => {
+    const manager = new RunnerManager({ ...runnerDeps, inboxEnabled: true });
+
+    const context = await createAgentHandlerContext({ agentExecutionParams, manager });
+
+    expect(context.workflowExecutionPoller).toBeUndefined();
   });
 });

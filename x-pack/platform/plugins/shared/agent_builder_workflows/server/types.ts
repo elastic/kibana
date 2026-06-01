@@ -11,10 +11,12 @@ import type {
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentContextLayer: AgentContextLayerPluginSetup;
+  inbox?: InboxPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 

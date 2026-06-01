@@ -16,9 +16,12 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  isBackgroundAgentCompleteStep,
+  isHitlFormResponseFreshStepData,
+  isHitlFormResponseStaleStepData,
+  isOtherStep,
   isReasoningStep,
   isToolCallStep,
-  isBackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -29,7 +32,11 @@ import {
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatSystemNotice } from '../prompts/utils/actions';
+import {
+  formatFreshHitlSubmissionNotice,
+  formatStaleHitlSubmissionNotice,
+  formatSystemNotice,
+} from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
@@ -73,10 +80,43 @@ export const convertPreviousRounds = async ({
 
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
+  //
+  // Stage 2 HITL: also exclude a sealed form-submission round (status=completed but has a
+  // hitl_form_response[_stale] step). handleFormPromptResponse seals the round before
+  // executeAgent runs, so createInitializerCommand can still set up mainActions from it and
+  // addRoundCompleteEvent creates a fresh round instead of merging.
   const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
-  if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
+  const submissionNotices: BaseMessage[] = [];
+  const isFormSubmissionSealedRound =
+    lastRound?.status === ConversationRoundStatus.completed &&
+    lastRound.steps.some(
+      (s) =>
+        isOtherStep(s) && (isHitlFormResponseFreshStepData(s) || isHitlFormResponseStaleStepData(s))
+    );
+  if (
+    lastRound &&
+    (lastRound.status === ConversationRoundStatus.awaitingPrompt || isFormSubmissionSealedRound)
+  ) {
     rounds = rounds.slice(0, rounds.length - 1);
-    input = lastRound.input;
+    // Only inherit lastRound.input when the current request carries actual user text.
+    // For pure form submissions (nextInput.message is empty), keep nextInput so
+    // formatRoundInput produces '[Form data submitted]' rather than echoing the
+    // original "run workflow" message — which would make the LLM believe the user
+    // just triggered a new workflow start instead of submitting a form.
+    if (conversation.nextInput.message) {
+      input = lastRound.input;
+    }
+    // The excluded round may contain submission audit steps the LLM must see.
+    // Lift both fresh and stale notices so they reach the LLM context.
+    for (const step of lastRound.steps) {
+      if (isOtherStep(step)) {
+        if (isHitlFormResponseFreshStepData(step)) {
+          submissionNotices.push(createUserMessage(formatFreshHitlSubmissionNotice(step)));
+        } else if (isHitlFormResponseStaleStepData(step)) {
+          submissionNotices.push(createUserMessage(formatStaleHitlSubmissionNotice(step)));
+        }
+      }
+    }
   }
 
   // Inject compaction summary as a user/assistant exchange before remaining rounds
@@ -90,7 +130,11 @@ export const convertPreviousRounds = async ({
     messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
+  // User input comes first, then submission notices so the LLM sees the chronological
+  // sequence: user submitted form → [tool call] → notice about what happened to the submission.
   messages.push(formatRoundInput({ input }));
+
+  messages.push(...submissionNotices);
 
   return messages;
 };
@@ -116,6 +160,10 @@ export const roundToLangchain = async (
     for (const step of round.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isOtherStep(step) && isHitlFormResponseFreshStepData(step)) {
+        messages.push(createUserMessage(formatFreshHitlSubmissionNotice(step)));
+      } else if (isOtherStep(step) && isHitlFormResponseStaleStepData(step)) {
+        messages.push(createUserMessage(formatStaleHitlSubmissionNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
         const group = groups[groupIndex];
@@ -131,8 +179,11 @@ export const roundToLangchain = async (
     }
   }
 
-  // assistant response
-  messages.push(formatAssistantResponse({ response: round.response }));
+  // assistant response — omit when empty (no tool_calls and empty content would be rejected by providers)
+  const assistantMessage = formatAssistantResponse({ response: round.response });
+  if (assistantMessage) {
+    messages.push(assistantMessage);
+  }
 
   return messages;
 };
@@ -140,7 +191,12 @@ export const roundToLangchain = async (
 const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
   const { message, attachments } = input;
 
-  let content = message;
+  // The Anthropic API rejects HumanMessages with empty content. This happens
+  // during HITL form-submission resumption when the user submits a form with
+  // no text (e.g. the second step of a multi-step approval). Use a descriptive
+  // placeholder — the established HITL convention across Anthropic/OpenAI/LangGraph —
+  // so the LLM has a semantic cue about why the turn has no user text.
+  let content = message || '[Form data submitted]';
 
   if (attachments.length > 0) {
     const attachmentsXml = generateXmlTree(
@@ -168,7 +224,14 @@ const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): 
   };
 };
 
-const formatAssistantResponse = ({ response }: { response: AssistantResponse }): AIMessage => {
+const formatAssistantResponse = ({
+  response,
+}: {
+  response: AssistantResponse;
+}): AIMessage | undefined => {
+  if (!response.message.trim()) {
+    return undefined;
+  }
   return createAIMessage(response.message);
 };
 

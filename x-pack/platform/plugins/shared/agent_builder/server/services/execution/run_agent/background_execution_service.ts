@@ -9,6 +9,7 @@ import pLimit from 'p-limit';
 import { ExecutionStatus, isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
+import type { createHitlWorkflowChecker } from './hitl_workflow_executions';
 
 const TERMINAL_STATUSES = new Set<string>([
   ExecutionStatus.completed,
@@ -21,14 +22,18 @@ const COMPLETION_CHECK_CONCURRENCY = 5;
 export class BackgroundExecutionService {
   private state: Record<string, BackgroundExecutionState>;
   private readonly subAgentExecutor: SubAgentExecutor;
+  private readonly hitlWorkflowChecker: ReturnType<typeof createHitlWorkflowChecker> | undefined;
 
   constructor({
+    hitlWorkflowChecker,
     subAgentExecutor,
     initialState = {},
   }: {
+    hitlWorkflowChecker?: ReturnType<typeof createHitlWorkflowChecker>;
     subAgentExecutor: SubAgentExecutor;
     initialState?: Record<string, BackgroundExecutionState>;
   }) {
+    this.hitlWorkflowChecker = hitlWorkflowChecker;
     this.subAgentExecutor = subAgentExecutor;
     this.state = { ...initialState };
   }
@@ -39,6 +44,12 @@ export class BackgroundExecutionService {
       execution_id: executionId,
       status: ExecutionStatus.running,
     };
+  }
+
+  /** Register a HITL workflow execution to be polled after resumeWorkflowExecution. */
+  registerWorkflowExecution(executionId: string): void {
+    if (!this.hitlWorkflowChecker) return;
+    this.state[executionId] = this.hitlWorkflowChecker.register(executionId);
   }
 
   /** Check all pending executions for completion. Returns newly completed ones. */
@@ -58,6 +69,10 @@ export class BackgroundExecutionService {
     const results = await Promise.all(
       pending.map((entry) =>
         limit(async (): Promise<BackgroundExecutionState | undefined> => {
+          if (entry.kind === 'hitl_workflow' && this.hitlWorkflowChecker) {
+            return this.hitlWorkflowChecker.check(entry, { roundId, toolCallGroupId });
+          }
+
           const execution = await this.subAgentExecutor.getExecution(entry.execution_id);
           if (!execution || !TERMINAL_STATUSES.has(execution.status)) {
             return undefined;

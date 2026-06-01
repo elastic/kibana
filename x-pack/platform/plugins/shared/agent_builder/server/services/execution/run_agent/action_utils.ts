@@ -14,7 +14,10 @@ import {
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
-import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerInterruptReturn,
+  isToolHandlerResultsWithPromptReturn,
+} from '@kbn/agent-builder-server/tools';
 import type {
   ToolCallAction,
   HandoverAction,
@@ -84,6 +87,11 @@ export const processToolNodeResponse = (
     const result: ToolHandlerReturn | undefined = msg.artifact;
     if (result && isToolHandlerInterruptReturn(result)) {
       interruptMessages.push(msg);
+      // Combined return (results + prompt): also record as completed so the tool-call
+      // step carries the execution result in conversation history (MCP path).
+      if (isToolHandlerResultsWithPromptReturn(result)) {
+        completedMessages.push(msg);
+      }
     } else {
       completedMessages.push(msg);
     }

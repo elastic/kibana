@@ -135,6 +135,7 @@ export interface WorkflowExecutionLogsResponse {
 }
 
 export interface ResumeExecutionParams {
+  expectedResumeSeq?: number;
   input: Record<string, unknown>;
 }
 

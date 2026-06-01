@@ -20,6 +20,19 @@ import type {
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
+ * Serializable snapshot of a resumed form-prompt execution, computed server-side by
+ * resumeFormPrompts and threaded into the agent run so roundToActions can refresh stale
+ * workflow tool results before the LLM re-processes them.
+ */
+export interface ResumedExecutionState {
+  execution_id: string;
+  observedStatus: string;
+  /** Full execution state as returned by getExecutionState; null when the workflow
+   *  was stale (workflow_already_resolved / workflow_advanced_to_new_prompt). */
+  observedExecution: unknown;
+}
+
+/**
  * Common execution parameters shared between conversation and standalone modes.
  */
 export interface BaseExecutionParams {
@@ -55,6 +68,9 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /** Resolved states from resumed form prompts, threaded through so the agent run can
+   *  refresh stale workflow tool results via roundToActions. */
+  resumedStates?: ResumedExecutionState[];
 }
 
 /**

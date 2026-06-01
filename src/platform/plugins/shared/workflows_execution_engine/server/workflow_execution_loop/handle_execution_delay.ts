@@ -61,6 +61,22 @@ export async function handleExecutionDelay(
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
     stepStatus === ExecutionStatus.WAITING_FOR_CHILD
   ) {
+    // A concurrent timeout monitor may have already called markWorkflowTimeouted(),
+    // setting finishedAt before this step's run() completed. Don't overwrite that
+    // terminal state with a waiting status — the partial ES update would leave
+    // finishedAt set while status reverts to waiting_for_input, which breaks resume.
+    if (workflowExecution.finishedAt) {
+      return;
+    }
+
+    // Flush the paused step's IO (input with schema/message/agent_context) to ES
+    // BEFORE the workflow-execution doc gains status=WAITING_FOR_INPUT.  Without
+    // this, flushWorkflowDoc() and flushStepChanges() run concurrently inside the
+    // same Promise.all in flush(), and a poller that observes WAITING_FOR_INPUT on
+    // the workflow doc may read the step doc before the schema-carrying input has
+    // landed — producing an empty schema in the nested HITL path.
+    await params.stepIoService.flushStepChanges();
+
     params.workflowExecutionState.updateWorkflowExecution({
       status: stepStatus,
     });

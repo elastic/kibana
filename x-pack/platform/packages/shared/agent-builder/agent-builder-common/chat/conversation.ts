@@ -15,7 +15,13 @@ import type {
   AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
-import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type {
+  AgentContext,
+  FormPromptResponse,
+  PromptRequest,
+  PromptResponse,
+  PromptStorageState,
+} from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
 
@@ -57,6 +63,12 @@ export interface ConverseInput {
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
+   * Responses to form prompts (HITL workflow inputs). Answered out-of-band via
+   * resumeWorkflowExecution; included here so preflight checks can verify that
+   * all pending form prompts have been responded to.
+   */
+  form_prompts?: FormPromptResponse[];
+  /**
    * Response from the user to prompt requests.
    */
   prompts?: Record<string, PromptResponse>;
@@ -74,10 +86,11 @@ export interface AssistantResponse {
 }
 
 export enum ConversationRoundStepType {
-  toolCall = 'tool_call',
-  reasoning = 'reasoning',
-  compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
+  compaction = 'compaction',
+  other = 'other',
+  reasoning = 'reasoning',
+  toolCall = 'tool_call',
   updateTodos = 'update_todos',
 }
 
@@ -245,12 +258,63 @@ export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | un
   return hasIncomplete ? todos : undefined;
 };
 
+export interface HitlFormResponseFreshStepData {
+  kind: 'hitl_form_response';
+  agent_context?: AgentContext;
+  execution_id: string;
+  message?: string;
+  schema?: Record<string, unknown>;
+  step_execution_id: string;
+  submitted_at: string;
+  values: Record<string, unknown>;
+}
+
+export type StaleSubmissionReason =
+  | 'concurrent_resume'
+  | 'workflow_advanced'
+  | 'workflow_already_resolved';
+
+export interface HitlFormResponseStaleStepData {
+  kind: 'hitl_form_response_stale';
+  agent_context?: AgentContext;
+  execution_id: string;
+  message?: string;
+  observed_status: string;
+  reason: StaleSubmissionReason;
+  schema?: Record<string, unknown>;
+  step_execution_id: string;
+  submitted_at: string;
+  submitted_values: Record<string, unknown>;
+}
+
+export type HitlFormResponseStepData =
+  | HitlFormResponseFreshStepData
+  | HitlFormResponseStaleStepData;
+
+export const isHitlFormResponseFreshStepData = (
+  data: HitlFormResponseStepData
+): data is HitlFormResponseFreshStepData => data.kind === 'hitl_form_response';
+
+export const isHitlFormResponseStaleStepData = (
+  data: HitlFormResponseStepData
+): data is HitlFormResponseStaleStepData => data.kind === 'hitl_form_response_stale';
+
+export type OtherStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.other,
+  HitlFormResponseStepData
+>;
+
+export const isOtherStep = (step: ConversationRoundStep): step is OtherStep => {
+  return step.type === ConversationRoundStepType.other;
+};
+
 export type ConversationRoundStep =
-  | ToolCallStep
-  | ReasoningStep
-  | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep;
+  | CompactionStep
+  | OtherStep
+  | ReasoningStep
+  | TodosStep
+  | ToolCallStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -395,6 +459,13 @@ export interface BackgroundExecutionState {
   error?: SerializedExecutionError;
   /** When and where the execution completed, for positioning the notification. */
   completed_at?: BackgroundExecutionCompletedAt;
+  /**
+   * Discriminates subagent executions from HITL workflow executions.
+   * Absent or 'subagent' means a background sub-agent; 'hitl_workflow' means
+   * a paused workflow execution waiting for the workflow engine to finish
+   * after the user submitted a form prompt.
+   */
+  kind?: 'subagent' | 'hitl_workflow';
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

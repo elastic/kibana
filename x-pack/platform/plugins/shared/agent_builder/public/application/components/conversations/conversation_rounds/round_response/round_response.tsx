@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type {
-  AssistantResponse,
-  ConversationRound,
-  ConversationRoundStep,
-} from '@kbn/agent-builder-common';
+import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
@@ -21,7 +17,6 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
-import { StepItem } from '../round_events/step_item';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -29,30 +24,24 @@ export interface RoundResponseProps {
   isLoading: boolean;
   hasError: boolean;
   isLastRound: boolean;
-  latestStep?: ConversationRoundStep;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  rawRound: ConversationRound;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
-  hasError,
-  response,
-  steps,
-  isLoading,
-  isLastRound,
-  latestStep,
-  conversationAttachments,
   attachmentRefs,
+  conversationAttachments,
   conversationId,
-  rawRound,
+  hasError,
+  isLastRound,
+  isLoading,
+  response: { message },
+  steps,
 }) => {
-  const hasMessage = Boolean(response.message);
-
-  const showStreamingText = isLoading && hasMessage;
-  const liveStep = isLoading ? latestStep : undefined;
-  const showCompletedAnswer = !isLoading;
+  if (!message && !isLoading && !hasError) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup
@@ -67,39 +56,27 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       `}
     >
       <EuiFlexItem>
-        {showStreamingText ? (
+        {isLoading ? (
           <StreamingText
-            content={response.message}
-            steps={steps}
-            conversationAttachments={conversationAttachments}
             attachmentRefs={attachmentRefs}
+            content={message}
+            conversationAttachments={conversationAttachments}
             conversationId={conversationId}
+            steps={steps}
           />
-        ) : liveStep ? (
-          <StepItem step={liveStep} />
-        ) : showCompletedAnswer ? (
+        ) : (
           <ChatMessageText
-            content={response.message}
-            steps={steps}
-            conversationAttachments={conversationAttachments}
             attachmentRefs={attachmentRefs}
+            content={message}
+            conversationAttachments={conversationAttachments}
             conversationId={conversationId}
+            steps={steps}
           />
-        ) : null}
+        )}
       </EuiFlexItem>
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingElastic size="l" aria-label="Streaming response" />
-        </EuiFlexItem>
-      )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions
-            content={response.message}
-            isVisible
-            isLastRound={isLastRound}
-            rawRound={rawRound}
-          />
+          <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

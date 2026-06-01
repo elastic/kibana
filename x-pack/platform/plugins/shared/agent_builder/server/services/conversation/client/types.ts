@@ -6,15 +6,16 @@
  */
 
 import type {
-  ConversationRound,
-  ToolCallWithResult,
-  ConversationRoundStepMixin,
-  ReasoningStep,
-  CompactionStep,
-  BackgroundAgentCompleteStep,
-  TodosStep,
-  ConversationRoundStepType,
   Conversation,
+  BackgroundAgentCompleteStep,
+  CompactionStep,
+  ConversationRound,
+  ConversationRoundStepMixin,
+  ConversationRoundStepType,
+  OtherStep,
+  ReasoningStep,
+  TodosStep,
+  ToolCallWithResult,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
@@ -52,10 +53,11 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
  * A union of all possible persistent step types.
  */
 export type PersistentConversationRoundStep =
+  | BackgroundAgentCompleteStep
+  | CompactionStep
+  | OtherStep
   | PersistentToolCallStep
   | ReasoningStep
-  | CompactionStep
-  | BackgroundAgentCompleteStep
   | TodosStep;
 
 /**

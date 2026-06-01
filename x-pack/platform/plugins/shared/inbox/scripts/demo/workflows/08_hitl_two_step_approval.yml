@@ -1,0 +1,36 @@
+# HITL demo — two sequential waitForInput steps
+# Mirrors the pattern exercised by the Scout HITL tests
+# (converse_hitl_inbox.spec.ts / makeHitlTwoStepWorkflowYaml).
+name: hitl-demo-two-step-approval
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_approval
+    type: waitForInput
+    with:
+      message: "Please approve this action"
+      schema:
+        type: object
+        properties:
+          approved:
+            type: boolean
+            title: Approve action
+        required:
+          - approved
+  - name: ask_confirmation
+    type: waitForInput
+    with:
+      message: "Please confirm the action"
+      schema:
+        type: object
+        properties:
+          confirmed:
+            type: boolean
+            title: Confirm action
+        required:
+          - confirmed
+  - name: log_result
+    type: console
+    with:
+      message: "Approved: {{ steps.ask_approval.output.approved }}, Confirmed: {{ steps.ask_confirmation.output.confirmed }}"

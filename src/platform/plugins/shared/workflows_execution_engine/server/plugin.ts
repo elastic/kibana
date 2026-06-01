@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type {
+  AnalyticsServiceSetup,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -27,7 +28,9 @@ import type {
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
+  WorkflowExecutionStaleResumeError,
 } from '@kbn/workflows/common/errors';
+import { HITL_EVENT_TYPES } from '@kbn/workflows-hitl-telemetry';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -81,10 +84,7 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import {
-  getWorkflowGlobalTimeoutResumeTaskId,
-  WorkflowTaskManager,
-} from './workflow_task_manager/workflow_task_manager';
+import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
@@ -148,6 +148,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
+    this.registerHitlEventTypes(core.analytics);
 
     const logger = this.logger;
     const config = this.config;
@@ -1217,7 +1218,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       input,
-      request
+      request,
+      options
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -1232,6 +1234,30 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        // When the caller opted into CAS (i.e. provided expectedResumeSeq), a
+        // non-waiting status means another resume already advanced/resolved the
+        // execution — the TaskManager task finished before our resume arrived
+        // ("Window 2" race). Surface this as a stale-resume error so every
+        // CAS-protected call site (Agent Builder chat, Inbox, execution view) can
+        // handle it uniformly through their existing stale-UX path.
+        // For the legacy unconditional-resume path (no expectedResumeSeq), preserve
+        // the original WorkflowExecutionInvalidStatusError so existing non-CAS
+        // callers and the route error mapping are unaffected.
+        if (options?.expectedResumeSeq !== undefined) {
+          this.logger.debug(
+            () =>
+              `[hitl-debug][wf] cas.staleStatus exec=${executionId} status=${
+                workflowExecution.status
+              } expectedSeq=${options.expectedResumeSeq} currentSeq=${
+                workflowExecution.resume_seq ?? -1
+              }`
+          );
+          throw new WorkflowExecutionStaleResumeError(
+            executionId,
+            options.expectedResumeSeq,
+            typeof workflowExecution.resume_seq === 'number' ? workflowExecution.resume_seq : -1
+          );
+        }
         throw new WorkflowExecutionInvalidStatusError(
           executionId,
           workflowExecution.status,
@@ -1239,17 +1265,34 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      // Freshness guard: a waitForInput step whose parent workflow already
-      // terminated (timeout, cancel, external failure) can leave the execution
-      // doc with `status: waiting_for_input` but `finishedAt` set — writing
-      // resumeInput and scheduling a resume task in that state is a no-op that
-      // silently swallows the analyst's response. Reject explicitly so the
-      // caller sees a 409 and the Inbox provider can surface a real error.
-      if (workflowExecution.finishedAt) {
-        throw new WorkflowExecutionInvalidStatusError(
-          executionId,
-          `${workflowExecution.status} (already finished at ${workflowExecution.finishedAt})`,
-          ExecutionStatus.WAITING_FOR_INPUT
+      // Atomic CAS on resume_seq. Modern callers (agent_builder HITL) pass
+      // `expectedResumeSeq`; we reject stale resumes here rather than racing the
+      // workflow task manager and trying to reconcile contradictory ES state
+      // after the fact. Callers that omit `expectedResumeSeq` use the legacy
+      // path (no concurrency protection) for backward compatibility.
+      if (options?.expectedResumeSeq !== undefined) {
+        const expectedSeq = options.expectedResumeSeq;
+        this.logger.debug(
+          () =>
+            `[hitl-debug][wf] cas.attempt exec=${executionId} seq=${expectedSeq} stepId=(none) expectedSeq=${expectedSeq}`
+        );
+        const cas = await workflowExecutionRepository.casIncrementResumeSeq({
+          id: executionId,
+          spaceId,
+          expectedSeq,
+        });
+        if (!cas.won) {
+          this.logger.debug(
+            () =>
+              `[hitl-debug][wf] cas.fail exec=${executionId} seq=${expectedSeq} stepId=(none) expectedSeq=${expectedSeq} currentSeq=${cas.currentSeq}`
+          );
+          throw new WorkflowExecutionStaleResumeError(executionId, expectedSeq, cas.currentSeq);
+        }
+        this.logger.debug(
+          () =>
+            `[hitl-debug][wf] cas.success exec=${executionId} seq=${expectedSeq} stepId=(none) oldSeq=${
+              expectedSeq - 1
+            } newSeq=${expectedSeq}`
         );
       }
 
@@ -1284,24 +1327,24 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
-      await workflowTaskManager.scheduleImmediateResume({
+      const { taskId } = await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
       });
 
-      await plugins.taskManager
-        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
-        .catch((error: unknown) => {
-          this.logger.warn(
-            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-
-      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      // Run only the newly-created task immediately. Using forceRunIdleTasks would
+      // run ALL idle tasks for this execution concurrently — including pre-existing
+      // timeout-resume tasks — which causes concurrent task execution and leaves the
+      // ES execution doc in contradictory state (finishedAt set while
+      // status=WAITING_FOR_INPUT). Target the specific task we just created instead.
+      await workflowTaskManager.runTaskSoon(taskId).catch((err: unknown) => {
+        this.logger.warn(
+          `Failed to runSoon task ${taskId} for execution ${executionId}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
@@ -1472,6 +1515,52 @@ export class WorkflowsExecutionEnginePlugin
         this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
       }
       return true; // On error, allow execution to proceed
+    }
+  }
+
+  private registerHitlEventTypes(analytics: AnalyticsServiceSetup): void {
+    const hitlEventSchema = {
+      event_type: {
+        type: 'keyword' as const,
+        _meta: { description: 'HITL event type', optional: false as const },
+      },
+      source_app: {
+        type: 'keyword' as const,
+        _meta: { description: 'Application that emitted the event', optional: false as const },
+      },
+      responseSource: {
+        type: 'keyword' as const,
+        _meta: {
+          description: 'Channel/origin of the HITL response (chat, inbox, unknown)',
+          optional: false as const,
+        },
+      },
+      workflow_id: {
+        type: 'keyword' as const,
+        _meta: { description: 'Workflow definition ID', optional: true as const },
+      },
+      execution_id: {
+        type: 'keyword' as const,
+        _meta: { description: 'Workflow execution ID', optional: false as const },
+      },
+      step_execution_id: {
+        type: 'keyword' as const,
+        _meta: { description: 'Step execution ID', optional: true as const },
+      },
+      response_latency_ms: {
+        type: 'long' as const,
+        _meta: {
+          description: 'Time in ms from hitl.created to hitl.responded',
+          optional: true as const,
+        },
+      },
+    };
+
+    for (const eventType of Object.values(HITL_EVENT_TYPES)) {
+      analytics.registerEventType({
+        eventType,
+        schema: hitlEventSchema as Parameters<typeof analytics.registerEventType>[0]['schema'],
+      });
     }
   }
 }

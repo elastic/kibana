@@ -9,6 +9,7 @@
 
 import type { InboxAction } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { parseAgentContext } from '@kbn/workflows-hitl-common';
 
 /**
  * Composite identifier that makes a Workflows step execution uniquely
@@ -49,6 +50,7 @@ export const parseWorkflowSourceId = (
  */
 export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
   const input = (step.input ?? {}) as {
+    agent_context?: unknown;
     message?: unknown;
     schema?: unknown;
   };
@@ -59,6 +61,13 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
       ? (input.schema as Record<string, unknown>)
       : undefined;
 
+  const agentContext = parseAgentContext(input.agent_context);
+
+  const baseDescription = `Workflow ${step.workflowId} — step "${step.stepId}"`;
+  const description = agentContext
+    ? `${baseDescription} — Why: ${agentContext.reasoning} (via ${agentContext.intended_tool})`
+    : baseDescription;
+
   return {
     id: buildWorkflowSourceId(step),
     source_app: 'workflows',
@@ -66,7 +75,7 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
     status: 'pending',
     // Short summary: prefer the rendered message, fall back to step id.
     title: message ?? `Step "${step.stepId}" is waiting for input`,
-    description: `Workflow ${step.workflowId} — step "${step.stepId}"`,
+    description,
     input_message: message,
     input_schema: schema,
     created_at: step.startedAt,

@@ -262,9 +262,16 @@ export class WorkflowApi {
     );
   }
 
-  async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
+  async resumeExecution(
+    executionId: string,
+    { expectedResumeSeq, input }: ResumeExecutionParams
+  ): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
-      body: JSON.stringify({ input }),
+      body: JSON.stringify(
+        expectedResumeSeq !== undefined
+          ? { expected_resume_seq: expectedResumeSeq, input }
+          : { input }
+      ),
       version: API_VERSION,
     });
   }

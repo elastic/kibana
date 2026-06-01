@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
 import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import type { FormPromptRequest } from '@kbn/agent-builder-common/agents';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
@@ -20,8 +23,10 @@ import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
 
 export const getWorkflowToolType = ({
+  inboxEnabled,
   workflowsManagement,
 }: {
+  inboxEnabled?: boolean;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): AnyToolTypeDefinition<ToolType.workflow, WorkflowToolConfig, z.ZodObject<any>> => {
   // workflow plugin not present - we disable the workflow tool type
@@ -37,7 +42,7 @@ export const getWorkflowToolType = ({
     getDynamicProps: (config, { spaceId }) => {
       return {
         getHandler: () => {
-          return async (params, { request, runContext }) => {
+          return async (params, { logger, request, runContext }) => {
             const { management: workflowApi } = workflowsManagement;
             const workflowId = config.workflow_id;
             const agentId = getAgentFromRunContext(runContext)?.agentId;
@@ -53,13 +58,41 @@ export const getWorkflowToolType = ({
                 metadata: agentId ? { agent_id: agentId } : undefined,
               });
 
-              const toolResults = result.success
-                ? [otherResult({ execution: result.execution })]
-                : [errorResult(result.error)];
+              if (!result.success) {
+                return { results: [errorResult(result.error)] };
+              }
 
-              return {
-                results: toolResults,
-              };
+              const toolResults = [otherResult({ execution: result.execution })];
+
+              if (inboxEnabled && result.execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+                const { waiting_input: waitingInput, resume_seq: resumeSeq } = result.execution;
+                const formPrompt: FormPromptRequest = {
+                  ...(waitingInput?.agent_context !== undefined && {
+                    agent_context: waitingInput.agent_context,
+                  }),
+                  execution_id: result.execution.execution_id,
+                  id: waitingInput?.step_execution_id ?? '',
+                  message: waitingInput?.message ?? '',
+                  resume_seq: typeof resumeSeq === 'number' ? resumeSeq : 0,
+                  schema: waitingInput?.schema ?? {},
+                  step_execution_id: waitingInput?.step_execution_id ?? '',
+                  type: AgentPromptType.form,
+                };
+                const schemaKeys = Object.keys(
+                  (formPrompt.schema as { properties?: Record<string, unknown> }).properties ??
+                    formPrompt.schema ??
+                    {}
+                ).length;
+                logger.debug(
+                  () =>
+                    `[hitl-debug][ab] workflowTool.formPrompt exec=${
+                      result.execution.execution_id
+                    } schemaKeys=${schemaKeys} messagePresent=${!!formPrompt.message}`
+                );
+                return { prompt: formPrompt, results: toolResults };
+              }
+
+              return { results: toolResults };
             } catch (e) {
               return {
                 results: [

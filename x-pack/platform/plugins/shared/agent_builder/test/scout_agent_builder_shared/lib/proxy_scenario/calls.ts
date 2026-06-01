@@ -95,6 +95,16 @@ export const mockAgentParallelToolCalls = ({
   });
 };
 
+export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string) => {
+  void llmProxy
+    .intercept({
+      name: 'handover-to-answer',
+      when: (_body) => true,
+      responseMock: answer,
+    })
+    .completeAfterIntercept();
+};
+
 export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
   void llmProxy
     .intercept({

@@ -89,7 +89,10 @@ export class AgentBuilderPlugin
     );
     this.analyticsService.registerAgentBuilderEventTypes();
 
+    const inboxEnabled = !!setupDeps.inbox;
+
     const serviceSetups = this.serviceManager.setupServices({
+      inboxEnabled,
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
       trackingService: this.trackingService,
@@ -126,7 +129,12 @@ export class AgentBuilderPlugin
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     setupDeps.workflowsExtensions.registerStepDefinition(
-      getRunAgentStepDefinition(this.serviceManager)
+      getRunAgentStepDefinition(
+        this.serviceManager,
+        setupDeps.workflowsManagement,
+        inboxEnabled,
+        this.logger.get('runAgentStep')
+      )
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
@@ -144,6 +152,7 @@ export class AgentBuilderPlugin
     registerRoutes({
       router,
       coreSetup,
+      inboxEnabled,
       logger: this.logger,
       pluginsSetup: setupDeps,
       getInternalServices,

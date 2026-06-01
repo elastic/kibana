@@ -708,10 +708,13 @@ steps:
         },
         mockRequest
       );
+      // includeInput is required so a WAITING_FOR_INPUT execution returned to callers (e.g. the
+      // Agent Builder workflow tool) carries the paused step's input — the only source of the
+      // schema/message/agent_context for nested ai.agent HITL steps.
       expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledWith(
         'test-exec-id',
         'default',
-        { includeOutput: true }
+        { includeInput: true, includeOutput: true }
       );
     });
 

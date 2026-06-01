@@ -12,6 +12,24 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { ensureValidInput } from './preflight_checks';
 
+const makeFormPromptPending = (...promptIds: string[]) =>
+  createEmptyConversation({
+    rounds: [
+      createRound({
+        pending_prompts: promptIds.map((id) => ({
+          agent_context: undefined,
+          execution_id: `exec-${id}`,
+          id,
+          message: 'Please fill in the form.',
+          schema: {},
+          step_execution_id: `step-${id}`,
+          type: AgentPromptType.form,
+        })),
+        status: ConversationRoundStatus.awaitingPrompt,
+      }),
+    ],
+  });
+
 describe('preflight_checks', () => {
   describe('ensureValidInput', () => {
     describe('when last round is completed (or no conversation)', () => {
@@ -158,6 +176,111 @@ describe('preflight_checks', () => {
         };
 
         expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+      });
+    });
+
+    describe('when last round is awaiting a form prompt', () => {
+      it('should not throw when form prompt response matches pending prompt ID', () => {
+        const conversation = makeFormPromptPending('form-123');
+        const input: ConverseInput = {
+          form_prompts: [{ execution_id: 'exec-form-123', id: 'form-123', values: {} }],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+      });
+
+      it('should not throw when all form prompt responses are provided for multiple prompts', () => {
+        const conversation = makeFormPromptPending('form-1', 'form-2');
+        const input: ConverseInput = {
+          form_prompts: [
+            { execution_id: 'exec-form-1', id: 'form-1', values: { approved: true } },
+            { execution_id: 'exec-form-2', id: 'form-2', values: { approved: false } },
+          ],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+      });
+
+      it('should throw when no form prompt response is provided', () => {
+        const conversation = makeFormPromptPending('form-123');
+        const input: ConverseInput = {};
+
+        expect(() => ensureValidInput({ input, conversation })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
+      it('should throw when only some form prompt responses are provided', () => {
+        const conversation = makeFormPromptPending('form-1', 'form-2');
+        const input: ConverseInput = {
+          form_prompts: [{ execution_id: 'exec-form-1', id: 'form-1', values: {} }],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
+      it('should throw when wrong form prompt ID is provided', () => {
+        const conversation = makeFormPromptPending('form-123');
+        const input: ConverseInput = {
+          form_prompts: [{ execution_id: 'exec-wrong', id: 'wrong-form-id', values: {} }],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
+      it('should not throw when a second step was newly appended by resumeFormPrompts for the same execution', () => {
+        // After step1 is submitted, resumeFormPrompts appends step2 to pending_prompts
+        // (same execution_id, different id/step_execution_id). step2 has no response yet —
+        // ensureValidInput must not reject it as "missing".
+        const conversation = createEmptyConversation({
+          rounds: [
+            createRound({
+              pending_prompts: [
+                {
+                  agent_context: undefined,
+                  execution_id: 'exec-workflow',
+                  id: 'step-exec-1',
+                  message: 'Step 1',
+                  schema: {},
+                  step_execution_id: 'step-exec-1',
+                  type: AgentPromptType.form,
+                },
+                {
+                  agent_context: undefined,
+                  execution_id: 'exec-workflow',
+                  id: 'step-exec-2',
+                  message: 'Step 2',
+                  schema: {},
+                  step_execution_id: 'step-exec-2',
+                  type: AgentPromptType.form,
+                },
+              ],
+              status: ConversationRoundStatus.awaitingPrompt,
+            }),
+          ],
+        });
+        // User submitted only step1; step2 is newly appended and has no response yet.
+        const input: ConverseInput = {
+          form_prompts: [{ execution_id: 'exec-workflow', id: 'step-exec-1', values: {} }],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+      });
+
+      it('should throw when only some form prompt responses are provided for different executions', () => {
+        // Two prompts from different workflow executions — both need responses.
+        const conversation = makeFormPromptPending('form-1', 'form-2');
+        const input: ConverseInput = {
+          form_prompts: [{ execution_id: 'exec-form-1', id: 'form-1', values: {} }],
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
       });
     });
   });
