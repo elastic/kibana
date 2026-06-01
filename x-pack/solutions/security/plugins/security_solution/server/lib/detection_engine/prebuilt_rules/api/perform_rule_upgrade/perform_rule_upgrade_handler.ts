@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
@@ -31,6 +32,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
@@ -97,8 +99,15 @@ export const performRuleUpgradeHandler = async (
       const latestVersionsMap = new Map(
         allLatestVersions.map((version) => [version.rule_id, version])
       );
+      const kqlFilter = filter
+        ? convertRulesFilterToKQL({
+            filter: filter.name,
+            tags: filter.tags,
+            customizationStatus: filter.customization_status,
+          })
+        : undefined;
       const allCurrentVersions = await ruleObjectsClient.fetchInstalledRuleVersions({
-        filter,
+        kqlFilter,
       });
 
       const upgradableRules = await getPossibleUpgrades(
@@ -112,18 +121,21 @@ export const performRuleUpgradeHandler = async (
       ruleUpgradeQueue.push(...request.body.rules);
     }
 
-    const BATCH_SIZE = 100;
     while (ruleUpgradeQueue.length > 0) {
-      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, BATCH_SIZE);
+      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
 
-      const [currentRules, latestRules] = await Promise.all([
+      const [currentRules, latestRulesResult] = await Promise.all([
         ruleObjectsClient.fetchInstalledRulesByIds({
           ruleIds: targetRulesForUpgrade.map(({ rule_id: ruleId }) => ruleId),
         }),
         ruleAssetsClient.fetchAssetsByVersion(targetRulesForUpgrade),
       ]);
-      const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
-      const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
+      const baseRulesResult = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+      const ruleVersionsMap = zipRuleVersions(
+        currentRules,
+        baseRulesResult.assets,
+        latestRulesResult.assets
+      );
 
       const upgradeableRules: RuleTriad[] = [];
       targetRulesForUpgrade.forEach((targetRule) => {
