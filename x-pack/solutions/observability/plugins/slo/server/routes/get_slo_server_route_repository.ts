@@ -18,14 +18,10 @@ import type { postCompositeSloSummaryRefreshRoute } from './slo/composite_slo/po
 
 interface RouteRepositoryOptions {
   isServerless?: boolean;
-  isCompositeSloEnabled?: boolean;
 }
 
-export function getSloServerRouteRepository({
-  isServerless,
-  isCompositeSloEnabled,
-}: RouteRepositoryOptions = {}) {
-  return getSloRouteRepository({ isServerless, isCompositeSloEnabled });
+export function getSloServerRouteRepository({ isServerless }: RouteRepositoryOptions = {}) {
+  return getSloRouteRepository({ isServerless });
 }
 
 type CompositeRoutes = typeof batchGetCompositeSLORoute &

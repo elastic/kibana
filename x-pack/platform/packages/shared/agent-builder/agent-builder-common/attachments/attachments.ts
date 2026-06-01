@@ -20,6 +20,8 @@ export interface Attachment<
   type: Type;
   /** data bound to the attachment */
   data: DataType;
+  /** Human-readable description of the attachment */
+  description?: string;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
   /**
@@ -32,6 +34,13 @@ export interface Attachment<
   version?: number;
   /** Total number of versions for this attachment. Undefined when version metadata is unavailable. */
   versionCount?: number;
+  /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same groupId were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   */
+  groupId?: string;
 }
 
 /**
