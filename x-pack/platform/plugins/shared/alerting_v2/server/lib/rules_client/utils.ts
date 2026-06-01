@@ -212,10 +212,12 @@ export function buildUpdateRuleAttributes(
  */
 export function transformRuleSoAttributesToRuleApiResponse(
   id: string,
-  attrs: RuleSavedObjectAttributes
+  attrs: RuleSavedObjectAttributes,
+  version?: string
 ): RuleResponse {
   return {
     id,
+    version,
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
