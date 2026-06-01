@@ -149,9 +149,16 @@ export class NavigationCustomizationService {
           // than letting the failure pass silently and the change vanish on the
           // next page load.
           core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c).catch((error: Error) => {
+            // `toastMessage` provides a friendlier, actionable body than the raw
+            // HTTP error (which is just "Internal Server Error"); the underlying
+            // error stays available via the toast's "See the full error" action.
             core.notifications.toasts.addError(error, {
               title: i18n.translate('navigation.customization.saveErrorTitle', {
                 defaultMessage: 'Unable to save navigation customization',
+              }),
+              toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
+                defaultMessage:
+                  'Your navigation customization could not be saved. You might not have permission to save preferences in this space.',
               }),
             });
           });
