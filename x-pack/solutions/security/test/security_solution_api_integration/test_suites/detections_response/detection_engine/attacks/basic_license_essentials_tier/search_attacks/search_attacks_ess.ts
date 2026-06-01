@@ -97,21 +97,17 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.hits.hits).toEqual(expectedAttackAlerts);
         });
 
-        it('should not return attack alerts without attack alerts index privileges', async () => {
+        it('should return no attack alerts without attack alerts index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_ATTACKS_SEARCH_URL)
             .auth(alertsReadNoAttackIndicesUser.username, alertsReadNoAttackIndicesUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
             .send(getSimpleAttackAlertsQuery())
-            .expect(403);
+            .expect(200);
 
-          expect(body).toEqual(
-            getMissingReadIndexPrivilegesError({
-              username: alertsReadNoAttackIndicesUser.username,
-              roles: alertsReadNoAttackIndicesUser.roles,
-            })
-          );
+          expect(body.hits.total.value).toEqual(0);
+          expect(body.hits.hits).toEqual([]);
         });
       });
     });

@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.hits.hits).toEqual(expectedAttackAlerts);
         });
 
-        it('should not return attack alerts without attack alerts index privileges', async () => {
+        it('should return no attack alerts without attack alerts index privileges', async () => {
           const testAgent = await utils.createSuperTestWithCustomRole(alertsReadNoAttackIndices);
 
           const { body } = await testAgent
@@ -132,9 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
             .send(getSimpleAttackAlertsQuery())
-            .expect(403);
+            .expect(200);
 
-          expect(body.message).toMatch(getServerlessMissingReadIndexPrivilegesErrorPattern());
+          expect(body.hits.total.value).toEqual(0);
+          expect(body.hits.hits).toEqual([]);
         });
       });
     });
