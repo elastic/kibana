@@ -677,6 +677,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
             visualizationGroups: dimensionGroups,
+            targetGroup: props.groupId,
           });
           setStateWrapper(newLayer);
         },

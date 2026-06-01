@@ -6,6 +6,7 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
+import { LENS_METRIC_ID } from '@kbn/lens-common';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import type { DatasourceMock } from '../../mocks';
 import {
@@ -81,6 +82,80 @@ describe('suggestion helpers', () => {
     });
     expect(suggestions).toHaveLength(1);
     expect(suggestions[0].visualizationState).toBe(suggestedState);
+  });
+
+  it('should normalize date histogram empty rows in suggestion datasource states', () => {
+    const datasourceState = {
+      layers: {
+        layer1: {
+          columnOrder: ['date'],
+          columns: {
+            date: {
+              dataType: 'date',
+              isBucketed: true,
+              label: '@timestamp',
+              operationType: 'date_histogram',
+              params: {
+                interval: 'auto',
+                includeEmptyRows: true,
+              },
+              scale: 'interval',
+              sourceField: '@timestamp',
+            },
+          },
+        },
+      },
+    };
+
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(datasourceState, 'layer1'),
+    ]);
+
+    const visualizationMap = {
+      [LENS_METRIC_ID]: {
+        ...createMockVisualization(LENS_METRIC_ID),
+        getSuggestions: () => [
+          {
+            score: 0.5,
+            title: 'Metric',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
+      },
+    };
+
+    const suggestions = getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap[LENS_METRIC_ID],
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      dataViews,
+    });
+
+    expect(suggestions[0].datasourceState).toEqual({
+      layers: {
+        layer1: {
+          columnOrder: ['date'],
+          columns: {
+            date: {
+              dataType: 'date',
+              isBucketed: true,
+              label: '@timestamp',
+              operationType: 'date_histogram',
+              params: {
+                interval: 'auto',
+                includeEmptyRows: false,
+              },
+              scale: 'interval',
+              sourceField: '@timestamp',
+            },
+          },
+        },
+      },
+    });
+    expect(datasourceState.layers.layer1.columns.date.params.includeEmptyRows).toBe(true);
   });
 
   it('should concatenate suggestions from all visualizations', () => {

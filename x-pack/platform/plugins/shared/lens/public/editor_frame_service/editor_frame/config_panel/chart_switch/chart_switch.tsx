@@ -18,6 +18,10 @@ import type {
   DatasourceStates,
   Suggestion,
 } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -35,7 +39,6 @@ import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
 import { useEditorFrameService } from '../../../editor_frame_service_context';
-
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
   selection: VisualizationSelection;
@@ -99,11 +102,38 @@ export const ChartSwitch = memo(function ChartSwitch({
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
+    const visualizationState = selection.getVisualizationState();
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      selection.visualizationId,
+      visualizationState
+    );
+    const currentDatasourceState = activeDatasourceId
+      ? datasourceStates[activeDatasourceId]?.state
+      : undefined;
+    const updatedDatasourceState =
+      selection.datasourceState ??
+      (selection.sameDatasources && currentDatasourceState !== undefined
+        ? applyDatasourceDefaultsToDatasourceState(currentDatasourceState, datasourceDefaults, {
+            overwriteExisting: true,
+            layerIds: layerId ? [layerId] : undefined,
+          })
+        : undefined);
+    const updatedActiveDatasource =
+      updatedDatasourceState !== undefined && updatedDatasourceState !== currentDatasourceState
+        ? activeDatasourceId
+        : undefined;
+    const nextDatasourceId = selection.datasourceId ?? updatedActiveDatasource ?? undefined;
+
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
-        visualizationState: selection.getVisualizationState(),
+        visualizationState,
+        datasourceId: nextDatasourceId,
+        datasourceState:
+          updatedDatasourceState !== currentDatasourceState
+            ? updatedDatasourceState
+            : selection.datasourceState,
       },
       { clearStagedPreview: true }
     );

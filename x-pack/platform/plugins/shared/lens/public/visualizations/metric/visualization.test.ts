@@ -486,6 +486,35 @@ describe('metric visualization', () => {
           })
         ).toMatchSnapshot();
       });
+
+      test('applies datasource defaults to trendline time and breakdown groups', () => {
+        const groups = visualization.getConfiguration({
+          state: fullStateWTrend,
+          layerId: fullStateWTrend.trendlineLayerId,
+          frame: mockFrameApi,
+        }).groups;
+
+        expect(
+          groups.find(({ groupId }) => groupId === LENS_METRIC_GROUP_ID.TREND_TIME)
+            ?.datasourceDefaults
+        ).toEqual({
+          operationParams: {
+            date_histogram: {
+              includeEmptyRows: false,
+            },
+          },
+        });
+        expect(
+          groups.find(({ groupId }) => groupId === LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY)
+            ?.datasourceDefaults
+        ).toEqual({
+          operationParams: {
+            date_histogram: {
+              includeEmptyRows: false,
+            },
+          },
+        });
+      });
     });
   });
 

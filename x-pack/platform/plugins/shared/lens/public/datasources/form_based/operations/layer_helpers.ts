@@ -21,6 +21,7 @@ import type {
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
+  VisualizationDatasourceDefaults,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
@@ -29,6 +30,7 @@ import type {
   BaseIndexPatternColumn,
   DatasourceFixAction,
 } from '@kbn/lens-common';
+import { applyDatasourceDefaultsToColumnParams } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -79,6 +81,30 @@ interface ColumnCopy {
   source: DataViewDragDropOperation;
   shouldDeleteSource?: boolean;
 }
+
+// Visualization configs pass datasource defaults through the dimension group config.
+// This only backfills values while the editor is creating or replacing a column;
+// chart switch, suggestion, and config-builder bulk updates use the shared
+// `@kbn/lens-common` datasource normalization helpers instead.
+const getDatasourceDefaultsForTargetGroup = (
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup?: string
+) =>
+  (targetGroup
+    ? visualizationGroups.find((group) => group.groupId === targetGroup)?.datasourceDefaults
+    : undefined) as VisualizationDatasourceDefaults | undefined;
+
+const applyDatasourceDefaults = (
+  op: OperationType,
+  columnParams: Record<string, unknown> | undefined,
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup?: string
+) =>
+  applyDatasourceDefaultsToColumnParams(
+    op,
+    columnParams,
+    getDatasourceDefaultsForTargetGroup(visualizationGroups, targetGroup)
+  );
 
 export function copyColumn({ layers, source, target }: ColumnCopy): Record<string, FormBasedLayer> {
   return createCopiedColumn(layers, target, source);
@@ -356,6 +382,12 @@ export function insertNewColumn({
     // @ts-expect-error upgrade typescript v5.9.3
     previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
+  const nextColumnParams = applyDatasourceDefaults(
+    op,
+    columnParams,
+    visualizationGroups,
+    targetGroup
+  );
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
     if (field) {
@@ -368,8 +400,8 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
-    const buildColumnFn = columnParams
-      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+    const buildColumnFn = nextColumnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, nextColumnParams)
       : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
@@ -458,7 +490,10 @@ export function insertNewColumn({
       return updateDefaultLabels(
         addBucket(
           layer,
-          operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+          operationDefinition.buildColumn(
+            { ...baseOptions, layer, field: invalidField },
+            nextColumnParams
+          ),
           columnId,
           visualizationGroups,
           targetGroup,
@@ -470,7 +505,10 @@ export function insertNewColumn({
       return updateDefaultLabels(
         addMetric(
           layer,
-          operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+          operationDefinition.buildColumn(
+            { ...baseOptions, layer, field: invalidField },
+            nextColumnParams
+          ),
           columnId
         ),
         indexPattern
@@ -498,7 +536,10 @@ export function insertNewColumn({
     };
   }
 
-  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
+  const newColumn = operationDefinition.buildColumn(
+    { ...baseOptions, layer, field },
+    nextColumnParams
+  );
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
@@ -585,6 +626,7 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  targetGroup,
   initialParams,
   shouldResetLabel,
   shouldCombineField,
@@ -607,6 +649,12 @@ export function replaceColumn({
     indexPattern,
     previousColumn,
   };
+  const nextColumnParams = applyDatasourceDefaults(
+    op,
+    initialParams?.params,
+    visualizationGroups,
+    targetGroup
+  );
 
   if (isNewOperation) {
     let tempLayer = { ...layer };
@@ -632,6 +680,7 @@ export function replaceColumn({
         op,
         field,
         visualizationGroups,
+        targetGroup,
         incompleteParams: previousColumn,
       });
 
@@ -664,6 +713,7 @@ export function replaceColumn({
         op,
         indexPattern,
         visualizationGroups,
+        targetGroup,
       });
     }
 
@@ -806,7 +856,10 @@ export function replaceColumn({
 
     tempLayer = removeOrphanedColumns(previousDefinition, previousColumn, tempLayer, indexPattern);
 
-    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    let newColumn = operationDefinition.buildColumn(
+      { ...baseOptions, layer: tempLayer, field },
+      nextColumnParams
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }
@@ -972,6 +1025,7 @@ function applyReferenceTransition({
   op,
   indexPattern,
   visualizationGroups,
+  targetGroup,
 }: {
   layer: FormBasedLayer;
   columnId: string;
@@ -979,6 +1033,7 @@ function applyReferenceTransition({
   op: OperationType;
   indexPattern: IndexPattern;
   visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
 }): FormBasedLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -1053,6 +1108,7 @@ function applyReferenceTransition({
           op: validOperations[0].type,
           indexPattern,
           visualizationGroups,
+          targetGroup,
         });
         return newId;
       }
@@ -1091,6 +1147,7 @@ function applyReferenceTransition({
           indexPattern,
           field: indexPattern.getFieldByName(previousColumn.sourceField),
           visualizationGroups,
+          targetGroup,
         });
         return newId;
       } else if (defIgnoringfield.length === 1) {
@@ -1134,6 +1191,7 @@ function applyReferenceTransition({
               indexPattern,
               field: previousField,
               visualizationGroups,
+              targetGroup,
             });
             return newId;
           }

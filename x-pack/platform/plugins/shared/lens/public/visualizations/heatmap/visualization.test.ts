@@ -138,6 +138,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
@@ -148,6 +155,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [{ columnId: 'y-accessor' }],
             filterOperations: filterOperationsAxis,
             isBreakdownDimension: true,
@@ -198,6 +212,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
@@ -208,6 +229,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [],
             filterOperations: filterOperationsAxis,
             supportsMoreColumns: true,
@@ -256,6 +284,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [{ columnId: 'x-accessor' }],
             filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
@@ -266,6 +301,13 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
+            datasourceDefaults: {
+              operationParams: {
+                date_histogram: {
+                  includeEmptyRows: false,
+                },
+              },
+            },
             accessors: [{ columnId: 'y-accessor' }],
             filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,

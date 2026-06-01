@@ -14,17 +14,26 @@ export const YAxisModes = {
   BOTTOM: 'bottom',
 } as const;
 
-export const SeriesTypes = {
+export const BarSeriesTypes = {
   BAR: 'bar',
+  BAR_STACKED: 'bar_stacked',
+  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
+  BAR_HORIZONTAL: 'bar_horizontal',
+  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
+  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
+} as const;
+
+export const SeriesTypes = {
+  BAR: BarSeriesTypes.BAR,
   LINE: 'line',
   AREA: 'area',
-  BAR_STACKED: 'bar_stacked',
+  BAR_STACKED: BarSeriesTypes.BAR_STACKED,
   AREA_STACKED: 'area_stacked',
-  BAR_HORIZONTAL: 'bar_horizontal',
-  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
-  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
+  BAR_HORIZONTAL: BarSeriesTypes.BAR_HORIZONTAL,
+  BAR_PERCENTAGE_STACKED: BarSeriesTypes.BAR_PERCENTAGE_STACKED,
+  BAR_HORIZONTAL_STACKED: BarSeriesTypes.BAR_HORIZONTAL_STACKED,
   AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
-  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
+  BAR_HORIZONTAL_PERCENTAGE_STACKED: BarSeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED,
 } as const;
 
 /**

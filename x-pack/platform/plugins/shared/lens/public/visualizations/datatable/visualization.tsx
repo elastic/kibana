@@ -46,6 +46,7 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  getVisualizationDatasourceDefaultsForVisualizationState,
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
@@ -346,6 +347,10 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      'lnsDatatable',
+      state
+    );
     const currentData =
       frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
 
@@ -434,6 +439,7 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
             defaultMessage: 'Split metrics by',
           }),
+          datasourceDefaults,
           dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
             defaultMessage: 'Split metrics by',
           }),

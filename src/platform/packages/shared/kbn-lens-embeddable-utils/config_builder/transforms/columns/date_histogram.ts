@@ -22,6 +22,8 @@ export function fromDateHistogramLensApiToLensState(
     drop_partial_intervals,
     label,
   } = options;
+  const includeEmptyRows =
+    typeof include_empty_rows === 'boolean' ? { includeEmptyRows: include_empty_rows } : {};
 
   return {
     operationType: 'date_histogram',
@@ -29,7 +31,7 @@ export function fromDateHistogramLensApiToLensState(
     ...getLensStateBucketSharedProps({ label, field }),
     params: {
       interval: suggested_interval,
-      includeEmptyRows: include_empty_rows,
+      ...includeEmptyRows,
       dropPartials: Boolean(drop_partial_intervals),
       ignoreTimeRange: use_original_time_range,
     },
@@ -39,12 +41,17 @@ export function fromDateHistogramLensApiToLensState(
 export function fromDateHistogramLensStateToAPI(
   column: DateHistogramIndexPatternColumn
 ): LensApiDateHistogramOperation {
+  const includeEmptyRows =
+    typeof column.params.includeEmptyRows === 'boolean'
+      ? { include_empty_rows: column.params.includeEmptyRows }
+      : {};
+
   return {
     operation: 'date_histogram',
     ...getLensAPIBucketSharedProps(column),
     suggested_interval: column.params.interval,
     use_original_time_range: Boolean(column.params.ignoreTimeRange),
-    include_empty_rows: Boolean(column.params.includeEmptyRows),
+    ...includeEmptyRows,
     drop_partial_intervals: Boolean(column.params.dropPartials),
   };
 }

@@ -31,6 +31,11 @@ import type {
 
 const ACCESSOR = 'metric_formula_accessor';
 
+// Carry the first series layer subtype into the visualization state so shared XY defaults stay aligned.
+const getPreferredSeriesType = (config: LensXYConfig) =>
+  config.layers.find((layer): layer is LensSeriesLayer => layer.type === 'series')?.seriesType ??
+  'line';
+
 function normalizeBreakdown(
   breakdown: LensBreakdownConfig | LensBreakdownConfig[] | undefined
 ): LensBreakdownConfig[] {
@@ -50,7 +55,7 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
       ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
-    preferredSeriesType: 'line',
+    preferredSeriesType: getPreferredSeriesType(config),
     valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',

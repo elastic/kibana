@@ -8,6 +8,10 @@
  */
 
 import type { LensEmbeddableInput } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceStates,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -56,7 +60,6 @@ import {
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
-
 const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
@@ -166,6 +169,29 @@ export class LensConfigBuilder {
     this.enableAPITransforms = enabled;
   }
 
+  private applyVisualizationDatasourceDefaults<T extends LensAttributes>(lensState: T): T {
+    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+      lensState.visualizationType,
+      lensState.state.visualization
+    );
+    const datasourceStates = applyDatasourceDefaultsToDatasourceStates(
+      lensState.state.datasourceStates,
+      datasourceDefaults
+    );
+
+    if (datasourceStates === lensState.state.datasourceStates) {
+      return lensState;
+    }
+
+    return {
+      ...lensState,
+      state: {
+        ...lensState.state,
+        datasourceStates,
+      },
+    };
+  }
+
   isSupported(chartType?: string | null): boolean {
     if (!chartType) return false;
     const type = compatibilityMap[chartType] ?? chartType;
@@ -220,17 +246,18 @@ export class LensConfigBuilder {
         query: options.query || { language: 'kuery', query: '' },
       },
     };
+    const normalizedChartState = this.applyVisualizationDatasourceDefaults(chartState);
 
     if (options.embeddable) {
       return {
         id: uuidv4(),
-        attributes: chartState,
+        attributes: normalizedChartState,
         timeRange: options.timeRange,
-        references: chartState.references,
+        references: normalizedChartState.references,
       } as LensEmbeddableInput;
     }
 
-    return chartState as LensAttributes;
+    return normalizedChartState as LensAttributes;
   }
 
   fromAPIFormat(config: LensApiConfig): LensAttributes {
@@ -246,8 +273,7 @@ export class LensConfigBuilder {
       config,
       attributes.references ?? []
     );
-
-    return {
+    const lensState = {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
@@ -259,6 +285,7 @@ export class LensConfigBuilder {
         filters,
       },
     };
+    return this.applyVisualizationDatasourceDefaults(lensState);
   }
 
   toAPIFormat(config: LensAttributes): LensApiConfig {

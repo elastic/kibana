@@ -28,6 +28,7 @@ import type {
   DatasourcePublicAPI,
 } from '@kbn/lens-common';
 import {
+  getVisualizationDatasourceDefaultsForVisualizationState,
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
@@ -166,7 +167,10 @@ const getMetricLayerConfiguration = (
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
   const canCollapseBy = isPrimaryMetricNumeric && props.state.collapseFn;
-
+  const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+    LENS_METRIC_ID,
+    props.state
+  );
   return {
     groups: [
       {
@@ -253,6 +257,7 @@ const getMetricLayerConfiguration = (
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
+        datasourceDefaults,
         accessors: props.state.breakdownByAccessor
           ? [
               {
@@ -276,6 +281,11 @@ const getTrendlineLayerConfiguration = (
   hidden: boolean;
   groups: VisualizationDimensionGroupConfig[];
 } => {
+  const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+    LENS_METRIC_ID,
+    props.state
+  );
+
   return {
     hidden: true,
     groups: [
@@ -316,6 +326,7 @@ const getTrendlineLayerConfiguration = (
       {
         groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
+        datasourceDefaults,
         accessors: props.state.trendlineTimeAccessor
           ? [
               {
@@ -333,6 +344,7 @@ const getTrendlineLayerConfiguration = (
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
+        datasourceDefaults,
         accessors: props.state.trendlineBreakdownByAccessor
           ? [
               {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
+import {
+  type ExtraAppendLayerArg,
+  applyXYSeriesTypeDatasourceDefaults,
+  getXyVisualization,
+} from './visualization';
 import { LegendValue, Position } from '@elastic/charts';
 import type {
   Operation,
@@ -2048,6 +2052,36 @@ describe('xy_visualization', () => {
         'Horizontal axis',
         'Breakdown',
       ]);
+    });
+
+    it('should derive datasource defaults from the selected layer series type', () => {
+      const initialState = exampleState();
+      const state = {
+        ...initialState,
+        preferredSeriesType: 'line' as SeriesType,
+        layers: [
+          {
+            ...initialState.layers[0],
+            seriesType: 'bar' as SeriesType,
+          },
+        ],
+      };
+
+      const xGroup = xyVisualization
+        .getConfiguration({
+          state,
+          frame,
+          layerId: 'first',
+        })
+        .groups.find(({ groupId }) => groupId === 'x');
+
+      expect(xGroup?.datasourceDefaults).toEqual({
+        operationParams: {
+          date_histogram: {
+            includeEmptyRows: false,
+          },
+        },
+      });
     });
 
     it('should only accept bucketed operations for x', () => {
@@ -4564,6 +4598,153 @@ describe('xy_visualization', () => {
       expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
+    });
+  });
+
+  describe('applyXYSeriesTypeDatasourceDefaults', () => {
+    it('turns include empty rows off when switching back to a bar subtype', () => {
+      const datasourceState = {
+        layers: {
+          first: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      };
+
+      expect(applyXYSeriesTypeDatasourceDefaults(datasourceState, 'bar')).toEqual({
+        layers: {
+          first: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: false,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('leaves line subtypes unchanged until their defaults are handled separately', () => {
+      const datasourceState = {
+        layers: {
+          first: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: false,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      };
+
+      expect(applyXYSeriesTypeDatasourceDefaults(datasourceState, 'line')).toBe(datasourceState);
+    });
+
+    it('only rewrites the selected layer when a layer id is provided', () => {
+      const datasourceState = {
+        layers: {
+          first: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+          second: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      };
+
+      expect(applyXYSeriesTypeDatasourceDefaults(datasourceState, 'bar', 'second')).toEqual({
+        layers: {
+          first: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+          second: {
+            columns: {
+              [DATE_HISTORGRAM_COLUMN_ID]: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: false,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      });
     });
   });
 });

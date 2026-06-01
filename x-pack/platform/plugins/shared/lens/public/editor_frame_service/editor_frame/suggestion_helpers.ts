@@ -28,6 +28,10 @@ import type {
   VisualizationState,
   DataViewsState,
 } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+} from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
 import { switchVisualization, applyChanges } from '../../state_management';
@@ -266,16 +270,31 @@ function getVisualizationSuggestions(
         datasourceId,
         query,
       })
-      .map(({ state, ...visualizationSuggestion }) => ({
-        ...visualizationSuggestion,
-        visualizationId,
-        visualizationState: state,
-        keptLayerIds: datasourceSuggestion.keptLayerIds,
-        datasourceState: datasourceSuggestion.state,
-        datasourceId: datasourceSuggestion.datasourceId,
-        columns: table.columns.length,
-        changeType: table.changeType,
-      }));
+      .map(({ state, ...visualizationSuggestion }) => {
+        const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+          visualizationId,
+          state
+        );
+        const datasourceState = applyDatasourceDefaultsToDatasourceState(
+          datasourceSuggestion.state,
+          datasourceDefaults,
+          {
+            overwriteExisting: true,
+            layerIds: datasourceSuggestion.keptLayerIds,
+          }
+        );
+
+        return {
+          ...visualizationSuggestion,
+          visualizationId,
+          visualizationState: state,
+          keptLayerIds: datasourceSuggestion.keptLayerIds,
+          datasourceState,
+          datasourceId: datasourceSuggestion.datasourceId,
+          columns: table.columns.length,
+          changeType: table.changeType,
+        };
+      });
   } catch (e) {
     showMemoizedErrorNotification(e);
     return [];

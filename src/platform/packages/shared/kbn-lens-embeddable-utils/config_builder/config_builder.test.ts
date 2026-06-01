@@ -1,0 +1,210 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-common';
+import { LensConfigBuilder } from './config_builder';
+import { lensApiConfigSchemaNoESQL } from './schema';
+import type { DatatableConfig } from './schema/charts/datatable';
+import type { XYConfig } from './schema/charts/xy';
+import { mockDataViewsService } from './charts/mock_utils';
+import { multiMetricRowSplitByDatatableWithAdhocDataView } from './tests/datatable/lens_api_config_dsl.mock';
+import { basicTagcloudWithDataView } from './tests/tagcloud/lens_api_config.mock';
+import { apiXYWithNoYTitleAndInsideLegend } from './tests/xy/basicXY.mock';
+
+type LensAttributes = TypedLensByValueInput['attributes'];
+type XYLayer = XYConfig['layers'][number];
+type XYLayerWithX = Extract<XYLayer, { x?: unknown }>;
+type DatatableRow = NonNullable<DatatableConfig['rows']>[number];
+type DateHistogramXAxis = Extract<NonNullable<XYLayerWithX['x']>, { operation: 'date_histogram' }>;
+type DateHistogramDatatableRow = Extract<DatatableRow, { operation: 'date_histogram' }>;
+
+const getDateHistogramColumn = (attributes: LensAttributes) => {
+  const formBasedLayers = attributes.state.datasourceStates.formBased?.layers ?? {};
+
+  for (const layer of Object.values(formBasedLayers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        return column as DateHistogramIndexPatternColumn;
+      }
+    }
+  }
+};
+
+const hasXAxis = (layer: XYLayer): layer is XYLayerWithX & { x: NonNullable<XYLayerWithX['x']> } =>
+  'x' in layer && layer.x !== undefined;
+
+const isDateHistogramXAxis = (x: XYLayerWithX['x']): x is DateHistogramXAxis =>
+  Boolean(x && 'operation' in x && x.operation === 'date_histogram');
+
+const isDateHistogramRow = (row: DatatableRow): row is DateHistogramDatatableRow =>
+  'operation' in row && row.operation === 'date_histogram';
+
+const removeIncludeEmptyRowsFromXYConfig = (config: XYConfig): XYConfig => {
+  const nextConfig = structuredClone(config);
+  const [firstLayer] = nextConfig.layers;
+
+  if (!firstLayer || !hasXAxis(firstLayer)) {
+    throw new Error(
+      'Expected the XY test config to start with a data layer that has an x dimension'
+    );
+  }
+
+  if (!isDateHistogramXAxis(firstLayer.x)) {
+    throw new Error('Expected the XY test config to use a date histogram x dimension');
+  }
+
+  const { include_empty_rows: _includeEmptyRows, ...x } = firstLayer.x;
+
+  return {
+    ...nextConfig,
+    layers: [{ ...firstLayer, x }, ...nextConfig.layers.slice(1)] as XYConfig['layers'],
+  } as XYConfig;
+};
+
+const removeIncludeEmptyRowsFromDatatableRows = (config: DatatableConfig): DatatableConfig => {
+  const nextConfig = structuredClone(config);
+  const rows = (nextConfig.rows ?? []).map((row) => {
+    if (!isDateHistogramRow(row)) {
+      return row;
+    }
+
+    const { include_empty_rows: _includeEmptyRows, ...dateHistogramRow } = row;
+    return dateHistogramRow;
+  }) as NonNullable<DatatableConfig['rows']>;
+
+  return {
+    ...nextConfig,
+    rows,
+  } as DatatableConfig;
+};
+
+describe('LensConfigBuilder', () => {
+  it('defaults empty rows off for built metric charts', async () => {
+    const builder = new LensConfigBuilder(mockDataViewsService() as any);
+
+    const result = (await builder.build({
+      chartType: 'metric',
+      title: 'Metric',
+      dataset: {
+        index: 'test',
+        timeFieldName: '@timestamp',
+      },
+      value: 'count()',
+      breakdown: {
+        type: 'dateHistogram',
+        field: '@timestamp',
+      },
+    })) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off for built bar charts', async () => {
+    const builder = new LensConfigBuilder(mockDataViewsService() as any);
+
+    const result = (await builder.build({
+      chartType: 'xy',
+      title: 'Bar',
+      dataset: {
+        index: 'test',
+        timeFieldName: '@timestamp',
+      },
+      layers: [
+        {
+          type: 'series',
+          seriesType: 'bar',
+          xAxis: {
+            type: 'dateHistogram',
+            field: '@timestamp',
+          },
+          yAxis: [
+            {
+              value: 'count()',
+            },
+          ],
+        },
+      ],
+    })) as LensAttributes;
+
+    expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar' });
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting XY API configs', () => {
+    const builder = new LensConfigBuilder();
+
+    const result = builder.fromAPIFormat(
+      removeIncludeEmptyRowsFromXYConfig(apiXYWithNoYTitleAndInsideLegend)
+    ) as LensAttributes;
+
+    expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off after validating XY API configs through the route schema', () => {
+    const builder = new LensConfigBuilder();
+
+    const validated = lensApiConfigSchemaNoESQL.validate(
+      removeIncludeEmptyRowsFromXYConfig(apiXYWithNoYTitleAndInsideLegend)
+    );
+
+    const result = builder.fromAPIFormat(validated) as LensAttributes;
+
+    expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting tag cloud API configs', () => {
+    const builder = new LensConfigBuilder();
+    const { include_empty_rows: _includeEmptyRows, ...tagBy } = basicTagcloudWithDataView.tag_by;
+
+    const result = builder.fromAPIFormat({
+      ...basicTagcloudWithDataView,
+      tag_by: tagBy,
+    }) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting partition API configs', () => {
+    const builder = new LensConfigBuilder();
+
+    const result = builder.fromAPIFormat({
+      title: 'Pie',
+      type: 'pie',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
+      },
+      ignore_global_filters: false,
+      sampling: 1,
+      metrics: [{ operation: 'count', empty_as_null: true }],
+      group_by: [
+        {
+          operation: 'date_histogram',
+          field: '@timestamp',
+          suggested_interval: 'auto',
+          use_original_time_range: false,
+        },
+      ],
+    }) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('keeps empty rows on when converting datatable API configs', () => {
+    const builder = new LensConfigBuilder();
+    const result = builder.fromAPIFormat(
+      removeIncludeEmptyRowsFromDatatableRows(multiMetricRowSplitByDatatableWithAdhocDataView)
+    ) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(true);
+  });
+});

@@ -164,7 +164,6 @@ test('generates metric chart config with trendline', async () => {
                     "label": "@timestamp",
                     "operationType": "date_histogram",
                     "params": Object {
-                      "includeEmptyRows": true,
                       "interval": "auto",
                     },
                     "scale": "interval",
