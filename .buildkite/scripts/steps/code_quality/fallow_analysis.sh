@@ -72,14 +72,14 @@ echo "Checks: dead code (unused exports/types/files) · duplication · complexit
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, production files only)"
 echo ""
 echo "Run locally (same as CI, grouped by team):"
-echo "  npx fallow@${FALLOW_VERSION} --group-by owner --production-dead-code --score"
+echo "  npx fallow --group-by owner --production-dead-code --score"
 echo ""
 echo "See ALL files for your team (no truncation):"
-echo "  search-kibana: npx fallow@${FALLOW_VERSION} dead-code --workspace 'x-pack/solutions/search/**' --production"
-echo "  workchat-eng:  npx fallow@${FALLOW_VERSION} dead-code --workspace 'src/platform/packages/shared/kbn-connector-specs/**' --production"
+echo "  search-kibana: npx fallow dead-code --workspace 'x-pack/solutions/search/**' --production"
+echo "  workchat-eng:  npx fallow dead-code --workspace 'src/platform/packages/shared/kbn-connector-specs/**' --production"
 echo ""
 echo "See hotspots for your team:"
-echo "  npx fallow@${FALLOW_VERSION} health --workspace 'x-pack/solutions/search/**'"
+echo "  npx fallow health --workspace 'x-pack/solutions/search/**'"
 set +e
 # shellcheck disable=SC2086
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
