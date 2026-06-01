@@ -10,13 +10,11 @@
 import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiProgress,
   EuiText,
-  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -207,11 +205,6 @@ const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
   minWidth: '4.5em',
   render: (item: TransactionGroup) => (
     <ActionsMenu
-      button={
-        <EuiToolTip content="Actions" disableScreenReaderOutput>
-          <EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />
-        </EuiToolTip>
-      }
       actions={[
         {
           id: 'discover',

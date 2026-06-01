@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiContextMenu, EuiPopover, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionGroups } from './types';
@@ -17,17 +23,11 @@ export type { ActionBase, ActionSubItem, Action, ActionGroup, ActionGroups } fro
 
 interface ActionsMenuProps {
   actions: ActionGroups;
-  button: React.ReactElement;
   id?: string;
   dataTestSubjPrefix?: string;
 }
 
-export function ActionsMenu({
-  actions,
-  button,
-  id,
-  dataTestSubjPrefix = 'actionsMenu',
-}: ActionsMenuProps) {
+export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }: ActionsMenuProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const generatedId = useGeneratedHtmlId({ prefix: 'actionsMenu' });
@@ -41,23 +41,23 @@ export function ActionsMenu({
     setIsPopoverOpen(false);
   }, []);
 
-  const buttonWithToggle = useMemo(
-    () => React.cloneElement(button, { onClick: togglePopover }),
-    [button, togglePopover]
-  );
-
   const panels = useMemo(
     () => buildPanels(actions, closePopover, euiTheme, dataTestSubjPrefix),
     [actions, closePopover, euiTheme, dataTestSubjPrefix]
   );
 
+  const ariaLabel = i18n.translate('apmUiShared.actionsMenu.ariaLabel', {
+    defaultMessage: 'Actions',
+  });
+
   return (
     <EuiPopover
       id={resolvedId}
-      aria-label={i18n.translate('apmUiShared.actionsMenu.ariaLabel', {
-        defaultMessage: 'Actions',
-      })}
-      button={buttonWithToggle}
+      aria-label={ariaLabel}
+      button={
+        // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
+        <EuiButtonIcon iconType="boxesHorizontal" aria-label={ariaLabel} onClick={togglePopover} />
+      }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"

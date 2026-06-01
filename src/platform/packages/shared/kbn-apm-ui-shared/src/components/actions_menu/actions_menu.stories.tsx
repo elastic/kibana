@@ -9,7 +9,6 @@
 
 import type { StoryFn } from '@storybook/react';
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
 import { ActionsMenu } from '.';
 
 export default {
@@ -17,15 +16,8 @@ export default {
   component: ActionsMenu,
 };
 
-const trigger = (
-  <EuiToolTip content="Actions" disableScreenReaderOutput>
-    <EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />
-  </EuiToolTip>
-);
-
 export const FlatActions: StoryFn = () => (
   <ActionsMenu
-    button={trigger}
     actions={[
       {
         id: 'main',
@@ -59,7 +51,6 @@ export const FlatActions: StoryFn = () => (
 
 export const GroupedActions: StoryFn = () => (
   <ActionsMenu
-    button={trigger}
     actions={[
       {
         id: 'investigate',
@@ -107,7 +98,6 @@ export const GroupedActions: StoryFn = () => (
 
 export const WithSubPanel: StoryFn = () => (
   <ActionsMenu
-    button={trigger}
     actions={[
       {
         id: 'main',
