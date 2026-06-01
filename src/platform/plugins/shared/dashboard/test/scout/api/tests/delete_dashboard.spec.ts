@@ -22,14 +22,17 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKey('viewer');
+  });
+
+  apiTest.beforeEach(async ({ kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterEach(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 

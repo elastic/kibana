@@ -21,9 +21,10 @@ import {
 } from '../../services/dashboard_api_services';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
+import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import { getDashboardApi } from '../get_dashboard_api';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { showWarningToast } from './show_warning_toast';
@@ -101,8 +102,9 @@ export async function loadDashboardApi({
     user,
     isAccessControlEnabled,
   });
+  const userActivityService = getDashboardUserActivityService(api);
 
-  const performanceSubscription = startQueryPerformanceTracking(api, {
+  const telemetrySubscription = startTrackingDashboardLoadTelemetry(api, {
     firstLoad: true,
     creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
       ?.startTime,
@@ -113,6 +115,7 @@ export async function loadDashboardApi({
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
+    api.userActivity$.next({ type: 'view', start: Date.now() });
     const contentInsightsClient = new ContentInsightsClient(
       { http: coreServices.http, logger },
       { domainId: 'dashboard' }
@@ -124,10 +127,14 @@ export async function loadDashboardApi({
     api,
     cleanup: () => {
       cleanup();
+      if (savedObjectId) {
+        api.userActivity$.next({ type: 'view', end: Date.now() });
+      }
+      userActivityService.cleanup();
       if (onApiCleanup) {
         onApiCleanup();
       }
-      performanceSubscription.unsubscribe();
+      telemetrySubscription.unsubscribe();
     },
     internalApi,
     useControlsIntegration: creationOptions?.useControlsIntegration,
