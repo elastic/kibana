@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Maps spaces smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const { common, maps, security, header } = getPageObjects([
