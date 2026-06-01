@@ -8,11 +8,12 @@
  */
 
 import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
-import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import { fromStoredFilter } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 
 import { migrateLegacyQuery } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
@@ -50,35 +51,31 @@ export function transformSearchSourceOut(
     searchSource = parsedSearchSource;
   }
 
-  let filters: AsCodeFilter[] | undefined;
-  try {
-    filters = fromStoredFilters(searchSource.filter, logger) ?? [];
-    filters = strictValidationSchema.validateKey('filters', filters);
-  } catch (error) {
-    // drop all invalid filters
-    const { valid, invalid } = (filters ?? []).reduce(
-      (prev, filter) => {
-        try {
-          const result = asCodeFilterSchema.validate(filter);
-          return { valid: [...prev.valid, result], invalid: prev.invalid };
-        } catch (validationError) {
-          return { valid: prev.valid, invalid: [...prev.invalid, filter] };
-        }
-      },
-      {
-        valid: [],
-        invalid: [],
-      } as { valid: AsCodeFilter[]; invalid: any[] }
-    );
-    filters = valid;
+  const validFilters: AsCodeFilter[] = [];
+  const invalidFilters: Array<{ filter: Filter; message: string }> = [];
+  searchSource.filter?.forEach((storedFilter) => {
+    try {
+      let asCodeFilter = fromStoredFilter(storedFilter, logger);
+      asCodeFilter = asCodeFilterSchema.validate(asCodeFilter);
+      validFilters.push(asCodeFilter);
+    } catch (error) {
+      invalidFilters.push({
+        filter: storedFilter,
+        message: error.message,
+      });
+    }
+  });
 
-    const warningMessage = `Unexpected error transforming filter state on read. Error: ${error.message}`;
+  if (invalidFilters.length) {
+    const warningMessage = `Unexpected error transforming filter state on read. Errors: [${invalidFilters
+      .map(({ message }, index) => `[filters.${index + 1}]: ${message}`)
+      .join(', ')}]`;
     logger.warn(warningMessage);
     warnings.push({
       type: 'dropped_property',
       message: warningMessage,
       key: 'filters',
-      value: invalid,
+      value: invalidFilters.map(({ filter }) => filter),
     });
   }
 
@@ -97,5 +94,5 @@ export function transformSearchSourceOut(
     });
   }
 
-  return { filters, query, warnings };
+  return { filters: validFilters, query, warnings };
 }

@@ -59,10 +59,12 @@ describe('transformSearchSourceOut', () => {
   });
 
   it('drops any invalid filters', () => {
-    jest.spyOn(filterTransformModule, 'fromStoredFilters').mockImplementationOnce((val: any) => {
-      // `fromStoredFilters` is **too** type safe so we have to allow invalid filters through
-      return val;
-    });
+    const spy = jest
+      .spyOn(filterTransformModule, 'fromStoredFilter')
+      .mockImplementation((val: any) => {
+        // `fromStoredFilter` is **too** type safe so we have to allow invalid filters through
+        return val;
+      });
 
     const meta = {
       searchSourceJSON: JSON.stringify({
@@ -87,11 +89,13 @@ describe('transformSearchSourceOut', () => {
           type: 'dropped_property',
           key: 'filters',
           message:
-            'Unexpected error transforming filter state on read. Error: [filters.1]: "type" property is required',
+            'Unexpected error transforming filter state on read. Errors: [[filters.1]: "type" property is required, [filters.2]: "type" property is required]',
           value: [{ invalidFilter: true }, { anotherInvalidFilter: 'yup' }],
         },
       ],
     });
+
+    spy.mockRestore();
   });
 
   it('returns empty object if searchSourceJSON is missing', () => {
