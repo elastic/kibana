@@ -30,8 +30,13 @@ export const createScheduleDataClient = async ({
 
   return new AttackDiscoveryScheduleDataClient({
     actionsClient,
+    // New schedules created via the internal (workflow) API are tagged so the
+    // public (legacy) API can exclude them. We intentionally do NOT set a
+    // `filterTags` include filter: the internal API surfaces ALL attack
+    // discovery schedules (both its own tagged rules and untagged schedules
+    // created by the legacy public API) so that schedules created while the
+    // feature flag was off remain visible after it is turned on.
     applyTags: [ATTACK_DISCOVERY_SCHEDULE_TAG],
-    filterTags: { includeTags: [ATTACK_DISCOVERY_SCHEDULE_TAG] },
     logger,
     rulesClient,
   });
