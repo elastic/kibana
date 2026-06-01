@@ -102,7 +102,7 @@ my_plugin/
 - Plugins should never call another plugin's REST API directly; access it through the plugin's contract instead
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`

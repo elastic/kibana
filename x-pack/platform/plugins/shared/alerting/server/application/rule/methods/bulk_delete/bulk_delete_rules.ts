@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
@@ -30,11 +31,7 @@ import {
   buildKueryNodeFilter,
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type {
-  BulkOperationError,
-  BulkDeleteRulesResult,
-  BulkDeleteRulesRequestBody,
-} from './types';
+import type { BulkOperationError, BulkDeleteRulesResult, BulkDeleteRulesParams } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -47,7 +44,7 @@ import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestBody
+  options: BulkDeleteRulesParams
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     validateBulkDeleteRulesBody(options);
@@ -89,7 +86,12 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
+          bulkDeleteWithOCC(context, {
+            filter: filterKueryNode,
+            changeTracking: {
+              metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+            },
+          }),
         filter: finalFilter,
       })
   );
@@ -154,7 +156,10 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
+  {
+    filter,
+    changeTracking,
+  }: { filter: KueryNode | null; changeTracking: RuleChangeTracking<never> }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -286,7 +291,7 @@ const bulkDeleteWithOCC = async (
     changesContext: {
       action: RuleChangeTrackingAction.ruleDelete,
       timestamp: deletionTimestamp,
-      metadata: { bulkCount: totalNumOfRules },
+      metadata: changeTracking?.metadata,
     },
   });
 
