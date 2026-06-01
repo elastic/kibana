@@ -1,4 +1,7 @@
 {
   "$schema": "https://docs.fallow.tools/schemas/config.json",
-  "ignoreDependencies": ["@kbn/*"]
+  "ignoreDependencies": ["@kbn/*"],
+  "workspaces": {
+    "patterns": ["packages/*", "src/**/packages/**", "x-pack/**/packages/**"]
+  }
 }
