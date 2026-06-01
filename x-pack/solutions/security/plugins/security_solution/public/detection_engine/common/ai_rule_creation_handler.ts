@@ -188,6 +188,8 @@ export const createAiRuleCreationHandler = ({
         data: {
           text: JSON.stringify(saved),
           attachmentLabel: saved.name,
+          ruleId: saved.id,
+          intent: 'update',
         },
       });
     } catch (err) {
