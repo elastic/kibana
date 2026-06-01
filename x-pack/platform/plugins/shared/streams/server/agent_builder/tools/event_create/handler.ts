@@ -6,11 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SigEvent, SigEventImpact, SigEventVerdict } from '@kbn/streams-schema';
+import type { SigEvent, SigEventImpact, SigEventStatus } from '@kbn/streams-schema';
 import type { EventClient } from '../../../lib/sig_events/events';
 
 export interface EventCreateInput {
-  status?: SigEventVerdict;
+  status?: SigEventStatus;
   title: string;
   summary: string;
   root_cause: string;

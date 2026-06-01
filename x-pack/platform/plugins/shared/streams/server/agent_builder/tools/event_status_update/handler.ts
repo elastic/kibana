@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SigEventVerdict } from '@kbn/streams-schema';
+import type { SigEventStatus } from '@kbn/streams-schema';
 import type { EventClient } from '../../../lib/sig_events/events';
 
 export async function updateEventStatusToolHandler({
@@ -16,8 +16,8 @@ export async function updateEventStatusToolHandler({
 }: {
   eventClient: EventClient;
   eventId: string;
-  status: SigEventVerdict;
-}): Promise<{ event_id: string; updated: number; ignored: number; status: SigEventVerdict }> {
+  status: SigEventStatus;
+}): Promise<{ event_id: string; updated: number; ignored: number; status: SigEventStatus }> {
   const { hits } = await eventClient.findById(eventId);
   const latest = hits[hits.length - 1];
 

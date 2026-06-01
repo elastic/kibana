@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { sigEventVerdictSchema } from '@kbn/streams-schema';
+import { sigEventStatusSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
@@ -39,7 +39,7 @@ const searchEventsSchema = z.object({
       })
     ),
   status: z
-    .array(sigEventVerdictSchema)
+    .array(sigEventStatusSchema)
     .optional()
     .describe(
       i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.status', {

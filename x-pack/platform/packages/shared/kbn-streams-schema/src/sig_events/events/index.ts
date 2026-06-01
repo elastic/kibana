@@ -14,9 +14,9 @@ import {
 } from '../common_schemas';
 import { MAX_TEXT_LENGTH } from '../constants';
 
-export const SIG_EVENT_VERDICT_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
-export const sigEventVerdictSchema = z.enum(SIG_EVENT_VERDICT_OPTIONS);
-export type SigEventVerdict = z.infer<typeof sigEventVerdictSchema>;
+export const SIG_EVENT_STATUS_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
+export const sigEventStatusSchema = z.enum(SIG_EVENT_STATUS_OPTIONS);
+export type SigEventStatus = z.infer<typeof sigEventStatusSchema>;
 
 export const SIG_EVENT_IMPACT_OPTIONS = ['critical', 'high', 'medium', 'low'] as const;
 export const sigEventImpactSchema = z.enum(SIG_EVENT_IMPACT_OPTIONS);
@@ -29,7 +29,7 @@ export const sigEventSchema = z.object({
   discovery_id: z.string().max(255).optional(),
   discovery_slug: z.string().max(255),
   previous_event_id: z.string().max(255).optional(),
-  verdict: sigEventVerdictSchema,
+  verdict: sigEventStatusSchema,
   verdict_id: z.string().max(255).optional(),
   workflow_execution_id: z.string().max(255).optional(),
   rule_names: z.array(z.string().max(255)).max(100).optional(),
