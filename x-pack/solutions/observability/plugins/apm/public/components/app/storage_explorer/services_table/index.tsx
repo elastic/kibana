@@ -236,10 +236,8 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
       ),
       render: ({ serviceName }: { serviceName: string }) => {
         return (
-          <EuiButtonIcon
-            data-test-subj={`storageDetailsButton_${serviceName}`}
-            onClick={() => toggleRowDetails(serviceName)}
-            aria-label={
+          <EuiToolTip
+            content={
               itemIdToExpandedRowMap[serviceName]
                 ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
                     defaultMessage: 'Collapse',
@@ -248,8 +246,25 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={itemIdToExpandedRowMap[serviceName] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`storageDetailsButton_${serviceName}`}
+              onClick={() => toggleRowDetails(serviceName)}
+              aria-label={
+                itemIdToExpandedRowMap[serviceName]
+                  ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+                      defaultMessage: 'Expand',
+                    })
+              }
+              iconType={
+                itemIdToExpandedRowMap[serviceName] ? 'chevronSingleUp' : 'chevronSingleDown'
+              }
+            />
+          </EuiToolTip>
         );
       },
     },
