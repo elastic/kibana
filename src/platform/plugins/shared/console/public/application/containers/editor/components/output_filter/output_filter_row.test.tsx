@@ -87,7 +87,10 @@ describe('OutputFilterRow', () => {
     it('renders the regex input with regex placeholder', () => {
       renderComponent();
       expect(screen.getByTestId('filterRegex')).toBeInTheDocument();
-      expect(screen.getByTestId('filterRegex')).toHaveAttribute('placeholder', 'Regular expression');
+      expect(screen.getByTestId('filterRegex')).toHaveAttribute(
+        'placeholder',
+        'Regular expression'
+      );
     });
 
     it('renders the invert match button in regex mode', () => {

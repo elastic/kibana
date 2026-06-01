@@ -198,10 +198,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                 hasShadow={false}
                 css={styles.fullHeightPanel}
               >
-                <EuiSplitPanel.Inner
-                  paddingSize="none"
-                  css={styles.outputPanelContent}
-                >
+                <EuiSplitPanel.Inner paddingSize="none" css={styles.outputPanelContent}>
                   <OutputPanel loading={isLoading} />
                 </EuiSplitPanel.Inner>
 

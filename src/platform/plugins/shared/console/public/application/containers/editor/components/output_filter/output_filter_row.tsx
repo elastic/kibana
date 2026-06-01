@@ -36,7 +36,9 @@ const modeOptions = [
   },
   {
     value: 'regex' as FilterMode,
-    text: i18n.translate('console.outputFilter.mode.regex', { defaultMessage: 'Regular expression' }),
+    text: i18n.translate('console.outputFilter.mode.regex', {
+      defaultMessage: 'Regular expression',
+    }),
   },
 ];
 
@@ -51,8 +53,11 @@ const isValidRegex = (expression: string): boolean => {
 };
 
 export const OutputFilterRow = () => {
-  const { expression: appliedExpression, mode: appliedMode, invertMatch: appliedInvertMatch } =
-    useOutputFilterReadContext();
+  const {
+    expression: appliedExpression,
+    mode: appliedMode,
+    invertMatch: appliedInvertMatch,
+  } = useOutputFilterReadContext();
   const { setExpression, setMode, setInvertMatch } = useOutputFilterActionContext();
 
   const [draftExpression, setDraftExpression] = useState(appliedExpression);
@@ -108,7 +113,9 @@ export const OutputFilterRow = () => {
             data-test-subj={draftMode === 'regex' ? 'filterRegex' : 'filterJq'}
             value={draftExpression}
             onChange={(e) => handleExpressionChange(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleApply();
+            }}
             isInvalid={isInvalid}
             placeholder={
               draftMode === 'regex'
@@ -129,8 +136,12 @@ export const OutputFilterRow = () => {
                   onClick={() => handleInvertMatchChange(!draftInvertMatch)}
                 >
                   {draftInvertMatch
-                    ? i18n.translate('console.outputFilter.regex.exclude', { defaultMessage: 'Exclude' })
-                    : i18n.translate('console.outputFilter.regex.include', { defaultMessage: 'Include' })}
+                    ? i18n.translate('console.outputFilter.regex.exclude', {
+                        defaultMessage: 'Exclude',
+                      })
+                    : i18n.translate('console.outputFilter.regex.include', {
+                        defaultMessage: 'Include',
+                      })}
                 </EuiButtonEmpty>
               ) : undefined
             }
@@ -153,13 +164,20 @@ export const OutputFilterRow = () => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="question"
-            aria-label={i18n.translate('console.outputFilter.helpAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('console.outputFilter.helpAriaLabel', {
               defaultMessage: 'Filter expression help',
             })}
-            onClick={() => setShowHelp(true)}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="question"
+              aria-label={i18n.translate('console.outputFilter.helpAriaLabel', {
+                defaultMessage: 'Filter expression help',
+              })}
+              onClick={() => setShowHelp(true)}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 

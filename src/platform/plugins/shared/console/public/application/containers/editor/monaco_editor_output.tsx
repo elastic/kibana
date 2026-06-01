@@ -34,7 +34,12 @@ import {
   languageForContentType,
   convertMapboxVectorTileToJson,
 } from './utils';
-import { useEditorReadContext, useRequestReadContext, useServicesContext, useOutputFilterReadContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useRequestReadContext,
+  useServicesContext,
+  useOutputFilterReadContext,
+} from '../../contexts';
 import { applyResponseFilter } from '../../lib/apply_response_filter';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
