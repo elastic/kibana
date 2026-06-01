@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createEsError } from './create_es_error';
 import { screen } from '@testing-library/react';
@@ -26,10 +26,10 @@ const servicesMock = {
   } as CoreStart['docLinks'],
 };
 
-const dataViewMock = buildDataViewMock({
+const dataViewMock = {
   id: '1234',
   title: 'logs',
-});
+} as AbstractDataView;
 
 describe('Painless error', () => {
   const painlessError = createEsError(
