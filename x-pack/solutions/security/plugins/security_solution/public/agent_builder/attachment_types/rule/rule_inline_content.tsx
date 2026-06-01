@@ -111,16 +111,11 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   aiRuleCreation,
 }) => {
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  const lastSavedRuleId = useObservable(aiRuleCreation.lastSavedRuleId$, null);
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // intent is per-version (frozen at write time) and drives the button label.
-  // ruleId comes from data.ruleId (server-persisted) → origin (legacy) → in-session fallback.
-  // The duplicate warning shows for create-intent versions that are already linked to a saved rule:
-  // clicking "Create rule" again would spawn a second copy.
   const intent = getRuleAttachmentIntent(attachment);
-  const ruleId = getRuleIdFromAttachment(attachment) ?? lastSavedRuleId ?? undefined;
+  const ruleId = getRuleIdFromAttachment(attachment);
   const willDuplicateOnSave = intent === 'create' && ruleId !== undefined;
 
   if (!rule) {
