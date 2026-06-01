@@ -89,9 +89,7 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --score \
   $SAVE_SNAPSHOT_FLAG \
   2>&1)
-FALLOW_EXIT=$?
 set -e
-echo "fallow exit: ${FALLOW_EXIT}, output lines: $(printf '%s\n' "$FALLOW_OUTPUT" | wc -l)"
 
 echo "--- Dead code"
 for owner in "${FALLOW_OWNERS[@]}"; do
