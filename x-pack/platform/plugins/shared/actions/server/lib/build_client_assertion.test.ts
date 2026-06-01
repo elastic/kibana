@@ -346,7 +346,9 @@ describe('buildClientAssertion', () => {
       });
 
       const [headerB64, payloadB64, signatureB64] = jwt.split('.');
-      const header = JSON.parse(Buffer.from(headerB64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString());
+      const header = JSON.parse(
+        Buffer.from(headerB64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
+      );
       expect(header.alg).toBe('ES256');
       expect(header.kid).toBe('ec-key-1');
 
@@ -363,11 +365,7 @@ describe('buildClientAssertion', () => {
       };
       const rDer = toDerInt(r);
       const sDer = toDerInt(s);
-      const derSig = Buffer.concat([
-        Buffer.from([0x30, rDer.length + sDer.length]),
-        rDer,
-        sDer,
-      ]);
+      const derSig = Buffer.concat([Buffer.from([0x30, rDer.length + sDer.length]), rDer, sDer]);
 
       const publicKey = createPublicKey({ key: EC_PUBLIC_KEY, format: 'pem' });
       const isValid = createVerify('sha256').update(signingInput).verify(publicKey, derSig);
