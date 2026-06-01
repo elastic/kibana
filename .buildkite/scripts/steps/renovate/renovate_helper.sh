@@ -35,10 +35,6 @@ regenerate_gh_aw_locks() {
   gh aw lint
 }
 
-# Both yarn deduplication and gh-aw lock regeneration are committed together in a
-# single commit below. Committing after yarn dedup alone would exit before the
-# gh-aw recompile could run (the push turns the next build into a `synchronize`
-# event, which does not re-run this helper).
 echo --- Deduplicate yarn.lock
 cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn_deduplicate.js"
 eval "$cmd"
