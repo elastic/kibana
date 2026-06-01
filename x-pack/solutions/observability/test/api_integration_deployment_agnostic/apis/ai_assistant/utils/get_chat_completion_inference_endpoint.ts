@@ -20,10 +20,15 @@ export async function getInferenceEndpointOnlyConnectorId(
   const response = await es.inference.get();
   const endpoints = response.endpoints ?? [];
 
-  const chatCompletionEndpoints = endpoints.filter((endpoint) => endpoint.task_type === 'chat_completion');
+  const chatCompletionEndpoints = endpoints.filter(
+    (endpoint) => endpoint.task_type === 'chat_completion'
+  );
 
-  const elasticEndpoint = chatCompletionEndpoints.find((endpoint) => endpoint.service === 'elastic');
-  const inferenceEndpointId = elasticEndpoint?.inference_id ?? chatCompletionEndpoints[0]?.inference_id;
+  const elasticEndpoint = chatCompletionEndpoints.find(
+    (endpoint) => endpoint.service === 'elastic'
+  );
+  const inferenceEndpointId =
+    elasticEndpoint?.inference_id ?? chatCompletionEndpoints[0]?.inference_id;
 
   if (!inferenceEndpointId) {
     log.warning(
