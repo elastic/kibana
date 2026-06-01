@@ -3242,7 +3242,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API SearchAttacks`);
     return this.kbnClient
       .request<SearchAttacksResponse>({
-        path: '/api/detection_engine/attacks/_search',
+        path: '/api/detection_engine/attacks/search',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },

@@ -539,7 +539,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
    */
   searchAttacks(props: SearchAttacksProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/detection_engine/attacks/_search', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/search', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
