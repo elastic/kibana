@@ -118,10 +118,7 @@ export class StaticLookupFormat extends FieldFormat {
     const formatted = String(result ?? '');
 
     const fieldName = field?.name;
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(formatted, hit.highlight[fieldName]);
-    }
 
-    return formatted;
+    return getHighlightReact(formatted, fieldName, hit);
   };
 }
