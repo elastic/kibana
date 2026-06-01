@@ -3,7 +3,7 @@ info:
   title: Attack discovery alerts search API endpoint
   version: '2023-10-31'
 paths:
-  /api/detection_engine/attacks/_search:
+  /api/detection_engine/attacks/search:
     post:
       x-labels: [serverless, ess]
       x-internal: true
