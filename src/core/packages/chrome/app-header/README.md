@@ -16,9 +16,6 @@ the page cannot safely own the header placement yet.
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
 that own their title, back target, tabs, badges, and app menu locally.
 
-Use `AppHeaderWithFallback` when the same page still needs a classic `EuiPageHeader` fallback while
-Chrome Next is disabled.
-
 Use `ChromeAppHeaderRegistration` when Chrome should own the top-bar slot. This keeps migration
 small for pages with sticky or shared top-nav constraints while still using the shared header view.
 
@@ -50,7 +47,7 @@ different buckets while the migration is in progress:
 
 | Bucket | Preferred API | When to use |
 |---|---|---|
-| Inline-ready | `AppHeader` or `AppHeaderWithFallback` | The page can colocate header state with its React tree. |
+| Inline-ready | `AppHeader` | The page can colocate header state with its React tree. |
 | Chrome-owned transitional | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot while the route keeps existing layout constraints. |
 | Fallback-only | Legacy Chrome state | Temporary safety net for routes that have not explicitly migrated. |
 

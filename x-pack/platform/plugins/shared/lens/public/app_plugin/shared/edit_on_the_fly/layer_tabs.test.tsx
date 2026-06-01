@@ -463,7 +463,7 @@ describe('LayerTabs', () => {
       expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
 
       // The delete action should exist
-      expect(instance.find('button[title="Delete layer"]').exists()).toBe(true);
+      expect(instance.find('button[aria-label="Delete layer"]').exists()).toBe(true);
     });
 
     it('should call the remove callback when deleting layer', async () => {
@@ -507,7 +507,7 @@ describe('LayerTabs', () => {
 
       // Click the delete layer button
       act(() => {
-        instance.find('button[title="Delete layer"]').first().simulate('click');
+        instance.find('button[aria-label="Delete layer"]').first().simulate('click');
       });
       instance.update();
 
