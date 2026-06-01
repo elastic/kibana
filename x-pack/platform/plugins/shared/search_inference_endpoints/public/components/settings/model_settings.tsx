@@ -122,7 +122,7 @@ export const ModelSettings: React.FC = () => {
   const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
   const hasAdvancedSettingsSavePermission =
-    application.capabilities.advancedSettings?.save === true;
+    application.capabilities?.advancedSettings?.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
