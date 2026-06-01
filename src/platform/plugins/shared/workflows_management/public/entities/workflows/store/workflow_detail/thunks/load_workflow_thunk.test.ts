@@ -65,7 +65,22 @@ describe('loadWorkflowThunk', () => {
       title: 'Failed to load workflow',
     });
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
-    expect(result.payload).toBe('Network Error');
+    expect(result.payload).toBe(error);
+  });
+
+  it('should reject with the original error when workflow is not found', async () => {
+    const error = {
+      message: 'Workflow not found',
+      response: { status: 404 },
+      body: { message: 'Workflow not found' },
+    };
+
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(loadWorkflowThunk({ id: 'missing-workflow' }));
+
+    expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
+    expect(result.payload).toBe(error);
   });
 
   it('should handle error without message', async () => {
@@ -82,6 +97,6 @@ describe('loadWorkflowThunk', () => {
       }
     );
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
-    expect(result.payload).toBe('Failed to load workflow');
+    expect(result.payload).toBe(error);
   });
 });
