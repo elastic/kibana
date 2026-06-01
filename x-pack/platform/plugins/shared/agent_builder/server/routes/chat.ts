@@ -95,7 +95,7 @@ export function registerChatRoutes({
         {
           meta: {
             description:
-              'Can be used to respond to a confirmation or authorization prompt. Confirmation responses carry `{ allow }`, authorization responses carry `{ authorized }`.',
+              'Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.',
           },
         }
       )
