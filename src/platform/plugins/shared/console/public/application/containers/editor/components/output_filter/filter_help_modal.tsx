@@ -18,6 +18,7 @@ import {
   EuiButton,
   EuiText,
   EuiCode,
+  EuiDescriptionList,
   EuiSpacer,
 } from '@elastic/eui';
 import type { FilterMode } from '../../../../contexts/output_filter_context';
@@ -34,11 +35,12 @@ const regexExamples = [
 ];
 
 const jqExamples = [
-  { expression: '._shards', description: i18n.translate('console.outputFilter.help.jq.example1', { defaultMessage: 'Extract the _shards field' }) },
-  { expression: '.hits.total', description: i18n.translate('console.outputFilter.help.jq.example2', { defaultMessage: 'Extract nested hits total count' }) },
-  { expression: '.hits.hits[0]', description: i18n.translate('console.outputFilter.help.jq.example3', { defaultMessage: 'Get the first hit' }) },
-  { expression: '.hits.hits[0] | [._source.name, ._source.id]', description: i18n.translate('console.outputFilter.help.jq.example4', { defaultMessage: 'Extract multiple fields from the first hit' }) },
-  { expression: '{ total: .hits.total, first: .hits.hits[0] }', description: i18n.translate('console.outputFilter.help.jq.example5', { defaultMessage: 'Reshape the response into a custom object' }) },
+  { expression: '._shards', description: i18n.translate('console.outputFilter.help.jq.example1', { defaultMessage: 'Extract a top-level field' }) },
+  { expression: '.hits.hits[0]', description: i18n.translate('console.outputFilter.help.jq.example2', { defaultMessage: 'Get the first hit' }) },
+  { expression: '.hits.hits[] | ._source', description: i18n.translate('console.outputFilter.help.jq.example3', { defaultMessage: 'Iterate hits and extract _source' }) },
+  { expression: '.hits.hits[] | select(._source.status == "active")', description: i18n.translate('console.outputFilter.help.jq.example4', { defaultMessage: 'Filter hits by a field value' }) },
+  { expression: 'to_entries | select(.value.type == "keyword") | .key', description: i18n.translate('console.outputFilter.help.jq.example5', { defaultMessage: 'List fields with a given mapping type' }) },
+  { expression: 'keys', description: i18n.translate('console.outputFilter.help.jq.example6', { defaultMessage: 'List all top-level keys' }) },
 ];
 
 export const FilterHelpModal = ({ mode, onClose }: FilterHelpModalProps) => {
@@ -51,7 +53,8 @@ export const FilterHelpModal = ({ mode, onClose }: FilterHelpModalProps) => {
   const note =
     mode === 'jq'
       ? i18n.translate('console.outputFilter.help.jq.note', {
-          defaultMessage: 'Only a subset of the JQ language is supported.',
+          defaultMessage:
+            'Supports field access, .[], pipes, select, comparisons, to_entries, keys, from_entries, not, and recursive descent (..).',
         })
       : i18n.translate('console.outputFilter.help.regex.note', {
           defaultMessage: 'Filter is applied line-by-line. Use "Invert match" to exclude matching lines.',
@@ -67,14 +70,13 @@ export const FilterHelpModal = ({ mode, onClose }: FilterHelpModalProps) => {
           {note}
         </EuiText>
         <EuiSpacer size="m" />
-        {examples.map(({ expression, description }) => (
-          <div key={expression}>
-            <EuiCode>{expression}</EuiCode>
-            <EuiText size="xs" color="subdued" css={{ marginBottom: 8 }}>
-              {description}
-            </EuiText>
-          </div>
-        ))}
+        <EuiDescriptionList
+          compressed
+          listItems={examples.map(({ expression, description }) => ({
+            title: description,
+            description: <EuiCode>{expression}</EuiCode>,
+          }))}
+        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill>

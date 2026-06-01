@@ -28,7 +28,7 @@ export interface OutputFilterActions {
 
 const defaultState: OutputFilterState = {
   expression: '',
-  mode: 'regex',
+  mode: 'jq',
   invertMatch: false,
   isExpanded: false,
 };
@@ -45,7 +45,7 @@ const OutputFilterActionContext = createContext<OutputFilterActions>(defaultActi
 
 export function OutputFilterContextProvider({ children }: { children: React.ReactNode }) {
   const [expression, setExpression] = useState('');
-  const [mode, setMode] = useState<FilterMode>('regex');
+  const [mode, setMode] = useState<FilterMode>('jq');
   const [invertMatch, setInvertMatch] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 

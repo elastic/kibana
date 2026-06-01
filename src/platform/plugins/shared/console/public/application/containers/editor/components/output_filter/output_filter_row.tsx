@@ -11,13 +11,14 @@ import React, { useState } from 'react';
 import { checkScript } from '@elastic/micro-jq';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
   EuiSplitPanel,
-  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,12 +31,12 @@ import { FilterHelpModal } from './filter_help_modal';
 
 const modeOptions = [
   {
-    value: 'regex' as FilterMode,
-    text: i18n.translate('console.outputFilter.mode.regex', { defaultMessage: 'Regular expression' }),
-  },
-  {
     value: 'jq' as FilterMode,
     text: i18n.translate('console.outputFilter.mode.jq', { defaultMessage: 'JQ expression' }),
+  },
+  {
+    value: 'regex' as FilterMode,
+    text: i18n.translate('console.outputFilter.mode.regex', { defaultMessage: 'Regular expression' }),
   },
 ];
 
@@ -119,24 +120,38 @@ export const OutputFilterRow = () => {
                     defaultMessage: 'JQ expression',
                   })
             }
+            prepend={
+              draftMode === 'regex' ? (
+                <EuiButtonEmpty
+                  size="xs"
+                  color={draftInvertMatch ? 'danger' : 'primary'}
+                  iconType={draftInvertMatch ? 'filterExclude' : 'filterInclude'}
+                  data-test-subj="invertFilter"
+                  onClick={() => handleInvertMatchChange(!draftInvertMatch)}
+                >
+                  {draftInvertMatch
+                    ? i18n.translate('console.outputFilter.regex.exclude', { defaultMessage: 'Exclude' })
+                    : i18n.translate('console.outputFilter.regex.include', { defaultMessage: 'Include' })}
+                </EuiButtonEmpty>
+              ) : undefined
+            }
             compressed
             fullWidth
           />
         </EuiFlexItem>
 
-        {draftMode === 'regex' && (
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              data-test-subj="invertFilter"
-              label={i18n.translate('console.outputFilter.regex.invertMatch', {
-                defaultMessage: 'Invert match',
-              })}
-              checked={draftInvertMatch}
-              onChange={(e) => handleInvertMatchChange(e.target.checked)}
-              compressed
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            color="primary"
+            iconType="returnKey"
+            iconSide="left"
+            onClick={handleBlur}
+            data-test-subj="consoleOutputFilterApply"
+          >
+            {i18n.translate('console.outputFilter.applyButton', { defaultMessage: 'Apply' })}
+          </EuiButton>
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -163,7 +178,7 @@ export const OutputFilterExpandedPanel = () => {
   return (
     <EuiSplitPanel.Inner
       grow={false}
-      paddingSize="xs"
+      paddingSize="s"
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePlain};
       `}
