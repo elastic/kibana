@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -116,15 +116,28 @@ export const getAlertsTableEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const { timeRange: selectedTimeRange } = useFetchContext(api);
+        const fetchContext = useFetchContext(api);
         const tableConfig = useStateFromPublishingSubject(tableConfig$);
+        const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>();
+
+        useEffect(() => {
+          if (fetchContext.isReload) {
+            setLastReloadRequestTime(Date.now());
+          }
+        }, [fetchContext.isReload]);
+
+        const onLoadingChange = useCallback((isLoading: boolean) => {
+          queryLoading$.next(isLoading);
+        }, []);
 
         return (
           <KibanaContextProvider services={services}>
             <QueryClientProvider client={queryClient}>
               <EmbeddableAlertsTable
                 id={`${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${uuid}`}
-                timeRange={selectedTimeRange}
+                timeRange={fetchContext.timeRange}
+                lastReloadRequestTime={lastReloadRequestTime}
+                onLoadingChange={onLoadingChange}
                 solution={tableConfig?.solution}
                 query={tableConfig?.query}
                 services={services}
