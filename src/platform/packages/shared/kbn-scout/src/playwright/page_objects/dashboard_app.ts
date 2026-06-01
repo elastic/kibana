@@ -970,12 +970,14 @@ export class DashboardApp {
    */
   async saveDashboardAsCopy(dashboardTitle?: string) {
     await this.quickSaveSecondaryButton.click();
+    await this.interactiveSaveMenuItem.isVisible();
     // The dashboard sometimes flags spurious unsaved changes on initial layout,
     // which triggers a continuous toolbar re-render that nudges the popover by a
     // pixel each frame and defeats Playwright's stability check. The menu item
     // is visibly clickable; bypass actionability to land the click.
     await this.interactiveSaveMenuItem.click({ force: true });
     await expect(this.savedObjectTitleInput).toBeVisible();
+
     if (dashboardTitle !== undefined) {
       await this.savedObjectTitleInput.fill(dashboardTitle);
     }
