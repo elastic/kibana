@@ -48,7 +48,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Input Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Input Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))"
             },
             "type": "metric",
             "sampling": 1,
@@ -89,7 +89,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Output Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Output Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))"
             },
             "type": "metric",
             "sampling": 1,
@@ -130,7 +130,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `LLM Requests` = COUNT(*)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `LLM Requests` = COUNT(*)"
             },
             "type": "metric",
             "sampling": 1,
@@ -176,7 +176,7 @@
                 "type": "area_stacked",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -284,7 +284,7 @@
                 "type": "bar_horizontal",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Request Count` = COUNT(*) BY `Model` = attributes.gen_ai.request.model\n| SORT `Request Count` DESC"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `Request Count` = COUNT(*) BY `Model` = attributes.gen_ai.request.model\n| SORT `Request Count` DESC"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -387,7 +387,7 @@
                 "type": "bar_horizontal",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ChatComplete\"\n| STATS `Request Count` = COUNT(*) BY `Provider` = attributes.gen_ai.system\n| SORT `Request Count` DESC"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ChatComplete\"\n| STATS `Request Count` = COUNT(*) BY `Provider` = attributes.gen_ai.system\n| SORT `Request Count` DESC"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -495,7 +495,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| STATS `Conversations` = COUNT(*)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| STATS `Conversations` = COUNT(*)"
             },
             "type": "metric",
             "sampling": 1,
@@ -536,7 +536,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -583,7 +583,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `P95 Duration (s)` = ROUND(PERCENTILE(duration_sec, 95), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `P95 Duration (s)` = ROUND(PERCENTILE(duration_sec, 95), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -631,7 +631,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Max Duration (s)` = ROUND(MAX(duration_sec), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Max Duration (s)` = ROUND(MAX(duration_sec), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -683,7 +683,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| STATS `Conversations` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| STATS `Conversations` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -784,7 +784,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -893,7 +893,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `Agent Executions` = COUNT(*)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `Agent Executions` = COUNT(*)"
             },
             "type": "metric",
             "sampling": 1,
@@ -934,7 +934,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -981,7 +981,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `P95 Duration (s)` = ROUND(PERCENTILE(duration_sec, 95), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `P95 Duration (s)` = ROUND(PERCENTILE(duration_sec, 95), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -1028,7 +1028,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Max Duration (s)` = ROUND(MAX(duration_sec), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Max Duration (s)` = ROUND(MAX(duration_sec), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -1080,7 +1080,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -1189,7 +1189,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `Execution Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `Execution Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -1300,7 +1300,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Calls` = COUNT(*)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Calls` = COUNT(*)"
             },
             "type": "metric",
             "sampling": 1,
@@ -1341,7 +1341,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\") AND status.code == \"Error\"\n| STATS `Tool Errors` = COUNT(*)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\") AND status.code == \"Error\"\n| STATS `Tool Errors` = COUNT(*)"
             },
             "type": "metric",
             "sampling": 1,
@@ -1382,7 +1382,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == \"Error\"\n| EVAL `Success Rate (%)` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == \"Error\"\n| EVAL `Success Rate (%)` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Success Rate (%)`"
             },
             "type": "metric",
             "sampling": 1,
@@ -1446,7 +1446,7 @@
           "config": {
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2)"
             },
             "type": "metric",
             "sampling": 1,
@@ -1498,7 +1498,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Tool Name` = name\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Tool Name` = name\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -1601,7 +1601,7 @@
                 "type": "line",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Status` = status.code\n| SORT `Time`"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Status` = status.code\n| SORT `Time`"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -1704,7 +1704,7 @@
                 "type": "bar_horizontal",
                 "data_source": {
                   "type": "esql",
-                  "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Tool Count` DESC\n| LIMIT 15"
+                  "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Tool Count` DESC\n| LIMIT 15"
                 },
                 "sampling": 1,
                 "ignore_global_filters": false,
@@ -1820,7 +1820,7 @@
             ],
             "data_source": {
               "type": "esql",
-              "query": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Call Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Call Count` DESC\n| LIMIT 15"
+              "query": "FROM traces-agent_builder.otel-*\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder.otel\" AND data_stream.namespace == \"__AGENT_BUILDER_TRACES_NAMESPACE__\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Call Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Call Count` DESC\n| LIMIT 15"
             },
             "legend": {
               "visibility": "visible",

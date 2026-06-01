@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
@@ -16,6 +16,7 @@ import {
   AGENT_BUILDER_DASHBOARD_TYPE_MIGRATION_VERSION,
   AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION,
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
+  AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
 } from './constants';
 
 interface DashboardGridPosition {
@@ -107,18 +108,22 @@ function transformVisPanelConfig(
   };
 }
 
+const isLensVisualizationPanel = (panel: DashboardPanelAsset) =>
+  panel.type === LENS_EMBEDDABLE_TYPE || panel.type === 'vis';
+
 function transformPanel(
   panel: DashboardPanelAsset,
   builder: LensConfigBuilder,
   sectionId?: string
 ): SavedDashboardPanel {
+  const isLensPanel = isLensVisualizationPanel(panel);
   const embeddableConfig =
-    panel.type === LENS_EMBEDDABLE_TYPE && panel.config
+    isLensPanel && panel.config
       ? transformVisPanelConfig(builder, panel.config)
       : panel.config ?? {};
 
   return {
-    type: panel.type,
+    type: isLensPanel ? LENS_EMBEDDABLE_TYPE : panel.type,
     panelIndex: panel.id,
     gridData: {
       x: panel.grid.x ?? 0,
@@ -161,10 +166,10 @@ function buildOverviewDashboardPanels(): {
 
 /**
  * Creates or overwrites the plugin-owned managed Agent Builder overview dashboard.
- * Idempotent: uses a stable id with overwrite. Re-run on startup upgrades the dashboard
- * when {@link AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION} increases.
+ * Idempotent: uses a stable id with overwrite. Re-run upgrades the dashboard when
+ * {@link AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION} increases.
  */
-async function installAgentBuilderDashboard(
+async function installAgentBuilderOverviewDashboard(
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<void> {
@@ -186,7 +191,10 @@ async function installAgentBuilderDashboard(
         }),
       },
       optionsJSON: transformOptionsIn(overviewDashboard.options),
-      panelsJSON: JSON.stringify(panels),
+      panelsJSON: JSON.stringify(panels).replaceAll(
+        AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
+        'default'
+      ),
       ...(sections.length > 0 && { sections }),
       timeRestore: false,
       title: overviewDashboard.title,
@@ -206,15 +214,42 @@ async function installAgentBuilderDashboard(
   logger.debug('Agent Builder overview dashboard installed');
 }
 
-export async function installAgentBuilderDashboardIfExperimentalEnabled(
+/**
+ * Removes the plugin-owned managed Agent Builder overview dashboard.
+ */
+async function removeAgentBuilderOverviewDashboard(
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<void> {
+  try {
+    await savedObjectsClient.delete('dashboard', AGENT_BUILDER_OVERVIEW_DASHBOARD_ID);
+    logger.debug('Agent Builder overview dashboard removed');
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      logger.debug('Agent Builder overview dashboard already absent');
+      return;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Installs or removes the managed overview dashboard based on the experimental-features
+ * uiSetting. Called at server startup and whenever the setting is toggled.
+ */
+export async function syncAgentBuilderOverviewDashboard(
   coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
   logger: Logger
 ): Promise<void> {
-  const internalRepository = coreStart.savedObjects.createInternalRepository();
-  const internalClient = new SavedObjectsClient(internalRepository);
+  const internalClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(internalClient);
-  if (!(await uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID))) {
-    return;
+  const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+
+  if (experimentalFeaturesEnabled) {
+    await installAgentBuilderOverviewDashboard(internalClient, logger);
+  } else {
+    await removeAgentBuilderOverviewDashboard(internalClient, logger);
   }
-  await installAgentBuilderDashboard(internalClient, logger);
 }

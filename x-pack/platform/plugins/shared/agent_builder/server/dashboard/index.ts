@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { installAgentBuilderDashboardIfExperimentalEnabled } from './install_dashboard';
+export { syncAgentBuilderOverviewDashboard } from './install_dashboard';

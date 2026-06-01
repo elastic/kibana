@@ -36,7 +36,7 @@ import { createModelProviderFactory } from './services/execution/runner/model_pr
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
-import { installAgentBuilderDashboardIfExperimentalEnabled } from './dashboard';
+import { syncAgentBuilderOverviewDashboard } from './dashboard';
 import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
@@ -250,13 +250,11 @@ export class AgentBuilderPlugin
       registerSampleData(this.home, this.logger);
     }
 
-    void installAgentBuilderDashboardIfExperimentalEnabled(coreStart, this.logger).catch(
-      (error) => {
-        this.logger.warn(
-          `Failed to install Agent Builder overview dashboard: ${(error as Error).message}`
-        );
-      }
-    );
+    void syncAgentBuilderOverviewDashboard(coreStart, this.logger).catch((error) => {
+      this.logger.warn(
+        `Failed to sync Agent Builder overview dashboard: ${(error as Error).message}`
+      );
+    });
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
