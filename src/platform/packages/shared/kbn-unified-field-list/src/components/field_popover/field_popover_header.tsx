@@ -39,6 +39,7 @@ export interface FieldPopoverHeaderProps {
   services?: {
     fieldsMetadata?: FieldsMetadataPublicStart;
   };
+  streamNames?: string[];
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -55,6 +56,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onEditField,
   onDeleteField,
   services,
+  streamNames,
 }) => {
   if (!field) {
     return null;
@@ -116,7 +118,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
                 aria-label={addFieldToWorkspaceTooltip}
                 {...(buttonAddFieldToWorkspaceProps || {})}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
@@ -131,7 +133,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
-                iconType="visBarVerticalStacked"
+                iconType="chartBarVerticalStack"
                 onClick={() => {
                   closePopover();
                   onAddBreakdownField(field);
@@ -195,6 +197,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         field={field}
         Wrapper={FieldDescriptionWrapper}
         fieldsMetadataService={services?.fieldsMetadata}
+        streamNames={streamNames}
       />
     </>
   );
@@ -203,7 +206,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
 const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {children}
     </>
   );

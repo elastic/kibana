@@ -4,42 +4,146 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-shared-deps-npm'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-shared-deps-npm'
+  title: '@kbn/ui-shared-deps-npm'
   description: Moon project for @kbn/ui-shared-deps-npm
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
+  sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
 dependsOn:
   - '@kbn/repo-info'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - private
+  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.js'
     - '!**/*.config.js'
     - '!target/**/*'
+    - version_dependencies.txt
 tasks:
+  extract-version-dependencies:
+    command: node
+    args:
+      - scripts/extract_version_dependencies.js
+      - src/platform/packages/private/kbn-ui-shared-deps-npm/version_dependencies.txt
+      - '--collect'
+      - '@babel/runtime'
+      - '--collect'
+      - '@elastic/apm-rum-core'
+      - '--collect'
+      - '@elastic/charts'
+      - '--collect'
+      - '@elastic/esql'
+      - '--collect'
+      - '@elastic/eui'
+      - '--collect'
+      - '@elastic/eui-theme-borealis'
+      - '--collect'
+      - '@elastic/numeral'
+      - '--collect'
+      - '@emotion/cache'
+      - '--collect'
+      - '@emotion/react'
+      - '--collect'
+      - '@hello-pangea/dnd'
+      - '--collect'
+      - '@reduxjs/toolkit'
+      - '--collect'
+      - '@tanstack/react-query'
+      - '--collect'
+      - '@tanstack/react-query-devtools'
+      - '--collect'
+      - classnames
+      - '--collect'
+      - clean-webpack-plugin
+      - '--collect'
+      - core-js
+      - '--collect'
+      - css-loader
+      - '--collect'
+      - fastest-levenshtein
+      - '--collect'
+      - fp-ts
+      - '--collect'
+      - history
+      - '--collect'
+      - immer
+      - '--collect'
+      - io-ts
+      - '--collect'
+      - jquery
+      - '--collect'
+      - lodash
+      - '--collect'
+      - mini-css-extract-plugin
+      - '--collect'
+      - moment
+      - '--collect'
+      - moment-timezone
+      - '--collect'
+      - node-stdlib-browser
+      - '--collect'
+      - qs
+      - '--collect'
+      - react
+      - '--collect'
+      - react-dom
+      - '--collect'
+      - react-redux
+      - '--collect'
+      - react-router
+      - '--collect'
+      - react-router-dom
+      - '--collect'
+      - react-router-dom-v5-compat
+      - '--collect'
+      - redux
+      - '--collect'
+      - reselect
+      - '--collect'
+      - rxjs
+      - '--collect'
+      - styled-components
+      - '--collect'
+      - symbol-observable
+      - '--collect'
+      - tslib
+      - '--collect'
+      - uuid
+      - '--collect'
+      - webpack
+      - '--transitive'
+    env:
+      CI_STATS_DISABLED: 'true'
+    inputs:
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true
   build-webpack:
     command: yarn
     args:
       - build
     deps:
+      - ~:extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
+      - package.json
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -52,9 +156,11 @@ tasks:
       - build
       - '--watch'
     deps:
+      - extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
+      - package.json
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

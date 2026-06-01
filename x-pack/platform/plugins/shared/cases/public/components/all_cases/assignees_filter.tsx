@@ -116,7 +116,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
       button={
         <EuiFilterButton
           data-test-subj="options-filter-popover-button-assignees"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isLoading={isLoadingData}
           isSelected={isPopoverOpen}

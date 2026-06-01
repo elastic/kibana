@@ -63,6 +63,7 @@ export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLD
 
 export interface LensBaseConfig {
   title: string;
+  description?: string;
   /** default data view id or index pattern to use, it can be overriden on each query */
   dataset?: LensDataset;
 }
@@ -291,7 +292,7 @@ export type LensAnnotationLayer = Identity<
 export type LensSeriesLayer = Identity<
   LensBaseXYLayer & {
     type: 'series';
-    breakdown?: LensBreakdownConfig;
+    breakdown?: LensBreakdownConfig | LensBreakdownConfig[];
     xAxis?: LensBreakdownConfig;
     seriesType: 'line' | 'bar' | 'area';
   }

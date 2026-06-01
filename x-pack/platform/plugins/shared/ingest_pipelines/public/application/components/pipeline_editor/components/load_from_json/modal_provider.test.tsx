@@ -60,7 +60,31 @@ describe('Load from JSON ModalProvider', () => {
     expect(within(modal).getByTestId('errorCallOut')).toHaveTextContent(
       'Please ensure the JSON is a valid pipeline object.'
     );
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('clears serialization errors on edit and re-enables submit', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
+
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: '{}' } });
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    expect(within(modal).getByTestId('errorCallOut')).toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
+
+    const validPipeline = JSON.stringify({ processors: [] });
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: validPipeline } });
+
+    expect(within(modal).queryByTestId('errorCallOut')).not.toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).not.toBeDisabled();
+
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+    expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('passes through a valid pipeline object', async () => {
@@ -110,6 +134,47 @@ describe('Load from JSON ModalProvider', () => {
           },
           Object {
             "badType2": 1,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('passes through a valid pipeline object with triple-quoted strings (xJSON)', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
+    const validPipelineWithTripleQuotes = `{
+      "processors": [
+        {
+          "script": {
+            "description": "add a test_field",
+            "lang": "painless",
+            "source": """
+              ctx['test_field'] = 'This is a test'
+            """
+          }
+        }
+      ]
+    }`;
+    const codeEditor = within(modal).getByTestId('mockedCodeEditor');
+    fireEvent.change(codeEditor, { target: { value: validPipelineWithTripleQuotes } });
+
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "processors": Array [
+          Object {
+            "script": Object {
+              "description": "add a test_field",
+              "lang": "painless",
+              "source": "
+                    ctx['test_field'] = 'This is a test'
+                  ",
+            },
           },
         ],
       }

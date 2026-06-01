@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
@@ -113,7 +114,8 @@ export const createCustomThresholdExecutor = ({
     };
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
+    const alertOnGroupDisappear =
+      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -152,10 +154,11 @@ export const createCustomThresholdExecutor = ({
     // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
     const esQueryConfig = await getEsQueryConfig(uiSettingsClient);
-    const alertResults = await evaluateRule(
+    const criterionResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataViewIndexPattern,
+      dataView,
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
@@ -166,6 +169,12 @@ export const createCustomThresholdExecutor = ({
       state.lastRunTimestamp,
       previousMissingGroups
     );
+
+    const alertResults = criterionResults.map((r) => r.evaluations);
+    const evaluationTimeRange = {
+      gte: new Date(Math.min(...criterionResults.map((r) => r.timeRange.start))).toISOString(),
+      lte: new Date(Math.max(...criterionResults.map((r) => r.timeRange.end))).toISOString(),
+    };
 
     const resultGroupSet = new Set<string>();
     for (const resultSet of alertResults) {
@@ -194,20 +203,32 @@ export const createCustomThresholdExecutor = ({
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+      if (isNoDataFound && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
-      const nextState = isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : AlertStates.OK;
+      const isIndeterminateState =
+        isNoDataFound &&
+        params.noDataBehavior === 'remainActive' &&
+        alertsClient.isTrackedAlert(group);
+
+      const isAlertOnNoDataEnabled = params.noDataBehavior
+        ? params.noDataBehavior === 'alertOnNoData'
+        : alertOnNoData || alertOnGroupDisappear;
+
+      const nextState =
+        isNoDataFound && isAlertOnNoDataEnabled
+          ? AlertStates.NO_DATA
+          : isIndeterminateState
+          ? AlertStates.ALERT
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT) {
+      if (nextState === AlertStates.ALERT && !isIndeterminateState) {
         reason = buildFiredAlertReason(alertResults, group, dataViewName);
       }
 
@@ -227,17 +248,16 @@ export const createCustomThresholdExecutor = ({
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
-        // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
-        // check to see if a No Data state has occurred
-        if (nextState === AlertStates.NO_DATA) {
-          reason = alertResults
-            .filter((result) => result[group]?.isNoData)
-            .map((result) =>
-              buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
-            )
-            .join('\n');
-        }
+      const shouldBuildNoDataReason = params.noDataBehavior
+        ? params.noDataBehavior !== 'recover'
+        : alertOnNoData || (alertOnGroupDisappear && hasGroups);
+      if (shouldBuildNoDataReason && (nextState === AlertStates.NO_DATA || isIndeterminateState)) {
+        reason = alertResults
+          .filter((result) => result[group]?.isNoData)
+          .map((result) =>
+            buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
+          )
+          .join('\n');
       }
 
       if (reason) {
@@ -263,9 +283,8 @@ export const createCustomThresholdExecutor = ({
             : {}
           : {};
 
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...options.rule.tags]));
 
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
@@ -274,6 +293,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_REASON]: reason,
             [ALERT_EVALUATION_VALUES]: evaluationValues,
             [ALERT_EVALUATION_THRESHOLD]: threshold,
+            [ALERT_EVALUATION_TIME_RANGE]: evaluationTimeRange,
             // Array of Group, example: [ { field: 'host.name', value: 'host-0' }]
             [ALERT_GROUP]: groups,
             // Object, example: { host: { name: 'host-0' } }
@@ -289,6 +309,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
+        const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -310,10 +331,12 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+              metrics: singleCriterion?.metrics ?? [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
+              timeSize: singleCriterion?.timeSize,
+              timeUnit: singleCriterion?.timeUnit,
             }),
             ...additionalContext,
           },
@@ -345,6 +368,8 @@ export const createCustomThresholdExecutor = ({
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
+          timeSize: params.criteria[0]?.timeSize,
+          timeUnit: params.criteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,

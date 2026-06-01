@@ -2,18 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": ["node", "jest"]
   },
-  "include": [
-    "**/*.ts",
-    "kbn_archives/large_arrays_data_view.json"
-  ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "include": ["**/*.ts", "kbn_archives/large_arrays_data_view.json"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/journeys",
     "@kbn/test-subj-selector",
@@ -23,6 +15,11 @@
     "@kbn/dev-utils",
     "@kbn/synthtrace-client",
     "@kbn/test-suites-src",
-    "@kbn/ftr-common-functional-services"
+    "@kbn/ftr-common-functional-services",
+    "@kbn/monaco",
+    "@kbn/streams-plugin",
+    "@kbn/content-packs-schema",
+    "@kbn/streams-schema",
+    "@kbn/streamlang"
   ]
 }

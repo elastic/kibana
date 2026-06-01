@@ -43,6 +43,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  AttachmentUIV2,
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
@@ -95,6 +96,21 @@ export const basicComment: AttachmentUI = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const basicCommentUnified: AttachmentUIV2 = {
+  id: basicCommentId,
+  type: 'comment',
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'Solve this fast!' },
+  metadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
   updatedAt: null,
@@ -278,6 +294,11 @@ export const basicCase: CaseUI = {
   incrementalId: undefined,
 };
 
+export const basicCaseWithUnifiedComments: CaseUI = {
+  ...basicCase,
+  comments: [basicCommentUnified],
+};
+
 export const basicFileMock: FileJSON = {
   id: '7d47d130-bcec-11ed-afa1-0242ac120002',
   name: 'my-super-cool-screenshot',
@@ -329,7 +350,6 @@ export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   CaseMetricsFeature.ALERTS_COUNT,
   CaseMetricsFeature.ALERTS_USERS,
   CaseMetricsFeature.ALERTS_HOSTS,
-  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
   CaseMetricsFeature.CONNECTORS,
 ];
 
@@ -348,12 +368,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     users: {
       total: 1,
       values: [{ name: 'Jon', count: 12 }],
-    },
-  },
-  actions: {
-    isolateHost: {
-      isolate: { total: 5 },
-      unisolate: { total: 3 },
     },
   },
   connectors: { total: 1 },

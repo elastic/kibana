@@ -179,12 +179,13 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus, gapFillStatus } from './constants';
-export type { GapStatus, GapFillStatus } from './constants';
+export { gapStatus, gapFillStatus, gapReasonType, DEFAULT_EXCLUDED_GAP_REASONS } from './constants';
+export type { GapStatus, GapFillStatus, GapReason, GapReasonType } from './constants';
 export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
+export { PROVISION_UIAM_API_KEYS_FEATURE_FLAG } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
@@ -213,6 +214,12 @@ export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_find` as const;
 export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
+
+// Public backfill API paths
+export const ALERTING_BACKFILL_API_PATH = `${BASE_ALERTING_API_PATH}/rules/backfill` as const;
+export const ALERTING_BACKFILL_FIND_API_PATH = `${ALERTING_BACKFILL_API_PATH}/_find` as const;
+export const ALERTING_BACKFILL_SCHEDULE_API_PATH =
+  `${ALERTING_BACKFILL_API_PATH}/_schedule` as const;
 
 export const INTERNAL_ALERTING_GAPS_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/gaps` as const;

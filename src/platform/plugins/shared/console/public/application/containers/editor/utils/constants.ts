@@ -15,8 +15,8 @@ export const slashesRegex = /\/+/;
 export const ampersandRegex = /&/;
 export const equalsSignRegex = /=/;
 export const questionMarkRegex = /\?/;
-export const urlVariableTemplateRegex = /\${(\w+)}/g;
-export const dataVariableTemplateRegex = /"\${(\w+)}"/g;
+export const urlVariableTemplateRegex = /\${(\w+)}/;
+export const dataVariableTemplateRegex = /"\${(\w+)}"/;
 export const numberStartRegex = /[-\d]/;
 export const digitRegex = /[\d]/;
 export const lettersRegex = /[A-Za-z]/;
@@ -40,10 +40,10 @@ export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
 export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
 /*
  * This regex matches a string that has
- * optional whitespace characters and a double quote, for example `  "`.
+ * optional whitespace characters and a double quote, for example `  "` or `  "cate`.
  * In this case autocomplete suggestions should be triggered for a property name.
  */
-export const propertyNameRegex = /^\s*"$/;
+export const propertyNameRegex = /^\s*"[^"]*$/;
 /*
  * This regex matches a string that has
  * a property name, a colon and an optional double quote, for example `"query" : "`.

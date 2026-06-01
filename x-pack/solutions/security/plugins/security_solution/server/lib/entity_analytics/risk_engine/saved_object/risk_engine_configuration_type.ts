@@ -16,6 +16,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     dataViewId: {
       type: 'keyword',
     },
+    /**
+     * @deprecated Replaced by Entity Store Maintainer Framework
+     */
     enabled: {
       type: 'boolean',
     },
@@ -26,6 +29,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     identifierType: {
       type: 'keyword',
     },
+    /**
+     * @deprecated Replaced by Entity Store Maintainer Framework
+     */
     interval: {
       type: 'keyword',
     },

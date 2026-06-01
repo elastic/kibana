@@ -61,7 +61,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
-      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '0Open');
     });
 
     it(`finds the host when filtering with KQL search bar query`, () => {
@@ -77,7 +77,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
-      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '0Open');
     });
 
     it(`finds the user when filtering with KQL search bar query`, () => {
@@ -180,9 +180,9 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
               cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', `Host name`);
-              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${hostName}1`);
+              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${hostName} 1`);
             });
         });
     });
@@ -206,11 +206,11 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
               cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', 'Host name');
-              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${hostName}1`);
+              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${hostName} 1`);
               cy.get(OPTION_LIST_LABELS).eq(2).should('have.text', 'Severity');
-              cy.get(OPTION_LIST_VALUES(2)).should('have.text', `${severityVal}1`);
+              cy.get(OPTION_LIST_VALUES(2)).should('have.text', `${severityVal} 1`);
             });
         });
     });
@@ -236,9 +236,9 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
               cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', `Username`);
-              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName}1`);
+              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName} 1`);
             });
         });
     });
@@ -262,11 +262,11 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
               cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', 'Username');
-              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName}1`);
+              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName} 1`);
               cy.get(OPTION_LIST_LABELS).eq(2).should('have.text', 'Severity');
-              cy.get(OPTION_LIST_VALUES(2)).should('have.text', `${severityVal}1`);
+              cy.get(OPTION_LIST_VALUES(2)).should('have.text', `${severityVal} 1`);
             });
         });
     });
@@ -287,9 +287,9 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+              cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
               cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', 'Rule name');
-              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${ruleName}1`);
+              cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${ruleName} 1`);
             });
         });
     });
@@ -299,7 +299,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
       waitForAlerts();
       cy.get(CONTROL_FRAMES).should('have.length', 1);
       cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-      cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
+      cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open 1');
     });
   });
 });

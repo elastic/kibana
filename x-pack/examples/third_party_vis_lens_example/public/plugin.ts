@@ -101,7 +101,7 @@ export class EmbeddedLensExamplePlugin
             const defaultDataView = await dataViews.getDefault();
             lensStart.navigateToPrefilledEditor({
               id: '',
-              timeRange: {
+              time_range: {
                 from: 'now-5d',
                 to: 'now',
               },
@@ -126,7 +126,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

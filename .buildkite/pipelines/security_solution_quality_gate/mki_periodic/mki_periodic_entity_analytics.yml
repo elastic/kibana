@@ -14,7 +14,9 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 2
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -29,6 +31,24 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:entity_analytics_home
+        label: 'Cypress MKI - Entity Analytics Home'
+        key: test_entity_analytics_home
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:host_details
         label: 'Cypress MKI - Host Details'
@@ -43,6 +63,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:hosts
         label: 'Cypress MKI - Hosts'
@@ -57,6 +79,40 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:priv_mon
+        label: 'Cypress MKI - Priv Mon'
+        key: test_entity_analytics_priv_mon
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:watchlists
+        label: 'Cypress MKI - Watchlists'
+        key: test_entity_analytics_watchlists
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:explore_hosts
         label: 'Cypress MKI - Explore - Hosts'
@@ -71,6 +127,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:machine_learning
         label: 'Cypress MKI - Explore - Machine Learning'
@@ -85,6 +143,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:network
         label: 'Cypress MKI - Explore - Network'
@@ -99,6 +159,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:users
         label: 'Cypress MKI - Explore - Users'
@@ -113,6 +175,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -130,6 +194,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - entity_analytics:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless
@@ -144,6 +210,72 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - entity_analytics:entity_details:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:entity_details:qa:serverless
+        key: entity_analytics:entity_details:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - entity_analytics:entity_store:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:entity_store:qa:serverless
+        key: entity_analytics:entity_store:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - entity_analytics:monitoring:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:monitoring:qa:serverless
+        key: entity_analytics:monitoring:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - entity_analytics:risk_score:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:risk_score:qa:serverless
+        key: entity_analytics:risk_score:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - explore:hosts:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless
@@ -158,6 +290,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - explore:network:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
@@ -172,6 +306,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - explore:users:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
@@ -186,3 +322,5 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101

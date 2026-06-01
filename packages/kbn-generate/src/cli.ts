@@ -15,6 +15,7 @@ import type { ContextExtensions } from './generate_command';
 import { PackageCommand } from './commands/package_command';
 import { CodeownersCommand } from './commands/codeowners_command';
 import { ConnectorCommand } from './commands/connector_command';
+import { UserActivityActionsDocsCommand } from './commands/user_activity_actions_docs_command';
 
 /**
  * Runs the generate CLI. Called by `node scripts/generate` and not intended for use outside of that script
@@ -29,6 +30,6 @@ export function runGenerateCli() {
         };
       },
     },
-    [PackageCommand, CodeownersCommand, ConnectorCommand]
+    [PackageCommand, CodeownersCommand, ConnectorCommand, UserActivityActionsDocsCommand]
   ).execute();
 }

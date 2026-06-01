@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { API_BASE_PATH } from '../../common/constants';
 import type { ClusterDetails, CloudConnectApiConfig } from '../types';
 import {
   type UseRequestConfig,
@@ -14,8 +15,6 @@ import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../shared_imports';
-
-const API_BASE_PATH = '/internal/cloud_connect';
 
 export interface UpdateServicesResponse {
   success: boolean;

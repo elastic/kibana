@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type {
   AggregationConfigMap,
   ChartsConfigMap,

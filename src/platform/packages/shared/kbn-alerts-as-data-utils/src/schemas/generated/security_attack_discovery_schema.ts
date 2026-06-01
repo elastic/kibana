@@ -96,6 +96,9 @@ const SecurityAttackDiscoveryAlertRequired = rt.type({
 });
 // prettier-ignore
 const SecurityAttackDiscoveryAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,
@@ -137,6 +140,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.scheduled_action.date': schemaString,
   'kibana.alert.scheduled_action.group': schemaString,
+  'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
@@ -148,6 +152,8 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
 });

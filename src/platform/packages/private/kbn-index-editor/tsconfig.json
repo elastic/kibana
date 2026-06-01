@@ -6,7 +6,7 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
@@ -35,12 +35,13 @@
     "@kbn/file-upload-plugin",
     "@kbn/react-kibana-context-common",
     "@kbn/restorable-state",
-    "@kbn/esql-language",
     "@kbn/es-types",
     "@kbn/esql-utils",
     "@kbn/test-jest-helpers",
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/field-utils",
+    "@kbn/es-query",
+    "@kbn/kql",
   ]
 }

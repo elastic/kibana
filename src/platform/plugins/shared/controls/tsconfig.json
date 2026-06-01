@@ -25,11 +25,9 @@
     "@kbn/datemath",
     "@kbn/config-schema",
     "@kbn/ui-actions-plugin",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/content-management-utils",
     "@kbn/field-formats-plugin",
-    "@kbn/presentation-panel-plugin",
     "@kbn/std",
     "@kbn/esql-types",
     "@kbn/css-utils",
@@ -41,6 +39,7 @@
     "@kbn/kql",
     "@kbn/control-group-renderer",
     "@kbn/utility-types",
+    "@kbn/esql-language"
   ],
   "exclude": ["target/**/*"]
 }

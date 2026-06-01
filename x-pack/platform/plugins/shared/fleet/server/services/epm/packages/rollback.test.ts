@@ -11,7 +11,10 @@ import type { PackagePolicyClient } from '../../package_policy_service';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
 
+import { fetchInfo } from '../registry';
+
 import { installPackage } from './install';
+import { removeInstallation } from './remove';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -21,11 +24,14 @@ import {
 
 jest.mock('../..', () => ({
   appContextService: {
-    getLogger: jest.fn().mockReturnValue({ info: jest.fn(), debug: jest.fn() } as any),
+    getLogger: jest
+      .fn()
+      .mockReturnValue({ info: jest.fn(), debug: jest.fn(), warn: jest.fn() } as any),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getTelemetryEventsSender: jest.fn(),
     getConfig: jest.fn().mockReturnValue({}),
     getInternalUserSOClient: jest.fn(),
+    getExperimentalFeatures: jest.fn().mockReturnValue({}),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -56,6 +62,14 @@ const sendTelemetryEventsMock = sendTelemetryEvents as jest.Mock;
 
 jest.mock('./install', () => ({
   installPackage: jest.fn(),
+}));
+
+jest.mock('./remove', () => ({
+  removeInstallation: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock('../registry', () => ({
+  fetchInfo: jest.fn().mockResolvedValue({}),
 }));
 
 describe('rollbackInstallation', () => {
@@ -173,7 +187,26 @@ describe('rollbackInstallation', () => {
     ).rejects.toThrow('No previous version found for package policies: test-package-policy');
   });
 
-  it('should throw an error if at least one package policy is not upgraded to the current package version', async () => {
+  it('should rollback if one package policy is not upgraded to the current package version', async () => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    const savedObjectsClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
+          },
+        ],
+      }),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -201,24 +234,36 @@ describe('rollbackInstallation', () => {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           attributes: {
             name: `${pkgName}-1`,
-            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            package: { name: pkgName, title: 'Test Package', version: '1.4.0' },
             revision: 3,
             latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy2:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
           },
         },
       ],
     } as any);
 
-    await expect(
-      rollbackInstallation({
-        esClient,
-        currentUserPolicyIds: ['test-package-policy'],
-        pkgName,
-        spaceId,
-      })
-    ).rejects.toThrow(
-      `Rollback not available because some integration policies are not upgraded to version ${newPkgVersion}`
-    );
+    await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: [
+        'test-package-policy',
+        'test-package-policy:prev',
+        'test-package-policy2',
+        'test-package-policy2:prev',
+      ],
+      pkgName,
+      spaceId,
+    });
+    expect(packagePolicyServiceMock.rollback).toHaveBeenCalled();
   });
 
   it('should throw an error if at least one package policy has a different previous version', async () => {
@@ -424,6 +469,74 @@ describe('rollbackInstallation', () => {
     });
   });
 
+  it('should rollback package policies if some package policies are not upgraded', async () => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    const savedObjectsClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
+          },
+        ],
+      }),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+        {
+          id: 'test-package-policy2',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+      ],
+    } as any);
+
+    await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: [
+        'test-package-policy',
+        'test-package-policy:prev',
+        'test-package-policy2',
+      ],
+      pkgName,
+      spaceId,
+    });
+    expect(packagePolicyServiceMock.rollback).toHaveBeenCalled();
+  });
+
   it('should throw error on rollback when package policy is managed', async () => {
     (installPackage as jest.Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
@@ -532,6 +645,280 @@ describe('rollbackInstallation', () => {
   });
 });
 
+describe('rollbackInstallation - dependency rollback (enableResolveDependencies=true)', () => {
+  const depName = 'dep-pkg';
+  const depPreviousVersion = '1.0.0';
+
+  beforeEach(() => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      enableResolveDependencies: true,
+    });
+  });
+
+  afterEach(() => {
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
+    jest.clearAllMocks();
+  });
+
+  const buildSavedObjectsClient = (
+    previousDependencyVersions: Array<{ name: string; previous_version: string | null }>,
+    depIsDependencyOf: Array<{ name: string; version: string }>
+  ) => {
+    return {
+      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+        if (search === pkgName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: pkgName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  install_source: 'registry',
+                  previous_version: oldPkgVersion,
+                  version: newPkgVersion,
+                  previous_dependency_versions: previousDependencyVersions,
+                },
+              },
+            ],
+          });
+        }
+        if (search === depName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: depName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  name: depName,
+                  install_started_at: new Date().toISOString(),
+                  is_dependency_of: depIsDependencyOf,
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ saved_objects: [] });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    } as any;
+  };
+
+  it('re-installs an upgraded dependency at its previous version', async () => {
+    const savedObjectsClient = buildSavedObjectsClient(
+      [{ name: depName, previous_version: depPreviousVersion }],
+      [{ name: pkgName, version: newPkgVersion }]
+    );
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    await rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId });
+
+    expect(installPackage).toHaveBeenCalledWith(
+      expect.objectContaining({ pkgkey: `${depName}-${depPreviousVersion}`, force: true })
+    );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      previous_dependency_versions: null,
+    });
+  });
+
+  it('removes a freshly-installed dependency when no other package depends on it', async () => {
+    const savedObjectsClient = buildSavedObjectsClient(
+      [{ name: depName, previous_version: null }],
+      [{ name: pkgName, version: newPkgVersion }]
+    );
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    await rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId });
+
+    expect(removeInstallation).toHaveBeenCalledWith(expect.objectContaining({ pkgName: depName }));
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      previous_dependency_versions: null,
+    });
+  });
+
+  it('skips removing a freshly-installed dependency still needed by another package', async () => {
+    // availability check passes because feature flag is on but we override find to allow it through
+    const savedObjectsClient = buildSavedObjectsClient(
+      [{ name: depName, previous_version: null }],
+      [
+        { name: pkgName, version: newPkgVersion },
+        { name: 'other-composable', version: '2.0.0' },
+      ]
+    );
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    // rollbackAvailableCheck will block this because dep is still needed — expect a throw
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow(
+      `Cannot rollback: dependency ${depName} is still required by other-composable`
+    );
+    expect(removeInstallation).not.toHaveBeenCalled();
+  });
+
+  it('throws and preserves the snapshot when a dependency rollback fails', async () => {
+    const savedObjectsClient = buildSavedObjectsClient(
+      [{ name: depName, previous_version: depPreviousVersion }],
+      [{ name: pkgName, version: newPkgVersion }]
+    );
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+    // Make installPackage fail on the first call (the dep reinstall), succeed on subsequent calls.
+    (installPackage as jest.Mock)
+      .mockRejectedValueOnce(new Error('registry unavailable'))
+      .mockResolvedValue({ pkgName });
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow(`Failed to roll back dependency: ${depName}`);
+
+    // The composable package itself must NOT have been reinstalled.
+    expect(installPackage).toHaveBeenCalledTimes(1);
+    // The snapshot must NOT have been cleared so a retry can re-attempt.
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
+
+  it('does not clear the snapshot when dependency rollback partially fails', async () => {
+    const dep2Name = 'dep-pkg-2';
+    const savedObjectsClient = {
+      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+        if (search === pkgName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: pkgName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  install_source: 'registry',
+                  previous_version: oldPkgVersion,
+                  version: newPkgVersion,
+                  previous_dependency_versions: [
+                    { name: depName, previous_version: depPreviousVersion },
+                    { name: dep2Name, previous_version: '2.0.0' },
+                  ],
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({
+          saved_objects: [
+            {
+              id: search,
+              type: PACKAGES_SAVED_OBJECT_TYPE,
+              attributes: {
+                name: search,
+                install_started_at: new Date().toISOString(),
+                is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
+              },
+            },
+          ],
+        });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+    // First dep succeeds, second fails.
+    (installPackage as jest.Mock)
+      .mockResolvedValueOnce({ pkgName })
+      .mockRejectedValueOnce(new Error('dep2 unavailable'));
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow(dep2Name);
+
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
+});
+
+describe('rollbackInstallation - feature flag disabled with existing snapshot', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not roll back dependencies or clear snapshot when enableResolveDependencies is false', async () => {
+    const depName = 'dep-pkg';
+    const savedObjectsClient = {
+      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+        if (search === pkgName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: pkgName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  install_source: 'registry',
+                  previous_version: oldPkgVersion,
+                  version: newPkgVersion,
+                  previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ saved_objects: [] });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      enableResolveDependencies: false,
+    });
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    await rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId });
+
+    // No dep rollback should have been attempted.
+    expect(installPackage).toHaveBeenCalledTimes(1);
+    expect(installPackage).toHaveBeenCalledWith(
+      expect.objectContaining({ pkgkey: `${pkgName}-${oldPkgVersion}` })
+    );
+    // Snapshot must be preserved so it can be used when the flag is re-enabled.
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
+});
+
 describe('isIntegrationRollbackTTLExpired', () => {
   it('should return true if integration rollback TTL is expired', () => {
     const installStartedAt = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(); // 8 days ago
@@ -588,50 +975,6 @@ describe('rollbackAvailableCheck', () => {
     jest.clearAllMocks();
   });
 
-  it('should return isAvailable: false if at least one package policy is not upgraded to the current package version', async () => {
-    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'test-package-policy',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: `${pkgName}-1`,
-            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
-            revision: 3,
-            latest_revision: true,
-          },
-        },
-        {
-          id: 'test-package-policy:prev',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: `${pkgName}-1`,
-            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
-            revision: 1,
-            latest_revision: false,
-          },
-        },
-        {
-          id: 'test-package-policy2',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: `${pkgName}-1`,
-            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
-            revision: 3,
-            latest_revision: true,
-          },
-        },
-      ],
-    } as any);
-
-    const response = await rollbackAvailableCheck(pkgName, []);
-
-    expect(response).toEqual({
-      isAvailable: false,
-      reason: `Rollback not available because some integration policies are not upgraded to version ${newPkgVersion}`,
-    });
-  });
-
   it('should return isAvailable: true if all package policies are upgraded to the current package version', async () => {
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
@@ -665,6 +1008,428 @@ describe('rollbackAvailableCheck', () => {
 
     expect(response).toEqual({
       isAvailable: true,
+    });
+  });
+
+  it('should return isAvailable: true if all package policies are upgraded or on the previous package version', async () => {
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+        {
+          id: 'test-package-policy2',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-2`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy3',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-3`,
+            package: { name: pkgName, title: 'Test Package', version: '0.9.0' },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+      ],
+    } as any);
+
+    const response = await rollbackAvailableCheck(pkgName, [
+      'test-package-policy',
+      'test-package-policy:prev',
+      'test-package-policy2',
+      'test-package-policy3',
+    ]);
+
+    expect(response).toEqual({
+      isAvailable: true,
+    });
+  });
+
+  describe('dependency rollback availability (enableResolveDependencies=true)', () => {
+    beforeEach(() => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        enableResolveDependencies: true,
+      });
+    });
+
+    afterEach(() => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
+      jest.clearAllMocks();
+    });
+
+    it('returns unavailable when a freshly-installed dependency is still needed by another composable package', async () => {
+      const depName = 'dep-pkg';
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: null }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: depName,
+                      install_started_at: new Date().toISOString(),
+                      is_dependency_of: [
+                        { name: pkgName, version: newPkgVersion },
+                        { name: 'other-composable', version: '2.0.0' },
+                      ],
+                    },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Cannot rollback: dependency ${depName} is still required by other-composable`,
+      });
+    });
+
+    it('returns unavailable when the previous registry version of an upgraded dependency is no longer available', async () => {
+      const depName = 'dep-pkg';
+      (fetchInfo as jest.Mock).mockRejectedValueOnce(new Error('404 Not Found'));
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: depName,
+                      install_started_at: new Date().toISOString(),
+                      is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
+                    },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Rollback not available: dependency ${depName}@1.0.0 is no longer available in the registry`,
+      });
+    });
+
+    it('returns unavailable when rolling back a dependency would violate another package constraint', async () => {
+      const depName = 'dep-pkg';
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: depName,
+                      install_started_at: new Date().toISOString(),
+                      is_dependency_of: [
+                        { name: pkgName, version: newPkgVersion },
+                        { name: 'other-composable', version: '3.0.0' },
+                      ],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === 'other-composable') {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: 'other-composable',
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: 'other-composable',
+                      // requires dep-pkg@^2.0.0, which 1.0.0 does not satisfy
+                      dependencies: [{ name: depName, version: '^2.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Rollback not available: rolling back dependency ${depName} to 1.0.0 would violate other-composable's constraint ^2.0.0`,
+      });
+    });
+
+    it('returns available when rolling back a dependency still satisfies all other packages constraints', async () => {
+      const depName = 'dep-pkg';
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.5.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: depName,
+                      install_started_at: new Date().toISOString(),
+                      is_dependency_of: [
+                        { name: pkgName, version: newPkgVersion },
+                        { name: 'other-composable', version: '3.0.0' },
+                      ],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === 'other-composable') {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: 'other-composable',
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: 'other-composable',
+                      // requires dep-pkg@^1.0.0, which 1.5.0 satisfies
+                      dependencies: [{ name: depName, version: '^1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({ isAvailable: true });
+    });
+
+    it('returns unavailable when a dependency TTL is expired', async () => {
+      const depName = 'dep-pkg';
+      const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: depName,
+                      install_started_at: eightDaysAgo,
+                      is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
+                    },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Rollback not available: TTL expired for dependency ${depName}`,
+      });
+    });
+
+    it('returns unavailable when multiple saved objects match a dependency name', async () => {
+      const depName = 'aws';
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: { name: depName, install_started_at: new Date().toISOString() },
+                  },
+                  {
+                    id: 'aws-logs',
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: { name: 'aws-logs', install_started_at: new Date().toISOString() },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Expected exactly one saved object for dependency ${depName}`,
+      });
     });
   });
 

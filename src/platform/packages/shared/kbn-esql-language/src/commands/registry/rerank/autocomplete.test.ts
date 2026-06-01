@@ -51,7 +51,7 @@ const OPERATOR_SUGGESTIONS = {
 // Helper to add placeholder to operator labels for test expectations
 const addPlaceholder = (operators: string[]) => operators.map((op) => `${op} $0`);
 
-const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0].text;
+const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '')[0].text;
 const NEXT_ACTIONS = [
   withCompleteItem.text,
   commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,
@@ -180,9 +180,27 @@ describe('RERANK Autocomplete', () => {
     test('suggests field columns after ON keyword', async () => {
       const query = buildRerankQuery({ query: '"search query"' }) + ' ON ';
 
-      await expectRerankSuggestions(query, {
-        contains: ['textField', 'keywordField', 'integerField'],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests text and keyword fields after an incomplete assignment in ON clause', async () => {
+      const query = `${buildRerankQuery({ query: '"search query"', onClause: 'col0 =' })} `;
+
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests field columns after a list of keyword fields and comma', async () => {
@@ -192,43 +210,40 @@ describe('RERANK Autocomplete', () => {
           onClause: 'textField, col0 = TRUE, keywordField, integerField,',
         }) + ' ';
 
-      await expectRerankSuggestions(query, {
-        contains: ['textField', 'keywordField', 'integerField'],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests field continuations after selecting a field', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' });
 
-      await expectRerankSuggestions(query, {
-        contains: [
-          ', ',
-          'WITH { $0 }',
-          '| ',
-          ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType(Location.RERANK, 'any', { scalar: true }),
-        ],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: [
+            ', ',
+            'WITH { $0 }',
+            '| ',
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.RERANK, ['text', 'keyword'], {
+              scalar: true,
+            }),
+          ],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests continuations after field with more trailing spaces', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' }) + ' ';
 
-      await expectRerankSuggestions(query, [
-        ...NEXT_ACTIONS,
-        ...getFunctionSignaturesByReturnType(
-          Location.RERANK,
-          'any',
-          {
-            operators: true,
-            excludeOperatorGroups: [],
-            skipAssign: true,
-            agg: false,
-            scalar: false,
-          },
-          ['keyword']
-        ),
-      ]);
+      await expectRerankSuggestions(query, NEXT_ACTIONS);
     });
   });
 
@@ -441,19 +456,14 @@ describe('RERANK Autocomplete', () => {
   describe('Partial completions and prefixes', () => {
     test.each([
       {
-        name: 'IS NULL operators',
-        partial: 'IS N',
-        expected: OPERATOR_SUGGESTIONS.EXISTENCE,
-      },
-      {
         name: 'LIKE operator',
         partial: 'LI',
-        expected: addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]]),
+        notExpected: addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]]),
       },
       {
         name: 'IN and IS operators',
         partial: 'I',
-        expected: [
+        notExpected: [
           addPlaceholder([OPERATOR_SUGGESTIONS.SET[0]])[0],
           ...OPERATOR_SUGGESTIONS.EXISTENCE,
         ],
@@ -461,21 +471,24 @@ describe('RERANK Autocomplete', () => {
       {
         name: 'NOT operators',
         partial: 'NO',
-        expected: [
+        notExpected: [
           addPlaceholder([OPERATOR_SUGGESTIONS.SET[1]])[0],
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[1]])[0],
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[3]])[0],
         ],
       },
-    ])('completes partial $name', async ({ partial, expected }) => {
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: `textField = keywordField ${partial}`,
-      });
+    ])(
+      'does not complete partial $name (strict text/keyword context)',
+      async ({ partial, notExpected }) => {
+        const query = buildRerankQuery({
+          query: '"search query"',
+          onClause: `textField = keywordField ${partial}`,
+        });
 
-      await expectRerankSuggestions(query, {
-        contains: expected,
-      });
-    });
+        await expectRerankSuggestions(query, {
+          notContains: notExpected,
+        });
+      }
+    );
   });
 });

@@ -5,46 +5,22 @@
  * 2.0.
  */
 
-import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-
-const defaultUiSettingsGet = (key: string) => {
-  switch (key) {
-    case 'dateFormat':
-      return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    case 'dateFormat:scaled':
-      return [[]];
-    case 'dateFormat:tz':
-      return 'UTC';
-    case 'histogram:barTarget':
-      return 50;
-    case 'histogram:maxBars':
-      return 100;
-  }
-};
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
+import {
+  mockLayer,
+  mockIndexPattern,
+  mockIndexPatternWithoutTimeField,
+  mockDateRange,
+} from './__mocks__/esql_query_mocks';
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });
-
-  const layer = {
-    indexPatternId: 'myIndexPattern',
-    columns: {},
-    columnOrder: [],
-  };
-
-  const indexPattern = {
-    title: 'myIndexPattern',
-    timeFieldName: 'order_date',
-    getFieldByName: (field: string) => {
-      if (field === 'records') return undefined;
-      return { name: field };
-    },
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
-  } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
     const result = generateEsqlQuery(
@@ -71,25 +47,19 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
@@ -117,13 +87,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -147,13 +114,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -188,25 +152,19 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
@@ -234,129 +192,19 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      {
-        title: 'myIndexPattern',
-        getFieldByName: (field: string) => {
-          if (field === 'records') return undefined;
-          return { name: field };
-        },
-        getFormatterForField: () => ({ convert: (v: unknown) => v }),
-      } as unknown as IndexPattern,
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
-  });
-
-  it('should return failure with non_utc_timezone reason if timezone is not UTC', () => {
-    uiSettings.get.mockImplementation((key: string) => {
-      if (key === 'dateFormat:tz') return 'America/Chicago';
-      return defaultUiSettingsGet(key);
-    });
-
-    const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'date_histogram',
-            sourceField: 'order_date',
-            label: 'Date histogram',
-            dataType: 'date',
-            isBucketed: true,
-            interval: 'auto',
-          },
-        ],
-        [
-          '2',
-          {
-            operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-          },
-        ],
-      ],
-      layer,
-      indexPattern,
-      uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
-      new Date()
-    );
-
-    expect(result).toEqual({
-      success: false,
-      reason: 'non_utc_timezone',
-    });
-  });
-
-  it('should work with iana timezones that fall under UTC+0', () => {
-    uiSettings.get.mockImplementation((key: string) => {
-      // There are only few countries that falls under UTC all year round, others just fall into that configuration half hear when not in DST
-      if (key === 'dateFormat:tz') return 'Atlantic/Reykjavik';
-      return defaultUiSettingsGet(key);
-    });
-
-    const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'date_histogram',
-            sourceField: 'order_date',
-            label: 'Date histogram',
-            dataType: 'date',
-            isBucketed: true,
-            interval: 'auto',
-          },
-        ],
-        [
-          '2',
-          {
-            operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-          },
-        ],
-      ],
-      layer,
-      indexPattern,
-      uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
-      new Date()
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should preserve user-configured format (e.g., currency) in esAggsIdMap', () => {
@@ -397,22 +245,18 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
     expect(result.success).toBe(true);
     if (result.success) {
-      // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
-      expect(metricKey).toBeDefined();
-      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      const metricKey = 'SUM(price)';
+      expect(result.esAggsIdMap).toHaveProperty(metricKey);
+      const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
         id: 'currency',
         params: {
@@ -460,22 +304,18 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
     expect(result.success).toBe(true);
     if (result.success) {
-      // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
-      expect(metricKey).toBeDefined();
-      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      const metricKey = 'AVG(bytes)';
+      expect(result.esAggsIdMap).toHaveProperty(metricKey);
+      const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
         id: 'bytes',
         params: {
@@ -514,24 +354,19 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        // eslint-disable-next-line prettier/prettier
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 });

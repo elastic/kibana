@@ -30,6 +30,9 @@ import type {
   PostAgentRollbackResponse,
   PostBulkAgentRollbackRequest,
   PostBulkAgentRollbackResponse,
+  PostGenerateAgentsReportRequest,
+  PostGenerateAgentsReportResponse,
+  GetCollectorGroupsResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -42,6 +45,9 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
+  PostBulkRemoveCollectorsRequest,
+  PostBulkRemoveCollectorsResponse,
+  PostRemoveCollectorResponse,
   PostAgentReassignRequest,
   PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -94,11 +100,27 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
 }
 export function useGetAgentsQuery(
   query: GetAgentsRequest['query'],
-  options: Partial<{ enabled: boolean }> = {}
+  options: Partial<{
+    enabled: boolean;
+    refetchInterval: number | false;
+    keepPreviousData: boolean;
+  }> = {}
 ) {
   return useQuery(['agents', query], () => sendGetAgents(query), {
     enabled: options.enabled,
+    refetchInterval: options.refetchInterval,
+    refetchIntervalInBackground: false,
+    keepPreviousData: options.keepPreviousData,
   });
+}
+
+export function useGetAgentEffectiveConfigQuery(agentId: string) {
+  return useQuery(['agent-effective-config', agentId], () =>
+    sendRequestForRq({
+      path: agentRouteService.getAgentEffectiveConfig(agentId),
+      method: 'get',
+    })
+  );
 }
 
 /**
@@ -216,6 +238,23 @@ export function sendPostBulkAgentUnenroll(
     body,
     version: API_VERSIONS.public.v1,
     ...options,
+  });
+}
+
+export function sendPostRemoveCollector(agentId: string) {
+  return sendRequestForRq<PostRemoveCollectorResponse>({
+    path: agentRouteService.getRemoveCollectorPath(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkRemoveCollectors(body: PostBulkRemoveCollectorsRequest['body']) {
+  return sendRequestForRq<PostBulkRemoveCollectorsResponse>({
+    path: agentRouteService.getBulkRemoveCollectorsPath(),
+    method: 'post',
+    body,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -463,4 +502,45 @@ export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['bo
     version: API_VERSIONS.public.v1,
     body,
   });
+}
+
+export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportRequest['body']) {
+  return sendRequestForRq<PostGenerateAgentsReportResponse>({
+    path: agentRouteService.postGenerateAgentsReport(),
+    method: 'post',
+    version: API_VERSIONS.internal.v1,
+    body,
+  });
+}
+
+export function useGetCollectorGroupsQuery(
+  query: {
+    groupBy?: string;
+    kuery?: string;
+    perPage?: number;
+    afterKey?: string;
+    showInactive?: boolean;
+  },
+  options: Partial<{
+    enabled: boolean;
+    refetchInterval: number | false;
+    keepPreviousData: boolean;
+  }> = {}
+) {
+  return useQuery(
+    ['collector-groups', query],
+    () =>
+      sendRequestForRq<GetCollectorGroupsResponse>({
+        path: agentRouteService.getCollectorGroupsPath(),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    {
+      enabled: options.enabled,
+      refetchInterval: options.refetchInterval,
+      refetchIntervalInBackground: false,
+      keepPreviousData: options.keepPreviousData,
+    }
+  );
 }

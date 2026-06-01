@@ -60,7 +60,9 @@ export const getCommonColumns = ({
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
-          iconType={itemIdToExpandedNotesRowMap[savedObjectId] ? 'arrowDown' : 'arrowRight'}
+          iconType={
+            itemIdToExpandedNotesRowMap[savedObjectId] ? 'chevronSingleDown' : 'chevronSingleRight'
+          }
         />
       ) : null,
     width: ACTION_COLUMN_WIDTH,

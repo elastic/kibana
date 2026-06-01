@@ -11,9 +11,6 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Icon"
       >
@@ -109,9 +106,6 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Icon"
       >

@@ -291,8 +291,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await action.click();
 
-        const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
-        const firstDashboardButton = await dashboardButtons[0];
+        const firstDashboardButton = await retry.try(async () => {
+          const dashboardButtons =
+            await PageObjects.datasetQuality.getIntegrationDashboardButtons();
+          if (!dashboardButtons || dashboardButtons.length === 0) {
+            throw new Error('Dashboard buttons not yet rendered');
+          }
+          return dashboardButtons[0];
+        });
         const dashboardText = await firstDashboardButton.getVisibleText();
 
         await firstDashboardButton.click();
@@ -343,10 +349,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in discover
+        // Confirm URL contains ES|QL query for degraded docs
         await retry.tryForTime(5000, async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${apacheAccessDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
     });

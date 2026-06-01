@@ -151,7 +151,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     data-telemetry-id="entSearchContent-connectors-newConnectorButton"
                     key="newConnector"
                     color="primary"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     fill
                     onClick={() => {
                       const url = application?.getUrlForApp('management', {
@@ -168,6 +168,10 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
+                      { defaultMessage: 'More connector options' }
+                    )}
                     isOpen={showMoreOptionsPopover}
                     closePopover={() => setShowMoreOptionsPopover(false)}
                     button={
@@ -187,10 +191,8 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     }
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorNative"
                           onClick={() => {
                             const url = application?.getUrlForApp('management', {
@@ -200,7 +202,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                               `${url}${NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH}`
                             );
                           }}
-                          icon="plusInCircle"
+                          icon="plusCircle"
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
@@ -210,9 +212,8 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                           )}
                         </EuiContextMenuItem>,
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorClient"
-                          icon="plusInCircle"
+                          icon="plusCircle"
                           onClick={() => {
                             const url = application?.getUrlForApp('management', {
                               path: `/data/content_connectors`,

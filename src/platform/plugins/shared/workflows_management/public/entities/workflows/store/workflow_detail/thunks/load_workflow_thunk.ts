@@ -10,6 +10,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { loadWorkflowsThunk } from './load_workflows_thunk';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { setWorkflow, setYamlString } from '../slice';
@@ -28,11 +30,12 @@ export const loadWorkflowThunk = createAsyncThunk<
   'detail/loadWorkflowThunk',
   async ({ id }, { dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     try {
-      // Make the API call to load the workflow
-      const response = await http.get<WorkflowDetailDto>(`/api/workflows/${id}`);
+      const response = await api.getWorkflow(id);
       dispatch(setWorkflow(response));
       dispatch(setYamlString(response.yaml));
+      dispatch(loadWorkflowsThunk());
 
       return response;
     } catch (error) {
@@ -44,7 +47,7 @@ export const loadWorkflowThunk = createAsyncThunk<
           defaultMessage: 'Failed to load workflow',
         }),
       });
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error);
     }
   }
 );

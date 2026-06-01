@@ -6,18 +6,22 @@
  */
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { z } from '@kbn/zod';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger } from '@kbn/core/server';
-import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
+import {
+  REVIEW_RULE_INSTALLATION_URL,
+  ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {
   PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
   PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY,
 } from '../../constants';
+import { buildSiemResponse } from '../../../routes/utils';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
+import { validateGranularReviewRequestBody } from '../validate_granular_review_request';
 
 export const reviewRuleInstallationRoute = (
   router: SecuritySolutionPluginRouter,
@@ -52,7 +56,13 @@ export const reviewRuleInstallationRoute = (
           },
         },
       },
-      (context, request, response) =>
-        reviewRuleInstallationHandler(context, request, response, logger)
+      (context, request, response) => {
+        const validationErrors = validateGranularReviewRequestBody(request.body);
+        if (validationErrors.length) {
+          const siemResponse = buildSiemResponse(response);
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
+        return reviewRuleInstallationHandler(context, request, response, logger);
+      }
     );
 };

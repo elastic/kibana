@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-search-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-search-plugin'
+  title: '@kbn/saved-search-plugin'
   description: Moon project for @kbn/saved-search-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/saved_search
+  sourceRoot: src/platform/plugins/shared/saved_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -34,7 +33,6 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/expressions-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/saved-objects-plugin'
   - '@kbn/es-query'
   - '@kbn/logging'
   - '@kbn/core-plugins-server'
@@ -45,6 +43,7 @@ dependsOn:
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-http-browser'
   - '@kbn/discover-utils'
+  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/logging-mocks'
 tags:
   - plugin
@@ -58,16 +57,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

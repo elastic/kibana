@@ -4,20 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryClient } from '@kbn/react-query';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { QueryClient, CancelledError } from '@kbn/react-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumns: jest.fn().mockResolvedValue([{ id: '_id' }]),
+jest.mock('../../../logic/esql_query_columns', () => ({
+  fetchEsqlQueryColumns: jest.fn(),
 }));
-jest.mock('../../../../../common/lib/kibana');
+
+const fetchEsqlQueryColumnsMock = fetchEsqlQueryColumns as jest.Mock;
 
 describe('esqlQueryValidator', () => {
+  beforeEach(() => {
+    fetchEsqlQueryColumnsMock.mockClear();
+    fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: '_id' }] as DatatableColumn[]);
+  });
+
   describe('ES|QL query syntax', () => {
     it.each([['incorrect syntax'], ['from test* metadata']])(
       'reports incorrect syntax in "%s"',
@@ -57,68 +63,9 @@ describe('esqlQueryValidator', () => {
     );
   });
 
-  describe('METADATA operator validation', () => {
-    it.each([
-      ['from test*'],
-      ['from metadata*'],
-      ['from test* | keep metadata'],
-      ['from test* | eval x="metadata _id"'],
-    ])('reports when METADATA operator is missing in a NON aggregating query "%s"', (esqlQuery) =>
-      expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue(esqlQuery),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toMatchObject({
-        code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-      })
-    );
-
-    it.each([
-      ['from test* metadata _id'],
-      ['from test* metadata _id, _index'],
-      ['from test* metadata _index, _id'],
-      ['from test*  metadata _id '],
-      ['from test*    metadata _id '],
-      ['from test*  metadata _id | limit 10'],
-      [
-        `from packetbeat* metadata
-
-        _id
-        | limit 100`,
-      ],
-    ])(
-      'succeeds validation when METADATA operator EXISTS in a NON aggregating query "%s"',
-      (esqlQuery) =>
-        expect(
-          createValidator()({
-            value: createEsqlQueryFieldValue(esqlQuery),
-          } as EsqlQueryValidatorArgs)
-        ).resolves.toBeUndefined()
-    );
-
-    it('succeeds validation when METADATA operator is missing in an aggregating query "from test* | stats c = count(*) by fieldA"', () =>
-      expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test* | stats c = count(*) by fieldA'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toBeUndefined());
-  });
-
-  describe('METADATA _id field validation for NON aggregating queries', () => {
-    it('reports when METADATA "_id" field is missing', () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
-
-      return expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test*'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toMatchObject({
-        code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-      });
-    });
-
-    it('succeeds validation when METADATA "_id" field EXISTS', async () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'column1' }]);
+  describe('_id column validation for non-aggregating queries', () => {
+    it('succeeds when _id column is present in response', () => {
+      fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
 
       return expect(
         createValidator()({
@@ -126,28 +73,55 @@ describe('esqlQueryValidator', () => {
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
-  });
 
-  describe('METADATA _id field validation for aggregating queries', () => {
-    it('succeeds validation when METADATA operator with "_id" field is missing', () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
+    it('returns MISSING_ID_FIELD warning when _id column is absent', () => {
+      fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: 'agent.name' }]);
 
       return expect(
         createValidator()({
-          value: createEsqlQueryFieldValue(
-            'from test* metadata someField | stats c = count(*) by fieldA'
-          ),
+          value: createEsqlQueryFieldValue('from test* metadata _id | drop _id'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toMatchObject({
+        code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+      });
+    });
+
+    it('returns MISSING_ID_FIELD warning when columns are empty', () => {
+      fetchEsqlQueryColumnsMock.mockResolvedValue([]);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test*'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toMatchObject({
+        code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+      });
+    });
+
+    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', () => {
+      fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test*'),
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
   });
 
-  describe('when getESQLQueryColumns fails', () => {
-    it('returns a validation error', () => {
-      // suppress the expected error messages
-      jest.spyOn(console, 'error').mockReturnValue();
+  describe('_id column validation for aggregating queries', () => {
+    it('succeeds when _id is absent for aggregating query', () => {
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test* | stats count() by agent.name'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toBeUndefined();
+    });
+  });
 
-      getESQLQueryColumnsMock.mockRejectedValue(new Error('some error'));
+  describe('when fetchEsqlQueryColumns fails', () => {
+    it('returns a validation error for unexpected errors', () => {
+      fetchEsqlQueryColumnsMock.mockRejectedValue(new Error('some error'));
 
       return expect(
         createValidator()({
@@ -158,14 +132,78 @@ describe('esqlQueryValidator', () => {
         message: 'Error validating ES|QL: "some error"',
       });
     });
+
+    it('returns undefined when the request is cancelled (CancelledError)', () => {
+      fetchEsqlQueryColumnsMock.mockRejectedValue(new CancelledError());
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test* metadata _id'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toBeUndefined();
+    });
+
+    it('returns undefined when the request is aborted (AbortError)', () => {
+      const abortError = new DOMException('The operation was aborted.', 'AbortError');
+      fetchEsqlQueryColumnsMock.mockRejectedValue(abortError);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test* metadata _id'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('cancellation and unmount behavior', () => {
+    it('returns undefined without fetching columns when the component is already unmounted', async () => {
+      const isUnmountedRef = { current: true };
+      const validator = createValidator({ isUnmountedRef });
+
+      const result = await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toBeUndefined();
+      expect(fetchEsqlQueryColumnsMock).not.toHaveBeenCalled();
+    });
+
+    it('aborts the previous in-flight request when a new validation starts', async () => {
+      const previousController = new AbortController();
+      const abortSpy = jest.spyOn(previousController, 'abort');
+      const abortControllerRef = { current: previousController };
+      const validator = createValidator({ abortControllerRef });
+
+      await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(abortSpy).toHaveBeenCalled();
+    });
+
+    it('sets abortControllerRef.current to a new AbortController after each validation', async () => {
+      const abortControllerRef = { current: null as AbortController | null };
+      const validator = createValidator({ abortControllerRef });
+
+      await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(abortControllerRef.current).toBeInstanceOf(AbortController);
+    });
   });
 });
 
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
 
-const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
+interface CreateValidatorOptions {
+  abortControllerRef?: { current: AbortController | null };
+  isUnmountedRef?: { current: boolean };
+}
 
-function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar> {
+function createValidator(
+  options: CreateValidatorOptions = {}
+): ValidationFunc<FormData, string, FieldValueQueryBar> {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -174,7 +212,7 @@ function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar>
     },
   });
 
-  return esqlQueryValidatorFactory({ queryClient });
+  return esqlQueryValidatorFactory({ queryClient, ...options });
 }
 
 function createEsqlQueryFieldValue(esqlQuery: string): Readonly<FieldValueQueryBar> {

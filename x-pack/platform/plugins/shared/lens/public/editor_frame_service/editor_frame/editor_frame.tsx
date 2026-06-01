@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 
-import { useEuiTheme, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -23,6 +23,7 @@ import type {
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
@@ -62,7 +63,6 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const { euiTheme } = useEuiTheme();
   const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -168,13 +168,12 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <>
-                <div
-                  css={css`
-                    background-color: ${euiTheme.colors.backgroundBaseHighlighted};
-                    border-bottom: ${euiTheme.border.thin};
-                  `}
-                >
+              {/* Flex container to enable proper scroll behavior for the config panel.
+                  The toolbar and layer tabs remain fixed at the top while the
+                  ConfigPanelWrapper content area scrolls independently. */}
+              <div css={styles.configPanelFlexContainer}>
+                {/* Toolbar area - fixed height, doesn't shrink */}
+                <div css={styles.toolbarArea}>
                   <EuiFlexGroup
                     gutterSize="s"
                     css={styles.visualizationToolbar}
@@ -192,15 +191,17 @@ export function EditorFrame(props: EditorFrameProps) {
                   </EuiFlexGroup>
                   <EuiSpacer size="s" />
                 </div>
+                {/* Layer tabs - fixed height via its own styling */}
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}
                   uiActions={props.plugins.uiActions}
                 />
+                {/* Scrollable config panel content area - takes remaining height */}
                 <div
-                  css={css`
-                    background-color: ${euiTheme.colors.emptyShade};
-                  `}
+                  className="eui-scrollBar"
+                  data-test-subj="lnsConfigPanelScrollContainer"
+                  css={styles.scrollableConfigPanel}
                 >
                   <ConfigPanelWrapper
                     core={props.core}
@@ -212,7 +213,7 @@ export function EditorFrame(props: EditorFrameProps) {
                     getUserMessages={props.getUserMessages}
                   />
                 </div>
-              </>
+              </div>
             </ErrorBoundary>
           )
         }
@@ -254,6 +255,30 @@ export function EditorFrame(props: EditorFrameProps) {
 }
 
 const componentStyles = {
+  configPanelFlexContainer: () =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    }),
+  toolbarArea: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      backgroundColor: euiTheme.colors.backgroundBaseHighlighted,
+      borderBottom: euiTheme.border.thin,
+    }),
+  scrollableConfigPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0, // Required for overflow to work in flex container
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      // Extend the scroll container to the left to accommodate drag-drop extra targets
+      // (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones.
+      // Use transparent background here - the EuiForm inside has its own background.
+      paddingLeft: DRAG_DROP_EXTRA_TARGETS_PADDING,
+      marginLeft: -DRAG_DROP_EXTRA_TARGETS_PADDING,
+    }),
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,

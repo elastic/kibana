@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
     'header',
   ]);
-  const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -73,9 +72,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -85,15 +81,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
+      await discover.resetQueryMode();
       await common.navigateToApp('discover');
       await discover.waitUntilSearchingHasFinished();
     });

@@ -6,53 +6,46 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
-import { lensCMSearchOptionsSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+import {
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
-// TODO cleanup and align search options types with client side options
-// TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)
-// TODO See if these should be in body or params?
 export const lensSearchRequestQuerySchema = schema.object({
-  ...lensCMSearchOptionsSchema.getPropSchemas(),
-  query: schema.maybe(
-    schema.string({
+  fields: schema.maybe(
+    schema.arrayOf(schema.string(), {
       meta: {
-        description: 'The text to search for Lens visualizations',
+        description:
+          'The saved object fields to include in each result. When omitted, all fields are returned.',
+      },
+      maxSize: 100,
+    })
+  ),
+  search_fields: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'The fields to match the `query` text against. Defaults to `title` when omitted.',
       },
     })
   ),
-  page: schema.number({
-    meta: {
-      description: 'Specifies the current page number of the paginated result.',
-    },
-    min: 1,
-    defaultValue: 1,
-  }),
-  perPage: schema.number({
-    meta: {
-      description: 'Maximum number of Lens visualizations included in a single response',
-    },
-    defaultValue: 20,
-    min: 1,
-    max: 1000,
-  }),
+  query: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Text to match against `search_fields`.',
+      },
+    })
+  ),
+  ...asCodePaginationParamsSchema.getPropSchemas(),
 });
-
-const lensSearchResponseMetaSchema = schema.object(
-  {
-    ...pickFromObjectSchema(searchOptionsSchemas, ['page', 'perPage']),
-    total: schema.number(), // TODO use shared definition
-  },
-  { unknowns: 'forbid' }
-);
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
-    meta: lensSearchResponseMetaSchema,
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: PAGINATION_MAX_SIZE }),
+    meta: asCodePaginationResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );

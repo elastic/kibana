@@ -41,6 +41,7 @@ import {
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -59,6 +60,7 @@ export function PackageCard({
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
+  isDeprecated,
   showLabels = true,
   showInstallationStatus,
   showCompressedInstallationStatus,
@@ -147,6 +149,24 @@ export function PackageCard({
     );
   }
 
+  let deprecatedBadge: React.ReactNode | null = null;
+
+  if (isDeprecated && showLabels) {
+    deprecatedBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning" iconType="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.deprecatedLabel"
+              defaultMessage="Deprecated"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
   let collectionButton: React.ReactNode | null = null;
   if (isCollectionCard) {
     collectionButton = (
@@ -203,6 +223,8 @@ export function PackageCard({
     isActive: hasDataStreams,
   });
 
+  const displayTitle = wrapTitleWithDeprecated({ title, deprecated: isDeprecated });
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -243,7 +265,15 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={<CardTitle title={title} titleBadge={titleBadge} />}
+        title={
+          titleLineClamp ? (
+            <EuiToolTip content={displayTitle} position="top" display="block">
+              <CardTitle title={displayTitle} titleBadge={titleBadge} />
+            </EuiToolTip>
+          ) : (
+            <CardTitle title={displayTitle} titleBadge={titleBadge} />
+          )
+        }
         titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder
@@ -282,6 +312,7 @@ export function PackageCard({
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
           {verifiedBadge}
           {updateAvailableBadge}
+          {deprecatedBadge}
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}

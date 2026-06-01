@@ -7,23 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { STEP_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 
-export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
-  const { http } = useKibana().services;
+/**
+ * Fetches a single step execution with full data (input/output).
+ * Polls while the step is still running, stops once it reaches a terminal status.
+ */
+export function useStepExecution(
+  workflowExecutionId: string,
+  stepExecutionId: string | undefined,
+  stepStatus: ExecutionStatus | undefined
+) {
+  const api = useWorkflowsApi();
+  const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http?.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
-      );
-      return response;
+      if (!workflowExecutionId || !stepExecutionId) {
+        throw new Error('Workflow execution ID and step execution ID are required');
+      }
+      return api.getStepExecution(workflowExecutionId, stepExecutionId);
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: 5000, // Refresh every 5 seconds for real-time logs
-    refetchInterval: 5000, // Auto-refresh logs
+    staleTime: isStepFinished ? Infinity : STEP_EXECUTION_POLL_INTERVAL_MS,
+    refetchInterval: false,
   });
+
+  const dataRef = useRef(query.data);
+  dataRef.current = query.data;
+
+  useSerialPolling({
+    poll: () => query.refetch(),
+    enabled: !!workflowExecutionId && !!stepExecutionId,
+    immediate: false,
+    intervalMs: STEP_EXECUTION_POLL_INTERVAL_MS,
+    shouldStop: () => {
+      const data = dataRef.current;
+      return data !== undefined && isTerminalStatus(data.status);
+    },
+    pollKey: stepExecutionId,
+  });
+
+  return query;
 }

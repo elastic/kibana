@@ -257,13 +257,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken
@@ -342,13 +343,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken

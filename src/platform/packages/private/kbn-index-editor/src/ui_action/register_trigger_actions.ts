@@ -8,17 +8,12 @@
  */
 
 import type { EditLookupIndexFlyoutDeps } from '../types';
-import {
-  ACTION_EDIT_LOOKUP_INDEX,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-} from './constants';
+import { ACTION_EDIT_LOOKUP_INDEX, EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
 
 export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
   const { uiActions } = deps;
 
   // Register index editor triggers and actions
-  uiActions.registerTrigger(EDIT_LOOKUP_INDEX_CONTENT_TRIGGER);
   uiActions.addTriggerActionAsync(
     EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
     ACTION_EDIT_LOOKUP_INDEX,
@@ -31,6 +26,7 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
         uiActions: deps.uiActions,
         fieldFormats: deps.fieldFormats,
         fileUpload: deps.fileUpload,
+        kql: deps.kql,
       });
     }
   );

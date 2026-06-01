@@ -71,6 +71,8 @@ export function FilterListButton({ onChange, filters }: Props) {
     label: (item as Filter).name,
     checked: (item as Filter).checked,
     'data-test-subj': 'filterItem',
+    'aria-selected': (item as Filter).checked === 'on',
+    'aria-label': (item as Filter).name,
   }));
 
   const toggleFilter = (filter: string) => {
@@ -88,7 +90,7 @@ export function FilterListButton({ onChange, filters }: Props) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={Object.keys(filters).length}
@@ -110,8 +112,9 @@ export function FilterListButton({ onChange, filters }: Props) {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         data-test-subj="filterList"
+        aria-label="Filter component templates"
       >
         <EuiSelectable
           allowExclusions

@@ -12,6 +12,8 @@ import { useStartServices } from '../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
+import { FLEET_PAGE_SIZE_OPTIONS } from '../../../../constants';
+
 import { useFetchAgentsData } from './use_fetch_agents_data';
 
 jest.mock('../../../../../../services/experimental_features');
@@ -134,6 +136,9 @@ describe('useFetchAgentsData', () => {
   beforeEach(() => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
+    // Reset sendGetAgentTagsForRq to default value
+    const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+    sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
   });
 
   it('should fetch agents and agent policies data', async () => {
@@ -176,7 +181,7 @@ describe('useFetchAgentsData', () => {
     );
 
     expect(result?.current.page).toEqual({ index: 0, size: 20 });
-    expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
+    expect(result?.current.pageSizeOptions).toEqual([...FLEET_PAGE_SIZE_OPTIONS]);
   });
 
   it('sync querystring kuery with current search', async () => {
@@ -198,5 +203,95 @@ describe('useFetchAgentsData', () => {
     });
 
     await waitFor(() => expect(renderer.history.location.search).toEqual(''));
+  });
+
+  it('should update allTags when tags are fetched', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+  });
+
+  describe('allTags', () => {
+    it('should be updated to empty array when all tags are removed', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.allTags).toEqual(['tag1']);
+
+      // Simulate removing the last tag - server returns empty array
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: [] });
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.allTags).toEqual([]);
+      });
+    });
+
+    it('should be updated when tags change from multiple to fewer', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2', 'tag3'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.allTags).toEqual(['tag1', 'tag2', 'tag3']);
+
+      // Remove one tag - server returns fewer tags
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2'] });
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+      });
+    });
+
+    it('should not be updated when they have not changed', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValue({ items: ['tag1', 'tag2'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const initialTags = result.current.allTags;
+      expect(initialTags).toEqual(['tag1', 'tag2']);
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        // Tags should still be the same reference (no unnecessary state update)
+        expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+      });
+    });
   });
 });

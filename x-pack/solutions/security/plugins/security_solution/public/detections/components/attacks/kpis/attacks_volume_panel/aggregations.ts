@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-export const attacksVolumeAggregations = (size: number = 10000) => ({
-  attacks_volume: {
+import type { estypes } from '@elastic/elasticsearch';
+
+import { ATTACK_IDS_FIELD, MAX_ATTACKS_COUNT } from '../common/constants';
+
+export const getAttacksVolumeAggregations = (): Record<
+  string,
+  estypes.AggregationsAggregationContainer
+> => ({
+  attacks: {
     terms: {
-      field: 'kibana.alert.attack_ids',
-      size,
+      field: ATTACK_IDS_FIELD,
+      size: MAX_ATTACKS_COUNT,
     },
   },
 });

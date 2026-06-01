@@ -21,7 +21,7 @@ import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { getSpaces, cloud, resolveMlCapabilities, isServerless }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities, serverless }: SystemRouteDeps
 ) {
   router.versioned
     .post({
@@ -205,8 +205,8 @@ export function systemRoutes(
               isCloudTrial,
               cloudUrl: cloud.baseUrl,
               isMlAutoscalingEnabled,
-              showNodeInfo: !isServerless,
-              showLicenseInfo: !isServerless,
+              showNodeInfo: !serverless.isServerless,
+              showLicenseInfo: !serverless.isServerless,
             },
           });
         } catch (error) {
@@ -264,7 +264,9 @@ export function systemRoutes(
       {
         version: '1',
         validate: {
-          request: { body: schema.object({ indices: schema.arrayOf(schema.string()) }) },
+          request: {
+            body: schema.object({ indices: schema.arrayOf(schema.string(), { maxSize: 10000 }) }),
+          },
         },
       },
       routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

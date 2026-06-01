@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
@@ -81,12 +81,10 @@ export const EntityConfig: FC<EntityConfigProps> = ({
   return (
     <EuiPopover
       ownFocus
-      style={{ height: '40px' }}
       button={
-        <EuiButtonIcon
-          color="text"
-          iconSize="m"
-          iconType="gear"
+        <EuiFormPrepend
+          element="button"
+          iconLeft="gear"
           aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.editControlConfiguration', {
             defaultMessage: 'Edit field configuration',
           })}
@@ -100,6 +98,9 @@ export const EntityConfig: FC<EntityConfigProps> = ({
       closePopover={() => {
         setIsEntityConfigPopoverOpen(false);
       }}
+      aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.entityConfig.popoverAriaLabel', {
+        defaultMessage: 'Entity field configuration',
+      })}
     >
       <div data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}>
         <EuiFormRow

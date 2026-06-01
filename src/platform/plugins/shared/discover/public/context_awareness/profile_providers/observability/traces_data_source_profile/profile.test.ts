@@ -77,6 +77,36 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('should NOT match when ES|QL query is transformational', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | STATS count()' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is invalid', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | WHERE' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is missing', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: undefined,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('should NOT match when the index is not for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({

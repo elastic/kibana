@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { test } from '../fixtures';
+
+test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'ingestHub.onboardingEnabled': 'true',
+      },
+    });
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'ingestHub.onboardingEnabled': false,
+      },
+    });
+  });
+
+  test('renders the onboarding shell and navigates between steps', async ({
+    browserAuth,
+    page,
+  }) => {
+    await browserAuth.loginAsAdmin();
+
+    await test.step('redirects to first step hash when no hash is present', async () => {
+      await page.gotoApp('onboarding/aws');
+      await expect(page).toHaveURL(/#connect/);
+    });
+
+    await test.step('renders the onboarding step shell', async () => {
+      await expect(page.testSubj.locator('onboardingShell')).toBeVisible();
+    });
+
+    await test.step('shows the connect step as current', async () => {
+      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+    });
+
+    await test.step('renders 5 step indicators', async () => {
+      const steps = page.locator('[data-test-subj^="onboardingStepIndicator-"]');
+      await expect(steps).toHaveCount(5);
+    });
+
+    await test.step('navigates directly to a step via hash', async () => {
+      await page.gotoApp('onboarding/aws#services');
+      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    });
+  });
+});

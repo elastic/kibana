@@ -843,6 +843,105 @@ describe('#getQueryParams', () => {
         );
       });
 
+      describe('deeply nested fields', () => {
+        let deepNestedMappings: IndexMapping;
+
+        const getDeepNestedMapping = (): SavedObjectsTypeMappingDefinition => ({
+          properties: {
+            actions: {
+              type: 'nested',
+              properties: {
+                params: {
+                  properties: {
+                    to: { type: 'text' },
+                    subject: { type: 'text' },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        beforeEach(() => {
+          const deepNestedType: SavedObjectsType = {
+            name: 'deepnested',
+            hidden: false,
+            namespaceType: 'single',
+            mappings: getDeepNestedMapping(),
+          };
+
+          registry.registerType(deepNestedType);
+          deepNestedMappings = createMappings({ registry });
+        });
+
+        it('supports deeply nested fields by finding the nested ancestor', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo',
+            searchFields: ['actions.params.to'],
+            type: ['deepnested'],
+            mappings: deepNestedMappings,
+          });
+
+          const mustClause = result.query.bool.must;
+          expect(mustClause.length).toBe(1);
+          const nestedQueryClause = mustClause[0].nested;
+
+          expect(nestedQueryClause.path).toBe('deepnested.actions');
+          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+            'deepnested.actions.params.to',
+          ]);
+        });
+
+        it('groups multiple deeply nested fields under the same nested ancestor', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo',
+            searchFields: ['actions.params.to', 'actions.params.subject'],
+            type: ['deepnested'],
+            mappings: deepNestedMappings,
+          });
+
+          const mustClause = result.query.bool.must;
+          expect(mustClause.length).toBe(1);
+          const nestedQueryClause = mustClause[0].nested;
+
+          expect(nestedQueryClause.path).toBe('deepnested.actions');
+          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+            'deepnested.actions.params.to',
+            'deepnested.actions.params.subject',
+          ]);
+        });
+
+        it('supports deeply nested fields with wildcard prefix search', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo*',
+            searchFields: ['actions.params.to'],
+            type: ['deepnested'],
+            mappings: deepNestedMappings,
+          });
+
+          expect(result.query.bool.should).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                nested: {
+                  path: 'deepnested.actions',
+                  query: {
+                    simple_query_string: {
+                      query: 'foo*',
+                      fields: ['deepnested.actions.params.to'],
+                    },
+                  },
+                },
+              }),
+            ])
+          );
+        });
+      });
+
       describe('when using same field name for different types and one is nested', () => {
         it('should create the specific nested clause and search in all fields even if they arent defined in the mapping', () => {
           const result = getQueryParams({

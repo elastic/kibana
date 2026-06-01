@@ -24,7 +24,7 @@ export type DatatableRenderProps = DatatableProps & {
 
   /**
    * A boolean for each table row, which is true if the row active
-   * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
+   * ON_CLICK_ROW actions attached to it, otherwise false.
    */
   rowHasRowClickTriggerActions?: boolean[];
   /**

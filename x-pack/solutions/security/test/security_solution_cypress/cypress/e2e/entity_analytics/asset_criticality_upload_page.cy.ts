@@ -21,6 +21,16 @@ describe(
   'Asset Criticality Upload page',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {
@@ -29,7 +39,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('include.text', 'Entity store');
+      cy.get(PAGE_TITLE).should('include.text', 'Entity analytics');
     });
 
     it('uploads a file', () => {

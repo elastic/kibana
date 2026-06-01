@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
-import { newConversationId } from '../../utils/new_conversation';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
-import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
-import { searchParamNames } from '../../search_param_names';
+import { useKibana } from '../../hooks/use_kibana';
 import { useConversationActions } from './use_conversation_actions';
+import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -28,86 +30,75 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 }) => {
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
-  const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
+  const {
+    services: { analytics },
+  } = useKibana();
+  const { conversationId: conversationIdParam, agentId: agentIdParam } = useParams<{
+    conversationId?: string;
+    agentId?: string;
+  }>();
 
   const conversationId = useMemo(() => {
-    return conversationIdParam === newConversationId ? undefined : conversationIdParam;
+    return conversationIdParam === 'new' ? undefined : conversationIdParam;
   }, [conversationIdParam]);
+
+  const agentIdFromPath = agentIdParam;
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
+  const entryPointSource = location.state?.entryPointSource ?? 'direct';
 
-  // Get search params for agent ID syncing
-  const [searchParams] = useSearchParams();
-  const { agents } = useAgentBuilderAgents();
+  const hasFiredEntryPointRef = useRef(false);
+  useEffect(() => {
+    if (!conversationId || !agentIdFromPath) return;
+    if (hasFiredEntryPointRef.current) return;
+    hasFiredEntryPointRef.current = true;
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint, {
+      agent_id: agentIdFromPath,
+      conversation_id: conversationId,
+      source: entryPointSource,
+    });
+  }, [analytics, agentIdFromPath, conversationId, entryPointSource]);
 
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const shouldAllowConversationRedirectRef = useRef(true);
-  const agentIdSyncedRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      // On unmount disable conversation redirect
-      shouldAllowConversationRedirectRef.current = false;
-    };
-  }, []);
-
-  const navigateToConversation = useCallback(
-    ({ nextConversationId }: { nextConversationId: string }) => {
-      // Navigate to the conversation if redirect is allowed
-      if (shouldAllowConversationRedirectRef.current) {
-        const path = appPaths.chat.conversation({ conversationId: nextConversationId });
-        const params = undefined;
-        const state = { shouldStickToBottom: false };
-        navigateToAgentBuilderUrl(path, params, state);
-      }
-    },
-    [shouldAllowConversationRedirectRef, navigateToAgentBuilderUrl]
-  );
-
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      navigateToConversation({ nextConversationId: id });
-    },
-    [navigateToConversation]
-  );
 
   const onDeleteConversation = useCallback(
     ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
-        // If deleting current conversation, navigate to new conversation
-        const path = appPaths.chat.new;
-        navigateToAgentBuilderUrl(path, undefined, { shouldStickToBottom: true });
+        // If deleting current conversation, navigate to root (redirects to last used agent)
+        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
       }
     },
     [navigateToAgentBuilderUrl]
   );
 
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
+
   const conversationActions = useConversationActions({
     conversationId,
     queryClient,
     conversationsService,
-    onConversationCreated,
     onDeleteConversation,
   });
 
-  // Handle agent ID syncing from URL params (moved from useSyncAgentId)
-  useEffect(() => {
-    if (agentIdSyncedRef.current || conversationId) {
+  const upsertAttachments = useCallback((nextAttachments: ConversationAttachment[]) => {
+    if (nextAttachments.length === 0) {
       return;
     }
+    setAttachments((prev) => upsertAttachmentsIntoList(prev, nextAttachments));
+  }, []);
 
-    // If we don't have a selected agent id, check for a valid agent id in the search params
-    // This is used for the "chat with agent" action on the Agent pages
-    const agentIdParam = searchParams.get(searchParamNames.agentId);
+  const resetAttachments = useCallback(() => {
+    setAttachments(undefined);
+  }, []);
 
-    if (agentIdParam && agents.some((agent) => agent.id === agentIdParam)) {
-      // Agent id passed to sync is valid, set it and mark as synced
-      conversationActions.setAgentId(agentIdParam);
-      agentIdSyncedRef.current = true;
-    }
-  }, [searchParams, agents, conversationId, conversationActions]);
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setAttachments((prev) => {
+      if (!prev) return prev;
+      return removeAttachmentFromList(prev, attachmentIndex);
+    });
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -117,11 +108,29 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage: true,
+      agentId: agentIdFromPath,
+      attachments,
+      upsertAttachments,
+      resetAttachments,
+      removeAttachment,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [
+      conversationId,
+      shouldStickToBottom,
+      conversationActions,
+      initialMessage,
+      agentIdFromPath,
+      attachments,
+      upsertAttachments,
+      resetAttachments,
+      removeAttachment,
+    ]
   );
 
   return (
-    <ConversationContext.Provider value={contextValue}>{children}</ConversationContext.Provider>
+    <ConversationContext.Provider value={contextValue}>
+      <ConversationChangeNotifier />
+      {children}
+    </ConversationContext.Provider>
   );
 };

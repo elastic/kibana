@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +40,7 @@ import {
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
+import { ConfirmDeployAgentPolicyModal, IncompatibleAgentVersionCallout } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
@@ -48,11 +48,12 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 import {
+  applyNamespaceCustomizationChange,
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -66,6 +67,8 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
 import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
+
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
@@ -118,7 +121,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessAgentPolicy, getAgentlessStatusForPackage } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -146,18 +149,21 @@ export const EditPackagePolicyForm = memo<{
     () =>
       existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
-          isAgentlessIntegration(packageInfo)
+          getAgentlessStatusForPackage(packageInfo).isAgentless
         : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
   );
 
   // Derive var_group_selections from policy for edit mode
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
+    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -173,7 +179,14 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
-  // make form dirty if new agent policy is selected
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+
   useEffect(() => {
     if (newAgentPolicyName) {
       setIsEdited(true);
@@ -212,6 +225,15 @@ export const EditPackagePolicyForm = memo<{
     [agentPoliciesToRemove]
   );
 
+  const selectedExistingPolicies = useMemo(() => {
+    return existingAgentPolicies.filter((existingPolicy) =>
+      agentPolicies.find((policy) => policy.id === existingPolicy.id)
+    );
+  }, [agentPolicies, existingAgentPolicies]);
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    selectedExistingPolicies
+  );
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -339,6 +361,17 @@ export const EditPackagePolicyForm = memo<{
         : packagePolicy.policy_ids,
     });
     if (!error) {
+      if (packageInfo) {
+        await applyNamespaceCustomizationChange(
+          packageInfo.name,
+          packageInfo.version,
+          packagePolicy.namespace,
+          namespaceCustomizationEnabledRef.current,
+          installedNamespaceCustomizationEnabledFor,
+          notifications,
+          packageInfo.title ?? packageInfo.name
+        );
+      }
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
@@ -449,6 +482,14 @@ export const EditPackagePolicyForm = memo<{
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
+              agentPolicies={agentPolicies}
+              onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
+                namespaceCustomizationEnabledRef.current = enabled;
+                if (!isInit) {
+                  setIsEdited(true);
+                }
+              }}
+              packagePolicyId={packagePolicyId}
             />
           )}
 
@@ -461,6 +502,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isUpgrade={isUpgrade}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               varGroupSelections={varGroupSelections}
             />
@@ -500,8 +542,11 @@ export const EditPackagePolicyForm = memo<{
       selectedTab,
       tabsViews,
       updatePackagePolicy,
+      isUpgrade,
       validationResults,
       varGroupSelections,
+      packagePolicyId,
+      setIsEdited,
     ]
   );
 
@@ -592,6 +637,15 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {incompatibleAgentVersion.status !== 'NONE' && (
+              <>
+                <IncompatibleAgentVersionCallout
+                  incompatibility={incompatibleAgentVersion.status}
+                  versionCondition={incompatibleAgentVersion.versionCondition}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

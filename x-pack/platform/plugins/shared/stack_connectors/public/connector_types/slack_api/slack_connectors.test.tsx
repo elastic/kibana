@@ -24,6 +24,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   })),
 }));
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
+
 describe('SlackActionFields renders', () => {
   const onSubmit = jest.fn();
 
@@ -35,7 +42,7 @@ describe('SlackActionFields renders', () => {
     const actionConnector = {
       secrets: {},
       config: {},
-      id: 'test',
+      id: 'slack',
       actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,
@@ -186,7 +193,7 @@ describe('SlackActionFields renders', () => {
         token: 'some token',
       },
       config: { allowedChannels: [{ id: 'channel-id', name: '#test' }] },
-      id: 'test',
+      id: 'slack',
       actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,

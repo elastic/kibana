@@ -8,10 +8,11 @@
 import React from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
   return (
-    <div className="text-left">
+    <div css={helpCommandsStyles} data-test-subj="syntheticsProjectApiKeyHelpCommands">
       <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="info" size="s" />
       <EuiSpacer size="s" />
       <EuiText size="s">
@@ -27,7 +28,10 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        export SYNTHETICS_API_KEY={apiKey}
+        {i18n.translate('xpack.synthetics.helpCommands.exportSYNTHETICSAPIKEYCodeBlockLabel', {
+          defaultMessage: 'export SYNTHETICS_API_KEY=',
+        })}
+        {apiKey}
       </EuiCodeBlock>
       <EuiSpacer size="m" />
       <EuiSpacer size="m" />
@@ -36,11 +40,21 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        SYNTHETICS_API_KEY={apiKey} npm run push
+        {i18n.translate('xpack.synthetics.helpCommands.syntheticsapikeyCodeBlockLabel', {
+          defaultMessage: 'SYNTHETICS_API_KEY=',
+        })}
+        {apiKey}{' '}
+        {i18n.translate('xpack.synthetics.helpCommands.npmRunPushCodeBlockLabel', {
+          defaultMessage: 'npm run push',
+        })}
       </EuiCodeBlock>
     </div>
   );
 };
+
+const helpCommandsStyles = css({
+  textAlign: 'left',
+});
 
 const API_KEY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.apiKey.label', {
   defaultMessage: 'API key',

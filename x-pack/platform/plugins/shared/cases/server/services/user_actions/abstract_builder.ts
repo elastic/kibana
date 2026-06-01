@@ -21,22 +21,14 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import type {
-  BuilderDeps,
   BuilderParameters,
   CommonBuilderArguments,
   SavedObjectParameters,
   UserActionParameters,
   UserActionEvent,
 } from './types';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export abstract class UserActionBuilder {
-  protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-
-  constructor(deps: BuilderDeps) {
-    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
-  }
-
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
     return {
       created_at: new Date().toISOString(),
@@ -100,7 +92,7 @@ export abstract class UserActionBuilder {
     value,
     valueKey,
     caseId,
-    attachmentId,
+    savedObjectId,
     connectorId,
     type,
   }: CommonBuilderArguments): SavedObjectParameters => {
@@ -113,7 +105,7 @@ export abstract class UserActionBuilder {
       },
       references: [
         ...this.createCaseReferences(caseId),
-        ...this.createCommentReferences(attachmentId ?? null),
+        ...this.createCommentReferences(savedObjectId ?? null),
         ...(type === UserActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)
           : []),

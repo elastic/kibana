@@ -35,7 +35,7 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
             name: i18n.SOURCE_CHART_LABEL,
             description: i18n.SOURCE_UNIT_LABEL,
             color: getSourceIpColor(euiTheme),
-            icon: 'visMapCoordinate',
+            icon: 'waypoint',
             lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
           },
           {
@@ -43,7 +43,7 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
             name: i18n.DESTINATION_CHART_LABEL,
             description: i18n.DESTINATION_UNIT_LABEL,
             color: getDestinationIpColor(euiTheme),
-            icon: 'visMapCoordinate',
+            icon: 'waypoint',
             lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
           },
         ],

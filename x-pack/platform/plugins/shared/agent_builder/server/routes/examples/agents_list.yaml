@@ -38,3 +38,12 @@ responses:
                     - platform.core.list_indices
                     - platform.core.get_index_mapping
                     - platform.core.get_document_by_id
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X GET "${KIBANA_URL}/api/agent_builder/agents" \
+     -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/agent_builder/agents

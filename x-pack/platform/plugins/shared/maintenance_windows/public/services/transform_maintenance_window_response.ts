@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { MaintenanceWindow, MaintenanceWindowResponse } from '../../common';
+import type { MaintenanceWindowResponse, MaintenanceWindowUI } from '../../common';
 
 export const transformMaintenanceWindowResponse = (
   response: MaintenanceWindowResponse
-): MaintenanceWindow => {
+): MaintenanceWindowUI => {
   return {
     title: response.title,
     enabled: response.enabled,
@@ -23,7 +23,7 @@ export const transformMaintenanceWindowResponse = (
     updatedBy: response.updated_by,
     createdAt: response.created_at,
     updatedAt: response.updated_at,
-    status: response.status as MaintenanceWindow['status'],
+    status: response.status as MaintenanceWindowUI['status'],
     eventStartTime: response.event_start_time,
     eventEndTime: response.event_end_time,
     id: response.id,

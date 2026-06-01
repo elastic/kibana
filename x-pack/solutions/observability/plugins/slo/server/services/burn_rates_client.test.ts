@@ -145,6 +145,249 @@ describe('SummaryClient', () => {
       });
     });
 
+    describe('calculateBatch', () => {
+      it('uses named filter aggregations when all members share the same index', async () => {
+        const slo1 = createSLO({ budgetingMethod: 'occurrences' });
+        const slo2 = createSLO({ budgetingMethod: 'occurrences' });
+
+        const lookbackWindows = [
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
+        ];
+
+        esClientMock.search.mockResolvedValueOnce({
+          ...commonEsResponse,
+          aggregations: {
+            member_0: {
+              doc_count: 100,
+              [LONG_WINDOW]: {
+                buckets: [
+                  {
+                    key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                    from: 1672527240000,
+                    from_as_string: '2022-12-31T22:54:00.000Z',
+                    to: 1672530840000,
+                    to_as_string: '2022-12-31T23:54:00.000Z',
+                    doc_count: 60,
+                    good: { value: 4500 },
+                    total: { value: 5000 },
+                  },
+                ],
+              },
+              [SHORT_WINDOW]: {
+                buckets: [
+                  {
+                    key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                    from: 1672530540000,
+                    from_as_string: '2022-12-31T23:49:00.000Z',
+                    to: 1672530840000,
+                    to_as_string: '2022-12-31T23:54:00.000Z',
+                    doc_count: 5,
+                    good: { value: 290 },
+                    total: { value: 300 },
+                  },
+                ],
+              },
+            },
+            member_1: {
+              doc_count: 200,
+              [LONG_WINDOW]: {
+                buckets: [
+                  {
+                    key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                    from: 1672527240000,
+                    from_as_string: '2022-12-31T22:54:00.000Z',
+                    to: 1672530840000,
+                    to_as_string: '2022-12-31T23:54:00.000Z',
+                    doc_count: 60,
+                    good: { value: 9000 },
+                    total: { value: 10000 },
+                  },
+                ],
+              },
+              [SHORT_WINDOW]: {
+                buckets: [
+                  {
+                    key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                    from: 1672530540000,
+                    from_as_string: '2022-12-31T23:49:00.000Z',
+                    to: 1672530840000,
+                    to_as_string: '2022-12-31T23:54:00.000Z',
+                    doc_count: 5,
+                    good: { value: 580 },
+                    total: { value: 600 },
+                  },
+                ],
+              },
+            },
+          },
+        } as any);
+
+        const client = new DefaultBurnRatesClient(esClientMock);
+        const results = await client.calculateBatch([
+          { slo: slo1, instanceId: ALL_VALUE, lookbackWindows },
+          { slo: slo2, instanceId: ALL_VALUE, lookbackWindows },
+        ]);
+
+        expect(esClientMock.search).toHaveBeenCalledTimes(1);
+        expect(esClientMock.msearch).not.toHaveBeenCalled();
+
+        const searchCall = esClientMock.search.mock.calls[0][0] as any;
+        expect(searchCall.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { terms: { 'slo.id': expect.arrayContaining([slo1.id, slo2.id]) } },
+          ])
+        );
+        expect(searchCall.aggs.member_0.filter.bool.filter).toEqual(
+          expect.arrayContaining([
+            { term: { 'slo.id': slo1.id } },
+            { term: { 'slo.revision': slo1.revision } },
+          ])
+        );
+        expect(searchCall.aggs.member_1.filter.bool.filter).toEqual(
+          expect.arrayContaining([
+            { term: { 'slo.id': slo2.id } },
+            { term: { 'slo.revision': slo2.revision } },
+          ])
+        );
+
+        expect(results).toHaveLength(2);
+        expect(results[0].find((r) => r.name === LONG_WINDOW)).toMatchObject({
+          name: LONG_WINDOW,
+          sli: 0.9,
+          burnRate: 100,
+        });
+        expect(results[1].find((r) => r.name === LONG_WINDOW)).toMatchObject({
+          name: LONG_WINDOW,
+          sli: 0.9,
+          burnRate: 100,
+        });
+      });
+
+      it('falls back to msearch when members use different indices', async () => {
+        const slo1 = createSLO({ budgetingMethod: 'occurrences' });
+        const slo2 = createSLO({ budgetingMethod: 'occurrences' });
+
+        const lookbackWindows = [
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
+        ];
+
+        const memberResponse = {
+          took: 5,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { hits: [] },
+          status: 200,
+          aggregations: {
+            [LONG_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                  from: 1672527240000,
+                  from_as_string: '2022-12-31T22:54:00.000Z',
+                  to: 1672530840000,
+                  to_as_string: '2022-12-31T23:54:00.000Z',
+                  doc_count: 60,
+                  good: { value: 4500 },
+                  total: { value: 5000 },
+                },
+              ],
+            },
+            [SHORT_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                  from: 1672530540000,
+                  from_as_string: '2022-12-31T23:49:00.000Z',
+                  to: 1672530840000,
+                  to_as_string: '2022-12-31T23:54:00.000Z',
+                  doc_count: 5,
+                  good: { value: 290 },
+                  total: { value: 300 },
+                },
+              ],
+            },
+          },
+        };
+
+        esClientMock.msearch.mockResolvedValueOnce({
+          took: 10,
+          responses: [memberResponse, memberResponse],
+        } as any);
+
+        const client = new DefaultBurnRatesClient(esClientMock);
+        const results = await client.calculateBatch([
+          { slo: slo1, instanceId: ALL_VALUE, lookbackWindows },
+          { slo: slo2, instanceId: ALL_VALUE, lookbackWindows, remoteName: 'remote_cluster' },
+        ]);
+
+        expect(esClientMock.msearch).toHaveBeenCalledTimes(1);
+        expect(esClientMock.search).not.toHaveBeenCalled();
+        expect(results).toHaveLength(2);
+      });
+
+      it('falls back to msearch for a single member', async () => {
+        const slo = createSLO({ budgetingMethod: 'occurrences' });
+        const lookbackWindows = [
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
+        ];
+
+        esClientMock.msearch.mockResolvedValueOnce({
+          took: 10,
+          responses: [
+            {
+              took: 5,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: { hits: [] },
+              status: 200,
+              aggregations: {
+                [LONG_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                      from: 1672527240000,
+                      from_as_string: '2022-12-31T22:54:00.000Z',
+                      to: 1672530840000,
+                      to_as_string: '2022-12-31T23:54:00.000Z',
+                      doc_count: 60,
+                      good: { value: 4500 },
+                      total: { value: 5000 },
+                    },
+                  ],
+                },
+                [SHORT_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                      from: 1672530540000,
+                      from_as_string: '2022-12-31T23:49:00.000Z',
+                      to: 1672530840000,
+                      to_as_string: '2022-12-31T23:54:00.000Z',
+                      doc_count: 5,
+                      good: { value: 290 },
+                      total: { value: 300 },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        } as any);
+
+        const client = new DefaultBurnRatesClient(esClientMock);
+        const results = await client.calculateBatch([
+          { slo, instanceId: ALL_VALUE, lookbackWindows },
+        ]);
+
+        expect(esClientMock.msearch).toHaveBeenCalledTimes(1);
+        expect(esClientMock.search).not.toHaveBeenCalled();
+        expect(results).toHaveLength(1);
+      });
+    });
+
     describe('for SLO defined with timeslices budgeting method', () => {
       it('calls ES with the lookback windows aggregations', async () => {
         const slo = createSLO({

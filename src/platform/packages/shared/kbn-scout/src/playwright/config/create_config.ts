@@ -11,6 +11,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
@@ -62,15 +63,30 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
    * While Playwright doesn't allow to read 'use' from the parent project, we have to create
    * a setup project with the explicit 'use' object for each parent project.
    * This is a workaround for https://github.com/microsoft/playwright/issues/32547
+   *
+   * The matching teardown project is always emitted: if no `global.teardown.ts` exists in
+   * `testDir`, the project's `testMatch` finds no tests and Playwright silently skips it,
+   * so plugins opt-in to teardown simply by adding the file. Linking it via Playwright's
+   * `teardown` field on the setup project guarantees teardown runs after the setup project
+   * AND every project depending on it has finished — including on test failure.
    */
+  const GLOBAL_HOOK_TIMEOUT_MS = 180000; // 3 minutes
   scoutProjects = options.runGlobalSetup
     ? scoutDefaultProjects.flatMap((project) => [
         {
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+          teardown: `teardown-${project?.name}`,
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
+        {
+          name: `teardown-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.teardown\.ts/,
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+        },
       ])
     : scoutDefaultProjects;
 
@@ -90,6 +106,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -109,6 +126,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

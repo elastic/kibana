@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// TODO check if we need that
 export * from '../../../common/types/models/package_policy_schema';

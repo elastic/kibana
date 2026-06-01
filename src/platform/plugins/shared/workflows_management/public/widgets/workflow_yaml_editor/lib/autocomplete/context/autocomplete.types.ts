@@ -9,13 +9,16 @@
 
 import type { Document, LineCounter, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import type { LineParseResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import type { LineParseResult } from './parse_line_for_completion';
+import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
   StepPropInfo,
 } from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import type { EsqlStepRegion } from '../../esql_validation/extract_esql_region';
 
 export interface AutocompleteContext {
   // what triggered the completion
@@ -43,18 +46,43 @@ export interface AutocompleteContext {
 
   // kind of ast info
   isInLiquidBlock: boolean;
+  /** True when the cursor is in the scalar value for `triggers[i].on.condition`. */
+  isInTriggerConditionField: boolean;
+  /**
+   * When the cursor is in `on.condition` and `triggers[i].type` matches a trigger registered
+   * in workflows extensions, the public definition. Undefined for built-in types, unregistered
+   * ids, or missing `type` in YAML.
+   */
+  triggerConditionDefinition: PublicTriggerDefinition | undefined;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
+  isInWorkflowInputsContext: boolean;
+  /**
+   * True iff the cursor is inside the `with.query` scalar of an
+   * `elasticsearch.esql.query` step. Implies `esqlRegion !== null` and
+   * `esqlOffsetInQuery !== null`.
+   */
+  isInEsqlQueryField: boolean;
+  /**
+   * The ES|QL region the cursor is in, or `null` when outside any. Same
+   * shape the validator uses, so the cursor offset and ranges round-trip
+   * cleanly between the two pipelines.
+   */
+  esqlRegion: EsqlStepRegion | null;
+  /**
+   * Cursor offset relative to the start of the ES|QL content
+   * (`absoluteOffset - esqlRegion.contentStartInFile`), or `null`. This is
+   * what `@kbn/esql-language` `suggest()` expects.
+   */
+  esqlOffsetInQuery: number | null;
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
-
-  // workflow definition (for JSON Schema autocompletion)
-  workflowDefinition: {
-    inputs?: unknown;
-    [key: string]: unknown;
-  } | null;
+  workflows: WorkflowsResponse;
+  currentWorkflowId: string | null;
+  isCurrentWorkflowManaged: boolean;
+  workflowDefinition: WorkflowYaml | null;
 }
 
 // Extended context includes Monaco editor model and position for advanced autocompletion features

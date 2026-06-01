@@ -19,7 +19,8 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { RESOLUTION_MATCH } from './__mocks__';
+import { RESOLUTION_MATCH } from './__mocks__/logs_data_source_resolution_match';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 
 const mockServices = createProfileProviderSharedServicesMock();
 
@@ -159,13 +160,14 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#a8caff', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#adccff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {
@@ -174,6 +176,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
@@ -187,6 +190,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
@@ -198,12 +202,16 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
+      const toolkit = {
+        actions: {
+          addFilter: jest.fn(),
+        },
+      };
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
         () => ({}),
-        { context: RESOLUTION_MATCH.context }
+        { context: RESOLUTION_MATCH.context, toolkit }
       );
       const getCellRenderersParams = {
-        actions: { addFilter: jest.fn() },
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,
@@ -220,14 +228,17 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getRowAdditionalLeadingControls', () => {
     it('should return the passed additional controls', () => {
-      const getRowAdditionalLeadingControls =
-        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
-          context: RESOLUTION_MATCH.context,
-        });
-      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+      const toolkit = {
         actions: {
           setExpandedDoc: jest.fn(),
         },
+      };
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit,
+        });
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
       });
 
@@ -240,9 +251,9 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowAdditionalLeadingControls =
         logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
-        actions: {},
         dataView: dataViewWithLogLevel,
       });
 
@@ -255,6 +266,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getColumnsConfiguration =
         logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
           context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
 
       const columnConfiguration = getColumnsConfiguration?.();

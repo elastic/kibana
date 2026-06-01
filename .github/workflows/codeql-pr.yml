@@ -4,6 +4,14 @@ on:
   pull_request:
     branches: [ "main" ]
     types: [ opened, ready_for_review, synchronize ]
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
+      - '**/*.cjs'
+      - '.github/codeql/**'
 
 jobs:
 
@@ -78,3 +86,4 @@ jobs:
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
       with:
         category: "/language:${{matrix.language}}"
+        wait-for-processing: true

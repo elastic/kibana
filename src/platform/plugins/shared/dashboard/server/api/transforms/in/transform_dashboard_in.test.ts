@@ -8,8 +8,8 @@
  */
 
 import type { PinnedControlState } from '@kbn/controls-schemas';
-import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
@@ -20,20 +20,20 @@ jest.mock('../../../kibana_services', () => ({
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       pinned_panels: [
         {
           config: { anyKey: 'some value' },
           grow: false,
-          uid: 'foo',
-          order: 0,
+          id: 'foo',
           type: 'type1',
           width: 'small',
         } as unknown as PinnedControlState,
       ],
       description: 'description',
-      query: { query: 'test', language: 'KQL' },
+      query: { expression: 'test', language: 'kql' as const },
       options: {
+        ...DEFAULT_DASHBOARD_OPTIONS,
         hide_panel_titles: true,
         use_margins: false,
         sync_colors: false,
@@ -48,10 +48,9 @@ describe('transformDashboardIn', () => {
             enhancements: {},
             savedObjectId: '1',
           },
-          uid: '1',
+          id: '1',
           title: 'title1',
           type: 'type1',
-          version: '2',
         },
       ],
       tags: [],
@@ -67,15 +66,25 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "controlGroupInput": Object {
-            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-          },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"kuery\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false,\\"autoApplyFilters\\":true}",
-          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"hidePanelBorders\\":false,\\"useMargins\\":false,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}",
+          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "pinned_panels": Object {
+            "panels": Object {
+              "foo": Object {
+                "config": Object {
+                  "anyKey": "some value",
+                },
+                "grow": false,
+                "order": 0,
+                "type": "type1",
+                "width": "small",
+              },
+            },
+          },
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,
@@ -85,14 +94,13 @@ describe('transformDashboardIn', () => {
           "timeTo": "now",
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
   });
 
   it('should not provide default values for optional properties', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 
@@ -109,30 +117,27 @@ describe('transformDashboardIn', () => {
           "timeRestore": false,
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
   });
 
   it('should transform project_routing to attributes', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
       project_routing: '_alias:_origin',
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes?.projectRouting).toBe('_alias:_origin');
   });
 
   it('should not include projectRouting in attributes when it is undefined', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });

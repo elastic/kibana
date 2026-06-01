@@ -186,10 +186,10 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `)

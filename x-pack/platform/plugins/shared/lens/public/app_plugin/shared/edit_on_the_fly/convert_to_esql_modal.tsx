@@ -25,9 +25,12 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { esql } from '@elastic/esql';
+
 import { layerTypes } from '../../..';
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
@@ -78,7 +81,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         itemIdToExpandedRowMapValues[layer.id] = (
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layer.query}
+              {esql(layer.query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         );
@@ -95,7 +98,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         field: 'icon',
         name: '',
         width: euiTheme.size.l,
-        render: (icon: string) => <EuiIcon type={icon} />,
+        render: (icon: string) => <EuiIcon type={icon} aria-hidden={true} />,
       },
       {
         field: 'name',
@@ -126,9 +129,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
           return (
-            <EuiButtonIcon
-              onClick={() => toggleDetails(layer)}
-              aria-label={
+            <EuiToolTip
+              content={
                 isExpanded
                   ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
                       defaultMessage: 'Collapse',
@@ -137,9 +139,23 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                       defaultMessage: 'Expand',
                     })
               }
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-              disabled={!layer.isConvertibleToEsql}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={() => toggleDetails(layer)}
+                aria-label={
+                  isExpanded
+                    ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
+                        defaultMessage: 'Collapse',
+                      })
+                    : i18n.translate('xpack.lens.config.expandAriaLabel', {
+                        defaultMessage: 'Expand',
+                      })
+                }
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                disabled={!layer.isConvertibleToEsql}
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -254,7 +270,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layers[0].query}
+              {esql(layers[0].query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

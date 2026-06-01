@@ -10,7 +10,7 @@ export interface IndexInfo {
   docs: number;
 }
 
-type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+export type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
 export interface CategoryGroup {
   category: MainCategories | string;
@@ -86,10 +86,85 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
+  packagePoliciesInfo?: {
+    count: number;
+  };
+}
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  docsCount: number;
+  failedDocsCount: number;
+  /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
+  statsAvailable: boolean;
+  categories?: string[];
 }
 export interface CasesSearchResponse {
   total: number;
   countOpenCases: number;
   countClosedCases: number;
   countInProgressCases: number;
+}
+
+// Retention types
+export type RetentionType = 'ilm' | 'dsl' | null;
+export type RetentionStatus = 'healthy' | 'non-compliant';
+
+export interface RetentionInfo {
+  indexName: string;
+  isDataStream: boolean;
+  retentionType: RetentionType;
+  retentionPeriod: string | null;
+  retentionDays: number | null;
+  policyName: string | null;
+  status: RetentionStatus;
+}
+
+export interface RetentionResponse {
+  items: RetentionInfo[];
+}
+
+export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
+
+export interface IndexDocCount {
+  index: string;
+  docCount: number;
+  exists: boolean;
+  error?: string;
+}
+
+export interface ActionableFinding {
+  category?: MainCategories;
+  severity: 'critical' | 'warning';
+  message: string;
+  resource: string;
+}
+
+export interface CoveragePayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: CategoryGroup[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface QualityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: DataQualityResultDocument[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface ContinuityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: PipelineStats[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface RetentionPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: RetentionInfo[];
+  actionableFindings: ActionableFinding[];
 }

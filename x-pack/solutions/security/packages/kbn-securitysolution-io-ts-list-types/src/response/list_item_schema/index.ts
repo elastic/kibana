@@ -8,10 +8,8 @@
 import * as t from 'io-ts';
 
 import { _versionOrUndefined } from '../../common/underscore_version';
-import { deserializerOrUndefined } from '../../common/deserializer';
 import { metaOrUndefined } from '../../common/meta';
 import { timestampOrUndefined } from '../../common/timestamp';
-import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
 import { id } from '../../common/id';
@@ -28,11 +26,9 @@ export const listItemSchema = t.exact(
     '@timestamp': timestampOrUndefined,
     created_at,
     created_by,
-    deserializer: deserializerOrUndefined,
     id,
     list_id,
     meta: metaOrUndefined,
-    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,

@@ -216,7 +216,7 @@ export function ChangeKbModel({
             }
           )}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>{error.message}</p>
         </EuiCallOut>
@@ -237,7 +237,6 @@ export function ChangeKbModel({
           >
             <EuiSuperSelect
               fullWidth
-              hasDividers
               isLoading={isLoadingEndpoints}
               options={superSelectOptions}
               valueOfSelected={selectedInferenceId}

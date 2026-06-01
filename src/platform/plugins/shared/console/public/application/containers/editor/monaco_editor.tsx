@@ -58,7 +58,6 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
-  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const MonacoEditor = ({
@@ -66,7 +65,6 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
-  enableSuggestWidgetRepositioning,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -80,6 +78,7 @@ export const MonacoEditor = ({
       application,
     },
     docLinkVersion,
+    config: { defaultEditorContent },
   } = context;
   const { toasts } = notifications;
   const {
@@ -202,7 +201,7 @@ export const MonacoEditor = ({
     [esqlCallbacks]
   );
 
-  useSetInitialValue({ localStorageValue, setValue, toasts });
+  useSetInitialValue({ localStorageValue, setValue, toasts, defaultEditorContent });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
@@ -298,7 +297,6 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
-        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );

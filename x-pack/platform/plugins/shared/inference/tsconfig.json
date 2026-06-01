@@ -44,5 +44,9 @@
     "@kbn/core-ui-settings-common",
     "@kbn/setup-node-env",
     "@kbn/es-errors",
+    "@kbn/anonymization-plugin",
+    "@kbn/anonymization-common",
+    "@kbn/utility-types",
+    "@kbn/management-settings-ids",
   ]
 }

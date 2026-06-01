@@ -11,8 +11,16 @@ import type { FC, ReactNode } from 'react';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useSidebarPanel } from '@kbn/core-chrome-sidebar-context';
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   height: ${euiTheme.size.xl};
@@ -26,10 +34,14 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   align-items: center;
 `;
 
+const closeSidebarLabel = i18n.translate('core.ui.chrome.sidebar.closeSidebarAriaLabel', {
+  defaultMessage: 'Close side panel',
+});
+
 export interface SidebarHeaderProps {
-  /** Title string (ignored if children provided) */
-  title?: string;
-  /** Custom header content (overrides title) */
+  /** Renders as heading and labels the panel via aria-labelledby. When children are provided, used only for the aria-label. */
+  title: string;
+  /** Custom header content. Overrides title rendering; title still labels the panel. */
   children?: ReactNode;
   /** Close handler (renders close button when provided) */
   onClose?: () => void;
@@ -39,9 +51,18 @@ export interface SidebarHeaderProps {
 
 /** Header component for sidebar apps */
 export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose, actions }) => {
-  const titleContent = children ?? (
+  const { headingId } = useSidebarPanel();
+
+  const titleContent = children ? (
+    <>
+      <EuiScreenReaderOnly>
+        <h2 id={headingId}>{title}</h2>
+      </EuiScreenReaderOnly>
+      {children}
+    </>
+  ) : (
     <EuiTitle size="xs">
-      <h3>{title}</h3>
+      <h2 id={headingId}>{title}</h2>
     </EuiTitle>
   );
 
@@ -55,14 +76,14 @@ export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose
               {actions && <EuiFlexItem grow={false}>{actions}</EuiFlexItem>}
               {onClose && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    onClick={onClose}
-                    aria-label={i18n.translate('core.ui.chrome.sidebar.closeSidebarAriaLabel', {
-                      defaultMessage: 'Close side panel',
-                    })}
-                    color="text"
-                  />
+                  <EuiToolTip content={closeSidebarLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      onClick={onClose}
+                      aria-label={closeSidebarLabel}
+                      color="text"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

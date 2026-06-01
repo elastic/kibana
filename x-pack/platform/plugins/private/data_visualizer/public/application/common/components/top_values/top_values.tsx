@@ -102,7 +102,7 @@ export const TopValues: FC<TopValuesProps> = ({
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(stats.topValuesSampleSize)}
+                  .convertToText(stats.topValuesSampleSize)}
               </strong>
             ),
           }}
@@ -136,7 +136,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}
@@ -152,7 +152,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(totalDocuments ?? 0)}
+                .convertToText(totalDocuments ?? 0)}
             </strong>
           ),
         }}
@@ -245,7 +245,7 @@ export const TopValues: FC<TopValuesProps> = ({
                     >
                       <EuiButtonIcon
                         iconSize="s"
-                        iconType="plusInCircle"
+                        iconType="plusCircle"
                         onClick={() => onAddFilter(fieldName, fieldValue, '+')}
                         aria-label={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
@@ -266,7 +266,7 @@ export const TopValues: FC<TopValuesProps> = ({
                       />
                       <EuiButtonIcon
                         iconSize="s"
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => onAddFilter(fieldName, fieldValue, '-')}
                         aria-label={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',

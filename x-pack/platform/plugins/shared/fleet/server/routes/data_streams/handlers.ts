@@ -104,8 +104,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       dataStreamsStatsByName,
       dataStreamsMeteringStatsByName
     );
-    const dataStreamNames = keys(dataStreams);
-
+    // filter out data streams starting with ".", e.g. ".workflows-events"
+    const dataStreamNames = keys(dataStreams).filter((name) => !name.startsWith('.'));
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
@@ -323,7 +323,6 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         continue;
       }
 
-      // Case 1: Using deprecated policy but @lifecycle doesn't exist → show callout
       if (!lifecyclePolicy) {
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,
@@ -333,14 +332,12 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         continue;
       }
 
-      // Case 2: Both policies exist
       // Don't show callout if both are unmodified (version 1) - auto-migration will happen
       if (deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
         // Both unmodified, auto-migration will handle this, skip
         continue;
       }
 
-      // Case 3: At least one policy is modified (version > 1) → show callout
       if (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1) {
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { HeaderSection } from '../../../../common/components/header_section';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { KpiPanel } from '../../alerts_kpis/common/components';
 import { KpiCollapse } from './kpi_collapse/kpi_collapse';
 import { KpiViewSelect } from './kpi_view_select/kpi_view_select';
 import { KpiViewSelection } from './kpi_view_select/helpers';
@@ -19,7 +17,11 @@ import { inputsSelectors } from '../../../../common/store/inputs';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { buildAlertAssigneesFilter } from '../../alerts_table/default_config';
 import { buildConnectorIdFilter } from '../table/filtering_configs';
-import { SummaryViewContent } from './summary_view_content';
+import { AttacksSummaryPanel } from './attacks_summary_panel';
+import { AttacksTrendsPanel } from './attacks_trends_panel';
+import { AttacksCountPanel } from './attacks_count_panel';
+import { AttacksTreemapPanel } from './attacks_treemap_panel';
+import { useAttacksKpiState } from './common/use_attacks_kpi_state';
 
 const ATTACKS_KPI_SECTION_PANEL_ID = 'attacks-kpis-section';
 
@@ -32,6 +34,8 @@ export interface KPIsSectionProps {
   assignees: AssigneesIdsSelection[];
   /** Selected connector IDs to filter by */
   selectedConnectorNames: string[];
+  /** DataView for the attacks page */
+  dataView: DataView;
 }
 
 /**
@@ -39,13 +43,12 @@ export interface KPIsSectionProps {
  * Supports view selection (Summary, Trends, Count, Treemap).
  */
 export const KPIsSection = memo(
-  ({ pageFilters, assignees, selectedConnectorNames }: KPIsSectionProps) => {
+  ({ pageFilters, assignees, selectedConnectorNames, dataView }: KPIsSectionProps) => {
     const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
       ATTACKS_KPI_SECTION_PANEL_ID
     );
-    const [kpiViewSelection, setKpiViewSelection] = useState<KpiViewSelection>(
-      KpiViewSelection.Summary
-    );
+    const { viewSelection: kpiViewSelection, setViewSelection: setKpiViewSelection } =
+      useAttacksKpiState();
 
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
@@ -76,39 +79,28 @@ export const KPIsSection = memo(
         ) : (
           <KpiCollapse kpiViewSelection={kpiViewSelection} />
         ),
-      [isExpanded, kpiViewSelection]
+      [isExpanded, kpiViewSelection, setKpiViewSelection]
+    );
+
+    const baseProps = useMemo(
+      () => ({ filters, title, isExpanded, setIsExpanded }),
+      [filters, title, isExpanded, setIsExpanded]
     );
 
     const content = useMemo(() => {
-      if (!isExpanded) {
-        return null;
+      if (kpiViewSelection === KpiViewSelection.Trend) {
+        return <AttacksTrendsPanel {...baseProps} />;
       }
-      if (kpiViewSelection === KpiViewSelection.Summary) {
-        return <SummaryViewContent filters={filters} query={query} />;
+      if (kpiViewSelection === KpiViewSelection.Count) {
+        return <AttacksCountPanel {...baseProps} />;
       }
-      // Other views are empty in this PR - content will be added in a follow-up PR
-      return <EuiFlexItem />;
-    }, [isExpanded, kpiViewSelection, filters, query]);
+      if (kpiViewSelection === KpiViewSelection.Treemap) {
+        return <AttacksTreemapPanel {...baseProps} query={query} />;
+      }
+      return <AttacksSummaryPanel {...baseProps} dataView={dataView} query={query} />;
+    }, [kpiViewSelection, baseProps, query, dataView]);
 
-    return (
-      <KpiPanel
-        data-test-subj={KPIS_SECTION}
-        hasBorder
-        paddingSize="m"
-        $toggleStatus={isExpanded}
-        height={375}
-      >
-        <HeaderSection
-          alignHeader="flexStart"
-          hideSubtitle
-          title={title}
-          titleSize={'s'}
-          toggleStatus={isExpanded}
-          toggleQuery={setIsExpanded}
-        />
-        {content}
-      </KpiPanel>
-    );
+    return content;
   }
 );
 
