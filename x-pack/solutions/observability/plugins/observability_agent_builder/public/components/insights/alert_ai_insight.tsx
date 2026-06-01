@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { APM_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -17,10 +18,26 @@ import { useApiClient } from '../../hooks/use_api_client';
 export interface AlertAiInsightProps {
   alertId: string;
   alertTitle?: string;
+  /**
+   * The `kibana.alert.rule.rule_type_id` of the alert. When this matches one
+   * of `APM_RULE_TYPE_IDS`, the "Start conversation" button prefills and
+   * auto-sends an "Investigate alert" prompt, which routes the agent into
+   * the `observability.investigate-apm-alert` skill.
+   */
+  alertRuleTypeId?: string;
 }
 
-export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
+export function AlertAiInsight({ alertId, alertTitle, alertRuleTypeId }: AlertAiInsightProps) {
   const apiClient = useApiClient();
+
+  const isApmAlert = Boolean(
+    alertRuleTypeId && (APM_RULE_TYPE_IDS as readonly string[]).includes(alertRuleTypeId)
+  );
+
+  const investigateApmAlertPrompt = i18n.translate(
+    'xpack.observabilityAgentBuilder.alertAiInsight.investigateApmAlertPrompt',
+    { defaultMessage: 'Investigate alert' }
+  );
 
   const createStream = useCallback(
     (signal: AbortSignal) =>
@@ -69,6 +86,12 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
       insightType="alert"
       createStream={createStream}
       buildAttachments={buildAttachments}
+      {...(isApmAlert
+        ? {
+            initialMessage: investigateApmAlertPrompt,
+            autoSendInitialMessage: true,
+          }
+        : {})}
     />
   );
 }

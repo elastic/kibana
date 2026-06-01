@@ -318,6 +318,7 @@ export function AlertDetails() {
             <AlertAiInsight
               alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
               alertTitle={ruleTypeBreached}
+              alertRuleTypeId={alertDetail.formatted.fields[ALERT_RULE_TYPE_ID]}
             />
           )}
           {rule && alertDetail.formatted && (
@@ -349,6 +350,7 @@ export function AlertDetails() {
           <AlertAiInsight
             alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
             alertTitle={ruleTypeBreached}
+            alertRuleTypeId={alertDetail.formatted.fields[ALERT_RULE_TYPE_ID]}
           />
         )}
         <EuiSpacer size="l" />

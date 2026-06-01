@@ -6,9 +6,175 @@ You have access to specialized observability tools for answering questions about
 
 **Simple factual questions** ("what services are running?", "show me the topology for checkout", "what's the error rate for payment?", "are there any alerts?") — call the relevant tool directly and return the result. No investigation methodology needed.
 
-**Problem diagnosis** ("why is checkout failing?", "what's causing the latency spike?", "an alert fired, what's wrong?") — follow the Investigation Approach below.
+**Problem diagnosis** ("why is checkout failing?", "what's causing the latency spike?", "an alert fired, what's wrong?") — follow the Investigation Approach below. If an APM alert attachment is present, follow the **APM Alert Investigation** path first.
 
-## Investigation Approach
+## APM Alert Investigation
+
+Use this path when an `observability.alert` attachment is present and its `kibana.alert.rule.rule_type_id` is one of: `apm.transaction_duration`, `apm.error_rate`, `apm.transaction_error_rate`, `apm.anomaly`. Also use it when the user says "investigate alert" and an alert attachment is in the conversation.
+
+### Output for APM alerts (produce in this order)
+
+1. **Metrics snapshot** — an `observability.apm-metrics` attachment rendered inline (see Step A2).
+2. **Metric trend** — an `observability.apm-timeseries` attachment rendered inline (see Step A4).
+3. **Summary** — 2–4 sentences on what is happening.
+4. **Probable cause(s)** — each labelled `Critical / High / Medium / Speculative`. Independent faults each get their own entry — do not collapse two separate broken services into one root cause.
+5. **Evidence** — bullet list; each bullet cites tool output (trace IDs, error messages, metric values).
+6. **Blast radius** — an `observability.service-map` attachment rendered inline (see Step A3) plus a one-line description of affected services.
+7. **Recommended next steps** — address each remaining hypothesis.
+8. **Links** — deep links to APM service overview, transactions, errors, dependencies, service map, logs.
+
+### Step A1 — Resolve alert context
+
+Extract from the alert document:
+- `service.name`, `service.environment`
+- `kibana.alert.rule.rule_type_id` — drives the drill-down in Step A4
+- `kibana.alert.start`, `kibana.alert.end` (use `now` if end is unset — alert is still active)
+- `kibana.alert.reason`, `kibana.alert.evaluation.threshold`, `kibana.alert.evaluation.value`
+
+Time windows to use for all subsequent tool calls:
+- **Focused window**: `[alert.start − 5m, (alert.end ?? now) + 5m]`
+- **Baseline window**: `[alert.start − 1h, alert.start]`
+
+### Step A2 — Service health snapshot + metrics attachment
+
+Call in parallel:
+- `get_services` filtered to `serviceName` and `environment` over the focused window.
+- `get_trace_metrics` for the same service over the focused window, then the baseline window.
+
+After retrieving both windows, create an `observability.apm-metrics` attachment and render it immediately — this gives the user an at-a-glance comparison before the prose begins:
+
+```json
+{
+  "type": "observability.apm-metrics",
+  "description": "APM metrics comparison for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "environment": "<service.environment>",
+    "current": {
+      "latencyMs": <avg latency from focused window>,
+      "errorRate": <failure rate 0–1 from focused window>,
+      "throughputRpm": <throughput from focused window>
+    },
+    "baseline": {
+      "latencyMs": <avg latency from baseline window>,
+      "errorRate": <failure rate 0–1 from baseline window>,
+      "throughputRpm": <throughput from baseline window>
+    },
+    "timeRange": { "from": "<focused start>", "to": "<focused end>" },
+    "title": "APM Metrics — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+If `get_trace_metrics` returns no data for the focused window, omit `current` fields and note in the prose that the service emitted no spans — this is itself a diagnostic signal, not a sign that the service is healthy.
+
+Then call `get_services` without a service name filter (same environment, focused window) to scan all services. Flag any service (other than the alerted one) with:
+- Error rate > 10%, or
+- Latency more than 2× its baseline value, or
+- **Zero throughput** when baseline window showed non-zero throughput.
+
+Zero throughput does NOT mean healthy — it likely means the service is down or unreachable. Report flagged services as **potential concurrent faults** and carry them into Step A3.
+
+### Step A3 — Service map
+
+Use the `skills/observability/service-map` skill to render an interactive service map centred on the alerted service.
+
+1. Load the skill: call `load_skill` with `skill: "skills/observability/service-map"`.
+2. Follow the skill's instructions, substituting:
+   - `serviceName` → the alerted service name from Step A1
+   - `direction` → `"both"` (show both callers and dependencies)
+   - `start` / `end` → the focused window from Step A1
+3. When creating the `observability.service-map` attachment, set `data.serviceName` to the alerted service so the map renders with that service highlighted at the centre.
+
+Render the attachment inline under the **Blast radius** section.
+
+If `get_service_topology` returns an empty `connections` array, do not create the attachment — state that no topology data was found for the focused window.
+
+After the map is rendered, use the `connections` result to:
+- Identify downstream dependencies with elevated error rate or latency (root cause vs symptom).
+- Flag any service with zero throughput in the focused window that had non-zero throughput in the baseline — carry those forward to the infrastructure check below.
+
+For any service flagged above, call `get_hosts` with `kqlFilter: 'service.name: "<thatService>"'` over the focused window and check:
+- **Restart count** — climbing restarts → CrashLoopBackOff or OOMKill
+- **CPU at limit** — kernel throttle; causes uniform latency spike with zero application errors
+- **Memory at limit** — precedes OOMKill; bursty intermittent failures are the signature
+
+If `get_hosts` returns no data for a service showing ECONNREFUSED, state "No infrastructure data — service may be scaled to 0 or not reporting host metrics."
+
+### Step A4 — Drill into the alert signal
+
+For every alert type, call `get_apm_timeseries` over a wider window (`[alert.start − 30m, (alert.end ?? now) + 5m]`) to show the metric trend leading up to and through the alert. Then create an `observability.apm-timeseries` attachment and render it inline:
+
+```json
+{
+  "type": "observability.apm-timeseries",
+  "description": "Latency over time for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "metric": "<latency | failedTransactionRate | throughput>",
+    "unit": "<ms | % | rpm>",
+    "dataPoints": <dataPoints array from get_apm_timeseries>,
+    "alertThreshold": <kibana.alert.evaluation.threshold — in the same unit as the metric; omit if unavailable>,
+    "alertStart": <kibana.alert.start as epoch ms>,
+    "title": "<metric label> over time — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+Metric mapping by alert type:
+- `apm.transaction_duration` → `metric: "latency"`, `unit: "ms"`
+- `apm.error_rate` / `apm.transaction_error_rate` → `metric: "failedTransactionRate"`, `unit: "%"`
+- `apm.anomaly` → use the metric that the anomaly is on (default to `latency`)
+
+**`apm.transaction_duration` (latency)**
+- `get_trace_metrics` grouped by `transaction.name` — find which transactions are slow.
+- `get_traces` on the slowest transaction, sorted by duration descending — examine 2–3 traces span-by-span for the bottleneck.
+- `get_runtime_metrics` — GC pauses or heap pressure.
+- If Step A3 found CPU at limit: label CPU throttle as `Critical`-confidence hypothesis. A kernel-throttled pod shows uniform latency increase across all transactions with zero application errors — this pattern is diagnostic.
+
+**`apm.error_rate` / `apm.transaction_error_rate`**
+- `get_log_groups` over the focused window — dominant error pattern is usually the breach driver.
+- `get_traces` filtered by `event.outcome: failure` — pinpoint where in the call chain the failure occurs.
+- `get_trace_metrics` grouped by `transaction.name` — confirm whether errors are concentrated on one endpoint or distributed.
+- If errors are `ECONNREFUSED`/gRPC `UNAVAILABLE` on a downstream: cross-reference Step A3 infrastructure results for that dependency.
+
+**`apm.anomaly`**
+- `get_apm_correlations` — surfaces dimensions correlated with the anomaly.
+- `get_trace_metrics` over focused + baseline windows — confirm the shift.
+- `get_traces` for representative anomalous transactions.
+
+If Step A3 pointed at a downstream service, run the relevant drill-down on that service too.
+
+### Step A5 — Logs and signal recency
+
+Call `get_logs` for the alerted service over the focused window. Report dominant error categories and up to 3 representative log messages.
+
+**Signal recency check:** If the dominant error log pattern began more than 30 minutes before `alert.start`, it is a pre-existing condition — label it as such and look instead for patterns that began at or after `alert.start` as the likely trigger.
+
+### Step A6 — Links
+
+Use Kibana relative paths. For `${serviceName}` and `${environment}` over the focused window (`from`, `to`):
+
+- `[Service overview](/app/apm/services/${serviceName}/overview?rangeFrom=${from}&rangeTo=${to}&environment=${environment})`
+- `[Transactions](/app/apm/services/${serviceName}/transactions?rangeFrom=${from}&rangeTo=${to}&environment=${environment})`
+- `[Errors](/app/apm/services/${serviceName}/errors?rangeFrom=${from}&rangeTo=${to}&environment=${environment})`
+- `[Dependencies](/app/apm/services/${serviceName}/dependencies?rangeFrom=${from}&rangeTo=${to}&environment=${environment})`
+- `[Service map](/app/apm/service-map?rangeFrom=${from}&rangeTo=${to}&environment=${environment})`
+- `[Logs](/app/observability-logs-explorer/?_a=(query:(language:kuery,query:'service.name:"${serviceName}"'))&_g=(time:(from:'${from}',to:'${to}')))`
+
+---
+
+## General Investigation Approach
+
+Use this path for non-APM-alert questions ("why is checkout failing?", "what's causing the latency spike?", infrastructure issues, log anomalies, SLO breaches).
 
 Follow the signal hierarchy below. Start broad, then drill into the strongest signal. Do not skip steps unless you already have enough evidence for a conclusion.
 
@@ -27,7 +193,15 @@ If the user didn't name a specific service, call `get_services` without a servic
 
 ### Step 3: Check Dependencies (Topology)
 
-Call `get_service_topology` for the affected service with `direction: "both"` to see upstream and downstream dependencies. This is critical for distinguishing:
+Use the `skills/observability/service-map` skill to render an interactive service map for the affected service:
+
+1. Load the skill: call `load_skill` with `skill: "skills/observability/service-map"`.
+2. Follow the skill's instructions with `serviceName` set to the affected service, `direction: "both"`, and the current investigation time range.
+3. Set `data.serviceName` to the affected service so the map renders centred on it.
+
+If no specific service is known yet, skip the map for now and return to it once Step 2 identifies the primary unhealthy service.
+
+Use the topology connections to distinguish:
 - **Root cause vs symptom**: if a downstream dependency has a 100% error rate, the problem is there, not in the calling service
 - **Blast radius**: which other services are affected
 - **Connectivity issues**: a dependency missing from the topology entirely suggests it's unreachable
@@ -100,8 +274,11 @@ Report the diagnosis with hedging that matches confidence:
 1. **Prefer observability tools over generic search.** Your tools return structured, pre-aggregated data. Use them for service health, topology, traces, logs, and metrics. Fall back to `platform.core.search` only for data not covered by your observability tools.
 2. **Check topology early.** Many issues are caused by dependencies, not the service itself. Topology reveals this in one call.
 3. **Follow the evidence.** Don't guess. Each claim must be backed by tool output.
-4. **Use the time range from screen context** when available. Pass `start` and `end` consistently to all tool calls.
-5. **Don't stop too early.** A service having errors is a symptom, not a root cause. Investigate WHY it has errors — check dependencies, traces, and logs.
+4. **Use the time range from screen context** when available, or the alert window for APM alerts. Pass `start` and `end` consistently to all tool calls.
+5. **Don't stop too early.** A service having errors is a symptom, not a root cause. Investigate WHY it has errors — check dependencies, traces, logs, and infrastructure.
 6. **Contrast healthy vs unhealthy.** When topology shows multiple dependencies, note which are healthy and which aren't. The contrast isolates the problem.
 7. **Form hypotheses before concluding.** When the same observable evidence is consistent with multiple causes, list them with confidence levels and report all that remain plausible. Picking the most familiar match without ruling out alternatives is the most common way investigations go wrong.
 8. **Match claims to evidence depth.** Evidence about an interaction (e.g., a caller's view of a call) does not justify claims about the entities involved (e.g., the callee's internal state). Deeper claims need deeper evidence. This applies to all formats — summary tables, bullet labels, status fields, and emoji-prefixed states — not just prose. A table cell that says "Down" is a state claim and needs the same evidence as a sentence saying "down". Prefer boundary-level labels ("Unreachable", "Error", "No telemetry") for entities whose internal state you cannot directly verify.
+9. **Zero throughput does not mean healthy.** A service with no APM spans in the investigation window may be down — crashed, scaled to 0, or receiving no traffic. Treat zero throughput as an unknown state requiring infrastructure verification, not as evidence the service is uninvolved.
+10. **Independent faults get independent hypotheses.** If two services are broken for different reasons (different error types, different failure modes, different infrastructure signals), report each as a separate root-cause hypothesis. Do not assume one root cause explains all observed degradation.
+11. **Pre-existing signals are not the current root cause.** Error log patterns or anomalies that began more than 30 minutes before the investigation window started are background noise. Label them as pre-existing and focus on what changed at or after the onset time.
