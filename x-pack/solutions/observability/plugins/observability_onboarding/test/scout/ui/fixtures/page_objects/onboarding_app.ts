@@ -157,13 +157,10 @@ export class OnboardingApp {
     } else {
       await card.click();
     }
+  }
 
-    // For flows that have the ingestion selector, wait for it to be visible
-    const flowsWithIngestionSelector =
-      /(auto-detect-logs|kubernetes-quick-start|otel-logs|otel-kubernetes)/;
-    if (flowsWithIngestionSelector.test(cardSelector)) {
-      await this.ingestionModeSelector.waitFor({ state: 'visible', timeout: 30000 });
-    }
+  async waitForIngestionModeSelector(timeout = 30_000) {
+    await this.ingestionModeSelector.waitFor({ state: 'visible', timeout });
   }
 
   async getGridColumnCount() {
@@ -260,5 +257,14 @@ export class OnboardingApp {
 
   async confirmEnableWiredStreamsModal() {
     await this.enableWiredStreamsConfirmButton.click();
+  }
+
+  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
+    try {
+      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
+      await this.confirmEnableWiredStreamsModal();
+    } catch {
+      // Modal omitted: Wired Streams was already enabled in this session.
+    }
   }
 }
