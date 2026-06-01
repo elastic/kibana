@@ -259,7 +259,7 @@ export function getDashboardStateSchema(
           defaultValue: [],
           meta: {
             description:
-              'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
+              'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`). Dashboards can contain up to 1000 total panels.',
           },
         }
       ),
