@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
+  - '@kbn/unified-histogram'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -111,6 +112,8 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
   - '@kbn/workflows-ui'
+  - '@kbn/datemath'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod

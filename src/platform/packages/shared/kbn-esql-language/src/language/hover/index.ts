@@ -32,7 +32,7 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 
   if (commandAtOffset?.name === 'promql') {
-    return getPromqlHoverItem(root, offset, callbacks);
+    return getPromqlHoverItem(root, offset, callbacks, fullText);
   }
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
