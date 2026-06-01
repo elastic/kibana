@@ -86,9 +86,13 @@ describe('Update OAuth Client route', () => {
     });
   });
 
-  describe('redirect_uris size validation aligned with UIAM (20)', () => {
+  describe('redirect_uris size validation aligned with UIAM (1-20)', () => {
     const getBodySchema = () => (routeConfig.validate as any).body as ObjectType;
     const uri = 'https://example.com/cb';
+
+    it('rejects an empty redirect_uris array', () => {
+      expect(() => getBodySchema().validate({ redirect_uris: [] })).toThrow(/redirect_uris/);
+    });
 
     it('accepts 20 redirect URIs', () => {
       expect(() =>

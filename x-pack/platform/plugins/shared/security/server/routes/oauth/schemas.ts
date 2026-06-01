@@ -36,6 +36,7 @@ export const clientTypeSchema = schema.oneOf([
 export const redirectUrisSchema = schema.arrayOf(
   schema.string({ minLength: 1, maxLength: OAUTH_MAX_URI_LENGTH }),
   {
+    minSize: 1,
     maxSize: OAUTH_REDIRECT_URIS_MAX_SIZE,
   }
 );

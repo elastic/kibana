@@ -33,8 +33,7 @@ export const OAUTH_REDIRECT_URIS_MAX_SIZE = 20;
 
 /**
  * Generic cap for short, identifier/name-like string fields on the OAuth
- * client management API (client IDs, names, metadata keys/values, revocation
- * reasons).
+ * client management API.
  */
 export const OAUTH_MAX_STRING_FIELD_LENGTH = 1024;
 

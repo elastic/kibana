@@ -143,8 +143,14 @@ describe('Create OAuth Client route', () => {
     });
   });
 
-  describe('redirect_uris size validation aligned with UIAM (20)', () => {
+  describe('redirect_uris size validation aligned with UIAM (1-20)', () => {
     const uri = 'https://example.com/cb';
+
+    it('rejects an empty redirect_uris array', () => {
+      expect(() =>
+        createClientBodySchema.validate({ client_name: 'Test', redirect_uris: [] })
+      ).toThrow(/redirect_uris/);
+    });
 
     it('accepts 20 redirect URIs', () => {
       expect(() =>
