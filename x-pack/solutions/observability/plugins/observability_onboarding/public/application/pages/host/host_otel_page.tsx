@@ -335,8 +335,8 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       subtitle={subtitle}
       logo={logo}
       returnTo="/"
-      bodyDataTestSubj={`observabilityOnboardingHostV2Layout-${os}`}
-      returnDataTestSubj="observabilityOnboardingHostV2Return"
+      bodyDataTestSubj={`observabilityOnboardingHostLayout-${os}`}
+      returnDataTestSubj="observabilityOnboardingHostReturn"
       banners={
         <>
           <MultiIntegrationInstallBanner />

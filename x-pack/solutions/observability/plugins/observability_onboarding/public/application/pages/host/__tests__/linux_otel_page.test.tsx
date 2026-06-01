@@ -109,7 +109,7 @@ const renderPage = (initialEntries: string[] = ['/host/linux']) =>
 describe('HostLinuxOtelPage', () => {
   it('renders the Linux layout chrome', () => {
     renderPage();
-    expect(screen.getByTestId('observabilityOnboardingHostV2Layout-linux')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingHostLayout-linux')).toBeInTheDocument();
   });
 
   it('renders the collection method selector with OTel selected', () => {
@@ -129,9 +129,7 @@ describe('HostLinuxOtelPage', () => {
 
   it('preserves the ingestion search param in the Return link href', () => {
     renderPage(['/host/linux?ingestion=wired']);
-    const returnLink = screen.getByTestId(
-      'observabilityOnboardingHostV2Return'
-    ) as HTMLAnchorElement;
+    const returnLink = screen.getByTestId('observabilityOnboardingHostReturn') as HTMLAnchorElement;
     expect(returnLink.getAttribute('href')).toContain('ingestion=wired');
   });
 

@@ -233,8 +233,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
       subtitle={subtitle}
       logo={logo}
       returnTo="/"
-      bodyDataTestSubj={`observabilityOnboardingHostV2Layout-${os}`}
-      returnDataTestSubj="observabilityOnboardingHostV2Return"
+      bodyDataTestSubj={`observabilityOnboardingHostLayout-${os}`}
+      returnDataTestSubj="observabilityOnboardingHostReturn"
       steps={steps}
       feedback={<FeedbackButtons flow="auto-detect" />}
     />

@@ -13,13 +13,13 @@ export const HostLinuxAutoDetectPage: React.FC = () => (
   <HostAutoDetectPage
     os="linux"
     routePath="/host/linux"
-    breadcrumbLabel={i18n.translate('xpack.observability_onboarding.hostV2.breadcrumbs.linux', {
+    breadcrumbLabel={i18n.translate('xpack.observability_onboarding.host.breadcrumbs.linux', {
       defaultMessage: 'Linux',
     })}
-    title={i18n.translate('xpack.observability_onboarding.hostV2.linux.title', {
+    title={i18n.translate('xpack.observability_onboarding.host.linux.title', {
       defaultMessage: 'Set up Linux',
     })}
-    subtitle={i18n.translate('xpack.observability_onboarding.hostV2.linux.subtitle', {
+    subtitle={i18n.translate('xpack.observability_onboarding.host.linux.subtitle', {
       defaultMessage: 'Collect logs and metrics from your Linux host.',
     })}
     logo="linux"

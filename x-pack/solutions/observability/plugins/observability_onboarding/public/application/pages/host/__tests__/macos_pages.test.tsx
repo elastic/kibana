@@ -125,7 +125,7 @@ const renderMacosAutoDetectPage = (initialEntries: string[] = ['/host/macos/auto
 describe('HostMacosOtelPage', () => {
   it('renders the macOS layout chrome', () => {
     renderMacosOtelPage();
-    expect(screen.getByTestId('observabilityOnboardingHostV2Layout-mac')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingHostLayout-mac')).toBeInTheDocument();
   });
 
   it('renders the collection method selector with OTel selected', () => {
@@ -218,7 +218,7 @@ describe('HostMacosOtelPage', () => {
 describe('HostMacosAutoDetectPage', () => {
   it('renders the macOS layout chrome', () => {
     renderMacosAutoDetectPage();
-    expect(screen.getByTestId('observabilityOnboardingHostV2Layout-mac')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingHostLayout-mac')).toBeInTheDocument();
   });
 
   it('marks Elastic Agent as the selected collection method', () => {

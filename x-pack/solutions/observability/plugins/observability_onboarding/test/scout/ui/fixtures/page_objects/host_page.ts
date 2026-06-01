@@ -7,16 +7,16 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 
-type HostV2Os = 'linux' | 'mac' | 'windows';
+type HostOs = 'linux' | 'mac' | 'windows';
 type HostTileId = 'linux' | 'macos' | 'windows';
 type HostCollectionMethodId = 'otel' | 'auto-detect';
 
-export class HostV2Page {
+export class HostPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoLanding() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.v2LandingWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+    await this.landingWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   async gotoPath(path: string) {
@@ -24,7 +24,7 @@ export class HostV2Page {
     await this.page.gotoApp(`observabilityOnboarding/${normalized}`);
   }
 
-  public get v2LandingWrapper() {
+  public get landingWrapper() {
     return this.page.getByTestId('addDataPageV2');
   }
 
@@ -32,8 +32,8 @@ export class HostV2Page {
     return this.page.getByTestId(`observabilityOnboardingIntegrationTile-${id}`);
   }
 
-  layout(os: HostV2Os) {
-    return this.page.getByTestId(`observabilityOnboardingHostV2Layout-${os}`);
+  layout(os: HostOs) {
+    return this.page.getByTestId(`observabilityOnboardingHostLayout-${os}`);
   }
 
   collectionMethodSelector() {
@@ -57,7 +57,7 @@ export class HostV2Page {
   }
 
   returnLink() {
-    return this.page.getByTestId('observabilityOnboardingHostV2Return');
+    return this.page.getByTestId('observabilityOnboardingHostReturn');
   }
 
   emptyPrompt() {
@@ -94,7 +94,7 @@ export class HostV2Page {
   }
 
   async clickHostTile(id: HostTileId) {
-    const layoutOs: HostV2Os = id === 'macos' ? 'mac' : id;
+    const layoutOs: HostOs = id === 'macos' ? 'mac' : id;
     await this.hostTile(id).click();
     await this.layout(layoutOs).waitFor({ state: 'visible', timeout: 30_000 });
   }

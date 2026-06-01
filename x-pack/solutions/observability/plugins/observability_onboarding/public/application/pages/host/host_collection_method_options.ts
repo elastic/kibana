@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { CollectionMethodOption } from '../../shared/collection_method_selector';
 
 export const HOST_SELECTOR_LEGEND = i18n.translate(
-  'xpack.observability_onboarding.hostV2.selectorLegend',
+  'xpack.observability_onboarding.host.selectorLegend',
   { defaultMessage: 'Choose a collection method' }
 );
 
 export const HOST_SELECTOR_STEP_TITLE = i18n.translate(
-  'xpack.observability_onboarding.hostV2.selectorStepTitle',
+  'xpack.observability_onboarding.host.selectorStepTitle',
   { defaultMessage: 'Choose how to collect host telemetry' }
 );
 
@@ -29,11 +29,11 @@ export const buildHostCollectionMethodOptions = ({
 }: BuildHostCollectionMethodOptionsArgs): CollectionMethodOption[] => [
   {
     id: 'otel',
-    label: i18n.translate('xpack.observability_onboarding.hostV2.collectionMethod.otel.label', {
+    label: i18n.translate('xpack.observability_onboarding.host.collectionMethod.otel.label', {
       defaultMessage: 'OpenTelemetry',
     }),
     description: i18n.translate(
-      'xpack.observability_onboarding.hostV2.collectionMethod.otel.description',
+      'xpack.observability_onboarding.host.collectionMethod.otel.description',
       {
         defaultMessage:
           'Use the Elastic Distribution of OpenTelemetry Collector for logs and metrics.',
@@ -45,11 +45,11 @@ export const buildHostCollectionMethodOptions = ({
   },
   {
     id: 'auto-detect',
-    label: i18n.translate('xpack.observability_onboarding.hostV2.collectionMethod.ea.label', {
+    label: i18n.translate('xpack.observability_onboarding.host.collectionMethod.ea.label', {
       defaultMessage: 'Elastic Agent',
     }),
     description: i18n.translate(
-      'xpack.observability_onboarding.hostV2.collectionMethod.ea.description',
+      'xpack.observability_onboarding.host.collectionMethod.ea.description',
       {
         defaultMessage: 'Deploy a standalone Elastic Agent that auto-detects services on the host.',
       }

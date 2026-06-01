@@ -105,7 +105,7 @@ const renderWindowsOtelPage = (initialEntries: string[] = ['/host/windows']) =>
 describe('HostWindowsOtelPage', () => {
   it('renders the Windows layout chrome', () => {
     renderWindowsOtelPage();
-    expect(screen.getByTestId('observabilityOnboardingHostV2Layout-windows')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingHostLayout-windows')).toBeInTheDocument();
   });
 
   it('does not render the collection method selector', () => {

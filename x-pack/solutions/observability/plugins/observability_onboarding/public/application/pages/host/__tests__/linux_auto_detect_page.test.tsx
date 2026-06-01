@@ -88,7 +88,7 @@ describe('HostLinuxAutoDetectPage', () => {
 
   it('renders the Linux layout chrome', () => {
     renderPage();
-    expect(screen.getByTestId('observabilityOnboardingHostV2Layout-linux')).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingHostLayout-linux')).toBeInTheDocument();
   });
 
   it('marks Elastic Agent as the selected collection method', () => {

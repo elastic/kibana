@@ -16,13 +16,13 @@ export const HostMacosAutoDetectPage: React.FC = () => {
     <HostAutoDetectPage
       os="mac"
       routePath="/host/macos"
-      breadcrumbLabel={i18n.translate('xpack.observability_onboarding.hostV2.breadcrumbs.macos', {
+      breadcrumbLabel={i18n.translate('xpack.observability_onboarding.host.breadcrumbs.macos', {
         defaultMessage: 'macOS',
       })}
-      title={i18n.translate('xpack.observability_onboarding.hostV2.macos.title', {
+      title={i18n.translate('xpack.observability_onboarding.host.macos.title', {
         defaultMessage: 'Set up macOS',
       })}
-      subtitle={i18n.translate('xpack.observability_onboarding.hostV2.macos.subtitle', {
+      subtitle={i18n.translate('xpack.observability_onboarding.host.macos.subtitle', {
         defaultMessage: 'Collect logs and metrics from your macOS host.',
       })}
       logo={colorMode === 'DARK' ? 'apple_white' : 'apple_black'}

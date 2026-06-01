@@ -13,18 +13,18 @@ export const HostWindowsOtelPage: React.FC = () => (
   <HostOtelPage
     os="windows"
     routePath="/host/windows"
-    breadcrumbLabel={i18n.translate('xpack.observability_onboarding.hostV2.breadcrumbs.windows', {
+    breadcrumbLabel={i18n.translate('xpack.observability_onboarding.host.breadcrumbs.windows', {
       defaultMessage: 'Windows',
     })}
-    title={i18n.translate('xpack.observability_onboarding.hostV2.windows.title', {
+    title={i18n.translate('xpack.observability_onboarding.host.windows.title', {
       defaultMessage: 'Set up Windows',
     })}
-    subtitle={i18n.translate('xpack.observability_onboarding.hostV2.windows.subtitle', {
+    subtitle={i18n.translate('xpack.observability_onboarding.host.windows.subtitle', {
       defaultMessage: 'Collect logs and metrics from your Windows host.',
     })}
     logo="windows"
     installStepTitle={i18n.translate(
-      'xpack.observability_onboarding.hostV2.windows.installStepTitle',
+      'xpack.observability_onboarding.host.windows.installStepTitle',
       { defaultMessage: 'Install the collector' }
     )}
   />

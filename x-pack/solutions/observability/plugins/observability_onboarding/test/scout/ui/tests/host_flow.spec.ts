@@ -13,7 +13,7 @@ import { setupWiredStreamsOnce } from '../fixtures/helpers/wired_streams_setup';
 const V2_FF_ID = 'observability.addDataPageV2Enabled';
 
 test.describe.serial(
-  'V2 Host Onboarding',
+  'Host Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -37,13 +37,13 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoLanding();
-      await pageObjects.hostV2.clickHostTile('linux');
+      await pageObjects.host.gotoLanding();
+      await pageObjects.host.clickHostTile('linux');
 
-      await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
+      await expect(pageObjects.host.layout('linux')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/linux/);
-      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
+      await expect(pageObjects.host.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.host.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
@@ -53,12 +53,12 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoPath('/host/linux');
+      await pageObjects.host.gotoPath('/host/linux');
 
-      await pageObjects.hostV2.collectionMethodCard('auto-detect').click();
+      await pageObjects.host.collectionMethodCard('auto-detect').click();
       await expect(page).toHaveURL(/\/host\/linux\/auto-detect/);
 
-      await pageObjects.hostV2.collectionMethodCard('otel').click();
+      await pageObjects.host.collectionMethodCard('otel').click();
       // Anchored so /host/linuxxyz and /host/linux/foo don't match.
       await expect(page).toHaveURL(/\/host\/linux(\?|$|#)/);
     });
@@ -67,8 +67,8 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoPath('/host/linux');
-      await pageObjects.hostV2.ingestionSelector().waitFor({ state: 'visible' });
+      await pageObjects.host.gotoPath('/host/linux');
+      await pageObjects.host.ingestionSelector().waitFor({ state: 'visible' });
 
       await test.step('select Wired Streams ingestion', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -77,7 +77,7 @@ test.describe.serial(
       });
 
       await test.step('switch collection method to Elastic Agent', async () => {
-        await pageObjects.hostV2.collectionMethodCard('auto-detect').click();
+        await pageObjects.host.collectionMethodCard('auto-detect').click();
         await expect(page).toHaveURL(/\/host\/linux\/auto-detect.*ingestion=wired/);
       });
 
@@ -93,11 +93,11 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoPath('/host/macos');
-      await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
+      await pageObjects.host.gotoPath('/host/macos');
+      await expect(pageObjects.host.layout('mac')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/macos/);
-      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
+      await expect(pageObjects.host.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.host.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
@@ -107,13 +107,13 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoLanding();
-      await pageObjects.hostV2.clickHostTile('macos');
+      await pageObjects.host.gotoLanding();
+      await pageObjects.host.clickHostTile('macos');
 
-      await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
+      await expect(pageObjects.host.layout('mac')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/macos/);
-      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.collectionMethodCard('otel')).toHaveAttribute(
+      await expect(pageObjects.host.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.host.collectionMethodCard('otel')).toHaveAttribute(
         'data-selected',
         'true'
       );
@@ -123,12 +123,12 @@ test.describe.serial(
       pageObjects,
       page,
     }) => {
-      await pageObjects.hostV2.gotoPath('/host/windows');
-      await expect(pageObjects.hostV2.layout('windows')).toBeVisible();
+      await pageObjects.host.gotoPath('/host/windows');
+      await expect(pageObjects.host.layout('windows')).toBeVisible();
       await expect(page).toHaveURL(/\/host\/windows/);
-      await expect(pageObjects.hostV2.collectionMethodSelector()).toHaveCount(0);
+      await expect(pageObjects.host.collectionMethodSelector()).toHaveCount(0);
 
-      const codeBlock = pageObjects.hostV2.otelInstallCodeBlock();
+      const codeBlock = pageObjects.host.otelInstallCodeBlock();
       await expect(codeBlock).toBeVisible();
       await expect(codeBlock).toContainText(/Invoke-WebRequest|otelcol\.ps1/);
     });
@@ -136,30 +136,30 @@ test.describe.serial(
     test('setup failure keeps the V2 chrome visible with an inline error and a working retry', async ({
       pageObjects,
     }) => {
-      await pageObjects.hostV2.stubOtelHostSetupAsFailing();
-      await pageObjects.hostV2.gotoPath('/host/linux');
+      await pageObjects.host.stubOtelHostSetupAsFailing();
+      await pageObjects.host.gotoPath('/host/linux');
 
-      await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
-      await expect(pageObjects.hostV2.returnLink()).toBeVisible();
-      await expect(pageObjects.hostV2.collectionMethodSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.emptyPrompt()).toBeVisible();
+      await expect(pageObjects.host.layout('linux')).toBeVisible();
+      await expect(pageObjects.host.returnLink()).toBeVisible();
+      await expect(pageObjects.host.collectionMethodSelector()).toBeVisible();
+      await expect(pageObjects.host.emptyPrompt()).toBeVisible();
 
-      const retry = pageObjects.hostV2.emptyPromptRetryButton();
+      const retry = pageObjects.host.emptyPromptRetryButton();
       await expect(retry).toBeVisible();
       await retry.click();
 
-      await expect(pageObjects.hostV2.otelInstallCodeBlock()).toBeVisible({ timeout: 30_000 });
-      await expect(pageObjects.hostV2.emptyPrompt()).toHaveCount(0);
+      await expect(pageObjects.host.otelInstallCodeBlock()).toBeVisible({ timeout: 30_000 });
+      await expect(pageObjects.host.emptyPrompt()).toHaveCount(0);
     });
 
     test('pre-existing data activates the visualize step get-started panel', async ({
       pageObjects,
     }) => {
       // Stub before navigation so usePreExistingDataCheck sees true on first render.
-      await pageObjects.hostV2.stubHasDataAsPreExisting();
-      await pageObjects.hostV2.gotoPath('/host/linux');
-      await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
-      await expect(pageObjects.hostV2.visualizeActionLink('logs')).toBeVisible({
+      await pageObjects.host.stubHasDataAsPreExisting();
+      await pageObjects.host.gotoPath('/host/linux');
+      await expect(pageObjects.host.layout('linux')).toBeVisible();
+      await expect(pageObjects.host.visualizeActionLink('logs')).toBeVisible({
         timeout: 30_000,
       });
     });
@@ -172,10 +172,10 @@ test.describe.serial(
       await apiServices.core.settings({
         'feature_flags.overrides': { [V2_FF_ID]: false },
       });
-      await pageObjects.hostV2.gotoPath('/host/linux');
+      await pageObjects.host.gotoPath('/host/linux');
       await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
-      await expect(pageObjects.hostV2.v2LandingWrapper).toHaveCount(0);
-      await expect(pageObjects.hostV2.layout('linux')).toHaveCount(0);
+      await expect(pageObjects.host.landingWrapper).toHaveCount(0);
+      await expect(pageObjects.host.layout('linux')).toHaveCount(0);
       await expect(page).not.toHaveURL(/\/host\//);
     });
   }
