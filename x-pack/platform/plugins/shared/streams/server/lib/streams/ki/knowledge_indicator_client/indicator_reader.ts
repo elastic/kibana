@@ -16,7 +16,7 @@ import {
   IS_NOT_EXCLUDED,
   IS_NOT_EXPIRED,
 } from '../esql_helpers';
-import { ID, KI_TYPE_FEATURE, KI_TYPE_QUERY, STREAM_NAME, TYPE } from '../fields';
+import { ID, KI_TYPE_FEATURE, KI_TYPE_QUERY, QUERY_RULE_BACKED, STREAM_NAME, TYPE } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
@@ -30,10 +30,10 @@ function ruleUnbackedPostGroupingWhere(
     case 'include':
       return undefined;
     case 'only':
-      return esql.exp`\`query.rule_backed\` == false`;
+      return esql.exp`${esql.col(QUERY_RULE_BACKED)} == false`;
     case 'exclude':
     default:
-      return esql.exp`\`query.rule_backed\` == true`;
+      return esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`;
   }
 }
 
