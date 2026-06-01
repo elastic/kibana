@@ -11,18 +11,24 @@ export const useAutoplayHelper = () => {
   const { nextPage, isFullscreen, autoplayInterval, isAutoplayPaused } =
     useContext(WorkpadRoutingContext);
   const timer = useRef<number | undefined>(undefined);
+  // Assign during render so the callback always captures the latest nextPage
+  // without restarting the timer when only the page count changes.
+  const nextPageRef = useRef(nextPage);
+  nextPageRef.current = nextPage;
 
   useEffect(() => {
-    if (timer.current || !isFullscreen || isAutoplayPaused) {
-      clearTimeout(timer.current);
-    }
+    clearTimeout(timer.current);
+    timer.current = undefined;
 
     if (isFullscreen && !isAutoplayPaused && autoplayInterval > 0) {
       timer.current = window.setTimeout(() => {
-        nextPage();
+        nextPageRef.current();
       }, autoplayInterval);
     }
 
-    return () => clearTimeout(timer.current);
-  }, [isFullscreen, nextPage, autoplayInterval, isAutoplayPaused]);
+    return () => {
+      clearTimeout(timer.current);
+      timer.current = undefined;
+    };
+  }, [isFullscreen, autoplayInterval, isAutoplayPaused]);
 };

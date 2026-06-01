@@ -283,3 +283,4 @@ export {
   type OAuthClientConnectionsSummary,
   OAuthClientType,
 } from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';
