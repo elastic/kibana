@@ -1,5 +1,5 @@
 {
-  "sha1": "1a2d0ac75f8396587c395067057a715c0de7c8d7",
+  "sha1": "1198d846efb2e4afdd26ee6d18d1facfa45977e8",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 27,
+        "line": 28,
         "column": 1
       }
     },
@@ -578,6 +578,70 @@
       }
     },
     {
+      "id": "df56a3325a48a71-afebe196ba7356a",
+      "title": "Infrastructure tab passes automated accessibility checks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-20a57e1ac67e92e",
+      "title": "Infrastructure tab shows container, pod, and host tabs when all infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-840fea91fe7661e",
+      "title": "Infrastructure tab shows only the host tab when only host attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-0e5d0a0406776e4",
+      "title": "Infrastructure tab shows no data message when no infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
       "id": "60c9455fa8e8206-13b591e4873487b",
       "title": "Service Dashboards displays a linked dashboard with a control group",
       "expectedStatus": "passed",
@@ -905,7 +969,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 9
       }
     },
