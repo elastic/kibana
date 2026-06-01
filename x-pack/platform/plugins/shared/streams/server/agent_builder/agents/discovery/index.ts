@@ -12,7 +12,9 @@ import { sigEventsJudgeAgent } from './judge';
 export { SIGEVENTS_INVESTIGATOR_AGENT_ID } from './investigator';
 export { SIGEVENTS_JUDGE_AGENT_ID } from './judge';
 
-export const registerDiscoveryAgents = (agentBuilder: AgentBuilderPluginSetup): void => {
+export const registerSignificantEventsDiscoveryAgents = (
+  agentBuilder: AgentBuilderPluginSetup
+): void => {
   agentBuilder.agents.register(sigEventsInvestigatorAgent);
   agentBuilder.agents.register(sigEventsJudgeAgent);
 };
