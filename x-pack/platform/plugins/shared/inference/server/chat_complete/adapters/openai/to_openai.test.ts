@@ -190,7 +190,7 @@ describe('messagesToOpenAI', () => {
     ]);
   });
 
-  it('converts an assistant tool call', () => {
+  it('converts an assistant tool call with null content to null (not empty string)', () => {
     expect(
       messagesToOpenAI({
         messages: [
@@ -212,7 +212,81 @@ describe('messagesToOpenAI', () => {
     ).toEqual([
       {
         role: 'assistant',
-        content: '',
+        content: null,
+        tool_calls: [
+          {
+            function: {
+              arguments: '{}',
+              name: 'function',
+            },
+            id: 'id',
+            type: 'function',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts an assistant tool call with empty string content to null', () => {
+    expect(
+      messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.Assistant,
+            content: '',
+            toolCalls: [
+              {
+                toolCallId: 'id',
+                function: {
+                  name: 'function',
+                  arguments: {},
+                },
+              },
+            ],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        role: 'assistant',
+        content: null,
+        tool_calls: [
+          {
+            function: {
+              arguments: '{}',
+              name: 'function',
+            },
+            id: 'id',
+            type: 'function',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts an assistant tool call with non-empty content preserves content', () => {
+    expect(
+      messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.Assistant,
+            content: 'thinking...',
+            toolCalls: [
+              {
+                toolCallId: 'id',
+                function: {
+                  name: 'function',
+                  arguments: {},
+                },
+              },
+            ],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        role: 'assistant',
+        content: 'thinking...',
         tool_calls: [
           {
             function: {
