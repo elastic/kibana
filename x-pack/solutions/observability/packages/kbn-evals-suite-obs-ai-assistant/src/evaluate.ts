@@ -13,7 +13,6 @@ import { ConversationsClient } from './clients/conversations_client';
 import { createChatClient, type ChatClient } from './clients/chat';
 import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
-import { createScenarioSummaryReporter } from './scenario_summary_reporter';
 
 const evaluateWithSynthtrace = mergeTests(base, synthtraceFixture);
 
@@ -72,13 +71,7 @@ export const evaluate = evaluateWithSynthtrace.extend<
   ],
   reportModelScore: [
     async ({ reportDisplayOptions }, use) => {
-      const useScenarioReporting = process.env.SCENARIO_REPORTING === 'true';
-
-      if (useScenarioReporting) {
-        await use(createScenarioSummaryReporter({ reportDisplayOptions }));
-      } else {
-        await use(createDefaultTerminalReporter({ reportDisplayOptions }));
-      }
+      await use(createDefaultTerminalReporter({ reportDisplayOptions }));
     },
     { scope: 'worker' },
   ],
