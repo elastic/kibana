@@ -130,7 +130,7 @@ export class OverviewStatusService {
     };
   }
 
-  getEsDataFilters() {
+  async getEsDataFilters() {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
@@ -163,20 +163,8 @@ export class OverviewStatusService {
         },
       ];
     };
-    // Both local and remote pings carry `meta.space_id` (remote pings hold the
-    // *remote* cluster's space slug).
-    // We only surface pings whose `meta.space_id` matches the active local space (or `*`).
-    // Same-named spaces across clusters federate together; remote pings from
-    // other spaces are dropped at ES filter time, which prevents
-    // cross-space leakage and avoids transferring monitors the user can't
-    // see anyway.
-    const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
-    const spaceFilter: QueryDslQueryContainer = {
-      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
-    };
-
     const filters: QueryDslQueryContainer[] = [
-      ...(skipSpaceFilter ? [] : [spaceFilter]),
+      ...(await this.getSpaceFilters(spaceId, Boolean(showFromAllSpaces))),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
@@ -200,6 +188,86 @@ export class OverviewStatusService {
       });
     }
     return filters;
+  }
+
+  /**
+   * Build the `meta.space_id` scoping for the status query.
+   *
+   * Local pings are already bounded by the saved-object query, which fetches
+   * monitors with `namespaces: ['*']` intersected with the user's permitted
+   * spaces; any local ping without a matching saved object is dropped during
+   * reconciliation. So local pings never need a `meta.space_id` constraint here.
+   *
+   * Remote (CCS) pings have *no* local saved object to join against, so they are
+   * the only pings that can leak across spaces. We therefore tie remote pings to
+   * the active space's `meta.space_id` (plus `*`). The one exception is a user
+   * who can read synthetics in *all* spaces — they are allowed to see remote
+   * pings from every space, so the constraint is dropped entirely for them.
+   */
+  private async getSpaceFilters(
+    spaceId: string,
+    showFromAllSpaces: boolean
+  ): Promise<QueryDslQueryContainer[]> {
+    if (!spaceId || spaceId === ALL_SPACES_ID) {
+      return [];
+    }
+
+    const activeSpaceTerms: QueryDslQueryContainer = {
+      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+    };
+
+    // Single-space view: both local and remote pings are tied to the active space.
+    if (!showFromAllSpaces) {
+      return [activeSpaceTerms];
+    }
+
+    // "All permitted spaces" on a local-only cluster: there are no remote pings,
+    // and local pings are bounded by the SO join, so nothing to add. Checked
+    // before the privilege lookup below so non-CCS deployments short-circuit
+    // without an authz round-trip.
+    if (!isCCSEnabled(this.routeContext.server)) {
+      return [];
+    }
+
+    // "All permitted spaces" + the user can read synthetics everywhere: no
+    // scoping at all (local via the SO join, remote unbounded across clusters).
+    if (await this.hasAllSpacesReadAccess()) {
+      return [];
+    }
+
+    // "All permitted spaces" without all-spaces access: keep local pings
+    // unconstrained (bounded by the SO join) while tying remote pings to the
+    // active space so they cannot leak in from spaces the user isn't viewing.
+    return [
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            // Local pings have no cluster-alias prefix in `_index` → any space.
+            { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+            // Remote pings carry a cluster-alias prefix → tied to the active space.
+            { bool: { filter: [{ wildcard: { _index: '*:*' } }, activeSpaceTerms] } },
+          ],
+        },
+      },
+    ];
+  }
+
+  /**
+   * Whether the current user can read synthetics in every space (current and
+   * future). Mirrors the saved-object query's permitted-spaces semantics for the
+   * remote-ping path, which has no saved-object join to rely on.
+   */
+  private async hasAllSpacesReadAccess(): Promise<boolean> {
+    const { server, request } = this.routeContext;
+    const { authz } = server.security;
+    if (!authz.mode.useRbacForRequest(request)) {
+      return true;
+    }
+    const { hasAllRequested } = await authz
+      .checkPrivilegesWithRequest(request)
+      .globally({ kibana: [authz.actions.api.get('uptime-read')] });
+    return hasAllRequested;
   }
 
   async getQueryResult() {
@@ -249,7 +317,7 @@ export class OverviewStatusService {
                   FINAL_SUMMARY_FILTER,
                   getRangeFilter({ from: range.from, to: range.to }),
                   getTimespanFilter({ from: 'now-15m', to: 'now' }),
-                  ...this.getEsDataFilters(),
+                  ...(await this.getEsDataFilters()),
                 ] as QueryDslQueryContainer[],
               },
             },

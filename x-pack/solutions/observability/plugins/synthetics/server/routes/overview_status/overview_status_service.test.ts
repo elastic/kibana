@@ -1611,6 +1611,180 @@ describe('current status route', () => {
       expect(Object.keys(result.pendingConfigs)).toHaveLength(0);
     });
 
+    it('ties remote pings to the active space but leaves local pings unconstrained when showFromAllSpaces is on and the user lacks all-spaces access', async () => {
+      // "All permitted spaces" without `*` read access: local pings are bounded
+      // by the saved-object join (so they need no `meta.space_id` filter), while
+      // remote pings — which have no saved object to join against — must stay
+      // tied to the active space so they can't leak in from other spaces.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { showFromAllSpaces: true } },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+          security: {
+            authz: {
+              mode: { useRbacForRequest: () => true },
+              actions: { api: { get: (tag: string) => `api:${tag}` } },
+              checkPrivilegesWithRequest: () => ({
+                globally: async () => ({ hasAllRequested: false }),
+              }),
+            },
+          },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+
+      // No top-level plain space terms — the scoping is now split local vs remote.
+      const plainSpaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      expect(plainSpaceFilter).toBeUndefined();
+
+      const splitFilter = filters.find(
+        (f: any) => f.bool?.minimum_should_match === 1 && f.bool?.should
+      );
+      expect(splitFilter).toBeDefined();
+
+      // Local branch: any local ping (no cluster-alias prefix in `_index`).
+      const localBranch = splitFilter.bool.should.find((s: any) => s.bool?.must_not);
+      expect(localBranch.bool.must_not).toEqual([{ wildcard: { _index: '*:*' } }]);
+
+      // Remote branch: remote pings tied to the active space (+ `*`).
+      const remoteBranch = splitFilter.bool.should.find((s: any) =>
+        s.bool?.filter?.some((c: any) => c.wildcard?._index)
+      );
+      expect(remoteBranch.bool.filter).toEqual(
+        expect.arrayContaining([
+          { wildcard: { _index: '*:*' } },
+          { terms: { 'meta.space_id': ['default', '*'] } },
+        ])
+      );
+    });
+
+    it('drops space scoping and surfaces remote pings from every space when the user can read synthetics in all spaces', async () => {
+      // A user permitted to read synthetics in all spaces sees remote monitors
+      // from every space, so no `meta.space_id` constraint is applied at all.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'remote-prod-monitor', locationId: 'us-east-1' },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Remote Prod Check',
+                      'monitor.type': 'http',
+                      config_id: 'remote-prod-config',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'cluster-east:synthetics-http-production', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { showFromAllSpaces: true } },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+          security: {
+            authz: {
+              mode: { useRbacForRequest: () => true },
+              actions: { api: { get: (tag: string) => `api:${tag}` } },
+              checkPrivilegesWithRequest: () => ({
+                globally: async () => ({ hasAllRequested: true }),
+              }),
+            },
+          },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+
+      // No space scoping at all (neither plain terms nor a local/remote split).
+      const anySpaceScoping = filters.find((f: any) =>
+        JSON.stringify(f).includes('meta.space_id')
+      );
+      expect(anySpaceScoping).toBeUndefined();
+
+      // The remote ping from `production` is surfaced.
+      const remoteDown = result.downConfigs['cluster-east-remote-prod-config-us-east-1'];
+      expect(remoteDown).toBeDefined();
+      expect(remoteDown.remote).toEqual({
+        remoteName: 'cluster-east',
+        kibanaUrl: 'https://east.kibana.example.com',
+      });
+      expect(result.down).toBe(1);
+    });
+
+    it('treats a non-RBAC request as having all-spaces access (no space scoping)', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { showFromAllSpaces: true } },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+          security: {
+            authz: {
+              mode: { useRbacForRequest: () => false },
+              actions: { api: { get: (tag: string) => `api:${tag}` } },
+              checkPrivilegesWithRequest: () => ({
+                globally: async () => ({ hasAllRequested: false }),
+              }),
+            },
+          },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const anySpaceScoping = filters.find((f: any) =>
+        JSON.stringify(f).includes('meta.space_id')
+      );
+      expect(anySpaceScoping).toBeUndefined();
+    });
+
     it('includes simple_query_string filter when query param is provided', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
