@@ -12,6 +12,7 @@ import {
   causeKiSchema,
   evidenceSchema,
 } from '../common_schemas';
+import { MAX_TEXT_LENGTH } from '../constants';
 
 export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -40,8 +41,8 @@ export const sigEventSchema = z.object({
   grouped_into: z.string().optional(),
   // TODO: rename once the data stream fields are renamed
   // Audit fields merged from verdict docs
-  verdict_summary: z.string().max(32767).optional(),
-  assessment_note: z.string().max(32767).optional(),
+  verdict_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+  assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;
