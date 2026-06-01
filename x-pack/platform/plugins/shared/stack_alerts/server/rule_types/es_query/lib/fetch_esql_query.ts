@@ -16,9 +16,8 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlShardFailure, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
-import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
@@ -29,8 +28,8 @@ export interface FetchEsqlQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    share: SharePluginStart;
     scopedClusterClient: IScopedClusterClient;
+    share: SharePluginStart;
     ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
@@ -55,9 +54,9 @@ export async function fetchEsqlQuery({
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  let response: EsqlTable;
+  let response: EsqlQueryResponse;
   try {
-    response = (await esClient.esql.query(query)) as EsqlTable;
+    response = await esClient.esql.query(query);
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
@@ -154,7 +153,7 @@ export function generateLink(
   return redirectUrl;
 }
 
-function getPartialResultsWarning(response: EsqlTable) {
+function getPartialResultsWarning(response: EsqlQueryResponse) {
   const clusters = response?._clusters?.details ?? {};
   const shardFailures: EsqlEsqlShardFailure[] = [];
   for (const cluster of Object.keys(clusters)) {

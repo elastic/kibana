@@ -11,6 +11,7 @@ import { fetchEsqlQuery, getEsqlQuery, generateLink } from './fetch_esql_query';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -19,7 +20,6 @@ import type {
   EsqlEsqlClusterInfo,
   EsqlEsqlShardFailure,
 } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 const getTimeRange = () => {
   const date = Date.now();
