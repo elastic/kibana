@@ -26,7 +26,7 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
-import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX, SIDE_PANEL_ID } from '../../constants';
 import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
 const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
@@ -110,6 +110,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         </p>
       </EuiScreenReaderOnly>
       <EuiSplitPanel.Outer
+        id={SIDE_PANEL_ID}
         aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
           defaultMessage: `Side panel for {label}`,
           values: {

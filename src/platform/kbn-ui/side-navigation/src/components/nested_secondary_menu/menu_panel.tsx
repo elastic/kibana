@@ -26,11 +26,12 @@ export type PanelChildren = ReactNode | ((ids: PanelIds) => ReactNode);
 
 export interface PanelProps {
   children: PanelChildren;
+  collapseButton?: ReactNode;
   id: string;
   title?: string;
 }
 
-export const Panel: FC<PanelProps> = ({ children, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, collapseButton, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
@@ -95,6 +96,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   if (title) {
     return (
       <SecondaryMenu
+        collapseButton={collapseButton}
         data-test-subj={nestedPanelTestSubj}
         ref={panelRef}
         title={title}

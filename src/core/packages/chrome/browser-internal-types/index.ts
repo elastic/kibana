@@ -116,6 +116,8 @@ export interface InternalChromeStart extends ChromeStart {
        * hidden nodes removed, and panel-openers with no visible descendants pruned.
        */
       renderableNodes: ChromeProjectNavigationNode[];
+      /** Whether primary navigation items show text labels. Defaults to true when omitted. */
+      showPrimaryItemLabels: boolean;
     }>;
 
     /** Get an observable of the current project breadcrumbs. */

@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiDragDropContext,
-  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -27,9 +25,9 @@ import {
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DraggableItem } from './draggable_item';
 import { HiddenItemsSection } from './hidden_items_section';
-import { SpaceCallout } from './space_callout';
+import { PrimaryLabelsToggle } from './primary_labels_toggle';
+import { VisibleItemsSection } from './visible_items_section';
 import { useItemList } from './use_item_list';
 import type { NavigationItemInfo } from '../types';
 
@@ -43,22 +41,20 @@ const headerCss = (euiTheme: EuiThemeComputed) => css`
 
 interface Props {
   items: NavigationItemInfo[];
-  isCalloutDismissed: boolean;
-  onSave: (order: string[], hiddenIds: string[]) => void;
+  showPrimaryItemLabels: boolean;
+  onSave: (order: string[], hiddenIds: string[], showPrimaryItemLabels: boolean) => void;
   onReset: () => NavigationItemInfo[];
-  onChange: (order: string[], hiddenIds: string[]) => void;
+  onChange: (order: string[], hiddenIds: string[], showPrimaryItemLabels: boolean) => void;
   onClose: () => void;
-  onDismissCallout: () => void;
 }
 
 export const CustomizeNavigationModal = ({
   items: initialItems,
-  isCalloutDismissed,
+  showPrimaryItemLabels: initialShowPrimaryItemLabels,
   onSave,
   onReset,
   onChange,
   onClose,
-  onDismissCallout,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
@@ -67,24 +63,25 @@ export const CustomizeNavigationModal = ({
     setItems,
     visibleItems,
     hiddenItems,
-    hasChanges,
+    hasChanges: hasItemChanges,
     createDragEndHandler,
     toggleItemVisibility,
   } = useItemList(initialItems);
 
+  const initialShowPrimaryItemLabelsRef = useRef(initialShowPrimaryItemLabels);
+  const [showPrimaryItemLabels, setShowPrimaryItemLabels] = useState(initialShowPrimaryItemLabels);
   const [isSaving, setIsSaving] = useState(false);
-  const [calloutDismissed, setCalloutDismissed] = useState(isCalloutDismissed);
 
-  const handleDismissCallout = useCallback(() => {
-    setCalloutDismissed(true);
-    onDismissCallout();
-  }, [onDismissCallout]);
+  const hasChanges = useMemo(
+    () => hasItemChanges || showPrimaryItemLabels !== initialShowPrimaryItemLabelsRef.current,
+    [hasItemChanges, showPrimaryItemLabels]
+  );
 
   useEffect(() => {
     const order = items.map((item) => item.id);
     const hiddenIds = items.filter((item) => item.hidden).map((item) => item.id);
-    onChange(order, hiddenIds);
-  }, [items, onChange]);
+    onChange(order, hiddenIds, showPrimaryItemLabels);
+  }, [items, onChange, showPrimaryItemLabels]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -95,13 +92,14 @@ export const CustomizeNavigationModal = ({
 
     const order = items.map((item) => item.id);
     const hiddenIds = items.filter((item) => item.hidden).map((item) => item.id);
-    onSave(order, hiddenIds);
+    onSave(order, hiddenIds, showPrimaryItemLabels);
 
     setIsSaving(false);
-  }, [items, onSave]);
+  }, [items, onSave, showPrimaryItemLabels]);
 
   const handleReset = useCallback(() => {
     setItems(onReset());
+    setShowPrimaryItemLabels(true);
   }, [onReset, setItems]);
 
   return (
@@ -127,25 +125,20 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {!calloutDismissed && (
-          <>
-            <SpaceCallout onDismissCallout={handleDismissCallout} />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <EuiDragDropContext onDragEnd={createDragEndHandler('visible')}>
-          <EuiDroppable droppableId="nav-items" spacing="none">
-            {visibleItems.map((item, index) => (
-              <DraggableItem
-                key={item.id}
-                item={item}
-                index={index}
-                toggleItemVisibility={toggleItemVisibility}
-              />
-            ))}
-          </EuiDroppable>
-        </EuiDragDropContext>
-        <EuiSpacer size="s" />
+        <PrimaryLabelsToggle
+          showPrimaryItemLabels={showPrimaryItemLabels}
+          onChange={(nextShowPrimaryItemLabels) => {
+            setShowPrimaryItemLabels(nextShowPrimaryItemLabels);
+            const order = items.map((item) => item.id);
+            const hiddenIds = items.filter((item) => item.hidden).map((item) => item.id);
+            onChange(order, hiddenIds, nextShowPrimaryItemLabels);
+          }}
+        />
+        <VisibleItemsSection
+          items={visibleItems}
+          onDragEnd={createDragEndHandler('visible')}
+          toggleItemVisibility={toggleItemVisibility}
+        />
         <HiddenItemsSection
           items={hiddenItems}
           onDragEnd={createDragEndHandler('hidden')}

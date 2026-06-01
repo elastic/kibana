@@ -17,10 +17,22 @@ import {
 } from './use_layout_width';
 
 describe('useLayoutWidth', () => {
-  it('sets the collapsed width when the navigation is collapsed', () => {
+  it('sets the expanded primary width when the side panel is closed', () => {
     const setWidth = jest.fn();
 
-    renderHook(() => useLayoutWidth({ isCollapsed: true, isSidePanelOpen: false, setWidth }));
+    renderHook(() =>
+      useLayoutWidth({ isSidePanelOpen: false, showPrimaryItemLabels: true, setWidth })
+    );
+
+    expect(setWidth).toHaveBeenCalledWith(EXPANDED_WIDTH);
+  });
+
+  it('sets the collapsed primary width when labels are hidden', () => {
+    const setWidth = jest.fn();
+
+    renderHook(() =>
+      useLayoutWidth({ isSidePanelOpen: false, showPrimaryItemLabels: false, setWidth })
+    );
 
     expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH);
   });
@@ -28,25 +40,27 @@ describe('useLayoutWidth', () => {
   it('adds the side panel width when the side panel is open', () => {
     const setWidth = jest.fn();
 
-    renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
+    renderHook(() =>
+      useLayoutWidth({ isSidePanelOpen: true, showPrimaryItemLabels: true, setWidth })
+    );
 
     expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
   });
 
-  it('updates when dependencies change', () => {
+  it('updates when the side panel open state changes', () => {
     const setWidth = jest.fn();
     const { rerender } = renderHook(
-      (props: { isCollapsed: boolean; isSidePanelOpen: boolean }) =>
+      (props: { isSidePanelOpen: boolean; showPrimaryItemLabels: boolean }) =>
         useLayoutWidth({ ...props, setWidth }),
       {
-        initialProps: { isCollapsed: false, isSidePanelOpen: false },
+        initialProps: { isSidePanelOpen: false, showPrimaryItemLabels: true },
       }
     );
 
     setWidth.mockClear();
 
-    rerender({ isCollapsed: true, isSidePanelOpen: true });
+    rerender({ isSidePanelOpen: true, showPrimaryItemLabels: true });
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
+    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
   });
 });

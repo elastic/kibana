@@ -11,26 +11,27 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SpaceCallout } from './space_callout';
+import { PrimaryLabelsToggle } from './primary_labels_toggle';
 
-describe('SpaceCallout', () => {
-  const onDismissCallout = jest.fn();
+describe('PrimaryLabelsToggle', () => {
+  const onChange = jest.fn();
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render the callout text', () => {
-    renderWithI18n(<SpaceCallout onDismissCallout={onDismissCallout} />);
-    expect(
-      screen.getByText('Reorder or hide apps in this space without affecting other users.')
-    ).toBeInTheDocument();
+  it('should render the toggle label', () => {
+    renderWithI18n(
+      <PrimaryLabelsToggle showPrimaryItemLabels={true} onChange={onChange} />
+    );
+    expect(screen.getByText('Show apps labels')).toBeInTheDocument();
   });
 
-  it('should call onDismissCallout when dismiss button is clicked', async () => {
-    renderWithI18n(<SpaceCallout onDismissCallout={onDismissCallout} />);
-    const dismissButton = screen.getByRole('button', { name: 'Dismiss' });
-    await userEvent.click(dismissButton);
-    expect(onDismissCallout).toHaveBeenCalledTimes(1);
+  it('should call onChange when toggled', async () => {
+    renderWithI18n(
+      <PrimaryLabelsToggle showPrimaryItemLabels={true} onChange={onChange} />
+    );
+    await userEvent.click(screen.getByTestId('customizeNavigationShowPrimaryLabelsToggle'));
+    expect(onChange).toHaveBeenCalledWith(false);
   });
 });

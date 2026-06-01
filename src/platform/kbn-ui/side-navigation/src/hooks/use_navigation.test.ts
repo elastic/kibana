@@ -68,10 +68,10 @@ describe('useNavigation', () => {
     expect(result.current.isSidePanelOpen).toBe(false);
   });
 
-  it('treats the navigation as collapsed when requested', () => {
+  it('closes the side panel when the secondary panel is collapsed', () => {
     const { result } = renderHook(() => useNavigation(true, navigation, 'logo-id'));
 
-    expect(result.current.isCollapsed).toBe(true);
+    expect(result.current.isSecondaryPanelCollapsed).toBe(true);
     expect(result.current.isSidePanelOpen).toBe(false);
   });
 });

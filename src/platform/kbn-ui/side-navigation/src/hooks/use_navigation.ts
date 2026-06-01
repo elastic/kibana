@@ -17,14 +17,14 @@ interface NavigationState {
   visuallyActivePageId: string | undefined;
   visuallyActiveSubpageId: string | undefined;
   openerNode: MenuItem | null;
-  isCollapsed: boolean;
+  isSecondaryPanelCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
 
 /**
  * Hook for managing the main navigation state.
  *
- * @param isCollapsed - whether the side nav is collapsed.
+ * @param isSecondaryPanelCollapsed - whether the secondary side panel is collapsed.
  * @param items - the navigation structure including primary, secondary, and footer items.
  * @param logoId - the logo ID, used for highlighting the logo.
  * @param activeItemId - the active item ID, used for highlighting the active item.
@@ -33,11 +33,11 @@ interface NavigationState {
  * - `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.
  * - `visuallyActiveSubpageId` - the visually active subpage ID.
  * - `openerNode` - the primary menu item whose submenu is shown in the side panel.
- * - `isCollapsed` - whether the side nav is collapsed.
+ * - `isSecondaryPanelCollapsed` - whether the secondary side panel is collapsed.
  * - `isSidePanelOpen` - whether the side panel is open.
  */
 export const useNavigation = (
-  isCollapsed: boolean,
+  isSecondaryPanelCollapsed: boolean,
   items: NavigationStructure,
   logoId: string,
   activeItemId?: string
@@ -51,14 +51,14 @@ export const useNavigation = (
   const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
   const openerNode = primaryItem;
-  const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
+  const isSidePanelOpen = !isSecondaryPanelCollapsed && !!openerNode?.sections;
 
   const state: NavigationState = {
     actualActiveItemId,
     visuallyActivePageId,
     visuallyActiveSubpageId,
     openerNode,
-    isCollapsed,
+    isSecondaryPanelCollapsed,
     isSidePanelOpen,
   };
 

@@ -13,8 +13,14 @@
  * @param container - the container element to search within.
  * @returns an array of focusable elements.
  */
+const isSideNavCollapseButton = (el: Element) =>
+  el.getAttribute('data-test-subj') === 'sideNavCollapseButton';
+
 export const getFocusableElements = (container: HTMLElement) => {
   return Array.from(container.querySelectorAll('button, a')).filter(
-    (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
+    (el) =>
+      !el.hasAttribute('disabled') &&
+      !el.getAttribute('aria-hidden') &&
+      !isSideNavCollapseButton(el)
   ) as HTMLElement[];
 };

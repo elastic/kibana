@@ -120,9 +120,9 @@ describe('Both modes', () => {
     /**
      * GIVEN the screen size is less than `s` (767px)
      * WHEN the navigation renders
-     * THEN it shows in collapsed mode
+     * THEN the primary navigation stays expanded and the secondary panel is collapsed
      */
-    it('should render in collapsed mode if the screen size is less than `s` (767px)', () => {
+    it('should keep the primary navigation expanded on small screens', () => {
       restoreWindowSize = resizeWindow(640, 480);
 
       render(
@@ -135,9 +135,8 @@ describe('Both modes', () => {
 
       const solutionLogo = screen.getByTestId(logoId);
 
-      // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
-      // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
+      expect(solutionLogo).toHaveTextContent(basicMock.logo.label);
+      expect(solutionLogo.children[1].className).not.toContain('euiScreenReaderOnly');
     });
 
     /**
@@ -1346,7 +1345,9 @@ describe('Both modes', () => {
 
         const popover = screen.getByTestId(morePopoverId);
         const popoverLinks = within(popover).queryAllByRole('link');
-        const popoverButtons = within(popover).queryAllByRole('button');
+        const popoverButtons = within(popover)
+          .queryAllByRole('button')
+          .filter((btn) => btn.getAttribute('data-test-subj') !== 'sideNavCollapseButton');
         const popoverItems = [...popoverButtons, ...popoverLinks];
 
         const firstItem = popoverItems[0];

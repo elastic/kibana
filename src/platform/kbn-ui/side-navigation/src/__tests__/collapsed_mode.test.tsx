@@ -34,7 +34,7 @@ const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
 const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
 const sidePanelId = 'kbnChromeNav-sidePanel';
 
-describe('Collapsed mode', () => {
+describe('Secondary panel collapsed mode', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
@@ -64,18 +64,17 @@ describe('Collapsed mode', () => {
 
   describe('Solution logo', () => {
     /**
-     * GIVEN the side navigation is in collapsed mode
+     * GIVEN the secondary navigation panel is collapsed
      * WHEN the navigation renders the solution logo
-     * THEN I should not see the solution label
+     * THEN I should still see the solution label
      */
-    it('should NOT display the solution label next to the logo', () => {
+    it('should display the solution label next to the logo', () => {
       render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
       const solutionLogo = screen.getByTestId(logoId);
 
-      // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
-      // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
+      expect(solutionLogo).toHaveTextContent(basicMock.logo.label);
+      expect(solutionLogo.children[1].className).not.toContain('euiScreenReaderOnly');
     });
   });
 
@@ -231,13 +230,12 @@ describe('Collapsed mode', () => {
       });
 
       /**
-       * GIVEN the side navigation is in collapsed mode
-       * AND a primary menu item is in beta
-       * WHEN I hover over that item
-       * THEN a tooltip shows up with the item label
-       * AND a beta badge with beta icon
+       * GIVEN the secondary navigation panel is collapsed
+       * AND a primary menu item has a badge
+       * WHEN the navigation renders
+       * THEN the item label is visible inline
        */
-      it('should show tooltip with label and beta badge on hover', async () => {
+      it('should show primary item labels inline', () => {
         render(
           <TestComponent
             isCollapsed
@@ -246,77 +244,8 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
-
-        await user.hover(dashboardsLink);
-        flushPopoverTimers();
-
-        const tooltip = await screen.findByRole('tooltip');
-        const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
-
-        expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Dashboards');
-        expect(betaIcon).toBeInTheDocument();
-      });
-
-      /**
-       * GIVEN the side navigation is in collapsed mode
-       * AND a primary menu item is in tech preview
-       * WHEN I hover over that item
-       * THEN a tooltip shows up with the item label
-       * AND a beta badge with flask icon
-       */
-      it('should show tooltip with label and flask badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
-
-        const casesLink = screen.getByTestId(primaryItemId('cases'));
-
-        await user.hover(casesLink);
-        flushPopoverTimers();
-
-        const tooltip = await screen.findByRole('tooltip');
-        const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
-
-        expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Cases');
-        expect(flaskIcon).toBeInTheDocument();
-      });
-
-      /**
-       * GIVEN the side navigation is in collapsed mode
-       * AND a primary menu item is new
-       * WHEN I hover over that item
-       * THEN a tooltip shows up with the item label
-       * AND a badge reading "New"
-       */
-      it('should show tooltip with label and new badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
-
-        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
-
-        await user.hover(alertsLink);
-        flushPopoverTimers();
-
-        const tooltip = await screen.findByRole('tooltip');
-
-        expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Alerts');
-
-        const badge = tooltip.querySelector('.euiBadge');
-        expect(badge).toBeInTheDocument();
-        expect(badge).toHaveTextContent('New');
+        expect(screen.getByTestId(primaryItemId('dashboards'))).toHaveTextContent('Dashboards');
+        expect(screen.getByTestId(primaryItemId('cases'))).toHaveTextContent('Cases');
       });
     });
 

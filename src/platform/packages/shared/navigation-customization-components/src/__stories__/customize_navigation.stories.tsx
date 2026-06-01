@@ -40,25 +40,25 @@ type ModalProps = React.ComponentProps<typeof CustomizeNavigationModal>;
  * story canvas. Callbacks are forwarded to Storybook actions so you can
  * observe the values in the Actions panel.
  */
-const ControlledModal = ({
-  items: initialItems,
-  isCalloutDismissed,
-}: Pick<ModalProps, 'items' | 'isCalloutDismissed'>) => {
+const ControlledModal = ({ items: initialItems }: Pick<ModalProps, 'items'>) => {
   const [items, setItems] = useState(initialItems);
 
   return (
     <CustomizeNavigationModal
       items={items}
-      isCalloutDismissed={isCalloutDismissed}
-      onChange={(order, hiddenIds) => action('onChange')({ order, hiddenIds })}
-      onSave={(order, hiddenIds) => action('onSave')({ order, hiddenIds })}
+      showPrimaryItemLabels={true}
+      onChange={(order, hiddenIds, showPrimaryItemLabels) =>
+        action('onChange')({ order, hiddenIds, showPrimaryItemLabels })
+      }
+      onSave={(order, hiddenIds, showPrimaryItemLabels) =>
+        action('onSave')({ order, hiddenIds, showPrimaryItemLabels })
+      }
       onReset={() => {
         action('onReset')();
         setItems(BASE_ITEMS);
         return BASE_ITEMS;
       }}
       onClose={() => action('onClose')()}
-      onDismissCallout={() => action('onDismissCallout')()}
     />
   );
 };
@@ -68,7 +68,7 @@ export default {
   parameters: { layout: 'centered' },
 } satisfies Meta;
 
-export const ModalWithCallout: StoryObj = {
-  name: 'Modal — with space callout',
-  render: () => <ControlledModal items={BASE_ITEMS} isCalloutDismissed={false} />,
+export const Modal: StoryObj = {
+  name: 'Modal',
+  render: () => <ControlledModal items={BASE_ITEMS} />,
 };

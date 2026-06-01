@@ -16,11 +16,13 @@ import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;
   children: ReactNode;
+  collapseButton?: ReactNode;
   isNew?: boolean;
   isPanel?: boolean;
   title: string;
@@ -33,31 +35,53 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title, isNew = false }, ref) => {
+  ({ badgeType, children, collapseButton, isPanel = false, title, isNew = false }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
+
+    const headerRowStyles = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.s};
+      width: 100%;
+    `;
 
     const titleWithBadgeStyles = css`
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.xs};
+      flex: 1;
+      min-width: 0;
     `;
 
     const titleStyles = css`
       ${headerStyle}
       background: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
+      ${collapseButton &&
+      css`
+        padding-right: calc(var(--horizontal-padding) - ${euiTheme.size.s});
+      `}
     `;
+
+    const headerTestSubj = collapseButton
+      ? isPanel
+        ? `${NAVIGATION_SELECTOR_PREFIX}-secondaryPanelHeader`
+        : `${NAVIGATION_SELECTOR_PREFIX}-secondaryPopoverHeader`
+      : undefined;
 
     return (
       <div ref={ref}>
         <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {/* Always show non-new badges, only show new ones if isNew check allows it */}
-            {badgeType && (badgeType !== 'new' || isNew) && (
-              <BetaBadge type={badgeType} alignment="text-bottom" />
-            )}
+          <div css={headerRowStyles} data-test-subj={headerTestSubj}>
+            <div css={titleWithBadgeStyles}>
+              <h4>{title}</h4>
+              {/* Always show non-new badges, only show new ones if isNew check allows it */}
+              {badgeType && (badgeType !== 'new' || isNew) && (
+                <BetaBadge type={badgeType} alignment="text-bottom" />
+              )}
+            </div>
+            {collapseButton}
           </div>
         </EuiTitle>
         {children}

@@ -120,9 +120,15 @@ export class ProjectNavigationService {
       shareReplay(1)
     );
 
-    const navigation$ = combineLatest([parsedNavigation$, location$]).pipe(
-      filter((args): args is [ParsedNavigation, Location] => args[0] !== null),
-      map(([parsed, location]) => {
+    const navigation$ = combineLatest([
+      parsedNavigation$,
+      location$,
+      this.customization$,
+    ]).pipe(
+      filter((args): args is [ParsedNavigation, Location, NavigationCustomization | undefined] => {
+        return args[0] !== null;
+      }),
+      map(([parsed, location, customization]) => {
         const pathname = stripQueryParams(`${prependBasePath(location.pathname)}${location.hash}`);
         return {
           solutionId: parsed.id,
@@ -131,6 +137,7 @@ export class ProjectNavigationService {
           overflowItemIds: parsed.overflowItemIds,
           defaultItemIds: parsed.defaultItemIds,
           renderableNodes: parsed.renderableNodes,
+          showPrimaryItemLabels: customization?.showPrimaryItemLabels ?? true,
         };
       }),
       distinctUntilChanged(deepEqual),

@@ -23,10 +23,7 @@ import type {
   NavigationServerStartDependencies,
 } from './types';
 import { getUiSettings } from './ui_settings';
-import {
-  NAV_CUSTOMIZATION_STORAGE_KEY,
-  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-} from '../common/constants';
+import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../common/constants';
 
 const navCustomizationSchema = z.object({
   moves: z.array(
@@ -36,6 +33,7 @@ const navCustomizationSchema = z.object({
     })
   ),
   hidden: z.array(z.string().max(100)),
+  showPrimaryItemLabels: z.boolean().optional(),
 });
 
 export class NavigationServerPlugin
@@ -70,19 +68,11 @@ export class NavigationServerPlugin
     // the user's saved customization. Do not flip preload to false without
     // auditing project_navigation_service.initNavigation.
     //
-    // NAV_CALLOUT_DISMISSED_STORAGE_KEY is also preloaded so the "Customize
-    // navigation" callout doesn't briefly appear and disappear on page load.
     core.userStorage.register({
       [NAV_CUSTOMIZATION_STORAGE_KEY]: {
         schema: navCustomizationSchema,
-        defaultValue: { moves: [], hidden: [] },
+        defaultValue: { moves: [], hidden: [], showPrimaryItemLabels: true },
         scope: 'space',
-        preload: true,
-      },
-      [NAV_CALLOUT_DISMISSED_STORAGE_KEY]: {
-        schema: z.boolean(),
-        defaultValue: false,
-        scope: 'global',
         preload: true,
       },
     });

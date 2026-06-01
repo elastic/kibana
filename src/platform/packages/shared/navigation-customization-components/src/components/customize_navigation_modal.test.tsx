@@ -23,12 +23,11 @@ describe('CustomizeNavigationModal', () => {
 
   const defaultProps = {
     items,
-    isCalloutDismissed: true,
+    showPrimaryItemLabels: true,
     onSave: jest.fn(),
     onReset: jest.fn(() => items),
     onChange: jest.fn(),
     onClose: jest.fn(),
-    onDismissCallout: jest.fn(),
   };
 
   afterEach(() => {
@@ -43,6 +42,11 @@ describe('CustomizeNavigationModal', () => {
   it('should render the modal title', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     expect(screen.getByText('Customize navigation')).toBeInTheDocument();
+  });
+
+  it('should render visible items section header', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByText('Order and visibility')).toBeInTheDocument();
   });
 
   it('should render visible items', () => {
@@ -66,18 +70,17 @@ describe('CustomizeNavigationModal', () => {
     expect(screen.getByText('Reset to default')).toBeInTheDocument();
   });
 
-  it('should show the space callout when not dismissed', () => {
-    renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={false} />);
+  it('should render the show primary labels toggle', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByText('Show apps labels')).toBeInTheDocument();
+    expect(screen.getByTestId('customizeNavigationShowPrimaryLabelsToggle')).toBeChecked();
+  });
+
+  it('should render the visible items section description', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     expect(
       screen.getByText('Reorder or hide apps in this space without affecting other users.')
     ).toBeInTheDocument();
-  });
-
-  it('should not show the space callout when dismissed', () => {
-    renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={true} />);
-    expect(
-      screen.queryByText('Reorder or hide apps in this space without affecting other users.')
-    ).not.toBeInTheDocument();
   });
 
   it('should call onClose when the modal is closed', async () => {

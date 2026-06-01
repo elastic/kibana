@@ -40,9 +40,15 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
-   * Whether the navigation is collapsed. This can be controlled by the parent component.
+   * Whether the secondary navigation side panel is collapsed.
+   * The primary navigation always stays expanded.
    */
   isCollapsed: boolean;
+  /**
+   * Whether text labels are shown on primary navigation items.
+   * Defaults to true.
+   */
+  showPrimaryItemLabels?: boolean;
   /**
    * The navigation structure containing primary, secondary, and footer items.
    */
@@ -84,6 +90,7 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
+  showPrimaryItemLabels = true,
   items,
   logo,
   onCustomizeNavigation,
@@ -93,8 +100,9 @@ export const Navigation = ({
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
-  const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
-  const isCollapsed = forcedCollapsed || isCollapsedProp;
+  const forcedSecondaryPanelCollapsed = useIsWithinBreakpoints(['xs', 's']);
+  const isSecondaryPanelCollapsed = forcedSecondaryPanelCollapsed || isCollapsedProp;
+  const isPrimaryNavCollapsed = !showPrimaryItemLabels;
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
   const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
   const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
@@ -106,12 +114,12 @@ export const Navigation = ({
     visuallyActiveSubpageId,
     isSidePanelOpen,
     openerNode,
-  } = useNavigation(isCollapsed, items, logo.id, activeItemId);
+  } = useNavigation(isSecondaryPanelCollapsed, items, logo.id, activeItemId);
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
+    isPrimaryNavCollapsed,
     items.primaryItems
   );
 
@@ -125,13 +133,20 @@ export const Navigation = ({
     activeItemId
   );
 
-  useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+  useLayoutWidth({ isSidePanelOpen, showPrimaryItemLabels, setWidth });
 
-  // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
+  // Shown only inside secondary nav surfaces (side panel or popover), not on the primary nav chrome.
   const collapseButton =
-    onToggleCollapsed && !forcedCollapsed ? (
-      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+    onToggleCollapsed && !forcedSecondaryPanelCollapsed ? (
+      <SideNavCollapseButton
+        isCollapsed={isSecondaryPanelCollapsed}
+        toggle={onToggleCollapsed}
+      />
     ) : null;
+
+  // Collapsed: expand control lives in popovers only. Expanded: in the side panel only.
+  const popoverCollapseButton = isSecondaryPanelCollapsed ? collapseButton : undefined;
+  const sidePanelCollapseButton = isSidePanelOpen ? collapseButton : undefined;
 
   return (
     <div
@@ -139,16 +154,16 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed}>
+      <SideNav isCollapsed={isPrimaryNavCollapsed}>
         <SideNav.Logo
-          isCollapsed={isCollapsed}
+          isCollapsed={isPrimaryNavCollapsed}
           isCurrent={actualActiveItemId === logo.id}
           isHighlighted={visuallyActivePageId === logo.id}
           onClick={() => onItemClick?.(logo)}
           {...logo}
         />
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isPrimaryNavCollapsed}>
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
@@ -160,7 +175,7 @@ export const Navigation = ({
                   <SideNav.Popover
                     key={item.id}
                     hasContent={getHasSubmenu(item)}
-                    isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    isSidePanelOpen={isSidePanelOpen && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     trigger={
@@ -169,7 +184,7 @@ export const Navigation = ({
                         aria-posinset={index + 1}
                         aria-setsize={setSize}
                         hasContent={getHasSubmenu(item)}
-                        isCollapsed={isCollapsed}
+                        isCollapsed={isPrimaryNavCollapsed}
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
@@ -182,9 +197,10 @@ export const Navigation = ({
                   >
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
-                        title={item.label}
                         badgeType={item.badgeType}
+                        collapseButton={popoverCollapseButton}
                         isNew={getIsNewSecondary(item.id)}
+                        title={item.label}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -246,7 +262,7 @@ export const Navigation = ({
                       hasContent
                       iconType="boxesVertical"
                       id={MORE_MENU_ID}
-                      isCollapsed={isCollapsed}
+                      isCollapsed={isPrimaryNavCollapsed}
                       isHighlighted={allOverflowItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
@@ -265,6 +281,7 @@ export const Navigation = ({
                   {(closePopover) => (
                     <SideNav.NestedSecondaryMenu>
                       <SideNav.NestedSecondaryMenu.Panel
+                        collapseButton={popoverCollapseButton}
                         id={MAIN_PANEL_ID}
                         title={i18n.translate('kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle', {
                           defaultMessage: 'More',
@@ -356,6 +373,7 @@ export const Navigation = ({
                             <>
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
+                                collapseButton={popoverCollapseButton}
                                 aria-describedby={panelNavigationInstructionsId}
                               />
                               {item.sections?.map((section) => (
@@ -393,7 +411,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
+        <SideNav.Footer isCollapsed={isPrimaryNavCollapsed}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -405,7 +423,7 @@ export const Navigation = ({
                   <SideNav.Popover
                     key={item.id}
                     hasContent={getHasSubmenu(item)}
-                    isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    isSidePanelOpen={isSidePanelOpen && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     persistent={false}
@@ -423,9 +441,10 @@ export const Navigation = ({
                   >
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
-                        title={item.label}
                         badgeType={item.badgeType}
+                        collapseButton={popoverCollapseButton}
                         isNew={getIsNewSecondary(item.id)}
+                        title={item.label}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -483,6 +502,7 @@ export const Navigation = ({
             return (
               <SideNav.SecondaryMenu
                 badgeType={openerNode.badgeType}
+                collapseButton={sidePanelCollapseButton}
                 isPanel
                 title={openerNode.label}
                 isNew={getIsNewSecondary(openerNode.id)}

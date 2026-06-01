@@ -20,10 +20,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import {
-  NAV_CUSTOMIZATION_STORAGE_KEY,
-  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-} from '../../common/constants';
+import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
 
 const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
   const { CustomizeNavigationUserMenuLink } = await import(
@@ -149,14 +146,14 @@ export class NavigationCustomizationService {
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
-      const isCalloutDismissed = core.userStorage.get<boolean>(
-        NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-        false
-      );
-
-      const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
+      const toCustomization = (
+        order: string[],
+        hiddenIds: string[],
+        showPrimaryItemLabels: boolean
+      ): NavigationCustomization => ({
         moves: computeMoves(defaultItemIds, order),
         hidden: hiddenIds as AppDeepLinkId[],
+        showPrimaryItemLabels,
       });
 
       const modal = core.overlays.openModal(
@@ -164,14 +161,16 @@ export class NavigationCustomizationService {
           core.rendering.addContext(
             <CustomizeNavigationModal
               items={items}
-              isCalloutDismissed={isCalloutDismissed}
-              onChange={(order, hiddenIds) => {
-                chrome.project.setNavigationCustomization(toCustomization(order, hiddenIds));
+              showPrimaryItemLabels={savedCustomization?.showPrimaryItemLabels ?? true}
+              onChange={(order, hiddenIds, showPrimaryItemLabels) => {
+                chrome.project.setNavigationCustomization(
+                  toCustomization(order, hiddenIds, showPrimaryItemLabels)
+                );
               }}
-              onSave={(order, hiddenIds) => {
+              onSave={(order, hiddenIds, showPrimaryItemLabels) => {
                 core.userStorage.set(
                   NAV_CUSTOMIZATION_STORAGE_KEY,
-                  toCustomization(order, hiddenIds)
+                  toCustomization(order, hiddenIds, showPrimaryItemLabels)
                 );
                 modal.close();
               }}
@@ -183,9 +182,6 @@ export class NavigationCustomizationService {
               onClose={() => {
                 chrome.project.setNavigationCustomization(savedCustomization);
                 modal.close();
-              }}
-              onDismissCallout={() => {
-                core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
               }}
             />
           ),

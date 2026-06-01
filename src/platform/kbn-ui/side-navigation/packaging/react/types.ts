@@ -110,8 +110,10 @@ export interface SideNavLogo {
 export interface NavigationProps {
   /** The active item ID, used for highlighting the current item. */
   activeItemId?: string;
-  /** Whether the navigation is collapsed. */
+  /** Whether the secondary navigation side panel is collapsed. */
   isCollapsed: boolean;
+  /** Whether text labels are shown on primary navigation items. Defaults to true. */
+  showPrimaryItemLabels?: boolean;
   /** The navigation structure containing primary, secondary, and footer items. */
   items: NavigationStructure;
   /** The logo object containing the route ID, href, label, and type. */

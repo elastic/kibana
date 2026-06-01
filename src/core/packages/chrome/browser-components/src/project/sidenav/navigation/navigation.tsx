@@ -34,7 +34,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, logoItem, activeItemId, solutionId, showPrimaryItemLabels } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
@@ -42,6 +42,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        showPrimaryItemLabels={showPrimaryItemLabels}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         onCustomizeNavigation={onCustomizeNavigation}
@@ -56,7 +57,10 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+const useNavigationItems = (): (NavigationItems & {
+  solutionId: SolutionId;
+  showPrimaryItemLabels: boolean;
+}) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
 
@@ -71,6 +75,7 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
           nav.overflowItemIds
         ),
         solutionId: nav.solutionId,
+        showPrimaryItemLabels: nav.showPrimaryItemLabels,
       }))
     );
   }, [chrome, basePath]);

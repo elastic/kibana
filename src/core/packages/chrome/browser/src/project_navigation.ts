@@ -311,4 +311,6 @@ export interface NavigationCustomization {
   moves: NavigationCustomizationMove[];
   /** IDs of items to hide from the main navigation (moved to overflow menu). */
   hidden: AppDeepLinkId[];
+  /** Whether labels are shown on primary navigation items. Defaults to true when omitted. */
+  showPrimaryItemLabels?: boolean;
 }

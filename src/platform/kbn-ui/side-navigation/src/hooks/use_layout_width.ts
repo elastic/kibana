@@ -14,23 +14,28 @@ export const EXPANDED_WIDTH = 100;
 export const SIDE_PANEL_WIDTH = 248;
 
 interface UseLayoutWidthArgs {
-  isCollapsed: boolean;
   isSidePanelOpen: boolean;
+  showPrimaryItemLabels: boolean;
   setWidth: (width: number) => void;
 }
 
 /**
  * Hook for handling layout width changes.
  *
- * @param isCollapsed - whether the side nav is collapsed.
+ * The primary navigation is always expanded; only the secondary side panel affects total width.
+ *
  * @param isSidePanelOpen - whether the side panel is open.
  * @param setWidth - callback to set the width of the navigation component.
  */
-export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLayoutWidthArgs) => {
+export const useLayoutWidth = ({
+  isSidePanelOpen,
+  showPrimaryItemLabels,
+  setWidth,
+}: UseLayoutWidthArgs) => {
   useEffect(() => {
-    const baseWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
-    const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
+    const primaryNavWidth = showPrimaryItemLabels ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+    const width = isSidePanelOpen ? primaryNavWidth + SIDE_PANEL_WIDTH : primaryNavWidth;
 
     setWidth(width);
-  }, [isCollapsed, isSidePanelOpen, setWidth]);
+  }, [isSidePanelOpen, showPrimaryItemLabels, setWidth]);
 };
