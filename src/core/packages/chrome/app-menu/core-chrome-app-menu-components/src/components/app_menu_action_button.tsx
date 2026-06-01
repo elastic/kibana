@@ -177,6 +177,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
         anchorPosition="downRight"
+        repositionToCrossAxis={false}
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
       />
@@ -195,6 +196,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
         anchorPosition="downRight"
+        repositionToCrossAxis={false}
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
       />
