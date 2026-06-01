@@ -28,7 +28,6 @@ import {
   rangeSliderControlSchema,
   timeSliderControlSchema,
 } from '@kbn/controls-schemas';
-import { schema } from '@kbn/config-schema';
 
 const mockGetTransforms = jest.fn();
 
@@ -53,9 +52,11 @@ beforeAll(() => {
       }
 
       if (type === 'invalidPanel') {
-        return schema.object({
-          foo: schema.string(),
-        });
+        return {
+          validate: jest.fn().mockImplementation(() => {
+            throw new Error('Boo!');
+          }),
+        };
       }
     }
     return {
@@ -157,7 +158,7 @@ describe('pinned panels', () => {
     expect(result.warnings).toMatchInlineSnapshot(`
       Array [
         Object {
-          "message": "Unable to transform pinned panel config. Error: [foo]: expected value of type [string] but got [undefined]",
+          "message": "Unable to transform pinned panel config. Error: Boo!",
           "panel_config": Object {},
           "panel_type": "invalidPanel",
           "type": "dropped_panel",
