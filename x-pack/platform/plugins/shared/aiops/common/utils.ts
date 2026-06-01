@@ -34,15 +34,9 @@ export const PatternAnalysisAttachmentPayloadSchema = buildAiopsAttachmentPayloa
   AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE
 );
 
-export type ChangePointChartAttachmentPayload = z.infer<
-  typeof ChangePointChartAttachmentPayloadSchema
->;
-export type LogRateAnalysisAttachmentPayload = z.infer<
-  typeof LogRateAnalysisAttachmentPayloadSchema
->;
-export type PatternAnalysisAttachmentPayload = z.infer<
-  typeof PatternAnalysisAttachmentPayloadSchema
->;
+type ChangePointChartAttachmentPayload = z.infer<typeof ChangePointChartAttachmentPayloadSchema>;
+type LogRateAnalysisAttachmentPayload = z.infer<typeof LogRateAnalysisAttachmentPayloadSchema>;
+type PatternAnalysisAttachmentPayload = z.infer<typeof PatternAnalysisAttachmentPayloadSchema>;
 
 export type ChangePointChartAttachmentData = ChangePointChartAttachmentPayload['data'];
 export type LogRateAnalysisAttachmentData = LogRateAnalysisAttachmentPayload['data'];

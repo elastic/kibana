@@ -40,7 +40,7 @@ export const initComponent = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = props.data.state as unknown as RawAttachmentState;
+        const rawState = props.data.state as RawAttachmentState;
         const normalized = normalizeChangePointChartLegacyFields(rawState);
         const inputProps = {
           timeRange: rawState.time_range ?? rawState.timeRange,

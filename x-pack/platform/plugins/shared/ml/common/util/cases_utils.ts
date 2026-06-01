@@ -34,13 +34,9 @@ export const SingleMetricViewerAttachmentPayloadSchema = buildMlAttachmentPayloa
   ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE
 );
 
-export type AnomalySwimLaneAttachmentPayload = z.infer<
-  typeof AnomalySwimLaneAttachmentPayloadSchema
->;
-export type AnomalyChartsAttachmentPayload = z.infer<typeof AnomalyChartsAttachmentPayloadSchema>;
-export type SingleMetricViewerAttachmentPayload = z.infer<
-  typeof SingleMetricViewerAttachmentPayloadSchema
->;
+type AnomalySwimLaneAttachmentPayload = z.infer<typeof AnomalySwimLaneAttachmentPayloadSchema>;
+type AnomalyChartsAttachmentPayload = z.infer<typeof AnomalyChartsAttachmentPayloadSchema>;
+type SingleMetricViewerAttachmentPayload = z.infer<typeof SingleMetricViewerAttachmentPayloadSchema>;
 
 export type AnomalySwimLaneAttachmentData = AnomalySwimLaneAttachmentPayload['data'];
 export type AnomalyChartsAttachmentData = AnomalyChartsAttachmentPayload['data'];
