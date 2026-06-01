@@ -20,7 +20,7 @@ const TIME_RANGE = {
   to: '2021-01-25T00:00:00.000Z',
 };
 
-spaceTest.describe('Index pattern with unmapped fields', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Data view with unmapped fields', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     // Load Kibana saved objects (data view + saved search)
     await scoutSpace.savedObjects.load(

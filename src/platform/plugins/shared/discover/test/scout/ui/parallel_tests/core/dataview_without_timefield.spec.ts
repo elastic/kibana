@@ -14,7 +14,7 @@
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-spaceTest.describe('Index pattern without timefield', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Data view without timefield', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     // Load Kibana saved objects (3 data views: with and without time fields)
     await scoutSpace.savedObjects.load(
