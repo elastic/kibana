@@ -77,10 +77,8 @@ export const registerDeleteDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const wasDeleted = await datasetClient.delete(datasetId);
 
           if (!wasDeleted) {
