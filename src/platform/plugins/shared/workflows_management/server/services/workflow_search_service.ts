@@ -141,7 +141,7 @@ export class WorkflowSearchService {
       query,
       managedFilter,
       sortField,
-      sortDirection = 'asc',
+      sortOrder = 'asc',
     } = params;
     const from = (page - 1) * size;
 
@@ -165,7 +165,7 @@ export class WorkflowSearchService {
 
     const esSort = sortField
       ? [
-          { [ES_SORT_FIELDS[sortField]]: { order: sortDirection } },
+          { [ES_SORT_FIELDS[sortField]]: { order: sortOrder } },
           { updated_at: { order: 'desc' as const } },
         ]
       : [{ updated_at: { order: 'desc' as const } }];

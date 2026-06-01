@@ -78,7 +78,7 @@ export interface GetWorkflowsParams {
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
   sortField?: WorkflowSortField;
-  sortDirection?: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface DeleteWorkflowsResponse {

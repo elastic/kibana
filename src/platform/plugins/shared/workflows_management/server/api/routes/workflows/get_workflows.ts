@@ -56,7 +56,7 @@ const querySchema = schema.object({
       meta: { description: 'Field to sort by.' },
     })
   ),
-  sortDirection: schema.maybe(
+  sortOrder: schema.maybe(
     schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       meta: { description: 'Sort direction.' },
     })
@@ -112,7 +112,7 @@ function prepareParams({
   query,
   managed,
   sortField,
-  sortDirection,
+  sortOrder,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
   return {
     query,
@@ -123,6 +123,6 @@ function prepareParams({
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
     managedFilter: managed,
     sortField,
-    sortDirection,
+    sortOrder,
   };
 }

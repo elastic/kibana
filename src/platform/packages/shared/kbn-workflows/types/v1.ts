@@ -781,7 +781,7 @@ export interface WorkflowsSearchParams {
   enabled?: boolean[];
   tags?: string[];
   sortField?: WorkflowSortField;
-  sortDirection?: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
 }
 
