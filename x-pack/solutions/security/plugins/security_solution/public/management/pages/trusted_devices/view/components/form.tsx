@@ -728,36 +728,18 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         setHasFormChanged(true);
         setHasVisitedAnyEntry(false);
 
-        const existingEntries = currentItem.entries?.length
-          ? currentItem.entries
-          : [defaultDeviceEntry()];
-
-        const updatedEntries = existingEntries.map((entry) => {
-          const isUsernameUnavailable =
+        // remove username field if it is not available for the selected OS
+        const updatedEntries = (currentItem.entries ?? []).filter((entry) => {
+          return !(
             entry.field === TrustedDeviceConditionEntryField.USERNAME &&
-            !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes);
-
-          const fieldToUse = isUsernameUnavailable
-            ? TrustedDeviceConditionEntryField.DEVICE_ID
-            : entry.field;
-
-          const entryType =
-            'type' in entry && entry.type === 'wildcard'
-              ? ('wildcard' as const)
-              : ('match' as const);
-
-          return {
-            field: fieldToUse,
-            operator: 'included' as const,
-            type: entryType,
-            value: isUsernameUnavailable ? '' : 'value' in entry ? String(entry.value || '') : '',
-          };
+            !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)
+          );
         });
 
         const updatedItem = {
           ...currentItem,
           os_types: osTypes,
-          entries: updatedEntries,
+          entries: updatedEntries.length ? updatedEntries : [defaultDeviceEntry()],
         };
 
         const { isValid } = computeValidation(updatedItem, visitedFields, false);

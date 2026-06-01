@@ -502,39 +502,41 @@ describe('Trusted devices form', () => {
       ).toBeTruthy();
     });
 
-    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Mac', async () => {
-      // Start with USERNAME field and Windows OS
+    it('should remove the USERNAME entry and fall back to a default DEVICE_ID entry when OS changes from Windows to Mac', async () => {
+      // Start with a single USERNAME entry and Windows-only OS
       formProps.item = createItem({
         os_types: [OperatingSystem.WINDOWS],
         entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
       });
       rerenderWithLatestProps();
 
-      // Change OS to Mac-only
+      // Change OS to Mac-only — USERNAME is not available on Mac, so the entry is removed
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
 
-      // Expect field to be reset to DEVICE_ID and value cleared
+      // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
       expect(lastCall?.item.os_types).toEqual([OperatingSystem.MAC]);
     });
 
-    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Windows+Mac', async () => {
-      // Start with USERNAME field and Windows OS
+    it('should remove the USERNAME entry and fall back to a default DEVICE_ID entry when OS changes from Windows to Windows+Mac', async () => {
+      // Start with a single USERNAME entry and Windows-only OS
       formProps.item = createItem({
         os_types: [OperatingSystem.WINDOWS],
         entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
       });
       rerenderWithLatestProps();
 
-      // Change OS to Windows+Mac
+      // Change OS to Windows+Mac — USERNAME is not available on Mac (multi-OS), so the entry is removed
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
 
-      // Expect field to be reset to DEVICE_ID and value cleared
+      // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
       expect(lastCall?.item.os_types).toEqual([OperatingSystem.WINDOWS, OperatingSystem.MAC]);
@@ -937,7 +939,7 @@ describe('Trusted devices form', () => {
       expect(lastCall?.item.entries[1].value).toBe('host-1');
     });
 
-    it('should reset only the USERNAME entry and keep other entries when OS changes to Mac', async () => {
+    it('should drop only the USERNAME entry and preserve other entries when OS changes to Mac', async () => {
       formProps.item = createItem({
         os_types: [OperatingSystem.WINDOWS],
         entries: [
@@ -953,13 +955,10 @@ describe('Trusted devices form', () => {
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
 
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
-      expect(lastCall?.item.entries).toHaveLength(2);
-      // First entry preserved
+      // USERNAME entry is removed; only the DEVICE_ID entry survives
+      expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries[0].value).toBe('dev-1');
-      // USERNAME entry reset to DEVICE_ID with cleared value
-      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
-      expect(lastCall?.item.entries[1].value).toBe('');
     });
   });
 
