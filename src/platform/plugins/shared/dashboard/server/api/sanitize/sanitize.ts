@@ -27,7 +27,12 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    transformDashboardOut(storedDashboardState ?? {}, references ?? []);
+    transformDashboardOut(
+      storedDashboardState ?? {},
+      references ?? [],
+      undefined,
+      dashboardStateSchema
+    );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
     transformedApiDashboardState as Partial<DashboardState>

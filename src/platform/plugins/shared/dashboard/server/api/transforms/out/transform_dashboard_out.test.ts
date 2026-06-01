@@ -12,6 +12,7 @@ import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformDashboardOut } from './transform_dashboard_out';
 
 jest.mock('../../../kibana_services', () => ({
@@ -45,7 +46,8 @@ describe('transformDashboardOut', () => {
     const input: Partial<DashboardSavedObjectAttributes> = {
       title: 'my title',
     };
-    expect(transformDashboardOut(input)).toMatchInlineSnapshot(`
+    expect(transformDashboardOut(input, undefined, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
           "options": Object {
@@ -110,7 +112,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toMatchInlineSnapshot(`
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
           "description": "description",
@@ -211,7 +214,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toMatchInlineSnapshot(`
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
           "description": "description",
@@ -276,7 +280,12 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         description: 'my description',
         projectRouting: '_alias:_origin',
       };
-      const { dashboardState } = transformDashboardOut(input);
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
       expect(dashboardState.project_routing).toBe('_alias:_origin');
     });
 
@@ -289,7 +298,12 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         description: 'my description',
         // projectRouting is undefined
       };
-      const { dashboardState } = transformDashboardOut(input);
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
       expect(dashboardState.project_routing).toBeUndefined();
       expect(dashboardState).not.toHaveProperty('project_routing');
     });

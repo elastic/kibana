@@ -181,7 +181,11 @@ export class DashboardPlugin
     });
 
     return {
-      scanDashboards,
+      scanDashboards: (
+        savedObjectsClient: SavedObjectsClientContract,
+        page: number,
+        perPage: number
+      ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
         read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
           (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,

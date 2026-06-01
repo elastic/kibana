@@ -12,7 +12,7 @@ import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common
 
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardState, Warnings } from '../../types';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
@@ -23,14 +23,11 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema?: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
 } {
-  const schema: ReturnType<typeof getDashboardStateSchema> =
-    strictValidationSchema ?? getDashboardStateSchema(isDashboardAppRequest);
-
   const {
     pinned_panels,
     controlGroupInput: legacyControls,
@@ -79,7 +76,7 @@ export function transformDashboardOut(
     filters,
     query,
     warnings: searchSourceWarnings,
-  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, schema);
+  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, strictValidationSchema);
 
   /**
    * Handle validating each state key that wasn't already validated above; if any validation fails,
@@ -111,7 +108,7 @@ export function transformDashboardOut(
     try {
       validatedState = {
         ...validatedState,
-        [key]: schema.validateKey(key, validatedState[key]),
+        [key]: strictValidationSchema.validateKey(key, validatedState[key]),
       };
     } catch (e) {
       validatedState = {
