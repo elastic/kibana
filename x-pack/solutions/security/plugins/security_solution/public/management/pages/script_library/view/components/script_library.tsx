@@ -310,7 +310,6 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
         data-test-subj={getTestId()}
         title={pageLabels.pageTitle}
         subtitle={pageLabels.pageAboutInfo}
-        hideHeader={!doesDataExist}
         actions={
           canWriteScriptsLibrary ? (
             <EuiButton
