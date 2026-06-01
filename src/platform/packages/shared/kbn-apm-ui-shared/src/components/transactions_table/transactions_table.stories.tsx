@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiProgress,
   EuiText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { LatencyAggregationType } from '@kbn/apm-types';
@@ -161,6 +162,10 @@ const itemsWithComparison: TransactionGroup[] = items.map((item, idx) => ({
 const impactColumn: EuiBasicTableColumn<TransactionGroup> = {
   field: 'impact',
   name: 'Impact',
+  align: RIGHT_ALIGNMENT,
+  width: '8em',
+  minWidth: '8em',
+  maxWidth: '8em',
   nameTooltip: {
     content:
       'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
@@ -196,7 +201,9 @@ const impactColumn: EuiBasicTableColumn<TransactionGroup> = {
 
 const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
   name: 'Actions',
-  width: '5em',
+  align: RIGHT_ALIGNMENT,
+  width: '4.5em',
+  minWidth: '4.5em',
   render: (item: TransactionGroup) => (
     <ActionsMenu
       button={<EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />}

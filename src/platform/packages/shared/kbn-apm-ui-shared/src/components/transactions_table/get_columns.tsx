@@ -22,6 +22,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -283,6 +284,10 @@ export function getBuiltInColumns({
       field: 'latency',
       sortable: ({ latency }: TransactionGroup) => latency.value ?? -Infinity,
       name: getLatencyColumnLabel(latencyAggregationType),
+      align: RIGHT_ALIGNMENT,
+      width: '15em',
+      maxWidth: '15em',
+      className: 'eui-textNoWrap',
       render: (_: unknown, { latency }: TransactionGroup) => (
         <MetricCell
           valueLabel={asMillisecondDuration(latency.value)}
@@ -299,6 +304,10 @@ export function getBuiltInColumns({
       name: i18n.translate('apmUiShared.transactionsTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
+      align: RIGHT_ALIGNMENT,
+      width: '15em',
+      maxWidth: '15em',
+      className: 'eui-textNoWrap',
       render: (_: unknown, { throughput }: TransactionGroup) => (
         <MetricCell
           valueLabel={asTransactionRate(throughput.value)}
@@ -312,6 +321,10 @@ export function getBuiltInColumns({
     errorRate: {
       field: 'errorRate',
       sortable: ({ errorRate }: TransactionGroup) => errorRate.value ?? -Infinity,
+      align: RIGHT_ALIGNMENT,
+      width: '15em',
+      maxWidth: '15em',
+      className: 'eui-textNoWrap',
       name: i18n.translate('apmUiShared.transactionsTable.errorRateColumnLabel', {
         defaultMessage: 'Failed transaction rate',
       }),
