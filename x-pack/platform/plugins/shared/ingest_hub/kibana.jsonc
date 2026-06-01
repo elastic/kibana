@@ -10,9 +10,9 @@
     "browser": true,
     "server": false,
     "configPath": ["xpack", "ingestHub"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["fleet"],
     "optionalPlugins": ["spaces", "cloud"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "fleet"],
     "extraPublicDirs": ["common"]
   }
 }
