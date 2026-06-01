@@ -104,6 +104,12 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
+        // The TLS rule only evaluates lightweight HTTP/TCP certificates, which
+        // always carry a sha256 fingerprint used as the stable alert id.
+        if (!cert.sha256) {
+          return;
+        }
+
         const alertId = cert.sha256;
         const { uuid } = alertsClient.report({
           id: alertId,
