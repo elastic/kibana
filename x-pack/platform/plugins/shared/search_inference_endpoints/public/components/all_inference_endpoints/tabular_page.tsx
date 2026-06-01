@@ -98,32 +98,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
   }, []);
 
-  const deleteAction = useMemo(
-    () =>
-      canManage
-        ? [
-            {
-              name: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
-                defaultMessage: 'Delete endpoint',
-              }),
-              description: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
-                defaultMessage: 'Delete endpoint',
-              }),
-              icon: 'trash' as const,
-              type: 'icon' as const,
-              enabled: (item: InferenceInferenceEndpointInfo) =>
-                !isEndpointPreconfigured(item.inference_id),
-              onClick: (item: InferenceInferenceEndpointInfo) => displayDeleteActionItem(item),
-              'data-test-subj': (item: InferenceInferenceEndpointInfo) =>
-                isEndpointPreconfigured(item.inference_id)
-                  ? 'inferenceUIDeleteAction-preconfigured'
-                  : 'inferenceUIDeleteAction-user-defined',
-            },
-          ]
-        : [],
-    [canManage, displayDeleteActionItem]
-  );
-
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
       {
@@ -200,12 +174,29 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
           },
-          ...deleteAction,
+          {
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
+              defaultMessage: 'Delete endpoint',
+            }),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
+              defaultMessage: 'Delete endpoint',
+            }),
+            icon: 'trash' as const,
+            type: 'icon' as const,
+            available: () => canManage,
+            enabled: (item: InferenceInferenceEndpointInfo) =>
+              !isEndpointPreconfigured(item.inference_id),
+            onClick: (item: InferenceInferenceEndpointInfo) => displayDeleteActionItem(item),
+            'data-test-subj': (item: InferenceInferenceEndpointInfo) =>
+              isEndpointPreconfigured(item.inference_id)
+                ? 'inferenceUIDeleteAction-preconfigured'
+                : 'inferenceUIDeleteAction-user-defined',
+          },
         ],
         width: '165px',
       },
     ],
-    [copyContent, deleteAction, displayInferenceFlyout]
+    [canManage, copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (
