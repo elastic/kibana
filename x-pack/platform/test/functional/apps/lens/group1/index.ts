@@ -71,11 +71,19 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    const loadSmokescreenTestFiles = () => {
+      loadTestFile(require.resolve('./chart_creation'));
+      loadTestFile(require.resolve('./chart_switching'));
+      loadTestFile(require.resolve('./layers'));
+      loadTestFile(require.resolve('./dimension_editor'));
+      loadTestFile(require.resolve('./chart_style_settings'));
+    };
+
     if (config.get('esTestCluster.ccs')) {
-      loadTestFile(require.resolve('./smokescreen'));
+      loadSmokescreenTestFiles();
     } else {
       // total run time ~16 min
-      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
+      loadSmokescreenTestFiles(); // smokescreen split, previously ~12m 12s
       loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
       loadTestFile(require.resolve('./multiple_data_views'));
       loadTestFile(require.resolve('./inspector'));
