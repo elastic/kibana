@@ -7,7 +7,8 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ScriptLibraryAllowedFileType,
   ScriptTagKey,
@@ -34,11 +35,7 @@ import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
-import { NewPageBanner } from './new_page_banner/new_page_banner';
 import { ScriptLibraryFilters } from './data_filters';
-
-export const SCRIPT_LIBRARY_PAGE_STORAGE_KEY =
-  'securitySolution.endpointManagement.scriptLibrary.showNewPageBanner';
 
 interface ScriptLibraryProps {
   'data-test-subj'?: string;
@@ -48,10 +45,30 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
   const getTestId = useTestIdGenerator(dataTestSubj ?? 'ScriptLibraryPage');
   const history = useHistory();
   const toasts = useToasts();
-  const { storage } = useKibana().services;
+  const {
+    docLinks: {
+      links: { securitySolution: securitySolutionDocLinks },
+    },
+  } = useKibana().services;
 
-  const [showNewPageBanner, setShowNewPageBanner] = useState(
-    storage.get(SCRIPT_LIBRARY_PAGE_STORAGE_KEY) ?? true
+  const pageSubtitle = useMemo(
+    () => (
+      <>
+        {pageLabels.pageAboutInfo}{' '}
+        <EuiLink
+          href={securitySolutionDocLinks.scriptLibrary}
+          target="_blank"
+          external
+          data-test-subj={getTestId('learn-more-link')}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.scriptLibrary.pageLearnMoreLink"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
+      </>
+    ),
+    [getTestId, securitySolutionDocLinks.scriptLibrary]
   );
 
   const { pagination: paginationFromUrlParams } = useUrlPagination();
@@ -75,11 +92,6 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
       showFromUrl === 'details'
     );
   }, [canWriteScriptsLibrary, showFromUrl]);
-
-  const onBannerDismiss = useCallback(() => {
-    setShowNewPageBanner(false);
-    storage.set(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
-  }, [storage]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -302,14 +314,10 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
 
   return (
     <>
-      {showNewPageBanner && (
-        <NewPageBanner onDismiss={onBannerDismiss} data-test-subj={getTestId()} />
-      )}
-
       <AdministrationListPage
         data-test-subj={getTestId()}
         title={pageLabels.pageTitle}
-        subtitle={pageLabels.pageAboutInfo}
+        subtitle={pageSubtitle}
         actions={
           canWriteScriptsLibrary ? (
             <EuiButton
