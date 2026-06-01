@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiPopover,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -55,8 +56,13 @@ export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }:
       id={resolvedId}
       aria-label={ariaLabel}
       button={
-        // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
-        <EuiButtonIcon iconType="boxesHorizontal" aria-label={ariaLabel} onClick={togglePopover} />
+        <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={ariaLabel}
+            onClick={togglePopover}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
