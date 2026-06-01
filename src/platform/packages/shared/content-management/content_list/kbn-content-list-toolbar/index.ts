@@ -26,6 +26,11 @@ export {
   type TagFilterProps,
 } from './src/filters';
 
+// Toolbar `filter` part factory + context. Consumers use `filter.createComponent`
+// to register custom one-off filters (for shared presets, see `filterPart`
+// configuration in `./src/filters/part`).
+export { filter, type FilterContext } from './src/filters';
+
 // Selection bar component for direct imports.
 export { SelectionBar, type SelectionBarProps } from './src/selection_bar';
 
@@ -52,10 +57,9 @@ export {
   type FilterType,
 } from './src/filters';
 
-// Query parser pipeline — implement `QueryParser` to add a new filter type.
+// Created By filter.
 export {
-  parseFiltersFromQuery,
-  useTagQueryParser,
-  type QueryParser,
-  type QueryParserResult,
+  CreatedByFilter,
+  CreatedByFilterRenderer,
+  type CreatedByFilterRendererProps,
 } from './src/filters';

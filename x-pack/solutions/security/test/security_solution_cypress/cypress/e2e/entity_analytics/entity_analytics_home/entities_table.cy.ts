@@ -7,7 +7,10 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { setGrouping } from '../../../tasks/entity_analytics/entity_analytics_home';
+import {
+  interceptEntityStoreStatus,
+  setGrouping,
+} from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
@@ -24,6 +27,7 @@ import {
   FIELDS_SELECTOR_CLOSE,
   LAST_UPDATED,
   FLYOUT_RIGHT_PANEL,
+  FLYOUT_TITLE_TEXT,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
@@ -45,6 +49,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
@@ -55,9 +60,11 @@ describe(
     });
 
     beforeEach(() => {
+      interceptEntityStoreStatus('running');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       waitForTableToLoad();
     });
 
@@ -72,13 +79,13 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('8 entities').should('be.visible');
+        cy.contains('13 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
         const expectedHeaders = [
           'Entity name',
-          'Entity id',
+          'Entity ID',
           'Data source',
           'Resolved to',
           'Entity type',
@@ -132,7 +139,7 @@ describe(
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
             cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-            cy.get('[data-test-subj="flyoutTitleText"]').should('contain', entityName.trim());
+            cy.get(FLYOUT_TITLE_TEXT).should('contain', entityName.trim());
           });
       });
 
@@ -182,15 +189,18 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
   },
   () => {
     beforeEach(() => {
+      interceptEntityStoreStatus('running');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       cy.get(PAGE_TITLE).should('exist');
     });
 

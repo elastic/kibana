@@ -12,7 +12,7 @@ import { getRawData } from '../../assistant/helpers';
 import { AIAssistantSection } from './components/ai_assistant_section';
 import { AttackDiscoverySection } from './components/attack_discovery_section';
 import { AlertSummarySection } from './components/alert_summary_section';
-import { HighlightedFields } from '../../flyout_v2/document/components/highlighted_fields';
+import { HighlightedFields } from '../../flyout_v2/document/main/components/highlighted_fields';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { useEaseDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';

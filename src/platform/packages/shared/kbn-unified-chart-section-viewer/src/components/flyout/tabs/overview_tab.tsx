@@ -22,10 +22,13 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
+import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
+import { useStreamsFieldRenderer } from '../hooks/use_streams_field_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -39,6 +42,32 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const localIndexName = isNonLocalIndexName(metricItem.indexName)
+    ? undefined
+    : metricItem.indexName;
+
+  const { kind: sourceKind } = useMetricSourceKind({
+    name: localIndexName,
+    fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+  });
+  const renderStreamField = useStreamsFieldRenderer();
+
+  const sourceLink = useMemo(() => {
+    if (!metricItem.indexName) {
+      return undefined;
+    }
+
+    const streamLink =
+      localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
+        ? renderStreamField({ streamName: localIndexName })
+        : null;
+
+    return {
+      indexName: metricItem.indexName,
+      kind: sourceKind,
+      streamLink,
+    };
+  }, [metricItem.indexName, localIndexName, sourceKind, renderStreamField]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -82,7 +111,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <OverviewTabMetadata metricItem={metricItem} />
+      <OverviewTabMetadata metricItem={metricItem} indexRow={sourceLink} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
@@ -151,8 +180,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
                   <EuiListGroup
                     data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
                     listItems={dimensionListItems}
-                    flush
-                    gutterSize="none"
                     wrapText={false}
                     maxWidth={false}
                     css={css`

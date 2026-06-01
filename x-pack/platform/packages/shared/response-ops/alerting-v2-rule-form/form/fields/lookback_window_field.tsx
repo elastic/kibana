@@ -12,6 +12,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { LookbackWindow } from './lookback_window';
+import { useRuleFormMeta } from '../contexts';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
@@ -25,6 +26,7 @@ const LOOKBACK_LESS_THAN_INTERVAL_WARNING = i18n.translate(
 
 export const LookbackWindowField = () => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const scheduleEvery = useWatch({ control, name: 'schedule.every' });
 
   return (
@@ -62,7 +64,7 @@ export const LookbackWindowField = () => {
             isInvalid={!!error}
             fullWidth
           >
-            <LookbackWindow {...field} errors={error?.message} />
+            <LookbackWindow {...field} errors={error?.message} compressed={layout === 'flyout'} />
           </EuiFormRow>
         );
       }}

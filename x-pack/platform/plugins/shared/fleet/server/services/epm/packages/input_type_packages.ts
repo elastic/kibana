@@ -29,11 +29,7 @@ import * as Registry from '../registry';
 
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import {
-  getNormalizedDataStreams,
-  getNormalizedInputs,
-  registryInputAllowsDynamicSignalTypes,
-} from '../../../../common/services';
+import { getNormalizedDataStreams, hasDynamicSignalTypes } from '../../../../common/services';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
@@ -92,23 +88,6 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
   );
 
   return filtered.length > 1;
-};
-
-/**
- * Returns true when any policy template in the package contains a registry input
- * that declares dynamic signal types (dynamic_signal_types: true).
- *
- * Covers both:
- *   - Input-only packages (top-level `input` key on the policy template)
- *   - Composable integration packages (nested `inputs[]` entries)
- */
-export const hasDynamicSignalTypes = (packageInfo?: PackageInfo): boolean => {
-  if (!packageInfo) {
-    return false;
-  }
-  return (packageInfo.policy_templates ?? []).some((template) =>
-    getNormalizedInputs(template).some(registryInputAllowsDynamicSignalTypes)
-  );
 };
 
 // install the assets needed for inputs type packages

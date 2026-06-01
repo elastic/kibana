@@ -75,4 +75,28 @@ describe('<IndexManagementHome />', () => {
       });
     });
   });
+
+  describe('WHEN manageIndexTemplates privilege is false', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
+      httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
+      await renderHome(httpSetup, {
+        dependenciesOverrides: {
+          privs: {
+            monitor: true,
+            manageEnrich: true,
+            monitorEnrich: true,
+            manageIndexTemplates: false,
+          },
+        },
+      });
+      await screen.findByTestId('appTitle');
+    });
+
+    test('SHOULD still open Component Templates without create affordances', async () => {
+      fireEvent.click(screen.getByTestId('component_templatesTab'));
+      await screen.findByTestId('emptyList');
+      expect(screen.queryByTestId('createComponentTemplateButton')).not.toBeInTheDocument();
+    });
+  });
 });

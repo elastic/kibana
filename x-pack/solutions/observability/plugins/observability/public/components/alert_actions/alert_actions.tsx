@@ -20,6 +20,7 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { useKibana } from '../../utils/kibana_react';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -45,11 +46,11 @@ export function AlertActions(
     },
     cases,
   } = services;
+  const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -58,6 +59,8 @@ export function AlertActions(
   );
 
   const observabilityAlert = parseObservabilityAlert(alert);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -71,6 +74,14 @@ export function AlertActions(
     alert,
     cases,
     refresh,
+    onAddToCase({ isNewCase }) {
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+      refresh?.();
+    },
     onActionExecuted: closeActionsPopover,
     owner: [observabilityFeatureId],
   });
@@ -94,12 +105,8 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const actionsMenuItems = [
-    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
-      ? caseAlertActionItems
-      : []),
+    ...caseAlertActionItems,
 
     useMemo(
       () => (
@@ -144,7 +151,7 @@ export function AlertActions(
           >
             <EuiButtonIcon
               data-test-subj="expand-event"
-              iconType="expand"
+              iconType="maximize"
               onClick={onExpandEvent}
               size="s"
               color="text"
@@ -191,7 +198,7 @@ export function AlertActions(
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />
@@ -201,11 +208,7 @@ export function AlertActions(
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel
-            size="s"
-            items={actionsMenuItems}
-            data-test-subj="alertsTableActionsMenu"
-          />
+          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
         </EuiPopover>
       </EuiFlexItem>
     </>

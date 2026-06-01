@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/use-observable'
   - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-browser
   - package

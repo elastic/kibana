@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiWrappingPopover,
   copyToClipboard,
+  useEuiTheme,
 } from '@elastic/eui';
 import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,10 +44,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
+import { SparklineRenderer } from '../../../../../../context_awareness/profile_providers/common/sparkline_data_source_profile/sparkline_cell_renderer';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 import type { ESQLDataGroupNode } from './types';
 import type { internalStateActions } from '../../../../state_management/redux';
+import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 
 interface RowContext {
   groupId: string;
@@ -60,7 +63,7 @@ interface RowClickActionContext {
   esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
   closeActionMenu: () => void;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
   updateESQLQuery: UpdateESQLQueryFn;
 }
 
@@ -381,12 +384,21 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
+const getArrayBadgeDisplayValue = (value: string | number) =>
+  typeof value === 'number' ? value : value || NO_VALUE_PLACEHOLDER;
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
   columnTypes: Map<string, 'number' | 'array'>
 ) {
+  const { euiTheme } = useEuiTheme();
+  const services = useDiscoverServices();
   const aggregateColumnIdentifiers = useMemo(() => {
     return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
   }, [editorQueryMeta.appliedFunctions]);
@@ -436,6 +448,25 @@ export function useEsqlDataCascadeRowHeaderComponents(
             return null;
           }
 
+          const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+          const isArrayType =
+            Array.isArray(aggregatedValue) ||
+            (aggregatedValue === undefined && columnTypes.get(selectedColumn) === 'array');
+
+          const aggregation = editorQueryMeta.appliedFunctions.find(
+            ({ identifier }) => identifier === selectedColumn
+          )?.aggregation;
+
+          if (aggregation && /sparkline/i.test(aggregation) && isArrayType) {
+            return (
+              <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false} css={{ width: '100px', minHeight: euiTheme.size.l }}>
+                  <SparklineRenderer charts={services.charts} values={aggregatedValue} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <FormattedMessage
@@ -449,26 +480,12 @@ export function useEsqlDataCascadeRowHeaderComponents(
                     </EuiFlexItem>
                   ),
                   badge: () => {
-                    const aggregatedValue = rowData.aggregatedValues[selectedColumn];
-                    const isArrayType =
-                      Array.isArray(aggregatedValue) ||
-                      (aggregatedValue === undefined &&
-                        columnTypes.get(selectedColumn) === 'array');
-
                     if (isArrayType) {
                       return (
                         <EuiFlexItem grow={false}>
                           <EuiBadge color="hollow" css={textSlotStyles}>
                             {Array.isArray(aggregatedValue)
-                              ? aggregatedValue
-                                  .map(
-                                    (value) =>
-                                      value ||
-                                      i18n.translate('discover.dataCascade.row.action.noValue', {
-                                        defaultMessage: '(blank)',
-                                      })
-                                  )
-                                  .join(', ')
+                              ? aggregatedValue.map(getArrayBadgeDisplayValue).join(', ')
                               : '-'}
                           </EuiBadge>
                         </EuiFlexItem>
@@ -487,7 +504,14 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [aggregateColumnIdentifiers, columnTypes, selectedColumns]
+    [
+      aggregateColumnIdentifiers,
+      columnTypes,
+      editorQueryMeta,
+      euiTheme.size.l,
+      selectedColumns,
+      services.charts,
+    ]
   );
 
   const rowActions = useCallback<

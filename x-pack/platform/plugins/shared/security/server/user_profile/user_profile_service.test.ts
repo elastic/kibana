@@ -445,11 +445,15 @@ describe('UserProfileService', () => {
 
     describe(`with api key`, () => {
       const testApiKeyValue = 'some-api-key-value';
+      const testApiKeyId = 'some-api-key-id';
+      const testEncodedApiKey = Buffer.from(`${testApiKeyId}:${testApiKeyValue}`).toString(
+        'base64'
+      );
       let mockApiKeyRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
       beforeEach(() => {
         mockApiKeyRequest = httpServerMock.createKibanaRequest({
-          headers: { authorization: `apikey ${testApiKeyValue}` },
+          headers: { authorization: `apikey ${testEncodedApiKey}` },
         });
       });
 
@@ -469,7 +473,10 @@ describe('UserProfileService', () => {
         ).toHaveBeenCalledTimes(1);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
-        ).toHaveBeenCalledWith({ with_profile_uid: true });
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
@@ -499,7 +506,10 @@ describe('UserProfileService', () => {
         expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
-        ).toHaveBeenCalledWith({ with_profile_uid: true });
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
@@ -533,7 +543,10 @@ describe('UserProfileService', () => {
         expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
-        ).toHaveBeenCalledWith({ with_profile_uid: true });
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
@@ -596,7 +609,10 @@ describe('UserProfileService', () => {
         expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
-        ).toHaveBeenCalledWith({ with_profile_uid: true });
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
@@ -625,7 +641,9 @@ describe('UserProfileService', () => {
     it('should update application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await startContract.update('UID', {
-        avatar: 'boring.png',
+        avatar: {
+          imageUrl: 'boring.png',
+        },
       });
       expect(
         mockStartParams.clusterClient.asInternalUser.security.updateUserProfileData
@@ -633,7 +651,9 @@ describe('UserProfileService', () => {
         uid: 'UID',
         data: {
           kibana: {
-            avatar: 'boring.png',
+            avatar: {
+              imageUrl: 'boring.png',
+            },
           },
         },
       });
@@ -646,7 +666,9 @@ describe('UserProfileService', () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(
         startContract.update('UID', {
-          avatar: 'boring.png',
+          avatar: {
+            imageUrl: 'boring.png',
+          },
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
       expect(logger.error).toHaveBeenCalled();

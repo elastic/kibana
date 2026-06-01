@@ -117,6 +117,45 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
 };
 
+/**
+ * Verify the Scout-managed ES and Kibana are actually reachable, not just that
+ * the parent PID is alive. Covers the common case where ES crashes while the
+ * Scout orchestrator (and Kibana) keep running.
+ */
+const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason?: string }> => {
+  const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
+  if (!Fs.existsSync(configPath)) {
+    return { ok: false, reason: 'local config missing (.scout/servers/local.json)' };
+  }
+
+  try {
+    const raw = Fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { hosts?: { kibana?: string; elasticsearch?: string } };
+    const esUrl = parsed.hosts?.elasticsearch;
+    const kbnUrl = parsed.hosts?.kibana;
+
+    if (!esUrl || !kbnUrl) {
+      return { ok: false, reason: 'hosts missing from local config' };
+    }
+
+    const [esOk, kbnOk] = await Promise.all([probeHttp(esUrl), probeHttp(`${kbnUrl}/api/status`)]);
+
+    if (!esOk && !kbnOk) {
+      return { ok: false, reason: `ES (${esUrl}) and Kibana (${kbnUrl}) are unreachable` };
+    }
+    if (!esOk) {
+      return { ok: false, reason: `ES is unreachable (${esUrl})` };
+    }
+    if (!kbnOk) {
+      return { ok: false, reason: `Kibana is unreachable (${kbnUrl})` };
+    }
+
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'failed to read local config' };
+  }
+};
+
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
 const shellQuote = (value: string): string => {
@@ -254,24 +293,13 @@ export const startCmd: Command<void> = {
     };
 
     // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
-    // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
+    // trace ES isn't reachable. Instead, warn and continue without external trace queries.
     if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
-      const evaluationsEsUrl = profileEnvOverrides.EVALUATIONS_ES_URL;
       const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
-      const [evalsReachable, tracingReachable] = await Promise.all([
-        evaluationsEsUrl ? probeHttp(stripTrailingSlash(evaluationsEsUrl)) : Promise.resolve(true),
-        tracingEsUrl ? probeHttp(stripTrailingSlash(tracingEsUrl)) : Promise.resolve(true),
-      ]);
-
-      if (!evalsReachable) {
-        log.warning(
-          `Export profile \"local\" was auto-selected but EVALUATIONS_ES_URL is not reachable (${evaluationsEsUrl}). ` +
-            'Continuing without exporting evaluation results. To require export, pass --export-profile local.'
-        );
-        delete profileEnvOverrides.EVALUATIONS_ES_URL;
-        delete profileEnvOverrides.EVALUATIONS_ES_API_KEY;
-      }
+      const tracingReachable = tracingEsUrl
+        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
+        : true;
 
       if (!tracingReachable) {
         log.warning(
@@ -355,8 +383,7 @@ export const startCmd: Command<void> = {
       } else {
         log.info('[1/4] Starting EDOT collector (backgrounded)...');
 
-        const elasticsearchHost =
-          profileEnvOverrides.TRACING_ES_URL ?? profileEnvOverrides.EVALUATIONS_ES_URL;
+        const elasticsearchHost = profileEnvOverrides.TRACING_ES_URL;
         if (elasticsearchHost) {
           log.info(`[1/4] EDOT collector will export to: ${elasticsearchHost}`);
         }
@@ -387,7 +414,18 @@ export const startCmd: Command<void> = {
         await stopService(repoRoot, 'scout', log);
       }
 
-      if (scoutAlive && !staleCheck.stale) {
+      let scoutReusable = scoutAlive && !staleCheck.stale;
+
+      if (scoutReusable) {
+        const health = await probeScoutHealth(repoRoot);
+        if (!health.ok) {
+          log.warning(`[2/4] Scout PID alive but ${health.reason}. Restarting...`);
+          await stopService(repoRoot, 'scout', log);
+          scoutReusable = false;
+        }
+      }
+
+      if (scoutReusable) {
         log.info('[2/4] Scout server already running -- reusing');
       } else {
         const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -398,6 +436,24 @@ export const startCmd: Command<void> = {
         log.info(
           `[2/4] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`
         );
+        // Forward the env overrides that the Scout server config consumes
+        // when launching ES / Kibana. Notably:
+        //   - GCS_CREDENTIALS  -> ES gcs.client.default.credentials_file
+        //                        secure setting (snapshot restore from GCS)
+        //   - TRACING_EXPORTERS -> Kibana --telemetry.tracing.exporters
+        //                         (fan-out OTLP destinations from config.json)
+        // Without TRACING_EXPORTERS, Scout falls back to the localhost:4318
+        // + phoenix defaults in `classic.stateful.config.ts`, so any custom
+        // tracing destinations declared in the vault profile are silently
+        // dropped.
+        const scoutEnv: Record<string, string> = {};
+        if (profileEnvOverrides.GCS_CREDENTIALS) {
+          scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
+        }
+        if (profileEnvOverrides.TRACING_EXPORTERS) {
+          scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
+        }
+
         startService(
           repoRoot,
           'scout',
@@ -407,9 +463,7 @@ export const startCmd: Command<void> = {
           {
             connectorsHash: connectorsHash(),
             serverConfigSet,
-            env: profileEnvOverrides.GCS_CREDENTIALS
-              ? { GCS_CREDENTIALS: profileEnvOverrides.GCS_CREDENTIALS }
-              : undefined,
+            env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
           }
         );
 
@@ -469,10 +523,6 @@ export const startCmd: Command<void> = {
     if (envOverrides.TRACING_ES_URL) {
       log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
     }
-    if (envOverrides.EVALUATIONS_ES_URL) {
-      log.info(`Evaluation results will export to: ${envOverrides.EVALUATIONS_ES_URL}`);
-    }
-
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
     }

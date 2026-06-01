@@ -56,7 +56,7 @@ export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
       onClick: () => openModal(selectedCases),
       disabled: isActionDisabled,
       'data-test-subj': 'cases-bulk-action-delete',
-      icon: <EuiIcon type="trash" size="m" color={color} />,
+      icon: <EuiIcon type="trash" size="m" color={color} aria-hidden={true} />,
       key: 'cases-bulk-action-delete',
     };
   };

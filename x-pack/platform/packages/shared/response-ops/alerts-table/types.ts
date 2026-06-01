@@ -6,25 +6,25 @@
  */
 
 import type {
-  JSX,
   ComponentClass,
   ComponentProps,
   ComponentType,
   Dispatch,
   FC,
+  JSX,
   Key,
   MutableRefObject,
   ReactNode,
   RefAttributes,
 } from 'react';
 import type {
-  AlertConsumers,
   ALERT_CASE_IDS,
-  ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -39,11 +39,9 @@ import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
@@ -51,7 +49,9 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
@@ -163,18 +163,6 @@ type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   : T extends ComponentClass<infer Props>
   ? ComponentClass<Props & AP>
   : never;
-
-export interface AlertWithLegacyFormats {
-  alert: Alert;
-  /**
-   * @deprecated
-   */
-  legacyAlert: LegacyField[];
-  /**
-   * @deprecated
-   */
-  ecsAlert: any;
-}
 
 export interface AlertsTableOnLoadedProps {
   alerts: Alert[];
@@ -317,7 +305,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderCellValue?: MergeProps<
     EuiDataGridProps['renderCellValue'],
-    RenderContext<AC> & AlertWithLegacyFormats
+    RenderContext<AC> & { alert: Alert }
   >;
   /**
    * Cell popover render function
@@ -331,8 +319,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
-    RenderContext<AC> &
-      AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
+    RenderContext<AC> & { alert: Alert; setIsActionLoading?: (isLoading: boolean) => void }
   >;
   /**
    * Get the alert formatter for a specific rule type.
@@ -425,12 +412,24 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   configurationStorage?: IStorageWrapper | null;
   /**
+   * Show a CSV export button in the toolbar. The button exports all alerts matching
+   * the current filters using the reporting CSV endpoint.
+   * Note: `services.rendering` must also be provided, otherwise the button will not render.
+   * @default false
+   */
+  showCsvExportButton?: boolean;
+  /**
    * Dependencies
    */
   services: {
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    /**
+     * Required to render the CSV export button (`showCsvExportButton`). The button will
+     * not appear if this is omitted, even when `showCsvExportButton` is true.
+     */
+    rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
@@ -466,6 +465,23 @@ export type RenderContext<AC extends AdditionalContext> = {
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 
   /**
+   * The rule type IDs used to filter alerts
+   */
+  ruleTypeIds: string[];
+  /**
+   * The consumers used to filter alerts
+   */
+  consumers?: string[];
+  /**
+   * The ES query used to filter alerts
+   */
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
+  /**
+   * The current sort configuration
+   */
+  sort: AlertsTableSortCombinations[];
+
+  /**
    * Refetches all the queries, resetting the alerts pagination if necessary
    */
   refresh: () => void;
@@ -477,14 +493,6 @@ export type RenderContext<AC extends AdditionalContext> = {
 
   isLoadingAlerts: boolean;
   alerts: Alert[];
-  /**
-   * @deprecated
-   */
-  oldAlertsData: LegacyField[][];
-  /**
-   * @deprecated
-   */
-  ecsAlertsData: any[];
   alertsCount: number;
   browserFields: BrowserFields;
 
@@ -562,6 +570,10 @@ export interface PublicAlertsDataGridProps
   trackScores?: boolean;
   consumers?: string[];
   /**
+   * Value to override the server side search
+   */
+  projectRouting?: ProjectRouting;
+  /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
    */
   showInspectButton?: boolean;
@@ -611,6 +623,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
+  showCsvExportButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
@@ -676,6 +689,7 @@ interface PanelConfig {
   id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
+  width?: number;
 }
 
 export interface RenderContentPanelProps {

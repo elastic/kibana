@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   createAlertActionParamsSchema,
+  errorResponseSchema,
   type CreateAlertActionBody,
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
-import { Request, Response, type RouteDefinition, type RouteHandler } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request, type RouteDefinition } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']
@@ -45,53 +47,59 @@ export const createAlertActionRouteForType = <
   type ActionBody = Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>;
 
   @injectable()
-  class CreateTypedAlertActionRoute implements RouteHandler {
+  class CreateTypedAlertActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/action/${pathSuffix}`;
+    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
       },
     };
-    static options = {
-      access: 'public',
+    static routeOptions = {
       summary: `Create an alert ${pathSuffix} action`,
       description: 'Create an action for a specific alert group.',
-      tags: ['oas-tag:alerting-v2'],
-      availability: { stability: 'experimental' },
-    } as const;
+    };
     static validate = {
       request: {
         params: buildRouteValidationWithZod(createAlertActionParamsSchema),
         body: buildRouteValidationWithZod(bodySchema),
       },
+      response: {
+        204: {
+          description: 'Returns the newly created alert action.',
+        },
+        400: {
+          body: () => errorResponseSchema,
+          description: 'Indicates an invalid schema or parameters.',
+        },
+        404: {
+          body: () => errorResponseSchema,
+          description: 'Indicates the alert event was not found.',
+        },
+      },
     } as const;
 
+    protected readonly routeName = `create alert ${pathSuffix} action`;
+
     constructor(
+      @inject(AlertingRouteContext) ctx: AlertingRouteContext,
       @inject(Request)
       private readonly request: KibanaRequest<CreateAlertActionParams, unknown, ActionBody>,
-      @inject(Response) private readonly response: KibanaResponseFactory,
       @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
-    ) {}
+    ) {
+      super(ctx);
+    }
 
-    async handle() {
-      try {
-        await this.alertActionsClient.createAction({
-          groupHash: this.request.params.group_hash,
-          action: {
-            action_type: actionType,
-            ...this.request.body,
-          } as Extract<CreateAlertActionBody, { action_type: TAction }>,
-        });
+    protected async execute() {
+      await this.alertActionsClient.createAction({
+        groupHash: this.request.params.group_hash,
+        action: {
+          action_type: actionType,
+          ...this.request.body,
+        } as Extract<CreateAlertActionBody, { action_type: TAction }>,
+      });
 
-        return this.response.noContent();
-      } catch (e) {
-        const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-        return this.response.customError({
-          statusCode: boom.output.statusCode,
-          body: boom.output.payload,
-        });
-      }
+      return this.ctx.response.noContent();
     }
   }
 

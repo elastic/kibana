@@ -18,10 +18,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQueriesBulkDelete } from '../hooks/use_queries_bulk_delete';
+import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
 import { RuleActionsCell } from './rule_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
@@ -30,7 +29,6 @@ import { formatLastOccurredAt } from '../../significant_events_discovery/compone
 import { TableTitle } from '../../stream_detail_systems/table_title';
 
 interface RulesTableProps {
-  definition: Streams.all.Definition;
   rules: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
@@ -39,7 +37,6 @@ interface RulesTableProps {
 }
 
 export function RulesTable({
-  definition,
   rules,
   occurrencesByQueryId,
   searchTerm,
@@ -49,8 +46,7 @@ export function RulesTable({
   const [selectedRules, setSelectedRules] = useState<KnowledgeIndicator[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [rulesToDelete, setRulesToDelete] = useState<KnowledgeIndicator[]>([]);
-  const { deleteRulesInBulk, isDeleting } = useQueriesBulkDelete({
-    definition,
+  const { demoteRules, isPending } = useRulesDemote({
     onSuccess: () => {
       setSelectedRules([]);
       setRulesToDelete([]);
@@ -58,9 +54,7 @@ export function RulesTable({
   });
 
   const filteredRules = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    if (!normalizedSearchTerm) {
+    if (!searchTerm) {
       return rules;
     }
 
@@ -70,7 +64,7 @@ export function RulesTable({
       }
 
       const title = (rule.query.title ?? '').toLowerCase();
-      return title.includes(normalizedSearchTerm);
+      return title.includes(searchTerm);
     });
   }, [rules, searchTerm]);
 
@@ -190,13 +184,13 @@ export function RulesTable({
         render: (item: KnowledgeIndicator) => (
           <RuleActionsCell
             rule={item}
-            isDisabled={isDeleting}
+            isDisabled={isPending}
             onDeleteRequest={(rule) => setRulesToDelete([rule])}
           />
         ),
       },
     ],
-    [isDeleting, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
+    [isPending, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (
@@ -227,8 +221,8 @@ export function RulesTable({
             color="danger"
             size="xs"
             aria-label={RULES_TABLE_DELETE_BULK_ACTION_LABEL}
-            isLoading={isDeleting}
-            isDisabled={isSelectionActionsDisabled || isDeleting}
+            isLoading={isPending}
+            isDisabled={isSelectionActionsDisabled || isPending}
             onClick={() => {
               setRulesToDelete(selectedRules);
             }}
@@ -263,7 +257,7 @@ export function RulesTable({
           items={rulesToDelete}
           onCancel={() => setRulesToDelete([])}
           onConfirm={() => {
-            void deleteRulesInBulk(
+            void demoteRules(
               rulesToDelete
                 .filter(
                   (item): item is Extract<KnowledgeIndicator, { kind: 'query' }> =>
@@ -272,7 +266,7 @@ export function RulesTable({
                 .map((item) => item.query.id)
             );
           }}
-          isLoading={isDeleting}
+          isLoading={isPending}
         />
       ) : null}
     </>

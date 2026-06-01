@@ -9,10 +9,14 @@ import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import type { AttachmentService } from '../../../services';
 import type { AlertAttachmentPayload } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
-import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
-import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
+import { MAX_ALERTS_PER_CASE } from '../../../../common/constants';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedAlertAttachment,
+} from '../../../../common/utils/attachments';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
+import { toStringArray } from '../../../../common/utils/attachments/string_utils';
 
 export class AlertLimiter extends BaseLimiter {
   constructor(private readonly attachmentService: AttachmentService) {
@@ -25,34 +29,23 @@ export class AlertLimiter extends BaseLimiter {
   }
 
   public async countOfItemsWithinCase(caseId: string): Promise<number> {
-    const limitAggregation = {
-      limiter: {
-        value_count: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-        },
-      },
-    };
-
-    const itemsAttachedToCase = await this.attachmentService.executeCaseAggregations<{
-      limiter: { value: number };
-    }>({
-      caseId,
-      aggregations: limitAggregation,
-      attachmentType: AttachmentType.alert,
-    });
-
-    return itemsAttachedToCase?.limiter?.value ?? 0;
+    return this.attachmentService.countAlertsWithinCase(caseId);
   }
 
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
-    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
-    const totalAlertsInReq = legacyRequests
-      .filter<AlertAttachmentPayload>(isCommentRequestTypeAlert)
-      .reduce((count, attachment) => {
-        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
+    return requests.reduce((count, attachment) => {
+      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
+        const legacyAlert = attachment as AlertAttachmentPayload;
+        const ids = toStringArray(legacyAlert.alertId);
         return count + ids.length;
-      }, 0);
-
-    return totalAlertsInReq;
+      }
+      if (isUnifiedAlertAttachment(attachment)) {
+        const ids = Array.isArray(attachment.attachmentId)
+          ? attachment.attachmentId
+          : [attachment.attachmentId];
+        return count + ids.length;
+      }
+      return count;
+    }, 0);
   }
 }

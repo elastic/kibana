@@ -7,14 +7,16 @@
 
 import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
-import type { Streams } from '@kbn/streams-schema';
 import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/sig_events/features/route';
 import { useKibana } from '../use_kibana';
 import { getLast24HoursTimeRange } from '../../util/time_range';
 
 interface StreamFeaturesApi {
+  /** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead */
   getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead */
   scheduleFeaturesIdentificationTask: () => Promise<void>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute with action: 'cancel' instead */
   cancelFeaturesIdentificationTask: () => Promise<void>;
   deleteFeature: (uuid: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
@@ -22,7 +24,7 @@ interface StreamFeaturesApi {
   restoreFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
-export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
+export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
   const {
     dependencies: {
       start: {
@@ -39,7 +41,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_status', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
           },
         });
       },
@@ -48,7 +50,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
             body: {
               action: 'schedule',
               to,
@@ -61,7 +63,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
             body: {
               action: 'cancel',
             },
@@ -72,7 +74,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
           signal,
           params: {
-            path: { name: definition.name, uuid },
+            path: { name: streamName, uuid },
           },
         });
       },
@@ -80,7 +82,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
             body: {
               operations: uuids.map((id) => ({ delete: { id } })),
             },
@@ -91,7 +93,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
             body: {
               operations: uuids.map((id) => ({ exclude: { id } })),
             },
@@ -102,7 +104,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
-            path: { name: definition.name },
+            path: { name: streamName },
             body: {
               operations: uuids.map((id) => ({ restore: { id } })),
             },
@@ -110,6 +112,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         });
       },
     }),
-    [streamsRepositoryClient, signal, definition.name]
+    [streamsRepositoryClient, signal, streamName]
   );
 }

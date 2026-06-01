@@ -58,7 +58,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
 
@@ -91,10 +91,10 @@ describe('updateGlobalNavigation', () => {
           deepLinks: [
             {
               ...caseRoute,
-              visibleIn: ['sideNav', 'globalSearch'], // visibility set
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'], // visibility set
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -126,7 +126,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -162,10 +162,10 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
 
@@ -199,70 +199,10 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
-        });
-      });
-
-      it('hides the alerts v2 deep link when alerting v2 is not enabled', () => {
-        const capabilities = {
-          logs: { show: true },
-          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown as ApplicationStart['capabilities'];
-
-        const alertsV2Route = {
-          id: 'alerts_v2',
-          title: 'Alerts v2',
-          order: 8002,
-          path: '/alerts-v2',
-          visibleIn: [],
-        };
-
-        const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
-
-        updateGlobalNavigation({ capabilities, deepLinks: [alertsV2Route], updater$, pricing });
-
-        expect(callback).toHaveBeenCalledWith({
-          deepLinks: [],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
-        });
-      });
-
-      it('shows the alerts v2 deep link when alerting v2 capability is present', () => {
-        const capabilities = {
-          alertingVTwo: {},
-          logs: { show: true },
-          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
-        } as unknown as ApplicationStart['capabilities'];
-
-        const alertsV2Route = {
-          id: 'alerts_v2',
-          title: 'Alerts v2',
-          order: 8002,
-          path: '/alerts-v2',
-          visibleIn: [],
-        };
-
-        const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
-
-        updateGlobalNavigation({ capabilities, deepLinks: [alertsV2Route], updater$, pricing });
-
-        expect(callback).toHaveBeenCalledWith({
-          deepLinks: [
-            {
-              ...alertsV2Route,
-              visibleIn: ['sideNav', 'globalSearch'],
-            },
-          ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });

@@ -34,7 +34,7 @@ import type {
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import * as i18n from '../execution_log_table/translations';
+import * as i18n from './translations';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -117,55 +117,56 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
         ? experimentalDataView
         : dataViewSpecToViewBase(oldSourcererDataView);
 
-      if (uuidDataViewField != null && dataViewAsViewBase) {
-        cachedGlobalQueryState.current = { filters, query, timerange };
-        const filter = buildFilter(
-          dataViewAsViewBase,
-          uuidDataViewField,
-          FILTERS.PHRASE,
-          false,
-          false,
-          executionId,
-          null
-        );
-        dispatch(
-          setAbsoluteRangeDatePicker({
-            id: InputsModelId.global,
-            from: moment(executionStart).subtract(1, 'days').toISOString(),
-            to: moment(executionStart).add(1, 'days').toISOString(),
-          })
-        );
-        filterManager.removeAll();
-        filterManager.addFilters(filter);
-        dispatch(
-          setSearchBarFilter({ id: InputsModelId.global, filters: filterManager.getFilters() })
-        );
-        dispatch(setFilterQuery({ id: InputsModelId.global, query: '', language: 'kuery' }));
-        selectAlertsTab();
-        successToastId.current = addSuccess(
-          {
-            title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-            text: toMountPoint(
-              <>
-                <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton size="s" onClick={resetGlobalQueryState}>
-                      {i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>,
-              startServices
-            ),
-          },
-          { toastLifeTimeMs: 10 * 60 * 1000 }
-        ).id;
-      } else {
+      if (uuidDataViewField == null || !dataViewAsViewBase) {
         addError(i18n.ACTIONS_FIELD_NOT_FOUND_ERROR, {
           title: i18n.ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE,
         });
+        return;
       }
+
+      cachedGlobalQueryState.current = { filters, query, timerange };
+      const filter = buildFilter(
+        dataViewAsViewBase,
+        uuidDataViewField,
+        FILTERS.PHRASE,
+        false,
+        false,
+        executionId,
+        null
+      );
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: moment(executionStart).subtract(1, 'days').toISOString(),
+          to: moment(executionStart).add(1, 'days').toISOString(),
+        })
+      );
+      filterManager.removeAll();
+      filterManager.addFilters(filter);
+      dispatch(
+        setSearchBarFilter({ id: InputsModelId.global, filters: filterManager.getFilters() })
+      );
+      dispatch(setFilterQuery({ id: InputsModelId.global, query: '', language: 'kuery' }));
+      selectAlertsTab();
+      successToastId.current = addSuccess(
+        {
+          title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
+          text: toMountPoint(
+            <>
+              <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={resetGlobalQueryState}>
+                    {i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>,
+            startServices
+          ),
+        },
+        { toastLifeTimeMs: 10 * 60 * 1000 }
+      ).id;
     },
     [
       newDataViewPickerEnabled,

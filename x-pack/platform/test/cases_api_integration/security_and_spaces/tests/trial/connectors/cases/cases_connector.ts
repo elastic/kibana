@@ -30,7 +30,11 @@ import {
 } from '@kbn/cases-plugin/server/common/constants';
 import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_RULES_SAVED_OBJECT,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+} from '@kbn/cases-plugin/common/constants';
 import type { User } from '../../../../../common/lib/authentication/types';
 import {
   globalRead,
@@ -77,6 +81,9 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
       await clearOracleRecords(es, kibanaServer);
+      await kibanaServer.uiSettings.update({
+        [MAX_OPEN_CASES_ADVANCED_SETTING]: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+      });
     });
 
     describe('validation', () => {
@@ -169,19 +176,19 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(res.serviceMessage).to.contain('→ at timeWindow');
       });
 
-      it('returns 400 when maximumCasesToOpen > 20', async () => {
+      it('returns 400 when maximumCasesToOpen exceeds the configured maximum', async () => {
+        await kibanaServer.uiSettings.update({
+          [MAX_OPEN_CASES_ADVANCED_SETTING]: 30,
+        });
+
         const res = await executeSystemConnector({
           supertest,
           connectorId,
-          req: getRequest({ maximumCasesToOpen: 21 }),
+          req: getRequest({ maximumCasesToOpen: 31 }),
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.contain('Request validation failed');
-        expect(res.serviceMessage).to.match(
-          /(expected number to be <=20|Number must be less than or equal to 20)/
-        );
-        expect(res.serviceMessage).to.contain('→ at maximumCasesToOpen');
+        expect(res.serviceMessage).to.be('Maximum cases to open must be between 1 and 30.');
       });
 
       it('returns 400 when maximumCasesToOpen < 1', async () => {

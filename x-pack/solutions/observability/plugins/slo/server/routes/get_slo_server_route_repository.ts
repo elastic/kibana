@@ -6,17 +6,32 @@
  */
 
 import { getSloRouteRepository } from './slo/route';
+import type { batchGetCompositeSLORoute } from './slo/composite_slo/batch_get_composite_slo';
+import type { createCompositeSLORoute } from './slo/composite_slo/create_composite_slo';
+import type { getCompositeSLORoute } from './slo/composite_slo/get_composite_slo';
+import type { getCompositeSLOSuggestionsRoute } from './slo/composite_slo/get_composite_slo_suggestions';
+import type { findCompositeSLORoute } from './slo/composite_slo/find_composite_slo';
+import type { updateCompositeSLORoute } from './slo/composite_slo/update_composite_slo';
+import type { deleteCompositeSLORoute } from './slo/composite_slo/delete_composite_slo';
+import type { fetchCompositeHistoricalSummaryRoute } from './slo/composite_slo/fetch_composite_historical_summary';
+import type { postCompositeSloSummaryRefreshRoute } from './slo/composite_slo/post_composite_slo_summary_refresh';
 
 interface RouteRepositoryOptions {
   isServerless?: boolean;
-  isCompositeSloEnabled?: boolean;
 }
 
-export function getSloServerRouteRepository({
-  isServerless,
-  isCompositeSloEnabled,
-}: RouteRepositoryOptions = {}) {
-  return getSloRouteRepository({ isServerless, isCompositeSloEnabled });
+export function getSloServerRouteRepository({ isServerless }: RouteRepositoryOptions = {}) {
+  return getSloRouteRepository({ isServerless });
 }
 
-export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository>;
+type CompositeRoutes = typeof batchGetCompositeSLORoute &
+  typeof createCompositeSLORoute &
+  typeof getCompositeSLORoute &
+  typeof getCompositeSLOSuggestionsRoute &
+  typeof findCompositeSLORoute &
+  typeof updateCompositeSLORoute &
+  typeof deleteCompositeSLORoute &
+  typeof fetchCompositeHistoricalSummaryRoute &
+  typeof postCompositeSloSummaryRefreshRoute;
+
+export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository> & CompositeRoutes;

@@ -11,14 +11,18 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
-import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/types';
 import type { IntlShape } from '@kbn/i18n-react';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
-import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
+import {
+  getColumnsWithTimeField,
+  getSharingData,
+  showPublicUrlSwitch,
+} from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -35,16 +39,26 @@ interface BuildShareOptionsParams {
 }
 
 /**
+ * Specifies an explicit type for the sharing data of the Discover app.
+ */
+type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
+
+/**
  * Builds share options for both share modal and export integrations
  */
-const buildShareOptions = async ({
+export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
-}: BuildShareOptionsParams): Promise<Omit<ShowShareMenuOptions, 'anchorElement' | 'asExport'>> => {
+}: BuildShareOptionsParams): Promise<
+  Omit<
+    ShowShareMenuOptions<DiscoverAppLocatorParams, ReportingCSVSharingData>,
+    'anchorElement' | 'asExport'
+  >
+> => {
   const { dataView, isEsqlMode } = discoverParams;
 
   const searchSource = createSearchSource({
@@ -54,28 +68,24 @@ const buildShareOptions = async ({
     services,
   });
 
-  const searchSourceSharingData = await getSharingData(
-    searchSource,
-    currentTab.appState,
-    services,
-    isEsqlMode
-  );
+  const searchSourceSharingData = await getSharingData(searchSource, currentTab.appState, services);
 
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
   const timeRange = timefilter.getTime();
+  const absoluteTimeRange = timefilter.getAbsoluteTime();
   const refreshInterval = timefilter.getRefreshInterval();
   const filters = services.filterManager.getFilters();
 
   // Share -> Get links -> Snapshot
-  const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
+  const params: DiscoverSharingData['locatorParams'][number]['params'] = {
     ...omit(currentTab.appState, 'dataSource'),
     ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
     ...(dataView?.isPersisted()
       ? { dataViewId: dataView?.id }
       : { dataViewSpec: dataView?.toMinimalSpec() }),
     filters,
-    timeRange: timeRange ?? undefined,
+    timeRange,
     refreshInterval,
   };
 
@@ -111,6 +121,8 @@ const buildShareOptions = async ({
     allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
     shareableUrl,
     shareableUrlForSavedObject,
+    // Share URL gets the unmodified `columns` array (without the automatically added time field)
+    // so it does not trigger the unsaved changes badge when user opens the link
     shareableUrlLocatorParams: { locator, params },
     objectId: persistedDiscoverSession?.id,
     objectType: 'search',
@@ -140,7 +152,25 @@ const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [{ id: locator.id, params }],
+      locatorParams: [
+        {
+          id: locator.id,
+          version: services.metadata.version,
+          params: isEsqlMode
+            ? {
+                ...params,
+                // in ES|QL mode this `columns` array will be used when generating CSV on Discover page (CSV v2)
+                // this way the time field will be included only for CSV export and not for Share URL
+                columns: getColumnsWithTimeField({
+                  columns: (params.columns as string[]) || [],
+                  timeFieldName: dataView?.timeFieldName,
+                  uiSettings: services.uiSettings,
+                  query: currentTab.appState.query,
+                }),
+              }
+            : params,
+        },
+      ],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:
@@ -149,6 +179,7 @@ const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };
@@ -257,7 +288,7 @@ export const getShareAppMenuItem = ({
   const menuItems: AppMenuItemType[] = [
     {
       id: AppMenuActionId.share,
-      order: 3,
+      order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -286,7 +317,7 @@ export const getShareAppMenuItem = ({
       id: AppMenuActionId.export,
       order: 8,
       label: i18n.translate('discover.localMenu.exportTitle', {
-        defaultMessage: 'Export',
+        defaultMessage: 'Export tab results',
       }),
       iconType: 'upload',
       testId: 'exportTopNavButton',

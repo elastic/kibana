@@ -24,14 +24,21 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
  */
 export function createPlaywrightEvalsConfig({
   testDir,
+  testIgnore,
   repetitions,
   timeout,
+  runGlobalSetup,
 }: {
   testDir: string;
+  testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
+  runGlobalSetup?: boolean;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
-  const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({ testDir });
+  const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
+    testDir,
+    runGlobalSetup,
+  });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
   const connectors = getAvailableConnectors();
@@ -64,6 +71,15 @@ export function createPlaywrightEvalsConfig({
   const experimentRepetitions =
     parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
 
+  // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
+  // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
+  // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
+  // has unknown teardown project 'teardown-local'".
+  const hookProjects =
+    projects?.filter(
+      (project) => project.name === 'setup-local' || project.name === 'teardown-local'
+    ) ?? [];
+
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
     return (
@@ -95,9 +111,10 @@ export function createPlaywrightEvalsConfig({
     use: {
       serversConfigDir: (use as ScoutTestOptions).serversConfigDir,
     },
-    projects: nextProjects,
+    projects: [...hookProjects, ...nextProjects],
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    ...(testIgnore !== undefined ? { testIgnore } : {}),
   });
 }

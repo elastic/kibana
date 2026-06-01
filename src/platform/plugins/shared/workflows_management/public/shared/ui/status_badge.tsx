@@ -68,6 +68,11 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
       tokenColor: 'euiColorVis9' as const,
     },
+    [ExecutionStatus.WAITING_FOR_CHILD]: {
+      color: euiTheme.colors.warning,
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
+    },
     [ExecutionStatus.CANCELLED]: {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -108,6 +113,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
   [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',
+  [ExecutionStatus.WAITING_FOR_CHILD]: 'hourglass',
   [ExecutionStatus.CANCELLED]: 'crossCircle',
   [ExecutionStatus.SKIPPED]: 'minusCircle',
 };
@@ -117,7 +123,10 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
     return <EuiLoadingSpinner size="m" />;
   }
 
-  if (status === ExecutionStatus.WAITING_FOR_INPUT) {
+  if (
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.WAITING_FOR_CHILD
+  ) {
     return (
       <EuiIcon
         type="hourglass"

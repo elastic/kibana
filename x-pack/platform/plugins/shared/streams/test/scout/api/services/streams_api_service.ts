@@ -7,12 +7,20 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { InsightImpactLevel, RoutingStatus, Streams } from '@kbn/streams-schema';
-import { getImpactLevel, type Insight } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
+import {
+  getImpactLevel,
+  type Insight,
+  type InsightImpactLevel,
+} from '@kbn/streams-schema/src/insights';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 
 export type { Insight };
 
@@ -36,6 +44,7 @@ export interface StreamsTestApiService {
   createQueryStream: (streamName: string, esql: string) => Promise<void>;
   updateStream: (streamName: string, body: { ingest: IngestUpsertRequest }) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
+  restoreDataStream: (streamName: string) => Promise<void>;
   forkStream: (
     parentStream: string,
     childStream: string,
@@ -63,6 +72,13 @@ export interface StreamsTestApiService {
   disableSignificantEvents: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
+  enableDraftStreams: () => Promise<void>;
+  disableDraftStreams: () => Promise<void>;
+  forkDraftStream: (
+    parentStream: string,
+    childStream: string,
+    condition: Condition
+  ) => Promise<void>;
   createEsqlView: (viewName: string, query: string) => Promise<void>;
   deleteEsqlView: (viewName: string) => Promise<void>;
   runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
@@ -171,6 +187,15 @@ export function getStreamsTestApiService({
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/streams/${streamName}`,
+        });
+      });
+    },
+
+    async restoreDataStream(streamName: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `/internal/streams/${streamName}/_restore_data_stream`,
         });
       });
     },
@@ -321,6 +346,38 @@ export function getStreamsTestApiService({
       await measurePerformanceAsync(log, 'streamsTestApi.disableWiredStreamViews', async () => {
         await kbnClient.uiSettings.update({
           'observability:streamsEnableWiredStreamViews': false,
+        });
+      });
+    },
+
+    async enableDraftStreams() {
+      await measurePerformanceAsync(log, 'streamsTestApi.enableDraftStreams', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+        });
+      });
+    },
+
+    async disableDraftStreams() {
+      await measurePerformanceAsync(log, 'streamsTestApi.disableDraftStreams', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        });
+      });
+    },
+
+    async forkDraftStream(parentStream: string, childStream: string, condition: Condition) {
+      await measurePerformanceAsync(log, 'streamsTestApi.forkDraftStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `/api/streams/${parentStream}/_fork`,
+          body: {
+            where: condition,
+            stream: { name: childStream },
+            draft: true,
+          },
         });
       });
     },

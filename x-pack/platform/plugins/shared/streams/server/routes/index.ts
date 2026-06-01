@@ -18,7 +18,6 @@ import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { internalPromptsRoutes } from './internal/sig_events/prompts/route';
 import { internalSignificantEventsRoutes } from './internal/sig_events/significant_events/route';
-import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { significantEventsRoutes } from './sig_events/streams/significant_events/route';
 import { queryRoutes } from './sig_events/queries/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
@@ -29,11 +28,18 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/sig_events/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/sig_events/features/route';
+import { identifyFeaturesRoutes as internalIdentifyFeaturesRoutes } from './internal/sig_events/features/identify_route';
 import { internalInsightsRoutes } from './internal/sig_events/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/sig_events/queries/route';
+import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/eligible_streams_route';
+import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
+import { internalMemoryRoutes } from './internal/memory/route';
+import { internalSigEventsDetectionsRoutes } from './internal/sig_events/detections/route';
+import { internalSigEventsDiscoveriesRoutes } from './internal/sig_events/discoveries/route';
+import { internalSigEventsEventsRoutes } from './internal/sig_events/events/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -46,16 +52,22 @@ export const streamsRouteRepository = {
   ...timeSeriesRoutes,
   ...internalPromptsRoutes,
   ...internalSignificantEventsRoutes,
-  ...internalSignificantEventsSettingsRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalFeatureRoutes,
+  ...internalIdentifyFeaturesRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
   ...internalQueriesRoutes,
+  ...internalEligibleStreamsRoutes,
+  ...internalSignificantEventsSettingsRoutes,
+  ...internalMemoryRoutes,
+  ...internalSigEventsDetectionsRoutes,
+  ...internalSigEventsDiscoveriesRoutes,
+  ...internalSigEventsEventsRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

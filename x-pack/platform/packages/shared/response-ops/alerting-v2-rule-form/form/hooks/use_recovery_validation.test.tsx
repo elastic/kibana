@@ -62,213 +62,54 @@ describe('useRecoveryValidation', () => {
     });
   };
 
-  describe('computed state', () => {
-    it('sets hasEvaluationCondition to true when evaluation condition exists', () => {
+  describe('recoveryMatchesEvaluation', () => {
+    it('is true when base queries are identical', () => {
       const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'query', query: { base: 'FROM logs-*' } },
       });
 
-      expect(result.current.hasEvaluationCondition).toBe(true);
+      expect(result.current.recoveryMatchesEvaluation).toBe(true);
     });
 
-    it('sets hasEvaluationCondition to false when no evaluation condition', () => {
+    it('is true when base queries match case-insensitively', () => {
+      const { result } = renderValidationHook({
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'query', query: { base: 'from logs-*' } },
+      });
+
+      expect(result.current.recoveryMatchesEvaluation).toBe(true);
+    });
+
+    it('is false when queries differ', () => {
+      const { result } = renderValidationHook({
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'query', query: { base: 'FROM metrics-*' } },
+      });
+
+      expect(result.current.recoveryMatchesEvaluation).toBe(false);
+    });
+
+    it('is false when recovery query is empty', () => {
       const { result } = renderValidationHook({
         evaluation: { query: { base: 'FROM logs-*' } },
       });
 
-      expect(result.current.hasEvaluationCondition).toBe(false);
+      expect(result.current.recoveryMatchesEvaluation).toBe(false);
     });
 
-    it('sets hasEvaluationCondition to false when evaluation condition is whitespace', () => {
+    it('is false when evaluation query is empty', () => {
       const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: '   ' } },
+        evaluation: { query: { base: '' } },
+        recoveryPolicy: { type: 'query', query: { base: 'FROM logs-*' } },
       });
 
-      expect(result.current.hasEvaluationCondition).toBe(false);
-    });
-
-    describe('assembledEvaluationQuery', () => {
-      it('assembles base and condition', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        });
-
-        expect(result.current.assembledEvaluationQuery).toBe('FROM logs-* | WHERE status > 500');
-      });
-
-      it('returns just base when no condition', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-        });
-
-        expect(result.current.assembledEvaluationQuery).toBe('FROM logs-*');
-      });
-
-      it('returns empty string when no base', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: '' } },
-        });
-
-        expect(result.current.assembledEvaluationQuery).toBe('');
-      });
-    });
-
-    describe('effectiveBaseQuery (split mode)', () => {
-      it('returns recovery base query when provided', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { base: 'FROM metrics-*', condition: 'WHERE status < 200' },
-          },
-        });
-
-        expect(result.current.effectiveBaseQuery).toBe('FROM metrics-*');
-      });
-
-      it('falls back to evaluation base query when recovery base is empty', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { condition: 'WHERE status < 200' },
-          },
-        });
-
-        expect(result.current.effectiveBaseQuery).toBe('FROM logs-*');
-      });
-
-      it('returns empty string in non-split mode', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { base: 'FROM metrics-*' },
-          },
-        });
-
-        expect(result.current.effectiveBaseQuery).toBe('');
-      });
-    });
-
-    describe('assembledRecoveryQuery', () => {
-      it('assembles base + condition in split mode', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { condition: 'WHERE status < 200' },
-          },
-        });
-
-        expect(result.current.assembledRecoveryQuery).toBe('FROM logs-* | WHERE status < 200');
-      });
-
-      it('returns just effective base in split mode when no recovery condition', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { base: 'FROM metrics-*' },
-          },
-        });
-
-        expect(result.current.assembledRecoveryQuery).toBe('FROM metrics-*');
-      });
-
-      it('returns recovery base query in non-split mode', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { base: 'FROM metrics-* | STATS count = COUNT(*)' },
-          },
-        });
-
-        expect(result.current.assembledRecoveryQuery).toBe(
-          'FROM metrics-* | STATS count = COUNT(*)'
-        );
-      });
-
-      it('returns empty string in non-split mode when no recovery base', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-        });
-
-        expect(result.current.assembledRecoveryQuery).toBe('');
-      });
-    });
-
-    describe('recoveryMatchesEvaluation', () => {
-      it('is true when assembled queries are identical', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-          recoveryPolicy: { type: 'query', query: { base: 'FROM logs-*' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(true);
-      });
-
-      it('is true when assembled queries match case-insensitively', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-          recoveryPolicy: { type: 'query', query: { base: 'from logs-*' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(true);
-      });
-
-      it('is true in split mode when condition matches', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: { type: 'query', query: { condition: 'WHERE status > 500' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(true);
-      });
-
-      it('is false when queries differ', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-          recoveryPolicy: { type: 'query', query: { base: 'FROM metrics-*' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(false);
-      });
-
-      it('is false in split mode when base differs even if condition matches', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-          recoveryPolicy: {
-            type: 'query',
-            query: { base: 'FROM metrics-*', condition: 'WHERE status > 500' },
-          },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(false);
-      });
-
-      it('is false when recovery query is empty', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: 'FROM logs-*' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(false);
-      });
-
-      it('is false when evaluation query is empty', () => {
-        const { result } = renderValidationHook({
-          evaluation: { query: { base: '' } },
-          recoveryPolicy: { type: 'query', query: { base: 'FROM logs-*' } },
-        });
-
-        expect(result.current.recoveryMatchesEvaluation).toBe(false);
-      });
+      expect(result.current.recoveryMatchesEvaluation).toBe(false);
     });
   });
 
   describe('grouping validation', () => {
-    it('passes assembledRecoveryQuery to useRecoveryQueryGroupingValidation', () => {
+    it('passes recovery base query to useRecoveryQueryGroupingValidation', () => {
       renderValidationHook({
         evaluation: { query: { base: 'FROM logs-*' } },
         recoveryPolicy: {
@@ -308,7 +149,7 @@ describe('useRecoveryValidation', () => {
     });
   });
 
-  describe('fullBaseQueryRules (non-split mode)', () => {
+  describe('fullBaseQueryRules', () => {
     it('includes a required message', () => {
       const { result } = renderValidationHook();
 
@@ -412,183 +253,18 @@ describe('useRecoveryValidation', () => {
     });
   });
 
-  describe('splitBaseQueryRules (split mode base query)', () => {
-    it('validate returns true for undefined value', () => {
-      const { result } = renderValidationHook();
-
-      expect(result.current.splitBaseQueryRules.validate(undefined)).toBe(true);
-    });
-
-    it('validate returns true for empty string', () => {
-      const { result } = renderValidationHook();
-
-      expect(result.current.splitBaseQueryRules.validate('')).toBe(true);
-    });
-
-    it('validate returns syntax error for invalid ES|QL', () => {
-      validateEsqlQuery.mockReturnValue('Invalid ES|QL query: unexpected token');
-
-      const { result } = renderValidationHook();
-
-      expect(result.current.splitBaseQueryRules.validate('INVALID')).toBe(
-        'Invalid ES|QL query: unexpected token'
-      );
-    });
-
-    it('validate returns true for valid ES|QL (no grouping or differs checks)', () => {
+  describe('watched values', () => {
+    it('exposes watched form values', () => {
       const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-      });
-
-      // Same as evaluation base — splitBaseQueryRules should NOT check differs-from-eval
-      expect(result.current.splitBaseQueryRules.validate('FROM logs-*')).toBe(true);
-    });
-
-    it('does not have a required rule', () => {
-      const { result } = renderValidationHook();
-
-      expect((result.current.splitBaseQueryRules as any).required).toBeUndefined();
-    });
-  });
-
-  describe('conditionRules (split mode condition)', () => {
-    it('validate returns error when neither base nor condition is provided', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: {} },
-      });
-
-      const error = result.current.conditionRules.validate(undefined);
-
-      expect(typeof error).toBe('string');
-      expect(error).toContain(
-        'Either a recovery base query or recovery condition must be specified'
-      );
-    });
-
-    it('validate returns error when both base and condition are empty strings', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: { base: '', condition: '' } },
-      });
-
-      const error = result.current.conditionRules.validate('');
-
-      expect(typeof error).toBe('string');
-      expect(error).toContain(
-        'Either a recovery base query or recovery condition must be specified'
-      );
-    });
-
-    it('validate returns error when assembled queries match (same base + same condition)', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: { condition: 'WHERE status > 500' } },
-      });
-
-      const error = result.current.conditionRules.validate('WHERE status > 500');
-
-      expect(typeof error).toBe('string');
-      expect(error).toContain('must differ from the evaluation query');
-    });
-
-    it('validate returns error case-insensitively when assembled queries match', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: { condition: 'where STATUS > 500' } },
-      });
-
-      const error = result.current.conditionRules.validate('where STATUS > 500');
-
-      expect(typeof error).toBe('string');
-      expect(error).toContain('must differ from the evaluation query');
-    });
-
-    it('validate passes when base differs even if condition matches evaluation', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: {
-          type: 'query',
-          query: { base: 'FROM metrics-*', condition: 'WHERE status > 500' },
-        },
-      });
-
-      // Different base means assembled queries differ, even with the same condition
-      expect(result.current.conditionRules.validate('WHERE status > 500')).toBe(true);
-    });
-
-    it('validate returns grouping error when grouping fields are missing', () => {
-      const groupingError = 'Recovery query is missing columns: host.name';
-      mockUseRecoveryQueryGroupingValidation.mockReturnValue({
-        validationError: groupingError,
-        missingColumns: ['host.name'],
-        isValidating: false,
-        queryColumns: [],
-        queryError: undefined,
-        recoveryColumns: [],
-      });
-
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: { condition: 'WHERE status < 200' } },
-      });
-
-      const error = result.current.conditionRules.validate('WHERE status < 200');
-
-      expect(error).toBe(groupingError);
-    });
-
-    it('validate returns true when condition differs from evaluation', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: { condition: 'WHERE status < 200' } },
-      });
-
-      expect(result.current.conditionRules.validate('WHERE status < 200')).toBe(true);
-    });
-
-    it('validate returns true when only base is provided (no condition)', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
+        evaluation: { query: { base: 'FROM logs-*' } },
         recoveryPolicy: {
           type: 'query',
           query: { base: 'FROM metrics-*' },
         },
       });
 
-      expect(result.current.conditionRules.validate(undefined)).toBe(true);
-    });
-
-    it('validate checks "at least one" before differs-from-eval', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: { type: 'query', query: {} },
-      });
-
-      // Empty condition with no base — should get "at least one" error, not "differs" error
-      const error = result.current.conditionRules.validate('   ');
-
-      expect(typeof error).toBe('string');
-      expect(error).toContain(
-        'Either a recovery base query or recovery condition must be specified'
-      );
-    });
-  });
-
-  describe('watched values', () => {
-    it('exposes watched form values', () => {
-      const { result } = renderValidationHook({
-        evaluation: { query: { base: 'FROM logs-*', condition: 'WHERE status > 500' } },
-        recoveryPolicy: {
-          type: 'query',
-          query: { base: 'FROM metrics-*', condition: 'WHERE status < 200' },
-        },
-      });
-
       expect(result.current.evaluationBaseQuery).toBe('FROM logs-*');
-      expect(result.current.evaluationCondition).toBe('WHERE status > 500');
       expect(result.current.recoveryBaseQuery).toBe('FROM metrics-*');
-      expect(result.current.recoveryCondition).toBe('WHERE status < 200');
     });
   });
 });

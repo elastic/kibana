@@ -37,6 +37,7 @@ import {
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
@@ -76,6 +77,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deleteConversations();
     deletePrompts();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     createAzureConnector();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);

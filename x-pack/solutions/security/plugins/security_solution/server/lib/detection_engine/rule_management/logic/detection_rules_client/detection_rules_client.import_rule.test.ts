@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -20,6 +21,7 @@ import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -31,6 +33,7 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const rulesAuthz = getMockRulesAuthz();
   const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   const allowMissingConnectorSecrets = true;
@@ -52,6 +55,7 @@ describe('DetectionRulesClient.importRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
@@ -79,6 +83,9 @@ describe('DetectionRulesClient.importRule', () => {
           }),
         }),
         allowMissingConnectorSecrets,
+        changeTracking: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleImport,
+        }),
       })
     );
   });
@@ -124,6 +131,9 @@ describe('DetectionRulesClient.importRule', () => {
             }),
           }),
           id: existingRule.id,
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleImport,
+          }),
         })
       );
     });

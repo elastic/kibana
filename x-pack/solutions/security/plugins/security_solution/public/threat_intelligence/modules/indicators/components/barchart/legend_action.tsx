@@ -101,9 +101,10 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={BUTTON_LABEL}
     >
       <ReduxProvider store={store}>
-        <EuiContextMenuPanel size="s" items={popoverItems} />
+        <EuiContextMenuPanel items={popoverItems} />
       </ReduxProvider>
     </EuiPopover>
   );

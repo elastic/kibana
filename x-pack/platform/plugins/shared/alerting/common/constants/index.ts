@@ -13,9 +13,10 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
 export { PLUGIN } from './plugin';
+export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';
 export { gapStatus, gapFillStatus } from './gap_status';
 export type { GapStatus, GapFillStatus } from './gap_status';
-export { gapReasonType } from './gap_reason';
+export { gapReasonType, DEFAULT_EXCLUDED_GAP_REASONS } from './gap_reason';
 export type { GapReason, GapReasonType } from './gap_reason';
 export { alertDeleteCategoryIds } from './alert_delete';
 export type { BackfillInitiator } from './backfill';

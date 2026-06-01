@@ -22,7 +22,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  showAlertingV2: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -75,6 +76,10 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'email',
+        },
+        {
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
@@ -99,6 +104,10 @@ export const createAiNavigationTree = (
           icon: 'reporter',
         },
       ],
+    },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
     },
   ],
   footer: [
@@ -150,7 +159,11 @@ export const createAiNavigationTree = (
       children: [
         {
           title: i18nStrings.stackManagementV2.access.title,
-          children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+          children: [
+            { link: 'management:api_keys' },
+            { link: 'management:application_connections' },
+            { link: 'management:roles' },
+          ],
         },
         {
           title: i18nStrings.stackManagementV2.organization.title,
@@ -164,6 +177,20 @@ export const createAiNavigationTree = (
             },
           ],
         },
+        ...(showAlertingV2
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:action_policies' as const },
+                  { link: 'management:execution_history' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [
@@ -180,6 +207,14 @@ export const createAiNavigationTree = (
             {
               link: 'management:trained_models',
             },
+          ],
+        },
+        {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
           ],
         },
         {

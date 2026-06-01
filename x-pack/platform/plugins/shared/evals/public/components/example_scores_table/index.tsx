@@ -19,11 +19,15 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { EvaluationRunDatasetExample, EvaluationScoreDocument } from '@kbn/evals-common';
+import type {
+  EvaluationExperimentDatasetExample,
+  EvaluationScoreDocument,
+} from '@kbn/evals-common';
 import * as i18n from './translations';
 
 const EXAMPLE_ID_VISIBLE_LENGTH = 16;
@@ -139,11 +143,11 @@ interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
   repetitionIndices: number[];
-  scoresByRepetition: Record<number, EvaluationRunDatasetExample['scores']>;
+  scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
-  examples: EvaluationRunDatasetExample[];
+  examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
   onExampleClick: (exampleId: string) => void;
   onTraceClick: (traceId: string, exampleId: string) => void;
@@ -200,7 +204,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         });
 
         const scoresByRepetition = scoreDocuments.reduce<
-          Record<number, EvaluationRunDatasetExample['scores']>
+          Record<number, EvaluationExperimentDatasetExample['scores']>
         >((acc, scoreDoc) => {
           const repetitionIndex = scoreDoc.task.repetition_index;
           const existingScores = acc[repetitionIndex] ?? [];
@@ -239,7 +243,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
   const getScoresForSelectedRepetition = (
     row: ExampleScoreRow
-  ): EvaluationRunDatasetExample['scores'] => {
+  ): EvaluationExperimentDatasetExample['scores'] => {
     const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
     return row.scoresByRepetition[selectedRepetitionIndex] ?? [];
   };
@@ -270,6 +274,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         paddingSize="none"
         transparentBackground
         fontSize="s"
+        isCopyable
       >
         {serializedValue}
       </EuiCodeBlock>
@@ -314,8 +319,13 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       name: i18n.COLUMN_EXAMPLE_ID,
       width: '120px',
       render: (exampleId: string, row: ExampleScoreRow) => {
-        const label =
-          row.exampleIndex != null ? `${row.exampleIndex + 1}: ${exampleId}` : exampleId;
+        // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
+        // Descriptive string IDs (e.g. "healthy-baseline") are shown as-is;
+        // the index prefix is omitted because the ID is self-explanatory.
+        const isNumericFallback = /^\d+$/.test(exampleId);
+        const label = isNumericFallback
+          ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
+          : exampleId;
         return (
           <EuiLink onClick={() => onExampleClick(exampleId)}>
             {truncate(label, EXAMPLE_ID_VISIBLE_LENGTH)}
@@ -386,12 +396,17 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {traceIds.map((traceId) => (
               <EuiFlexItem key={traceId} grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconType="apmTrace"
-                  onClick={() => onTraceClick(traceId, row.exampleId)}
-                  aria-label={i18n.getTraceButtonAriaLabel(traceId)}
-                />
+                <EuiToolTip
+                  content={i18n.getTraceButtonAriaLabel(traceId)}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    iconType="apmTrace"
+                    onClick={() => onTraceClick(traceId, row.exampleId)}
+                    aria-label={i18n.getTraceButtonAriaLabel(traceId)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

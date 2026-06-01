@@ -101,6 +101,7 @@ export async function getRuleIdsWithGaps(
       hasUnfilledIntervals: params.hasUnfilledIntervals,
       hasInProgressIntervals: params.hasInProgressIntervals,
       hasFilledIntervals: params.hasFilledIntervals,
+      excludedReasons: params.excludedReasons,
     });
 
     if (ruleTypes?.length) {

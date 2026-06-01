@@ -22,6 +22,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { deletePacksRequestParamsSchema } from '../../../common/api';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { policyHasPack, removePackFromPolicy } from './utils';
+import { deletePackResponseSchema } from './response_schemas';
 
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +44,11 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               typeof deletePacksRequestParamsSchema,
               DeletePacksRequestParamsSchema
             >(deletePacksRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => deletePackResponseSchema,
+            },
           },
         },
       },

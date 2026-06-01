@@ -74,20 +74,20 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+const mockSetFilters = jest.fn();
+const mockClearFilters = jest.fn();
+
+jest.mock('./export_filters_context', () => ({
+  useExportFiltersContext: () => ({
+    getFilters: jest.fn(),
+    setFilters: mockSetFilters,
+    clearFilters: mockClearFilters,
+    subscribe: jest.fn(() => () => undefined),
+  }),
+}));
+
 let capturedOnInitialStateChange: ((state: Partial<{ isCompareActive: boolean }>) => void) | null =
   null;
-
-jest.mock('@kbn/unified-data-table', () => ({
-  UnifiedDataTable: (props: {
-    onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
-  }) => {
-    capturedOnInitialStateChange = props.onInitialStateChange ?? null;
-
-    return <div data-test-subj="mockUnifiedDataTable" />;
-  },
-  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-  DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
-}));
 
 jest.mock('./results_flyout', () => ({
   OsqueryResultsFlyout: () => null,
@@ -168,10 +168,30 @@ const defaultProps = {
   agentIds: ['agent-1'],
 };
 
+let capturedUnifiedDataTableProps: Record<string, unknown> = {};
+
+// Mock that also captures props for assertions
+jest.mock('@kbn/unified-data-table', () => ({
+  UnifiedDataTable: (props: Record<string, unknown>) => {
+    capturedUnifiedDataTableProps = props;
+    capturedOnInitialStateChange =
+      (
+        props as {
+          onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
+        }
+      ).onInitialStateChange ?? null;
+
+    return <div data-test-subj="mockUnifiedDataTable" />;
+  },
+  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+  DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
+}));
+
 describe('UnifiedResultsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnInitialStateChange = null;
+    capturedUnifiedDataTableProps = {};
     transformEdgesToRecordsMock.mockReturnValue([]);
   });
 
@@ -230,6 +250,131 @@ describe('UnifiedResultsTable', () => {
       });
 
       expect(screen.getByTestId('pagination-button-0')).toBeInTheDocument();
+    });
+  });
+
+  describe('ECS-mapped column visibility', () => {
+    it('should pass visible columns derived from result data to UnifiedDataTable', () => {
+      const mockRows = [{ id: 'row-1', raw: {}, flattened: {} }] as never;
+      transformEdgesToRecordsMock.mockReturnValue(mockRows);
+      setupMocks({ rows: [{}], total: 1 });
+      useAllResultsMock.mockReturnValue({
+        data: {
+          edges: [{}],
+          total: 1,
+          columns: ['osquery.days.number', 'osquery.hostname', 'agent.id'],
+        },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      // UnifiedDataTable should receive columns prop
+      expect(capturedUnifiedDataTableProps).toHaveProperty('columns');
+      const columns = capturedUnifiedDataTableProps.columns as string[];
+      expect(columns).toContain('osquery.days.number');
+      expect(columns).toContain('osquery.hostname');
+    });
+
+    it('should render the UnifiedDataTable component', () => {
+      const mockRows = [{ id: 'row-1', raw: {}, flattened: {} }] as never;
+      transformEdgesToRecordsMock.mockReturnValue(mockRows);
+      setupMocks({ rows: [{}], total: 1 });
+      useAllResultsMock.mockReturnValue({
+        data: { edges: [{}], total: 1, columns: ['osquery.uptime'] },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(screen.getByTestId('mockUnifiedDataTable')).toBeInTheDocument();
+    });
+  });
+
+  describe('empty state', () => {
+    it('should render results panel when no results', () => {
+      setupMocks({ rows: [], total: 0 });
+      useAllResultsMock.mockReturnValue({
+        data: { edges: [], total: 0, columns: [] },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(screen.getAllByTestId('osqueryResultsPanel').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('export filters publishing', () => {
+    // `useActionResults` seeds React Query with
+    // `initialData.aggregations.totalRowCount = 0`, so the publisher must rely
+    // on `isFetched && !isError` to distinguish "loaded, zero rows" from the
+    // initial-loading and error states. See the comment in
+    // `unified_results_table.tsx` next to `unfilteredTotal`.
+    const initialDataAggregations = { totalResponded: 0, totalRowCount: 0 };
+
+    it('keeps total undefined while the initial fetch is still in flight', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: initialDataAggregations },
+        isFetched: false,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: undefined })
+      );
+    });
+
+    it('keeps total undefined when the initial fetch errored, even though `isFetched` is true', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: initialDataAggregations },
+        isFetched: true,
+        isError: true,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: undefined })
+      );
+    });
+
+    it('publishes total: 0 only when the fetch confirms zero rows', () => {
+      setupMocks({ rows: [], total: 0 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: { totalResponded: 1, totalRowCount: 0 } },
+        isFetched: true,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: 0 })
+      );
+    });
+
+    it('publishes the actual row count when the fetch succeeds with results', () => {
+      setupMocks({ rows: [], total: 7 });
+      useActionResultsMock.mockReturnValue({
+        data: { aggregations: { totalResponded: 1, totalRowCount: 7 } },
+        isFetched: true,
+        isError: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
+        'test-action-id',
+        expect.objectContaining({ total: 7 })
+      );
     });
   });
 });

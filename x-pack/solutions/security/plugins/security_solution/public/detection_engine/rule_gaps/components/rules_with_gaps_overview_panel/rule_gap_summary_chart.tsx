@@ -27,6 +27,8 @@ import {
 } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue } from '../../constants';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { DONUT_HEIGHT } from './constants';
 import * as i18n from './translations';
@@ -50,6 +52,8 @@ interface RuleGapSummaryChartProps {
 
 export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enabled = true }) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const excludedReasons = services.uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const { scheduler } = useGapAutoFillSchedulerContext();
   const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
@@ -61,6 +65,7 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
     {
       gapRange: defaultRangeValue,
       gapFillStatuses: [],
+      excludedReasons,
       schedulerId: activeSchedulerId,
     },
     { enabled }

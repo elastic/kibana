@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -21,7 +20,8 @@ import {
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
-import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
+import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
+import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
@@ -43,6 +43,9 @@ export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
 }> = ({ entityType, entityIdentifier }) => {
+  // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
+  // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
+  const assistantContext = useMaybeAssistantContext();
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
   const {
@@ -78,8 +81,7 @@ export const EntityHighlightsAccordion: React.FC<{
   }, [aiConnectors, connectorId]);
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-  const { hasConnectorsReadPrivilege, hasAssistantPrivilege, isAssistantVisible } =
-    useAssistantAvailability();
+  const { hasConnectorsReadPrivilege, hasAssistantPrivilege } = useAssistantAvailability();
   const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
@@ -131,6 +133,12 @@ export const EntityHighlightsAccordion: React.FC<{
   }, []);
 
   const disabled = useMemo(() => {
+    // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
+    // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
+    if (!assistantContext) {
+      return true;
+    }
+
     if (!hasEntityHighlightsLicense) {
       return true;
     }
@@ -143,6 +151,7 @@ export const EntityHighlightsAccordion: React.FC<{
     // if user does not have access to assistant or agent builder, disable entity highlights
     return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
   }, [
+    assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,
@@ -176,7 +185,7 @@ export const EntityHighlightsAccordion: React.FC<{
                 id="xpack.securitySolution.flyout.entityDetails.highlights.title"
                 defaultMessage="Entity summary"
               />{' '}
-              <EuiIcon type="sparkles" aria-hidden={true} />
+              <AiIcon iconType="sparkles" aria-hidden={true} />
             </h3>
           </EuiTitle>
         }
@@ -194,9 +203,6 @@ export const EntityHighlightsAccordion: React.FC<{
               openPopover={onButtonClick}
               isLoading={isLoading}
               isPopoverOpen={isPopoverOpen}
-              isAssistantVisible={isAssistantVisible}
-              entityType={entityType}
-              entityIdentifier={entityIdentifier}
             />
           )
         }
@@ -285,17 +291,17 @@ export const EntityHighlightsAccordion: React.FC<{
               </EuiFlexItem>
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
-                  <EuiButton
+                  <AiButton
                     onClick={fetchEntityHighlights}
                     isDisabled={!connectorId}
-                    color="primary"
                     size="s"
+                    iconType="sparkles"
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
                       defaultMessage="Generate"
                     />
-                  </EuiButton>
+                  </AiButton>
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={1}>

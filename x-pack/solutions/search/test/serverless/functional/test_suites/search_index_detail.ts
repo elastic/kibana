@@ -45,7 +45,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices([indexDoesNotExistName]);
   };
 
-  describe('index details page - search solution', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/249729
+  describe.skip('index details page - search solution', function () {
     // fails on MKI, see https://github.com/elastic/kibana/issues/233476
     this.tags(['failsOnMKI']);
 

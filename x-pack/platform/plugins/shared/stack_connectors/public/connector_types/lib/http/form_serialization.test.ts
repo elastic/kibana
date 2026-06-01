@@ -73,6 +73,113 @@ describe('formSerializer', () => {
       })
     );
   });
+
+  it('should correctly serialize secretQueryParams', () => {
+    const formData = {
+      actionTypeId: '.connector-test',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasQueryParams: true,
+        queryParams: [
+          { key: 'apiKey', value: 'secret123' },
+          { key: 'token', value: 'abc' },
+        ],
+      },
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData)).toEqual(
+      expect.objectContaining({
+        secrets: expect.objectContaining({
+          secretQueryParams: { apiKey: 'secret123', token: 'abc' },
+        }),
+      })
+    );
+  });
+
+  it('should set secretQueryParams to undefined when empty', () => {
+    const formData = {
+      actionTypeId: '.connector-test',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasQueryParams: false,
+        queryParams: [],
+      },
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData)).toEqual(
+      expect.objectContaining({
+        secrets: expect.objectContaining({
+          secretQueryParams: undefined,
+        }),
+      })
+    );
+  });
+
+  it('should not crash when queryParams contain undefined key or value', () => {
+    const formData = {
+      actionTypeId: '.connector-test',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasQueryParams: true,
+        queryParams: [
+          { key: undefined, value: undefined },
+          { key: 'valid', value: 'val' },
+          { key: '', value: 'val2' },
+          { key: 'key3', value: '' },
+        ],
+      },
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    const result = formSerializer(formData as any);
+    expect(result.secrets).toEqual(
+      expect.objectContaining({
+        secretQueryParams: { valid: 'val' },
+      })
+    );
+  });
+
+  it('should skip whitespace-only keys and values in queryParams', () => {
+    const formData = {
+      actionTypeId: '.connector-test',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasQueryParams: true,
+        queryParams: [
+          { key: '   ', value: 'val' },
+          { key: 'key', value: '   ' },
+          { key: 'good', value: 'data' },
+        ],
+      },
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData)).toEqual(
+      expect.objectContaining({
+        secrets: expect.objectContaining({
+          secretQueryParams: { good: 'data' },
+        }),
+      })
+    );
+  });
 });
 
 describe('formDeserializer', () => {

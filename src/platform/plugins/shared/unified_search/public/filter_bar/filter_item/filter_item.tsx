@@ -206,7 +206,7 @@ function FilterItemComponent(props: FilterItemProps) {
               id: 'unifiedSearch.filter.filterBar.excludeFilterButtonLabel',
               defaultMessage: 'Exclude results',
             }),
-        icon: negate ? 'plusInCircle' : 'minusInCircle',
+        icon: negate ? 'plusCircle' : 'minusCircle',
         onClick: () => {
           setIsPopoverOpen(false);
           onToggleNegated();
@@ -223,7 +223,7 @@ function FilterItemComponent(props: FilterItemProps) {
               id: 'unifiedSearch.filter.filterBar.disableFilterButtonLabel',
               defaultMessage: 'Temporarily disable',
             }),
-        icon: `${disabled ? 'eye' : 'eyeClosed'}`,
+        icon: `${disabled ? 'eye' : 'eyeSlash'}`,
         onClick: () => {
           setIsPopoverOpen(false);
           onToggleDisabled();
@@ -335,6 +335,7 @@ function FilterItemComponent(props: FilterItemProps) {
     panelProps: {
       css: styles.popoverDragAndDrop,
     },
+    focusTrapProps: { clickOutsideDisables: false },
   };
 
   return readOnly ? (

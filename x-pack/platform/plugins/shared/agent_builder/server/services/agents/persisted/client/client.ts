@@ -13,14 +13,18 @@ import type {
 } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
+  agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
+  type AgentAcl,
+  type CurrentUser,
   type ToolSelection,
-  type UserIdAndName,
 } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
+  AgentAclUpdateRequest,
   AgentCreateRequest,
   AgentDeleteRequest,
   AgentListOptions,
@@ -28,34 +32,63 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types';
+import type {
+  AgentsUsingSkillsResult,
+  AgentsUsingToolsResult,
+  PersistedAgentDefinition,
+} from '../types';
+import type { AgentAccess } from '../../agent_source';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
-import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
+import {
+  aclUpdateToEs,
+  createRequestToEs,
+  type Document,
+  fromEs,
+  updateRequestToEs,
+} from './converters';
 import { validateToolSelection } from './utils/tools';
+import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
-import { SYSTEM_USER_ID } from '../../../constants';
 import {
-  buildVisibilityReadFilter,
+  buildReadAccessFilter,
+  hasDeleteAccess,
+  hasManageAclAccess,
   hasReadAccess,
-  validateVisibilityUpdateAccess,
+  hasUseAccess,
   hasWriteAccess,
+  redactAclForCaller,
+  validateVisibilityUpdateAccess,
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
+import { validateAclUpdate } from './utils/acl';
+
+export interface GetAgentAclResult {
+  /** True when the caller is allowed to read the principal list. */
+  canManage: boolean;
+  /** Always present; entries[] may be empty for legacy or default agents. */
+  acl: AgentAcl;
+}
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinition>;
+  /** Get the agent and assert the caller has at least `access` rights on it. */
+  getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
   ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
+  getAcl(agentId: string): Promise<GetAgentAclResult>;
+  updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl>;
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
+  getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
+  removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
 }
 
 export const createClient = async ({
@@ -101,7 +134,7 @@ class AgentClientImpl implements AgentClient {
   private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
-  private readonly user: UserIdAndName;
+  private readonly user: CurrentUser;
   private readonly isAdmin: boolean;
   private readonly logger: Logger;
 
@@ -116,7 +149,7 @@ class AgentClientImpl implements AgentClient {
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
-    user: UserIdAndName;
+    user: CurrentUser;
     isAdmin: boolean;
     request: KibanaRequest;
     space: string;
@@ -171,10 +204,46 @@ class AgentClientImpl implements AgentClient {
     });
   }
 
+  async getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult> {
+    return runSkillRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      skillIds: params.skillIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removeSkillRefsFromAgents(params: {
+    skillIds: string[];
+  }): Promise<AgentsUsingSkillsResult> {
+    return runSkillRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      skillIds: params.skillIds,
+      logger: this.logger,
+    });
+  }
+
   async get(agentId: string): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return fromEs(document);
+    return redactAclForCaller({
+      definition: fromEs(document),
+      source: document._source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
+  }
+
+  async getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition> {
+    const document = await this.getDocumentWithAccess({ agentId, access });
+    return redactAclForCaller({
+      definition: fromEs(document),
+      source: document._source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -192,7 +261,7 @@ class AgentClientImpl implements AgentClient {
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const filters = [createSpaceDslFilter(this.space)];
     if (!this.isAdmin) {
-      filters.push(buildVisibilityReadFilter({ user: this.user }));
+      filters.push(buildReadAccessFilter({ user: this.user }));
     }
 
     const response = await this.storage.getClient().search({
@@ -205,7 +274,15 @@ class AgentClientImpl implements AgentClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    return response.hits.hits.map((hit) => {
+      const document = hit as Document;
+      return redactAclForCaller({
+        definition: fromEs(document),
+        source: document._source!,
+        user: this.user,
+        isAdmin: this.isAdmin,
+      });
+    });
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
@@ -304,10 +381,54 @@ class AgentClientImpl implements AgentClient {
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
 
-    const document = await this.getDocumentWithAccess({ agentId: id, access: 'write' });
+    const document = await this.getDocumentWithAccess({ agentId: id, access: 'delete' });
 
     const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     return deleteResponse.result === 'deleted';
+  }
+
+  async getAcl(agentId: string): Promise<GetAgentAclResult> {
+    // Caller must at least have read access on the agent.
+    const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
+    const source = document._source;
+    const canManage = hasManageAclAccess({
+      source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
+    const acl: AgentAcl = source.acl ?? { entries: [] };
+    return { canManage, acl };
+  }
+
+  async updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
+    if (agentId === agentBuilderDefaultAgentId) {
+      throw createBadRequestError(
+        `The default agent (${agentBuilderDefaultAgentId}) does not support custom access controls.`
+      );
+    }
+
+    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAcl' });
+    const source = document._source;
+
+    const validationError = validateAclUpdate(update.entries);
+    if (validationError) {
+      throw createBadRequestError(validationError);
+    }
+
+    const nextAcl: AgentAcl = { entries: update.entries };
+
+    const next = aclUpdateToEs({
+      currentProps: source,
+      acl: nextAcl,
+      updateDate: new Date(),
+    });
+
+    await this.storage.getClient().index({
+      id: document._id,
+      document: next,
+    });
+
+    return nextAcl;
   }
 
   // Agent tool selection validation helper
@@ -329,27 +450,38 @@ class AgentClientImpl implements AgentClient {
     access,
   }: {
     agentId: string;
-    access: 'read' | 'write';
+    access: AgentAccess;
   }): Promise<Required<Document>> {
     const document = await this._get(agentId);
     if (!hasRequiredDocumentFields(document)) {
       throw createAgentNotFoundError({ agentId });
     }
 
-    const hasRequestedAccess =
-      access === 'read'
-        ? hasReadAccess({
-            source: document._source,
-            user: this.user,
-            isAdmin: this.isAdmin,
-          })
-        : hasWriteAccess({
-            source: document._source,
-            user: this.user,
-            isAdmin: this.isAdmin,
-          });
+    const source = document._source;
+    let allowed = false;
+    switch (access) {
+      case 'read':
+        allowed = hasReadAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        break;
+      case 'use':
+        allowed = hasUseAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        break;
+      case 'write':
+        allowed = hasWriteAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        break;
+      case 'delete':
+        allowed = hasDeleteAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        break;
+      case 'manageAcl':
+        allowed = hasManageAclAccess({
+          source,
+          user: this.user,
+          isAdmin: this.isAdmin,
+        });
+        break;
+    }
 
-    if (!hasRequestedAccess) {
+    if (!allowed) {
       throw createAgentNotFoundError({ agentId });
     }
 

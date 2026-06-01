@@ -7,9 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { AiAssistantButton } from '../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export const UserPanelFooter = ({
   identityFields,
@@ -24,12 +27,30 @@ export const UserPanelFooter = ({
     [identityFields]
   );
 
+  const euidApi = useEntityStoreEuidApi();
+  const euidEntityFilter = useMemo((): string | undefined => {
+    if (!euidApi?.euid || !entity) {
+      return undefined;
+    }
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument('user', entity);
+  }, [euidApi?.euid, entity]);
+
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <TakeAction isDisabled={!userName} kqlQuery={`user.name: "${userName}"`} />
+            <AiAssistantButton
+              entityType={EntityType.user}
+              entityName={userName}
+              telemetryPathway="entity_flyout"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TakeAction
+              isDisabled={!userName}
+              kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

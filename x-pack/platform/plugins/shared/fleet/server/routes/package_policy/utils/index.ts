@@ -97,7 +97,7 @@ export async function renameAgentlessAgentPolicy(
       esClient,
       agentPolicy.id,
       { name: agentlessAgentPolicyName },
-      { force: true }
+      { force: true, bumpRevision: false }
     );
   } catch (error) {
     throw new PackagePolicyRequestError(

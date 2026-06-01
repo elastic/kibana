@@ -13,6 +13,8 @@ import type {
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
   IntegrationListExtractor,
+  StreamsFieldsExtractor,
+  StreamsFieldsSearchParams,
 } from './repositories/types';
 
 export type * from './repositories/types';
@@ -23,13 +25,16 @@ export interface FieldsMetadataServiceStartDeps {}
 export interface FieldsMetadataServiceSetup {
   registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => void;
   registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => void;
+  registerStreamsFieldsExtractor: (extractor: StreamsFieldsExtractor) => void;
 }
 
 export interface FieldsMetadataServiceStart {
   getClient(request: KibanaRequest): Promise<IFieldsMetadataClient>;
 }
 
-export interface GetFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {
+export interface GetFieldsMetadataOptions
+  extends Partial<IntegrationFieldsSearchParams>,
+    Partial<StreamsFieldsSearchParams> {
   source?: FieldSource | FieldSource[];
 }
 

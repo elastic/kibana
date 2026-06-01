@@ -15,6 +15,24 @@ import {
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
 
+const KI_EXTRACTION_RECOMMENDED_MODELS = [
+  '.openai-gpt-oss-120b-chat_completion',
+  '.openai-gpt-5.2-chat_completion',
+  '.anthropic-claude-4.6-sonnet-chat_completion',
+];
+
+const KI_QUERY_GENERATION_RECOMMENDED_MODELS = [
+  '.openai-gpt-5.2-chat_completion',
+  '.anthropic-claude-4.6-sonnet-chat_completion',
+  '.openai-gpt-oss-120b-chat_completion',
+];
+
+const DISCOVERY_RECOMMENDED_MODELS = [
+  '.anthropic-claude-4.6-opus-chat_completion',
+  '.anthropic-claude-4.6-sonnet-chat_completion',
+  '.openai-gpt-5.2-chat_completion',
+];
+
 /**
  * Registers Streams Significant Events parent + child features with the Inference Feature Registry.
  * No-op when the searchInferenceEndpoints plugin is unavailable.
@@ -43,6 +61,7 @@ export function registerSignificantEventsInferenceFeatures(
     ),
     taskType: 'chat_completion',
     recommendedEndpoints: [],
+    isTechPreview: true,
   });
   if (parentResult.ok) {
     logger.debug(
@@ -59,6 +78,7 @@ export function registerSignificantEventsInferenceFeatures(
     featureName: string;
     featureDescription: string;
     recommendedEndpoints: string[];
+    ignoreGlobalDefault: boolean;
   }> = [
     {
       featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -68,11 +88,8 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.kiExtractionDescription', {
         defaultMessage: 'Model used to extract Knowledge Indicators.',
       }),
-      recommendedEndpoints: [
-        '.google-gemini-3.0-flash-chat_completion',
-        '.openai-gpt-oss-120b-chat_completion',
-        '.openai-gpt-5.2-chat_completion',
-      ],
+      recommendedEndpoints: KI_EXTRACTION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
     {
       featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -85,11 +102,8 @@ export function registerSignificantEventsInferenceFeatures(
           defaultMessage: 'Model used for Knowledge Indicator Query generation.',
         }
       ),
-      recommendedEndpoints: [
-        '.openai-gpt-5.2-chat_completion',
-        '.google-gemini-3.1-pro-chat_completion',
-        '.anthropic-claude-4.6-sonnet-chat_completion',
-      ],
+      recommendedEndpoints: KI_QUERY_GENERATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
     {
       featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
@@ -99,11 +113,8 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.discoveryDescription', {
         defaultMessage: 'Model used during Discovery and Significant Event generation.',
       }),
-      recommendedEndpoints: [
-        '.openai-gpt-5.2-chat_completion',
-        '.anthropic-claude-4.6-opus-chat_completion',
-        '.anthropic-claude-4.6-sonnet-chat_completion',
-      ],
+      recommendedEndpoints: DISCOVERY_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
   ];
 
@@ -115,6 +126,7 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: child.featureDescription,
       taskType: 'chat_completion',
       recommendedEndpoints: child.recommendedEndpoints,
+      ignoreGlobalDefault: child.ignoreGlobalDefault,
     });
     if (childResult.ok) {
       logger.debug(`Registered child inference feature "${child.featureId}"`);

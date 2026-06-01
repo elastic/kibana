@@ -51,7 +51,7 @@ export function updateGlobalNavigation({
           if (capabilities[casesFeatureId].read_cases) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -59,15 +59,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
-            };
-          }
-          return null;
-        case 'alerts_v2':
-          if (someVisible && capabilities.alertingVTwo) {
-            return {
-              ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -75,7 +67,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -87,7 +79,7 @@ export function updateGlobalNavigation({
 
   updater$.next(() => {
     const visibleIn: AppDeepLinkLocations[] = someVisible
-      ? ['sideNav', 'home', 'kibanaOverview']
+      ? ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview']
       : [];
 
     if (isCompleteOverviewEnabled && someVisible) {

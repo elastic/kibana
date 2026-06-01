@@ -13,6 +13,17 @@ import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { cleanSyntheticsTestData } from './services/private_location_test_service';
+
+/**
+ * GET routes that intentionally require `uptime-write` in addition to `uptime-read`.
+ * Adding a route here is a deliberate decision — the default expectation for any new
+ * GET route is `[uptime-read]` only. The corresponding 403 message check below uses this
+ * allowlist as a tripwire to flag accidental `writeAccess: true` on a GET.
+ */
+const GET_ROUTES_REQUIRING_WRITE_ACCESS: ReadonlySet<string> = new Set([
+  SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS,
+]);
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyntheticsAPISecurity', function () {
@@ -71,7 +82,13 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .send({});
           expect(statusCodes.includes(resp.status)).to.eql(true, getStatusMessage(resp.status));
-          verifyPermissionsBody(resp, getBodyMessage('[uptime-read]'));
+          // GETs default to `[uptime-read]`; only routes explicitly allow-listed in
+          // GET_ROUTES_REQUIRING_WRITE_ACCESS may also require `uptime-write`. This keeps the
+          // assertion as a tripwire against accidental `writeAccess: true` on a new GET route.
+          verifyPermissionsBody(
+            resp,
+            getBodyMessage(GET_ROUTES_REQUIRING_WRITE_ACCESS.has(path) ? tags : '[uptime-read]')
+          );
           break;
         case 'PUT':
           resp = await supertestWithoutAuth
@@ -106,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     const allRoutes = syntheticsAppRestApiRoutes.concat(syntheticsAppPublicRestApiRoutes);

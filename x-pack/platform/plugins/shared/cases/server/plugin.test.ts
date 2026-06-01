@@ -33,6 +33,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: { index: { enabled: true } },
     templates: { enabled: true },
+    casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
     ...overrides,
   };
@@ -175,6 +176,11 @@ describe('Cases Plugin', () => {
             "attachments": Object {
               "enabled": true,
             },
+            "casesRedesign": Object {
+              "details": false,
+              "list": false,
+              "settings": false,
+            },
             "enabled": true,
             "files": Object {
               "allowedMimeTypes": Array [
@@ -259,6 +265,7 @@ describe('Cases Plugin', () => {
                 "text/json",
                 "application/json",
                 "application/zip",
+                "application/x-zip-compressed",
                 "application/gzip",
                 "application/x-bzip",
                 "application/x-bzip2",

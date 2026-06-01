@@ -9,18 +9,17 @@ import { useQuery } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { WorkflowsApi } from '../services/workflows_api';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { workflowKeys } from './query_key_factory';
 
 export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
-  const workflowsApi = useService(WorkflowsApi);
+  const workflowsApi = useService(WorkflowApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<WorkflowDetailDto, Error>({
     queryKey: workflowKeys.detail(id!),
     queryFn: () => workflowsApi.getWorkflow(id!),
     enabled: !!id && isEnabled,
-    staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {

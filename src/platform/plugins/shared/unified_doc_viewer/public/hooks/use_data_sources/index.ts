@@ -9,15 +9,17 @@
 
 import createContainer from 'constate';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { useMemo } from 'react';
 
 type UseDataSourcesParams = DataSources;
 
 export interface DataSources {
   indexes: ObservabilityIndexes;
+  profileId: string;
 }
 
-const useDataSources = ({ indexes }: UseDataSourcesParams) => {
-  return { indexes };
+const useDataSources = ({ indexes, profileId }: UseDataSourcesParams) => {
+  return useMemo(() => ({ indexes, profileId }), [indexes, profileId]);
 };
 
 export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);

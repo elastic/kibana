@@ -18,6 +18,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   private async dismissToastsAndClick(element: WebElementWrapper) {
     await this.toasts.dismissAll();
@@ -35,31 +36,20 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickTopNavAddMenu() {
     this.log.debug('DashboardAddPanel.clickTopNavAddMenu');
-    await this.testSubjects.click('dashboardAddTopNavButton');
+    await this.appMenu.clickMenuItem('dashboardAddTopNavButton');
   }
 
   async clickAddFromLibrary() {
     this.log.debug('DashboardAddPanel.clickAddFromLibrary');
-    await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardAddFromLibraryButton');
+    await this.openAddPanelFlyout();
+    await this.testSubjects.click('addToDashboardTab-library');
     await this.testSubjects.existOrFail('savedObjectsFinderTable');
     await this.savedObjectsFinder.waitForListLoading();
   }
 
-  async clickCreateNewLink() {
-    this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardCreateNewVisButton');
-    await this.testSubjects.waitForDeleted('dashboardCreateNewVisButton');
-    await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('lnsApp', {
-      timeout: 5000,
-    });
-  }
-
-  async clickAddCustomVisualization() {
+  async clickAddVega() {
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Custom visualization');
+    await this.clickAddNewPanelFromUIActionLink('Vega');
   }
   async clickAddMarkdownPanel() {
     this.log.debug('DashboardAddPanel.clickAddMarkdownPanel');
@@ -76,7 +66,11 @@ export class DashboardAddPanelService extends FtrService {
   async clickAddLensPanel() {
     this.log.debug('DashboardAddPanel.clickAddLensPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Lens');
+    await this.clickAddNewPanelFromUIActionLink('Visualization');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.existOrFail('lnsApp', {
+      timeout: 5000,
+    });
   }
 
   async clickAddControlPanel() {
@@ -85,10 +79,16 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Control');
   }
 
+  async clickAddVariableControlPanel() {
+    this.log.debug('DashboardAddPanel.clickAddVariableControlPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Variable control');
+  }
+
   async clickAddEsqlPanel() {
     this.log.debug('DashboardAddPanel.clickAddEsqlPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('ES|QL');
+    await this.clickAddNewPanelFromUIActionLink('Visualization (query)');
   }
 
   async clickAddDiscoverPanel() {
@@ -97,19 +97,23 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Discover session');
   }
 
+  async clickAddCollapsibleSection() {
+    this.log.debug('DashboardAddPanel.clickAddCollapsibleSection');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Collapsible section');
+  }
+
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
-    await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     await this.retry.try(async () => {
-      return await this.testSubjects.exists('dashboardPanelSelectionList');
+      await this.testSubjects.existOrFail('dashboardAddPanel');
     });
   }
 
   async expectAddPanelFlyoutClosed() {
     this.log.debug('DashboardAddPanel.expectAddPanelFlyoutClosed');
-    await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
+    await this.testSubjects.missingOrFail('dashboardAddPanel');
   }
 
   async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {

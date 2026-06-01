@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -42,24 +42,27 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
+      experimental: true,
       requiresPageReload: false,
       readonly: false,
     },
-    [AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.connectorsEnabled.description', {
-        defaultMessage:
-          'Enables connectors management in Agent Builder, including automatic workflow and tool creation when connectors are added.',
-      }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.connectorsEnabled.name', {
-        defaultMessage: 'Elastic Agent Builder: Connectors',
+    [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description',
+        {
+          defaultMessage:
+            'Internal gate for UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI. Not intended for end-user use.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name', {
+        defaultMessage: 'UIAM OAuth client management',
       }),
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
-      requiresPageReload: false,
+      requiresPageReload: true,
       readonly: true,
-      readonlyMode: 'ui',
+      readonlyMode: 'strict',
     },
   });
 };

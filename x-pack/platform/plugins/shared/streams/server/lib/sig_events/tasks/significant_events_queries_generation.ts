@@ -5,29 +5,27 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Queries generation is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
-import {
-  getStreamTypeFromDefinition,
-  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  type SignificantEventsQueriesGenerationResult,
-} from '@kbn/streams-schema';
+import type { SignificantEventsQueriesGenerationResult } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { parseError } from '../../streams/errors/parse_error';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { TaskContext } from '../../tasks/task_definitions';
 import type { TaskParams } from '../../tasks/types';
-import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import { cancellableTask } from '../../tasks/cancellable_task';
-import { generateSignificantEventDefinitions } from '../generate_significant_events';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
+import { generateKIQueries } from '../ki_queries_generation_service';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
   start: number;
   end: number;
   sampleDocsSize?: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -47,8 +45,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
-              const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
+              const {
+                start,
+                end,
+                sampleDocsSize,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance
                 .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
@@ -56,68 +62,47 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
-                featureClient,
+                getFeatureClient,
+                getQueryClient,
                 scopedClusterClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
+                request: fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdAndCheckAllowlist({
-                connectorId: settings.connectorIdRuleGeneration,
-                uiSettingsClient,
-                logger: taskLogger,
-                featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: runContext.fakeRequest,
-              });
-              taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
               try {
-                const stream = await streamsClient.getStream(streamName);
+                const [featureClient, queryClient] = await Promise.all([
+                  getFeatureClient(),
+                  getQueryClient(),
+                ]);
 
-                const esClient = scopedClusterClient.asCurrentUser;
-
-                const promptsConfigService = new PromptsConfigService({
-                  soClient,
-                  logger: taskContext.logger,
-                });
-
-                const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
-
-                const result = await generateSignificantEventDefinitions(
+                const result = await generateKIQueries(
+                  { streamName, connectorId: connectorIdOverride },
                   {
-                    definition: stream,
-                    connectorId,
-                    start,
-                    end,
-                    systemPrompt: significantEventsPromptOverride,
-                  },
-                  {
+                    streamsClient,
                     inferenceClient,
-                    esClient,
+                    soClient,
                     featureClient,
-                    logger: taskContext.logger.get('significant_events_generation'),
+                    queryClient,
+                    esClient: scopedClusterClient.asCurrentUser,
+                    featureFlags: taskContext.server.core.featureFlags,
+                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    request: fakeRequest,
+                    logger: taskLogger,
                     signal: runContext.abortController.signal,
+                    telemetry: taskContext.telemetry,
                   }
                 );
-
-                taskContext.telemetry.trackSignificantEventsQueriesGenerated({
-                  count: result.queries.length,
-                  stream_name: stream.name,
-                  stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: result.tokensUsed.prompt,
-                  output_tokens_used: result.tokensUsed.completion,
-                  tool_usage: result.toolUsage,
-                });
 
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { start, end, sampleDocsSize, streamName }, result);
+                >(
+                  _task,
+                  { start, end, sampleDocsSize, streamName, connectorId: connectorIdOverride },
+                  { queries: result.queries, tokensUsed: result.tokensUsed }
+                );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -126,12 +111,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : parseError(error).message;
+                const errorMessage = parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -146,7 +126,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { start, end, sampleDocsSize, streamName },
+                  {
+                    start,
+                    end,
+                    sampleDocsSize,
+                    streamName,
+                    connectorId: connectorIdOverride,
+                  },
                   errorMessage
                 );
 

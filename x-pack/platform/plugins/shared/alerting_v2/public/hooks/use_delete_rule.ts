@@ -17,14 +17,16 @@ export const useDeleteRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => rulesApi.deleteRule(id),
-    onSuccess: () => {
+    mutationFn: ({ id }: { id: string; name: string }) => rulesApi.deleteRule(id),
+    onSuccess: (_data, { name }) => {
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.hooks.useDeleteRule.successMessage', {
-          defaultMessage: 'Rule deleted successfully',
+          defaultMessage: 'Rule "{ruleName}" deleted successfully',
+          values: { ruleName: name },
         })
       );
       queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.details());
     },
     onError: () => {

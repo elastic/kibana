@@ -8,93 +8,31 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
 import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
 
 export const RetentionCard = ({
   openModal,
   canManageFailureStore,
-  streamName,
   failureStoreConfig,
 }: {
   openModal: (show: boolean) => void;
   canManageFailureStore: boolean;
-  streamName: string;
   failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
-  const {
-    failureStoreEnabled,
-    customRetentionPeriod,
-    defaultRetentionPeriod,
-    inheritOptions,
-    retentionDisabled,
-  } = failureStoreConfig;
+  const { failureStoreEnabled, customRetentionPeriod, defaultRetentionPeriod, retentionDisabled } =
+    failureStoreConfig;
 
   if (!failureStoreEnabled) {
     return null;
   }
 
-  const {
-    isWired: isWiredStream,
-    isCurrentlyInherited: isInheritingFailureStore,
-    canShowInherit,
-  } = inheritOptions;
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.title',
     {
-      defaultMessage: 'Retention',
+      defaultMessage: 'Lifecycle summary',
     }
   );
-
-  const getRetentionOrigin = () => {
-    if (isWiredStream) {
-      if (isInheritingFailureStore) {
-        return i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromParent', {
-          defaultMessage: 'Inherit from parent',
-        });
-      } else if (canShowInherit) {
-        return i18n.translate('xpack.streams.streamDetailFailureStore.overrideParent', {
-          defaultMessage: 'Override parent',
-        });
-      }
-      return null;
-    }
-
-    if (!isWiredStream) {
-      return isInheritingFailureStore
-        ? i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromIndexTemplate', {
-            defaultMessage: 'Inherit from index template',
-          })
-        : i18n.translate('xpack.streams.streamDetailFailureStore.overrideIndexTemplate', {
-            defaultMessage: 'Override index template',
-          });
-    }
-
-    return null;
-  };
-
-  const retentionOrigin = getRetentionOrigin();
-
-  const retentionTypeApplied = retentionDisabled
-    ? i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.indefinite',
-        {
-          defaultMessage: 'Indefinite retention',
-        }
-      )
-    : customRetentionPeriod
-    ? i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.custom',
-        {
-          defaultMessage: 'Custom retention period',
-        }
-      )
-    : i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.default',
-        {
-          defaultMessage: 'Default retention period',
-        }
-      );
 
   const failureRetentionPeriod = retentionDisabled
     ? '∞'
@@ -102,13 +40,18 @@ export const RetentionCard = ({
     ? getTimeSizeAndUnitLabel(customRetentionPeriod)
     : getTimeSizeAndUnitLabel(defaultRetentionPeriod);
 
-  const subtitles = retentionOrigin
-    ? [retentionTypeApplied, retentionOrigin]
-    : [retentionTypeApplied];
+  const phasesCount = retentionDisabled ? 1 : 2;
+
+  const subtitles = [
+    i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleSummary.dataPhasesCount', {
+      defaultMessage: '{count, plural, one {# data phase} other {# data phases}}',
+      values: { count: phasesCount },
+    }),
+  ];
 
   const metric = [
     {
-      data: failureRetentionPeriod,
+      data: failureRetentionPeriod ?? '—',
       subtitle: subtitles,
       'data-test-subj': 'failureStoreRetention',
     },
@@ -125,16 +68,16 @@ export const RetentionCard = ({
             color="text"
             onClick={() => openModal(true)}
             aria-label={i18n.translate(
-              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editFailureStoreRetentionMethodAriaLabel',
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editFailureStoreLifecycleMethodAriaLabel',
               {
-                defaultMessage: 'Edit failure store retention method',
+                defaultMessage: 'Edit failure store lifecycle method',
               }
             )}
           >
             {i18n.translate(
-              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editRetentionMethodButton',
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editLifecycleMethodButton',
               {
-                defaultMessage: 'Edit retention method',
+                defaultMessage: 'Edit lifecycle method',
               }
             )}
           </EuiButton>

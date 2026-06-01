@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
+import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
+import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { validateConnectorIds } from './validate_connector_ids';
-import { validateCustomProperties } from './validate_custom_properties';
+import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
-import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
@@ -34,14 +35,27 @@ import {
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { CUSTOM_YAML_VALIDATION_MARKER_OWNERS, type YamlValidationResult } from '../model/types';
+import {
+  BATCHED_CUSTOM_MARKER_OWNER,
+  validationResultFingerprint,
+  type YamlValidationResult,
+} from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
   warning: MarkerSeverity.Warning,
   info: MarkerSeverity.Info,
 };
+
+function buildResultsFingerprint(results: YamlValidationResult[]): string {
+  if (results.length === 0) {
+    return '';
+  }
+  return results.map(validationResultFingerprint).join('\n');
+}
 
 export interface UseYamlValidationResult {
   error: Error | null;
@@ -56,6 +70,14 @@ export function useYamlValidation(
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
+  const lastFingerprintRef = useRef<string>('');
+  const setStableValidationResults = useCallback((results: YamlValidationResult[]) => {
+    const fingerprint = buildResultsFingerprint(results);
+    if (fingerprint !== lastFingerprintRef.current) {
+      lastFingerprintRef.current = fingerprint;
+      setValidationResults(results);
+    }
+  }, []);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const yamlDocument = useSelector(selectYamlDocument);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -65,9 +87,23 @@ export function useYamlValidation(
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
   const workflows = useSelector(selectWorkflows);
-  const { application } = useKibana().services;
+  const { application, http, data, licensing } = useKibana().services;
+  const esqlCallbacks = useWorkflowEsqlCallbacks({
+    http,
+    application,
+    data,
+    licensing,
+  });
+  // Held in a ref so the effect below doesn't re-fire just because the
+  // memo identity rebuilt (it does on every render in tests where the kibana
+  // mock returns fresh service objects).
+  const esqlCallbacksRef = useRef(esqlCallbacks);
+  esqlCallbacksRef.current = esqlCallbacks;
+  const getPropertyHandler = useGetPropertyHandler();
 
   useEffect(() => {
+    const esqlAbortController = new AbortController();
+
     async function validateYaml() {
       if (!editor) {
         return;
@@ -82,31 +118,24 @@ export function useYamlValidation(
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
-        CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-          monaco.editor.setModelMarkers(model, owner, []);
-        });
-        setValidationResults([]);
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
+        setStableValidationResults([]);
         setIsLoading(false);
         setError(null);
         return;
       }
 
       if (!yamlDocument) {
-        setValidationResults([]);
+        setStableValidationResults([]);
         setIsLoading(false);
         setError(new Error('Error validating: Yaml document is not loaded'));
         return;
       }
 
       const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
-      const customPropertyItems =
+      const stepPropertyItems =
         workflowLookup && lineCounter
-          ? collectAllCustomPropertyItems(
-              workflowLookup,
-              lineCounter,
-              (stepType: string, scope: 'config' | 'input', key: string) =>
-                getPropertyHandler(stepType, scope, key)
-            )
+          ? collectAllStepPropertyItems(workflowLookup, lineCounter, getPropertyHandler)
           : [];
       const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
@@ -119,18 +148,29 @@ export function useYamlValidation(
       // These validations only need the parsed YAML document, not the full workflow graph.
       // They must run even when workflowGraph/workflowDefinition are unavailable
       // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
-      // so that connector-id, step-name, liquid-template, custom-property, and
+      // so that connector-id, step-name, liquid-template, step-property, and
       // workflow-inputs validation still provide feedback.
       const results: YamlValidationResult[] = [
-        ...validateStepNameUniqueness(yamlDocument),
+        ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
         ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
-        ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
+        ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
+        // Lookup-backed validators run sequentially (each await blocks the next).
+        // ES|QL runs after step-property validation so property errors surface first
+        // and we avoid overlapping cluster calls from validateQuery with property handlers.
         ...(workflowLookup && lineCounter
           ? [
+              ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
+              ...(await validateEsqlSteps(
+                workflowLookup,
+                lineCounter,
+                model,
+                esqlCallbacksRef.current,
+                esqlAbortController.signal
+              ).catch(() => [])),
             ]
           : []),
       ];
@@ -162,19 +202,17 @@ export function useYamlValidation(
       }
       decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
-      setValidationResults(results);
+      setStableValidationResults(results);
       setIsLoading(false);
-      CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-        monaco.editor.setModelMarkers(
-          model,
-          owner,
-          markers.filter((m) => m.source === owner)
-        );
-      });
+      monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, markers);
       setError(null);
     }
 
     validateYaml();
+
+    return () => {
+      esqlAbortController.abort();
+    };
   }, [
     editor,
     lineCounter,
@@ -186,6 +224,8 @@ export function useYamlValidation(
     connectors?.connectorTypes,
     workflowLookup,
     workflows,
+    setStableValidationResults,
+    getPropertyHandler,
   ]);
 
   return {
@@ -196,6 +236,7 @@ export function useYamlValidation(
 }
 
 // create markers and decorations for the validation results
+// eslint-disable-next-line complexity
 function createMarkersAndDecorations(validationResults: YamlValidationResult[]): {
   markers: monaco.editor.IMarkerData[];
   decorations: monaco.editor.IModelDeltaDecoration[];
@@ -289,13 +330,13 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         range: createRange(validationResult),
         options: createSelectionDecoration(validationResult),
       });
-    } else if (validationResult.owner === 'custom-property-validation') {
+    } else if (validationResult.owner === 'step-property-validation') {
       if (validationResult.severity !== null) {
         markers.push({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
-          source: 'custom-property-validation',
+          source: 'step-property-validation',
         });
       }
       decorations.push({

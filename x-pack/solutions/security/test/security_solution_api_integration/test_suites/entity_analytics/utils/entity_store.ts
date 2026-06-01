@@ -11,9 +11,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
+import { entityMaintainerRouteHelpersFactory } from './entity_maintainers';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
@@ -45,16 +47,20 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
+
+    // Temporarily enable V2 so the uninstall API isn't blocked by the
+    // feature flag middleware (which returns 403 when V2 is disabled).
+    // A previous test's cleanup may have already disabled V2.
     await supertest
       .post(settingsUrl)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
     // Use the supported uninstall API so maintainers are removed via
     // entityMaintainersClient.removeAll() and don't leak task state between tests.
-    let uninstallUrl = '/internal/security/entity_store/uninstall?apiVersion=2';
+    let uninstallUrl = '/api/security/entity_store/uninstall';
     if (namespace !== 'default') {
       uninstallUrl = `/s/${namespace}${uninstallUrl}`;
     }
@@ -63,10 +69,11 @@ export const EntityStoreUtils = (
         .post(uninstallUrl)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '2023-10-31')
         .send({ entityTypes: ['user', 'host', 'service'] })
         .expect(200);
     } catch (e) {
-      log.warning(`Error uninstalling entity store during cleanup: ${e.message}`);
+      log.debug(`Entity store not installed, skipping uninstall during cleanup: ${e.message}`);
     }
 
     const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
@@ -87,6 +94,14 @@ export const EntityStoreUtils = (
     } catch (e) {
       log.warning(`Error deleting engines: ${e.message}`);
     }
+
+    // Disable V2 to leave a clean slate for the next test.
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .expect(200);
   };
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
@@ -210,7 +225,7 @@ export const EntityStoreUtils = (
     filter: string,
     opts: { size?: number; source?: string[] } = {}
   ) => {
-    let url = '/internal/security/entity_store/entities';
+    let url = '/api/security/entity_store/entities';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -218,7 +233,7 @@ export const EntityStoreUtils = (
       .get(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
+      .set('elastic-api-version', '2023-10-31')
       .query({
         filter,
         ...(opts.size !== undefined ? { size: opts.size } : {}),
@@ -233,7 +248,7 @@ export const EntityStoreUtils = (
   };
 
   const deleteEntityV2 = async (entityId: string) => {
-    let url = '/internal/security/entity_store/entities/';
+    let url = '/api/security/entity_store/entities/';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -241,7 +256,7 @@ export const EntityStoreUtils = (
       .delete(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
+      .set('elastic-api-version', '2023-10-31')
       .send({ entityId });
     if (res.status !== 200) {
       log.error(`Failed to delete entity ${entityId}`);
@@ -256,14 +271,32 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
-    await supertest
-      .post(settingsUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
-      .expect(200);
 
-    let url = '/internal/security/entity_store/install?apiVersion=2';
+    await retry.waitForWithTimeout(
+      'entityStoreEnableV2 uiSetting to read back as enabled',
+      60_000,
+      async () => {
+        // Try to enable
+        await supertest
+          .post(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+          .expect(200);
+
+        // Check that it worked
+        const settingsRes = await supertest
+          .get(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .expect(200);
+        return (
+          settingsRes.body?.settings?.['securitySolution:entityStoreEnableV2']?.userValue === true
+        );
+      }
+    );
+
+    let url = '/api/security/entity_store/install';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -271,6 +304,7 @@ export const EntityStoreUtils = (
       .post(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
       .send(body);
     if (res.status !== 201 && res.status !== 200) {
       log.error(`Failed to install entity store v2`);
@@ -287,6 +321,8 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
+      stopMaintainerAfterInstall = true,
+      maintainerAutoStart: _ignoredAutoStart,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -336,18 +372,57 @@ export const EntityStoreUtils = (
       await waitForEntityStoreEntities({ es, log, count: 1, namespace });
     }
 
-    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init?apiVersion=2';
-    if (namespace !== 'default') {
-      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+    // Install schedules the risk-score maintainer with enabled: true.
+    // Wait for any TM auto-run to complete, then stop the task so tests
+    // can set up preconditions before triggering scoring via the sync
+    // run_now route. The run_now route calls ensureRiskScoreSetup before
+    // scoring, so resources are created on first use even if we stop the
+    // maintainer before its first TM execution. Tests that need the
+    // maintainer running (e.g. async lifecycle tests) pass
+    // stopMaintainerAfterInstall: false to skip this block.
+    if (stopMaintainerAfterInstall) {
+      const maintainerRoutes = entityMaintainerRouteHelpersFactory(
+        supertest,
+        namespace !== 'default' ? namespace : undefined
+      );
+
+      // Wait for any TM auto-run to finish BEFORE stopping. Install
+      // schedules the task with enabled=true so TM may auto-run it
+      // immediately. Calling stopMaintainer (bulkUpdateState) while TM
+      // is mid-execution causes a version_conflict_engine_exception on
+      // TM's write-back, permanently wedging the task in "running" state.
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'risk-score maintainer to be idle before stop after install',
+        60_000,
+        async () => {
+          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === 'risk-score'
+          );
+          if (!maintainer) return false;
+
+          const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+
+          const runs = maintainer.runs;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
+      );
+
+      try {
+        await maintainerRoutes.stopMaintainer('risk-score');
+      } catch (e) {
+        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
+      }
     }
 
-    const maintainersRes = await supertest
-      .post(maintainersUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({});
-
-    expect([200, 201]).to.contain(maintainersRes.status);
     return res;
   };
 
@@ -358,7 +433,7 @@ export const EntityStoreUtils = (
     entityType: EntityType;
     body: Record<string, unknown>;
   }) => {
-    let url = `/internal/security/entity_store/entities/${entityType}?apiVersion=2&force=true`;
+    let url = `/api/security/entity_store/entities/${entityType}?force=true`;
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -367,6 +442,7 @@ export const EntityStoreUtils = (
       .put(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
       .send(body);
 
     if (response.status !== 200) {
@@ -374,6 +450,58 @@ export const EntityStoreUtils = (
       log.error(JSON.stringify(response.body));
     }
     expect(response.status).to.eql(200);
+    return response;
+  };
+
+  const unlinkEntitiesViaResolutionApi = async ({ entityIds }: { entityIds: string[] }) => {
+    let url: string = ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK;
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+
+    const response = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ entity_ids: entityIds });
+
+    if (response.status !== 200) {
+      log.error('Failed to unlink entities via resolution API');
+      log.error(JSON.stringify(response.body));
+    }
+    expect(response.status).to.eql(200);
+    return response;
+  };
+
+  const forceExtractEntities = async ({
+    entityType,
+    fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  }: {
+    entityType: EntityType;
+    fromDateISO?: string;
+    toDateISO?: string;
+  }) => {
+    let url = `/internal/security/entity_store/${entityType}/force_log_extraction`;
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+
+    log.info(`Force extracting entities for type: ${entityType}`);
+    const response = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .send({ fromDateISO, toDateISO });
+
+    log.info(
+      `Force extraction for ${entityType}: status=${response.status}, body=${JSON.stringify(
+        response.body
+      )}`
+    );
+    expect([200, 202]).to.contain(response.status);
     return response;
   };
 
@@ -389,6 +517,8 @@ export const EntityStoreUtils = (
     enableEntityStoreV2,
     installEntityStoreV2,
     forceUpdateEntityViaCrud,
+    unlinkEntitiesViaResolutionApi,
+    forceExtractEntities,
     waitForEngineStatus,
     initEntityEngineForEntityType,
   };
@@ -401,7 +531,7 @@ export const readEntityStoreEntities = async (
   es: Client,
   namespace: string = 'default'
 ): Promise<Array<{ entity: { id: string; risk?: Record<string, unknown> } }>> => {
-  const index = `.entities.v2.latest.security_${namespace}`;
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   try {
     const results = await es.search({ index, size: 1000 });
     return results.hits.hits.map(
@@ -466,7 +596,7 @@ export const waitForEntityStoreDoc = async ({
   requiredWatchlistId?: string;
   namespace?: string;
 }): Promise<void> => {
-  const index = `.entities.v2.latest.security_${namespace}`;
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   await retry.waitForWithTimeout(
     `entity store doc present for ${entityId}`,
     timeoutMs,

@@ -446,8 +446,8 @@ const UnifiedHistoryTableComponent = () => {
 
   const renderRunByColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => {
-      if (!isLiveRow(row)) {
-        return <>{'\u2014'}</>;
+      if (!isLiveRow(row) || !row.userId) {
+        return <>{'Elastic'}</>;
       }
 
       return (

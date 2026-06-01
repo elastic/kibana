@@ -130,6 +130,18 @@ export const FIELD_PATTERN_INVALID = i18n.translate(
   }
 );
 
+export const INVALID_USER_PROFILES = (names: string[]) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserProfiles', {
+    defaultMessage: 'The following users do not exist and must be removed: {names}',
+    values: { names: names.join(', ') },
+  });
+
+export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserPickerDefault', {
+    defaultMessage: 'User "{name}" in default values was not found or has changed.',
+    values: { name },
+  });
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });
@@ -649,3 +661,102 @@ export const TEMPLATE_VALIDATION_ERROR = (fileName: string, index: number, issue
 export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
   defaultMessage: 'Templates',
 });
+
+export const EXTENDS_LABEL = i18n.translate('xpack.cases.templates.extendsLabel', {
+  defaultMessage: 'Extends',
+});
+
+export const EXTENDS_SELECTOR_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.extendsSelectorPlaceholder',
+  {
+    defaultMessage: 'Select a parent template',
+  }
+);
+
+export const VIEW_PARENT_TEMPLATE = i18n.translate('xpack.cases.templates.viewParentTemplate', {
+  defaultMessage: 'View',
+});
+
+export const INHERITED_FIELD_BADGE = i18n.translate('xpack.cases.templates.inheritedFieldBadge', {
+  defaultMessage: 'Inherited',
+});
+
+export const INHERITED_FIELD_TOOLTIP = (parentName: string) =>
+  i18n.translate('xpack.cases.templates.inheritedFieldTooltip', {
+    defaultMessage: 'Inherited from {parentName}',
+    values: { parentName },
+  });
+
+export const EXTENDS_CHAINING_ERROR = i18n.translate('xpack.cases.templates.extendsChainingError', {
+  defaultMessage:
+    'Template chaining is not allowed. The referenced template already extends another template.',
+});
+
+export const EXTENDS_NOT_FOUND_ERROR = (name: string) =>
+  i18n.translate('xpack.cases.templates.extendsNotFoundError', {
+    defaultMessage: 'Template "{name}" not found.',
+    values: { name },
+  });
+
+export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmFieldEdit', {
+  defaultMessage: 'Save field',
+});
+
+export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFieldEdit', {
+  defaultMessage: 'Cancel field edit',
+});
+
+export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
+  'xpack.cases.templates.fieldType.inputText',
+  { defaultMessage: 'Text Input' }
+);
+
+export const FIELD_TYPE_TITLE_INPUT_NUMBER = i18n.translate(
+  'xpack.cases.templates.fieldType.inputNumber',
+  { defaultMessage: 'Number Input' }
+);
+
+export const FIELD_TYPE_TITLE_SELECT_BASIC = i18n.translate(
+  'xpack.cases.templates.fieldType.selectBasic',
+  { defaultMessage: 'Select' }
+);
+
+export const FIELD_TYPE_TITLE_TEXTAREA = i18n.translate(
+  'xpack.cases.templates.fieldType.textarea',
+  { defaultMessage: 'Textarea' }
+);
+
+export const FIELD_TYPE_TITLE_DATE_PICKER = i18n.translate(
+  'xpack.cases.templates.fieldType.datePicker',
+  { defaultMessage: 'Date Picker' }
+);
+
+export const FIELD_TYPE_TITLE_CHECKBOX_GROUP = i18n.translate(
+  'xpack.cases.templates.fieldType.checkboxGroup',
+  { defaultMessage: 'Checkbox Group' }
+);
+
+export const FIELD_TYPE_TITLE_RADIO_GROUP = i18n.translate(
+  'xpack.cases.templates.fieldType.radioGroup',
+  { defaultMessage: 'Radio Group' }
+);
+
+export const FIELD_TYPE_TITLE_USER_PICKER = i18n.translate(
+  'xpack.cases.templates.fieldType.userPicker',
+  { defaultMessage: 'User Picker' }
+);
+
+export const TEMPLATE_DEFINITION_EMPTY = i18n.translate(
+  'xpack.cases.templates.templateDefinitionEmpty',
+  { defaultMessage: 'Template definition is empty' }
+);
+
+export const INVALID_YAML_NON_OBJECT = i18n.translate(
+  'xpack.cases.templates.invalidYamlNonObject',
+  { defaultMessage: 'Invalid YAML: parsed to null or non-object' }
+);
+
+export const INVALID_YAML_DEFINITION = i18n.translate(
+  'xpack.cases.templates.invalidYamlDefinition',
+  { defaultMessage: 'Invalid YAML definition' }
+);

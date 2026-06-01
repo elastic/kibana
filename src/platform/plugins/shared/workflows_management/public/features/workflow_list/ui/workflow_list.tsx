@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflows } from '@kbn/workflows-ui';
+import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
@@ -35,6 +35,7 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
 interface WorkflowListProps {
@@ -46,11 +47,29 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
+  const {
+    canCreateWorkflow,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canExecuteWorkflow,
+    canUpdateWorkflow,
+    canDeleteWorkflow,
+  } = useWorkflowsCapabilities();
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
-      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
-      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+      return {
+        ...search,
+        enabled: search.enabled.map((enabled) => {
+          if (typeof enabled === 'string') {
+            return (enabled as string).trim().toLowerCase() === 'true';
+          }
+          if (typeof enabled === 'number') {
+            return enabled === 1;
+          }
+          return Boolean(enabled);
+        }),
+      };
     }
     return search;
   }, [search]);
@@ -111,11 +130,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [workflows?.results]
   );
 
-  const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
-  const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
-  const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
-  const canDeleteWorkflow = application.capabilities.workflowsManagement.deleteWorkflow;
-
   const deselectWorkflows = useCallback(() => {
     setSelectedItems([]);
   }, []);
@@ -134,9 +148,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+    (
+      id: string,
+      event: Record<string, unknown>,
+      triggerTab?: WorkflowTriggerTab,
+      workflowHasCustomEventTrigger?: boolean
+    ) => {
       runWorkflow.mutate(
-        { id, inputs: event, triggerTab },
+        { id, inputs: event, triggerTab, hasCustomEventTrigger: workflowHasCustomEventTrigger },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -158,6 +177,25 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       );
     },
     [application, notifications, runWorkflow]
+  );
+
+  const handleCloseExecuteModal = useCallback(() => {
+    setExecuteWorkflow(null);
+  }, []);
+
+  const handleExecuteModalSubmit = useCallback(
+    (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => {
+      if (!executeWorkflow) {
+        return;
+      }
+      handleRunWorkflow(
+        executeWorkflow.id,
+        data,
+        triggerTab,
+        hasCustomEventTrigger(executeWorkflow.definition)
+      );
+    },
+    [executeWorkflow, handleRunWorkflow]
   );
 
   const handleDeleteWorkflow = useCallback(
@@ -205,6 +243,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          workflowDefinition: item.definition ?? undefined,
           skipRefetch: true,
         },
         {
@@ -270,7 +309,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         <EuiFlexItem grow={false}>
           <WorkflowsEmptyState
             onCreateWorkflow={onCreateWorkflow}
-            canCreateWorkflow={!!canCreateWorkflow}
+            canCreateWorkflow={canCreateWorkflow}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -329,6 +368,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onRequestRun={setExecuteWorkflow}
         getEditHref={getEditHref}
         canCreateWorkflow={!!canCreateWorkflow}
+        canReadWorkflow={!!canReadWorkflow}
+        canReadWorkflowExecution={!!canReadWorkflowExecution}
         canUpdateWorkflow={!!canUpdateWorkflow}
         canDeleteWorkflow={!!canDeleteWorkflow}
         canExecuteWorkflow={!!canExecuteWorkflow}
@@ -338,8 +379,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           isTestRun={false}
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
-          onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+          onClose={handleCloseExecuteModal}
+          onSubmit={handleExecuteModalSubmit}
         />
       )}
       {singleExportModal && (

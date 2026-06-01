@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React from 'react';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -20,8 +21,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { LibraryToggleRow } from './library_toggle_row';
+import { LibrarySortFilterButton } from './library_sort_filter_button';
+import { useLibrarySortFilter } from './use_library_sort_filter';
 import { FLYOUT_WIDTH } from './constants';
 
 export interface LibraryItem {
@@ -33,7 +38,7 @@ export interface LibraryPanelLabels {
   title: string;
   manageLibraryLink: string;
   searchPlaceholder: string;
-  availableSummary: (filtered: number, total: number) => string;
+  availableSummary: (filtered: number, total: number) => React.ReactNode;
   noMatchMessage: string;
   noItemsMessage: string;
   disabledBadgeLabel?: string;
@@ -46,14 +51,15 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   allItems: T[];
   activeItemIdSet: Set<string>;
   onToggleItem: (item: T, isActive: boolean) => void;
-  mutatingItemId: string | null;
   flyoutTitleId: string;
   libraryLabels: LibraryPanelLabels;
   manageLibraryPath: string;
   getItemName?: (item: T) => string;
   getSearchableText?: (item: T) => string[];
   disabledItemIdSet?: Set<string>;
+  readOnlyItemIdSet?: Set<string>;
   callout?: React.ReactNode;
+  ebtEntityType?: string;
 }
 
 const defaultGetItemName = <T extends LibraryItem>(item: T): string => item.id;
@@ -63,33 +69,36 @@ export const LibraryPanel = <T extends LibraryItem>({
   allItems,
   activeItemIdSet,
   onToggleItem,
-  mutatingItemId,
   flyoutTitleId,
   libraryLabels,
   manageLibraryPath,
   getItemName = defaultGetItemName,
   getSearchableText,
   disabledItemIdSet,
+  readOnlyItemIdSet,
   callout,
+  ebtEntityType,
 }: LibraryPanelProps<T>) => {
   const { createAgentBuilderUrl } = useNavigation();
   const manageLibraryUrl = createAgentBuilderUrl(manageLibraryPath);
-  const [searchQuery, setSearchQuery] = useState('');
   const { euiTheme } = useEuiTheme();
 
-  const getSearchFields = useCallback(
-    (item: T): string[] =>
-      getSearchableText ? getSearchableText(item) : [getItemName(item), item.description],
-    [getSearchableText, getItemName]
-  );
-
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return allItems;
-    const lower = searchQuery.toLowerCase();
-    return allItems.filter((item) =>
-      getSearchFields(item).some((field) => field.toLowerCase().includes(lower))
-    );
-  }, [allItems, searchQuery, getSearchFields]);
+  const {
+    filteredItems,
+    searchQuery,
+    setSearchQuery,
+    sortOrder,
+    setSortOrder,
+    filterMode,
+    setFilterMode,
+    filterCounts,
+  } = useLibrarySortFilter({
+    allItems,
+    activeItemIdSet,
+    readOnlyItemIdSet,
+    getItemName,
+    getSearchableText,
+  });
 
   return (
     <EuiFlyout
@@ -113,6 +122,11 @@ export const LibraryPanel = <T extends LibraryItem>({
                 margin-top: ${euiTheme.size.m};
                 font-size: ${euiTheme.size.m};
               `}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.MANAGE_ALL,
+                detail: ebtEntityType ?? '',
+              })}
             >
               {libraryLabels.manageLibraryLink}
             </EuiLink>
@@ -120,21 +134,35 @@ export const LibraryPanel = <T extends LibraryItem>({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFieldSearch
-          placeholder={libraryLabels.searchPlaceholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          incremental
-          fullWidth
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              placeholder={libraryLabels.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              incremental
+              fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LibrarySortFilterButton
+              sortOrder={sortOrder}
+              onSortChange={setSortOrder}
+              filterMode={filterMode}
+              onFilterChange={setFilterMode}
+              filterCounts={filterCounts}
+              ebtEntityType={ebtEntityType}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs">
           {libraryLabels.availableSummary(filteredItems.length, allItems.length)}
         </EuiText>
 
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="s" />
 
         {callout}
 
@@ -143,7 +171,7 @@ export const LibraryPanel = <T extends LibraryItem>({
             {searchQuery.trim() ? libraryLabels.noMatchMessage : libraryLabels.noItemsMessage}
           </EuiText>
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup direction="column" gutterSize="none">
             {filteredItems.map((item) => (
               <EuiFlexItem key={item.id} grow={false}>
                 <LibraryToggleRow
@@ -152,12 +180,14 @@ export const LibraryPanel = <T extends LibraryItem>({
                   description={item.description}
                   isActive={activeItemIdSet.has(item.id)}
                   onToggle={(checked) => onToggleItem(item, checked)}
-                  isMutating={mutatingItemId === item.id}
                   isDisabled={disabledItemIdSet?.has(item.id)}
+                  isReadOnly={readOnlyItemIdSet?.has(item.id)}
                   disabledBadgeLabel={libraryLabels.disabledBadgeLabel}
                   disabledTooltipTitle={libraryLabels.disabledTooltipTitle}
                   disabledTooltipBody={libraryLabels.disabledTooltipBody}
+                  ebtEntityType={ebtEntityType}
                 />
+                <EuiHorizontalRule margin="m" />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

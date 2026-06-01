@@ -34,6 +34,9 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return esClient.search<TDocument>({
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        expand_wildcards: ['open', 'hidden'],
         ...searchParams,
       }) as Promise<InferSearchResponseOf<TDocument, TParams>>;
     },

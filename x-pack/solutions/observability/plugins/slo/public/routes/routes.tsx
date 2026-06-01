@@ -6,6 +6,7 @@
  */
 
 import {
+  SLOS_COMPOSITE_PATH,
   SLOS_MANAGEMENT_PATH,
   SLOS_MANAGEMENT_TEMPLATES_PATH,
   SLOS_PATH,
@@ -18,7 +19,6 @@ import {
   SLO_SETTINGS_PATH,
 } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
-import type { ExperimentalFeatures } from '../../common/config';
 import { CompositeSloEditPage } from '../pages/composite_slo_edit/composite_slo_edit';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
@@ -28,7 +28,7 @@ import { SlosPage } from '../pages/slos/slos';
 import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 
 export const getRoutes = (
-  experimentalFeatures?: ExperimentalFeatures
+  isCompositeSloEnabled: boolean
 ): {
   [key: string]: {
     handler: () => React.ReactElement;
@@ -36,8 +36,6 @@ export const getRoutes = (
     exact: boolean;
   };
 } => {
-  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled === true;
-
   return {
     [SLOS_PATH]: {
       handler: () => {
@@ -89,6 +87,13 @@ export const getRoutes = (
       exact: true,
     },
     ...(isCompositeSloEnabled && {
+      [SLOS_COMPOSITE_PATH]: {
+        handler: () => {
+          return <SlosPage />;
+        },
+        params: {},
+        exact: true,
+      },
       [SLO_COMPOSITE_CREATE_PATH]: {
         handler: () => {
           return <CompositeSloEditPage />;

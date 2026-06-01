@@ -7,6 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
+import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -15,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
     'entityAnalyticsEntityStoreV2',
+    'entityAnalyticsWatchlistEnabled',
   ];
 
   return {
@@ -28,6 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
+        `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
       ],
     },
     testFiles: [require.resolve('..')],

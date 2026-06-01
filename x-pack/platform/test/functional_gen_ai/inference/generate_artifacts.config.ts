@@ -6,9 +6,11 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
+import {
+  getPreconfiguredConnectorConfig,
+  buildEisPreconfiguredConnectors,
+} from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
-import { buildEisPreconfiguredConnectors } from '../../agent_builder/smoke_tests/tests/eis_helpers';
 
 // EIS QA environment URL for Cloud Connected Mode
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
@@ -42,7 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
-        '--xpack.anonymization.active=true',
       ],
     },
   };

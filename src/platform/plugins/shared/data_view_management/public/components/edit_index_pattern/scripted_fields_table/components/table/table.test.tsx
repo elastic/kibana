@@ -7,121 +7,156 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { TableWithoutPersist as Table } from './table';
 import type { ScriptedFieldItem } from '../../types';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { TableWithoutPersist as Table } from './table';
+import { userEvent } from '@testing-library/user-event';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+const createScriptedField = ({
+  displayName,
+  ...field
+}: ScriptedFieldItem & { displayName: string }) => ({
+  displayName,
+  ...field,
+});
 
-const items: ScriptedFieldItem[] = [
-  { name: '1', lang: 'painless', script: '', isUserEditable: true },
-  { name: '2', lang: 'painless', script: '', isUserEditable: false },
-];
-
-const baseProps = {
+const baseProps: Pick<React.ComponentProps<typeof Table>, 'euiTablePersist'> = {
   euiTablePersist: {
+    onTableChange: jest.fn(),
     pageSize: 10,
-    onTableChange: () => {},
-    sorting: { sort: { direction: 'asc' as const, field: 'name' as const } },
+    sorting: { sort: { direction: 'asc', field: 'name' } },
   },
 };
 
-describe('Table', () => {
-  let indexPattern: DataView;
-
-  beforeEach(() => {
-    indexPattern = getIndexPatternMock({
-      fieldFormatMap: {
-        Elastic: {
-          type: {
-            title: 'string',
-          },
+const indexPattern = Object.assign(
+  createStubDataView({
+    spec: {
+      title: 'test-data-view',
+    },
+  }),
+  {
+    fieldFormatMap: {
+      Elastic: {
+        type: {
+          title: 'string',
         },
       },
-    });
+    },
+  }
+);
+
+const items = [
+  createScriptedField({
+    displayName: 'Elastic',
+    isUserEditable: true,
+    lang: 'painless',
+    name: 'Elastic',
+    script: "emit('one')",
+  }),
+  createScriptedField({
+    displayName: 'ReadonlyScriptedField',
+    isUserEditable: false,
+    lang: 'painless',
+    name: 'ReadonlyScriptedField',
+    script: "emit('two')",
+  }),
+];
+
+const getActionButton = (fieldName: string, buttonIndex: number) => {
+  const button = getRowByText(fieldName).querySelectorAll('button')[buttonIndex];
+
+  if (!button) {
+    throw new Error(`Unable to find action button ${buttonIndex} for field ${fieldName}`);
+  }
+
+  return button;
+};
+
+const getRowByText = (text: string) => {
+  const row = screen.getByText(text).closest('tr');
+
+  if (!row) throw new Error(`Unable to find row for ${text}`);
+
+  return row;
+};
+
+const renderTable = ({
+  deleteField = jest.fn(),
+  editField = jest.fn(),
+  tableItems = items,
+}: {
+  deleteField?: React.ComponentProps<typeof Table>['deleteField'];
+  editField?: React.ComponentProps<typeof Table>['editField'];
+  tableItems?: React.ComponentProps<typeof Table>['items'];
+} = {}) => {
+  renderWithI18n(
+    <Table
+      {...baseProps}
+      deleteField={deleteField}
+      editField={editField}
+      indexPattern={indexPattern}
+      items={tableItems}
+    />
+  );
+
+  return { deleteField, editField };
+};
+
+describe('Table', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
-  test('should render normally', () => {
-    const component = shallow<typeof Table>(
-      <Table
-        {...baseProps}
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-        deleteField={() => {}}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  test('should render the format', () => {
-    const component = shallow(
-      <Table
-        {...baseProps}
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-        deleteField={() => {}}
-      />
-    );
+  it('should render normally', () => {
+    renderTable();
 
-    const formatTableCell = shallow(component.prop('columns')[3].render('Elastic'));
-    expect(formatTableCell).toMatchSnapshot();
+    expect(screen.getByText('Elastic')).toBeVisible();
+    expect(screen.getByText('ReadonlyScriptedField')).toBeVisible();
+    expect(screen.getAllByText('painless')).toHaveLength(2);
+    expect(screen.getByText("emit('one')")).toBeVisible();
+    expect(screen.getByText("emit('two')")).toBeVisible();
   });
 
-  test('should allow edits', () => {
+  it('should render the format', () => {
+    renderTable();
+
+    expect(getRowByText('Elastic')).toHaveTextContent('string');
+  });
+
+  it('should allow edits', async () => {
+    const user = userEvent.setup();
     const editField = jest.fn();
 
-    const component = shallow(
-      <Table
-        {...baseProps}
-        indexPattern={indexPattern}
-        items={items}
-        editField={editField}
-        deleteField={() => {}}
-      />
-    );
+    renderTable({ editField });
 
-    // Click the delete button
-    component.prop('columns')[4].actions[0].onClick();
-    expect(editField).toBeCalled();
+    await user.click(getActionButton('Elastic', 0));
+
+    expect(editField).toHaveBeenCalled();
   });
 
-  test('should allow deletes', () => {
+  it('should allow deletes', async () => {
+    const user = userEvent.setup();
     const deleteField = jest.fn();
 
-    const component = shallow(
-      <Table
-        {...baseProps}
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-        deleteField={deleteField}
-      />
-    );
+    renderTable({ deleteField });
 
-    // Click the delete button
-    component.prop('columns')[4].actions[1].onClick();
-    expect(deleteField).toBeCalled();
+    await user.click(getActionButton('Elastic', 1));
+
+    expect(deleteField).toHaveBeenCalled();
   });
 
-  test('should not allow edit or deletion for user with only read access', () => {
-    const component = shallow(
-      <Table
-        {...baseProps}
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-        deleteField={() => {}}
-      />
-    );
-    const editAvailable = component.prop('columns')[4].actions[0].available(items[1]);
-    const deleteAvailable = component.prop('columns')[4].actions[1].available(items[1]);
-    expect(editAvailable).toBeFalsy();
-    expect(deleteAvailable).toBeFalsy();
+  it('should not allow edit or deletion for user with only read access', () => {
+    renderTable({ tableItems: [items[1]] });
+
+    expect(screen.getByText('ReadonlyScriptedField')).toBeVisible();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
   });
 });

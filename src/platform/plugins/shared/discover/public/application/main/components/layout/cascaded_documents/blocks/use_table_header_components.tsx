@@ -98,14 +98,14 @@ function CascadeGroupingSelectionPopover({
       })}
       isOpen={cascadeSelectOpen}
       closePopover={closeSelectionPopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       button={
         <EuiToolTip
           title={i18n.translate('discover.dataCascade.header.techPreviewLabel', {
-            defaultMessage: 'Cascade experience (Technical preview)',
+            defaultMessage: 'Grouped results (technical preview)',
           })}
           content={i18n.translate('discover.dataCascade.header.techPreviewTooltip', {
-            defaultMessage: 'This functionality is in technical preview and is subject to change.',
+            defaultMessage: 'Results are grouped when running a Stats BY',
           })}
         >
           <EuiFilterGroup css={toolbarStyles.controlButton}>

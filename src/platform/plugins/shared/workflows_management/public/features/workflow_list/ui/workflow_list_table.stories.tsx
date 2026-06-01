@@ -416,6 +416,8 @@ export const Default: Story = {
     onRequestRun: noop,
     getEditHref: () => '#',
     canCreateWorkflow: true,
+    canReadWorkflow: true,
+    canReadWorkflowExecution: true,
     canUpdateWorkflow: true,
     canDeleteWorkflow: true,
     canExecuteWorkflow: true,

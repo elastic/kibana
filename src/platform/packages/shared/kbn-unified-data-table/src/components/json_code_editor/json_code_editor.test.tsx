@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import '@kbn/code-editor-mock/jest_helper';
 import JsonCodeEditor from './json_code_editor';
+import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
-it('returns the `JsonCodeEditor` component', () => {
-  const value = {
-    _index: 'test',
-    _type: 'doc',
-    _id: 'foo',
-    _score: 1,
-    _source: { test: 123 },
-  };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+describe('JsonCodeEditor', () => {
+  it('returns the `JsonCodeEditor` component', () => {
+    const value = {
+      _index: 'test',
+      _type: 'doc',
+      _id: 'foo',
+      _score: 1,
+      _source: { test: 123 },
+    };
+
+    renderWithI18n(<JsonCodeEditor json={value} />);
+
+    const editor = screen.getByTestId('mockedCodeEditor');
+    expect(editor).toBeVisible();
+    expect(editor).toHaveAttribute('data-currentvalue', JSON.stringify(value, null, 2));
+  });
 });

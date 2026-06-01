@@ -47,7 +47,7 @@ export const deserializeState = async ({
 
   if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
     // by reference
-    const { discover_session_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
+    const { ref_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
     const { getDiscoverSession } = discoverServices.savedSearch;
     const session = await getDiscoverSession(savedObjectId);
     const selectedTab = selectedTabId
@@ -158,11 +158,23 @@ export const serializeState = ({
     return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByRef(stored) : stored;
   }
 
+  const { title, description, ...titleOptions } = serializeTitles() ?? {};
+
+  const serializedTitles = {
+    title: title || initialState.savedObjectTitle,
+    description: description || initialState.savedObjectDescription,
+  };
+
   const stored: StoredSearchEmbeddableByValueState = {
-    ...serializeTitles(),
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    attributes: savedSearchAttributes,
+    ...serializedTitles,
+    ...titleOptions,
+    attributes: {
+      ...savedSearchAttributes,
+      ...(serializedTitles.title && { title: serializedTitles.title }),
+      ...(serializedTitles.description && { description: serializedTitles.description }),
+    },
   };
   return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByValue(stored, []) : stored;
 };

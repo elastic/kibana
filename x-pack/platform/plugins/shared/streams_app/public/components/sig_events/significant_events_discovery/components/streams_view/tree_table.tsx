@@ -22,8 +22,12 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams, TaskStatus } from '@kbn/streams-schema';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import {
+  Streams,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
@@ -39,6 +43,7 @@ import {
   QUERIES_COLUMN_HEADER,
   RUN_STREAM_ONBOARDING_BUTTON_LABEL,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
+  SIGNIFICANT_EVENTS_COLUMN_TOOLTIP,
   STOP_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
 } from './translations';
@@ -62,7 +67,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
+  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusResult>;
   loading?: boolean;
   searchQuery?: Query;
   selection: EuiTableSelectionType<TableRow>;
@@ -193,16 +198,8 @@ export function StreamsTreeTable({
 
   // Expand/Collapse all button for the name column header
   const expandCollapseAllButton = (
-    <EuiButtonIcon
-      size="xs"
-      iconType={allExpanded ? 'fold' : 'unfold'}
-      color="text"
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        handleExpandCollapseAll();
-      }}
-      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-      aria-label={
+    <EuiToolTip
+      content={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
               defaultMessage: 'Collapse all',
@@ -211,7 +208,28 @@ export function StreamsTreeTable({
               defaultMessage: 'Expand all',
             })
       }
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        iconType={allExpanded ? 'fold' : 'unfold'}
+        color="text"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          handleExpandCollapseAll();
+        }}
+        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+        aria-label={
+          allExpanded
+            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+                defaultMessage: 'Expand all',
+              })
+        }
+      />
+    </EuiToolTip>
   );
 
   const streamsListStepProps = getStepPropsByStepId('streams_list');
@@ -341,22 +359,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case TaskStatus.InProgress:
-                  case TaskStatus.BeingCanceled:
+                  case StreamsKIsOnboardingStatus.InProgress:
+                  case StreamsKIsOnboardingStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case TaskStatus.NotStarted:
-                  case TaskStatus.Canceled:
+                  case StreamsKIsOnboardingStatus.NotStarted:
+                  case StreamsKIsOnboardingStatus.Canceled:
                     return '-';
-                  case TaskStatus.Completed:
-                  case TaskStatus.Acknowledged:
+                  case StreamsKIsOnboardingStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case TaskStatus.Stale:
-                    return (
-                      <EuiIcon type="checkCircleFill" color="subdued" size="m" aria-hidden={true} />
-                    );
-                  case TaskStatus.Failed:
+                  case StreamsKIsOnboardingStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -391,8 +404,20 @@ export function StreamsTreeTable({
               ),
             },
             {
-              name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
-              width: '200px',
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>{SIGNIFICANT_EVENTS_COLUMN_HEADER}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      type="info"
+                      color="subdued"
+                      content={SIGNIFICANT_EVENTS_COLUMN_TOOLTIP}
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              width: '210px',
               align: 'left',
               render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
             },
@@ -406,11 +431,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (
-                  [TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(
-                    onboardingResult?.status
-                  )
-                ) {
+                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"
@@ -421,7 +442,9 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={onboardingResult.status === TaskStatus.BeingCanceled}
+                        disabled={
+                          onboardingResult.status === StreamsKIsOnboardingStatus.BeingCanceled
+                        }
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>

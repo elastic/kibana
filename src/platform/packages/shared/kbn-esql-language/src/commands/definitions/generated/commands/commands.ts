@@ -16,6 +16,10 @@ export const commandsMetadata: Record<string, unknown> = {
     license: 'platinum',
     observability_tier: 'COMPLETE',
   },
+  dedup: {
+    type: 'command',
+    name: 'dedup',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -124,6 +128,7 @@ export const commandsMetadata: Record<string, unknown> = {
 
 export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
+  DEDUP = 'dedup',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',

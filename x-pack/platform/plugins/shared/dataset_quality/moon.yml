@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dataset-quality-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/kibana-management'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/dataset-quality-plugin'
   description: Moon project for @kbn/dataset-quality-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/shared/dataset_quality
 dependsOn:
   - '@kbn/alerting-comparators'
@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/deeplinks-observability'
   - '@kbn/discover-plugin'
   - '@kbn/ebt-tools'
+  - '@kbn/es-errors'
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/field-formats-plugin'

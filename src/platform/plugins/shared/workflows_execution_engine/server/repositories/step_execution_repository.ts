@@ -8,9 +8,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+
+export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
@@ -59,24 +62,67 @@ export class StepExecutionRepository {
    * Retrieves step executions by their IDs using mget (O(1) operation).
    * This is real-time (reads from translog) and doesn't require index refresh.
    *
+   * Boundary normalisation: ES collapses `undefined` to "missing", but the
+   * engine relies on the `null` (FAILED) vs `undefined` (evicted) distinction
+   * for `output`. When the caller explicitly asked for `output` via
+   * `sourceIncludes` and ES returns the doc without that field, normalise to
+   * `null` so downstream code sees `JsonValue | null` instead of having to
+   * coerce. Open-projection calls (no `sourceIncludes`) preserve ES's exact
+   * shape so existing consumers are not affected.
+   *
    * @param stepExecutionIds - The IDs of the step executions to retrieve.
    * @returns A promise that resolves to an array of step executions.
    */
   public async getStepExecutionsByIds(
-    stepExecutionIds: string[]
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
       index: this.indexName,
       ids: stepExecutionIds,
+      ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
+      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
     });
+
+    const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
 
     const stepExecutions: EsWorkflowStepExecution[] = [];
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._source) {
-        stepExecutions.push(doc._source as EsWorkflowStepExecution);
+        const source = doc._source as EsWorkflowStepExecution;
+        if (outputExplicitlyRequested && source.output === undefined) {
+          source.output = null;
+        }
+        stepExecutions.push(source);
       }
     }
     return stepExecutions;
+  }
+
+  /**
+   * Marks non-terminal step executions for a workflow run as FAILED (e.g. after interrupt recovery).
+   */
+  public async markNonTerminalStepsFailed(
+    workflowExecutionId: string,
+    error: SerializedError
+  ): Promise<void> {
+    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
+
+    if (nonTerminalSteps.length === 0) {
+      return;
+    }
+
+    const finishedAt = new Date().toISOString();
+    await this.bulkUpsert(
+      nonTerminalSteps.map((step) => ({
+        id: step.id,
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      }))
+    );
   }
 
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {

@@ -11,9 +11,9 @@ import path from 'path';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_CLONE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCloneWorkflowRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit } = deps;
@@ -21,7 +21,7 @@ export function registerCloneWorkflowRoute(deps: RouteDependencies) {
     .post({
       path: '/api/workflows/workflow/{id}/clone',
       access: 'public',
-      security: WORKFLOW_CREATE_SECURITY,
+      security: WORKFLOW_CLONE_SECURITY,
       summary: 'Clone a workflow',
       description: 'Create a copy of an existing workflow.',
       options: {
@@ -41,7 +41,7 @@ export function registerCloneWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);

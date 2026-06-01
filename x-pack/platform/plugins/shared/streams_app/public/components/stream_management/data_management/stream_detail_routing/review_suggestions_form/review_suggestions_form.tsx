@@ -20,7 +20,7 @@ import { css } from '@emotion/css';
 import React, { useCallback, useMemo } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { NestedView } from '../../../../nested_view';
-import { GenerateSuggestionButton } from './generate_suggestions_button';
+import { RefinementPopover } from './refinement_popover';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
 import type {
   PartitionSuggestion,
@@ -50,7 +50,7 @@ export interface ReviewSuggestionsFormProps
     | 'clearSuggestionSelection'
   > {
   suggestions: PartitionSuggestion[];
-  onRegenerate: (connectorId: string) => void;
+  onRegenerate: (connectorId: string, userPrompt?: string) => void;
   definition: Streams.WiredStream.GetResponse;
   aiFeatures: AIFeatures;
   onBulkAccept: () => void;
@@ -223,17 +223,11 @@ export function ReviewSuggestionsForm({
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <GenerateSuggestionButton
-                  iconType="refresh"
-                  size="s"
-                  onClick={onRegenerate}
+                <RefinementPopover
+                  onRefine={onRegenerate}
                   isLoading={isLoadingSuggestions}
                   aiFeatures={aiFeatures}
-                >
-                  {i18n.translate('xpack.streams.reviewSuggestionsForm.regenerateAllButton', {
-                    defaultMessage: 'Regenerate all',
-                  })}
-                </GenerateSuggestionButton>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

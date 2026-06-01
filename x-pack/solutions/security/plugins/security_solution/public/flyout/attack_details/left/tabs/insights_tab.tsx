@@ -10,7 +10,8 @@ import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { useAttackDetailsContext } from '../../context';
 import { AttackDetailsLeftPanelKey } from '../../constants/panel_keys';
 import {
@@ -51,7 +52,7 @@ const insightsSubTabButtons: EuiButtonGroupOptionProps[] = [
 export const InsightsTab = memo(() => {
   const { attackId, indexName } = useAttackDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const panels = useExpandableFlyoutState();
+  const panels = useStableExpandableFlyoutState();
   const activeSubTabId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
 
   const onChangeSubTab = useCallback(

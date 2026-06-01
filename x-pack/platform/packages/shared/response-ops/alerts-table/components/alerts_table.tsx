@@ -178,6 +178,7 @@ const AlertsTableContent = typedForwardRef(
       id,
       ruleTypeIds,
       consumers,
+      projectRouting,
       query,
       minScore,
       trackScores = false,
@@ -218,6 +219,7 @@ const AlertsTableContent = typedForwardRef(
       lastReloadRequestTime,
       configurationStorage: configurationStorageProp,
       isMutedAlertsEnabled = true,
+      showCsvExportButton = false,
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -361,6 +363,7 @@ const AlertsTableContent = typedForwardRef(
     const queryParams = useAlertsTableQueryParams({
       ruleTypeIds,
       consumers,
+      projectRouting,
       fields,
       query,
       sort,
@@ -385,8 +388,6 @@ const AlertsTableContent = typedForwardRef(
 
     const {
       alerts = [],
-      oldAlertsData = [],
-      ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
       error: alertsError,
@@ -513,6 +514,10 @@ const AlertsTableContent = typedForwardRef(
           columns: columnsWithFieldsData,
           tableId: id,
           dataGridRef,
+          ruleTypeIds,
+          consumers,
+          query,
+          sort,
           refresh,
           isLoading:
             isLoadingAlerts ||
@@ -523,10 +528,6 @@ const AlertsTableContent = typedForwardRef(
           isLoadingAlerts,
           alerts,
           alertsCount,
-
-          // TODO deprecate
-          ecsAlertsData,
-          oldAlertsData,
 
           browserFields: selectedAlertsFields,
           isLoadingCases: casesQuery.isFetching,
@@ -557,6 +558,10 @@ const AlertsTableContent = typedForwardRef(
         additionalContext,
         columnsWithFieldsData,
         id,
+        ruleTypeIds,
+        consumers,
+        query,
+        sort,
         refresh,
         isLoadingAlerts,
         casesQuery.isFetching,
@@ -568,8 +573,6 @@ const AlertsTableContent = typedForwardRef(
         fieldsQuery.isFetching,
         alerts,
         alertsCount,
-        ecsAlertsData,
-        oldAlertsData,
         selectedAlertsFields,
         pageIndex,
         setPageIndex,
@@ -630,6 +633,7 @@ const AlertsTableContent = typedForwardRef(
         alertsQuerySnapshot,
         sort,
         onSortChange: onDataGridSortChange,
+        showCsvExportButton,
       }),
       [
         publicDataGridProps,
@@ -652,6 +656,7 @@ const AlertsTableContent = typedForwardRef(
         alertsQuerySnapshot,
         sort,
         onDataGridSortChange,
+        showCsvExportButton,
       ]
     );
 

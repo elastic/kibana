@@ -15,3 +15,5 @@ export * from './download_sources';
 export * from './synced_integrations';
 export * from './custom_integrations';
 export * from './epm_packages';
+export * from './cloud_connector';
+export * from './cloud_onboarding_deployment';

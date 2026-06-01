@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { entity: _entityFromDoc, ...restDoc } = entity.doc;
         const docId = hashEuid(entity.id);
         return [
-          { index: { _index: getLatestEntitiesIndexName('default'), _id: docId } },
+          { index: { _index: getEntitiesAlias(ENTITY_LATEST, 'default'), _id: docId } },
           {
             '@timestamp': new Date().toISOString(),
             entity: {
@@ -114,7 +114,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await Promise.all(entities.map((e) => entityStoreUtils.deleteEntityV2(e.id)));
+      // Use allSettled so a 403 (V2 mode cleared by a concurrent test's
+      // cleanEngines()) does not fail the suite — the entity store uninstall
+      // in cleanEngines already removes the underlying index documents.
+      await Promise.allSettled(entities.map((e) => entityStoreUtils.deleteEntityV2(e.id)));
     });
 
     it('uploads CSV and updates asset criticality for a matched entity', async () => {

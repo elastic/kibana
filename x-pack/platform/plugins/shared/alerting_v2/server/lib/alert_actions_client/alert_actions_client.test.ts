@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { UserService } from '../services/user_service/user_service';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
-import { createQueryService } from '../services/query_service/query_service.mock';
-import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
-import { AlertActionsClient } from './alert_actions_client';
+import type { AlertActionsClient } from './alert_actions_client';
+import { createAlertActionsClient } from './alert_actions_client.mock';
 import {
   getBulkAlertEventsESQLResponse,
   getAlertEventESQLResponse,
@@ -21,17 +20,19 @@ import {
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
-  const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
-  const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
-  let userService: UserService;
-  let userProfile: jest.Mocked<UserProfileServiceStart>;
   let client: AlertActionsClient;
+  let queryServiceEsClient: DeeplyMockedApi<ElasticsearchClient>;
+  let storageServiceEsClient: jest.Mocked<ElasticsearchClient>;
+  let userProfileService: jest.Mocked<UserProfileServiceStart>;
 
   beforeEach(() => {
-    ({ userService, userProfile } = createUserService());
-    userProfile.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
+    ({
+      alertActionsClient: client,
+      queryServiceEsClient,
+      storageServiceEsClient,
+      userProfileService,
+    } = createAlertActionsClient());
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
-    client = new AlertActionsClient(queryService, storageService, userService);
   });
 
   afterEach(() => {
@@ -66,23 +67,9 @@ describe('AlertActionsClient', () => {
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
         actor: 'test-uid',
+        space_id: 'default',
       });
       expect(docs[0]).toHaveProperty('@timestamp');
-    });
-
-    it('should throw when alert event is not found', async () => {
-      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
-
-      await expect(
-        client.createAction({
-          groupHash: 'unknown-group-hash',
-          action: actionData,
-        })
-      ).rejects.toThrow(
-        'Alert event with group_hash [unknown-group-hash] and episode_id [episode-1] not found'
-      );
-
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should handle action with episode_id', async () => {
@@ -136,15 +123,9 @@ describe('AlertActionsClient', () => {
 
     it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+      userProfileService.getCurrent.mockResolvedValueOnce(null);
 
-      userProfile.getCurrent.mockResolvedValueOnce(null);
-      const clientWithoutSecurity = new AlertActionsClient(
-        queryService,
-        storageService,
-        userService
-      );
-
-      await clientWithoutSecurity.createAction({
+      await client.createAction({
         groupHash: 'test-group-hash',
         action: actionData,
       });
@@ -231,6 +212,33 @@ describe('AlertActionsClient', () => {
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 0, total: 2 });
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error codes and details', () => {
+    it('attaches ALERT_EVENT_NOT_FOUND code with group_hash and episode_id details on createAction', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({
+          groupHash: 'unknown-group-hash',
+          action: {
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+            episode_id: 'episode-1',
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ALERT_EVENT_NOT_FOUND',
+          details: {
+            group_hash: 'unknown-group-hash',
+            episode_id: 'episode-1',
+          },
+        },
+      });
+
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
   });

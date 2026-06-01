@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
+import { useYaml } from '../../../../../../../services';
 import { getBreakingChanges, parseYamlChangelog } from '../utils';
 
 /**
@@ -19,6 +20,7 @@ export const useChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
+  const yaml = useYaml();
   const {
     data,
     error: getFileError,
@@ -28,8 +30,9 @@ export const useChangelog = (
   const error = getFileError?.statusCode === 404 ? null : getFileError;
 
   const changelog = useMemo(() => {
-    return parseYamlChangelog(data, latestVersion, currentVersion);
-  }, [data, latestVersion, currentVersion]);
+    if (!yaml) return [];
+    return parseYamlChangelog(yaml.parse, data, latestVersion, currentVersion);
+  }, [yaml, data, latestVersion, currentVersion]);
 
   const breakingChanges = useMemo(() => {
     const _breakingChanges = getBreakingChanges(changelog);

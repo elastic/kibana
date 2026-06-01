@@ -20,7 +20,7 @@ import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { getSpaceInitials } from '../../space_avatar';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
@@ -173,6 +173,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
+    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 
@@ -207,6 +208,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       } = formValues;
 
       const spaceClone = structuredClone(partialSpace as Partial<Space>);
+
+      // Auto-generate color if needed
+      if (!spaceClone.color && !spaceClone.imageUrl) {
+        spaceClone.color = getSpaceColor(spaceClone);
+      }
       const { id, name } = spaceClone;
 
       if (!id) {

@@ -19,11 +19,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import { asyncMap } from '@kbn/std';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
-import {
-  checkForDuplicateDashboardTitle,
-  dashboardClient,
-  findService,
-} from '../../dashboard_client';
+import { dashboardClient, findService, hasLibraryItemWithTitle } from '../../dashboard_client';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
@@ -116,8 +112,10 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
+      // `access_control` can not be specified as part of the update payload
+      const { access_control, ...restOfAttributes } = dashboard.attributes;
       await dashboardClient.update(id, {
-        ...dashboard.attributes,
+        ...restOfAttributes,
         ...updatedState,
       });
 
@@ -132,26 +130,24 @@ export const useDashboardListingTable = ({
         {
           type: 'warning',
           fn: async (value: string, id: string) => {
-            if (id) {
-              try {
-                const dashboard = await findService.findById(id);
-                if (dashboard.status === 'error') {
-                  return;
-                }
-
-                const validTitle = await checkForDuplicateDashboardTitle({
-                  title: value,
-                  copyOnSave: false,
-                  lastSavedTitle: dashboard.attributes.title,
-                  isTitleDuplicateConfirmed: false,
-                });
-
-                if (!validTitle) {
-                  throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
-                }
-              } catch (e) {
-                return e.message;
+            if (!id) return;
+            try {
+              const dashboard = await findService.findById(id);
+              if (dashboard.status === 'error') {
+                return;
               }
+
+              if (value.toLowerCase() === dashboard.attributes.title.toLowerCase()) {
+                return;
+              }
+
+              const hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+
+              if (hasDuplicateTitle) {
+                return dashboardListingErrorStrings.getDuplicateTitleWarning(value);
+              }
+            } catch (e) {
+              return e.message;
             }
           },
         },

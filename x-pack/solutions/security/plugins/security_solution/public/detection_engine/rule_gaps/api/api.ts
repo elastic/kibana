@@ -28,7 +28,12 @@ import type {
 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
 import dateMath from '@kbn/datemath';
 import { KibanaServices } from '../../../common/lib/kibana';
-import type { GapStatus, ScheduleBackfillProps, GapAutoFillSchedulerBase } from '../types';
+import type {
+  GapReasonType,
+  GapStatus,
+  ScheduleBackfillProps,
+  GapAutoFillSchedulerBase,
+} from '../types';
 
 /**
  * Schedule rules run over a specified time range
@@ -130,6 +135,7 @@ export const getRuleIdsWithGaps = async ({
   hasUnfilledIntervals,
   hasInProgressIntervals,
   hasFilledIntervals,
+  excludedReasons,
   schedulerId,
 }: {
   start: string;
@@ -138,6 +144,7 @@ export const getRuleIdsWithGaps = async ({
   hasUnfilledIntervals?: boolean;
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
+  excludedReasons?: string[];
   signal?: AbortSignal;
   schedulerId?: string;
 }): Promise<GetRuleIdsWithGapResponseBody> =>
@@ -158,6 +165,7 @@ export const getRuleIdsWithGaps = async ({
         ...(hasFilledIntervals !== undefined && {
           has_filled_intervals: hasFilledIntervals,
         }),
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
         ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
       signal,
@@ -175,11 +183,13 @@ export const getGapsSummaryByRuleIds = async ({
   start,
   end,
   ruleIds,
+  excludedReasons,
   schedulerId,
 }: {
   start: string;
   end: string;
   ruleIds: string[];
+  excludedReasons?: string[];
   signal?: AbortSignal;
   schedulerId?: string;
 }): Promise<GetGapsSummaryByRuleIdsResponseBody> =>
@@ -192,6 +202,7 @@ export const getGapsSummaryByRuleIds = async ({
         start,
         end,
         rule_ids: ruleIds,
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
         ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
     }
@@ -213,6 +224,7 @@ export const findGapsForRule = async ({
   start,
   end,
   statuses,
+  excludedReasons,
 }: {
   ruleId: string;
   page: number;
@@ -220,6 +232,7 @@ export const findGapsForRule = async ({
   start: string;
   end: string;
   statuses: GapStatus[];
+  excludedReasons?: GapReasonType[];
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
@@ -240,6 +253,7 @@ export const findGapsForRule = async ({
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),
         statuses,
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
       }),
       signal,
     }
@@ -305,6 +319,7 @@ export const createGapAutoFillScheduler = async (
         max_backfills: params.maxBackfills,
         num_retries: params.numRetries,
         enabled: params.enabled,
+        excluded_reasons: params.excludedReasons,
       }),
     }
   );
@@ -325,6 +340,7 @@ export const updateGapAutoFillScheduler = async (
         max_backfills: params.maxBackfills,
         num_retries: params.numRetries,
         enabled: params.enabled,
+        excluded_reasons: params.excludedReasons,
       }),
     }
   );

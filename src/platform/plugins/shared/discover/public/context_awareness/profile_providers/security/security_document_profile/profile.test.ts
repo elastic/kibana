@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createSecurityDocumentProfileProvider } from './profile';
 import { DocumentType } from '../../..';
 
@@ -28,8 +29,9 @@ const prevDocViewer = () => ({
 const getDocViewerFor = (record: DataTableRecord) => {
   const getDocViewer = provider.profile.getDocViewer!(prevDocViewer, {
     context: { type: DocumentType.Default },
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
-  return getDocViewer({ actions: {}, record } as Parameters<typeof getDocViewer>[0]);
+  return getDocViewer({ record } as Parameters<typeof getDocViewer>[0]);
 };
 
 describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
@@ -71,15 +73,11 @@ describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
     });
   });
 
-  it('registers the overview tab when event.kind is absent', () => {
+  it('does NOT register the overview tab when event.kind is absent', () => {
     const registry = new DocViewsRegistry();
     const docViewer = getDocViewerFor(buildRecord({}));
     docViewer.docViewsRegistry(registry);
-    expect(registry.getAll()).toHaveLength(1);
-    expect(registry.getAll()[0]).toMatchObject({
-      id: 'doc_view_alerts_overview',
-      title: 'Event Overview',
-    });
+    expect(registry.getAll()).toHaveLength(0);
   });
 
   it('does NOT register the overview tab for a scheduled attack discovery alert', () => {

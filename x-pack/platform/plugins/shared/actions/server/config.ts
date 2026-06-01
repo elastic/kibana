@@ -216,12 +216,14 @@ export const configSchema = schema.object({
     oauth_authorization_code: schema.object({
       rate_limits: oauthAuthorizationCodeRateLimitsSchema,
     }),
+    ears: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        enableExperimental: schema.boolean({ defaultValue: false }),
+        url: schema.maybe(schema.uri({ scheme: ['https'] })),
+      })
+    ),
   }),
-  ears: schema.maybe(
-    schema.object({
-      url: schema.maybe(schema.uri({ scheme: ['https'] })),
-    })
-  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

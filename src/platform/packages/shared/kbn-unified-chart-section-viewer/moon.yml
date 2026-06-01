@@ -39,13 +39,18 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/restorable-state'
   - '@kbn/esql-types'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/ebt-tools'
   - '@kbn/es-query'
   - '@kbn/apm-types-shared'
   - '@kbn/core'
   - '@kbn/search-types'
   - '@kbn/es-types'
+  - '@kbn/inspector-plugin'
+  - '@kbn/esql-language'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/discover-shared-plugin'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - shared-browser
   - package

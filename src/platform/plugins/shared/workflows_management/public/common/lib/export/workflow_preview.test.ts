@@ -34,10 +34,10 @@ steps:
     with:
       message: done
 `;
-    const result = extractWorkflowPreview('w-1', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result).toEqual({
-      id: 'w-1',
+      id: 'my-workflow',
       name: 'My Workflow',
       description: 'A test workflow',
       triggers: [{ type: 'manual' }, { type: 'scheduled' }],
@@ -65,7 +65,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-2', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.inputCount).toBe(3);
     expect(result.valid).toBe(true);
@@ -79,21 +79,27 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-3', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.name).toBeNull();
     expect(result.description).toBeNull();
     expect(result.triggers).toEqual([{ type: 'alert' }]);
     expect(result.stepCount).toBe(1);
     expect(result.valid).toBe(true);
+    // No name field → ID falls back to workflow-{uuid}
+    expect(result.id).toMatch(
+      /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    );
   });
 
   it('should return valid: false when YAML parses to a scalar (not an object)', () => {
     const yaml = 'just a string';
-    const result = extractWorkflowPreview('bad', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result).toEqual({
-      id: 'bad',
+      id: expect.stringMatching(
+        /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      ),
       name: null,
       description: null,
       triggers: [],
@@ -105,9 +111,12 @@ steps:
 
   it('should return valid: true with null metadata for a YAML object missing workflow fields', () => {
     const yaml = 'foo: bar\nbaz: 123';
-    const result = extractWorkflowPreview('no-wf-fields', yaml);
+    const result = extractWorkflowPreview(yaml);
 
-    expect(result.id).toBe('no-wf-fields');
+    // No name field → UUID fallback
+    expect(result.id).toMatch(
+      /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    );
     expect(result.name).toBeNull();
     expect(result.description).toBeNull();
     expect(result.triggers).toEqual([]);
@@ -117,7 +126,7 @@ steps:
   });
 
   it('should return valid: false for empty YAML', () => {
-    const result = extractWorkflowPreview('empty', '');
+    const result = extractWorkflowPreview('');
 
     expect(result.valid).toBe(false);
     expect(result.name).toBeNull();
@@ -130,7 +139,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-no-triggers', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.triggers).toEqual([]);
     expect(result.valid).toBe(true);
@@ -145,7 +154,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-no-inputs', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.inputCount).toBe(0);
   });
@@ -161,7 +170,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-bad-triggers', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.triggers).toEqual([{ type: 'manual' }, { type: 'scheduled' }]);
   });
@@ -176,7 +185,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-weird', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.triggers).toEqual([{ type: 'manual' }]);
   });
@@ -194,7 +203,7 @@ steps:
   - name: step1
     type: console
 `;
-    const result = extractWorkflowPreview('w-all-triggers', yaml);
+    const result = extractWorkflowPreview(yaml);
 
     expect(result.triggers).toEqual([{ type: 'manual' }, { type: 'scheduled' }, { type: 'alert' }]);
   });

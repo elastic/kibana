@@ -24,8 +24,9 @@ export interface SimulationMachineDeps {
   toasts: IToasts;
 }
 
-export type ProcessorMetrics =
-  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
+export type ProcessorMetrics = NonNullable<
+  Simulation['processors_metrics'][keyof Simulation['processors_metrics']]
+>;
 
 export interface SimulationSearchParams extends Required<QueryState> {
   query: Query;

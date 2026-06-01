@@ -28,6 +28,7 @@ export const defaultScalarFunctionLocations: Location[] = [
   Location.STATS,
   Location.STATS_BY,
   Location.LIMIT_BY,
+  Location.CHANGE_POINT_BY,
   Location.STATS_WHERE,
   Location.STATS_TIMESERIES,
   Location.COMPLETION,

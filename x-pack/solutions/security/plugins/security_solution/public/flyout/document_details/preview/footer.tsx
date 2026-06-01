@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TakeActionButton } from '../shared/components/take_action_button';
 import { getField } from '../shared/utils';
-import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';

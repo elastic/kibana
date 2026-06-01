@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema } from '@kbn/slo-schema';
-import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { DefaultBurnRatesClient, DefaultSummaryClient, GetCompositeSLO } from '../../../services';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
-export const getCompositeSLORoute = createSloServerRoute({
+export const getCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'GET /api/observability/slo_composites/{id} 2023-10-31',
   options: { access: 'public' },
   security: {
@@ -19,13 +18,25 @@ export const getCompositeSLORoute = createSloServerRoute({
     },
   },
   params: getCompositeSLOParamsSchema,
-  handler: async ({ params, logger, request, plugins, getScopedClients }) => {
-    await assertPlatinumLicense(plugins);
+  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
+    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
-    const { soClient } = await getScopedClients({ request, logger });
-    const repository = new DefaultCompositeSLORepository(soClient, logger);
+    const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
+    const summaryClient = new DefaultSummaryClient(
+      scopedClusterClient.asCurrentUser,
+      burnRatesClient
+    );
+    const getCompositeSLO = new GetCompositeSLO(
+      compositeSloRepository,
+      repository,
+      summaryClient,
+      scopedClusterClient.asCurrentUser
+    );
 
-    const compositeSlo = await repository.findById(params.path.id);
-    return getCompositeSLOResponseSchema.encode(compositeSlo);
+    return await getCompositeSLO.execute(params.path.id, spaceId);
   },
 });

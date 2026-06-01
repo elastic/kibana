@@ -11,6 +11,7 @@ import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
+  AutoColorType,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
@@ -18,9 +19,11 @@ import type {
   ColorMappingColorDefType,
   ColorMappingGradientType,
   ColorMappingType,
+  NoColorType,
   StaticColorType,
   UnassignedColorType,
 } from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
 import { getReversibleMappings } from '../charts/utils';
 
@@ -38,6 +41,19 @@ export function isLegacyColorPalette(
   color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
 ): color is { palette: PaletteOutput } {
   return 'palette' in (color ?? {});
+}
+
+export function getContinuity(
+  rangeMin: number | null,
+  rangeMax: number | null
+): 'all' | 'above' | 'below' | 'none' {
+  return rangeMin === null && rangeMax === null
+    ? 'all'
+    : rangeMax === null
+    ? 'above'
+    : rangeMin === null
+    ? 'below'
+    : 'none';
 }
 
 export function fromColorByValueAPIToLensState(
@@ -87,23 +103,15 @@ export function fromColorByValueAPIToLensState(
             // value can be null
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
-      // ignore colorStops when shifting palettes stops
       colorStops,
-      continuity:
-        rangeMin === null && rangeMax === null
-          ? 'all'
-          : rangeMax === null
-          ? 'above'
-          : rangeMin === null
-          ? 'below'
-          : 'none',
+      continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
 
-function getRangeValue(value?: number | null): number | null {
+export function getRangeValue(value?: number | null): number | null {
   if (value === undefined || value === null || !isFinite(value)) return null;
   return value;
 }
@@ -118,7 +126,8 @@ export function fromColorByValueLensStateToAPI(
   const { rangeType, reverse } = colorParams;
   let originalStops = colorParams.stops ?? [];
 
-  const palette = colorParams.name ?? 'custom';
+  // config.name is the root palette identifier used by the runtime palette service
+  const palette = config.name ?? colorParams.name ?? 'custom';
   const isLegacy = palette !== 'custom';
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);
@@ -445,4 +454,12 @@ export function isColorByValueAbsolute(color?: AllColoringTypes): color is Color
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
   if (!color || !('mode' in color)) return false;
   return color.mode === 'categorical' || color.mode === 'gradient';
+}
+
+export function isNoColor(color?: AllColoringTypes): color is NoColorType {
+  return !!color && 'type' in color && color.type === 'none';
+}
+
+export function isAutoColor(color?: AllColoringTypes): color is AutoColorType {
+  return !!color && 'type' in color && color.type === 'auto';
 }

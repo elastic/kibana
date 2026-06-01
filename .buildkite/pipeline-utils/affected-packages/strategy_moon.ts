@@ -22,7 +22,7 @@ export function getAffectedProjectsMoon(
   const output = execSync(command, {
     cwd: REPO_ROOT,
     encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+    maxBuffer: 30 * 1024 * 1024, // 30MB buffer
     env: {
       ...process.env,
       MOON_BASE: mergeBase,

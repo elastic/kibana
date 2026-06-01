@@ -75,6 +75,12 @@ export class SpacesPopoverList extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         ownFocus={false}
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.spacesPopoverList.popoverAriaLabel',
+          {
+            defaultMessage: 'Spaces',
+          }
+        )}
       >
         <EuiFocusTrap>{this.getMenuPanel()}</EuiFocusTrap>
       </EuiPopover>
@@ -122,6 +128,7 @@ export class SpacesPopoverList extends Component<Props, State> {
           rowHeight: 40,
           showIcons: false,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list, search) => (

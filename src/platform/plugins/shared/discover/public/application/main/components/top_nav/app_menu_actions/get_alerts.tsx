@@ -19,9 +19,11 @@ import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { internalStateActions } from '../../../state_management/redux';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import type { DiscoverInternalState } from '../../../state_management/redux';
+import type { DiscoverInternalState, InternalStateDispatch } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux';
+import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -42,14 +44,10 @@ const CreateAlertFlyout: React.FC<{
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
   onFinishAction: () => void;
-}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
-  const {
-    dataView,
-    isEsqlMode,
-    adHocDataViews,
-    actions: { updateAdHocDataViews },
-  } = discoverParams;
+}> = ({ discoverParams, services, tabId, getState, dispatch, onFinishAction = () => {} }) => {
+  const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
@@ -108,9 +106,9 @@ const CreateAlertFlyout: React.FC<{
       consumer={'alerts'}
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
-      onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
-        updateAdHocDataViews(metadata.adHocDataViewList)
-      }
+      onChangeMetaData={(metadata: EsQueryAlertMetaData) => {
+        void dispatch(internalStateActions.updateAdHocDataViews(metadata.adHocDataViewList));
+      }}
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}
       validConsumers={EsQueryValidConsumer}
@@ -126,17 +124,49 @@ export const getAlertsAppMenuItem = ({
   services,
   tabId,
   getState,
+  dispatch,
+  subscribe,
+  showCreateRuleV2,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
+  subscribe: (listener: () => void) => () => void;
+  showCreateRuleV2?: boolean;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
   const items: DiscoverAppMenuPopoverItem[] = [];
+
+  if (showCreateRuleV2) {
+    items.push({
+      id: 'create-esql-rule-v2',
+      order: 0,
+      label: i18n.translate('discover.alerts.createEsqlRuleV2', {
+        defaultMessage: 'Create ES|QL rule',
+      }),
+      labelBadgeText: i18n.translate('discover.alerts.newBadge', {
+        defaultMessage: 'New',
+      }),
+      iconType: 'bell',
+      testId: 'discoverCreateEsqlRuleV2Button',
+      run: ({ context: { onFinishAction } }) => {
+        return (
+          <CreateESQLRuleFlyout
+            services={services}
+            tabId={tabId}
+            getState={getState}
+            subscribe={subscribe}
+            onClose={onFinishAction}
+          />
+        );
+      },
+    });
+  }
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
     items.push({
@@ -173,6 +203,7 @@ export const getAlertsAppMenuItem = ({
               services={services}
               tabId={tabId}
               getState={getState}
+              dispatch={dispatch}
             />
           );
         },
@@ -182,11 +213,11 @@ export const getAlertsAppMenuItem = ({
 
   return {
     id: AppMenuActionId.alerts,
-    label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
-      defaultMessage: 'Alerts',
+    label: i18n.translate('discover.localMenu.alertsTitle', {
+      defaultMessage: 'Create alert rule',
     }),
     testId: 'discoverAlertsButton',
-    order: 4,
+    order: 11,
     iconType: 'warning',
     popoverWidth: 250,
     items,
