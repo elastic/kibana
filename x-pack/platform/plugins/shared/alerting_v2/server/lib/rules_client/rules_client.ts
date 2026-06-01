@@ -288,13 +288,16 @@ export class RulesClient {
   public async getRules(ids: string[]): Promise<RuleResponse[]> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
-    return result.flatMap((doc) => {
-      if ('error' in doc) {
-        return [];
-      }
+    const rulesById = new Map<string, RuleResponse>();
 
-      return [transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version)];
-    });
+    for (const doc of result) {
+      if ('error' in doc) {
+        throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
+      }
+      rulesById.set(doc.id, transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+    }
+
+    return ids.map((id) => rulesById.get(id)!).filter(Boolean);
   }
 
   @withApm
