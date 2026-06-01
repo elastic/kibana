@@ -71,6 +71,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
    * Release: TBD
+   * FIXME: revert to `false` before merging — turned on for PR cloud deployment testing only
    */
   endpointResponseActionsSkill: true,
 
