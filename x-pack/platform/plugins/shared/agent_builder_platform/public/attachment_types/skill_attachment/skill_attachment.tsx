@@ -139,10 +139,16 @@ const SkillReferences = ({
   );
 };
 
+const fullHeightStyles = css`
+  height: 100%;
+`;
+const minHeightZeroStyles = css`
+  min-height: 0;
+`;
 const fullContentInstructionsStyles = css`
   width: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
+  ${fullHeightStyles}
+  overflow: hidden;
 `;
 const previewInstructionsStyles = css`
   width: 100%;
@@ -191,7 +197,7 @@ const SkillInstructions = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column">
+    <EuiFlexGroup gutterSize="xs" direction="column" css={showFullContent && fullHeightStyles}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           alignItems="center"
@@ -241,7 +247,7 @@ const SkillInstructions = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem css={showFullContent && minHeightZeroStyles}>
         {showDiff && hasPreviousVersion && beforeContent ? (
           <>
             <SkillDiffViewer
@@ -305,13 +311,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
       hasShadow={false}
       hasBorder={false}
       paddingSize="m"
-      css={showFullContent && { height: '100%' }}
+      css={showFullContent && fullHeightStyles}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        css={showFullContent && { height: '100%' }}
-      >
+      <EuiFlexGroup direction="column" gutterSize="none" css={showFullContent && fullHeightStyles}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <strong>
@@ -327,7 +329,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
           </EuiText>
           <EuiHorizontalRule margin="m" />
         </EuiFlexItem>
-        <EuiFlexItem grow>
+        <EuiFlexItem grow css={showFullContent && minHeightZeroStyles}>
           <SkillInstructions
             showFullContent={showFullContent}
             content={content}
