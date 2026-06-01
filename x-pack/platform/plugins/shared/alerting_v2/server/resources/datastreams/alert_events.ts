@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 3;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.rule-events-ilm-policy';
 
@@ -43,6 +43,9 @@ const mappings: MappingsDefinition = {
       },
     },
     group_hash: { type: 'keyword' },
+    // Field names that produced `group_hash` at write time. Lets labels survive a
+    // later change to the rule's grouping config (the hash/data still reflect the old fields).
+    grouping_fields: { type: 'keyword' },
     data: { type: 'flattened' },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
@@ -79,6 +82,7 @@ export const alertEventSchema = z.object({
     version: z.number(),
   }),
   group_hash: z.string(),
+  grouping_fields: z.array(z.string()).optional(),
   data: z.record(z.string(), z.any()),
   status: alertEventStatusSchema,
   source: z.string(),
