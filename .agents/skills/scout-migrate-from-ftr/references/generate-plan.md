@@ -51,7 +51,11 @@ Also read thoroughly:
 
 For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
-**File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
+**Default to API.** Before classifying anything as UI, look in `server/routes` for the endpoint that already returns the answer the FTR test asserts. If one exists (capabilities, internal data routes, saved-object RPCs), pick API and put the endpoint in the **Justification** column.
+
+**File splitting**: when a single FTR file tests multiple roles, unrelated flows, or large top-level `describe`s, recommend splitting into separate specs. List the proposed splits.
+
+**Scenario consolidation**: when several `it(...)` blocks share expensive setup (login, archive load, navigation) and form a sequence, recommend collapsing into one `test(...)` + `test.step(...)`. Note this in the file's decision row; rationale in `execute-plan.md` step 3.
 
 ### 3. Complexity estimation
 

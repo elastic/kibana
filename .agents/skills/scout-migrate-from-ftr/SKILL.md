@@ -88,6 +88,8 @@ Address `blocker` and `major` findings before considering the migration done. Su
 - **Loop discipline (step 4)**: don't paper over a real failure by skipping the test, loosening the assertion, or adding a sleep. Diagnose, then fix.
 - **No guessing**: if you can't determine something during planning, flag it as `NEEDS VERIFICATION` rather than guessing.
 - **Preserve intent**: when recommending dropping or converting a test, explain what coverage is lost and where it moves.
+- **Default to API**: for every FTR UI test, look for a backing endpoint (capabilities, internal data routes, saved-object RPCs) that returns the same answer. If one exists, migrate as a Scout API test. Only keep UI when the test actually validates rendering, interaction, or navigation. Catalog in [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md).
+- **Validate the change, not the cluster**: scope assertions to the resource the test mutated, not to global state (empty listings, total counts). Move "did it really go away?" into API-driven `afterAll` cleanup.
 
 ## References
 
