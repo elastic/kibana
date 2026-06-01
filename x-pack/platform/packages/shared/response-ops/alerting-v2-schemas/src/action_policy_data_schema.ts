@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { durationSchema, tagsSchema } from './common';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
-  ACTION_POLICY_VERSION_MAX_LENGTH,
+  VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_DESCRIPTION_LENGTH,
@@ -330,7 +330,7 @@ export const updateActionPolicyBodySchema = updateActionPolicyDataSchema.extend(
   version: z
     .string()
     .min(1)
-    .max(ACTION_POLICY_VERSION_MAX_LENGTH)
+    .max(VERSION_MAX_LENGTH)
     .describe('The current version of the action policy, used for optimistic concurrency control.'),
 });
 

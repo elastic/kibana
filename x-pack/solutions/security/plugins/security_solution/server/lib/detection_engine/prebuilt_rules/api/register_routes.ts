@@ -32,7 +32,7 @@ export const registerPrebuiltRulesRoutes = (
   performRuleInstallationRoute(router, logger);
   performRuleUpgradeRoute(router, logger);
   reviewRuleInstallationRoute(router, logger);
-  reviewRuleUpgradeRoute(router);
+  reviewRuleUpgradeRoute(router, logger);
   bootstrapEaseRulesRoute(router, logger);
   getPrebuiltRuleBaseVersion(router);
   revertPrebuiltRule(router);
