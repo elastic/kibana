@@ -2466,6 +2466,15 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/micro-jq",
+      "matchDepNames": ["@elastic/micro-jq"],
+      "reviewers": ["team:kibana-management"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "node-stdlib-browser",
       "matchDepNames": ["node-stdlib-browser"],
       "reviewers": ["team:kibana-operations"],
