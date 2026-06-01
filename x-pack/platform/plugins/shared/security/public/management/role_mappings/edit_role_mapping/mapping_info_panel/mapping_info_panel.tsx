@@ -187,7 +187,7 @@ export class MappingInfoPanel extends Component<Props, State> {
               id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
               defaultMessage="Switch to role templates"
             />{' '}
-            <EuiIcon size="s" type="inputOutput" />
+            <EuiIcon size="s" type="inputOutput" aria-hidden={true} />
           </Fragment>
         </EuiLink>
       );
@@ -266,7 +266,7 @@ export class MappingInfoPanel extends Component<Props, State> {
               id="xpack.security.management.editRoleMapping.switchToRoles"
               defaultMessage="Switch to roles"
             />{' '}
-            <EuiIcon size="s" type="inputOutput" />
+            <EuiIcon size="s" type="inputOutput" aria-hidden={true} />
           </Fragment>
         </EuiLink>
       );
