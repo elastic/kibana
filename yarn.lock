@@ -6251,6 +6251,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-settings-types@link:src/core/packages/user-settings/types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-browser-internal@link:src/core/packages/user-storage/browser-internal":
   version "0.0.0"
   uid ""
