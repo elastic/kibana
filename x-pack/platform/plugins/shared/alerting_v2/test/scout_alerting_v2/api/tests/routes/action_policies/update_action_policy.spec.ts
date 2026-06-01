@@ -471,7 +471,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-
   apiTest(
     'validation: rejects unknown extra field (.strict() schema)',
     async ({ apiClient, apiServices }) => {

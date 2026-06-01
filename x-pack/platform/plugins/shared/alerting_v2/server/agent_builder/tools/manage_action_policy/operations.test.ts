@@ -8,7 +8,6 @@
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   executeActionPolicyOperations,
-  actionPolicyOperationSchema,
   ActionPolicyOperationValidationError,
   type ActionPolicyOperation,
 } from './operations';

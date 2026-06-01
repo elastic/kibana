@@ -9,7 +9,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
-import { actionPolicyOperationSchema } from './operations';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
