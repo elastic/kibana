@@ -11,7 +11,7 @@ import { registerAgentBuilderTools } from './register_tools';
 import { STREAMS_READ_TOOL_IDS, STREAMS_WRITE_TOOL_IDS } from './tool_ids';
 import {
   STREAMS_CREATE_EVENT_TOOL_ID,
-  STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
   STREAMS_SEARCH_EVENTS_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './register_tools';
@@ -55,7 +55,7 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID);
     expect(registeredIds).toContain(STREAMS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(STREAMS_CREATE_EVENT_TOOL_ID);
-    expect(registeredIds).toContain(STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID);
+    expect(registeredIds).toContain(STREAMS_EVENT_STATUS_UPDATE_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {

@@ -30,9 +30,9 @@ import {
 import { createSearchEventsTool, STREAMS_SEARCH_EVENTS_TOOL_ID } from './event_search/tool';
 import { createEventTool, STREAMS_CREATE_EVENT_TOOL_ID } from './event_create/tool';
 import {
-  createEventVerdictUpdateTool,
-  STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID,
-} from './event_verdict_update/tool';
+  createEventStatusUpdateTool,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+} from './event_status_update/tool';
 import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
@@ -57,7 +57,7 @@ export {
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
   STREAMS_SEARCH_EVENTS_TOOL_ID,
   STREAMS_CREATE_EVENT_TOOL_ID,
-  STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
 };
 
 export function registerAgentBuilderTools({
@@ -125,10 +125,10 @@ export function registerAgentBuilderTools({
       logger: logger.get('event_create_tool'),
       telemetry,
     }),
-    createEventVerdictUpdateTool({
+    createEventStatusUpdateTool({
       getScopedClients,
       server,
-      logger: logger.get('event_verdict_update_tool'),
+      logger: logger.get('event_status_update_tool'),
       telemetry,
     }),
   ];

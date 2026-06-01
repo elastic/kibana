@@ -23,9 +23,9 @@ import { createEventToolHandler } from './handler';
 export const STREAMS_CREATE_EVENT_TOOL_ID = platformStreamsSigEventsTools.createEvent;
 
 const createEventSchema = z.object({
-  verdict: sigEventVerdictSchema.optional().describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.schema.verdict', {
-      defaultMessage: 'Verdict for the new event.',
+  status: sigEventVerdictSchema.optional().describe(
+    i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.schema.status', {
+      defaultMessage: 'Status for the new event.',
     })
   ),
   title: z.string().max(500),

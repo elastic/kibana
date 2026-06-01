@@ -38,12 +38,12 @@ const searchEventsSchema = z.object({
         defaultMessage: 'Optional stream name to scope the search.',
       })
     ),
-  verdict: z
+  status: z
     .array(sigEventVerdictSchema)
     .optional()
     .describe(
-      i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.verdict', {
-        defaultMessage: 'Optional event verdict filters.',
+      i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.status', {
+        defaultMessage: 'Optional event status filters.',
       })
     ),
   page: z.number().int().min(1).optional().default(1),

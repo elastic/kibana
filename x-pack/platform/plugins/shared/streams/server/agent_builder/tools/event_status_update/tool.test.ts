@@ -10,38 +10,38 @@ import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { updateEventVerdictToolHandler } from './handler';
-import { createEventVerdictUpdateTool, STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID } from './tool';
+import { updateEventStatusToolHandler } from './handler';
+import { createEventStatusUpdateTool, STREAMS_EVENT_STATUS_UPDATE_TOOL_ID } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
 jest.mock('./handler', () => ({
-  updateEventVerdictToolHandler: jest.fn(),
+  updateEventStatusToolHandler: jest.fn(),
 }));
 
-describe('event_verdict_update tool', () => {
-  const telemetry = { trackAgentToolEventVerdictUpdate: jest.fn() };
+describe('event_status_update tool', () => {
+  const telemetry = { trackAgentToolEventStatusUpdate: jest.fn() };
 
   it('uses expected tool id', () => {
-    const tool = createEventVerdictUpdateTool({
+    const tool = createEventStatusUpdateTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
       server: {} as StreamsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
 
-    expect(tool.id).toBe(STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID);
+    expect(tool.id).toBe(STREAMS_EVENT_STATUS_UPDATE_TOOL_ID);
   });
 
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (updateEventVerdictToolHandler as jest.Mock).mockResolvedValue({
+    (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
       event_id: 'e1',
       updated: 1,
       ignored: 0,
-      verdict: 'acknowledged',
+      status: 'acknowledged',
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
@@ -50,7 +50,7 @@ describe('event_verdict_update tool', () => {
       uiSettingsClient: {},
     });
 
-    const tool = createEventVerdictUpdateTool({
+    const tool = createEventStatusUpdateTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       server: {} as StreamsServer,
       logger: loggingSystemMock.createLogger(),
@@ -59,7 +59,7 @@ describe('event_verdict_update tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { event_id: 'e1', verdict: 'acknowledged' },
+      { event_id: 'e1', status: 'acknowledged' },
       createMockToolContext()
     );
 

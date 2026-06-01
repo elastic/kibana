@@ -95,10 +95,10 @@ interface StreamsAgentToolEventCreateProps {
   error_message?: string;
 }
 
-interface StreamsAgentToolEventVerdictUpdateProps {
+interface StreamsAgentToolEventStatusUpdateProps {
   success: boolean;
   event_id: string;
-  verdict: SigEventVerdict;
+  status: SigEventVerdict;
   error_message?: string;
 }
 
@@ -113,5 +113,5 @@ export {
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
-  type StreamsAgentToolEventVerdictUpdateProps,
+  type StreamsAgentToolEventStatusUpdateProps,
 };

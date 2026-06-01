@@ -18,16 +18,16 @@ You have 3 SigEvents tools in this skill:
 
 - `event_search`
   Use this first to find existing similar significant events.
-  `query` is optional; if omitted (or empty), search uses optional stream and verdict filters only.
+  `query` is optional; if omitted (or empty), search uses optional stream and status filters only.
   `stream_name` is optional; omit it for cross-stream searches.
 
 - `event_create`
   Use this only after confirming there is no similar existing event.
   The system generates internal identifiers and timestamps automatically.
 
-- `event_verdict_update`
-  Use this to update an existing event verdict to one of: `promoted`, `acknowledged`, `demoted`.
-  If an event already has the requested verdict or is missing, update is ignored.
+- `event_status_update`
+  Use this to update an existing event status to one of: `promoted`, `acknowledged`, `demoted`.
+  If an event already has the requested status or is missing, update is ignored.
 
 Additional globally-available helper guidance:
 - `ki_search` can be used to gather existing Knowledge Indicators (KIs) for context.
@@ -45,14 +45,14 @@ Always follow this workflow:
    - Use `execute_esql` to confirm the issue and gather supporting facts.
 6. Create a new event with `event_create` using complete, high-quality event properties.
 
-Verdict update workflow:
+Status update workflow:
 1. Gather evidence supporting the target event state.
-2. Choose verdict based on intent:
+2. Choose status based on intent:
    - `promoted`: incident-worthy and active.
    - `acknowledged`: known and actively tracked.
    - `demoted`: no longer incident-worthy.
-3. Call `event_verdict_update` with the event id and target verdict.
-4. Treat `{ updated: 0, ignored: 1 }` as expected when event is missing or already in the requested verdict.
+3. Call `event_status_update` with the event id and target status.
+4. Treat `{ updated: 0, ignored: 1 }` as expected when event is missing or already in the requested status.
 </required_workflow>
 
 <proactive_behavior>
@@ -81,7 +81,7 @@ Using ES|QL for confirmation:
 <sig_event_property_guidance>
 Populate event properties with care:
 
-- `verdict`:
+- `status`:
   - For new events, default to `promoted` unless user intent says otherwise.
 
 - `title`:
@@ -120,27 +120,27 @@ Tool: `event_search`
 {
   "query": "checkout latency spike with timeout burst",
   "stream_name": "logs.checkout",
-  "verdict": ["promoted", "acknowledged"]
+  "status": ["promoted", "acknowledged"]
 }
 
 Example: filter-only search (no query text)
 Tool: `event_search`
 {
   "stream_name": "logs.checkout",
-  "verdict": ["promoted", "acknowledged"]
+  "status": ["promoted", "acknowledged"]
 }
 
 Example: cross-stream search (no stream_name)
 Tool: `event_search`
 {
   "query": "timeout burst",
-  "verdict": ["promoted", "acknowledged"]
+  "status": ["promoted", "acknowledged"]
 }
 
 Example: create a new significant event
 Tool: `event_create`
 {
-  "verdict": "promoted",
+  "status": "promoted",
   "title": "Checkout timeout spike under upstream latency",
   "summary": "Checkout experienced a sustained timeout spike correlated with upstream latency increase.",
   "root_cause": "Upstream dependency latency exceeded service timeout budget during peak load.",
@@ -154,10 +154,10 @@ Tool: `event_create`
   ]
 }
 
-Example: update an existing significant event verdict
-Tool: `event_verdict_update`
+Example: update an existing significant event status
+Tool: `event_status_update`
 {
   "event_id": "9c4d04a1-86fe-45c2-b1dd-00891a8ba9f1",
-  "verdict": "acknowledged"
+  "status": "acknowledged"
 }
 </tool_examples>

@@ -20,7 +20,7 @@ describe('searchEventsToolHandler', () => {
 
     const result = await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { query: 'timeout', stream_name: 'logs.checkout', verdict: ['promoted'], page: 2 },
+      params: { query: 'timeout', stream_name: 'logs.checkout', status: ['promoted'], page: 2 },
     });
 
     expect(eventClient.findLatestPaginated).toHaveBeenCalledWith({
@@ -45,7 +45,7 @@ describe('searchEventsToolHandler', () => {
 
     await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { query: 'latency', verdict: ['promoted'] },
+      params: { query: 'latency', status: ['promoted'] },
     });
 
     expect(eventClient.findLatestPaginated).toHaveBeenCalledWith({

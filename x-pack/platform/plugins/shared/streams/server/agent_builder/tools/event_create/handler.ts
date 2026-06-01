@@ -10,7 +10,7 @@ import type { SigEvent, SigEventImpact, SigEventVerdict } from '@kbn/streams-sch
 import type { EventClient } from '../../../lib/sig_events/events';
 
 export interface EventCreateInput {
-  verdict?: SigEventVerdict;
+  status?: SigEventVerdict;
   title: string;
   summary: string;
   root_cause: string;
@@ -36,7 +36,7 @@ export async function createEventToolHandler({
     created_at: now,
     event_id: eventId,
     discovery_slug: `agent-event-${eventId.slice(0, 8)}`,
-    verdict: eventInput.verdict ?? 'promoted',
+    verdict: eventInput.status ?? 'promoted',
     stream_names: eventInput.stream_names,
     title: eventInput.title,
     summary: eventInput.summary,

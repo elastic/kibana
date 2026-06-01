@@ -18,25 +18,24 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../../types';
 import { createSigEventsAvailability } from '../sig_events_availability';
-import { updateEventVerdictToolHandler } from './handler';
+import { updateEventStatusToolHandler } from './handler';
 
-export const STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID =
-  platformStreamsSigEventsTools.updateEventVerdict;
+export const STREAMS_EVENT_STATUS_UPDATE_TOOL_ID = platformStreamsSigEventsTools.updateEventStatus;
 
-const eventVerdictUpdateSchema = z.object({
+const eventStatusUpdateSchema = z.object({
   event_id: z.string().describe(
     i18n.translate('xpack.streams.agentBuilder.tools.eventVerdictUpdate.schema.eventId', {
       defaultMessage: 'Identifier of the significant event to update.',
     })
   ),
-  verdict: sigEventVerdictSchema.describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventVerdictUpdate.schema.verdict', {
-      defaultMessage: 'Target verdict value to set.',
+  status: sigEventVerdictSchema.describe(
+    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.status', {
+      defaultMessage: 'Target status value to set.',
     })
   ),
 });
 
-export function createEventVerdictUpdateTool({
+export function createEventStatusUpdateTool({
   getScopedClients,
   server,
   logger,
@@ -46,16 +45,16 @@ export function createEventVerdictUpdateTool({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): StaticToolRegistration<typeof eventVerdictUpdateSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof eventVerdictUpdateSchema> = {
-    id: STREAMS_EVENT_VERDICT_UPDATE_TOOL_ID,
+}): StaticToolRegistration<typeof eventStatusUpdateSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof eventStatusUpdateSchema> = {
+    id: STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventVerdictUpdate.description', {
-        defaultMessage: 'Update the verdict of an existing significant event.',
+      ${i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.description', {
+        defaultMessage: 'Update the status of an existing significant event.',
       })}
     `,
-    schema: eventVerdictUpdateSchema,
+    schema: eventStatusUpdateSchema,
     tags: ['streams', 'significant_events'],
     availability: createSigEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
@@ -64,26 +63,26 @@ export function createEventVerdictUpdateTool({
         const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-        const data = await updateEventVerdictToolHandler({
+        const data = await updateEventStatusToolHandler({
           eventClient: getEventClient(),
           eventId: toolParams.event_id,
-          verdict: toolParams.verdict,
+          status: toolParams.status,
         });
 
-        telemetry.trackAgentToolEventVerdictUpdate({
+        telemetry.trackAgentToolEventStatusUpdate({
           success: true,
           event_id: toolParams.event_id,
-          verdict: toolParams.verdict,
+          status: toolParams.status,
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_verdict_update: ${message}`);
-        telemetry.trackAgentToolEventVerdictUpdate({
+        logger.error(`Error running event_status_update: ${message}`);
+        telemetry.trackAgentToolEventStatusUpdate({
           success: false,
           event_id: toolParams.event_id,
-          verdict: toolParams.verdict,
+          status: toolParams.status,
           error_message: message,
         });
         return {
@@ -92,9 +91,9 @@ export function createEventVerdictUpdateTool({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.streams.agentBuilder.tools.eventVerdictUpdate.errorMessage',
+                  'xpack.streams.agentBuilder.tools.eventStatusUpdate.errorMessage',
                   {
-                    defaultMessage: 'Failed to update significant event verdict: {message}',
+                    defaultMessage: 'Failed to update significant event status: {message}',
                     values: { message },
                   }
                 ),

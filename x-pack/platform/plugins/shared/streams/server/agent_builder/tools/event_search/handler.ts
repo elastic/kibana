@@ -16,7 +16,7 @@ export async function searchEventsToolHandler({
   params: {
     query?: string;
     stream_name?: string;
-    verdict?: string[];
+    status?: string[];
     page?: number;
     per_page?: number;
   };
@@ -26,7 +26,7 @@ export async function searchEventsToolHandler({
     perPage: params.per_page,
     search: params.query,
     stream: params.stream_name ? [params.stream_name] : undefined,
-    verdict: params.verdict,
+    verdict: params.status,
   });
 
   return {

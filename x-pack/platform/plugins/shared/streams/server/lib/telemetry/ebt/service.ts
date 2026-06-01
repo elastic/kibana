@@ -17,7 +17,7 @@ import {
   streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
   streamsAgentToolKiIdentificationStartedEventType,
   streamsAgentToolEventCreateEventType,
-  streamsAgentToolEventVerdictUpdateEventType,
+  streamsAgentToolEventStatusUpdateEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
 
@@ -38,7 +38,7 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(streamsAgentBuilderKnowledgeIndicatorCreatedEventType);
     this.analytics.registerEventType(streamsAgentToolKiIdentificationStartedEventType);
     this.analytics.registerEventType(streamsAgentToolEventCreateEventType);
-    this.analytics.registerEventType(streamsAgentToolEventVerdictUpdateEventType);
+    this.analytics.registerEventType(streamsAgentToolEventStatusUpdateEventType);
   }
 
   public getClient() {

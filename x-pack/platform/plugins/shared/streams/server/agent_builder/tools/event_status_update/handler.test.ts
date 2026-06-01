@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { updateEventVerdictToolHandler } from './handler';
+import { updateEventStatusToolHandler } from './handler';
 
-describe('updateEventVerdictToolHandler', () => {
-  it('creates a new event version when verdict changes', async () => {
+describe('updateEventStatusToolHandler', () => {
+  it('creates a new event version when status changes', async () => {
     const eventClient = {
       findById: jest.fn().mockResolvedValue({
         hits: [{ event_id: 'event-1', verdict: 'promoted' }],
@@ -16,10 +16,10 @@ describe('updateEventVerdictToolHandler', () => {
       bulkCreate: jest.fn().mockResolvedValue({}),
     };
 
-    const result = await updateEventVerdictToolHandler({
+    const result = await updateEventStatusToolHandler({
       eventClient: eventClient as never,
       eventId: 'event-1',
-      verdict: 'acknowledged',
+      status: 'acknowledged',
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -27,21 +27,21 @@ describe('updateEventVerdictToolHandler', () => {
       event_id: 'event-1',
       updated: 1,
       ignored: 0,
-      verdict: 'acknowledged',
+      status: 'acknowledged',
     });
   });
 
-  it('ignores when event is missing or verdict unchanged', async () => {
+  it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
       findById: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn(),
     };
-    const missing = await updateEventVerdictToolHandler({
+    const missing = await updateEventStatusToolHandler({
       eventClient: eventClientMissing as never,
       eventId: 'event-1',
-      verdict: 'demoted',
+      status: 'demoted',
     });
-    expect(missing).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, verdict: 'demoted' });
+    expect(missing).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
 
     const eventClientSame = {
       findById: jest
@@ -49,11 +49,11 @@ describe('updateEventVerdictToolHandler', () => {
         .mockResolvedValue({ hits: [{ event_id: 'event-1', verdict: 'demoted' }] }),
       bulkCreate: jest.fn(),
     };
-    const same = await updateEventVerdictToolHandler({
+    const same = await updateEventStatusToolHandler({
       eventClient: eventClientSame as never,
       eventId: 'event-1',
-      verdict: 'demoted',
+      status: 'demoted',
     });
-    expect(same).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, verdict: 'demoted' });
+    expect(same).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
   });
 });

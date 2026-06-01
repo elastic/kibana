@@ -54,7 +54,7 @@ export const platformStreamsSigEventsTools = {
   createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
   searchEvent: `${internalNamespaces.platformStreams}.sig_events.event_search`,
   createEvent: `${internalNamespaces.platformStreams}.sig_events.event_create`,
-  updateEventVerdict: `${internalNamespaces.platformStreams}.sig_events.event_verdict_update`,
+  updateEventStatus: `${internalNamespaces.platformStreams}.sig_events.event_status_update`,
 } as const;
 
 export const attachmentTools = {

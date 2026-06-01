@@ -17,7 +17,7 @@ import type {
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   StreamsAgentToolKiIdentificationStartedProps,
   StreamsAgentToolEventCreateProps,
-  StreamsAgentToolEventVerdictUpdateProps,
+  StreamsAgentToolEventStatusUpdateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -448,12 +448,12 @@ const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateP
   },
 };
 
-const streamsAgentToolEventVerdictUpdateSchema: RootSchema<StreamsAgentToolEventVerdictUpdateProps> =
+const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventStatusUpdateProps> =
   {
     success: {
       type: 'boolean',
       _meta: {
-        description: 'Whether the event verdict update succeeded',
+        description: 'Whether the event status update succeeded',
       },
     },
     event_id: {
@@ -462,16 +462,16 @@ const streamsAgentToolEventVerdictUpdateSchema: RootSchema<StreamsAgentToolEvent
         description: 'The identifier of the updated significant event',
       },
     },
-    verdict: {
+    status: {
       type: 'keyword',
       _meta: {
-        description: 'The verdict value set on the significant event',
+        description: 'The status value set on the significant event',
       },
     },
     error_message: {
       type: 'text',
       _meta: {
-        description: 'Error message when event verdict update fails',
+        description: 'Error message when event status update fails',
         optional: true,
       },
     },
@@ -488,5 +488,5 @@ export {
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
   streamsAgentToolEventCreateSchema,
-  streamsAgentToolEventVerdictUpdateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
 };
