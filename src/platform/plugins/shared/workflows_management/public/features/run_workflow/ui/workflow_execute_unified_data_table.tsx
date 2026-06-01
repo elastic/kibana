@@ -65,6 +65,8 @@ export interface WorkflowExecuteUnifiedDataTableProps {
   onDataGridFullScreenChange?: (isFullScreen: boolean) => void;
   /** Mirrors modal table-grid fullscreen; drives the custom toolbar fullscreen control. */
   isTableGridFullScreen?: boolean;
+  /** When set, renders instead of the data grid (e.g. trigger-events empty state). */
+  emptyStateContent?: React.ReactNode;
   fillHeight?: boolean;
   minTableHeight?: number;
 }
@@ -101,6 +103,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
   onFetchMoreRecords,
   onDataGridFullScreenChange,
   isTableGridFullScreen = false,
+  emptyStateContent,
   fillHeight = true,
   minTableHeight = 280,
 }: WorkflowExecuteUnifiedDataTableProps): React.JSX.Element {
@@ -227,6 +230,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
             </div>
           )}
           {dataView ? (
+            emptyStateContent ?? (
             <div
               css={css({
                 flex: 1,
@@ -267,6 +271,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                 />
               </CellActionsProvider>
             </div>
+            )
           ) : null}
         </div>
       </EuiFlexItem>

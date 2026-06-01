@@ -11,6 +11,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@el
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { TIMEPICKER_FALLBACK } from './constants';
 import { useTriggerEventSearch } from './use_trigger_event_search';
@@ -18,7 +19,10 @@ import { useTriggerEventTableConfig } from './use_trigger_event_table_config';
 import { useWorkflowsEventsDataView } from './use_workflows_events_data_view';
 import { WorkflowExecuteEventFormSearchResults } from './workflow_execute_event_form_search_results';
 import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
-import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
+import {
+  getWorkflowCustomTriggerTypeIds,
+  isDefaultTriggerEventSearchScope,
+} from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
@@ -38,6 +42,8 @@ export interface WorkflowExecuteEventFormProps {
   isTableGridFullScreen?: boolean;
   /** Notifies the modal when the table toolbar fullscreen control is toggled. */
   onTableGridFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Switches the execute modal to the Manual tab from the empty-state action. */
+  onOpenManualTab?: () => void;
 }
 
 export const WorkflowExecuteEventForm = ({
@@ -49,6 +55,7 @@ export const WorkflowExecuteEventForm = ({
   onTriggerEventTableSelectionCountChange,
   isTableGridFullScreen = false,
   onTableGridFullScreenChange,
+  onOpenManualTab,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const tableSurfaceColor = euiTheme.colors.backgroundBasePlain;
@@ -87,6 +94,7 @@ export const WorkflowExecuteEventForm = ({
 
   const {
     query,
+    submittedQuery,
     timeRange,
     searchResult,
     isError,
@@ -95,6 +103,7 @@ export const WorkflowExecuteEventForm = ({
     totalHits,
     onFetchMoreRecords,
     tableLoadingState,
+    isFetching,
     handleQueryChange,
     handleQuerySubmit,
     handleRefresh,
@@ -114,6 +123,18 @@ export const WorkflowExecuteEventForm = ({
   }, [rows.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   const documentCount = searchResult?.total ?? 0;
+
+  const isDefaultTriggerScope = useMemo(
+    () => isDefaultTriggerEventSearchScope(submittedQuery, customTriggerTypeIds),
+    [submittedQuery, customTriggerTypeIds]
+  );
+
+  const showNoEventsEmptyState =
+    tableLoadingState === DataLoadingState.loaded &&
+    !isFetching &&
+    !isError &&
+    documentCount === 0 &&
+    Boolean(dataView);
 
   const tableConfig = useTriggerEventTableConfig({
     services,
@@ -217,6 +238,9 @@ export const WorkflowExecuteEventForm = ({
         onFetchMoreRecords={onFetchMoreRecords}
         isTableGridFullScreen={isTableGridFullScreen}
         onDataGridFullScreenChange={onTableGridFullScreenChange}
+        showNoEventsEmptyState={showNoEventsEmptyState}
+        isDefaultTriggerScope={isDefaultTriggerScope}
+        onOpenManualTab={onOpenManualTab}
       />
     </EuiFlexGroup>
   );

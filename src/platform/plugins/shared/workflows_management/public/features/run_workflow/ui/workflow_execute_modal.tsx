@@ -31,7 +31,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
 import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
@@ -44,11 +43,15 @@ import {
   WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS,
 } from './workflow_execute_modal_global_styles';
 import {
+  ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
+  getVisibleWorkflowTriggerTabs,
   hasCustomEventTrigger,
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
+  isWorkflowTriggerTabDisabled,
   resolveInitialSelectedTrigger,
+  type WorkflowTriggerTabAvailability,
 } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
@@ -95,13 +98,28 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [definition, yamlString]
     );
 
+    const visibleTriggerTabs = useMemo(
+      () => getVisibleWorkflowTriggerTabs(definition),
+      [definition]
+    );
+
+    const triggerTabAvailability = useMemo<WorkflowTriggerTabAvailability>(
+      () => ({
+        hasAlertRacAccess,
+        canReadWorkflowExecution,
+        eventDrivenExecutionEnabled,
+      }),
+      [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled]
+    );
+
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
       resolveInitialSelectedTrigger(
         definition,
         initialExecutionId,
         hasAlertRacAccess,
         canReadWorkflowExecution,
-        normalizedInputs
+        normalizedInputs,
+        eventDrivenExecutionEnabled
       )
     );
 
@@ -212,13 +230,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
-        if (trigger === 'alert' && !hasAlertRacAccess) {
-          return;
-        }
-        if (trigger === 'historical' && !canReadWorkflowExecution) {
-          return;
-        }
-        if (trigger === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
+        if (isWorkflowTriggerTabDisabled(trigger, triggerTabAvailability)) {
           return;
         }
         if (trigger === selectedTrigger) {
@@ -229,7 +241,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setEventTriggerTableSelectionCount(0);
         setSelectedTrigger(trigger);
       },
-      [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled, selectedTrigger]
+      [triggerTabAvailability, selectedTrigger]
     );
 
     const shouldAutoRun = useMemo(() => {
@@ -263,23 +275,27 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       setSelectedTrigger((current) => {
+        let next = current;
         if (current === 'alert' && !hasAlertRacAccess) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+        } else if (current === 'historical' && !canReadWorkflowExecution) {
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+        } else if (
+          current === 'event' &&
+          (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)
+        ) {
+          next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
         }
-        if (current === 'historical' && !canReadWorkflowExecution) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-        }
-        if (current === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
-          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-        }
-        return current;
+        return ensureSelectedTriggerTabVisible(next, visibleTriggerTabs, triggerTabAvailability);
       });
     }, [
+      triggerTabAvailability,
+      normalizedInputs,
+      definition,
+      visibleTriggerTabs,
       hasAlertRacAccess,
       canReadWorkflowExecution,
       eventDrivenExecutionEnabled,
-      normalizedInputs,
-      definition,
     ]);
 
     if (shouldAutoRun) {
@@ -418,7 +434,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                   `}
                 >
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
-                    {ENABLED_TRIGGER_TABS.map((trigger) => {
+                    {visibleTriggerTabs.map((trigger) => {
                       let triggerDisabledTooltip: string | undefined;
                       if (trigger === 'alert' && !hasAlertRacAccess) {
                         triggerDisabledTooltip = alertTabDisabledTooltip;
@@ -431,7 +447,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                           triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
                         }
                       }
-                      const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
+                      const isTriggerTabDisabled = isWorkflowTriggerTabDisabled(
+                        trigger,
+                        triggerTabAvailability
+                      );
                       const triggerButton = (
                         <EuiButton
                           color={selectedTrigger === trigger ? 'primary' : 'text'}
@@ -596,6 +615,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     }
                     isTableGridFullScreen={isTableGridFullScreen}
                     onTableGridFullScreenChange={setIsTableGridFullScreen}
+                    onOpenManualTab={() => handleChangeTrigger('manual')}
                   />
                 )}
                 {selectedTrigger === 'historical' && (

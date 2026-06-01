@@ -9,6 +9,7 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WorkflowExecuteEventFormEmptyState } from './workflow_execute_event_form_empty_state';
 import { formatTriggerEventQueryError } from './workflow_execute_event_query_errors';
 import {
   WorkflowExecuteUnifiedDataTable,
@@ -17,12 +18,15 @@ import {
 
 export type WorkflowExecuteEventFormSearchResultsProps = Omit<
   WorkflowExecuteUnifiedDataTableProps,
-  'dataTestSubj' | 'fillHeight'
+  'dataTestSubj' | 'fillHeight' | 'emptyStateContent'
 > & {
   isError: boolean;
   searchError: unknown;
   errors: string | null;
   triggerEventsSurfaceRef: React.Ref<HTMLDivElement>;
+  showNoEventsEmptyState: boolean;
+  isDefaultTriggerScope: boolean;
+  onOpenManualTab?: () => void;
 };
 
 export const WorkflowExecuteEventFormSearchResults = memo(
@@ -32,6 +36,9 @@ export const WorkflowExecuteEventFormSearchResults = memo(
     errors,
     triggerEventsSurfaceRef,
     onDataGridFullScreenChange,
+    showNoEventsEmptyState,
+    isDefaultTriggerScope,
+    onOpenManualTab,
     ...tableProps
   }: WorkflowExecuteEventFormSearchResultsProps): React.JSX.Element {
     return (
@@ -53,6 +60,14 @@ export const WorkflowExecuteEventFormSearchResults = memo(
           }
         )}
         onDataGridFullScreenChange={onDataGridFullScreenChange}
+        emptyStateContent={
+          showNoEventsEmptyState ? (
+            <WorkflowExecuteEventFormEmptyState
+              isDefaultTriggerScope={isDefaultTriggerScope}
+              onOpenManualTab={onOpenManualTab}
+            />
+          ) : undefined
+        }
       />
     );
   }
