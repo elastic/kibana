@@ -262,8 +262,9 @@ export enum ConversationRoundStatus {
 }
 
 /**
- * Display status for a conversation in the conversation list.
- * Returned directly by the conversations list endpoint.
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
  */
 export enum ConversationDisplayStatus {
   /** conversation has been read, no pending activity */

@@ -43,7 +43,7 @@ export const createStatusLinkStyles = (
     case ConversationDisplayStatus.unread:
     case ConversationDisplayStatus.awaitingPrompt:
       return css`
-        color: ${euiTheme.colors.text};
+        color: ${euiTheme.colors.textParagraph};
         font-weight: ${euiTheme.font.weight.medium};
       `;
 
@@ -56,7 +56,7 @@ export const createStatusLinkStyles = (
 
     case ConversationDisplayStatus.error:
       return css`
-        color: ${euiTheme.colors.text};
+        color: ${euiTheme.colors.textParagraph};
         font-weight: ${euiTheme.font.weight.regular};
       `;
 

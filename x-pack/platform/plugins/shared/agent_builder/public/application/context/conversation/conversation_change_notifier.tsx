@@ -6,14 +6,11 @@
  */
 
 import { useEffect } from 'react';
-import { useQueryClient } from '@kbn/react-query';
-import produce from 'immer';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
-import { useConversation } from '../../hooks/use_conversation';
+import { useConversation, useAgentId } from '../../hooks/use_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useStreamingContext } from '../streaming/streaming_context';
-import { queryKeys } from '../../query_keys';
+import { useConversationListMutations } from '../../hooks/use_conversation_list_mutations';
 
 /**
  * Publishes the active conversation to the shared `EventsService` whenever the
@@ -22,11 +19,16 @@ import { queryKeys } from '../../query_keys';
  * closes the sidebar).
  */
 export const ConversationChangeNotifier = (): null => {
-  const { eventsService, conversationsService } = useAgentBuilderServices();
+  const { eventsService } = useAgentBuilderServices();
   const conversationId = useConversationId();
   const { conversation, isError, isFetched } = useConversation();
   const { activeStreams } = useStreamingContext();
-  const queryClient = useQueryClient();
+  const agentId = useAgentId();
+
+  const { markAsRead } = useConversationListMutations({
+    routeConversationId: conversationId,
+    agentId: agentId ?? '',
+  });
 
   const isStreaming = Boolean(conversationId && activeStreams.has(conversationId));
 
@@ -54,30 +56,8 @@ export const ConversationChangeNotifier = (): null => {
 
   useEffect(() => {
     if (!isFetched || !conversation || conversation.read !== false || isStreaming) return;
-
-    const { id, agent_id: agentId } = conversation;
-    const byIdKey = queryKeys.conversations.byId(id);
-    const byAgentKey = queryKeys.conversations.byAgent(agentId);
-
-    queryClient.setQueryData<Conversation>(byIdKey, (current) => {
-      if (!current) return current;
-      return produce(current, (draft) => {
-        draft.read = true;
-      });
-    });
-
-    queryClient.setQueryData<ConversationWithoutRounds[]>(byAgentKey, (current) => {
-      if (!current) return current;
-      return produce(current, (draft) => {
-        const conv = draft.find((c) => c.id === id);
-        if (conv) conv.read = true;
-      });
-    });
-
-    conversationsService.updateReadStatus({ conversationId: id, read: true }).catch(() => {
-      void queryClient.invalidateQueries({ queryKey: byAgentKey });
-    });
-  }, [isFetched, conversation, isStreaming, conversationsService, queryClient]);
+    markAsRead(conversation.id);
+  }, [isFetched, conversation, isStreaming, markAsRead]);
 
   return null;
 };

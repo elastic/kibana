@@ -68,6 +68,16 @@ export const useConversationListMutations = ({
 
   const updateReadStatus = useCallback(
     (conversationId: string, read: boolean) => {
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(conversationId),
+        (current) => {
+          if (!current) return current;
+          return produce(current, (draft) => {
+            draft.read = read;
+          });
+        }
+      );
+
       queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
         if (!current) return current;
         return produce(current, (draft) => {
