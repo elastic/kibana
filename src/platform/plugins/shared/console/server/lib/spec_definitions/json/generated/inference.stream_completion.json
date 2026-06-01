@@ -17,7 +17,8 @@
     "patterns": [
       "_inference/completion/{inference_id}/_stream"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-stream-inference",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-stream-completion",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-stream-completion",
     "availability": {
       "stack": true,
       "serverless": true
