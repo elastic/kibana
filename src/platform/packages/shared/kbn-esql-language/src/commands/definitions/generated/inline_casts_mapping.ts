@@ -37,4 +37,6 @@ export const inlineCastsMapping = {
   time_duration: 'to_timeduration',
   unsigned_long: 'to_unsigned_long',
   version: 'to_version',
+  counter: 'to_counter',
+  gauge: 'to_gauge',
 } as const;
