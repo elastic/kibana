@@ -6,27 +6,28 @@
  */
 
 import { keyBy } from 'lodash';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 
 /**
  * Merges `nextAttachments` into `existingAttachments` (upsert by id).
  *
- * - Existing items with a matching `id` in `nextAttachments` are replaced (updated in place).
- * - Items in `nextAttachments` whose `id` is not in the existing list are appended.
+ * - Existing items with a matching `id` are replaced (updated in place).
+ *   AttachmentGroup always has an `id`; AttachmentInput.id is optional.
+ * - Items whose `id` is not in the existing list are appended.
  * - Items without an `id` are always appended.
  *
  * Order: existing list (with updates applied), then new items. Does not mutate inputs.
  */
 export const upsertAttachmentsIntoList = (
-  existingAttachments: AttachmentInput[] | undefined,
-  nextAttachments: AttachmentInput[]
-): AttachmentInput[] => {
+  existingAttachments: ConversationAttachment[] | undefined,
+  nextAttachments: ConversationAttachment[]
+): ConversationAttachment[] => {
   const existing = [...(existingAttachments ?? [])];
 
   // Map of id -> attachment for the incoming list (only items with id). Used to update
   // existing entries in O(1). keyBy keeps last occurrence when ids repeat, which we want.
   const nextById = keyBy(
-    nextAttachments.filter((a): a is AttachmentInput & { id: string } => Boolean(a.id)),
+    nextAttachments.filter((a): a is ConversationAttachment & { id: string } => Boolean(a.id)),
     'id'
   );
 
