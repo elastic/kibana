@@ -20,7 +20,7 @@ export type DashboardListingTab = TableListTab & {
     title: string;
     visibleIn?: AppDeepLinkLocations[];
   };
-  createAction?: () => void;
+  createAction?: () => void | Promise<void>;
 };
 
 export type DashboardListingProps = PropsWithChildren<{

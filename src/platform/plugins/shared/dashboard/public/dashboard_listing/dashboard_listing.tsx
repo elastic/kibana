@@ -18,7 +18,7 @@ import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { AppHeader } from '@kbn/app-header';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
@@ -88,8 +88,56 @@ export const DashboardListing = ({
     [tabs, activeTabId]
   );
 
-  const appMenu: AppMenuConfig = useMemo(() => {
+  const appMenu = useMemo<AppMenuConfig | undefined>(() => {
     const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
+    const createDashboardAction = tabsByIdMap.get('dashboards')?.createAction;
+    const createVisualizationAction = tabsByIdMap.get('visualizations')?.createAction;
+    const createAnnotationAction = tabsByIdMap.get('annotations')?.createAction;
+    const createMenuItems: AppMenuPopoverItem[] = [];
+
+    if (createDashboardAction) {
+      createMenuItems.push({
+        id: 'createDashboard',
+        order: 1,
+        label: i18n.translate('dashboard.listing.createDashboardButtonLabel', {
+          defaultMessage: 'Create Dashboard',
+        }),
+        iconType: 'productDashboard',
+        testId: 'createDashboardButton',
+        run: createDashboardAction,
+      });
+    }
+
+    if (createVisualizationAction) {
+      createMenuItems.push({
+        id: 'createVisualization',
+        order: 2,
+        label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create Visualization',
+        }),
+        iconType: 'chartBarVertical',
+        testId: 'createVisualizationButton',
+        run: createVisualizationAction,
+      });
+    }
+
+    if (createAnnotationAction) {
+      createMenuItems.push({
+        id: 'createAnnotation',
+        order: 3,
+        label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
+          defaultMessage: 'Create Annotation',
+        }),
+        iconType: 'flag',
+        testId: 'createAnnotationButton',
+        run: createAnnotationAction,
+      });
+    }
+
+    if (createMenuItems.length === 0) {
+      return undefined;
+    }
+
     return {
       primaryActionItem: {
         id: 'create',
@@ -99,32 +147,7 @@ export const DashboardListing = ({
           defaultMessage: 'Create',
         }),
         popoverWidth: 180,
-        items: [
-          {
-            id: 'createDashboard',
-            order: 1,
-            label: 'Dashboard',
-            iconType: 'productDashboard',
-            testId: 'createDashboardButton',
-            run: () => tabsByIdMap.get('dashboards')?.createAction?.(),
-          },
-          {
-            id: 'createVisualization',
-            order: 2,
-            label: 'Visualization',
-            iconType: 'chartBarVertical',
-            testId: 'createVisualizationButton',
-            run: () => tabsByIdMap.get('visualizations')?.createAction?.(),
-          },
-          {
-            id: 'createAnnotation',
-            order: 3,
-            label: 'Annotation',
-            iconType: 'flag',
-            testId: 'createAnnotationButton',
-            run: () => tabsByIdMap.get('annotations')?.createAction?.(),
-          },
-        ],
+        items: createMenuItems,
       },
     };
   }, [tabs]);

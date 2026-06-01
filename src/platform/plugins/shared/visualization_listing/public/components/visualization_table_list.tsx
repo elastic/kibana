@@ -75,16 +75,24 @@ export const VisualizationTableList = ({
   const closeNewVisModal = useRef(() => {});
 
   const createNewVis = useCallback(() => {
-    firstValueFrom(core.application.currentAppId$).then((currentApp) => {
-      const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
-      closeNewVisModal.current = visualizations.showNewVisModal({
-        originatingApp: currentApp,
-        originatingPath: window.location.hash,
-        breadcrumbs,
-        outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+    firstValueFrom(core.application.currentAppId$)
+      .then((currentApp) => {
+        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
+        closeNewVisModal.current = visualizations.showNewVisModal({
+          originatingApp: currentApp,
+          originatingPath: window.location.hash,
+          breadcrumbs,
+          outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+            defaultMessage: 'Error opening new visualization modal',
+          }),
+        });
       });
-    });
-  }, [visualizations, core.application, getBreadcrumbs]);
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {

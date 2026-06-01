@@ -10,6 +10,7 @@
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { CoreStart } from '@kbn/core/public';
@@ -57,26 +58,34 @@ export const showNewVisModalFromDashboard = async (
   pluginsStart: { visualizations: VisualizationsStart; embeddable: EmbeddableStart },
   tabTitle: string
 ) => {
-  const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
-  const breadcrumbs = currentApp
-    ? [
-        {
-          text:
-            pluginsStart.embeddable.getStateTransfer().getAppNameFromId(currentApp) ?? currentApp,
-          href: coreStart.application.getUrlForApp(currentApp),
-        },
-        {
-          text: tabTitle,
-          href: coreStart.application.getUrlForApp(currentApp, {
-            path: window.location.hash,
-          }),
-        },
-      ]
-    : undefined;
-  pluginsStart.visualizations.showNewVisModal({
-    originatingApp: currentApp,
-    originatingPath: window.location.hash,
-    outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-    breadcrumbs,
-  });
+  try {
+    const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
+    const breadcrumbs = currentApp
+      ? [
+          {
+            text:
+              pluginsStart.embeddable.getStateTransfer().getAppNameFromId(currentApp) ?? currentApp,
+            href: coreStart.application.getUrlForApp(currentApp),
+          },
+          {
+            text: tabTitle,
+            href: coreStart.application.getUrlForApp(currentApp, {
+              path: window.location.hash,
+            }),
+          },
+        ]
+      : undefined;
+    pluginsStart.visualizations.showNewVisModal({
+      originatingApp: currentApp,
+      originatingPath: window.location.hash,
+      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+      breadcrumbs,
+    });
+  } catch (error) {
+    coreStart.notifications.toasts.addError(error, {
+      title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+        defaultMessage: 'Error opening new visualization modal',
+      }),
+    });
+  }
 };
