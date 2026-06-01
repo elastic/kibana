@@ -522,31 +522,31 @@ export const createToolAttachmentDefinition = ({
       i18n.translate('xpack.agentBuilderPlatform.attachments.tool.label', {
         defaultMessage: 'Tool draft',
       }),
-    getHeaderIcon: () => 'wrench',
-    getHeaderSubtitle: ({ attachment }) => attachment.data.id,
-    getHeaderBadges: ({ attachment, version, versionCount }) => {
-      const headerBadges: HeaderBadge[] = [];
+    getHeader: ({ attachment }) => {
+      const { version, versionCount } = attachment;
+      const badges: HeaderBadge[] = [];
       const isCreated = Boolean(attachment.origin);
 
       if (isCreated) {
-        headerBadges.push({
+        badges.push({
           label: i18n.translate('xpack.agentBuilderPlatform.attachments.tool.createdBadge', {
             defaultMessage: 'Created',
           }),
           color: 'success',
           iconType: 'check',
         });
-        return headerBadges;
+        // Created attachments only show created badge
+        return { icon: 'wrench', subtitle: attachment.data.id, badges };
       }
 
-      headerBadges.push({
+      badges.push({
         label: i18n.translate('xpack.agentBuilderPlatform.attachments.tool.draftBadge', {
           defaultMessage: 'Draft',
         }),
       });
 
       if (isLatest({ version, versionCount })) {
-        headerBadges.push({
+        badges.push({
           label: i18n.translate('xpack.agentBuilderPlatform.attachments.tool.latestBadge', {
             defaultMessage: 'Latest',
           }),
@@ -554,18 +554,12 @@ export const createToolAttachmentDefinition = ({
         });
       }
 
-      return headerBadges;
+      return { icon: 'wrench', subtitle: attachment.data.id, badges };
     },
     renderInlineContent: (props) => <ToolInlineContent {...props} http={http} />,
     renderCanvasContent: (props) => <ToolCanvasContent {...props} http={http} />,
-    getActionButtons: ({
-      attachment,
-      updateOrigin,
-      openCanvas,
-      isCanvas,
-      version,
-      versionCount,
-    }) => {
+    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
+      const { version, versionCount } = attachment;
       const isCreated = Boolean(attachment.origin);
       const actionButtons: ActionButton[] = [];
 
@@ -612,7 +606,7 @@ export const createToolAttachmentDefinition = ({
             href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
               path: `${TOOLS_MANAGE_PATH}/${toolId}`,
             }),
-            target: '_blank',
+            openInNewTab: true,
             handler: () => {
               // navigation handled by href
             },

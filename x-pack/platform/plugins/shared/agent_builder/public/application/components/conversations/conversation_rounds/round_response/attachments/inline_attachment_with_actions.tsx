@@ -96,8 +96,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
-        version,
-        versionCount,
       }) ?? [],
     [
       uiDefinition,
@@ -108,8 +106,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
-      version,
-      versionCount,
     ]
   );
 
@@ -131,13 +127,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-<<<<<<< HEAD
-  const headerIcon = uiDefinition?.getHeaderIcon?.({ attachment, version, versionCount });
-  const headerSubtitle = uiDefinition?.getHeaderSubtitle?.({ attachment, version, versionCount });
-  const headerBadges = uiDefinition?.getHeaderBadges?.({ attachment, version, versionCount });
-=======
   const header = uiDefinition?.getHeader?.({ attachment });
->>>>>>> main
 
   return (
     <EuiSplitPanel.Outer

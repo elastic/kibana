@@ -52,28 +52,41 @@ Two **registry tools** are also relevant — they're not inline tools from this 
 
 ## Authoring Workflow
 
-1. **Clarify intent first if the request is vague.**
-   - Ask up to 2 short questions if the user has not described the *purpose* of the tool (what should an agent ask it for?) or the *data source* (which index / data stream?).
+1. **Clarify intent before drafting.**
+   - If the request is vague, ask before writing anything. You need enough to write a specific, useful tool — not just a rough one.
+   - Useful things to establish:
+     - What question is the tool answering? What does a successful result look like (top-N, time series, single value, table per group)?
+     - Which index, alias, or data stream should it query? If the user named one, take it verbatim; if they didn't, ask.
+     - What does the caller control per call? (Time window, limit, identifiers, thresholds, watchlists — these become params. Anything else stays a literal.)
+     - What's intentionally out of scope — adjacent slices you should *not* fold into this one tool?
+   - Don't turn this into an interrogation. If the user gave enough context to answer most of these, fill the gaps yourself or make a reasonable call and note it in the draft.
    - If the user already gave enough detail, skip ahead.
 
-2. **Pick an id, description, and tags.**
-   - \`id\`: lowercase letters, numbers, dots, hyphens, and underscores; must start and end with a letter or number. Max 64 chars. Use dotted namespaces for grouping. Example: \`logs.top_error_counts\`. If the id already exists, propose_tool will reject it — pick a more specific variant.
-   - \`description\`: lead with **when** an agent should pick this tool. Example: "Use when the user asks for the most frequent error message types in a logs-* index over a recent time window." This is a routing hint, not user-facing copy.
-   - \`tags\`: optional. Use sparingly.
+2. **Pick an id and tags.**
+   - \`id\`: lowercase letters, numbers, dots, hyphens, and underscores; must start and end with a letter or number. Max 64 chars. Use dotted namespaces for grouping. Example: \`logs.top_error_counts\`. If the id already exists, \`propose_tool\` will reject it — pick a more specific variant.
+   - \`tags\`: optional. Use sparingly — they're for management UI grouping, not for agent routing (that's what \`description\` is for).
 
-3. **Generate the starting query with \`platform.core.generate_esql\` — don't write ES|QL from scratch.**
+3. **Write the description — this is the triggering mechanism.**
+   - The description is how the orchestrating agent decides whether to invoke this tool at runtime. A tool with a weak description will rarely get picked, even if the query is great. This step matters more than it looks.
+   - Lead with **when** to use the tool, and cover **intent**, not just keywords. Users won't always use the words you expect — think about how someone might describe needing this result, including casual or indirect phrasings ("which errors are blowing up", "what's making p95 spike", "show me the noisy IPs").
+   - Be specific about the trigger context. Vague descriptions either over-fire (competing with every other tool) or never fire (the agent can't tell they apply).
+   - **Weak:** \`"Returns error data from logs."\` — vague output, no trigger.
+   - **Strong:** \`"Use when the user asks which error messages are most frequent in a logs-* index over a recent time window — including phrasings like 'top errors', 'noisiest exceptions', or 'which errors are spiking'. Returns up to N message strings ranked by count."\` — covers result shape *and* multiple phrasings the user might use.
+   - Max 1024 chars. A few focused sentences beat one sentence trying to cover everything.
+
+4. **Generate the starting query with \`platform.core.generate_esql\` — don't write ES|QL from scratch.**
    - Pass the user's description (lightly cleaned up if needed) as \`query\`. If the user mentioned an index or data stream, pass it as \`index\`. Leave \`execute_query: true\` (the default) so the returned query is validated against the user's actual mappings — this catches field-name guesses (\`log.level\` vs \`log.flags\`) immediately.
    - The tool returns a working ES|QL string. Treat that as your draft body — copy it verbatim, then move on to parameterizing it. **Do not invent field names** based on conventions; the field names in the returned query came from the user's real index mappings and should be preserved.
    - If \`generate_esql\` fails (no matching index, no relevant fields), ask the user one short clarifying question (which index? which field?) rather than guessing.
 
-4. **Parameterize the query with \`?name\` bindings.**
+5. **Parameterize the query with \`?name\` bindings.**
    - Look at the generated query and identify the literals that should be tuneable per call: the \`LIMIT N\`, narrow filters (specific service name, log level, severity), comparison thresholds.
    - Replace each tuneable literal with \`?name\` and add a matching entry to \`configuration.params\`. Reference parameters via one \`?\` followed by the param key. Example: \`LIMIT 10\` becomes \`LIMIT ?top_n\` with a \`top_n\` integer param.
    - Every \`?name\` in the query must have a matching entry in \`configuration.params\`. Every key in \`params\` must appear as \`?name\` in the query. Orphans on either side fail validation.
    - **Time windows: prefer embedding \`NOW() - N hours\` (or \`days\`, \`minutes\`) directly in the query as a fixed literal.** ES|QL does **not** accept relative-time strings (\`now-24h\`, \`now-7d\`) as values for a \`?param\` binding — it strictly requires an ISO 8601 datetime there. If the lookback truly needs to be configurable per call, parameterize the *number* of hours/days as an \`integer\` and write \`WHERE @timestamp >= NOW() - ?lookback_hours hours\`. Only use a \`date\`-typed \`?param\` when the caller will pass an actual ISO timestamp (e.g., a known incident start time).
    - **Don't over-parameterize.** Every param is a decision the calling agent has to make at runtime — the more params, the higher the chance of a wrong call. Parameterize values that meaningfully change between calls (limits, identifiers, thresholds); keep structural things (which index, which aggregation function, which fields) as literals.
 
-5. **Define each parameter.**
+6. **Define each parameter.**
    - \`type\`: one of \`string\`, \`integer\`, \`float\`, \`boolean\`, \`date\`, \`array\`.
      - \`date\`: **strict ISO 8601 only** at call time (e.g. \`"2024-05-20T00:00:00Z"\`). Relative strings like \`"now-24h"\` will fail in ES|QL execution — do not use them for \`date\` params, and do not use them as \`defaultValue\`. If you find yourself wanting \`"now-24h"\`, the right move is to either embed \`NOW() - 24 hours\` directly in the query (no param) or use an \`integer\` param for the number of hours.
      - \`array\`: only when the query uses \`IN (...)\` or a similar list form.
@@ -81,31 +94,31 @@ Two **registry tools** are also relevant — they're not inline tools from this 
    - \`optional\`: defaults to false. Set \`true\` only when the query works correctly with the parameter unset.
    - \`defaultValue\`: only valid when \`optional: true\`. Type must match \`type\`. For \`date\`, the default must be an ISO 8601 string (or omit the default and use \`NOW()\` in the query instead).
 
-6. **(Optional) Sanity-check with \`platform.core.execute_esql\`.**
+7. **(Optional) Sanity-check with \`platform.core.execute_esql\`.**
    - For a non-trivial query, before \`propose_tool\` you can run the parameterized query against the user's data using \`execute_esql\` with concrete \`params\` values (e.g. \`top_n: 5\`). This catches mapping mismatches, type errors, or empty-result patterns before the user sees a draft. Skip for simple queries; it costs latency.
 
-7. **Call \`propose_tool\`.**
+8. **Call \`propose_tool\`.**
    - Pass the full payload in one shot.
    - On success the tool returns \`attachment_id\` and \`version\`.
    - **On failure:** the error message lists the specific problems (syntax, undefined params, type mismatches). Fix in the next call — usually a single \`patch_tool\` covers it.
 
-8. **Render the draft inline — exactly once per response.**
+9. **Render the draft inline — exactly once per response.**
    - Emit \`<render_attachment id="ATTACHMENT_ID" />\` (replacing \`ATTACHMENT_ID\` with the value from the tool result) **at the end of your response**, after at most one short sentence of prose. Do not surround it with quotes or a code fence.
    - **Do not repeat the render tag.** Emit it once and only once per response — never once near the top and again at the bottom.
    - **Do not restate what the card already shows.** The card already renders the description, the ES|QL query, and the parameter list with their types and descriptions. Listing parameters again as bullet points, dumping the query as a code block, or summarizing the "query shape" duplicates what the user is about to see and clutters the chat. Just say what you drafted in one sentence (e.g., "I drafted \`logs.top_error_counts\` with two optional parameters.") and let the card speak.
 
-9. **Iterate on feedback via \`patch_tool\`.**
+10. **Iterate on feedback via \`patch_tool\`.**
    - When the user asks for changes ("rename \`top_n\` to \`limit\`", "broaden to include FATAL", "filter only to ERROR level"), call \`patch_tool\` with the existing \`attachment_id\` and only the fields that need to change.
    - For small query edits prefer \`query_patches\` (search-replace) over a full \`query\` rewrite.
    - Renaming a parameter means: a \`query_patches\` entry to rename \`?old\` → \`?new\`, plus \`params_to_remove: ['old']\` and \`params_to_add: { new: { ... } }\`. Or use \`params_to_update\` if you're just tweaking type/description.
    - For larger structural changes (different aggregation, new join), it can be cleaner to call \`platform.core.generate_esql\` again with an updated description and then patch the query as a full \`query\` replacement.
    - After each patch, re-render the attachment so the card refreshes in place.
 
-10. **Encourage the user to test before persisting.**
+11. **Encourage the user to test before persisting.**
     - The card's **Preview** button opens the canvas, where the user can enter parameter values and run the draft against their real data without persisting.
     - Suggest concrete sample values matching the param types — e.g. \`top_n=5\` for an integer; for a \`date\` param, an actual ISO timestamp like \`2024-05-20T00:00:00Z\` (not \`now-24h\`, which is not valid ES|QL parameter input).
 
-11. **When the user is happy, point them at the Create button.**
+12. **When the user is happy, point them at the Create button.**
     - The card itself wires "Create tool" to \`POST /api/agent_builder/tools\`. You do **not** need to call any HTTP endpoint yourself — the user clicks the button.
     - If the user lacks the \`manageTools\` privilege, the button is disabled with a tooltip; nudge them to ask an admin.
 
