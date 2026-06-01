@@ -53,38 +53,18 @@ echo "--- Install fallow v${FALLOW_VERSION}"
 npm ci --prefix .buildkite
 .buildkite/node_modules/.bin/fallow --version
 
-echo "--- Load previous snapshot for trend comparison"
-# Snapshots are saved only from the weekly standalone pipeline (kibana-code-quality-fallow).
-# PR runs and local runs do not save snapshots.
-IS_WEEKLY_PIPELINE="${BUILDKITE_PIPELINE_SLUG:-}" && [ "$IS_WEEKLY_PIPELINE" = "kibana-code-quality-fallow" ] && IS_WEEKLY_PIPELINE=true || IS_WEEKLY_PIPELINE=false
+# Snapshot: save only from the weekly standalone pipeline, not PR runs.
+# Trend comparison will be added once weekly pipeline is running.
+IS_WEEKLY_PIPELINE=false
+if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ]; then
+  IS_WEEKLY_PIPELINE=true
+fi
 
-TREND_FLAG=""
 SAVE_SNAPSHOT_FLAG=""
-
-# Snapshots are only used in the weekly standalone pipeline.
-# On PR runs, --save-snapshot is skipped: writing a ~200MB snapshot on every PR is too expensive.
 if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
   mkdir -p "$SNAPSHOT_DIR"
   SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
-
-  if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
-    PREV_BUILD=$(curl -sf \
-      -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
-      "https://api.buildkite.com/v2/organizations/elastic/pipelines/kibana-code-quality-fallow/builds?state=passed&branch=main&per_page=1" \
-      | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null || true)
-    if [ -n "$PREV_BUILD" ]; then
-      if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
-        echo "Loaded snapshot from weekly build #${PREV_BUILD} — trend comparison enabled"
-        TREND_FLAG="--trend"
-      else
-        echo "No snapshot found in build #${PREV_BUILD} — this run will create the first baseline"
-      fi
-    else
-      echo "No previous weekly build found — this run will create the first baseline"
-    fi
-  fi
-else
-  echo "PR run — snapshot skipped (weekly pipeline only)"
+  echo "Weekly pipeline — snapshot will be saved after analysis"
 fi
 
 echo "--- Run fallow analysis"
@@ -109,9 +89,10 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --quiet \
   --score \
   $SAVE_SNAPSHOT_FLAG \
-  $TREND_FLAG \
   2>&1)
+FALLOW_EXIT=$?
 set -e
+echo "fallow exit: ${FALLOW_EXIT}, output lines: $(printf '%s\n' "$FALLOW_OUTPUT" | wc -l)"
 
 echo "--- Dead code"
 for owner in "${FALLOW_OWNERS[@]}"; do
