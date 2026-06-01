@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { LENS_BASIC_FIXTURE_IDS } from '../../../fixtures/kbn_archives/lens/ids';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
-  const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -21,9 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // label, format, reference, or incomplete configuration in the dimension editor.
   describe('lens dimension editor', () => {
     it('should edit settings of xy line chart', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis, 'xyVisChart');
 
       await lens.removeDimension('lnsXY_splitDimensionPanel');
       await lens.switchToVisualization('line');

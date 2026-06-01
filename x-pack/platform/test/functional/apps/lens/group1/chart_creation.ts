@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { LENS_BASIC_FIXTURE_IDS } from '../../../fixtures/kbn_archives/lens/ids';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
@@ -68,9 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
-      await visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis, 'xyVisChart');
 
       // Change the IP field to filters
       await lens.configureDimension({
