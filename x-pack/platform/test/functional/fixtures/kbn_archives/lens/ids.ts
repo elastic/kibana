@@ -12,7 +12,10 @@
  * visualization without going through the listing page.
  */
 export const LENS_BASIC_FIXTURE_IDS = {
-  /** lnsMetric, title: `Artistpreviouslyknownaslens` */
+  /**
+   * Legacy Lens metric (`lnsLegacyMetric`), title: `Artistpreviouslyknownaslens`.
+   * Renders as `legacyMtrVis` (NOT the new `mtrVis`).
+   */
   artistMetric: '76fc4200-cf44-11e9-b933-fd84270f3ac1',
   /** lnsXY, title: `lnsXYvis` */
   xyVis: '76fc4200-cf44-11e9-b933-fd84270f3ac2',

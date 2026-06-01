@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // to another and verifying that Lens preserves or maps the configuration.
   describe('lens chart switching', () => {
     it('should transition from metric to table to metric', async () => {
-      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.artistMetric, 'mtrVis');
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.artistMetric, 'legacyMtrVis');
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await lens.switchToVisualization('lnsDatatable');
