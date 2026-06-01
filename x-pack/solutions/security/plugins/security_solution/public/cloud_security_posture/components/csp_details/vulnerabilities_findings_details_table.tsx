@@ -7,7 +7,15 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiBasicTable,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
