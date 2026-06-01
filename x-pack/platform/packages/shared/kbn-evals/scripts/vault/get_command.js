@@ -6,17 +6,18 @@
  */
 
 require('@kbn/babel-register').install();
-const { getCommand } = require('./manage_secrets');
+const { getCommand, getVaultPath } = require('./manage_secrets');
+const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function run() {
   const argv = minimist(process.argv.slice(2));
   const format = argv.format || 'vault-write';
-  const vault = argv.vault || 'ci-prod';
+  const vault = argv.vault;
 
-  if (vault !== 'ci-prod') {
+  if (!vault || !KBN_EVALS_VAULT_TYPES.includes(vault)) {
     // eslint-disable-next-line no-console
-    console.error('Error: vault parameter must be "ci-prod"');
+    console.error(`Error: --vault is required (${KBN_EVALS_VAULT_TYPES.join(' | ')})`);
     process.exit(1);
   }
 
@@ -26,6 +27,8 @@ async function run() {
     process.exit(1);
   }
 
+  // eslint-disable-next-line no-console
+  console.log(`Using ${vault} vault (${getVaultPath(vault)})...`);
   const cmd = await getCommand(format, vault);
   // eslint-disable-next-line no-console
   console.log(cmd);
