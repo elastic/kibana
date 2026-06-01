@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -30,6 +30,7 @@ import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
 import { SourceEnricherService } from './source_enricher_service';
+import { ViewEnricherService } from './view_enricher_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -57,21 +58,25 @@ export interface EsqlPluginSetup {
   registerSourceEnricher(
     enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
   ): void;
+  registerViewEnricher(enricher: (views: EsqlView[]) => Promise<EsqlView[]>): void;
 }
 
 export interface EsqlPluginStart {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
   private readonly sourceEnricherService: SourceEnricherService;
+  private readonly viewEnricherService: ViewEnricherService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.sourceEnricherService = new SourceEnricherService(
       initContext.logger.get('sourceEnricher')
     );
+    this.viewEnricherService = new ViewEnricherService(initContext.logger.get('viewEnricher'));
   }
 
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
@@ -81,6 +86,9 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
     return {
       registerSourceEnricher: (enricher) => {
         this.sourceEnricherService.register(enricher);
+      },
+      registerViewEnricher: (enricher) => {
+        this.viewEnricherService.register(enricher);
       },
     };
   }
@@ -146,7 +154,14 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
-      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
+      enrichSources: (sources: ESQLSourceResult[]) => {
+        console.log('### enrichSources called with', sources);
+        return this.sourceEnricherService.enrich(sources);
+      },
+      enrichViews: async (views: EsqlView[]) => {
+        console.log('### enrichViews called with', views);
+        return this.viewEnricherService.enrich(views);
+      },
     };
 
     setKibanaServices(
