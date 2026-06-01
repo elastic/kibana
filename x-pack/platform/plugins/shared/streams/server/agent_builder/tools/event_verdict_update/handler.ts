@@ -6,9 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { SigEventVerdict } from '@kbn/streams-schema';
 import type { EventClient } from '../../../lib/sig_events/events';
-
-type EventVerdict = 'promoted' | 'acknowledged' | 'demoted';
 
 export async function updateEventVerdictToolHandler({
   eventClient,
@@ -17,8 +16,8 @@ export async function updateEventVerdictToolHandler({
 }: {
   eventClient: EventClient;
   eventId: string;
-  verdict: EventVerdict;
-}): Promise<{ event_id: string; updated: number; ignored: number; verdict: EventVerdict }> {
+  verdict: SigEventVerdict;
+}): Promise<{ event_id: string; updated: number; ignored: number; verdict: SigEventVerdict }> {
   const { hits } = await eventClient.findById(eventId);
   const latest = hits[hits.length - 1];
 
