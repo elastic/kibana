@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -219,21 +220,28 @@ export const AttachmentsMenu = ({
               }
             )}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate(
-                  'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
-                  {
-                    defaultMessage: 'Attachments',
-                  }
-                )}
-                size="m"
-                color="text"
-                display="base"
-                isSelected={isActionMenuOpen}
-                iconType="boxesVertical"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
+                  defaultMessage: 'Attachments',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  size="m"
+                  color="text"
+                  display="base"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

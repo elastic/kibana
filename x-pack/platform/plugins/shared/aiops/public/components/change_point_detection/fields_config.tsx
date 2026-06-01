@@ -20,6 +20,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -523,19 +524,29 @@ const FieldPanel: FC<FieldPanelProps> = ({
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems={'flexStart'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
               {
                 defaultMessage: 'Toggle change points table',
               }
             )}
-            aria-expanded={isExpanded}
-            size="s"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="aiopsChangePointDetectionExpandConfigButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+              aria-label={i18n.translate(
+                'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+                {
+                  defaultMessage: 'Toggle change points table',
+                }
+              )}
+              aria-expanded={isExpanded}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -564,21 +575,28 @@ const FieldPanel: FC<FieldPanelProps> = ({
               <EuiPopover
                 id={`panelContextMenu_${panelIndex}`}
                 button={
-                  <EuiButtonIcon
-                    data-test-subj="aiopsChangePointDetectionContextMenuButton"
-                    aria-label={i18n.translate(
-                      'xpack.aiops.changePointDetection.configActionsLabel',
-                      {
-                        defaultMessage: 'Context menu',
-                      }
-                    )}
-                    color="text"
-                    display="base"
-                    size="s"
-                    isSelected={isActionMenuOpen}
-                    iconType="boxesVertical"
-                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
-                  />
+                  <EuiToolTip
+                    content={i18n.translate('xpack.aiops.changePointDetection.configActionsLabel', {
+                      defaultMessage: 'Context menu',
+                    })}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="aiopsChangePointDetectionContextMenuButton"
+                      aria-label={i18n.translate(
+                        'xpack.aiops.changePointDetection.configActionsLabel',
+                        {
+                          defaultMessage: 'Context menu',
+                        }
+                      )}
+                      color="text"
+                      display="base"
+                      size="s"
+                      isSelected={isActionMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isActionMenuOpen}
                 closePopover={setIsActionMenuOpen.bind(null, false)}
