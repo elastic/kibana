@@ -44,7 +44,7 @@ export function transformPanelsOut(
   try {
     parsedPanels = JSON.parse(panelsJSON);
   } catch (parseError) {
-    logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
+    logger.warn(`Unable to parse panelsJSON. Error: ${parseError.message}`);
     return { panels: [], warnings };
   }
 
