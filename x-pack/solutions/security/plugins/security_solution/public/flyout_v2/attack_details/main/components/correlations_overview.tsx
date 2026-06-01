@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -50,7 +49,6 @@ export interface CorrelationsOverviewProps {
  */
 export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
   ({ attack, onShowAttackCorrelations }) => {
-    const { euiTheme } = useEuiTheme();
     const { originalAlertIds } = useHeaderData(attack);
     const relatedAlertsCount = originalAlertIds.length;
 
@@ -68,14 +66,7 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
           iconType: 'arrowStart',
         }}
       >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
-          responsive={false}
-          css={css`
-            padding: ${euiTheme.size.m} ${euiTheme.size.base};
-          `}
-        >
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup
               alignItems="center"

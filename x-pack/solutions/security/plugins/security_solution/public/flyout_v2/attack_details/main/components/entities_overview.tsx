@@ -6,14 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
@@ -57,7 +55,6 @@ export interface EntitiesOverviewProps {
  */
 export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
   ({ attack, onShowAttackEntities }) => {
-    const { euiTheme } = useEuiTheme();
     const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(attack);
 
     const link = useMemo(
@@ -74,14 +71,7 @@ export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
           iconType: 'chevronLimitLeft',
         }}
       >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
-          responsive={false}
-          css={css`
-            padding: ${euiTheme.size.m} ${euiTheme.size.base};
-          `}
-        >
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup
               alignItems="center"
