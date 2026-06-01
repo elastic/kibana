@@ -80,6 +80,14 @@ export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
   prunedSnoozedInstances?: RawRuleSnoozedInstance[];
+  /**
+   * Audit context for `alert_auto_unsnooze`
+   */
+  autoUnsnoozeAudit?: {
+    expired: RawRuleSnoozedInstance[];
+    conditionExpired: RawRuleSnoozedInstance[];
+    ruleName: string;
+  };
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {

@@ -3949,6 +3949,42 @@ describe('Task Runner', () => {
     );
   });
 
+  test('should NOT emit alert_auto_unsnooze audit events when the rule SO update fails', async () => {
+    const expiredSnooze = {
+      instanceId: 'alert-1',
+      expiresAt: '1969-12-31T23:59:59.000Z',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [expiredSnooze],
+      },
+    };
+
+    elasticsearchService.client.asInternalUser.update.mockRejectedValueOnce(
+      new Error('simulated ES update failure')
+    );
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
+  });
+
   function testAlertingEventLogCalls({
     ruleContext = alertingEventLoggerInitializer,
     ruleTypeDef = ruleType,

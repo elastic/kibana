@@ -213,6 +213,10 @@ export class TaskRunner<
     this.ruleResult = new RuleResultService();
   }
 
+  /**
+   * Persists the post-run rule attributes (including any pruned per-alert
+   * snoozes) to Elasticsearch.
+   */
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
     attributes: {
@@ -222,7 +226,7 @@ export class TaskRunner<
       lastRun?: RawRuleLastRun | null;
       snoozedInstances?: RawRuleSnoozedInstance[];
     }
-  ) {
+  ): Promise<boolean> {
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -243,8 +247,10 @@ export class TaskRunner<
           refresh: false,
         }
       );
+      return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
+      return false;
     }
   }
 
@@ -319,8 +325,6 @@ export class TaskRunner<
       rule.snoozedInstances,
       this.runDate
     );
-
-    this.logAutoUnsnoozeAuditEvents(expiredInstances, 'ttl_expired', rule);
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
@@ -461,8 +465,6 @@ export class TaskRunner<
       alertAsDataByInstanceId
     );
 
-    this.logAutoUnsnoozeAuditEvents(conditionExpiredInstances, 'condition_met', rule);
-
     const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
     const updatedActiveInstances =
       conditionExpiredInstances.length > 0
@@ -547,6 +549,15 @@ export class TaskRunner<
         updatedActiveInstances.length < rule.snoozedInstances.length
           ? updatedActiveInstances
           : undefined,
+      ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+        ? {
+            autoUnsnoozeAudit: {
+              expired: expiredInstances,
+              conditionExpired: conditionExpiredInstances,
+              ruleName: rule.name,
+            },
+          }
+        : {}),
     };
   }
 
@@ -760,6 +771,9 @@ export class TaskRunner<
       const prunedSnoozedInstances = isOk(runRuleResult)
         ? runRuleResult.value.prunedSnoozedInstances
         : undefined;
+      const autoUnsnoozeAudit = isOk(runRuleResult)
+        ? runRuleResult.value.autoUnsnoozeAudit
+        : undefined;
 
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -774,7 +788,7 @@ export class TaskRunner<
           );
         }
 
-        await this.updateRuleSavedObjectPostRun(ruleId, {
+        const updatePersisted = await this.updateRuleSavedObjectPostRun(ruleId, {
           executionStatus: ruleExecutionStatusToRaw(executionStatus),
           nextRun,
           lastRun: lastRunToRaw(lastRun),
@@ -783,6 +797,17 @@ export class TaskRunner<
             ? { snoozedInstances: prunedSnoozedInstances }
             : {}),
         });
+
+        // Only emit `alert_auto_unsnooze` events after the SO update.
+        if (updatePersisted && autoUnsnoozeAudit !== undefined) {
+          const ruleRef = { id: ruleId, name: autoUnsnoozeAudit.ruleName };
+          this.logAutoUnsnoozeAuditEvents(autoUnsnoozeAudit.expired, 'ttl_expired', ruleRef);
+          this.logAutoUnsnoozeAuditEvents(
+            autoUnsnoozeAudit.conditionExpired,
+            'condition_met',
+            ruleRef
+          );
+        }
       }
 
       if (startedAt) {
