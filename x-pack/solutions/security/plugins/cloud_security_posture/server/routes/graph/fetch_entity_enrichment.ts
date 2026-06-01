@@ -36,17 +36,14 @@ const BASE_ENRICHMENT_COLUMNS = new Set([
 ]);
 
 // Additional entity-store columns needed to reconstruct sourceFields, beyond the base set.
-// Deduped; strips ".target" suffix so actor-namespace definitions map to store column names.
 const EXTRA_SOURCE_FIELD_COLUMNS = [
-  ...new Set(
-    [
-      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.all,
-      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
-      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
-      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
-      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
-    ].map((f) => f.replace('.target', ''))
-  ),
+  ...new Set([
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.all,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+  ]),
 ].filter((col) => !BASE_ENRICHMENT_COLUMNS.has(col));
 
 /**
@@ -67,17 +64,17 @@ const buildSourceFields = (
   };
 
   for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS.all) {
-    addField(field.replace('.target', ''));
+    addField(field);
   }
 
   const matchedType = TYPED_ENTITY_PREFIXES.find((p) => entityId.startsWith(`${p}:`));
   if (matchedType) {
     for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS[matchedType]) {
-      addField(field.replace('.target', ''));
+      addField(field);
     }
   } else {
     for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic) {
-      addField(field.replace('.target', ''));
+      addField(field);
     }
   }
 
