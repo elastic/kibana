@@ -57,7 +57,7 @@ export const OnboardingPanel = ({
         <EuiSplitPanel.Inner color="subdued" grow={false} paddingSize="l">
           <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
             <EuiFlexItem grow={false}>
-              <EuiImage size={euiTheme.size.xxxxl} src={icon} alt="" />
+              <EuiImage size={euiTheme.base * 4} src={icon} alt="" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
