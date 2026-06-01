@@ -31,112 +31,106 @@ const getActiveTabId = (tabId?: string) => {
   return CASE_VIEW_PAGE_TABS.ACTIVITY;
 };
 
-export const CaseViewPage = React.memo<CaseViewPageProps>(
-  ({ caseData, refreshRef, actionsNavigation }) => {
-    const { urlParams } = useUrlParams();
-    const refreshCaseViewPage = useRefreshCaseViewPage();
+export const CaseViewPage = React.memo<CaseViewPageProps>(({ caseData, refreshRef }) => {
+  const { urlParams } = useUrlParams();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const onSearch = useCallback(
-      (newSearch: string) => {
-        const trimSearch = newSearch.trim();
-        setSearchTerm(trimSearch);
-      },
-      [setSearchTerm]
-    );
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const onSearch = useCallback(
+    (newSearch: string) => {
+      const trimSearch = newSearch.trim();
+      setSearchTerm(trimSearch);
+    },
+    [setSearchTerm]
+  );
 
-    const caseWithFilteredAttachments = useMemo(
-      () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
-      [caseData, searchTerm]
-    );
+  const caseWithFilteredAttachments = useMemo(
+    () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
+    [caseData, searchTerm]
+  );
 
-    useCasesTitleBreadcrumbs(caseData.title);
+  useCasesTitleBreadcrumbs(caseData.title);
 
-    const activeTabId = getActiveTabId(urlParams?.tabId);
+  const activeTabId = getActiveTabId(urlParams?.tabId);
 
-    const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-      caseData,
-    });
+  const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
+    caseData,
+  });
 
-    // Set `refreshRef` if needed
-    useEffect(() => {
-      let isStale = false;
-      if (refreshRef) {
-        refreshRef.current = {
-          refreshCase: async () => {
-            // Do nothing if component (or instance of this render cycle) is stale or it is already loading
-            if (isStale || isLoading) {
-              return;
-            }
-            refreshCaseViewPage();
-          },
-        };
-        return () => {
-          isStale = true;
-          refreshRef.current = null;
-        };
-      }
-    }, [isLoading, refreshRef, refreshCaseViewPage]);
-
-    const onSubmitTitle = useCallback(
-      (newTitle: string) =>
-        onUpdateField({
-          key: 'title',
-          value: newTitle,
-        }),
-      [onUpdateField]
-    );
-
-    return (
-      <>
-        <HeaderPage
-          border={false}
-          data-test-subj="case-view-title"
-          titleNode={
-            <EditableTitle
-              key={caseData.id}
-              isLoading={isLoading && loadingKey === 'title'}
-              title={caseData.title}
-              onSubmit={onSubmitTitle}
-            />
+  // Set `refreshRef` if needed
+  useEffect(() => {
+    let isStale = false;
+    if (refreshRef) {
+      refreshRef.current = {
+        refreshCase: async () => {
+          // Do nothing if component (or instance of this render cycle) is stale or it is already loading
+          if (isStale || isLoading) {
+            return;
           }
-          title={caseData.title}
-          incrementalId={caseData.incrementalId}
-        >
-          <CaseActionBar
-            caseData={caseData}
-            isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
+          refreshCaseViewPage();
+        },
+      };
+      return () => {
+        isStale = true;
+        refreshRef.current = null;
+      };
+    }
+  }, [isLoading, refreshRef, refreshCaseViewPage]);
+
+  const onSubmitTitle = useCallback(
+    (newTitle: string) =>
+      onUpdateField({
+        key: 'title',
+        value: newTitle,
+      }),
+    [onUpdateField]
+  );
+
+  return (
+    <>
+      <HeaderPage
+        border={false}
+        data-test-subj="case-view-title"
+        titleNode={
+          <EditableTitle
+            key={caseData.id}
+            isLoading={isLoading && loadingKey === 'title'}
+            title={caseData.title}
+            onSubmit={onSubmitTitle}
+          />
+        }
+        title={caseData.title}
+        incrementalId={caseData.incrementalId}
+      >
+        <CaseActionBar
+          caseData={caseData}
+          isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
+          onUpdateField={onUpdateField}
+        />
+      </HeaderPage>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
+        {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
+          <CaseViewActivity caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
+        )}
+        {ATTACHMENT_TAB_ALIASES.has(activeTabId) && (
+          <CaseViewAttachments
+            onSearch={onSearch}
+            searchTerm={searchTerm}
+            caseData={caseWithFilteredAttachments}
             onUpdateField={onUpdateField}
           />
-        </HeaderPage>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
-          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
-            <CaseViewActivity
-              caseData={caseWithFilteredAttachments}
-              searchTerm={searchTerm}
-              actionsNavigation={actionsNavigation}
-            />
-          )}
-          {ATTACHMENT_TAB_ALIASES.has(activeTabId) && (
-            <CaseViewAttachments
-              onSearch={onSearch}
-              searchTerm={searchTerm}
-              caseData={caseWithFilteredAttachments}
-              onUpdateField={onUpdateField}
-            />
-          )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
-            <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
-          )}
-        </EuiFlexGroup>
-      </>
-    );
-  }
-);
+        )}
+        {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
+          <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
+        )}
+      </EuiFlexGroup>
+    </>
+  );
+});
 CaseViewPage.displayName = 'CaseViewPage';
