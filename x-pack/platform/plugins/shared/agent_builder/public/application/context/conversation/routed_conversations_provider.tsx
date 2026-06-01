@@ -73,7 +73,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(
+    location.state?.attachments
+  );
 
   const conversationActions = useConversationActions({
     conversationId,
