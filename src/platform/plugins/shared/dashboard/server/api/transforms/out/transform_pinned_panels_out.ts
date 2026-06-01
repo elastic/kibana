@@ -11,11 +11,11 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
-  getControlsSchema,
   type LegacyIgnoreParentSettings,
   type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_schema';
 
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
@@ -30,7 +30,6 @@ export function transformPinnedPanelsOut(
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[] = []
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
-  const pinnedPanelSchema = getControlsSchema();
   let warnings: Warnings = [];
   let transformedPanels: DashboardPinnedPanelsState = [];
   if (pinnedPanels) {
@@ -39,8 +38,7 @@ export function transformPinnedPanelsOut(
      */
     ({ warnings, panels: transformedPanels } = transformPanels(
       flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
-      containerReferences,
-      pinnedPanelSchema
+      containerReferences
     ));
   } else if (controlGroupInput) {
     /**
@@ -54,8 +52,7 @@ export function transformPinnedPanelsOut(
             transformPinnedPanelsObjectToArray,
             transformPinnedPanelProperties
           )(controlGroupInput.panelsJSON),
-          containerReferences,
-          pinnedPanelSchema
+          containerReferences
         )
       : { warnings: [], panels: [] });
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
@@ -124,33 +121,41 @@ export function transformPinnedPanelProperties(
  */
 function transformPanels(
   panels: DashboardPinnedPanelsState,
-  containerReferences: Reference[],
-  schema: ReturnType<typeof getControlsSchema>
+  containerReferences: Reference[]
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
 
   panels.forEach((panel) => {
-    const transforms = embeddableService.getTransforms(panel.type);
-    const { config, ...rest } = panel;
-    if (transforms?.transformOut) {
-      try {
-        const transformed = {
-          ...rest,
-          config: transforms.transformOut(config, [], containerReferences, panel.id),
-        } as DashboardPinnedPanel;
-        // Validate individual panel; if invalid, it will be dropped from the pinned panel array
-        transformedPanels.push(schema.validate(transformed));
-      } catch (e) {
-        warnings.push({
-          type: 'dropped_panel',
-          panel_type: panel.type,
-          panel_config: panel.config,
-          message: `Unable to transform pinned panel config. Error: ${e.message}`,
-        });
+    const { transformOut, schema } = embeddableService.getTransforms(panel.type) ?? {};
+    // eslint-disable-next-line prefer-const
+    let { config, type, ...rest } = panel;
+    try {
+      if (transformOut) {
+        config = transformOut(
+          config,
+          [],
+          containerReferences,
+          panel.id
+        ) as DashboardPinnedPanel['config'];
       }
-    } else {
-      transformedPanels.push({ ...rest, config } as DashboardPinnedPanel);
+      if (schema) {
+        config = schema.validate(config, undefined, undefined, {
+          stripUnknownKeys: true,
+        }) as DashboardPinnedPanel['config'];
+      }
+      transformedPanels.push({
+        ...pinnedControlSchema.validate(rest),
+        config,
+        type,
+      } as DashboardPinnedPanel);
+    } catch (e) {
+      warnings.push({
+        type: 'dropped_panel',
+        panel_type: panel.type,
+        panel_config: panel.config,
+        message: `Unable to transform pinned panel config. Error: ${e.message}`,
+      });
     }
   });
   return { warnings, panels: transformedPanels };

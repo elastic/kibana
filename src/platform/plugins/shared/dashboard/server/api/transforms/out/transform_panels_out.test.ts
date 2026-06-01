@@ -16,7 +16,6 @@ beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   };
 });
 
@@ -100,25 +99,28 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('drops any invalid panels', () => {
-    mockGetTransforms
-      .mockReturnValueOnce({
-        title: 'markdown',
-        transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
-        schema: {
-          getSchema: jest.fn().mockReturnValue({}),
-          validate: jest.fn().mockImplementation((val) => val),
-        },
-      })
-      .mockReturnValueOnce({
-        title: 'invalid',
-        schema: {
-          getSchema: jest.fn().mockReturnValue({}),
-          validate: jest.fn().mockImplementation(() => {
-            throw new Error('Boo!');
-          }),
-        },
-      });
+  it('should drop invalid panels', () => {
+    mockGetTransforms.mockImplementation((type: string) => {
+      if (type === 'DASHBOARD_MARKDOWN') {
+        return {
+          title: 'markdown',
+          transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
+          schema: {
+            validate: jest.fn().mockImplementation((val) => val),
+          },
+        };
+      }
+      if (type === 'invalidPanel') {
+        return {
+          title: 'invalid',
+          schema: {
+            validate: jest.fn().mockImplementation(() => {
+              throw new Error('Boo!');
+            }),
+          },
+        };
+      }
+    });
 
     const panelsJSON = JSON.stringify([
       {
