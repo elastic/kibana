@@ -142,6 +142,77 @@ export interface RouterRoute {
   isVersioned: boolean;
 }
 
+/**
+ * A query-string parameter accepted by a registered route, derived from its query
+ * validation schema.
+ *
+ * Carries just enough metadata to power autocomplete (e.g. Dev Tools Console) without
+ * serializing the full validation schema. Returned as part of {@link RegisteredRouteInfo}
+ * when query parameters are requested.
+ *
+ * @public
+ */
+export interface RegisteredRouteQueryParameter {
+  /** The query parameter name, e.g. `perPage`. */
+  name: string;
+  /** Whether the parameter is required by the route's validation schema. */
+  required: boolean;
+  /**
+   * The closed set of values the parameter accepts, when the schema constrains it to an
+   * enumeration. Omitted for free-form parameters.
+   */
+  options?: string[];
+  /** `true` when the parameter is a boolean flag (i.e. accepts `true`/`false`). */
+  flag?: boolean;
+}
+
+/**
+ * Lightweight, serializable description of a route registered with the HTTP service.
+ *
+ * Exposes only routing metadata (path, method, access tier, etc.) and intentionally
+ * omits handlers and validation schemas, making it cheap to enumerate every registered
+ * route. Returned by {@link HttpServiceSetup.getRegisteredRoutes}.
+ *
+ * @public
+ */
+export interface RegisteredRouteInfo {
+  /** The path the route is registered on, e.g. `/api/spaces/space/{id}`. */
+  path: string;
+  /** The HTTP method the route responds to. */
+  method: RouteMethod;
+  /**
+   * The intended consumer tier of the route. Defaults to `internal` when a route
+   * does not explicitly declare its access level.
+   */
+  access: RouteAccess;
+  /** A human-readable description of the route, when one was provided at registration. */
+  description?: string;
+  /** Whether the route was registered through the versioned router. */
+  isVersioned: boolean;
+  /**
+   * The route's query-string parameters, derived from its query validation schema.
+   * Only populated when {@link GetRegisteredRoutesOptions.includeQueryParameters} is
+   * requested, since extracting them is more expensive than reading routing metadata.
+   */
+  queryParams?: RegisteredRouteQueryParameter[];
+}
+
+/**
+ * Options for {@link HttpServiceSetup.getRegisteredRoutes}.
+ *
+ * @public
+ */
+export interface GetRegisteredRoutesOptions {
+  /**
+   * When `true`, each route's query-string parameters are extracted from its validation
+   * schema and returned on {@link RegisteredRouteInfo.queryParams}. This is more expensive
+   * than the default metadata-only enumeration, so callers opt in only when needed.
+   *
+   * @default false
+   */
+  includeQueryParameters?: boolean;
+}
+
 /** @public */
 export interface RouterDeprecatedApiDetails {
   routeDeprecationOptions?: RouteDeprecationInfo;

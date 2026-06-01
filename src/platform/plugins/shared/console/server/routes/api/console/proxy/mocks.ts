@@ -45,6 +45,8 @@ export const getProxyRouteHandlerDeps = ({
   return {
     services,
     router,
+    getRegisteredRoutes: jest.fn(() => []),
+    isDevMode: false,
     proxy: proxy
       ? {
           ...defaultProxyValue,

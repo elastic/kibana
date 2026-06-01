@@ -9,6 +9,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RouteDependencies } from '../../..';
+import { buildKibanaApiSpec, type KibanaApiSpec } from '../../../../lib';
 
 interface SpecDefinitionsRouteResponse {
   es: {
@@ -16,12 +17,25 @@ interface SpecDefinitionsRouteResponse {
     globals: Record<string, any>;
     endpoints: Record<string, any>;
   };
+  kibana: KibanaApiSpec;
 }
 
-export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
+export const registerSpecDefinitionsRoute = ({
+  router,
+  services,
+  getRegisteredRoutes,
+  isDevMode,
+}: RouteDependencies) => {
   const handler: RequestHandler = async (ctx, request, response) => {
     const specResponse: SpecDefinitionsRouteResponse = {
       es: services.specDefinitionService.asJson(),
+      // In development, also surface internal Kibana routes so Dev Tools users
+      // get autocomplete for the `/internal/...` endpoints they commonly call.
+      // `includeQueryParameters` extracts each route's query params so Console can
+      // suggest them (e.g. `?perPage=`) after the URL path.
+      kibana: buildKibanaApiSpec(getRegisteredRoutes({ includeQueryParameters: true }), {
+        includeInternal: isDevMode,
+      }),
     };
 
     return response.ok({

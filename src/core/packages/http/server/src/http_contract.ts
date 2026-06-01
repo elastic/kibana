@@ -9,8 +9,10 @@
 
 import type {
   IContextContainer,
+  GetRegisteredRoutesOptions,
   IContextProvider,
   IRouter,
+  RegisteredRouteInfo,
   RequestHandlerContextBase,
   RouterDeprecatedApiDetails,
 } from './router';
@@ -368,6 +370,20 @@ export interface HttpServiceSetup<
    * @returns {RouterDeprecatedApiDetails[]}
    */
   getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+
+  /**
+   * Provides lightweight {@link RegisteredRouteInfo | routing metadata} for every route
+   * registered with the HTTP service (including versioned routes), without handlers or
+   * validation schemas.
+   *
+   * The routers are evaluated every time this function is called to account for any late
+   * route registrations.
+   *
+   * @param options Optional {@link GetRegisteredRoutesOptions | options}, e.g. to also
+   * extract each route's query-string parameters.
+   * @returns {RegisteredRouteInfo[]}
+   */
+  getRegisteredRoutes: (options?: GetRegisteredRoutesOptions) => RegisteredRouteInfo[];
 }
 
 /** @public */

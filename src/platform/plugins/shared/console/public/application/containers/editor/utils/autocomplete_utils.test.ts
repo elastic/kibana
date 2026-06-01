@@ -22,6 +22,8 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
   };
 });
 import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import * as kb from '../../../../lib/kb';
+import { AutocompleteInfo, setAutocompleteInfo } from '../../../../services';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
@@ -92,6 +94,13 @@ describe('autocomplete_utils', () => {
     it('triggers no suggestions for the url if not at the slash', () => {
       const actual = shouldTriggerSuggestions('GET _search');
       expect(actual).toBe(false);
+    });
+    it('triggers suggestions while editing a Kibana (kbn:) url mid-segment', () => {
+      // Unlike Elasticsearch urls, Kibana urls re-open suggestions while being
+      // edited so deleting characters mid-segment still surfaces routes.
+      expect(shouldTriggerSuggestions('GET kbn:')).toBe(true);
+      expect(shouldTriggerSuggestions('GET kbn:/api/synthetics/')).toBe(true);
+      expect(shouldTriggerSuggestions('GET kbn:/api/synthetics/monit')).toBe(true);
     });
     it('triggers suggestions for the url params', () => {
       const actual = shouldTriggerSuggestions('GET _search?');
@@ -304,6 +313,183 @@ describe('autocomplete_utils', () => {
         endLineNumber: 1,
         endColumn: 9,
       });
+    });
+
+    it('offers the kbn: entry point at the start of the url, pinned and re-triggering', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET ',
+        getWordUntilPosition: () => ({ startColumn: 5 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 5 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      const kbnItem = items.find((item) => item.label === 'kbn:');
+      expect(kbnItem).toBeDefined();
+      // pinned to the top and re-opens suggestions so the Kibana routes appear on accept
+      expect(kbnItem?.sortText).toBe('0');
+      expect(kbnItem?.command?.id).toBe('editor.action.triggerSuggest');
+      // Elasticsearch endpoints are still listed alongside it
+      expect(items.map((item) => item.label)).toEqual(expect.arrayContaining(['_cat', '_search']));
+    });
+
+    it('hides the kbn: entry point once a non-matching prefix is typed', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET _search',
+        getWordUntilPosition: () => ({ startColumn: 12 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 12 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      expect(items.some((item) => item.label === 'kbn:')).toBe(false);
+    });
+  });
+
+  describe('getUrlPathCompletionItems with Kibana API (kbn:) prefix', () => {
+    beforeEach(() => {
+      const mockAutocompleteSet = [
+        { name: 'api' },
+        { name: 'data_views' },
+        { name: 'spaces' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+    });
+
+    const getTokenPathPassedToPopulateContext = (): string[] =>
+      mockPopulateContext.mock.calls[mockPopulateContext.mock.calls.length - 1][0][0];
+
+    it('suggests Kibana top-level segments right after the kbn: prefix', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:',
+      } as unknown as monaco.editor.ITextModel;
+      // 'GET kbn:' has length 8, so the cursor sits at column 9.
+      const mockPosition = { lineNumber: 1, column: 9 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+
+      expect(items.map((item) => item.label).sort()).toEqual(['api', 'data_views', 'spaces']);
+      // No partial text after the prefix, so the suggestion is inserted at the cursor.
+      expect(items[0].range).toEqual({
+        startLineNumber: 1,
+        startColumn: 9,
+        endLineNumber: 1,
+        endColumn: 9,
+      });
+    });
+
+    it('keeps the kbn: prefix intact when completing the first segment', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:ap',
+      } as unknown as monaco.editor.ITextModel;
+      // 'GET kbn:ap' has length 10, so the cursor sits at column 11.
+      const mockPosition = { lineNumber: 1, column: 11 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+
+      expect(items.map((item) => item.label)).toEqual(['api']);
+      // Only 'ap' (columns 9-10) is replaced; 'kbn:' (columns 5-8) stays untouched.
+      expect(items[0].range).toEqual({
+        startLineNumber: 1,
+        startColumn: 9,
+        endLineNumber: 1,
+        endColumn: 11,
+      });
+      // The prefix is stripped before matching against the Kibana definitions.
+      expect(getTokenPathPassedToPopulateContext()).toEqual([]);
+    });
+
+    it('strips the kbn: prefix and matches subsequent segments (kbn:api/ form)', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:api/da',
+      } as unknown as monaco.editor.ITextModel;
+      // 'GET kbn:api/da' has length 14, so the cursor sits at column 15.
+      const mockPosition = { lineNumber: 1, column: 15 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+
+      expect(items.map((item) => item.label)).toEqual(['data_views']);
+      expect(items[0].range).toEqual({
+        startLineNumber: 1,
+        startColumn: 13,
+        endLineNumber: 1,
+        endColumn: 15,
+      });
+      expect(getTokenPathPassedToPopulateContext()).toEqual(['api']);
+    });
+
+    it('supports the kbn:/api/ slash form with a trailing slash', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:/api/',
+      } as unknown as monaco.editor.ITextModel;
+      // 'GET kbn:/api/' has length 13, so the cursor sits at column 14.
+      const mockPosition = { lineNumber: 1, column: 14 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+
+      expect(items.map((item) => item.label).sort()).toEqual(['api', 'data_views', 'spaces']);
+      expect(getTokenPathPassedToPopulateContext()).toEqual(['api']);
+    });
+  });
+
+  describe('getUrlPathCompletionItems Kibana route methods in detail', () => {
+    beforeEach(() => {
+      // Building an Api compiles body definitions, which requires AutocompleteInfo.
+      setAutocompleteInfo(new AutocompleteInfo());
+      kb._test.setKibanaApi(
+        kb._test.loadApisFromJson({
+          kibana: {
+            name: 'kibana',
+            globals: {},
+            endpoints: {
+              // Methods deliberately out of canonical order to assert sorting.
+              'api/spaces/space': { patterns: ['api/spaces/space'], methods: ['POST', 'GET'] },
+              'api/data_views': { patterns: ['api/data_views'], methods: ['GET'] },
+            },
+          },
+        })
+      );
+    });
+
+    afterEach(() => {
+      kb._test.setKibanaApi(kb._test.loadApisFromJson({}));
+    });
+
+    it('shows the supported HTTP methods (canonically ordered) as the suggestion detail', () => {
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [
+          { name: 'api/spaces/space' },
+          { name: 'api/data_views' },
+        ] as unknown as AutoCompleteContext['autoCompleteSet'];
+      });
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:',
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 9 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      const detailByLabel = Object.fromEntries(items.map((item) => [item.label, item.detail]));
+
+      expect(detailByLabel['api/spaces/space']).toBe('GET POST');
+      expect(detailByLabel['api/data_views']).toBe('GET');
+    });
+
+    it('falls back to the generic endpoint label when a suggestion is not a registered route', () => {
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [
+          { name: 'api' },
+        ] as unknown as AutoCompleteContext['autoCompleteSet'];
+      });
+      const mockModel = {
+        getValueInRange: () => 'GET kbn:',
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 9 } as unknown as monaco.Position;
+
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+
+      // `api` is only a path trunk here, not an endpoint, so no methods are shown.
+      expect(items[0].detail).toBe('endpoint');
     });
   });
 

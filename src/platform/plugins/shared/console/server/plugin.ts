@@ -48,6 +48,8 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     registerRoutes({
       router,
       log: this.log,
+      getRegisteredRoutes: http.getRegisteredRoutes,
+      isDevMode: this.ctx.env.mode.dev,
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,

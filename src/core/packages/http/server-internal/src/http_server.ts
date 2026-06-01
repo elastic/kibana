@@ -28,6 +28,7 @@ import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-in
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
+  GetRegisteredRoutesOptions,
   HttpAuth,
   HttpServerInfo,
   HttpServiceSetup,
@@ -40,6 +41,8 @@ import type {
   OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreRoutingHandler,
+  RegisteredRouteInfo,
+  RegisteredRouteQueryParameter,
   RouteMethod,
   RouterDeprecatedApiDetails,
   RouterRoute,
@@ -47,6 +50,7 @@ import type {
   TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
+import { extractRouteQueryParameters } from '@kbn/router-to-openapispec';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
@@ -164,6 +168,7 @@ export interface HttpServerSetup {
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   getDeprecatedRoutes: HttpServiceSetup['getDeprecatedRoutes'];
+  getRegisteredRoutes: HttpServiceSetup['getRegisteredRoutes'];
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
@@ -315,6 +320,7 @@ export class HttpServer {
     return {
       registerRouter: this.registerRouter.bind(this),
       getDeprecatedRoutes: this.getDeprecatedRoutes.bind(this),
+      getRegisteredRoutes: this.getRegisteredRoutes.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       staticAssets,
@@ -468,6 +474,58 @@ export class HttpServer {
     }
 
     return deprecatedRoutes;
+  }
+
+  private getRegisteredRoutes(options?: GetRegisteredRoutesOptions): RegisteredRouteInfo[] {
+    const includeQueryParameters = options?.includeQueryParameters ?? false;
+    const registeredRoutes: RegisteredRouteInfo[] = [];
+
+    for (const router of this.registeredRouters) {
+      const allRouterRoutes = [
+        // exclude versioned routes here so we don't get double entries; they are
+        // retrieved separately from the versioned router below.
+        router.getRoutes({ excludeVersionedRoutes: true }),
+        router.versioned.getRoutes(),
+      ].flat();
+
+      for (const route of allRouterRoutes) {
+        const queryParams = includeQueryParameters
+          ? this.extractRouteQueryParameters(route)
+          : undefined;
+
+        registeredRoutes.push({
+          path: route.path,
+          // Versioned routes type `method` as a plain string, but it always holds
+          // a valid lowercase HTTP method (see the deprecated-routes enumeration
+          // above for the same normalization).
+          method: route.method as RouteMethod,
+          access: route.options.access ?? 'internal',
+          description: route.options.description,
+          isVersioned: route.isVersioned,
+          ...(queryParams && queryParams.length > 0 ? { queryParams } : {}),
+        });
+      }
+    }
+
+    return registeredRoutes;
+  }
+
+  /**
+   * Extracts a route's query-string parameters from its validation schema. Extraction is
+   * best-effort: a single route whose schema cannot be converted is skipped (its query
+   * params are omitted) rather than failing the whole enumeration.
+   */
+  private extractRouteQueryParameters(
+    route: RouterRoute | VersionedRouterRoute
+  ): RegisteredRouteQueryParameter[] | undefined {
+    try {
+      return extractRouteQueryParameters(route);
+    } catch (e) {
+      this.log.debug(
+        `Unable to extract query parameters for route '${route.method} ${route.path}': ${e.message}`
+      );
+      return undefined;
+    }
   }
 
   private setupGracefulShutdownHandlers() {
