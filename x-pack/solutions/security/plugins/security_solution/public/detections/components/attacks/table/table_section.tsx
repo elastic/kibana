@@ -265,7 +265,7 @@ export const TableSection = React.memo(
       [getAttack, statusFilter]
     );
 
-    const accordionExtraActionGroupStats = useGroupStats();
+    const accordionExtraActionGroupStats = useGroupStats({ getAttack });
 
     const dataViewSpec = useMemo(() => {
       return dataView.toSpec(true);
