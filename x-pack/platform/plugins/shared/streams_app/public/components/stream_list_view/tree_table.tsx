@@ -660,14 +660,8 @@ export function StreamsTreeTable({
           dataType: 'number',
           width: '220px',
           render: (_: unknown, item: TableRow) => {
-            if (isDraftStream(item.stream)) {
-              return (
-                <span>
-                  {i18n.translate('xpack.streams.streamsTreeTable.span.naLabel', {
-                    defaultMessage: 'N/A',
-                  })}
-                </span>
-              );
+            if (isDraftStream(item.stream) || Streams.QueryStream.Definition.is(item.stream)) {
+              return '-';
             }
             return (
               <RetentionColumn
