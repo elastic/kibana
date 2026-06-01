@@ -116,7 +116,7 @@ describe('ActionsMenu', () => {
     expect(screen.getByTestId('testMenuItem-createAnomalyRule')).toBeInTheDocument();
   });
 
-  it('calls onClick and closes the popover when a direct action is clicked', () => {
+  it('calls onClick and closes the popover when a direct action is clicked', async () => {
     const onClick = jest.fn();
     const actions: ActionGroups = [
       {
@@ -130,7 +130,9 @@ describe('ActionsMenu', () => {
     fireEvent.click(screen.getByTestId('menuItem-action1'));
 
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('menuItem-action1')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('menuItem-action1')).not.toBeInTheDocument();
+    });
   });
 
   it('navigates to the sub-panel when a parent action is clicked', async () => {
@@ -176,7 +178,9 @@ describe('ActionsMenu', () => {
     fireEvent.click(screen.getByTestId('menuItem-child'));
 
     expect(subItemClick).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('menuItem-child')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('menuItem-child')).not.toBeInTheDocument();
+    });
   });
 
   it('does not render actions column when actions are empty', () => {
