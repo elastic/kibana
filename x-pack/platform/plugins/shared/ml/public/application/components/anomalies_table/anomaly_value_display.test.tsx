@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AnomalyValueDisplay } from './anomaly_value_display';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../contexts/kibana', () => ({
@@ -88,7 +87,6 @@ describe('AnomalyValueDisplay', () => {
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
@@ -106,7 +104,6 @@ describe('AnomalyValueDisplay', () => {
     expect(offsetText).toBeInTheDocument();
 
     fireEvent.mouseOver(timeText);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
@@ -121,7 +118,6 @@ describe('AnomalyValueDisplay', () => {
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
