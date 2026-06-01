@@ -56,6 +56,18 @@ const idpGate: Condition = {
   ],
 };
 
+// Group-typed asset events (authentik/group, entityanalytics_ad group pipeline) emit the
+// member roster in `related.user` — accreting that into a user entity would conflate identities.
+// Restricting to event.type=user keeps the same-person guarantee.
+const relatedUserCollectionGate: Condition = {
+  and: [
+    { field: 'event.kind', includes: 'asset' },
+    { field: 'event.type', includes: 'user' },
+  ],
+};
+
+const SAFE_RELATED_USER_FIELD = '_safe_related_user';
+
 const localNamespaceGate: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
@@ -181,6 +193,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     ],
   },
 
+  whenConditionTrueSetFieldsPreAgg: [
+    {
+      condition: relatedUserCollectionGate,
+      fields: {
+        [SAFE_RELATED_USER_FIELD]: { source: 'related.user' },
+      },
+    },
+  ],
+
   /**
    * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
    * else → high). Logs ESQL maps to `recent.*` after STATS.
@@ -252,6 +273,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'user.group.domain' }),
     collect({ source: 'user.group.id' }),
     collect({ source: 'user.group.name' }),
+    collect({ source: SAFE_RELATED_USER_FIELD, destination: 'related.user' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
 

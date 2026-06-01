@@ -73,6 +73,44 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  it('inserts whenConditionTrueSetFieldsPreAgg EVAL before STATS', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildCcsLogsExtractionEsqlQuery({
+      indexPatterns: ['remote:metrics-*'],
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsPreAgg: [
+          {
+            condition: { field: 'event.kind', includes: 'asset' },
+            fields: { _custom_field: { source: 'host.name' } },
+          },
+        ],
+      },
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      docsLimit: 100,
+    });
+    const preAggEvalIdx = query.indexOf('_custom_field = CASE(');
+    const statsIdx = query.indexOf('| STATS');
+    expect(preAggEvalIdx).toBeGreaterThan(-1);
+    expect(statsIdx).toBeGreaterThan(preAggEvalIdx);
+  });
+
+  it('emits related.user collection on user entity via _safe_related_user pre-agg EVAL', () => {
+    const query = buildCcsLogsExtractionEsqlQuery({
+      indexPatterns: ['remote:logs-*'],
+      entityDefinition: getEntityDefinition('user', 'default'),
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      docsLimit: 100,
+    });
+    expect(query).toContain(
+      '_safe_related_user = CASE((MV_CONTAINS(TO_STRING(event.kind), "asset")'
+    );
+    expect(query).toContain('MV_CONTAINS(TO_STRING(event.type), "user")');
+    expect(query).toContain('related.user = VALUES(TO_STRING(_safe_related_user))');
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after STATS and before KEEP without recent. prefix', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildCcsLogsExtractionEsqlQuery({

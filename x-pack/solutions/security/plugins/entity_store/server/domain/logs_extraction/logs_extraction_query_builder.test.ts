@@ -64,6 +64,49 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  it('inserts whenConditionTrueSetFieldsPreAgg EVAL after fieldEvaluations and before EUID EVAL', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsPreAgg: [
+          {
+            condition: { field: 'event.kind', includes: 'asset' },
+            fields: { _custom_field: { source: 'host.name' } },
+          },
+        ],
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    const preAggEvalIdx = query.indexOf('_custom_field = CASE(');
+    const euidEvalIdx = query.indexOf('recent.entity.EngineMetadata.UntypedId = ');
+    const statsIdx = query.indexOf('| STATS');
+    expect(preAggEvalIdx).toBeGreaterThan(-1);
+    expect(euidEvalIdx).toBeGreaterThan(preAggEvalIdx);
+    expect(statsIdx).toBeGreaterThan(euidEvalIdx);
+  });
+
+  it('emits related.user collection on user entity via _safe_related_user pre-agg EVAL', () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    expect(query).toContain(
+      '_safe_related_user = CASE((MV_CONTAINS(TO_STRING(event.kind), "asset")'
+    );
+    expect(query).toContain('MV_CONTAINS(TO_STRING(event.type), "user")');
+    expect(query).toContain('recent.related.user = VALUES(TO_STRING(_safe_related_user))');
+    expect(query).toContain('related.user = MV_SLICE(MV_UNION(recent.related.user, related.user)');
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildLogsExtractionEsqlQuery({
