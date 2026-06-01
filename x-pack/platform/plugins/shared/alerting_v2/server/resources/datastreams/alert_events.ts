@@ -82,7 +82,7 @@ export const alertEventSchema = z.object({
     version: z.number(),
   }),
   group_hash: z.string(),
-  grouping_fields: z.array(z.string()).optional(),
+  grouping_fields: z.array(z.string()).max(10).optional(),
   data: z.record(z.string(), z.any()),
   status: alertEventStatusSchema,
   source: z.string(),
