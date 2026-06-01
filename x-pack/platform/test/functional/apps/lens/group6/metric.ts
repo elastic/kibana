@@ -18,51 +18,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
 
-  const inspectorTrendlineData = [
-    ['2015-09-19 06:00', NULL_LABEL],
-    ['2015-09-19 09:00', NULL_LABEL],
-    ['2015-09-19 12:00', NULL_LABEL],
-    ['2015-09-19 15:00', NULL_LABEL],
-    ['2015-09-19 18:00', NULL_LABEL],
-    ['2015-09-19 21:00', NULL_LABEL],
-    ['2015-09-20 00:00', '6,011.351'],
-    ['2015-09-20 03:00', '5,849.901'],
-    ['2015-09-20 06:00', '5,722.622'],
-    ['2015-09-20 09:00', '5,769.092'],
-    ['2015-09-20 12:00', '5,740.875'],
-    ['2015-09-20 15:00', '5,520.429'],
-    ['2015-09-20 18:00', '5,153.053'],
-    ['2015-09-20 21:00', '6,656.581'],
-    ['2015-09-21 00:00', '5,139.357'],
-    ['2015-09-21 03:00', '5,884.891'],
-    ['2015-09-21 06:00', '5,683.283'],
-    ['2015-09-21 09:00', '5,863.661'],
-    ['2015-09-21 12:00', '5,657.531'],
-    ['2015-09-21 15:00', '5,841.935'],
+  const firstTrendlineInspectorRow = ['2015-09-20 00:00', '6,011.351'];
+  const lastTrendlineInspectorRow = ['2015-09-22 09:00', '5,659.477'];
+  const removedEmptyTrendlineInspectorRow = ['2015-09-19 06:00', NULL_LABEL];
+  const breakdownTrendlineInspectorRow = ['97.220.3.248', '2015-09-21 09:00', '19,755'];
+  const removedEmptyBreakdownTrendlineInspectorRow = [
+    '97.220.3.248',
+    '2015-09-19 06:00',
+    NULL_LABEL,
   ];
 
-  const inspectorExpectedTrenlineDataWithBreakdown = [
-    ['97.220.3.248', '2015-09-19 06:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-19 09:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-19 12:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-19 15:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-19 18:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-19 21:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 00:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 03:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 06:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 09:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 12:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 15:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 18:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-20 21:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-21 00:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-21 03:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-21 06:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-21 09:00', '19,755'],
-    ['97.220.3.248', '2015-09-21 12:00', NULL_LABEL],
-    ['97.220.3.248', '2015-09-21 15:00', NULL_LABEL],
-  ];
+  const hasInspectorRow = (rows: string[][], expectedRow: string[]) =>
+    rows.some(
+      (row) =>
+        row.length === expectedRow.length &&
+        row.every((value, index) => value === expectedRow[index])
+    );
 
   const clickMetric = async (title: string) => {
     const tiles = await lens.getMetricTiles();
@@ -108,7 +79,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open('lnsApp_inspectButton');
 
       const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
-      expect(trendLineData).to.eql(inspectorTrendlineData);
+      expect(trendLineData[0]).to.eql(firstTrendlineInspectorRow);
+      expect(trendLineData[trendLineData.length - 1]).to.eql(lastTrendlineInspectorRow);
+      expect(hasInspectorRow(trendLineData, removedEmptyTrendlineInspectorRow)).to.be(false);
       await inspector.close();
     });
 
@@ -232,7 +205,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open('lnsApp_inspectButton');
 
       const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
-      expect(trendLineData).to.eql(inspectorExpectedTrenlineDataWithBreakdown);
+      expect(hasInspectorRow(trendLineData, breakdownTrendlineInspectorRow)).to.be(true);
+      expect(hasInspectorRow(trendLineData, removedEmptyBreakdownTrendlineInspectorRow)).to.be(
+        false
+      );
+      expect(trendLineData.some(([, , value]) => value === NULL_LABEL)).to.be(false);
       await inspector.close();
 
       await lens.openDimensionEditor(

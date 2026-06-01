@@ -1344,12 +1344,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeTableSortingBy(colIndex = 0, direction: 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
-      await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
-      const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
-      await popoverToggle.click();
-      const buttonEl = await find.byCssSelector(
-        `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
-      );
+      const sortButtonSelector = `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`;
+
+      await retry.waitFor('datatable sort action to appear', async () => {
+        await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
+        const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
+        await popoverToggle.click();
+        return find.existsByCssSelector(sortButtonSelector);
+      });
+
+      const buttonEl = await find.byCssSelector(sortButtonSelector);
       return buttonEl.click();
     },
 
