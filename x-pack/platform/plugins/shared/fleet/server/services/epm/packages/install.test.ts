@@ -26,6 +26,7 @@ import {
   handleInstallPackageFailure,
   installPackage,
   isPackageVersionOrLaterInstalled,
+  saveKibanaAssetsRefs,
 } from './install';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
