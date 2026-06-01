@@ -13,11 +13,12 @@ import {
   evidenceSchema,
 } from '../common_schemas';
 import { MAX_STREAM_NAME_LENGTH } from '../../helpers/stream_name_validation';
-
-const MAX_ID_LENGTH = 256;
-const MAX_RULE_NAME_LENGTH = 256;
-const MAX_TITLE_LENGTH = 512;
-const MAX_TEXT_LENGTH = 10_000;
+import {
+  MAX_ID_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_TITLE_LENGTH,
+  MAX_TEXT_LENGTH,
+} from '../constants';
 
 const discoveryDetectionSchema = z.object({
   detection_id: z.string().max(MAX_ID_LENGTH).optional(),

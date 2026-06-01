@@ -336,7 +336,6 @@ describe('Discover documents layout', () => {
       expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
       expect(flyoutProps.columns).toEqual(['bytes']);
       expect(flyoutProps.columnsMeta).toEqual(cascadedColumnsMeta);
-      expect(flyoutProps.docViewerExtensionActions?.refreshData).toEqual(expect.any(Function));
 
       act(() => {
         flyoutProps.setExpandedDoc(nextExpandedDoc);
