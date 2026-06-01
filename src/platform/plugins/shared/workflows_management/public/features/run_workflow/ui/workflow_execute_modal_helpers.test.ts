@@ -13,6 +13,7 @@ import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers'
 import {
   buildDefaultTriggerEventSearchQuery,
   buildWorkflowTriggerScopeKql,
+  ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
   getVisibleWorkflowTriggerTabs,
   getWorkflowCustomTriggerTypeIds,
@@ -196,6 +197,38 @@ describe('getFallbackTriggerTab', () => {
   });
 });
 
+describe('ensureSelectedTriggerTabVisible', () => {
+  const allEnabled = {
+    hasAlertRacAccess: true,
+    canReadWorkflowExecution: true,
+    eventDrivenExecutionEnabled: true,
+  };
+
+  it('keeps the selected tab when it is visible and enabled', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('manual', ['alert', 'manual', 'historical'], allEnabled)
+    ).toBe('manual');
+  });
+
+  it('chooses the first visible enabled tab when the selected tab is not visible', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['alert', 'manual', 'historical'], {
+        ...allEnabled,
+        hasAlertRacAccess: false,
+      })
+    ).toBe('manual');
+  });
+
+  it('skips event when execution read is denied', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['event', 'manual', 'historical'], {
+        ...allEnabled,
+        canReadWorkflowExecution: false,
+      })
+    ).toBe('manual');
+  });
+});
+
 describe('resolveInitialSelectedTrigger', () => {
   const customOnly = workflowWithExtensionTriggers([{ type: 'example.custom_trigger' }]);
 
@@ -205,10 +238,22 @@ describe('resolveInitialSelectedTrigger', () => {
     );
   });
 
-  it('falls back to the first visible tab when custom triggers exist but execution read is denied', () => {
+  it('falls back to manual when custom triggers exist but execution read is denied', () => {
     expect(resolveInitialSelectedTrigger(customOnly, undefined, true, false, undefined)).toBe(
-      'event'
+      'manual'
     );
+  });
+
+  it('falls back to manual for alert-only workflows without RAC access', () => {
+    expect(
+      resolveInitialSelectedTrigger(
+        { ...baseDefinition, triggers: [{ type: 'alert' }] },
+        undefined,
+        false,
+        true,
+        undefined
+      )
+    ).toBe('manual');
   });
 
   it('prefers alert when an alert trigger exists alongside custom triggers', () => {

@@ -46,7 +46,9 @@ import {
   hasCustomEventTrigger,
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
+  isWorkflowTriggerTabDisabled,
   resolveInitialSelectedTrigger,
+  type WorkflowTriggerTabAvailability,
 } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
@@ -98,13 +100,23 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [definition]
     );
 
+    const triggerTabAvailability = useMemo<WorkflowTriggerTabAvailability>(
+      () => ({
+        hasAlertRacAccess,
+        canReadWorkflowExecution,
+        eventDrivenExecutionEnabled,
+      }),
+      [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled]
+    );
+
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
       resolveInitialSelectedTrigger(
         definition,
         initialExecutionId,
         hasAlertRacAccess,
         canReadWorkflowExecution,
-        normalizedInputs
+        normalizedInputs,
+        eventDrivenExecutionEnabled
       )
     );
 
@@ -169,13 +181,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
-        if (trigger === 'alert' && !hasAlertRacAccess) {
-          return;
-        }
-        if (trigger === 'historical' && !canReadWorkflowExecution) {
-          return;
-        }
-        if (trigger === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
+        if (isWorkflowTriggerTabDisabled(trigger, triggerTabAvailability)) {
           return;
         }
         if (trigger === selectedTrigger) {
@@ -186,7 +192,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setEventTriggerTableSelectionCount(0);
         setSelectedTrigger(trigger);
       },
-      [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled, selectedTrigger]
+      [triggerTabAvailability, selectedTrigger]
     );
 
     const shouldAutoRun = useMemo(() => {
@@ -230,15 +236,16 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         ) {
           next = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
         }
-        return ensureSelectedTriggerTabVisible(next, visibleTriggerTabs);
+        return ensureSelectedTriggerTabVisible(next, visibleTriggerTabs, triggerTabAvailability);
       });
     }, [
-      hasAlertRacAccess,
-      canReadWorkflowExecution,
-      eventDrivenExecutionEnabled,
+      triggerTabAvailability,
       normalizedInputs,
       definition,
       visibleTriggerTabs,
+      hasAlertRacAccess,
+      canReadWorkflowExecution,
+      eventDrivenExecutionEnabled,
     ]);
 
     if (shouldAutoRun) {
@@ -385,7 +392,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                           triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
                         }
                       }
-                      const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
+                      const isTriggerTabDisabled = isWorkflowTriggerTabDisabled(
+                        trigger,
+                        triggerTabAvailability
+                      );
                       const triggerButton = (
                         <EuiButton
                           color={selectedTrigger === trigger ? 'primary' : 'text'}

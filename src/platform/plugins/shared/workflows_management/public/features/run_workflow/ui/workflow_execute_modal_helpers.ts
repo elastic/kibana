@@ -84,14 +84,45 @@ export function getVisibleWorkflowTriggerTabs(
   return visible;
 }
 
+export interface WorkflowTriggerTabAvailability {
+  hasAlertRacAccess: boolean;
+  canReadWorkflowExecution: boolean;
+  eventDrivenExecutionEnabled: boolean;
+}
+
+export function isWorkflowTriggerTabDisabled(
+  trigger: WorkflowTriggerTab,
+  availability: WorkflowTriggerTabAvailability
+): boolean {
+  if (trigger === 'alert' && !availability.hasAlertRacAccess) {
+    return true;
+  }
+  if (trigger === 'historical' && !availability.canReadWorkflowExecution) {
+    return true;
+  }
+  if (
+    trigger === 'event' &&
+    (!availability.canReadWorkflowExecution || !availability.eventDrivenExecutionEnabled)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function ensureSelectedTriggerTabVisible(
   selected: WorkflowTriggerTab,
-  visibleTabs: readonly WorkflowTriggerTab[]
+  visibleTabs: readonly WorkflowTriggerTab[],
+  availability?: WorkflowTriggerTabAvailability
 ): WorkflowTriggerTab {
-  if (visibleTabs.includes(selected)) {
+  const isEnabled = (tab: WorkflowTriggerTab) =>
+    !availability || !isWorkflowTriggerTabDisabled(tab, availability);
+
+  if (visibleTabs.includes(selected) && isEnabled(selected)) {
     return selected;
   }
-  return visibleTabs[0] ?? 'historical';
+
+  const firstEnabledVisible = visibleTabs.find(isEnabled);
+  return firstEnabledVisible ?? visibleTabs[0] ?? 'manual';
 }
 
 export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean {
@@ -187,7 +218,8 @@ export function resolveInitialSelectedTrigger(
   initialExecutionId: string | undefined,
   hasAlertRacAccess: boolean,
   canReadWorkflowExecution: boolean,
-  normalizedInputs: NormalizedWorkflowInputs | undefined
+  normalizedInputs: NormalizedWorkflowInputs | undefined,
+  eventDrivenExecutionEnabled = true
 ): WorkflowTriggerTab {
   const visibleTabs = getVisibleWorkflowTriggerTabs(definition);
 
@@ -220,5 +252,9 @@ export function resolveInitialSelectedTrigger(
     }
   }
 
-  return ensureSelectedTriggerTabVisible(selected, visibleTabs);
+  return ensureSelectedTriggerTabVisible(selected, visibleTabs, {
+    hasAlertRacAccess,
+    canReadWorkflowExecution,
+    eventDrivenExecutionEnabled,
+  });
 }
