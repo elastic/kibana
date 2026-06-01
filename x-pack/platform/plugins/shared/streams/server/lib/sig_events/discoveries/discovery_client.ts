@@ -27,11 +27,7 @@ import {
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
-import {
-  FIELD_DISCOVERY_ID,
-  FIELD_DISCOVERY_SLUG,
-  FIELD_CLOSES_DISCOVERY_ID,
-} from '../field_names';
+import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 const CLEARED_IDS_CHUNK_SIZE = 250;
 
@@ -155,16 +151,6 @@ export class DiscoveryClient {
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_DISCOVERY_ID,
       idValues: discoveryIds,
-    });
-  }
-
-  async findByClosesDiscoveryId(discoveryId: string): Promise<{ hits: Discovery[] }> {
-    return runFindByIdEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: DISCOVERIES_DATA_STREAM,
-      idField: FIELD_CLOSES_DISCOVERY_ID,
-      idValue: discoveryId,
     });
   }
 
