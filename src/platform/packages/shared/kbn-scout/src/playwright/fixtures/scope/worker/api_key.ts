@@ -217,10 +217,10 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       };
 
       const getApiKeyForBuiltinRole = async (roleName: string): Promise<RoleApiCredentials> => {
-        const descriptor = await samlAuth.setBuiltinRole(roleName);
-        return createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
-          [samlAuth.customRoleName]: descriptor,
-        });
+        // Use fetchBuiltinRoleDescriptor (not setBuiltinRole) — the API key embeds
+        // the descriptor inline so no ES role needs to be created.
+        const descriptor = await samlAuth.fetchBuiltinRoleDescriptor(roleName);
+        return createApiKeyWithAdminCredentials(roleName, { [roleName]: descriptor });
       };
 
       await use({

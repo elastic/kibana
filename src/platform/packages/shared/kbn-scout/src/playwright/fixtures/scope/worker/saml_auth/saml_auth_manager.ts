@@ -61,30 +61,36 @@ export class SamlAuthManager {
     this.customRoleHash = newRoleHash;
   }
 
-  /**
-   * Fetches the live descriptor of any named ES role and provisions it as the
-   * worker's custom role slot. Works for both built-in ES roles (e.g. `kibana_admin`,
-   * `superuser`) and any other role present in Elasticsearch.
-   *
-   * @param roleName - The name of the role to look up in Elasticsearch.
-   */
-  async setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+  private guardServerless(methodName: string): void {
     if (this.isServerless) {
       throw new Error(
-        `setBuiltinRole('${roleName}') is not supported on Serverless deployments. ` +
+        `${methodName} is not supported on Serverless deployments. ` +
           `Use a native realm role (e.g. loginAs() / getApiKey()) or define a custom role ` +
           `with explicit privileges (loginWithCustomRole() / getApiKeyForCustomRole()) instead.`
       );
     }
+  }
+
+  private async getEsRoleData(roleName: string) {
     const response = await this.esClient.security.getRole({ name: roleName });
     const roleData = response[roleName];
     if (!roleData) {
       throw new Error(`Role '${roleName}' not found in Elasticsearch`);
     }
-    // Strip fields that are not valid privilege fields:
-    // - `metadata` / `transient_metadata`: ES internal bookkeeping
-    // - `description`: human-readable label accepted by the role API but rejected
-    //   by the API key role_descriptors endpoint
+    return roleData;
+  }
+
+  /**
+   * Provisions the worker's custom role slot with the privileges of a named ES role.
+   * Use for SAML-based login (`loginWithBuiltinRole`).
+   */
+  async setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+    this.guardServerless(`setBuiltinRole('${roleName}')`);
+    const roleData = await this.getEsRoleData(roleName);
+    // Strip non-privilege fields before creating the ES role.
+    // metadata / transient_metadata are ES bookkeeping; description is a
+    // human-readable label that the PUT /_security/role API accepts but that
+    // the API key role_descriptors endpoint rejects.
     const {
       metadata: _metadata,
       transient_metadata: _transient,
@@ -93,6 +99,26 @@ export class SamlAuthManager {
     } = roleData;
     await this.setCustomRole(descriptor as ElasticsearchRoleDescriptor);
     return descriptor as ElasticsearchRoleDescriptor;
+  }
+
+  /**
+   * Fetches a named ES role's privileges filtered to API-key-safe fields.
+   * Does not create a role in ES — use for inline API key descriptors.
+   */
+  async fetchBuiltinRoleDescriptor(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+    this.guardServerless(`fetchBuiltinRoleDescriptor('${roleName}')`);
+    const roleData = await this.getEsRoleData(roleName);
+    // Allow-list: only keep fields the API key role_descriptors endpoint accepts.
+    // This is more forward-compatible than stripping individual known-bad fields.
+    const { cluster, indices, applications, run_as: runAs } = roleData;
+    return {
+      ...(cluster !== undefined && { cluster }),
+      ...(indices !== undefined && { indices: indices as ElasticsearchRoleDescriptor['indices'] }),
+      ...(applications !== undefined && {
+        applications: applications as ElasticsearchRoleDescriptor['applications'],
+      }),
+      ...(runAs !== undefined && { run_as: runAs }),
+    };
   }
 
   async asInteractiveUser(
