@@ -1733,9 +1733,7 @@ describe('current status route', () => {
       const filters = searchCall.query.bool.filter;
 
       // No space scoping at all (neither plain terms nor a local/remote split).
-      const anySpaceScoping = filters.find((f: any) =>
-        JSON.stringify(f).includes('meta.space_id')
-      );
+      const anySpaceScoping = filters.find((f: any) => JSON.stringify(f).includes('meta.space_id'));
       expect(anySpaceScoping).toBeUndefined();
 
       // The remote ping from `production` is surfaced.
@@ -1779,9 +1777,7 @@ describe('current status route', () => {
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const anySpaceScoping = filters.find((f: any) =>
-        JSON.stringify(f).includes('meta.space_id')
-      );
+      const anySpaceScoping = filters.find((f: any) => JSON.stringify(f).includes('meta.space_id'));
       expect(anySpaceScoping).toBeUndefined();
     });
 
