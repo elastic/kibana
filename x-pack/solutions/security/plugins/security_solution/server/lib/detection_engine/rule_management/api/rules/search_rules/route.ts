@@ -12,10 +12,7 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../../../common/constants';
-import type {
-  SearchRulesField,
-  SearchRulesResponse,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+import type { SearchRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../../../common/api/detection_engine/rule_management/urls';
 import { SearchRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -29,16 +26,7 @@ import {
 } from '../../../logic/search/granular_facet_aggregations';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
-
-const REQUIRED_TRANSFORM_FIELDS: readonly SearchRulesField[] = [
-  'schedule',
-  'params',
-  'updatedAt',
-  'createdAt',
-];
-
-const resolveEffectiveFields = (fields: SearchRulesField[] | undefined): string[] | undefined =>
-  fields?.length ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS])) : undefined;
+import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -150,7 +138,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
               ? buildAggregations({ categories: categoryCounts })
               : undefined;
 
-          const effectiveFields = resolveEffectiveFields(fields);
+          const effectiveFields = translateSearchFieldsToSoFields(fields);
 
           const rules = await findRules({
             rulesClient,
