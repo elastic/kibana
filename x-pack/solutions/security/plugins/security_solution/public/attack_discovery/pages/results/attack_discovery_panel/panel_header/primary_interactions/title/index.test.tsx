@@ -10,8 +10,29 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
+import { AttacksEventTypes } from '../../../../../../../common/lib/telemetry';
 import { Title } from '.';
 import { TestProviders } from '../../../../../../../common/mock';
+
+const mockReportEvent = jest.fn();
+jest.mock('../../../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => {
+      const actual = original.useKibana();
+      return {
+        ...actual,
+        services: {
+          ...actual.services,
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      };
+    },
+  };
+});
 
 jest.mock('@kbn/elastic-assistant-common', () => ({
   ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
@@ -167,7 +188,7 @@ describe('Title', () => {
   });
 
   describe('schedule detection', () => {
-    it('renders DetailsFlyout when attack discovery has alertRuleUuid that is not ad-hoc', async () => {
+    it('renders DetailsFlyout and sends telemetry when attack discovery has alertRuleUuid that is not ad-hoc', async () => {
       const discoveryWithSchedule = {
         ...mockRawResponse,
         alertRuleUuid: 'scheduled-rule-id',
@@ -183,6 +204,9 @@ describe('Title', () => {
       await userEvent.click(screen.getByTestId('scheduleButton'));
 
       expect(screen.getByTestId('detailsFlyout')).toHaveTextContent('scheduled-rule-id');
+      expect(mockReportEvent).toHaveBeenCalledWith(AttacksEventTypes.ScheduleDetailsFlyoutOpened, {
+        source: 'attack_discovery_page',
+      });
     });
 
     it('does NOT render the schedule button when attack discovery has no alertRuleUuid', () => {
