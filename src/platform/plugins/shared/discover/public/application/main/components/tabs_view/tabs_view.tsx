@@ -92,7 +92,7 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
 
     return (tabsBar) => (
       <AppHeader
-        title={headerTitle ?? 'Discover'}
+        title={headerTitle ?? ''}
         menu={topNavMenuItems}
         sticky={false}
         padding="m"
