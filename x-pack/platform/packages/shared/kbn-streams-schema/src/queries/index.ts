@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
+import type { Feature } from '../feature';
 import type { SignificantEventsResponse } from '../api/significant_events';
 
 export interface EsqlQuery {
@@ -125,4 +126,22 @@ export interface QueryLink {
   rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
+  /**
+   * ISO timestamp of the latest revision in storage. Bumped by every write.
+   * Read-only at the domain layer.
+   */
+  updated_at?: string;
+  /**
+   * ISO timestamp after which this query is considered stale.
+   * Computed as `updated_at + ki_ttl_days` from the tuning config.
+   */
+  expires_at?: string;
 }
+
+/**
+ * Unified knowledge indicator on the wire. Discriminated by the root `type`
+ * field. Used by server callers that handle both feature and query KIs.
+ */
+export type KnowledgeIndicator =
+  | { type: 'feature'; feature: Feature }
+  | { type: 'query'; query: QueryLink };

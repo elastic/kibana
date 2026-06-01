@@ -304,6 +304,7 @@ export {
   type Verdict,
   sigEventSchema,
   type SigEvent,
+  type KnowledgeIndicator,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
