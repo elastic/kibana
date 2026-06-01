@@ -18,7 +18,6 @@ import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useTemplateFormSync } from './use_template_form_sync';
 import * as i18n from './translations';
-import * as libI18n from '../field_library/translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
@@ -107,33 +106,18 @@ export const CreateCaseTemplateFields: React.FC = () => {
   // treat it as not-loading so the form renders global fields without a template selected.
   const isLoadingFields = Boolean(templateId) && isLoadingFieldsRaw;
 
-  const globalFieldsFragment = useMemo(() => {
-    if (!visibleGlobalInlineFields.length) return null;
-    return (
-      <>
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h4>{libI18n.GLOBAL_FIELDS_TITLE}</h4>
-        </EuiTitle>
-        <EuiSpacer />
+  const globalFieldsFragment = useMemo(
+    () =>
+      visibleGlobalInlineFields.length ? (
         <FieldsRenderer resolvedFields={visibleGlobalInlineFields} />
-      </>
-    );
-  }, [visibleGlobalInlineFields]);
+      ) : null,
+    [visibleGlobalInlineFields]
+  );
 
   const templateFieldsFragment = useMemo(() => {
     if (!templateId || template?.definition?.fields === undefined) return null;
     if (!templateFields.length) return null;
-    return (
-      <>
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h4>{i18n.EXTENDED_FIELDS_TITLE}</h4>
-        </EuiTitle>
-        <EuiSpacer />
-        <FieldsRenderer resolvedFields={templateFields} />
-      </>
-    );
+    return <FieldsRenderer resolvedFields={templateFields} />;
   }, [templateId, template, templateFields]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs || isGlobalDefsError) {
@@ -156,11 +140,23 @@ export const CreateCaseTemplateFields: React.FC = () => {
     );
   }
 
+  const hasFields = globalFieldsFragment !== null || templateFieldsFragment !== null;
+
   return (
     <>
       <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
+      {hasFields && (
+        <>
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h4>{i18n.EXTENDED_FIELDS_TITLE}</h4>
+          </EuiTitle>
+          <EuiSpacer />
+        </>
+      )}
       <FormProvider {...innerForm}>
         {globalFieldsFragment}
+        {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
         {templateFieldsFragment}
       </FormProvider>
     </>

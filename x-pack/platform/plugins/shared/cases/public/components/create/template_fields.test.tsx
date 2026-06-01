@@ -193,7 +193,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
     expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
@@ -228,7 +228,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
   });
 
@@ -270,7 +270,9 @@ describe('CreateCaseTemplateFields', () => {
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
     // The template references incident_type via $ref — it should not appear in the global section.
+    // The "Extended fields" heading still appears because the template has its own fields (hostname).
     expect(screen.queryByText('Global fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.queryByTestId('control-incident_type')).not.toBeInTheDocument();
   });
 
@@ -310,7 +312,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
   });
 
