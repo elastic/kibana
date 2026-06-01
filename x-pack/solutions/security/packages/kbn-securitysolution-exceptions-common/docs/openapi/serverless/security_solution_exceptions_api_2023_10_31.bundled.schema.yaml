@@ -1,9 +1,8 @@
 openapi: 3.0.3
 info:
-  description: >-
-    Exceptions API allows you to manage detection rule exceptions to prevent a
-    rule from generating an alert from incoming events even when the rule's
-    other criteria are met.
+  description: Exceptions API allows you to manage detection rule exceptions to
+    prevent a rule from generating an alert from incoming events even when the
+    rule's other criteria are met.
   title: Security Exceptions API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -393,9 +392,7 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
-        - description: >-
-            Determines whether to include expired exceptions in the exported
-            list
+        - description: Determines whether to include expired exceptions in the exported list
           in: query
           name: include_expired_exceptions
           required: true
@@ -469,9 +466,7 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
-        - description: >-
-            Determines whether to include expired exceptions in the exported
-            list
+        - description: Determines whether to include expired exceptions in the exported list
           in: query
           name: include_expired_exceptions
           required: true
@@ -486,9 +481,7 @@ paths:
           content:
             application/ndjson:
               schema:
-                description: >-
-                  A `.ndjson` file containing specified exception list and its
-                  items
+                description: A `.ndjson` file containing specified exception list and its items
                 format: binary
                 type: string
           description: Successful response
@@ -830,9 +823,8 @@ paths:
       tags:
         - Security Exceptions API
     get:
-      description: >-
-        Get the details of an exception list item using the `id` or `item_id`
-        field.
+      description: Get the details of an exception list item using the `id` or
+        `item_id` field.
       operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -1899,55 +1891,23 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >
-      Exceptions are associated with detection and endpoint rules, and are used
-      to prevent a rule from generating an alert from incoming events, even when
-      the rule's other criteria are met. They can help reduce the number of
-      false positives and prevent trusted processes and network activity from
-      generating unnecessary alerts.
-
+  - description: |
+      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
 
       Exceptions are made up of:
 
+      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
+      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
 
-      * **Exception containers**: A container for related exceptions. Generally,
-      a single exception container contains all the exception items relevant for
-      a subset of rules. For example, a container can be used to group together
-      network-related exceptions that are relevant for a large number of network
-      rules. The container can then be associated with all the relevant rules.
-
-      * **Exception items**: The query (fields, values, and logic) used to
-      prevent rules from generating alerts. When an exception item's query
-      evaluates to `true`, the rule does not generate an alert.
-
-
-      For detection rules, you can also use lists to define rule exceptions. A
-      list holds multiple values of the same Elasticsearch data type, such as IP
-      addresses. These values are used to determine when an exception prevents
-      an alert from being generated.
-
+      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
       > info
-
       > You cannot use lists with endpoint rule exceptions.
 
-
       > info
-
-      > Only exception containers can be associated with rules. You cannot
-      directly associate an exception item or a list container with a rule. To
-      use list exceptions, create an exception item that references the relevant
-      list container.
-
+      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
 
       ## Exceptions requirements
 
-
-      Before you can start working with exceptions that use value lists, you
-      must create the `.lists` and `.items` data streams for the relevant Kibana
-      space. To do this, use the [Create list data
-      streams](../operation/operation-createlistindex) endpoint. Once these data
-      streams are created, your role needs privileges to manage rules. For a
-      complete list of requirements, refer to [Enable and access
-      detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
+      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions
