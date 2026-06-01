@@ -13,7 +13,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
  *
  * Migration: Remove. Reporting smoke tests compares map screen shots
  */
-expor;
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const { common, maps, header, home, timePicker } = getPageObjects([
     'common',
