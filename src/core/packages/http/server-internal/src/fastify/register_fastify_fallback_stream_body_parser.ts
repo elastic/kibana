@@ -36,13 +36,20 @@ export function registerFastifyFallbackStreamBodyParser(fastify: FastifyInstance
       }
 
       const route = (request as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
+      const buf = Buffer.isBuffer(body) ? body : Buffer.from(body ?? []);
       if (!routeHasUnparsedPayload(route)) {
+        // Hapi Subtext uses defaultContentType `application/json`; an empty body still parses to
+        // `null` (see installHapiCompatibleJsonBodyParser). Bodyless POSTs without Content-Type
+        // hit this catch-all parser and also yield `null`.
+        if (buf.length === 0) {
+          done(null, null);
+          return;
+        }
         const err = Object.assign(new Error('Unsupported Media Type'), { statusCode: 415 });
         done(err);
         return;
       }
 
-      const buf = Buffer.isBuffer(body) ? body : Buffer.from(body);
       const payload = buf.length > 0 ? buf : Buffer.alloc(0);
       done(null, routeWantsStreamPayload(route) ? Readable.from(payload) : payload);
     }

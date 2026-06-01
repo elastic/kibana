@@ -305,7 +305,7 @@ describe('FastifyHttpServer', () => {
         {
           path: '/empty-json-body',
           security: { authz: { enabled: false, reason: 'test' } },
-          validate: false,
+          validate: { body: schema.nullable(schema.any()) },
         },
         async (_context, req, res) => res.ok({ body: { body: req.body } })
       );
@@ -324,7 +324,51 @@ describe('FastifyHttpServer', () => {
         },
       });
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res.body)).toEqual({ body: {} });
+      expect(JSON.parse(res.body)).toEqual({ body: null });
+    }, 15000);
+
+    it('returns 400 when POST has no Content-Type and an empty body on a validated route (Hapi parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/validated-empty-body',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: { body: schema.object({ test: schema.string() }) },
+        },
+        async () => {
+          throw new Error('should not reach handler');
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/validated-empty-body', 'POST', {
+        headers: { 'Content-Length': '0' },
+      });
+      expect(res.statusCode).toBe(400);
+      const body = JSON.parse(res.body);
+      expect(body.statusCode).toBe(400);
+      expect(body.message).toBe(
+        '[request body]: expected a plain object value, but found [null] instead.'
+      );
     }, 15000);
 
     it('parses application/x-www-form-urlencoded for validated routes (SAML callback parity)', async () => {

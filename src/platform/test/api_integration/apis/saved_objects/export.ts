@@ -334,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: 'Either `type` or `objects` are required.',
+              message: '[request body]: expected a plain object value, but found [null] instead.',
             });
           });
       });
@@ -351,7 +351,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.header['content-disposition']).to.eql(
               'attachment; filename="export.ndjson"'
             );
-            expect(resp.header['content-type']).to.eql('application/ndjson; charset=utf-8');
+            expect(resp.header['content-type']).to.eql('application/ndjson');
             const objects = ndjsonToObject(resp.text);
 
             // Sort values aren't deterministic so we need to exclude them
@@ -415,7 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.header['content-disposition']).to.eql(
               'attachment; filename="export.ndjson"'
             );
-            expect(resp.header['content-type']).to.eql('application/ndjson; charset=utf-8');
+            expect(resp.header['content-type']).to.eql('application/ndjson');
             const objects = ndjsonToObject(resp.text);
 
             // Sort values aren't deterministic so we need to exclude them
@@ -483,7 +483,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.header['content-disposition']).to.eql(
               'attachment; filename="export.ndjson"'
             );
-            expect(resp.header['content-type']).to.eql('application/ndjson; charset=utf-8');
+            expect(resp.header['content-type']).to.eql('application/ndjson');
             const objects = ndjsonToObject(resp.text);
 
             // Sort values aren't deterministic so we need to exclude them
@@ -569,7 +569,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.header['content-disposition']).to.eql(
               'attachment; filename="export.ndjson"'
             );
-            expect(resp.header['content-type']).to.eql('application/ndjson; charset=utf-8');
+            expect(resp.header['content-type']).to.eql('application/ndjson');
             const objects = ndjsonToObject(resp.text);
             expect(objects.length).to.eql(10001);
           });

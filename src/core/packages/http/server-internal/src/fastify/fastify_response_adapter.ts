@@ -219,7 +219,7 @@ function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
   }
 }
 
-/** Hapi adds `; charset=utf-8` to JSON error/success bodies; Fastify leaves bare `application/json`. */
+/** Hapi adds `; charset=utf-8` to JSON/NDJSON bodies; Fastify may leave the bare mime type. */
 function ensureHapiCompatibleJsonCharset(reply: FastifyReply): void {
   const raw =
     typeof reply.getHeader === 'function'
@@ -230,24 +230,45 @@ function ensureHapiCompatibleJsonCharset(reply: FastifyReply): void {
     return;
   }
   const lower = typeStr.toLowerCase();
-  if (lower.startsWith('application/json') && !lower.includes('charset=')) {
-    reply.header('content-type', 'application/json; charset=utf-8');
+  if (lower.includes('charset=')) {
+    return;
+  }
+  const mime = lower.split(';')[0].trim();
+  if (mime === 'application/json') {
+    reply.header('content-type', `${mime}; charset=utf-8`);
   }
 }
 
-const NDJSON_CONTENT_TYPES_WITHOUT_CHARSET = new Set([
-  'application/ndjson',
-  'application/x-ndjson',
-]);
+function markExplicitNdjsonCharsetIntent(reply: FastifyReply, contentType: string): void {
+  const parts = contentType
+    .toLowerCase()
+    .split(';')
+    .map((part) => part.trim());
+  const mime = parts[0];
+  if (!NDJSON_CONTENT_TYPES.has(mime)) {
+    return;
+  }
+  if (parts.some((part) => part.startsWith('charset='))) {
+    (reply as { [kibanaExplicitNdjsonCharset]?: boolean })[kibanaExplicitNdjsonCharset] = true;
+  }
+}
+
+const NDJSON_CONTENT_TYPES = new Set(['application/ndjson', 'application/x-ndjson']);
+
+const kibanaExplicitNdjsonCharset = Symbol('kibanaExplicitNdjsonCharset');
 
 /**
- * Fastify `Reply#send` appends `; charset=utf-8` to string bodies when Content-Type contains
- * `json` (see `fastify/lib/reply.js`), which breaks exact header assertions for ndjson exports.
- * Hapi does not add that suffix. Run from an `onSend` hook after `send()` adjusts the header.
+ * Security rule export asserts an exact `Content-Type: application/ndjson` header (no charset).
+ * Fastify `Reply#send` appends `; charset=utf-8` to string bodies when the type contains `json`
+ * (see `fastify/lib/reply.js`). Strip only that auto-suffix; keep charset when
+ * {@link markExplicitNdjsonCharsetIntent} set it for saved-objects export.
  *
  * @internal
  */
 export function stripCharsetFromNdjsonContentTypeHeader(reply: FastifyReply): void {
+  if ((reply as { [kibanaExplicitNdjsonCharset]?: boolean })[kibanaExplicitNdjsonCharset]) {
+    return;
+  }
   const raw =
     typeof reply.getHeader === 'function'
       ? reply.getHeader('content-type') ?? reply.getHeader('Content-Type')
@@ -256,8 +277,16 @@ export function stripCharsetFromNdjsonContentTypeHeader(reply: FastifyReply): vo
   if (typeof typeStr !== 'string') {
     return;
   }
-  const mime = typeStr.toLowerCase().split(';')[0].trim();
-  if (NDJSON_CONTENT_TYPES_WITHOUT_CHARSET.has(mime)) {
+  const parts = typeStr
+    .toLowerCase()
+    .split(';')
+    .map((part) => part.trim());
+  const mime = parts[0];
+  if (!NDJSON_CONTENT_TYPES.has(mime)) {
+    return;
+  }
+  const charsetPart = parts.find((part) => part.startsWith('charset='));
+  if (charsetPart === 'charset=utf-8' && parts.length === 2) {
     reply.header('content-type', mime);
   }
 }
@@ -326,6 +355,9 @@ export class FastifyResponseAdapter {
       if (name.toLowerCase() === 'etag' && typeof value === 'string') {
         reply.header(name, this.formatHapiEtagHeader(value));
         continue;
+      }
+      if (name.toLowerCase() === 'content-type' && typeof value === 'string') {
+        markExplicitNdjsonCharsetIntent(reply, value);
       }
       reply.header(name, value);
     }

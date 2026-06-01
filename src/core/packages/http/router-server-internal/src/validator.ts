@@ -69,7 +69,8 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getBody(data: unknown, namespace?: string): Readonly<B> {
-    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace) as B;
+    const coerced = coerceJsonStringRequestBody(data, this.config.body);
+    return this.validate(this.config.body, this.options.unsafe?.body, coerced, namespace) as B;
   }
 
   /**
@@ -162,4 +163,46 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
       return schema.maybe(schema.nullable(schema.any({})));
     }
   }
+}
+
+/**
+ * Hapi parsed `application/json` bodies that were already JSON strings (e.g. security
+ * analytics posts `localStorage.getItem(...)`). Fastify's JSON parser can leave those as
+ * strings, which then fail config-schema validation with indexed property errors.
+ *
+ * Skipped when the route validates the body as a string/buffer/stream (e.g. Painless Lab scripts).
+ */
+function coerceJsonStringRequestBody(
+  data: unknown,
+  validationRule?: RouteValidationSpec<unknown>
+): unknown {
+  if (bodyValidationExpectsRawPayload(validationRule)) {
+    return data;
+  }
+  if (typeof data !== 'string') {
+    return data;
+  }
+  const text = data.trim();
+  if (text === '') {
+    return undefined;
+  }
+  if (text === 'null') {
+    return null;
+  }
+  if (text.startsWith('{') || text.startsWith('[')) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return data;
+    }
+  }
+  return data;
+}
+
+function bodyValidationExpectsRawPayload(validationRule?: RouteValidationSpec<unknown>): boolean {
+  if (!validationRule || !isConfigSchema(validationRule)) {
+    return false;
+  }
+  const type = validationRule.getSchema().type;
+  return type === 'string' || type === 'binary' || type === 'stream';
 }

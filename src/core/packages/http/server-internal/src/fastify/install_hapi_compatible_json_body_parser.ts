@@ -15,13 +15,11 @@ import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_rout
 
 /**
  * Fastify rejects requests that declare `Content-Type: application/json` but send an
- * empty body (`FST_ERR_CTP_EMPTY_JSON_BODY`). Hapi accepted these; bodyless JSON POSTs are
- * treated as `{}` (e.g. export routes with `schema.object` fields). Explicit JSON `null` still
- * parses to `null` for `schema.nullable(...)` routes.
+ * empty body (`FST_ERR_CTP_EMPTY_JSON_BODY`). Hapi accepted these via `@hapi/subtext`, which
+ * returns `null` for an empty `application/json` payload (see `internals.object` in subtext).
  *
  * Install before routes listen; replaces the built-in `application/json` parser with one
- * that treats an empty string body as `{}` (Hapi parity for bodyless JSON POSTs),
- * delegating otherwise to Fastify's default
+ * that treats an empty body as `null` (Hapi parity), delegating otherwise to Fastify's default
  * JSON parser (same proto / constructor poisoning settings as the instance).
  *
  * Uses `parseAs: 'buffer'` (this Fastify build does not allow `parseAs: 'stream'` on JSON).
@@ -50,9 +48,7 @@ export function installHapiCompatibleJsonBodyParser(fastify: FastifyInstance): v
 
       const text = body.length === 0 ? '' : body.toString('utf8');
       if (text === '') {
-        // Hapi treats bodyless `application/json` POSTs as `{}` for `schema.object` routes; `null`
-        // only comes from an explicit JSON `null` body or `schema.nullable(...)`.
-        done(null, {});
+        done(null, null);
         return;
       }
       defaultJsonParser(request, text, done);

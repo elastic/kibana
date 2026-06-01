@@ -223,15 +223,27 @@ describe('CoreKibanaRequest', () => {
           /expected value of type \[Stream\] but got \[null\]/
         );
       });
-      it('maps an undefined POST payload to {} for parsed JSON object routes', () => {
+      it('rejects a null POST payload for schema.object routes (Hapi Subtext empty JSON)', () => {
+        const request = hapiMocks.createRequest({
+          method: 'post',
+          payload: null as any,
+        });
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            body: schema.object({ test: schema.maybe(schema.string()) }),
+          })
+        ).toThrow(/expected a plain object value, but found \[null\] instead/);
+      });
+      it('maps an undefined POST payload to null (Fastify unset body)', () => {
         const request = hapiMocks.createRequest({
           method: 'post',
           payload: undefined,
         });
-        const kibanaRequest = CoreKibanaRequest.from(request, {
-          body: schema.object({ ids: schema.maybe(schema.arrayOf(schema.string())) }),
-        });
-        expect(kibanaRequest.body).toEqual({});
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            body: schema.object({ ids: schema.maybe(schema.arrayOf(schema.string())) }),
+          })
+        ).toThrow(/expected a plain object value, but found \[null\] instead/);
       });
     });
 

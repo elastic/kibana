@@ -124,9 +124,29 @@ describe('FastifyResponseAdapter', () => {
     );
   });
 
-  it('preserves application/ndjson Content-Type without a charset (Fastify send parity)', async () => {
+  it('adds charset=utf-8 to application/ndjson responses (saved objects export parity)', async () => {
     const fastify = Fastify();
     const adapter = new FastifyResponseAdapter();
+
+    fastify.get('/export', async (_req, reply) => {
+      await adapter.handle(
+        new KibanaResponse(200, '{"rule_id":"rule-1"}\n', {
+          headers: { 'Content-Type': 'application/ndjson; charset=utf-8' },
+        }),
+        reply
+      );
+    });
+
+    const response = await fastify.inject({ method: 'GET', url: '/export' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/ndjson; charset=utf-8');
+    expect(response.body).toBe('{"rule_id":"rule-1"}\n');
+
+    await fastify.close();
+  });
+
+  it('strips only Fastify auto-added charset from ndjson (security export parity)', async () => {
+    const fastify = Fastify();
 
     fastify.addHook('onSend', async (_req, reply, payload) => {
       stripCharsetFromNdjsonContentTypeHeader(reply);
@@ -134,12 +154,9 @@ describe('FastifyResponseAdapter', () => {
     });
 
     fastify.get('/export', async (_req, reply) => {
-      await adapter.handle(
-        new KibanaResponse(200, '{"rule_id":"rule-1"}\n', {
-          headers: { 'Content-Type': 'application/ndjson' },
-        }),
-        reply
-      );
+      return reply
+        .header('content-type', 'application/ndjson; charset=utf-8')
+        .send('{"rule_id":"rule-1"}\n');
     });
 
     const response = await fastify.inject({ method: 'GET', url: '/export' });
