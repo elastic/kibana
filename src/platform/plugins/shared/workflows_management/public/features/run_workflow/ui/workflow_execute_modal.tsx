@@ -94,8 +94,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     );
 
     const visibleTriggerTabs = useMemo(
-      () => getVisibleWorkflowTriggerTabs(definition, normalizedInputs),
-      [definition, normalizedInputs]
+      () => getVisibleWorkflowTriggerTabs(definition),
+      [definition]
     );
 
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>

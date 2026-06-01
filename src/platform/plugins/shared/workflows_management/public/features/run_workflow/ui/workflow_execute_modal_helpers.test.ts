@@ -142,7 +142,7 @@ describe('buildDefaultTriggerEventSearchQuery', () => {
 
 describe('getVisibleWorkflowTriggerTabs', () => {
   it('returns all tabs when the workflow has no triggers', () => {
-    expect(getVisibleWorkflowTriggerTabs(null, undefined)).toEqual([
+    expect(getVisibleWorkflowTriggerTabs(null)).toEqual([
       'alert',
       'index',
       'event',
@@ -151,43 +151,22 @@ describe('getVisibleWorkflowTriggerTabs', () => {
     ]);
   });
 
-  it('returns alert and historical for alert-only workflows', () => {
+  it('returns alert, manual, and historical for alert-only workflows', () => {
     expect(
-      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] }, undefined)
-    ).toEqual(['alert', 'historical']);
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] })
+    ).toEqual(['alert', 'manual', 'historical']);
   });
 
-  it('returns document and historical for manual-only workflows without inputs', () => {
+  it('returns document, manual, and historical for manual-only workflows', () => {
     expect(
-      getVisibleWorkflowTriggerTabs(
-        { ...baseDefinition, triggers: [{ type: 'manual' }] },
-        undefined
-      )
-    ).toEqual(['index', 'historical']);
-  });
-
-  it('returns manual, document, and historical when manual trigger defines inputs', () => {
-    const normalizedWithOneField = normalizeFieldsToJsonSchema([
-      { name: 'x', type: 'string', required: true },
-    ]);
-    expect(
-      getVisibleWorkflowTriggerTabs(
-        {
-          ...baseDefinition,
-          triggers: [{ type: 'manual', inputs: [{ name: 'x', type: 'string', required: true }] }],
-        } as WorkflowYaml,
-        normalizedWithOneField
-      )
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'manual' }] })
     ).toEqual(['index', 'manual', 'historical']);
   });
 
-  it('returns event and historical for custom event-driven workflows', () => {
+  it('returns event, manual, and historical for custom event-driven workflows', () => {
     expect(
-      getVisibleWorkflowTriggerTabs(
-        workflowWithExtensionTriggers([{ type: 'cases.created' }]),
-        undefined
-      )
-    ).toEqual(['event', 'historical']);
+      getVisibleWorkflowTriggerTabs(workflowWithExtensionTriggers([{ type: 'cases.created' }]))
+    ).toEqual(['event', 'manual', 'historical']);
   });
 });
 

@@ -185,10 +185,10 @@ describe('WorkflowExecuteModal', () => {
       );
 
       expect(getByText('Alert')).toBeInTheDocument();
+      expect(getByText('Manual')).toBeInTheDocument();
       expect(getByText('Historical')).toBeInTheDocument();
       expect(queryByText('Document')).not.toBeInTheDocument();
       expect(queryByText('Event')).not.toBeInTheDocument();
-      expect(queryByText('Manual')).not.toBeInTheDocument();
     });
 
     it('uses the test run title and still exposes the full trigger tab set', () => {
