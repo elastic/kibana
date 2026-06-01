@@ -10,7 +10,7 @@
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { PresentationContainer, PublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { PublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
@@ -22,6 +22,7 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
+import type { DashboardApi } from '../types';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -40,8 +41,8 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   dashboardSubsequentLoad: 2, // on filter-refresh
 };
 
-export function startQueryPerformanceTracking(
-  dashboard: PresentationContainer,
+export function startTrackingDashboardLoadTelemetry(
+  dashboard: DashboardApi,
   performanceState: PerformanceState
 ) {
   return dashboard.children$
@@ -100,6 +101,9 @@ export function startQueryPerformanceTracking(
 
       if (queryHasStarted) {
         performanceState.lastLoadStartTime = now;
+        if (loadType === 'dashboardSubsequentLoad') {
+          dashboard.userActivity$.next({ type: 'refresh', start: Date.now() });
+        }
         return;
       }
 
@@ -107,6 +111,11 @@ export function startQueryPerformanceTracking(
         const timeToData = now - (performanceState.lastLoadStartTime ?? now);
         const completeLoadDuration =
           (performanceState.creationEndTime ?? now) - (performanceState.creationStartTime ?? now);
+
+        if (loadType === 'dashboardSubsequentLoad') {
+          dashboard.userActivity$.next({ type: 'refresh', end: Date.now() });
+        }
+
         reportPerformanceMetrics({
           timeToData,
           panelCount,
