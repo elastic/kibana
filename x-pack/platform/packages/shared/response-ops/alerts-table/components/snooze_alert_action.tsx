@@ -54,11 +54,21 @@ export const SnoozeAlertAction = typedMemo(
       if (ruleId == null || alertInstanceId == null) return;
       if (isMuted) {
         await unmuteAlert({ ruleId, alertInstanceId });
-      } else {
+      }
+      if (isSnoozed && snoozedInstance) {
         await unsnoozeAlert({ ruleId, alertInstanceId });
       }
       handleActionDone();
-    }, [alertInstanceId, handleActionDone, isMuted, ruleId, unmuteAlert, unsnoozeAlert]);
+    }, [
+      alertInstanceId,
+      handleActionDone,
+      isMuted,
+      isSnoozed,
+      snoozedInstance,
+      ruleId,
+      unmuteAlert,
+      unsnoozeAlert,
+    ]);
 
     const handleSnoozeApply = useCallback(
       async (payload: AlertSnoozePayload) => {

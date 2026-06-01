@@ -32,7 +32,7 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
   const alertStatus = (alert?.[ALERT_STATUS] ?? []) as string[] | undefined;
 
   const snoozedTooltip = isMuted
-    ? i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertMuted', {
+    ? i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertSnoozedIndefinitely', {
         defaultMessage: 'Alert snoozed indefinitely',
       })
     : expiresAt
