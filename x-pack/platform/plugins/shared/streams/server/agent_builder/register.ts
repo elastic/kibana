@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -18,17 +18,13 @@ import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const createMemoryToolsOptions = ({
-  getScopedClients,
   server,
   logger,
 }: {
-  getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
-  const getMemoryService = (
-    esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient
-  ) =>
+  const getMemoryService = (esClient: ElasticsearchClient) =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient,
@@ -37,9 +33,6 @@ export const createMemoryToolsOptions = ({
   return {
     getMemoryService,
     getSecurity: () => server.core.security,
-    getScopedClients,
-    server,
-    logger,
   };
 };
 
@@ -60,7 +53,7 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
-  await registerAgentBuilderTools({
+  registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,
     server,
@@ -69,7 +62,7 @@ export const registerStreamsAgentBuilder = async ({
   });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
 
-  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+  const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
 
   // The memory skill is registered lazily — only once the significant events memory feature flag is on.
   // This avoids exposing the skill to the agent when memory is not configured.

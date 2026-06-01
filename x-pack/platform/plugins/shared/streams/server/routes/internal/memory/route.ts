@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { TaskResult } from '@kbn/streams-schema';
 import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
@@ -60,10 +60,8 @@ const assertMemoryEnabled = async ({
   }
 };
 
-const createMemoryService = (
-  esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient,
-  logger: Logger
-) => new MemoryServiceImpl({ logger, esClient });
+const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
+  new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',

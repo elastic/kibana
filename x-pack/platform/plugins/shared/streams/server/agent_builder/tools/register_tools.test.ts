@@ -31,7 +31,7 @@ describe('registerAgentBuilderTools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
-    await registerAgentBuilderTools({
+    registerAgentBuilderTools({
       agentBuilder,
       getScopedClients,
       server: createMockServer() as StreamsServer,
@@ -54,7 +54,7 @@ describe('registerAgentBuilderTools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
-    await registerAgentBuilderTools({
+    registerAgentBuilderTools({
       agentBuilder,
       getScopedClients,
       server: createMockServer() as StreamsServer,
@@ -73,7 +73,7 @@ describe('registerAgentBuilderTools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
-    await registerAgentBuilderTools({
+    registerAgentBuilderTools({
       agentBuilder: undefined!,
       getScopedClients,
       server: createMockServer() as StreamsServer,

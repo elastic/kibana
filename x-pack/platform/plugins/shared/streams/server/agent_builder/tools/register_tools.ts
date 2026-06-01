@@ -50,7 +50,7 @@ export {
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 };
 
-export async function registerAgentBuilderTools({
+export function registerAgentBuilderTools({
   agentBuilder,
   getScopedClients,
   server,
@@ -62,7 +62,7 @@ export async function registerAgentBuilderTools({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): Promise<void> {
+}): void {
   if (!agentBuilder) {
     return;
   }
