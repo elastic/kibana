@@ -82,8 +82,8 @@ import {
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
+  registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
-import { registerRulePreviewAttachment } from './agent_builder/attachment_types/rule_preview_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
 
