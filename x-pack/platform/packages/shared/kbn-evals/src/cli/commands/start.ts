@@ -356,22 +356,11 @@ export const startCmd: Command<void> = {
     const exportProfileIsImplicit =
       !profile && isExportProfileImplicitLocal(flagsReader, exportProfile);
     if (exportProfileIsImplicit) {
-      const evaluationsEsUrl = profileEnvOverrides.EVALUATIONS_ES_URL;
       const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
-      const [evalsReachable, tracingReachable] = await Promise.all([
-        evaluationsEsUrl ? probeHttp(stripTrailingSlash(evaluationsEsUrl)) : Promise.resolve(true),
-        tracingEsUrl ? probeHttp(stripTrailingSlash(tracingEsUrl)) : Promise.resolve(true),
-      ]);
-
-      if (!evalsReachable) {
-        log.warning(
-          `Export profile \"local\" was auto-selected but EVALUATIONS_ES_URL is not reachable (${evaluationsEsUrl}). ` +
-            'Continuing without exporting evaluation results. To require export, pass --export-profile local.'
-        );
-        delete profileEnvOverrides.EVALUATIONS_ES_URL;
-        delete profileEnvOverrides.EVALUATIONS_ES_API_KEY;
-      }
+      const tracingReachable = tracingEsUrl
+        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
+        : true;
 
       if (!tracingReachable) {
         log.warning(
@@ -455,8 +444,7 @@ export const startCmd: Command<void> = {
       } else {
         log.info('[1/4] Starting EDOT collector (backgrounded)...');
 
-        const elasticsearchHost =
-          profileEnvOverrides.TRACING_ES_URL ?? profileEnvOverrides.EVALUATIONS_ES_URL;
+        const elasticsearchHost = profileEnvOverrides.TRACING_ES_URL;
         if (elasticsearchHost) {
           log.info(`[1/4] EDOT collector will export to: ${elasticsearchHost}`);
         }
@@ -600,10 +588,6 @@ export const startCmd: Command<void> = {
     if (envOverrides.TRACING_ES_URL) {
       log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
     }
-    if (envOverrides.EVALUATIONS_ES_URL) {
-      log.info(`Evaluation results will export to: ${envOverrides.EVALUATIONS_ES_URL}`);
-    }
-
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
     }

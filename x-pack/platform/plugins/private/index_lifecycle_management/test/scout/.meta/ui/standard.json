@@ -1,0 +1,61 @@
+{
+  "sha1": "1b30e48fbdea3549ceb0db11b15adeeb9027a182",
+  "tests": [
+    {
+      "id": "f87a8d4bdab7457-3168ea966d63c88",
+      "title": "Index Lifecycle Policies — duplicate managed policy cloning a managed policy does not propagate the managed flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_duplicate_managed_policy.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "fb0e1ea51235d33-3c3b02969d65b50",
+      "title": "Index Lifecycle Policies shows the header and Create policy button for a user with manage_ilm",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_home_page.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb0e1ea51235d33-49f92c6fa89a868",
+      "title": "Index Lifecycle Policies creates a multi-phase policy and shows it in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_home_page.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "68742dbc8178524-22674b0ddcf0325",
+      "title": "Index Lifecycle Policies — read-only view read_ilm user sees the policy list but cannot create policies and can open the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_read_only_view.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    }
+  ]
+}

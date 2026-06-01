@@ -150,25 +150,25 @@ node scripts/evals run --suite agent-builder --grep "product documentation"
 node scripts/evals run --suite streams --dry-run
 ```
 
-| Flag                             | Alias     | Description                                                   |
-| -------------------------------- | --------- | ------------------------------------------------------------- |
-| `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                  |
-| `--config <path>`                |           | Playwright config path (alternative to `--suite`)             |
-| `--project <id>`                 | `--model` | Connector/model to evaluate                                   |
-| `--evaluation-connector-id <id>` | `--judge` | Connector for LLM-as-a-judge evaluators                       |
-| `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)          |
-| `--repetitions <n>`              |           | Repeat each example N times                                   |
-| `--executor <name>`              |           | `kibana` (default) or `phoenix`                               |
-| `--profile <name>`               |           | Load both dataset + export settings from `config.<name>.json` |
-| `--datasets-profile <name>`      |           | Load dataset settings from `config.<name>.json`               |
-| `--export-profile <name>`        |           | Load export settings from `config.<name>.json`                |
-| `--trace-es-url <url>`           |           | Elasticsearch URL for trace queries                           |
-| `--trace-es-api-key <key>`       |           | API key for trace ES                                          |
-| `--evaluations-es-url <url>`     |           | Elasticsearch URL for storing eval results                    |
-| `--evaluations-es-api-key <key>` |           | API key for evaluations ES                                    |
-| `--phoenix-base-url <url>`       |           | Phoenix API URL (when using `--executor phoenix`)             |
-| `--phoenix-api-key <key>`        |           | Phoenix API key                                               |
-| `--dry-run`                      |           | Print the Playwright command and exit                         |
+| Flag                              | Alias     | Description                                                   |
+| --------------------------------- | --------- | ------------------------------------------------------------- |
+| `--suite <id>`                    |           | Suite to run (interactive prompt if omitted)                  |
+| `--config <path>`                 |           | Playwright config path (alternative to `--suite`)             |
+| `--project <id>`                  | `--model` | Connector/model to evaluate                                   |
+| `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                       |
+| `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)          |
+| `--repetitions <n>`               |           | Repeat each example N times                                   |
+| `--executor <name>`               |           | `kibana` (default) or `phoenix`                               |
+| `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json` |
+| `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`               |
+| `--export-profile <name>`         |           | Load export settings from `config.<name>.json`                |
+| `--trace-es-url <url>`            |           | Elasticsearch URL for trace queries                           |
+| `--trace-es-api-key <key>`        |           | API key for trace ES                                          |
+| `--evaluations-kbn-url <url>`     |           | Kibana URL for score ingestion and dataset operations         |
+| `--evaluations-kbn-api-key <key>` |           | API key for the target Kibana                                 |
+| `--phoenix-base-url <url>`        |           | Phoenix API URL (when using `--executor phoenix`)             |
+| `--phoenix-api-key <key>`         |           | Phoenix API key                                               |
+| `--dry-run`                       |           | Print the Playwright command and exit                         |
 
 ### `list` -- List available suites
 
