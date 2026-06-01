@@ -92,6 +92,7 @@ export const solutionSchema = schema.oneOf([
   schema.literal('es'),
   schema.literal('classic'),
   schema.literal('nightshift'),
+  schema.literal('daybreak'),
 ]);
 
 export const getSpaceSchema = (isServerless: boolean) => {

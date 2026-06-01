@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { getNightshiftIconDataUrl } from '../../common';
+import { getDaybreakIconDataUrl, getNightshiftIconDataUrl } from '../../common';
 import type { SupportedSolutionView } from './types';
 
 export const SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX = 'spaces.solutionViewSwitch';
@@ -36,5 +36,11 @@ export const SOLUTION_VIEW_CONFIG: Record<SupportedSolutionView, { name: string;
       defaultMessage: 'Nightshift',
     }),
     icon: getNightshiftIconDataUrl({ size: 24 }),
+  },
+  daybreak: {
+    name: i18n.translate('xpack.spaces.solutionViewSwitch.solutionViewName.daybreak', {
+      defaultMessage: 'Daybreak',
+    }),
+    icon: getDaybreakIconDataUrl({ size: 24 }),
   },
 };

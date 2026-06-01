@@ -44,6 +44,13 @@ export const SOLUTION_VIEW_CLASSIC = 'classic' as const;
 export const SOLUTION_VIEW_NIGHTSHIFT = 'nightshift' as const;
 
 /**
+ * The 'daybreak' solution view is an experimental, project-style solution view
+ * for Security — Daybreak is to Security what Nightshift is to Observability.
+ * Currently reuses the Security solution navigation tree.
+ */
+export const SOLUTION_VIEW_DAYBREAK = 'daybreak' as const;
+
+/**
  * The feature privileges constants are used to identify the granularity of the configured feature visibility
  */
 export const FEATURE_PRIVILEGES_ALL = 'all' as const;

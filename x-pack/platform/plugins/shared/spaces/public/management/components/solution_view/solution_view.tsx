@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
-import { getNightshiftIconDataUrl } from '../../../../common';
+import { getDaybreakIconDataUrl, getNightshiftIconDataUrl } from '../../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
@@ -113,6 +113,45 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
         </EuiFlexGroup>
       ),
       'data-test-subj': 'solutionViewNightshiftOption',
+    },
+    {
+      value: 'daybreak',
+      inputDisplay: (
+        <>
+          <EuiIcon type={getDaybreakIconDataUrl({ size: 16 })} css={iconCss} />
+          {i18n.translate(
+            'xpack.spaces.management.manageSpacePage.solutionViewSelect.daybreakOptionLabel',
+            { defaultMessage: 'Daybreak' }
+          )}
+        </>
+      ),
+      dropdownDisplay: (
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={getDaybreakIconDataUrl({ size: 24 })} size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.daybreakOptionLabel',
+                  { defaultMessage: 'Daybreak' }
+                )}
+              </strong>
+            </EuiText>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate(
+                'xpack.spaces.management.manageSpacePage.solutionViewSelect.daybreakOptionDescription',
+                {
+                  defaultMessage:
+                    'Autonomous mode \u2014 Kibana runs your security investigations at sunrise.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'solutionViewDaybreakOption',
     },
     {
       value: 'classic',

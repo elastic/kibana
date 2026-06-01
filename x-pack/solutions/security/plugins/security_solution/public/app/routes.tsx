@@ -21,6 +21,7 @@ import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
+import { DaybreakPage } from './daybreak/daybreak_page';
 import { HomePage } from './home';
 import { AlertDetailsRedirect } from '../detections/pages/alerts/alert_details_redirect';
 import { AttackDetailsRedirect } from '../detections/pages/attacks/attack_details_redirect';
@@ -52,6 +53,17 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
       <Router history={history}>
         <RouteCapture>
           <Routes>
+            {/*
+             * Daybreak landing page. Routed at the top so it short-
+             * circuits past the alert/attack redirects AND the heavy
+             * `HomePage` wrapper (sourcerer / drag-drop / data view
+             * manager) that the rest of the Security app relies on.
+             * The Daybreak surface is a read-only status page and
+             * doesn't need any of that initialization. Using `render`
+             * (instead of children) here is the React Router v5 idiom
+             * that survives `Switch` re-renders most reliably.
+             */}
+            <Route exact path="/daybreak" render={() => <DaybreakPage />} />
             <Route
               path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`}
               component={AlertDetailsRedirect}

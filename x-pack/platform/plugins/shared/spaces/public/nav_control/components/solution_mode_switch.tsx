@@ -21,7 +21,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { Space, SolutionView } from '../../../common';
-import { getNightshiftIconDataUrl } from '../../../common';
+import { DEFAULT_SPACE_ID, getDaybreakIconDataUrl, getNightshiftIconDataUrl } from '../../../common';
 import type { SpacesManager } from '../../spaces_manager';
 
 interface Props {
@@ -37,8 +37,23 @@ interface Props {
   uiSettings?: IUiSettingsClient;
 }
 
+/* ----------------------------------------------------------------------- *
+ * Two parallel mode pairs the switcher knows how to render:
+ *
+ *  - Observability spaces: Standard (oblt) ⇄ Nightshift
+ *  - Security spaces:      Classic Security ⇄ Daybreak
+ *
+ * The pair is picked off the active space's `solution`; the switcher
+ * stays hidden if the active space isn't in one of the four solutions
+ * listed below.
+ * ----------------------------------------------------------------------- */
+
+type ModeFamily = 'observability' | 'security';
+
 const STANDARD_ID: SolutionView = 'oblt';
 const NIGHTSHIFT_ID: SolutionView = 'nightshift';
+const CLASSIC_SECURITY_ID: SolutionView = 'security';
+const DAYBREAK_ID: SolutionView = 'daybreak';
 
 const DARK_MODE_SETTING_ID = 'theme:darkMode';
 
@@ -49,6 +64,32 @@ const DARK_MODE_SETTING_ID = 'theme:darkMode';
  */
 const STANDARD_LANDING_PATH = '/app/observability/overview';
 const NIGHTSHIFT_LANDING_PATH = '/app/observability/nightshift';
+const CLASSIC_SECURITY_LANDING_PATH = '/app/security/get_started';
+const DAYBREAK_LANDING_PATH = '/app/security/daybreak';
+
+const familyForSolution = (solution: SolutionView | undefined): ModeFamily | undefined => {
+  if (solution === STANDARD_ID || solution === NIGHTSHIFT_ID) return 'observability';
+  if (solution === CLASSIC_SECURITY_ID || solution === DAYBREAK_ID) return 'security';
+  return undefined;
+};
+
+interface ModePair {
+  family: ModeFamily;
+  classicId: SolutionView;
+  aiId: SolutionView;
+  classicLandingPath: string;
+  aiLandingPath: string;
+  sectionLabel: string;
+  legendLabel: string;
+  classicLabel: string;
+  aiLabel: string;
+  classicIconType: string;
+  aiIconDataUrl: string;
+  classicLoadingMessage: string;
+  aiLoadingMessage: string;
+  classicDataTestSubj: string;
+  aiDataTestSubj: string;
+}
 
 /**
  * sessionStorage key consumed by Kibana's bootstrap template
@@ -80,6 +121,76 @@ const LOADING_MODE_KEY = 'kbn:loadingMode';
  *  - Full-page reloads so the navigation plugin re-evaluates the active
  *    space's solution view and swaps the side nav tree.
  */
+const OBSERVABILITY_PAIR: ModePair = {
+  family: 'observability',
+  classicId: STANDARD_ID,
+  aiId: NIGHTSHIFT_ID,
+  classicLandingPath: STANDARD_LANDING_PATH,
+  aiLandingPath: NIGHTSHIFT_LANDING_PATH,
+  sectionLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.label', {
+    defaultMessage: 'Observability Mode',
+  }),
+  legendLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.legend', {
+    defaultMessage: 'Switch between Standard and Nightshift',
+  }),
+  classicLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.standardLabel', {
+    defaultMessage: 'Standard',
+  }),
+  aiLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.nightshiftLabel', {
+    defaultMessage: 'Nightshift',
+  }),
+  classicIconType: 'logoObservability',
+  aiIconDataUrl: getNightshiftIconDataUrl({ size: 16 }),
+  classicLoadingMessage: i18n.translate(
+    'xpack.spaces.navControl.solutionModeSwitch.loadingStandard',
+    { defaultMessage: 'Switching to Standard mode\u2026' }
+  ),
+  aiLoadingMessage: i18n.translate(
+    'xpack.spaces.navControl.solutionModeSwitch.loadingNightshift',
+    { defaultMessage: 'Switching to Nightshift mode\u2026' }
+  ),
+  classicDataTestSubj: 'solutionModeSwitchStandard',
+  aiDataTestSubj: 'solutionModeSwitchNightshift',
+};
+
+const SECURITY_PAIR: ModePair = {
+  family: 'security',
+  classicId: CLASSIC_SECURITY_ID,
+  aiId: DAYBREAK_ID,
+  classicLandingPath: CLASSIC_SECURITY_LANDING_PATH,
+  aiLandingPath: DAYBREAK_LANDING_PATH,
+  sectionLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.securityLabel', {
+    defaultMessage: 'Security Mode',
+  }),
+  legendLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.securityLegend', {
+    defaultMessage: 'Switch between Classic Security and Daybreak',
+  }),
+  classicLabel: i18n.translate(
+    'xpack.spaces.navControl.solutionModeSwitch.classicSecurityLabel',
+    { defaultMessage: 'Classic' }
+  ),
+  aiLabel: i18n.translate('xpack.spaces.navControl.solutionModeSwitch.daybreakLabel', {
+    defaultMessage: 'Daybreak',
+  }),
+  classicIconType: 'logoSecurity',
+  aiIconDataUrl: getDaybreakIconDataUrl({ size: 16 }),
+  classicLoadingMessage: i18n.translate(
+    'xpack.spaces.navControl.solutionModeSwitch.loadingClassicSecurity',
+    { defaultMessage: 'Switching to Classic Security mode\u2026' }
+  ),
+  aiLoadingMessage: i18n.translate(
+    'xpack.spaces.navControl.solutionModeSwitch.loadingDaybreak',
+    { defaultMessage: 'Switching to Daybreak mode\u2026' }
+  ),
+  classicDataTestSubj: 'solutionModeSwitchClassicSecurity',
+  aiDataTestSubj: 'solutionModeSwitchDaybreak',
+};
+
+const MODE_PAIRS: Record<ModeFamily, ModePair> = {
+  observability: OBSERVABILITY_PAIR,
+  security: SECURITY_PAIR,
+};
+
 export const SolutionModeSwitch: React.FC<Props> = ({
   spacesManager,
   activeSpace,
@@ -88,7 +199,14 @@ export const SolutionModeSwitch: React.FC<Props> = ({
 }) => {
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const idSelected = activeSpace.solution === NIGHTSHIFT_ID ? NIGHTSHIFT_ID : STANDARD_ID;
+  const family = familyForSolution(activeSpace.solution);
+  if (!family) {
+    // No mode pair for this solution (e.g. classic, es, workplaceai) —
+    // hide the switcher rather than rendering a confusing empty toggle.
+    return null;
+  }
+  const pair = MODE_PAIRS[family];
+  const idSelected = activeSpace.solution === pair.aiId ? pair.aiId : pair.classicId;
 
   const handleChange = async (nextSolution: string) => {
     if (isSwitching || nextSolution === idSelected) return;
@@ -98,28 +216,23 @@ export const SolutionModeSwitch: React.FC<Props> = ({
         ...activeSpace,
         solution: nextSolution as SolutionView,
       });
-      // Couple dark mode with the selected mode: Nightshift → enabled,
-      // Standard → disabled. Best-effort: if user-profile dark mode is set
-      // or the setting is locked down by config, this set won't visibly
-      // flip the rendered theme, but we still proceed with the reload.
+      // Couple dark mode with the selected mode: AI mode (Nightshift /
+      // Daybreak) → enabled, classic mode → disabled. Best-effort: if
+      // user-profile dark mode is set or the setting is locked down by
+      // config, this won't visibly flip the rendered theme, but we still
+      // proceed with the reload.
       if (uiSettings) {
-        const nextDarkMode = nextSolution === NIGHTSHIFT_ID ? 'enabled' : 'disabled';
+        const nextDarkMode = nextSolution === pair.aiId ? 'enabled' : 'disabled';
         try {
           await uiSettings.set(DARK_MODE_SETTING_ID, nextDarkMode);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.warn('[Nightshift] Failed to update theme:darkMode setting', err);
+          console.warn('[SolutionModeSwitch] Failed to update theme:darkMode setting', err);
         }
       }
       try {
         const loadingMessage =
-          nextSolution === NIGHTSHIFT_ID
-            ? i18n.translate('xpack.spaces.navControl.solutionModeSwitch.loadingNightshift', {
-                defaultMessage: 'Switching to Nightshift mode\u2026',
-              })
-            : i18n.translate('xpack.spaces.navControl.solutionModeSwitch.loadingStandard', {
-                defaultMessage: 'Switching to Standard mode\u2026',
-              });
+          nextSolution === pair.aiId ? pair.aiLoadingMessage : pair.classicLoadingMessage;
         window.sessionStorage.setItem(LOADING_MESSAGE_OVERRIDE_KEY, loadingMessage);
         window.sessionStorage.setItem(LOADING_MODE_KEY, nextSolution);
       } catch {
@@ -127,11 +240,23 @@ export const SolutionModeSwitch: React.FC<Props> = ({
       }
       // Navigate to the mode's landing page (full page navigation, not a
       // soft reload). The full navigation is what causes the navigation
-      // plugin to re-evaluate the active space's solution view and swap the
-      // side nav tree on the next boot.
+      // plugin to re-evaluate the active space's solution view and swap
+      // the side nav tree on the next boot.
+      //
+      // URL shape:  {serverBasePath}{spacePrefix}{landingPath}
+      //   - serverBasePath:  Kibana's HTTP base path (e.g. `/kbn`).
+      //   - spacePrefix:     `/s/{spaceId}` for non-default spaces, empty
+      //                      for the default space. Without this prefix
+      //                      the navigation drops us out of the current
+      //                      space, which would let the chrome boot in
+      //                      the default space and ignore the solution
+      //                      switch we just persisted.
+      //   - landingPath:     the mode's app-relative landing route.
       const landingPath =
-        nextSolution === NIGHTSHIFT_ID ? NIGHTSHIFT_LANDING_PATH : STANDARD_LANDING_PATH;
-      window.location.assign(`${serverBasePath}${landingPath}`);
+        nextSolution === pair.aiId ? pair.aiLandingPath : pair.classicLandingPath;
+      const spacePrefix =
+        activeSpace.id && activeSpace.id !== DEFAULT_SPACE_ID ? `/s/${activeSpace.id}` : '';
+      window.location.assign(`${serverBasePath}${spacePrefix}${landingPath}`);
     } catch (e) {
       setIsSwitching(false);
     }
@@ -139,36 +264,28 @@ export const SolutionModeSwitch: React.FC<Props> = ({
 
   const options = [
     {
-      id: STANDARD_ID,
+      id: pair.classicId,
       label: (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="s" />
+            <EuiIcon type={pair.classicIconType} size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.spaces.navControl.solutionModeSwitch.standardLabel', {
-              defaultMessage: 'Standard',
-            })}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{pair.classicLabel}</EuiFlexItem>
         </EuiFlexGroup>
       ),
-      'data-test-subj': 'solutionModeSwitchStandard',
+      'data-test-subj': pair.classicDataTestSubj,
     },
     {
-      id: NIGHTSHIFT_ID,
+      id: pair.aiId,
       label: (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={getNightshiftIconDataUrl({ size: 16 })} size="s" />
+            <EuiIcon type={pair.aiIconDataUrl} size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.spaces.navControl.solutionModeSwitch.nightshiftLabel', {
-              defaultMessage: 'Nightshift',
-            })}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{pair.aiLabel}</EuiFlexItem>
         </EuiFlexGroup>
       ),
-      'data-test-subj': 'solutionModeSwitchNightshift',
+      'data-test-subj': pair.aiDataTestSubj,
     },
   ];
 
@@ -181,17 +298,11 @@ export const SolutionModeSwitch: React.FC<Props> = ({
     >
       <EuiHorizontalRule margin="xs" />
       <EuiTitle size="xxs">
-        <h6>
-          {i18n.translate('xpack.spaces.navControl.solutionModeSwitch.label', {
-            defaultMessage: 'Observability Mode',
-          })}
-        </h6>
+        <h6>{pair.sectionLabel}</h6>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiButtonGroup
-        legend={i18n.translate('xpack.spaces.navControl.solutionModeSwitch.legend', {
-          defaultMessage: 'Switch between Standard and Nightshift',
-        })}
+        legend={pair.legendLabel}
         options={options}
         idSelected={idSelected}
         onChange={handleChange}

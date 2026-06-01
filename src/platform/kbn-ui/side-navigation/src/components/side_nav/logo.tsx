@@ -39,8 +39,9 @@ export const Logo = ({
   /**
    * **Icon size**
    *
-   * In Figma, the logo icon is 20x20.
-   * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   * The logo icon renders at 16x16 to align with EUI's `EuiIcon` size `m`
+   * (`l` is 24x24, `m` is 16x16). This matches the rest of the chrome's
+   * primary nav icons so the home logo doesn't feel oversized.
    *
    * **Padding**
    *
@@ -59,8 +60,8 @@ export const Logo = ({
     }
 
     svg {
-      height: 20px;
-      width: 20px;
+      height: 16px;
+      width: 16px;
     }
   `;
 

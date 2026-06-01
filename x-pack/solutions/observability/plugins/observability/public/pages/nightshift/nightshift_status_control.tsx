@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -27,6 +27,15 @@ import {
   type NightshiftStatus,
 } from './nightshift_state';
 
+/**
+ * Solution ids the Nightshift status dropdown supports. Each solution
+ * exposes its own subset of statuses (see `STATUS_OPTIONS_BY_SOLUTION`).
+ *
+ *  - `'nightshift'` — full obs Nightshift flow (loading / healthy / morning / critical)
+ *  - `'es'`         — Search-solution Nightshift surface (single `search` option)
+ */
+type SupportedSolution = 'nightshift' | 'es';
+
 interface StatusOption {
   id: NightshiftStatus;
   label: string;
@@ -34,7 +43,7 @@ interface StatusOption {
   color: 'subdued' | 'success' | 'danger';
 }
 
-const STATUS_OPTIONS: StatusOption[] = [
+const OBSERVABILITY_OPTIONS: StatusOption[] = [
   {
     id: 'loading',
     label: i18n.translate('xpack.observability.nightshift.statusControl.loading', {
@@ -65,14 +74,49 @@ const STATUS_OPTIONS: StatusOption[] = [
   },
 ];
 
-const getOption = (status: NightshiftStatus): StatusOption =>
-  STATUS_OPTIONS.find((opt) => opt.id === status) ?? STATUS_OPTIONS[0];
+const SEARCH_OPTIONS: StatusOption[] = [
+  {
+    id: 'vectordb',
+    label: i18n.translate('xpack.observability.nightshift.statusControl.vectordb', {
+      defaultMessage: 'VectorDB',
+    }),
+    color: 'success',
+  },
+  {
+    id: 'search',
+    label: i18n.translate('xpack.observability.nightshift.statusControl.search', {
+      defaultMessage: 'Search',
+    }),
+    color: 'success',
+  },
+];
+
+/**
+ * Map a supported solution to the set of status options the dropdown
+ * exposes inside that solution. The dropdown stays hidden in every
+ * other solution.
+ */
+const STATUS_OPTIONS_BY_SOLUTION: Record<SupportedSolution, StatusOption[]> = {
+  nightshift: OBSERVABILITY_OPTIONS,
+  es: SEARCH_OPTIONS,
+};
+
+const getOption = (
+  status: NightshiftStatus,
+  options: StatusOption[]
+): StatusOption => options.find((opt) => opt.id === status) ?? options[0];
+
+const isSupportedSolution = (
+  solution: string | undefined
+): solution is SupportedSolution =>
+  solution === 'nightshift' || solution === 'es';
 
 interface NightshiftStatusControlProps {
   /**
    * Active space stream — the control hides itself unless the active
-   * space's `solution` is `'nightshift'`, so it only appears in the
-   * Nightshift solution view.
+   * space's `solution` is one of `SupportedSolution` (`'nightshift'` for
+   * the obs flow, `'es'` for the Search flow). In every other solution
+   * the dropdown renders nothing.
    */
   activeSpace$: Observable<Space | undefined>;
 }
@@ -85,7 +129,15 @@ interface NightshiftStatusControlProps {
  *
  * Picking an option flips the `nightshiftStatus$` subject, which the
  * Nightshift analyzing page subscribes to and renders different copy /
- * icons / colors for. Only visible in the Nightshift solution view.
+ * icons / colors for.
+ *
+ * Visibility / option set is solution-scoped:
+ *  - In the obs `'nightshift'` solution, the dropdown exposes
+ *    Loading / Healthy / Morning / Critical.
+ *  - In the `'es'` (Search) solution, it exposes a single `Search`
+ *    option, and the global status auto-flips to `'search'` on entry so
+ *    the Nightshift page renders the Search variant out of the box.
+ *  - In every other solution the dropdown is hidden.
  */
 export const NightshiftStatusControl: React.FC<NightshiftStatusControlProps> = ({
   activeSpace$,
@@ -95,11 +147,43 @@ export const NightshiftStatusControl: React.FC<NightshiftStatusControlProps> = (
   const status = useObservable(nightshiftStatus$, nightshiftStatus$.getValue());
   const [isOpen, setIsOpen] = useState(false);
 
-  if (activeSpace?.solution !== 'nightshift') {
+  const solution = activeSpace?.solution;
+  const supportedSolution = isSupportedSolution(solution) ? solution : undefined;
+
+  /*
+   * Keep the global Nightshift status in sync with the active solution.
+   * Each solution exposes its own subset of statuses (see
+   * `STATUS_OPTIONS_BY_SOLUTION`); on solution switch we flip the
+   * global status to the first valid option for the new solution so
+   * the page never renders content for a status that isn't selectable
+   * in the visible menu.
+   *
+   *  - Entering `'es'` (Search): if the current status isn't one of
+   *    the Search options, default to `'vectordb'` so the VectorDB
+   *    Nightshift surface renders out of the box.
+   *  - Entering `'nightshift'`: if the current status is a Search-only
+   *    status, fall back to `'loading'` (the obs welcome state).
+   */
+  useEffect(() => {
+    if (supportedSolution === 'es') {
+      const isSearchStatus = status === 'vectordb' || status === 'search';
+      if (!isSearchStatus) {
+        setNightshiftStatus('vectordb');
+      }
+    } else if (supportedSolution === 'nightshift') {
+      const isSearchStatus = status === 'vectordb' || status === 'search';
+      if (isSearchStatus) {
+        setNightshiftStatus('loading');
+      }
+    }
+  }, [supportedSolution, status]);
+
+  if (!supportedSolution) {
     return null;
   }
 
-  const current = getOption(status);
+  const options = STATUS_OPTIONS_BY_SOLUTION[supportedSolution];
+  const current = getOption(status, options);
 
   return (
     <EuiPopover
@@ -155,7 +239,7 @@ export const NightshiftStatusControl: React.FC<NightshiftStatusControlProps> = (
     >
       <EuiContextMenuPanel
         size="s"
-        items={STATUS_OPTIONS.map((option) => (
+        items={options.map((option) => (
           <EuiContextMenuItem
             key={option.id}
             icon={option.id === status ? 'check' : 'empty'}

@@ -20,6 +20,12 @@ export {
   getNightshiftIconSvg,
   getNightshiftIconDataUrl,
 } from './nightshift_icon';
+export {
+  DAYBREAK_GRADIENT_START,
+  DAYBREAK_GRADIENT_END,
+  getDaybreakNavIconSvg,
+  getDaybreakIconDataUrl,
+} from './daybreak_icon';
 export { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
 export type {
   Space,

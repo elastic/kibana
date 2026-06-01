@@ -14,8 +14,27 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { i18n } from '@kbn/i18n';
+import { getDaybreakIconDataUrl } from '@kbn/spaces-plugin/common';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
+
+/**
+ * Full deep link id for the Daybreak landing page. Resolves to
+ * `/app/security/daybreak` via the deep link registered in
+ * `security_solution`'s `defaultDeepLinks`.
+ *
+ * The chrome looks at this string (and the `nav-item-deepLinkId-<id>`
+ * token it derives from it) to wire up active-route highlighting and
+ * the side-nav home selector — `[data-test-subj*="daybreak"]` is what
+ * `DaybreakSidenavGlobalStyles` matches in the spaces plugin.
+ */
+const DAYBREAK_HOME_LINK = 'securitySolutionUI:daybreak' as AppDeepLinkId;
+
+const DAYBREAK_TITLE = i18n.translate(
+  'xpack.securitySolutionEss.daybreak.solutionTitle',
+  { defaultMessage: 'Daybreak' }
+);
 
 export const createNavigationTree = (
   services: Services,
@@ -307,5 +326,51 @@ export const createNavigationTree = (
         ],
       },
     ],
+  };
+};
+
+/**
+ * Daybreak variant of the Security navigation tree.
+ *
+ * Identical to the Security tree except that the **home node** is
+ * rewritten to use:
+ *   - the Daybreak deep link (`securitySolutionUI:daybreak`) so the
+ *     home button navigates to the Daybreak landing page;
+ *   - the Daybreak sun icon (rendered in the side-nav logo slot at
+ *     24px so the chrome's `Logo` shrinks it to 16x16 via the
+ *     `wrapperStyles svg` rule); and
+ *   - the "Daybreak" title.
+ *
+ * The home node's `id` is also overridden to `daybreak_home` so the
+ * chrome's `data-test-subj` token includes "daybreak" — which is what
+ * `DaybreakSidenavGlobalStyles` (in the spaces plugin) matches to
+ * paint the AI gradient on the active-state home button.
+ */
+export const createDaybreakNavigationTree = (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => {
+  const tree = createNavigationTree(services, chatExperience);
+  const [originalHome, ...rest] = tree.body;
+  /*
+   * We deliberately do NOT set `href` on the home node. The chrome's
+   * `parseNavigationTree` validates with `isAbsoluteLink` and throws
+   * for relative URLs (anything not prefixed with http:// or https://),
+   * which would silently fail the whole nav tree and leave the sidenav
+   * blank. The `link: 'securitySolutionUI:daybreak'` deep link is
+   * resolved by the chrome to the correct space-aware URL — that deep
+   * link is guaranteed to exist via `ALWAYS_INCLUDE_DEEP_LINKS` in the
+   * security plugin's dynamic deep links updater.
+   */
+  const daybreakHome = {
+    ...originalHome,
+    id: 'daybreak_home',
+    title: DAYBREAK_TITLE,
+    link: DAYBREAK_HOME_LINK,
+    icon: getDaybreakIconDataUrl({ size: 24 }),
+  };
+  return {
+    ...tree,
+    body: [daybreakHome, ...rest],
   };
 };

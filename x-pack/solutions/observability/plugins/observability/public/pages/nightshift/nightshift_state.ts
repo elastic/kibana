@@ -17,8 +17,18 @@ import { BehaviorSubject } from 'rxjs';
  *  - `healthy`  — workflows have settled, no significant events.
  *  - `morning`  — overnight remediation summary (prototype: mirrors healthy UI).
  *  - `critical` — significant events in critical state require action.
+ *  - `vectordb` — VectorDB flavoured Nightshift surface for the Search
+ *                solution; default option in `'es'`-solution spaces.
+ *  - `search`   — "Search Labs" flavoured Nightshift surface; second
+ *                option in `'es'`-solution spaces.
  */
-export type NightshiftStatus = 'loading' | 'healthy' | 'morning' | 'critical';
+export type NightshiftStatus =
+  | 'loading'
+  | 'healthy'
+  | 'morning'
+  | 'critical'
+  | 'vectordb'
+  | 'search';
 
 /**
  * Module-singleton BehaviorSubject keeping the current Nightshift state.

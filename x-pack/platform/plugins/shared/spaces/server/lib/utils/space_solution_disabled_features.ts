@@ -9,7 +9,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { SolutionView } from '../../../common';
 
-type SolutionViewWithFeatures = SolutionId | 'nightshift';
+type SolutionViewWithFeatures = SolutionId | 'nightshift' | 'daybreak';
 
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
@@ -45,6 +45,7 @@ const enabledFeaturesPerSolution: Record<SolutionViewWithFeatures, string[]> = {
   workplaceai: [],
   vectordb: [],
   nightshift: [],
+  daybreak: [],
 };
 
 /**
@@ -91,6 +92,14 @@ export function withSpaceSolutionDisabledFeatures(
       'enterpriseSearch',
       'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
+  } else if (spaceSolution === 'daybreak') {
+    // Daybreak is to Security what Nightshift is to Observability — a
+    // clone of the Security solution view with a different chrome.
+    disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
+      'observability',
+      'enterpriseSearch',
+      'workplaceai',
+    ]).filter((featureId) => !enabledFeaturesPerSolution.daybreak.includes(featureId));
   } else if (spaceSolution === 'workplaceai') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',

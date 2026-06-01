@@ -24,4 +24,8 @@ export const DEFAULT_ROUTES = {
   // Nightshift has its own dedicated welcome page registered by the
   // observability plugin (see `pages/nightshift/nightshift.tsx`).
   nightshift: '/app/observability/nightshift',
+  // Daybreak is to Security what Nightshift is to Observability — its
+  // landing page is registered by the security_solution plugin (see
+  // `public/app/daybreak/daybreak_page.tsx`).
+  daybreak: '/app/security/daybreak',
 };

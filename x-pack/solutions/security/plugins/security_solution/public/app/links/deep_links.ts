@@ -8,6 +8,7 @@
 import type { Subject, Subscription } from 'rxjs';
 import { combineLatestWith, debounceTime } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
@@ -134,6 +135,32 @@ const formatDeepLink = (appLink: LinkItem): AppDeepLink => {
 };
 
 /**
+ * Static deep links that the dynamic updater must always preserve.
+ *
+ * `solutionFormatter` derives deep links from the active solution
+ * navigation tree, which means anything _not_ in that tree (e.g. the
+ * Daybreak landing page, which has its own sibling navigation tree
+ * registered by `security_solution_ess`) would get stripped on every
+ * dynamic update. Without the daybreak deep link, the chrome can't
+ * resolve `link: 'securitySolutionUI:daybreak'` on the Daybreak nav
+ * tree's home node and the whole project sidenav fails to render.
+ *
+ * Keep this list narrowly scoped to sibling-tree links that aren't
+ * part of the main Security navigation hierarchy.
+ */
+const ALWAYS_INCLUDE_DEEP_LINKS: AppDeepLink[] = [
+  {
+    id: 'daybreak',
+    path: '/daybreak',
+    title: i18n.translate('xpack.securitySolution.daybreak.deepLinkTitle', {
+      defaultMessage: 'Daybreak',
+    }),
+    visibleIn: [],
+    keywords: ['daybreak'],
+  },
+];
+
+/**
  * Registers any change in appLinks to be updated in app deepLinks
  */
 export const registerDeepLinksUpdater = (
@@ -146,10 +173,12 @@ export const registerDeepLinksUpdater = (
       debounceTime(100) // Debounce to avoid too many updates
     )
     .subscribe(([navigationTree, appLinks, normalizedLinks]) => {
-      const deepLinks =
+      const derivedDeepLinks =
         navigationTree == null
           ? classicFormatter(appLinks)
           : solutionFormatter(navigationTree, normalizedLinks);
+
+      const deepLinks = [...derivedDeepLinks, ...ALWAYS_INCLUDE_DEEP_LINKS];
 
       appUpdater$.next(() => ({ deepLinks }));
     });

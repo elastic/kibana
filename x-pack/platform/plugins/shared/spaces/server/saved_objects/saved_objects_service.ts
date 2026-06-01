@@ -50,6 +50,7 @@ export class SpacesSavedObjectsService {
                 schema.literal('es'),
                 schema.literal('classic'),
                 schema.literal('nightshift'),
+                schema.literal('daybreak'),
               ])
             ),
             }),

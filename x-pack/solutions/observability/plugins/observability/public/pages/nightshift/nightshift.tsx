@@ -15,6 +15,7 @@ import { NightshiftLoading } from './nightshift_loading';
 import { NightshiftHealthy } from './nightshift_healthy';
 import { NightshiftMorning } from './nightshift_morning';
 import { NightshiftCritical } from './nightshift_critical';
+import { NightshiftSearch } from './nightshift_search';
 import { NightshiftInput } from './nightshift_input';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
 import { nightshiftStatus$, type NightshiftStatus } from './nightshift_state';
@@ -105,12 +106,17 @@ const analyzingTopStyles = css`
  *   healthy  → NightshiftHealthy   ("You have no critical significant events")
  *   morning  → NightshiftMorning   (healthy layout, overnight summary copy)
  *   critical → NightshiftCritical
+ *   vectordb → NightshiftSearch    (Search-solution VectorDB surface)
+ *   search   → NightshiftSearch    (Search-solution Search Labs surface,
+ *                                   shares the VectorDB layout for now)
  */
 const STATUS_PAGES: Record<NightshiftStatus, React.FC> = {
   loading: NightshiftLoading,
   healthy: NightshiftHealthy,
   morning: NightshiftMorning,
   critical: NightshiftCritical,
+  vectordb: NightshiftSearch,
+  search: NightshiftSearch,
 };
 
 /**

@@ -16,7 +16,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
+import { DaybreakSidenavGlobalStyles } from './components/daybreak_sidenav_styles';
 import { NightshiftSidenavGlobalStyles } from './components/nightshift_sidenav_styles';
+import { SearchSidenavGlobalStyles } from './components/search_sidenav_styles';
 
 const LazyNavControlPopover = lazy(() =>
   import('./nav_control_popover').then(({ NavControlPopover }) => ({
@@ -47,6 +49,8 @@ export function initSpacesNavControl(
     return (
       <QueryClientProvider client={queryClient}>
         <NightshiftSidenavGlobalStyles />
+        <SearchSidenavGlobalStyles />
+        <DaybreakSidenavGlobalStyles />
         <Suspense
           fallback={
             <EuiSkeletonRectangle

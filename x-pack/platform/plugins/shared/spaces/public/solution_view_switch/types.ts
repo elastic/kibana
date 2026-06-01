@@ -20,7 +20,7 @@ export interface SolutionViewSwitchCalloutProps {
 
 export type SupportedSolutionView = Extract<
   SolutionView,
-  'es' | 'oblt' | 'security' | 'nightshift'
+  'es' | 'oblt' | 'security' | 'nightshift' | 'daybreak'
 >;
 
 export interface SolutionViewSwitchModalProps {

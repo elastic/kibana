@@ -16,6 +16,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
+import vectordbIcon from './assets/images/vectordb_icon.svg';
+
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
@@ -25,10 +27,13 @@ export interface DynamicSideNavItems {
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Elasticsearch',
+    defaultMessage: 'VectorDB',
   }
 );
-const icon = 'logoElasticsearch';
+// Custom side-nav logo for the Search solution (rebranded as VectorDB).
+// `vectordbIcon` is the webpack URL of the SVG asset, which `EuiIcon`
+// accepts directly via its `IconType` union.
+const icon = vectordbIcon;
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,

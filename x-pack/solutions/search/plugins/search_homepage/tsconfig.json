@@ -45,6 +45,7 @@
     "@kbn/cloud",
     "@kbn/agent-builder-browser",
     "@kbn/scout-search",
+    "@kbn/shared-ux-ai-components",
   ],
   "exclude": [
     "target/**/*"
