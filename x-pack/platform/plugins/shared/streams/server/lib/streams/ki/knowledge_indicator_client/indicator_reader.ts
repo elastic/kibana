@@ -17,10 +17,7 @@ import {
   IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
-<<<<<<< Updated upstream
-=======
   EXCLUDED,
->>>>>>> Stashed changes
   ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
