@@ -47,7 +47,7 @@ export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
       <EuiFlexItem grow={false}>
         {deleteDetector !== undefined && (
           <EuiToolTip
-            content={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel', {
+            content={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.deleteButtonAriaLabel', {
               defaultMessage: 'Next',
             })}
             disableScreenReaderOutput
