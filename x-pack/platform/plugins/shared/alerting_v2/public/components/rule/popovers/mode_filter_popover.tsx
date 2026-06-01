@@ -14,14 +14,14 @@ const MODE_FILTER_OPTIONS: FilterPopoverOption[] = [
   {
     value: 'alert',
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alerting',
+      defaultMessage: 'Alert',
     }),
     iconType: 'bell',
   },
   {
     value: 'signal',
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Detect only',
+      defaultMessage: 'Signal',
     }),
     iconType: 'radar',
   },

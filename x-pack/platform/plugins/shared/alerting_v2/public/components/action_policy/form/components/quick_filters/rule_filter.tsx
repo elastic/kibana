@@ -37,10 +37,10 @@ interface RuleSelectableMeta {
 const kindLabel = (kind: RuleResponse['kind']): string =>
   kind === 'alert'
     ? i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.alert', {
-        defaultMessage: 'Alerting',
+        defaultMessage: 'Alert',
       })
     : i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.signal', {
-        defaultMessage: 'Detect only',
+        defaultMessage: 'Signal',
       });
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
