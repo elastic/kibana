@@ -26,6 +26,8 @@ export const timeseriesCommand = {
   methods: timeseriesCommandMethods,
   metadata: {
     type: 'source' as const,
+    subquerySource: true,
+    subquerySourceHidden: true,
     hidden: false,
     preview: true,
     isTimeseries: true,
