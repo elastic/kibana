@@ -17,7 +17,11 @@ export default {
   component: ActionsMenu,
 };
 
-const trigger = <EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />;
+const trigger = (
+  <EuiToolTip content="Actions" disableScreenReaderOutput>
+    <EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />
+  </EuiToolTip>
+);
 
 export const FlatActions: StoryFn = () => (
   <ActionsMenu

@@ -206,7 +206,11 @@ const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
   minWidth: '4.5em',
   render: (item: TransactionGroup) => (
     <ActionsMenu
-      button={<EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />}
+      button={
+        <EuiToolTip content="Actions" disableScreenReaderOutput>
+          <EuiButtonIcon iconType="boxesHorizontal" aria-label="Actions" />
+        </EuiToolTip>
+      }
       actions={[
         {
           id: 'discover',
