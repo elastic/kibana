@@ -21,9 +21,9 @@ import { tags } from '@kbn/scout';
 import {
   selectEvaluators,
   type DefaultEvaluators,
+  type EvaluationDataset,
   type EvalsExecutorClient,
-  type ExperimentTask,
-  type TaskOutput,
+  type Example,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
@@ -52,7 +52,7 @@ const alertBatches: Array<{ alertIds: string[] }> = Array.from(
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-interface AlertEvalExample {
+interface AlertEvalExample extends Example {
   input: { question: string };
   output: { expected: string };
   metadata?: {
@@ -81,24 +81,25 @@ function createEvaluateAlertBatches({
   }: {
     dataset: { name: string; description: string; examples: AlertEvalExample[] };
   }) {
-    const task: ExperimentTask<AlertEvalExample, TaskOutput> = async ({ input, metadata }) => {
-      const attachments = metadata?.attachments ?? [];
-      return callConverse({
-        fetch,
-        connectorId: connector.id,
-        question: input.question,
-        attachments,
-        log,
-      });
-    };
-
     const selectedEvaluators = selectEvaluators([
       attachmentReadCompliance,
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
     await executorClient.runExperiment(
-      { dataset: { name, description, examples }, task },
+      {
+        datasets: [{ name, description, examples } satisfies EvaluationDataset],
+        task: async ({ input, metadata }) => {
+          const attachments = metadata?.attachments ?? [];
+          return callConverse({
+            fetch,
+            connectorId: connector.id,
+            question: input.question,
+            attachments,
+            log,
+          });
+        },
+      },
       selectedEvaluators
     );
   };

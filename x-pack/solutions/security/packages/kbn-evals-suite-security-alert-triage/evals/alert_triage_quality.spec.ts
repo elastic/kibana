@@ -30,9 +30,9 @@ import type { EsClient } from '@kbn/scout';
 import {
   selectEvaluators,
   type DefaultEvaluators,
+  type EvaluationDataset,
   type EvalsExecutorClient,
-  type ExperimentTask,
-  type TaskOutput,
+  type Example,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
@@ -64,7 +64,7 @@ const toAlertAttachments = (ids: string[]) => {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface TriageEvalExample {
+interface TriageEvalExample extends Example {
   input: { question: string };
   output: { expected: string };
   metadata?: {
@@ -95,17 +95,6 @@ function createEvaluateTriageQuality({
     dataset: { name: string; description: string; examples: TriageEvalExample[] };
     criteria: string[];
   }) {
-    const task: ExperimentTask<TriageEvalExample, TaskOutput> = async ({ input, metadata }) => {
-      const { attachments = [] } = metadata ?? {};
-      return callConverse({
-        fetch,
-        connectorId: connector.id,
-        question: input.question,
-        attachments,
-        log,
-      });
-    };
-
     const selectedEvaluators = selectEvaluators([
       evaluators.criteria(criteria),
       attachmentReadCompliance,
@@ -114,12 +103,23 @@ function createEvaluateTriageQuality({
 
     await executorClient.runExperiment(
       {
-        dataset: {
-          name: dataset.name,
-          description: dataset.description,
-          examples: dataset.examples,
+        datasets: [
+          {
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples,
+          } satisfies EvaluationDataset,
+        ],
+        task: async ({ input, metadata }) => {
+          const { attachments = [] } = metadata ?? {};
+          return callConverse({
+            fetch,
+            connectorId: connector.id,
+            question: input.question,
+            attachments,
+            log,
+          });
         },
-        task,
       },
       selectedEvaluators
     );
