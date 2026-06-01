@@ -77,7 +77,6 @@ describe('Collapsed mode', () => {
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
       expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
     });
-
   });
 
   describe('Primary menu', () => {
