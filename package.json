@@ -537,6 +537,7 @@
     "@kbn/core-user-settings-server": "link:src/core/packages/user-settings/server",
     "@kbn/core-user-settings-server-internal": "link:src/core/packages/user-settings/server-internal",
     "@kbn/core-user-settings-server-mocks": "link:src/core/packages/user-settings/server-mocks",
+    "@kbn/core-user-settings-types": "link:src/core/packages/user-settings/types",
     "@kbn/core-user-storage-browser": "link:src/core/packages/user-storage/browser",
     "@kbn/core-user-storage-browser-internal": "link:src/core/packages/user-storage/browser-internal",
     "@kbn/core-user-storage-common": "link:src/core/packages/user-storage/common",
