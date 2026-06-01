@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 
@@ -17,26 +17,23 @@ import {
 import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 import type { ViewToggleId } from '../constants';
 
+const VIEW_TOGGLE_OPTIONS: EuiButtonGroupOptionProps[] = [
+  { id: VIEW_TOGGLE_LIST_ID, iconType: 'listBullet', label: VIEW_TOGGLE_LIST_LABEL },
+  { id: VIEW_TOGGLE_TABLE_ID, iconType: 'tableDensityNormal', label: VIEW_TOGGLE_TABLE_LABEL },
+];
+
 interface ViewToggleProps {
   idSelected: ViewToggleId;
   onChange: (id: ViewToggleId) => void;
 }
 
 export const ViewToggle: React.FC<ViewToggleProps> = ({ idSelected, onChange }) => {
-  const options: EuiButtonGroupOptionProps[] = useMemo(
-    () => [
-      { id: VIEW_TOGGLE_LIST_ID, iconType: 'listBullet', label: VIEW_TOGGLE_LIST_LABEL },
-      { id: VIEW_TOGGLE_TABLE_ID, iconType: 'tableDensityNormal', label: VIEW_TOGGLE_TABLE_LABEL },
-    ],
-    []
-  );
-
   const handleChange = useCallback((id: string) => onChange(id as ViewToggleId), [onChange]);
 
   return (
     <EuiButtonGroup
       legend={VIEW_TOGGLE_LEGEND}
-      options={options}
+      options={VIEW_TOGGLE_OPTIONS}
       idSelected={idSelected}
       onChange={handleChange}
       buttonSize="m"

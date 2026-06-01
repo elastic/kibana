@@ -172,7 +172,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiPopover
-                          aria-label="Bulk actions popover"
+                          aria-label={i18n.BULK_ACTIONS_POPOVER_ARIA_LABEL}
                           isOpen={isPopoverOpen}
                           closePopover={closePopover}
                           panelPaddingSize="none"

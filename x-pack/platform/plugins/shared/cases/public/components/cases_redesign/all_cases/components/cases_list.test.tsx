@@ -46,7 +46,6 @@ const defaultProps = {
   pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
   onChange: jest.fn(),
   disableActions: false,
-  isSelectorView: false,
   selectedFields: [],
 };
 

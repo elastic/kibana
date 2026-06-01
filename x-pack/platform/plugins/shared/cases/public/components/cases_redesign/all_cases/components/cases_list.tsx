@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { Pagination } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,45 +29,32 @@ import * as i18n from '../translations';
 
 const LIST_ITEM_HEIGHT = 80;
 const SKELETON_COUNT = 5;
+const DEFAULT_PAGE_SIZE = 10;
 
 interface CasesListProps {
   data: CasesFindResponseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   isLoading: boolean;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-    totalItemCount: number;
-  };
+  pagination: Pagination;
   onChange: (change: EuiBasicTableOnChange) => void;
   disableActions: boolean;
-  isSelectorView: boolean;
   selectedFields: CasesColumnSelection[];
 }
 
 export const CasesList: React.FC<CasesListProps> = React.memo(
-  ({
-    data,
-    userProfiles,
-    isLoading,
-    pagination,
-    onChange,
-    disableActions,
-    isSelectorView,
-    selectedFields,
-  }) => {
+  ({ data, userProfiles, isLoading, pagination, onChange, disableActions, selectedFields }) => {
     const { euiTheme } = useEuiTheme();
     const { permissions } = useCasesContext();
     const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
     const activePage = useMemo(() => pagination.pageIndex, [pagination.pageIndex]);
     const pageCount = useMemo(
-      () => Math.ceil(pagination.totalItemCount / pagination.pageSize),
+      () => Math.ceil(pagination.totalItemCount / (pagination.pageSize ?? DEFAULT_PAGE_SIZE)),
       [pagination.totalItemCount, pagination.pageSize]
     );
 
     const handlePageChange = useCallback(
       (pageIndex: number) => {
-        onChange({ page: { index: pageIndex, size: pagination.pageSize } });
+        onChange({ page: { index: pageIndex, size: pagination.pageSize ?? DEFAULT_PAGE_SIZE } });
       },
       [onChange, pagination.pageSize]
     );
@@ -142,7 +130,6 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
                 theCase={theCase}
                 userProfiles={userProfiles}
                 disableActions={disableActions}
-                isSelectorView={isSelectorView}
                 selectedFields={selectedFields}
               />
             </EuiFlexItem>

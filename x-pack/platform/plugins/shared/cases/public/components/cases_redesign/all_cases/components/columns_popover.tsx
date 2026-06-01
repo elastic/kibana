@@ -55,6 +55,32 @@ export const ColumnsPopover: React.FC<Props> = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
+  const styles = useMemo(
+    () => ({
+      dragDropContainer: css`
+        width: 300px;
+        height: 40vh;
+      `,
+      droppableEnabled: {
+        paddingBottom: euiTheme.size.base,
+      },
+      droppableDisabled: {
+        paddingTop: euiTheme.size.base,
+      },
+      draggableItem: css`
+        height: ${euiTheme.size.xl};
+        padding-left: ${euiTheme.size.base};
+      `,
+      switchLabel: css`
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: ${euiTheme.base * 12}px;
+        overflow: hidden;
+      `,
+    }),
+    [euiTheme]
+  );
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
@@ -81,13 +107,25 @@ export const ColumnsPopover: React.FC<Props> = ({
   const showAll = useCallback(() => toggleColumns({ isChecked: true }), [toggleColumns]);
   const hideAll = useCallback(() => toggleColumns({ isChecked: false }), [toggleColumns]);
 
-  const onDragEnd = ({ source, destination }: DropResult) => {
-    if (source && destination) {
-      const reorderedColumns = euiDragDropReorder(selectedColumns, source.index, destination.index);
+  const onDragEnd = useCallback(
+    ({ source, destination }: DropResult) => {
+      if (source && destination) {
+        const reorderedColumns = euiDragDropReorder(
+          selectedColumns,
+          source.index,
+          destination.index
+        );
 
-      onSelectedColumnsChange(reorderedColumns);
-    }
-  };
+        onSelectedColumnsChange(reorderedColumns);
+      }
+    },
+    [selectedColumns, onSelectedColumnsChange]
+  );
+
+  const onSearchChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => setColumnSearchText(e.currentTarget.value),
+    []
+  );
 
   const filteredColumns = useMemo(
     () =>
@@ -99,7 +137,7 @@ export const ColumnsPopover: React.FC<Props> = ({
 
   return (
     <EuiPopover
-      aria-label="Columns popover"
+      aria-label={i18n.COLUMNS_POPOVER_ARIA_LABEL}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -125,33 +163,20 @@ export const ColumnsPopover: React.FC<Props> = ({
           placeholder={i18n.SEARCH}
           aria-label={i18n.SEARCH_COLUMNS}
           value={columnSearchText}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setColumnSearchText(e.currentTarget.value)
-          }
+          onChange={onSearchChange}
           data-test-subj="column-selection-popover-search"
         />
       </EuiPopoverTitle>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup
-          css={css`
-            width: 300px;
-            height: 40vh;
-          `}
+          css={styles.dragDropContainer}
           className="eui-yScrollWithShadows"
           data-test-subj="column-selection-popover-drag-drop-context"
         >
           <EuiFlexItem>
             <EuiDroppable
               droppableId="casesColumnDroppableArea"
-              css={
-                isDragEnabled
-                  ? {
-                      paddingBottom: euiTheme.size.base,
-                    }
-                  : {
-                      paddingTop: euiTheme.size.base,
-                    }
-              }
+              css={isDragEnabled ? styles.droppableEnabled : styles.droppableDisabled}
             >
               {filteredColumns.map(({ field, name, isChecked }, idx) => (
                 <EuiDraggable
@@ -159,7 +184,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                   index={idx}
                   draggableId={field}
                   isDragDisabled={!isDragEnabled}
-                  css={{ height: euiTheme.size.xl, paddingLeft: euiTheme.size.base }}
+                  css={styles.draggableItem}
                   customDragHandle
                   hasInteractiveChildren
                   usePortal
@@ -178,12 +203,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                           onChange={(e) => toggleColumns({ field, isChecked: e.target.checked })}
                           compressed
                           labelProps={{
-                            style: {
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              width: '190px',
-                              overflow: 'hidden',
-                            },
+                            css: styles.switchLabel,
                           }}
                         />
                       </EuiFlexItem>

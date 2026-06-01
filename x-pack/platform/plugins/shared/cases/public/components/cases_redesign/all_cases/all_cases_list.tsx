@@ -16,12 +16,12 @@ import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../../common/ui/types';
 import type { CaseStatuses } from '../../../../common/types/domain';
-import { useCasesColumns } from '../../all_cases/use_cases_columns';
+import { useCasesColumns } from './hooks/use_cases_columns';
 import { CasesTableFilters } from './components/table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from '../../all_cases/table';
 import { CasesList } from './components/cases_list';
-import { VIEW_TOGGLE_TABLE_ID } from './constants';
+import { VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CasesMetrics } from './components/cases_metrics';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
@@ -148,6 +148,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { viewMode: storedViewMode, setViewMode } = useViewMode();
     const viewMode = isSelectorView ? VIEW_TOGGLE_TABLE_ID : storedViewMode;
 
+    const onViewModeChange = useCallback(
+      (mode: ViewToggleId) => {
+        deselectCases();
+        setViewMode(mode);
+      },
+      [deselectCases, setViewMode]
+    );
+
     const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
       filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
@@ -231,7 +239,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           filterOptions={filterOptions}
           deselectCases={deselectCases}
           viewMode={viewMode}
-          onViewModeChange={setViewMode}
+          onViewModeChange={onViewModeChange}
           selectedColumns={selectedColumns}
           onSelectedColumnsChange={setSelectedColumns}
           listFields={selectedFields}
@@ -283,7 +291,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             pagination={pagination}
             onChange={tableOnChangeCallback}
             disableActions={selectedCases.length > 0}
-            isSelectorView={isSelectorView}
             selectedFields={selectedFields}
           />
         )}

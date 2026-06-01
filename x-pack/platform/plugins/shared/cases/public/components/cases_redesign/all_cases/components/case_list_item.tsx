@@ -28,7 +28,7 @@ import { useAssignees } from '../../../../containers/user_profiles/use_assignees
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { CaseDetailsLink } from '../../../links';
 import { ActionColumnComponent as ActionColumn } from '../../../all_cases/use_actions';
-import { SeverityHealth } from '../../../severity/config';
+import { SeverityBadge } from './severity_badge';
 import * as i18n from '../translations';
 
 const LIST_ITEM_HEIGHT = 80;
@@ -75,9 +75,8 @@ export const CaseListItem: React.FC<{
   theCase: CaseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   disableActions: boolean;
-  isSelectorView: boolean;
   selectedFields: CasesColumnSelection[];
-}> = React.memo(({ theCase, userProfiles, disableActions, isSelectorView, selectedFields }) => {
+}> = React.memo(({ theCase, userProfiles, disableActions, selectedFields }) => {
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
 
@@ -121,7 +120,7 @@ export const CaseListItem: React.FC<{
               </CaseDetailsLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SeverityHealth severity={theCase.severity} />
+              <SeverityBadge severity={theCase.severity} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Status status={theCase.status} />
@@ -211,11 +210,9 @@ export const CaseListItem: React.FC<{
                 {theCase.totalComment}
               </EuiBadge>
             </EuiFlexItem>
-            {!isSelectorView && (
-              <EuiFlexItem grow={false}>
-                <ActionColumn theCase={theCase} disableActions={disableActions} />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <ActionColumn theCase={theCase} disableActions={disableActions} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -41,7 +41,6 @@ const defaultProps = {
   theCase: mockCase,
   userProfiles: new Map(),
   disableActions: false,
-  isSelectorView: false,
   selectedFields: [],
 };
 
@@ -55,7 +54,7 @@ describe('CaseListItem', () => {
 
     expect(screen.getByTestId('cases-list-item-title')).toHaveTextContent(mockCase.title);
     expect(screen.getByTestId('cases-list-item-id')).toHaveTextContent('#42');
-    expect(screen.getByTestId(`case-table-column-severity-${mockCase.severity}`)).toHaveTextContent(
+    expect(screen.getByTestId(`case-severity-badge-${mockCase.severity}`)).toHaveTextContent(
       'High'
     );
     expect(screen.getByTestId(`case-status-badge-${mockCase.status}`)).toBeInTheDocument();
@@ -169,11 +168,5 @@ describe('CaseListItem', () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
     expect(screen.getByTestId('mock-action-column')).toBeInTheDocument();
-  });
-
-  it('hides action column in selector view', () => {
-    renderWithTestingProviders(<CaseListItem {...defaultProps} isSelectorView={true} />);
-
-    expect(screen.queryByTestId('mock-action-column')).not.toBeInTheDocument();
   });
 });

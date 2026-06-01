@@ -22,25 +22,28 @@ import { StatusStats } from '../../../status/status_stats';
 import { useGetCasesMetrics } from '../../../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from '../translations';
 
-export const CasesMetrics: React.FC = () => {
+const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
+const MTTR_MULTIPLIER = 1000;
+
+const CasesMetricsComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data: { mttr, status } = { mttr: 0 }, isLoading: isCasesMetricsLoading } =
     useGetCasesMetrics();
 
   const mttrValue = useMemo(
-    () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),
+    () => (mttr != null ? prettyMilliseconds(mttr * MTTR_MULTIPLIER, PRETTY_MS_OPTIONS) : '-'),
     [mttr]
   );
 
+  const panelStyles = useMemo(
+    () => css`
+      border-radius: ${euiTheme.border.radius.medium};
+    `,
+    [euiTheme.border.radius.medium]
+  );
+
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="m"
-      grow={false}
-      css={css`
-        border-radius: ${euiTheme.border.radius.medium};
-      `}
-    >
+    <EuiPanel hasBorder paddingSize="m" grow={false} css={panelStyles}>
       <EuiFlexGroup responsive={true} data-test-subj="cases-metrics-stats">
         <EuiFlexItem grow={true}>
           <StatusStats
@@ -95,4 +98,6 @@ export const CasesMetrics: React.FC = () => {
     </EuiPanel>
   );
 };
-CasesMetrics.displayName = 'CasesMetrics';
+CasesMetricsComponent.displayName = 'CasesMetrics';
+
+export const CasesMetrics = React.memo(CasesMetricsComponent);

@@ -81,3 +81,23 @@ export const LIST_FIELD_EVENTS = (count: number) =>
     values: { count },
     defaultMessage: '{count} {count, plural, one {event} other {events}}',
   });
+
+export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
+  i18n.translate('xpack.cases.casesRedesign.caseTable.showingCasesTitle', {
+    values: { totalRules, pageSize },
+    defaultMessage: 'Showing {pageSize} of {totalRules}',
+  });
+
+export const COLUMNS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.columnsPopover.ariaLabel',
+  {
+    defaultMessage: 'Columns popover',
+  }
+);
+
+export const BULK_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.bulkActionsPopover.ariaLabel',
+  {
+    defaultMessage: 'Bulk actions popover',
+  }
+);

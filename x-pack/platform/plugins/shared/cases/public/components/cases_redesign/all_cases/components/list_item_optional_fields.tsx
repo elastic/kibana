@@ -31,14 +31,22 @@ const ExtendedFieldsListItemContent: React.FC<ExtendedFieldsListItemContentProps
   const labels = getExtendedFieldDisplayLabels(extendedFields, extendedFieldsLabels);
   const count = labels.length;
 
-  const tooltipContent = (
-    <div
-      css={css`
+  const styles = useMemo(
+    () => ({
+      tooltipContent: css`
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.xs};
-      `}
-    >
+      `,
+      tooltipAnchor: {
+        cursor: 'default',
+      },
+    }),
+    [euiTheme]
+  );
+
+  const tooltipContent = (
+    <div css={styles.tooltipContent}>
       {labels.map((label, index) => (
         <div key={`${label}-${index}`}>{label}</div>
       ))}
@@ -48,7 +56,7 @@ const ExtendedFieldsListItemContent: React.FC<ExtendedFieldsListItemContentProps
   return (
     <EuiToolTip content={tooltipContent} position="top">
       <span
-        css={{ cursor: 'default' }}
+        css={styles.tooltipAnchor}
         data-test-subj="cases-list-item-field-extended-fields-tooltip-anchor"
         tabIndex={0}
       >
@@ -69,14 +77,19 @@ interface ListItemFieldTextProps {
 const ListItemFieldText: React.FC<ListItemFieldTextProps> = ({ label, testSubj, children }) => {
   const { euiTheme } = useEuiTheme();
 
+  const styles = useMemo(
+    () => ({
+      label: css`
+        font-weight: ${euiTheme.font.weight.semiBold};
+      `,
+    }),
+    [euiTheme]
+  );
+
   return (
     <EuiFlexItem grow={false}>
       <EuiText size="xs" color="subdued" data-test-subj={testSubj}>
-        <span
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-        >
+        <span css={styles.label}>
           {label}
           {':'}
         </span>{' '}
@@ -271,6 +284,15 @@ export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const styles = useMemo(
+    () => ({
+      container: css`
+        margin-top: ${euiTheme.size.s};
+      `,
+    }),
+    [euiTheme]
+  );
+
   const visibleFields = useMemo(
     () =>
       selectedFields.reduce<Array<ListItemFieldContent & { field: string }>>(
@@ -299,9 +321,7 @@ export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
       responsive={false}
       wrap={false}
       data-test-subj="cases-list-item-optional-fields"
-      css={css`
-        margin-top: ${euiTheme.size.s};
-      `}
+      css={styles.container}
     >
       {visibleFields.map(({ field, label, content, testSubj }) => (
         <ListItemFieldText key={field} label={label} testSubj={testSubj}>

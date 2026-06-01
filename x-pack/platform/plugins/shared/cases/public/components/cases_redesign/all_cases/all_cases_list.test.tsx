@@ -236,7 +236,7 @@ describe('AllCasesListGeneric', () => {
     ).toBeInTheDocument();
 
     expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
-      `Showing 10 of ${useGetCasesMockState.data.total} cases`
+      `Showing 10 of ${useGetCasesMockState.data.total}`
     );
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
@@ -1143,7 +1143,7 @@ describe('AllCasesListGeneric', () => {
       renderWithTestingProviders(<AllCasesList />);
 
       expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
-        `Showing 10 of ${useGetCasesMockState.data.total} cases`
+        `Showing 10 of ${useGetCasesMockState.data.total}`
       );
     });
   });
