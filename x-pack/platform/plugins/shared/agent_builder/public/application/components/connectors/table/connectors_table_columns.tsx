@@ -20,6 +20,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConnectorOAuthConnect, OAuthRedirectMode } from '@kbn/response-ops-oauth-hooks';
 import React, { useMemo } from 'react';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
@@ -92,11 +93,13 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
   const canDelete = application.capabilities.actions?.delete === true;
   const { actionTypeRegistry } = triggersActionsUi;
 
-  const { isEarsEnabled } = useAgentBuilderServices();
+  const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
 
   return useMemo(() => {
     const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
-      !isEarsEnabled && connector.config?.authType === 'ears';
+      connector.config?.authType === 'ears' &&
+      (!isEarsEnabled ||
+        (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled));
 
     return [
       {
@@ -199,5 +202,5 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         ),
       },
     ];
-  }, [editConnector, actionTypeRegistry, canDelete, isEarsEnabled]);
+  }, [editConnector, actionTypeRegistry, canDelete, isEarsEnabled, isEarsExperimentalEnabled]);
 };
