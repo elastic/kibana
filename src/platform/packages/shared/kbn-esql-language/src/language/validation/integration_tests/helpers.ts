@@ -32,6 +32,11 @@ interface EsqlErrorResponse {
   };
 }
 
+interface EsqlQueryResult {
+  resp: EsqlQueryResponse | undefined;
+  error: { message: string } | undefined;
+}
+
 const nonIndexableFieldTypes = new Set(['date_period', 'null', 'time_duration', 'time_literal']);
 const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 const enrichIndexFields = [
@@ -64,7 +69,12 @@ const createIndexRequest = (index: string, fieldList: Array<{ name: string; type
           esType = 'shape';
         }
         if (type === 'aggregate_metric_double') {
-          esType = 'double';
+          memo[name] = {
+            type: 'aggregate_metric_double',
+            metrics: ['min', 'max', 'sum', 'value_count'],
+            default_metric: 'max',
+          } as MappingProperty;
+          return memo;
         }
         if (type === ESQL_NAMED_PARAMS_TYPE || type === 'unsupported') {
           esType = 'integer_range';
@@ -103,6 +113,15 @@ const setupIntegrationEnv = async () => {
   };
 };
 
+/**
+ * Boots a local Elasticsearch cluster and prepares test indices and enrich policies.
+ *
+ * Warning: every call starts a new cluster and runs full setup — avoid calling this from
+ * multiple `integration_tests/*.test.ts` files (each `beforeAll` would pay that cost again).
+ *
+ * This package uses the recommended pattern: one integration file (`validation_suites.test.ts`),
+ * one `beforeAll(setupEsqlEnv)`, and shared `run*ValidationSuite(setup)` from `__tests__/*_suite.ts`.
+ */
 export const setupEsqlEnv = async () => {
   const integrationEnv = await setupIntegrationEnv();
   const es = integrationEnv.esClient;
@@ -161,12 +180,7 @@ export const setupEsqlEnv = async () => {
     }
   };
 
-  const sendEsqlQuery = async (
-    query: string
-  ): Promise<{
-    resp: EsqlQueryResponse | undefined;
-    error: { message: string } | undefined;
-  }> => {
+  const sendEsqlQuery = async (query: string): Promise<EsqlQueryResult> => {
     try {
       const resp = await es.esql.query({
         query,
