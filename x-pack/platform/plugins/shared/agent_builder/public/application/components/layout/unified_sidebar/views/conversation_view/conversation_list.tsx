@@ -55,7 +55,7 @@ interface ConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
   isNewConversationRoute: boolean;
-  onItemClick?: () => void;
+  onItemClick?: (conversationId: string) => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -98,7 +98,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             to={appPaths.agent.conversations.new({ agentId })}
             css={isNewConversationRoute ? activeLinkStyles : linkStyles}
             data-test-subj="agentBuilderSidebarConversation-new"
-            onClick={onItemClick}
           >
             <EuiTextTruncate text={newConversationLabel} />
           </Link>
@@ -123,7 +122,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               isActive={isActive}
               routeConversationId={currentConversationId}
               showActionsMenu={!isStreaming}
-              onItemClick={onItemClick}
+              onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
               status={status}
             />
           </EuiFlexItem>
