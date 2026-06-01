@@ -12,6 +12,7 @@ import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { resolveCcmApiKey } from '@kbn/es';
 import { resolveEvalSuites } from '../suites';
 import {
   promptForSuite,
@@ -29,7 +30,8 @@ import {
   connectorsHash,
   tailLog,
 } from '../services';
-import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import { safeExec } from '../utils';
+import { readCachedEisConnectors } from '../eis_connectors_cache';
 import {
   defaultExportProfile,
   envFromDatasetsProfile,
@@ -45,36 +47,6 @@ import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
-
-const fetchCcmApiKey = (log: ToolingLog): string => {
-  const envKey = process.env.KIBANA_EIS_CCM_API_KEY;
-  if (envKey) {
-    return envKey;
-  }
-
-  log.info('KIBANA_EIS_CCM_API_KEY not set -- fetching from Vault...');
-  const vaultOk = safeExec('vault', ['token', 'lookup', '-format=json']);
-  if (!vaultOk) {
-    throw new Error(
-      [
-        'Vault authentication required for EIS CCM.',
-        'Log in first:  vault login --method oidc',
-        'Or set KIBANA_EIS_CCM_API_KEY manually.',
-      ].join('\n')
-    );
-  }
-
-  const key = safeExec('vault', ['read', '-field=key', VAULT_SECRET_PATH]);
-  if (!key) {
-    throw new Error(
-      [
-        'Failed to read EIS CCM API key from Vault.',
-        'Ensure VPN is connected and try:  vault login --method oidc',
-      ].join('\n')
-    );
-  }
-  return key;
-};
 
 const isEdotRunningViaDocker = (): boolean => {
   const result = safeExec('docker', [
@@ -348,6 +320,16 @@ export const startCmd: Command<void> = {
         ? projects.some(isEisConnectorId)
         : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
+    if (requiresEisCcm && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
+      const cached = readCachedEisConnectors();
+      if (cached) {
+        process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(cached)).toString(
+          'base64'
+        );
+        log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+      }
+    }
+
     const baseProfile = profile;
     const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
     const exportProfile =
@@ -560,7 +542,7 @@ export const startCmd: Command<void> = {
       // --- Step 3: EIS CCM ---
       if (requiresEisCcm) {
         log.info('[3/4] Enabling EIS (Cloud Connected Mode)...');
-        const ccmApiKey = fetchCcmApiKey(log);
+        const ccmApiKey = await resolveCcmApiKey(log);
 
         const ccmResult = spawn(
           'node',

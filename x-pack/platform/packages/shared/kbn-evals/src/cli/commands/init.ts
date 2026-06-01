@@ -13,8 +13,10 @@ import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { set } from '@kbn/safer-lodash-set';
+import { resolveCcmApiKey } from '@kbn/es';
 import { isTTY, parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
-import { safeExec, getVaultAddr, VAULT_SECRET_PATH } from '../utils';
+import { safeExec, getVaultAddr } from '../utils';
+import { readCachedEisConnectors, writeCachedEisConnectors } from '../eis_connectors_cache';
 import { VAULT_CONFIG_DIR, resolveVaultConfigPath } from '../profiles';
 
 const EIS_MODELS_PATH = 'target/eis_models.json';
@@ -268,21 +270,6 @@ export const ensureVaultAuth = async (log: ToolingLog): Promise<void> => {
   }
 };
 
-const fetchCcmApiKey = (log: ToolingLog): string => {
-  log.info('Fetching EIS CCM API key from Vault...');
-  const result = safeExec('vault', ['read', '-field=key', VAULT_SECRET_PATH]);
-  if (!result) {
-    throw new Error(
-      [
-        'Failed to read EIS CCM API key from Vault.',
-        'Ensure you are logged in: vault login --method oidc',
-        'And connected to VPN if needed.',
-      ].join('\n')
-    );
-  }
-  return result;
-};
-
 const runDiscoverEisModels = (repoRoot: string, apiKey: string): void => {
   const result = spawnSync('node', ['scripts/discover_eis_models.js'], {
     cwd: repoRoot,
@@ -332,7 +319,7 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
 export const runConnectorSetup = async (
   repoRoot: string,
   log: ToolingLog,
-  options?: { skipDiscovery?: boolean }
+  options?: { skipDiscovery?: boolean; useCache?: boolean }
 ): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
@@ -398,13 +385,28 @@ export const runConnectorSetup = async (
 
   log.info('');
 
+  if (options?.useCache !== false) {
+    const cachedConnectors = readCachedEisConnectors();
+    if (cachedConnectors) {
+      const connectorEntries = Object.entries(cachedConnectors);
+      const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
+      process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
+
+      log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
+      connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
+      log.info('');
+      log.info('To force re-discovery, run: node scripts/evals init');
+      return;
+    }
+  }
+
   const vaultAddr = getVaultAddr();
 
   log.info(`Checking Vault auth (VAULT_ADDR=${vaultAddr})...`);
   await ensureVaultAuth(log);
   log.info('Vault auth OK');
 
-  const apiKey = fetchCcmApiKey(log);
+  const apiKey = await resolveCcmApiKey(log);
   log.info('CCM API key retrieved');
 
   if (!(options?.skipDiscovery ?? false)) {
@@ -441,7 +443,10 @@ export const runConnectorSetup = async (
     throw new Error('No connectors generated from EIS models.');
   }
 
-  log.info(`Generated ${connectors.length} connector(s)`);
+  const parsedConnectors = JSON.parse(Buffer.from(base64Payload, 'base64').toString('utf-8'));
+  writeCachedEisConnectors(parsedConnectors);
+
+  log.info(`Generated and cached ${connectors.length} connector(s)`);
 
   log.info('');
   log.info('Done! Run the following to export connectors to your shell:');
@@ -514,6 +519,7 @@ export const initCmd: Command<void> = {
     if (!configOnly) {
       await runConnectorSetup(repoRoot, log, {
         skipDiscovery: flagsReader.boolean('skip-discovery'),
+        useCache: false,
       });
     }
   },

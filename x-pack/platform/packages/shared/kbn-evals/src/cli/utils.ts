@@ -7,7 +7,6 @@
 
 import { execFileSync } from 'child_process';
 
-export const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
 export const KBN_EVALS_VAULT_CONFIG_FIELD = 'config';
 export const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
 
