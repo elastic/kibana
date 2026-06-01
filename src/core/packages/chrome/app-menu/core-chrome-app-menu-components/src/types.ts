@@ -216,6 +216,10 @@ export type AppMenuItemType = AppMenuItemCommon & {
    * Order of the item in the menu. Lower numbers appear first.
    */
   order: number;
+  /**
+   * Adds a separator line above or below the item in the menu.
+   */
+  separator?: 'above' | 'below';
 };
 
 /**

@@ -85,6 +85,7 @@ import {
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
   ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
 } from './constants';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface DefaultColumn {
   id: string;
@@ -193,7 +194,11 @@ export const EntitiesDataTable = ({
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
+    alertsPrivileges: {
+      alerts: { read: canReadAlerts },
+    },
   } = useUserPrivileges();
+  const { hasIndexRead: canReadAlertsIndex } = useAlertsPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
 
   const openTableFlyout = useCallback(
@@ -334,6 +339,12 @@ export const EntitiesDataTable = ({
 
   const styles = useStyles();
 
+  const columnsWithPrivileges = useMemo(
+    () =>
+      localStorageColumns?.filter((c) => c !== 'alerts' || (canReadAlerts && canReadAlertsIndex)),
+    [localStorageColumns, canReadAlerts, canReadAlertsIndex]
+  );
+
   const {
     columns: currentColumns,
     onSetColumns,
@@ -345,7 +356,7 @@ export const EntitiesDataTable = ({
     dataView,
     dataViews,
     setAppState: (props) => setLocalStorageColumns(props.columns),
-    columns: localStorageColumns,
+    columns: columnsWithPrivileges,
     sort,
   });
 

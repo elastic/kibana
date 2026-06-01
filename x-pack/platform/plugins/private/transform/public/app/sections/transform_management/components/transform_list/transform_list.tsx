@@ -298,6 +298,10 @@ export const TransformList: FC<TransformListProps> = ({
       <EuiPopover
         key="bulkActionIcon"
         id="transformBulkActionsMenu"
+        aria-label={i18n.translate(
+          'xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel',
+          { defaultMessage: 'Bulk actions' }
+        )}
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
