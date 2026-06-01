@@ -39,10 +39,22 @@ export const getVariablesHoverContent = (
   return buildVariablesHoverContent(usedVariablesInNode, variables);
 };
 
+const getParamNameAtOffset = (text: string, offset: number): string | undefined => {
+  let start = offset;
+  while (start > 0 && /\w/.test(text[start - 1])) start--;
+  if (start > 0 && text[start - 1] === '?') {
+    let end = offset;
+    while (end < text.length && /\w/.test(text[end])) end++;
+    return text.slice(start, end);
+  }
+  return undefined;
+};
+
 export function getPromqlHoverItem(
   root: WalkerAstNode,
   offset: number,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  fullText?: string
 ): { contents: Array<{ value: string }> } {
   let functionNode: PromQLFunction | undefined;
   let selectorNode: PromQLSelector | undefined;
@@ -77,6 +89,19 @@ export function getPromqlHoverItem(
 
     if (variablesContent.length) {
       return { contents: variablesContent };
+    }
+  }
+
+  // Fallback for params in PromQL label matchers: the PromQL parser doesn't store
+  // named params in label.value, so the Walker never visits them. Scan the raw text.
+  if (!paramNode && fullText) {
+    const paramName = getParamNameAtOffset(fullText, offset);
+    if (paramName) {
+      const variables = callbacks?.getVariables?.();
+      const variablesContent = buildVariablesHoverContent([paramName], variables);
+      if (variablesContent.length) {
+        return { contents: variablesContent };
+      }
     }
   }
 
