@@ -142,7 +142,6 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=ll
 
 > **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
 
-
 ### External Phoenix dataset evaluations
 
 If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
@@ -160,14 +159,13 @@ Notes:
 
 ### Evaluation comparisons
 
-Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluations` data stream) using paired t-tests.
+Use the evals CLI to compare two evaluation runs (persisted to the `.evaluation-scores` data stream) using paired t-tests.
 
-Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
+Run the suite twice and capture the two execution IDs (via `TEST_RUN_ID`). Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. Each model gets its own execution ID (`TEST_RUN_ID::model-id`), so multiple models can run in the same suite invocation without collisions.
 
 ```bash
-# This must point at the cluster where eval scores were exported.
-# (The default Scout test ES is typically http://elastic:changeme@localhost:9220)
-export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+# This must point at the Kibana instance where eval scores are ingested/read.
+export EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601/dev
 
 # LLM-as-a-judge connector (required by @kbn/evals)
 export EVALUATION_CONNECTOR_ID=<llm-judge-connector-id>
@@ -181,16 +179,16 @@ TEST_RUN_ID=agent-builder-change \
   node scripts/evals run --suite agent-builder --project <task-connector-id>
 ```
 
-Tip: the run id is also printed at the end of the run in the export message containing `run_id:"..."`.
+Tip: the execution id is also printed at the end of the run in the export message containing `metadata.execution_id:"..."`.
 
 Then compare:
 
 ```bash
-export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+export EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601/dev
 node scripts/evals compare agent-builder-baseline agent-builder-change
 ```
 
 Notes:
 
 - The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
-- `compare` reads from `EVALUATIONS_ES_URL` (defaults to `http://elastic:changeme@localhost:9220`).
+- `compare` reads through `EVALUATIONS_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).

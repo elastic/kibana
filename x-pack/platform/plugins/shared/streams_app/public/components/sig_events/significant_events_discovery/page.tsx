@@ -30,7 +30,6 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { DiscoveriesTab } from './components/discoveries_tab';
-import { VerdictsTab } from './components/verdicts_tab';
 import { SigEventsTab } from './components/sig_events_tab';
 
 const discoveryTabs = [
@@ -40,7 +39,6 @@ const discoveryTabs = [
   'insights',
   'detections',
   'discoveries',
-  'verdicts',
   'significant_events',
   'memory',
   'settings',
@@ -78,7 +76,7 @@ export function SignificantEventsDiscoveryPage() {
     [toasts]
   );
 
-  const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
+  const { isMemoryEnabled } = useDiscoverySettings();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -135,14 +133,6 @@ export function SignificantEventsDiscoveryPage() {
         isSelected: tab === 'discoveries',
       },
       {
-        id: 'verdicts',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.verdictsTab', {
-          defaultMessage: 'Verdicts',
-        }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'verdicts' } }),
-        isSelected: tab === 'verdicts',
-      },
-      {
         id: 'significant_events',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
           defaultMessage: 'Significant Events',
@@ -197,9 +187,6 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (tab === 'memory' && !isMemoryEnabled) {
-    if (isSettingsLoading) {
-      return <EuiLoadingElastic size="xxl" />;
-    }
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
@@ -247,7 +234,6 @@ export function SignificantEventsDiscoveryPage() {
           {tab === 'insights' && <InsightsTab />}
           {tab === 'detections' && <DetectionsTab />}
           {tab === 'discoveries' && <DiscoveriesTab />}
-          {tab === 'verdicts' && <VerdictsTab />}
           {tab === 'significant_events' && <SigEventsTab />}
           {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
           {tab === 'settings' && <SettingsTab />}

@@ -300,8 +300,6 @@ export {
   type Detection,
   discoverySchema,
   type Discovery,
-  verdictSchema,
-  type Verdict,
   sigEventSchema,
   type SigEvent,
   type KnowledgeIndicator,
