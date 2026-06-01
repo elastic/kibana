@@ -59,6 +59,9 @@ jest.mock('../../cases/components/provider/provider', () => ({
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
+  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 jest.mock('../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(),
 }));
@@ -82,6 +85,21 @@ describe('AlertFlyoutHeader', () => {
       },
     },
     upselling: {},
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getAbsoluteTime: jest.fn().mockReturnValue({
+              from: '2023-01-01T00:00:00.000Z',
+              to: '2023-12-31T23:59:59.999Z',
+            }),
+          },
+        },
+      },
+    },
+    notifications: {
+      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+    },
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {

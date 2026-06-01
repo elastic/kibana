@@ -16,7 +16,7 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/constants';
 import type { Refetch } from '../../../../common/types';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';

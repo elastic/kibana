@@ -70,6 +70,7 @@ import { DocumentFlyout } from '../../../../../flyout_v2/document/main';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import { RISK_INPUTS_TAB_QUERY_ID } from './constants';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -85,7 +86,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
-export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
+export { RISK_INPUTS_TAB_QUERY_ID } from './constants';
 
 interface RiskScorePanelProps extends FlyoutPanelProps {
   params: {
