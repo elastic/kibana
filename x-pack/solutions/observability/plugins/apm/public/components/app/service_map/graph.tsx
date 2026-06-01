@@ -610,19 +610,17 @@ function GraphInner({
                       data-test-subj="serviceMapZoomOutButton"
                       css={mapToolbarControlIconCss}
                     />
-                    {!isEmbedded && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
-                        title={fitViewLabel}
-                        aria-label={fitViewLabel}
-                        data-test-subj="serviceMapFitViewButton"
-                        css={mapToolbarControlIconCss}
-                      />
-                    )}
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="crosshair"
+                      onClick={() => fitView(getFitViewOptions())}
+                      title={fitViewLabel}
+                      aria-label={fitViewLabel}
+                      data-test-subj="serviceMapFitViewButton"
+                      css={mapToolbarControlIconCss}
+                    />
                     {fullMapHref && (
                       <EuiButtonIcon
                         display="empty"
