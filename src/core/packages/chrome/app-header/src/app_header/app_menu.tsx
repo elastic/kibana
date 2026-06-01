@@ -8,7 +8,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { hasNonGlobalStaticItems, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { LegacyHeaderActionMenu } from './legacy_action_menu';
 import { useAppHeaderMenu } from './hooks';
@@ -27,8 +27,9 @@ export interface AppMenuProps {
 export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegrations }) => {
   const { config, staticItems } = useAppHeaderMenu(menu, docLink, showAddIntegrations);
   const hasLegacyActionMenu = useHasLegacyActionMenu();
+  const hasStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if (config || staticItems?.length) {
+  if (config || hasStaticItems) {
     return (
       <Suspense>
         <AppMenuComponent config={config} staticItems={staticItems} />
