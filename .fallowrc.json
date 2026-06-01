@@ -1,7 +1,9 @@
 {
-  "$schema": "https://docs.fallow.tools/schemas/config.json",
   "ignoreDependencies": ["@kbn/*"],
   "rules": {
     "unresolved-imports": "off"
+  },
+  "workspaces": {
+    "patterns": ["x-pack/solutions/search/**"]
   }
 }
