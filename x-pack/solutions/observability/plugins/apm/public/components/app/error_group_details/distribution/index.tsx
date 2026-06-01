@@ -22,6 +22,7 @@ import React from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { ERROR_GROUP_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -105,6 +106,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus, discoverPa
               rangeFrom={discoverParams.rangeFrom}
               rangeTo={discoverParams.rangeTo}
               queryParams={discoverParams.queryParams}
+              ebt={{ element: ERROR_GROUP_DETAILS_EBT_ELEMENTS.DISTRIBUTION_CHART }}
             />
           </EuiFlexItem>
         )}

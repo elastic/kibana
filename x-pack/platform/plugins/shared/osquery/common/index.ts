@@ -12,6 +12,8 @@ export {
   getExperimentalAllowedValues,
 } from './experimental_features';
 export type { ExperimentalFeatures } from './experimental_features';
+export type { ScheduleType, RRuleScheduleConfig } from './schedule';
+export { MAX_SPLAY_SECONDS } from './schedule';
 
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'Osquery';

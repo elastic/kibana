@@ -6,7 +6,6 @@
  */
 
 import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 
 export interface ShouldIdentifyFeaturesResult {
@@ -25,7 +24,7 @@ export async function shouldIdentifyFeatures({
   const { hits } = await featureClient.getFeatures(streamName, {
     type: [...INFERRED_FEATURE_TYPES],
     limit: 1,
-    sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
+    sortBy: 'lastSeen',
   });
 
   if (hits.length === 0) {
