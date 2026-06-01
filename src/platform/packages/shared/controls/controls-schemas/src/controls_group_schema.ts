@@ -48,7 +48,7 @@ export const pinnedControlSchema = schema.object({
   }),
 });
 
-export const getControlsSchemas = () => {
+export const getControlsSchema = () => {
   /**
    * - keep types in alphabetical order for the sake of documentation
    * - control order will be determined by the array
@@ -119,7 +119,7 @@ export const getControlsSchemas = () => {
 };
 
 export const getControlsGroupSchema = () => {
-  return schema.arrayOf(getControlsSchemas(), {
+  return schema.arrayOf(getControlsSchema(), {
     defaultValue: [],
     maxSize: 100,
     meta: { description: 'An array of control panels and their state in the control group.' },

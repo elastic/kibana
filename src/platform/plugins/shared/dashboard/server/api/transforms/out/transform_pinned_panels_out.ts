@@ -11,7 +11,7 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
-  getControlsSchemas,
+  getControlsSchema,
   type LegacyIgnoreParentSettings,
   type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
@@ -30,7 +30,7 @@ export function transformPinnedPanelsOut(
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[] = []
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
-  const pinnedPanelSchema = getControlsSchemas();
+  const pinnedPanelSchema = getControlsSchema();
   let warnings: Warnings = [];
   let transformedPanels: DashboardPinnedPanelsState = [];
   if (pinnedPanels) {
@@ -125,7 +125,7 @@ export function transformPinnedPanelProperties(
 function transformPanels(
   panels: DashboardPinnedPanelsState,
   containerReferences: Reference[],
-  schema: ReturnType<typeof getControlsSchemas>
+  schema: ReturnType<typeof getControlsSchema>
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
