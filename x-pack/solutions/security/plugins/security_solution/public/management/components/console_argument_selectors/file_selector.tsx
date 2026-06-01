@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiToolTip,
   htmlIdGenerator,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
