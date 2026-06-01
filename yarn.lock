@@ -2331,9 +2331,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_stickyheaderfix0.tgz":
-  version "116.3.0-stickyheadersfix.0"
-  resolved "file:./eui_stickyheaderfix0.tgz#0e57fab9e4081c998a7cfbb41dfa30622a7cfe5e"
+"@elastic/eui@file:./eui_stickyheaderfix1.tgz":
+  version "116.3.0-stickyheadersfix.1"
+  resolved "file:./eui_stickyheaderfix1.tgz#648122d7a612ea3cfb6dc1add522cd9905ae9bd7"
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
