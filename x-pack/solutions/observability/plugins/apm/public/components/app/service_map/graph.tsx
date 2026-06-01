@@ -27,6 +27,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiPanel,
+  EuiToolTip,
   useGeneratedHtmlId,
   keys,
 } from '@elastic/eui';
