@@ -35,7 +35,15 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
+  AlertEpisodeDetailsFlyout: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
+}));
+
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
+
+jest.mock('./components/episodes_histogram', () => ({
+  EpisodesHistogram: () => null,
+}));
 
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
@@ -66,6 +74,9 @@ const mockServices = {
   expressions: {},
   share: {},
   uiSettings: {},
+  unifiedDocViewer: {},
+  dataViews: {},
+  userProfile: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
 };
@@ -184,5 +195,21 @@ describe('AlertEpisodesListPage', () => {
         expressions: mockServices.expressions,
       })
     );
+  });
+
+  it('passes expandedDoc, setExpandedDoc and renderDocumentView to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastCall).toHaveProperty('expandedDoc');
+    expect(typeof lastCall?.setExpandedDoc).toBe('function');
+    expect(typeof lastCall?.renderDocumentView).toBe('function');
+  });
+
+  it('renderDocumentView returns a node when invoked with a hit containing episode.id', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactNode;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(node).toBeTruthy();
   });
 });

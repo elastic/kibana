@@ -14,12 +14,13 @@ import { upsertComment } from '#pipeline-utils';
 /**
  * SOURCE OF TRUTH: packages/kbn-check-saved-objects-cli/src/findings/types.ts
  *
- * This interface is intentionally inlined rather than imported so that this
+ * These interfaces are intentionally inlined rather than imported so that this
  * Buildkite script keeps the same minimal dependency surface as the other
  * notifiers (only `#pipeline-utils`, no Kibana package deps).
  *
- * When adding, removing, or changing fields in `SavedObjectsCheckFinding` or
- * `SavedObjectsCheckReport` in the canonical file above, mirror the change here.
+ * When adding, removing, or changing fields in `SavedObjectsCheckFinding`,
+ * `TypeChangeDetails`, or `SavedObjectsCheckReport` in the canonical file
+ * above, mirror the changes here.
  */
 export interface SavedObjectsCheckFinding {
   ruleId: string;
@@ -39,6 +40,14 @@ export interface SavedObjectsCheckFinding {
   serverlessBaselineUrl?: string;
 }
 
+/** Per-type model version change details for updated SO types. */
+export interface TypeChangeDetails {
+  /** Model versions added since the baseline, formatted as `10.x.0`. */
+  newModelVersions: string[];
+  /** Existing model versions modified since the baseline, formatted as `10.x.0`. */
+  modifiedModelVersions: string[];
+}
+
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
   baseline?: string;
@@ -47,11 +56,22 @@ export interface SavedObjectsCheckReport {
   updatedTypes: string[];
   removedTypes: string[];
   findings: SavedObjectsCheckFinding[];
+  /**
+   * Per-type model version change details for updated SO types.
+   * Only present when both `from` and `to` snapshots were available during the check.
+   */
+  typeChanges?: Record<string, TypeChangeDetails>;
+  /**
+   * True when the check ran against synthetic test data (either via `--test`
+   * or the automatic fallback when no real SO types changed). The change lists
+   * in this case reflect test fixtures, not actual contributor changes.
+   */
+  testMode?: boolean;
 }
 
 const COMMENT_CONTEXT = 'saved-objects-check';
 const DOCS_BASE_URL = 'https://www.elastic.co/docs/extend/kibana/saved-objects';
-const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/validate#troubleshooting`;
+const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/troubleshooting`;
 const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}#defining-model-versions`;
 
 function hasSoChanges(report: SavedObjectsCheckReport): boolean {
@@ -60,6 +80,50 @@ function hasSoChanges(report: SavedObjectsCheckReport): boolean {
 
 function needsTwoStepReleaseReminder(report: SavedObjectsCheckReport): boolean {
   return report.updatedTypes.length > 0 || report.removedTypes.length > 0;
+}
+
+/**
+ * Returns the list of type names for which mapping changes are being introduced,
+ * triggering the "only map what needs to be searchable" banner.
+ *
+ * - All new types always qualify.
+ * - Updated types qualify when they have at least one new model version (which
+ *   implies new mappings were potentially introduced). When `typeChanges` is
+ *   absent (older report format) we conservatively include all updated types.
+ */
+function typesWithMappingChanges(report: SavedObjectsCheckReport): string[] {
+  const updatedWithNewVersion = report.typeChanges
+    ? report.updatedTypes.filter((t) => (report.typeChanges![t]?.newModelVersions.length ?? 0) > 0)
+    : report.updatedTypes;
+
+  return [...report.newTypes, ...updatedWithNewVersion];
+}
+
+/**
+ * Builds a per-type change-detail section listing new and modified model
+ * versions for each updated type. Returns an empty string when there is
+ * nothing to report.
+ */
+function buildTypeChangeDetails(report: SavedObjectsCheckReport): string {
+  const { typeChanges } = report;
+  if (!typeChanges || Object.keys(typeChanges).length === 0) return '';
+
+  const lines = Object.entries(typeChanges).flatMap(([typeName, details]) => {
+    const result: string[] = [];
+    if (details.newModelVersions.length > 0) {
+      const versions = details.newModelVersions.map((v) => `\`${v}\``).join(', ');
+      result.push(`- A new model version was introduced for type \`${typeName}\`: ${versions}.`);
+    }
+    if (details.modifiedModelVersions.length > 0) {
+      const versions = details.modifiedModelVersions.map((v) => `\`${v}\``).join(', ');
+      result.push(
+        `- The following model versions have been modified for type \`${typeName}\`: ${versions}.`
+      );
+    }
+    return result;
+  });
+
+  return lines.length > 0 ? `\n\n${lines.join('\n')}` : '';
 }
 
 function buildkiteBuildLink(): string {
@@ -152,16 +216,29 @@ export function buildSuccessBody(report: SavedObjectsCheckReport): string {
     .filter(Boolean)
     .join('\n');
 
+  const changeDetails = buildTypeChangeDetails(report);
+
+  const mappingsBanner =
+    typesWithMappingChanges(report).length > 0
+      ? `\n\n> [!IMPORTANT]\n> Only map properties that need to be searchable and/or sortable. There is no need to include all type properties in the mappings.`
+      : '';
+
   const reminder = needsTwoStepReleaseReminder(report)
     ? `\n\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
     : '';
 
   return `## Saved Objects CI check passed
 
-${summary}${reminder}`;
+${summary}${changeDetails}${mappingsBanner}${reminder}`;
 }
 
 export function buildCommentBody(report: SavedObjectsCheckReport): string | null {
+  // When the check ran against synthetic test data (no real SO types changed),
+  // the change lists reflect test fixtures rather than contributor work.
+  // Posting a comment in this case would be confusing and unhelpful.
+  if (report.testMode) {
+    return null;
+  }
   if (report.status === 'fail') {
     return buildFailureBody(report);
   }

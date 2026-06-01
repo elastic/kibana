@@ -91,6 +91,7 @@ export function DocumentDetailFlyout({
       dataView={dataView}
       hit={data.hit}
       loading={data.loading}
+      error={data.error}
       title={data.title}
       dataTestSubj={dataTestSubj}
       hasAnimation={hasAnimation}
