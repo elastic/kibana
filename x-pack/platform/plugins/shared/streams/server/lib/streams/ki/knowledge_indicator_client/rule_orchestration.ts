@@ -10,10 +10,15 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import pLimit from 'p-limit';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
+import { STREAMS_CONSUMER } from '../../../../../common/constants';
+import { TIMESTAMP } from '../fields';
 
 const RULE_INSTALL_CONCURRENCY = 10;
+const RULE_TAG = 'streams';
+const RULE_SCHEDULE_INTERVAL = '1m';
 
 export function toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
   const { rule_id: ruleId, query } = queryLink;
@@ -21,17 +26,17 @@ export function toCreateRuleParams(queryLink: QueryLink, definition: Streams.all
   return {
     data: {
       name: query.title,
-      consumer: 'streams',
-      alertTypeId: 'streams.rules.esql',
+      consumer: STREAMS_CONSUMER,
+      alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
       actions: [],
       params: {
-        timestampField: '@timestamp',
+        timestampField: TIMESTAMP,
         query: query.esql.query,
       },
       enabled: true,
-      tags: ['streams', definition.name],
+      tags: [RULE_TAG, definition.name],
       schedule: {
-        interval: '1m',
+        interval: RULE_SCHEDULE_INTERVAL,
       },
     },
     options: {
@@ -49,12 +54,12 @@ export function toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all
       name: query.title,
       actions: [],
       params: {
-        timestampField: '@timestamp',
+        timestampField: TIMESTAMP,
         query: query.esql.query,
       },
-      tags: ['streams', definition.name],
+      tags: [RULE_TAG, definition.name],
       schedule: {
-        interval: '1m',
+        interval: RULE_SCHEDULE_INTERVAL,
       },
     },
   };

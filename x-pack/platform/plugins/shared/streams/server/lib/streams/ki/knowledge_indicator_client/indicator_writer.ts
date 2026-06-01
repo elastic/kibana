@@ -36,97 +36,17 @@ export class IndicatorWriter {
       return { applied: 0, skipped: 0 };
     }
 
-    for (const op of operations) {
-      if ('index' in op && 'feature' in op.index) {
-        const f = op.index.feature;
-        if (f.filter && !isConditionComplete(f.filter)) {
-          throw new StatusError(`Invalid feature ${f.id}: filter is incomplete`, 400);
-        }
-      }
-    }
+    this.assertFeatureFiltersComplete(operations);
 
-    // Exclude requires a pre-read: the new revision must preserve the full
-    // feature payload so the Excluded tab can render it and downstream
-    // consumers (LLM dedup hint) have the fingerprint.
-    const excludeOps = operations.filter(
-      (op): op is Extract<KIBulkOperation, { exclude: unknown }> => 'exclude' in op
-    );
-    const excludeIds = new Set(excludeOps.map((op) => op.exclude.id));
-    const excludeLatest =
-      excludeIds.size > 0
-        ? await this.revisionReader.fetchLatestFeatures(stream, [...excludeIds])
-        : [];
-    const excludableLatest: StoredFeatureKnowledgeIndicator[] = [];
-    let excludeSkipped = 0;
-    for (const id of excludeIds) {
-      const latest = excludeLatest.find((doc) => doc.id === id);
-      if (!latest) {
-        // Unknown id → no-op. Excluding an id that doesn't exist would
-        // create an orphan revision; treat as skipped.
-        excludeSkipped += 1;
-        continue;
-      }
-      const asFeature = fromStoredFeature(latest);
-      if (isComputedFeature(asFeature)) {
-        // Computed features are derived; excluding them is meaningless
-        // (they would be regenerated on the next run). Skip.
-        excludeSkipped += 1;
-        continue;
-      }
-      if (latest.excluded === true) {
-        // Already excluded — avoid churn revisions that would add no
-        // information and only consume retention.
-        excludeSkipped += 1;
-        continue;
-      }
-      excludableLatest.push(latest);
-    }
-
-    // Restore requires a pre-read: the full feature payload is needed so we
-    // can re-index it with excluded cleared and fresh timestamps.
-    const restoreOps = operations.filter(
-      (op): op is Extract<KIBulkOperation, { restore: unknown }> => 'restore' in op
-    );
-    const restoreIds = new Set(restoreOps.map((op) => op.restore.id));
-    const restoreLatest =
-      restoreIds.size > 0
-        ? await this.revisionReader.fetchLatestFeatures(stream, [...restoreIds])
-        : [];
-    const restorableLatest: StoredFeatureKnowledgeIndicator[] = [];
-    let restoreSkipped = 0;
-    for (const id of restoreIds) {
-      const latest = restoreLatest.find((doc) => doc.id === id);
-      if (!latest) {
-        restoreSkipped += 1;
-        continue;
-      }
-      const asFeature = fromStoredFeature(latest);
-      if (isComputedFeature(asFeature)) {
-        restoreSkipped += 1;
-        continue;
-      }
-      restorableLatest.push(latest);
-    }
-
-    // Delete requires a pre-read so we can skip unknown/non-existent IDs
-    // rather than writing tombstones for them (which would count as applied).
-    const deleteOps = operations.filter(
-      (op): op is Extract<KIBulkOperation, { delete: unknown }> => 'delete' in op
-    );
-    const deleteIds = new Set(deleteOps.map((op) => op.delete.id));
-    const deleteLatest =
-      deleteIds.size > 0
-        ? await this.revisionReader.fetchLatestFeatures(stream, [...deleteIds])
-        : [];
-    const deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>> = [];
-    let deleteSkipped = 0;
-    for (const op of deleteOps) {
-      if (deleteLatest.find((doc) => doc.id === op.delete.id)) {
-        deletableOps.push(op);
-      } else {
-        deleteSkipped += 1;
-      }
-    }
+    const [
+      { excludableLatest, skipped: excludeSkipped },
+      { restorableLatest, skipped: restoreSkipped },
+      { deletableOps, skipped: deleteSkipped },
+    ] = await Promise.all([
+      this.prepareExcludes(stream, operations),
+      this.prepareRestores(stream, operations),
+      this.prepareDeletes(stream, operations),
+    ]);
 
     const indexOpsCount = operations.filter((op) => 'index' in op).length;
     const totalApplied =
@@ -137,44 +57,197 @@ export class IndicatorWriter {
       return { applied: 0, skipped: totalSkipped };
     }
 
-    await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
-      const docs: StoredKnowledgeIndicator[] = [];
-      for (const op of operations) {
-        if ('index' in op) {
-          if ('feature' in op.index) {
-            docs.push(toStoredFeature(stream, op.index.feature, includeEmbedding, this.ttlDays));
-          } else {
-            docs.push(toStoredQuery(stream, op.index.query, includeEmbedding, this.ttlDays));
-          }
-        }
-      }
-      for (const latest of excludableLatest) {
-        const feature = fromStoredFeature(latest);
-        docs.push(
-          toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, this.ttlDays)
-        );
-      }
-      for (const latest of restorableLatest) {
-        const feature = fromStoredFeature(latest);
-        docs.push(
-          toStoredFeature(
-            stream,
-            { ...feature, excluded: undefined },
-            includeEmbedding,
-            this.ttlDays
-          )
-        );
-      }
-      for (const op of deletableOps) {
-        docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
-      }
-      return this.dataStreamClient.create({
+    await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) =>
+      this.dataStreamClient.create({
         refresh: 'wait_for',
-        documents: docs as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
-      });
-    });
+        documents: this.buildBulkDocs(stream, operations, {
+          excludableLatest,
+          restorableLatest,
+          deletableOps,
+          includeEmbedding,
+        }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
+      })
+    );
 
     return { applied: totalApplied, skipped: totalSkipped };
+  }
+
+  /**
+   * Feature index ops must carry a complete condition — reject incomplete
+   * filters up front rather than persisting an unusable revision.
+   */
+  private assertFeatureFiltersComplete(operations: KIBulkOperation[]): void {
+    for (const op of operations) {
+      if ('index' in op && 'feature' in op.index) {
+        const f = op.index.feature;
+        if (f.filter && !isConditionComplete(f.filter)) {
+          throw new StatusError(`Invalid feature ${f.id}: filter is incomplete`, 400);
+        }
+      }
+    }
+  }
+
+  /**
+   * Exclude requires a pre-read: the new revision must preserve the full
+   * feature payload so the Excluded tab can render it and downstream
+   * consumers (LLM dedup hint) have the fingerprint. Unknown, computed, and
+   * already-excluded ids are skipped (they'd create orphans or churn).
+   */
+  private async prepareExcludes(
+    stream: string,
+    operations: KIBulkOperation[]
+  ): Promise<{ excludableLatest: StoredFeatureKnowledgeIndicator[]; skipped: number }> {
+    const excludeOps = operations.filter(
+      (op): op is Extract<KIBulkOperation, { exclude: unknown }> => 'exclude' in op
+    );
+    const excludeIds = new Set(excludeOps.map((op) => op.exclude.id));
+    if (excludeIds.size === 0) {
+      return { excludableLatest: [], skipped: 0 };
+    }
+
+    const excludeLatest = await this.revisionReader.fetchLatestFeatures(stream, [...excludeIds]);
+    const excludableLatest: StoredFeatureKnowledgeIndicator[] = [];
+    let skipped = 0;
+    for (const id of excludeIds) {
+      const latest = excludeLatest.find((doc) => doc.id === id);
+      if (!latest) {
+        // Unknown id → no-op. Excluding an id that doesn't exist would
+        // create an orphan revision; treat as skipped.
+        skipped += 1;
+        continue;
+      }
+      const asFeature = fromStoredFeature(latest);
+      if (isComputedFeature(asFeature)) {
+        // Computed features are derived; excluding them is meaningless
+        // (they would be regenerated on the next run). Skip.
+        skipped += 1;
+        continue;
+      }
+      if (latest.excluded === true) {
+        // Already excluded — avoid churn revisions that would add no
+        // information and only consume retention.
+        skipped += 1;
+        continue;
+      }
+      excludableLatest.push(latest);
+    }
+    return { excludableLatest, skipped };
+  }
+
+  /**
+   * Restore requires a pre-read: the full feature payload is needed so we
+   * can re-index it with `excluded` cleared and fresh timestamps.
+   */
+  private async prepareRestores(
+    stream: string,
+    operations: KIBulkOperation[]
+  ): Promise<{ restorableLatest: StoredFeatureKnowledgeIndicator[]; skipped: number }> {
+    const restoreOps = operations.filter(
+      (op): op is Extract<KIBulkOperation, { restore: unknown }> => 'restore' in op
+    );
+    const restoreIds = new Set(restoreOps.map((op) => op.restore.id));
+    if (restoreIds.size === 0) {
+      return { restorableLatest: [], skipped: 0 };
+    }
+
+    const restoreLatest = await this.revisionReader.fetchLatestFeatures(stream, [...restoreIds]);
+    const restorableLatest: StoredFeatureKnowledgeIndicator[] = [];
+    let skipped = 0;
+    for (const id of restoreIds) {
+      const latest = restoreLatest.find((doc) => doc.id === id);
+      if (!latest) {
+        skipped += 1;
+        continue;
+      }
+      const asFeature = fromStoredFeature(latest);
+      if (isComputedFeature(asFeature)) {
+        skipped += 1;
+        continue;
+      }
+      restorableLatest.push(latest);
+    }
+    return { restorableLatest, skipped };
+  }
+
+  /**
+   * Delete requires a pre-read so we can skip unknown/non-existent ids
+   * rather than writing tombstones for them (which would count as applied).
+   */
+  private async prepareDeletes(
+    stream: string,
+    operations: KIBulkOperation[]
+  ): Promise<{
+    deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+    skipped: number;
+  }> {
+    const deleteOps = operations.filter(
+      (op): op is Extract<KIBulkOperation, { delete: unknown }> => 'delete' in op
+    );
+    const deleteIds = new Set(deleteOps.map((op) => op.delete.id));
+    if (deleteIds.size === 0) {
+      return { deletableOps: [], skipped: 0 };
+    }
+
+    const deleteLatest = await this.revisionReader.fetchLatestFeatures(stream, [...deleteIds]);
+    const deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>> = [];
+    let skipped = 0;
+    for (const op of deleteOps) {
+      if (deleteLatest.find((doc) => doc.id === op.delete.id)) {
+        deletableOps.push(op);
+      } else {
+        skipped += 1;
+      }
+    }
+    return { deletableOps, skipped };
+  }
+
+  /**
+   * Materializes the append-only revision documents for a single bulk attempt:
+   * index ops (feature/query), exclude/restore re-indexes, and delete
+   * tombstones. Called per attempt so `includeEmbedding` can toggle for the
+   * inference fallback.
+   */
+  private buildBulkDocs(
+    stream: string,
+    operations: KIBulkOperation[],
+    {
+      excludableLatest,
+      restorableLatest,
+      deletableOps,
+      includeEmbedding,
+    }: {
+      excludableLatest: StoredFeatureKnowledgeIndicator[];
+      restorableLatest: StoredFeatureKnowledgeIndicator[];
+      deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+      includeEmbedding: boolean;
+    }
+  ): StoredKnowledgeIndicator[] {
+    const docs: StoredKnowledgeIndicator[] = [];
+    for (const op of operations) {
+      if ('index' in op) {
+        if ('feature' in op.index) {
+          docs.push(toStoredFeature(stream, op.index.feature, includeEmbedding, this.ttlDays));
+        } else {
+          docs.push(toStoredQuery(stream, op.index.query, includeEmbedding, this.ttlDays));
+        }
+      }
+    }
+    for (const latest of excludableLatest) {
+      const feature = fromStoredFeature(latest);
+      docs.push(
+        toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, this.ttlDays)
+      );
+    }
+    for (const latest of restorableLatest) {
+      const feature = fromStoredFeature(latest);
+      docs.push(
+        toStoredFeature(stream, { ...feature, excluded: undefined }, includeEmbedding, this.ttlDays)
+      );
+    }
+    for (const op of deletableOps) {
+      docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
+    }
+    return docs;
   }
 
   async deleteIndicators(stream: string): Promise<void> {

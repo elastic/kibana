@@ -6,7 +6,7 @@
  */
 
 import { esql, type ComposerSortShorthand } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   KNOWLEDGE_INDICATORS_DATA_STREAM,
   isStoredFeatureKnowledgeIndicator,
@@ -26,7 +26,7 @@ import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 const REVISION_SIZE_LIMIT = 10_000;
 
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
@@ -41,6 +41,11 @@ export class RevisionReader {
     query = withSort(query, sort);
     // Cap at REVISION_SIZE_LIMIT regardless of the requested limit so a large
     // caller-supplied value can't fetch an unbounded result set.
+    if (limit > REVISION_SIZE_LIMIT) {
+      this.logger.debug(
+        `Requested revision limit ${limit} exceeds REVISION_SIZE_LIMIT ${REVISION_SIZE_LIMIT}; capping at ${REVISION_SIZE_LIMIT}.`
+      );
+    }
     query = query.keep('_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
 
     const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
