@@ -372,5 +372,114 @@ apiTest.describe(
         });
       }
     );
+
+    // Search must evaluate filters against each page's LATEST version only. A category present on an
+    // older (now stale) version in the append-only stream must not make the page resurface once the
+    // latest version has dropped it.
+    apiTest(
+      'search does not return a page whose latest version no longer matches the filter',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
+
+        const pageName = `scout-search-filter-${uuidv4().slice(0, 8)}`;
+        const category = `scout/search-filter-${uuidv4().slice(0, 8)}`;
+        const token = `scoutsearch${uuidv4().replace(/-/g, '').slice(0, 12)}`;
+
+        const createResponse = await apiClient.post('internal/streams/memory/entries', {
+          headers,
+          body: {
+            name: pageName,
+            title: 'Search filter test',
+            content: `Searchable content ${token}`,
+            categories: [category],
+            tags: ['scout'],
+          },
+          responseType: 'json',
+        });
+        expect(createResponse.statusCode).toBe(200);
+        const entryId = createResponse.body.id as string;
+
+        // The latest version still has the category — it is returned.
+        const beforeResponse = await apiClient.post('internal/streams/memory/search', {
+          headers,
+          body: { query: token, categories: [category] },
+          responseType: 'json',
+        });
+        expect(
+          beforeResponse.body.results.some((result: { id: string }) => result.id === entryId)
+        ).toBe(true);
+
+        // A newer version drops the category; an older (v1) document still carries it in the stream.
+        const updateResponse = await apiClient.put(`internal/streams/memory/entries/${entryId}`, {
+          headers,
+          body: { categories: [], change_summary: 'remove category' },
+          responseType: 'json',
+        });
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body.version).toBe(2);
+
+        // The match is evaluated against the latest version only, so the page no longer surfaces.
+        const afterResponse = await apiClient.post('internal/streams/memory/search', {
+          headers,
+          body: { query: token, categories: [category] },
+          responseType: 'json',
+        });
+        expect(
+          afterResponse.body.results.some((result: { id: string }) => result.id === entryId)
+        ).toBe(false);
+
+        // cleanup
+        await apiClient.delete(`internal/streams/memory/entries/${entryId}`, {
+          headers,
+          responseType: 'json',
+        });
+      }
+    );
+
+    // A soft-delete writes a tombstone that retains the page's fields, so the tombstone can still
+    // match a structured filter. A deleted page must never appear in search results regardless.
+    apiTest(
+      'search does not return a soft-deleted page even if its latest version matches the filter',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
+
+        const pageName = `scout-search-deleted-${uuidv4().slice(0, 8)}`;
+        const category = `scout/search-deleted-${uuidv4().slice(0, 8)}`;
+        const token = `scoutsearch${uuidv4().replace(/-/g, '').slice(0, 12)}`;
+
+        const createResponse = await apiClient.post('internal/streams/memory/entries', {
+          headers,
+          body: {
+            name: pageName,
+            title: 'Search deleted test',
+            content: `Searchable content ${token}`,
+            categories: [category],
+            tags: ['scout'],
+          },
+          responseType: 'json',
+        });
+        expect(createResponse.statusCode).toBe(200);
+        const entryId = createResponse.body.id as string;
+
+        const deleteResponse = await apiClient.delete(
+          `internal/streams/memory/entries/${entryId}`,
+          { headers, responseType: 'json' }
+        );
+        expect(deleteResponse.statusCode).toBe(200);
+        expect(deleteResponse.body.deleted).toBe(true);
+
+        // The tombstone retains the category, but a deleted page must never appear in search.
+        const searchResponse = await apiClient.post('internal/streams/memory/search', {
+          headers,
+          body: { query: token, categories: [category] },
+          responseType: 'json',
+        });
+        expect(
+          searchResponse.body.results.some((result: { id: string }) => result.id === entryId)
+        ).toBe(false);
+      }
+    );
   }
 );

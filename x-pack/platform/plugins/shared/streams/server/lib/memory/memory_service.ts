@@ -39,13 +39,6 @@ type MemoryCollapseField = 'name' | 'id';
 const MAX_PAGES = 10000;
 
 /**
- * Multiplier applied to the requested `size` when searching. Field collapse resolves the latest
- * version per page, which may be a soft-delete tombstone; we drop those after the query, so we
- * over-fetch to avoid returning fewer than `size` live results.
- */
-const SEARCH_OVER_FETCH_FACTOR = 3;
-
-/**
  * MemoryServiceImpl backed by two append-only data streams:
  *   - .significant_events-memories  (pages, latest version resolved via field collapse)
  *   - .significant_events-memory-history  (version history, append-only)
@@ -135,9 +128,9 @@ export class MemoryServiceImpl implements MemoryService {
     query: QueryDslQueryContainer;
     collapseField: MemoryCollapseField;
     size?: number;
-  }): Promise<Array<{ _source: MemoryEntry }>> {
+  }): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
     try {
-      const response = await this.esClient.search({
+      const response = await this.esClient.search<MemoryEntry>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         size,
@@ -145,7 +138,9 @@ export class MemoryServiceImpl implements MemoryService {
         collapse: { field: collapseField },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
       });
-      return response.hits.hits as Array<{ _source: MemoryEntry }>;
+      return response.hits.hits.flatMap((hit) =>
+        typeof hit._id === 'string' && hit._source ? [{ _id: hit._id, _source: hit._source }] : []
+      );
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
@@ -224,14 +219,16 @@ export class MemoryServiceImpl implements MemoryService {
    * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
    * fields, so callers see each page's true latest state rather than the version that matched.
    */
-  private async _resolveLatestByIds(ids: string[]): Promise<MemoryEntry[]> {
+  private async _resolveLatestByIds(
+    ids: string[]
+  ): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
     if (ids.length === 0) return [];
     const hits = await this._searchLatest({
       query: { bool: { filter: [{ terms: { id: ids } }] } },
       collapseField: 'id',
       size: ids.length,
     });
-    return hits.map((hit) => hit._source).filter((entry) => entry.is_deleted !== true);
+    return hits.filter((hit) => hit._source.is_deleted !== true);
   }
 
   // ── Public API ──
@@ -466,7 +463,7 @@ export class MemoryServiceImpl implements MemoryService {
       bool: { filter: [{ term: { references: id } }] },
     });
     const latest = await this._resolveLatestByIds(candidateIds);
-    return latest.filter((entry) => entry.references.includes(id));
+    return latest.map((hit) => hit._source).filter((entry) => entry.references.includes(id));
   }
 
   // ── Search & browse ──
@@ -475,49 +472,76 @@ export class MemoryServiceImpl implements MemoryService {
     const { query, tags, categories, references, size = 10 } = params;
     const escapedQuery = query.toLowerCase().replace(/[\\*?]/g, '\\$&');
 
-    // Structured filters are matched against the collapsed latest version, which is best-effort
-    // under field collapse: a page can still surface on a stale version that matched. Fuzzy search
-    // is inherently best-effort, so we accept this rather than running a two-phase resolution here.
-    const filters: QueryDslQueryContainer[] = [];
-    if (tags?.length) filters.push({ terms: { tags } });
-    if (categories?.length) filters.push({ terms: { categories } });
-    if (references?.length) filters.push({ terms: { references } });
+    const structuredFilters: QueryDslQueryContainer[] = [];
+    if (tags?.length) structuredFilters.push({ terms: { tags } });
+    if (categories?.length) structuredFilters.push({ terms: { categories } });
+    if (references?.length) structuredFilters.push({ terms: { references } });
 
-    const fetchSize = Math.min(size * SEARCH_OVER_FETCH_FACTOR, MAX_PAGES);
+    const fuzzyMatch: QueryDslQueryContainer = {
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query,
+              fields: ['title^3', 'content'],
+              type: 'best_fields',
+              fuzziness: 'AUTO',
+            },
+          },
+          { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
 
+    // Phase 1: collect the id of every page that has ANY version matching the query (ids only, so
+    // this stays cheap even when widened). The matched version may be stale; we only keep the page
+    // ids here and re-validate each page's latest version in phases 2-3. Fetching all matching pages
+    // (up to MAX_PAGES) — rather than a relevance-capped window — means a page whose latest matches
+    // can never be dropped before it reaches the authoritative phase 3 ranking.
+    let candidateIds: string[];
+    try {
+      const candidateResponse = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        collapse: { field: 'id' },
+        query: { bool: { filter: structuredFilters, must: [fuzzyMatch] } },
+        size: MAX_PAGES,
+        _source: false,
+        fields: ['id'],
+      });
+      candidateIds = candidateResponse.hits.hits
+        .map((hit) => hit.fields?.id?.[0])
+        .filter((id): id is string => typeof id === 'string');
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
+    if (candidateIds.length === 0) return [];
+
+    // Phase 2: resolve each candidate page's current latest version (filtering on `id` is
+    // invariant-safe) and keep the Elasticsearch `_id` of those that are still live.
+    const latestLiveIds = (await this._resolveLatestByIds(candidateIds)).map((hit) => hit._id);
+    if (latestLiveIds.length === 0) return [];
+
+    // Phase 3: re-run the query against ONLY those latest documents (via an `ids` filter), so a
+    // result can come only from a page whose LATEST version satisfies the filters and the text
+    // query — a stale older version that once matched, or a soft-deleted page, can never surface.
     let response;
     try {
       response = await this.esClient.search<MemoryEntry>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
-        collapse: { field: 'id' },
-        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         query: {
           bool: {
-            filter: filters,
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      multi_match: {
-                        query,
-                        fields: ['title^3', 'content'],
-                        type: 'best_fields',
-                        fuzziness: 'AUTO',
-                      },
-                    },
-                    { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
-                    { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
-                    { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+            filter: [{ ids: { values: latestLiveIds } }, ...structuredFilters],
+            must: [fuzzyMatch],
           },
         },
-        size: fetchSize,
+        sort: [{ _score: { order: 'desc' } }],
+        size,
         highlight: {
           fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
         },
@@ -527,30 +551,23 @@ export class MemoryServiceImpl implements MemoryService {
       throw err;
     }
 
-    // Drop soft-deleted top hits, then trim to the requested size (the over-fetch above means a
-    // tombstone winning a collapse group no longer crowds out a live result).
-    const results: MemorySearchResult[] = [];
-    for (const hit of response.hits.hits) {
+    return response.hits.hits.flatMap((hit) => {
       const source = hit._source;
-      if (!source || source.is_deleted === true) {
-        continue;
-      }
-      results.push({
-        id: source.id,
-        name: source.name,
-        title: source.title,
-        snippet: hit.highlight?.content?.[0] ?? source.content.substring(0, 200),
-        score: hit._score ?? 0,
-        updated_at: source.updated_at,
-        updated_by: source.updated_by,
-        tags: source.tags ?? [],
-        categories: source.categories ?? [],
-      });
-      if (results.length >= size) {
-        break;
-      }
-    }
-    return results;
+      if (!source) return [];
+      return [
+        {
+          id: source.id,
+          name: source.name,
+          title: source.title,
+          snippet: hit.highlight?.content?.[0] ?? source.content.substring(0, 200),
+          score: hit._score ?? 0,
+          updated_at: source.updated_at,
+          updated_by: source.updated_by,
+          tags: source.tags ?? [],
+          categories: source.categories ?? [],
+        },
+      ];
+    });
   }
 
   async listAll(): Promise<MemoryEntry[]> {
@@ -598,7 +615,7 @@ export class MemoryServiceImpl implements MemoryService {
       bool: { filter: [{ term: { categories: category } }] },
     });
     const latest = await this._resolveLatestByIds(candidateIds);
-    return latest.filter((entry) => entry.categories.includes(category));
+    return latest.map((hit) => hit._source).filter((entry) => entry.categories.includes(category));
   }
 
   // ── History ──

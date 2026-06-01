@@ -20,7 +20,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 const mockedUuidV4 = uuidV4 as jest.MockedFunction<() => string>;
 
-type MemoryDocument = MemoryEntry & { '@timestamp'?: string };
+type MemoryDocument = MemoryEntry & { '@timestamp'?: string; _id?: string };
 
 const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
   if (b.version !== a.version) {
@@ -61,6 +61,10 @@ const filterByQuery = (
         const fieldValues = values as unknown[];
         return fieldValues.includes(doc[field as keyof MemoryDocument]);
       }
+      if ('ids' in clause) {
+        const ids = clause.ids as { values?: unknown[] };
+        return (ids.values ?? []).includes(doc._id);
+      }
       return true;
     })
   );
@@ -87,6 +91,7 @@ const collapseDocuments = (
 
 const createInMemoryEsClient = () => {
   const memoryDocs: MemoryDocument[] = [];
+  let docCounter = 0;
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   // Memory page writes go through DataStreamClient.create, which issues a bulk request.
@@ -97,7 +102,10 @@ const createInMemoryEsClient = () => {
     // Operations alternate [actionMetadata, document]; documents sit at odd indices.
     for (let i = 1; i < operations.length; i += 2) {
       if (request.index === MEMORIES_DATA_STREAM) {
-        memoryDocs.push(operations[i] as MemoryDocument);
+        const doc = operations[i] as MemoryDocument;
+        // Each appended document gets a unique _id, mirroring an append-only data stream.
+        doc._id = `doc-${docCounter++}`;
+        memoryDocs.push(doc);
       }
       items.push({ create: { status: 201, _id: 'doc', _index: String(request.index) } });
     }
@@ -129,7 +137,11 @@ const createInMemoryEsClient = () => {
     return {
       hits: {
         hits: winners.map((source) => {
-          const hit: { _source?: MemoryDocument; fields?: Record<string, unknown[]> } = {};
+          const hit: {
+            _id?: string;
+            _source?: MemoryDocument;
+            fields?: Record<string, unknown[]>;
+          } = { _id: source._id };
           if (request._source !== false) {
             hit._source = source;
           }
@@ -376,7 +388,7 @@ describe('MemoryServiceImpl', () => {
     expect(results[0]).toMatchObject({ id: live.id, name: 'live-page' });
   });
 
-  it('search over-fetches so a soft-deleted top hit does not crowd out a live result', async () => {
+  it('search returns a live result even when a deleted page also matched the query', async () => {
     mockedUuidV4
       .mockReturnValueOnce('live-uuid')
       .mockReturnValueOnce('history-uuid-1')
@@ -385,8 +397,6 @@ describe('MemoryServiceImpl', () => {
       .mockReturnValueOnce('history-uuid-3');
     const { service } = createService();
 
-    // 'a-deleted' sorts ahead of 'b-live'; with size: 1 and no over-fetch the single collapsed
-    // slot would be the tombstone and the live page would be dropped from the results.
     await service.create({ name: 'b-live', title: 'Live', content: 'searchable', user });
     const doomed = await service.create({
       name: 'a-deleted',
@@ -396,6 +406,7 @@ describe('MemoryServiceImpl', () => {
     });
     await service.delete({ id: doomed.id, user });
 
+    // Only the live page's latest version is matched; the tombstone is never a candidate.
     await expect(service.search({ query: 'searchable', size: 1 })).resolves.toEqual([
       expect.objectContaining({ name: 'b-live' }),
     ]);
