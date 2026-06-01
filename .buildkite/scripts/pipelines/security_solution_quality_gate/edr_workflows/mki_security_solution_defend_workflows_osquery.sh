@@ -33,7 +33,7 @@ if [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$status" -eq 101 ]]; then
     --job "$PARENT_TRIGGER_JOB_ID" || true
 elif [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$status" -eq 1 ]]; then
   echo "--- Test failure captured"
-  buildkite-agent meta-data set "failed_build_link" "${BUILDKITE_BUILD_URL}" \
+  buildkite-agent meta-data set "${BUILDKITE_PIPELINE_SLUG}" "${BUILDKITE_BUILD_URL}" \
     --job "$PARENT_TRIGGER_JOB_ID" || true
 fi
 
