@@ -75,15 +75,15 @@ describe('registerContextFunction connector resolution', () => {
   it('resolves inference endpoint IDs via inference.getConnectorById', async () => {
     const handler = registerAndGetHandler();
 
-    await lastValueFrom(
-      handler({
-        connectorId: inferenceEndpointId,
-        messages: [],
-        screenContexts: [{ screenDescription: 'User is viewing a service map.' }],
-        chat: jest.fn(),
-        signal: new AbortController().signal,
-      })
-    );
+    const response$ = await handler({
+      connectorId: inferenceEndpointId,
+      messages: [],
+      screenContexts: [{ screenDescription: 'User is viewing a service map.' }],
+      chat: jest.fn(),
+      signal: new AbortController().signal,
+    });
+
+    await lastValueFrom(response$);
 
     expect(getConnectorById).toHaveBeenCalledWith(inferenceEndpointId, request);
     expect(recallAndScoreMock).toHaveBeenCalledWith(
