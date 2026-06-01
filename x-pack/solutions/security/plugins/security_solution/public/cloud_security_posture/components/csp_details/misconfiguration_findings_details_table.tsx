@@ -329,48 +329,59 @@ export const MisconfigurationFindingsDetailsTable = memo(
         name: '',
         width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
-          <EuiButtonIcon
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
               {
                 defaultMessage: 'Preview finding details',
               }
             )}
-            iconType="maximize"
-            onClick={() => {
-              uiMetricService.trackUiMetric(
-                METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
-              );
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
+                {
+                  defaultMessage: 'Preview finding details',
+                }
+              )}
+              iconType="maximize"
+              onClick={() => {
+                uiMetricService.trackUiMetric(
+                  METRIC_TYPE.CLICK,
+                  NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
+                );
 
-              if (onShowFinding) {
-                onShowFinding(finding.resource.id, finding.rule.id);
-                return;
-              }
+                if (onShowFinding) {
+                  onShowFinding(finding.resource.id, finding.rule.id);
+                  return;
+                }
 
-              const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
-                id: MisconfigurationFindingsPreviewPanelKey,
-                params: {
-                  resourceId: finding.resource.id,
-                  ruleId: finding.rule.id,
-                  scopeId,
-                  isPreviewMode: true,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview finding details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
-                  },
-                },
-              };
+                const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview =
+                  {
+                    id: MisconfigurationFindingsPreviewPanelKey,
+                    params: {
+                      resourceId: finding.resource.id,
+                      ruleId: finding.rule.id,
+                      scopeId,
+                      isPreviewMode: true,
+                      banner: {
+                        title: i18n.translate(
+                          'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
+                          {
+                            defaultMessage: 'Preview finding details',
+                          }
+                        ),
+                        backgroundColor: 'warning',
+                        textColor: 'warning',
+                      },
+                    },
+                  };
 
-              openPreviewPanel(previewPanelProps);
-            }}
-          />
+                openPreviewPanel(previewPanelProps);
+              }}
+            />
+          </EuiToolTip>
         ),
       },
       {

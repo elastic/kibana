@@ -339,59 +339,70 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           const eventId = finding?.event?.id;
 
           return (
-            <EuiButtonIcon
-              iconType="maximize"
-              onClick={() => {
-                if (
-                  onShowVulnerability &&
-                  vulnerabilityId &&
-                  resourceId &&
-                  packageName &&
-                  packageVersion &&
-                  eventId
-                ) {
-                  onShowVulnerability({
-                    vulnerabilityId,
-                    resourceId,
-                    packageName,
-                    packageVersion,
-                    eventId,
-                  });
-                  return;
-                }
-
-                const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
-                  id: VulnerabilityFindingsPreviewPanelKey,
-                  params: {
-                    vulnerabilityId,
-                    resourceId,
-                    packageName,
-                    packageVersion,
-                    eventId,
-                    scopeId,
-                    isPreviewMode: true,
-                    banner: {
-                      title: i18n.translate(
-                        'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
-                        {
-                          defaultMessage: 'Preview vulnerability details',
-                        }
-                      ),
-                      backgroundColor: 'warning',
-                      textColor: 'warning',
-                    },
-                  },
-                };
-
-                openPreviewPanel(previewPanelProps);
-              }}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
                 {
                   defaultMessage: 'Preview vulnerability details',
                 }
               )}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="maximize"
+                onClick={() => {
+                  if (
+                    onShowVulnerability &&
+                    vulnerabilityId &&
+                    resourceId &&
+                    packageName &&
+                    packageVersion &&
+                    eventId
+                  ) {
+                    onShowVulnerability({
+                      vulnerabilityId,
+                      resourceId,
+                      packageName,
+                      packageVersion,
+                      eventId,
+                    });
+                    return;
+                  }
+
+                  const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview =
+                    {
+                      id: VulnerabilityFindingsPreviewPanelKey,
+                      params: {
+                        vulnerabilityId,
+                        resourceId,
+                        packageName,
+                        packageVersion,
+                        eventId,
+                        scopeId,
+                        isPreviewMode: true,
+                        banner: {
+                          title: i18n.translate(
+                            'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
+                            {
+                              defaultMessage: 'Preview vulnerability details',
+                            }
+                          ),
+                          backgroundColor: 'warning',
+                          textColor: 'warning',
+                        },
+                      },
+                    };
+
+                  openPreviewPanel(previewPanelProps);
+                }}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+                  {
+                    defaultMessage: 'Preview vulnerability details',
+                  }
+                )}
+              />
+            </EuiToolTip>
           );
         },
       },
