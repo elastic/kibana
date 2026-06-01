@@ -75,4 +75,7 @@ export enum SYNTHETICS_API_URLS {
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',
 
   MONITOR_SUMMARY_STATS = '/internal/synthetics/monitor/summary_stats',
+
+  /** Internal support bundle: monitors (redacted), indices, Fleet policies, locations, param keys. */
+  SYNTHETICS_DIAGNOSTICS = '/internal/synthetics/diagnostics',
 }

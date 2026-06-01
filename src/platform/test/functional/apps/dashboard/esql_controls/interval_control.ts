@@ -42,8 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboard.waitForRenderComplete();
       const panelCountBefore = await dashboard.getPanelCount();
 
