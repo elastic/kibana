@@ -108,6 +108,7 @@ export const useFooterLinks = ({
       ? application.getUrlForApp(preferredTarget.appId, { path: preferredTarget.path })
       : undefined;
 
+    // TODO: https://github.com/elastic/kibana/issues/271876
     // "Get started" link ("Add data" for Observability projects)
     if (getStartedHref) {
       items.push({
