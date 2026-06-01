@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+import {
+  MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES,
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+} from '../../../common/constants';
 
 import { PackagePolicyPermissionSummarySchema } from '../models/cloud_connector';
 
@@ -238,12 +242,18 @@ export const GetCloudConnectorUsageRequestSchema = {
   }),
   query: schema.object({
     page: schema.maybe(
-      schema.string({
+      schema.number({
+        defaultValue: 1,
+        min: 1,
+        max: 10000,
         meta: { description: 'The page number for pagination.' },
       })
     ),
     perPage: schema.maybe(
-      schema.string({
+      schema.number({
+        defaultValue: 10,
+        min: 1,
+        max: MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES,
         meta: { description: 'The number of items per page.' },
       })
     ),

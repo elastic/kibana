@@ -59,7 +59,6 @@ export const PermissionStatusCell: React.FC<PermissionStatusCellProps> = ({
         cellState={cellState}
         summary={summary}
         integrationName={integrationName}
-        packagePolicyId={packagePolicyId}
       />
     </EuiPopover>
   );

@@ -215,14 +215,12 @@ interface PermissionStatusPopoverProps {
   cellState: CellState;
   summary: PackagePolicyPermissionSummary | undefined;
   integrationName: string;
-  packagePolicyId: string;
 }
 
 export const PermissionStatusPopover: React.FC<PermissionStatusPopoverProps> = ({
   cellState,
   summary,
   integrationName,
-  packagePolicyId,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -307,13 +305,7 @@ export const PermissionStatusPopover: React.FC<PermissionStatusPopoverProps> = (
         <>
           <EuiHorizontalRule margin="s" />
           <EuiPopoverFooter paddingSize="s">
-            <IntegrationActionButtons
-              policyTemplate={summary.policy_template}
-              packagePolicyId={packagePolicyId}
-              hasVerifiedPermission={
-                summary.permissions?.some((p) => p.status === 'verified') ?? false
-              }
-            />
+            <IntegrationActionButtons />
           </EuiPopoverFooter>
         </>
       )}

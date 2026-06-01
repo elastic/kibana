@@ -387,6 +387,31 @@ function buildSummaryFromBucket(
 }
 
 /**
+ * Strip control characters and Unicode bidirectional-override sequences from a
+ * string sourced from the verifier OTel log stream, then trim whitespace.
+ *
+ * The verifier package emits these strings into a system-internal log index, but the
+ * string *content* originates in cloud-provider error responses (AWS / Azure / GCP).
+ * Treating those as untrusted at the ingestion boundary defends against:
+ *   - log-injection via embedded \n (forging fake log lines downstream)
+ *   - bidi-override attacks that visually disguise the rendered text
+ *   - C0/C1 control characters that break log parsers and PDF exports
+ *
+ * Returns `undefined` for non-strings or strings that become empty after cleaning,
+ * so callers can use a single truthiness check.
+ */
+function sanitizeString(value: string | undefined): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const cleaned = value
+    // Strip ASCII control characters (C0 + DEL) and C1 controls.
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+    // Strip Unicode bidirectional-override characters (LRE/RLE/PDF/LRO/RLO + isolates).
+    .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+    .trim();
+  return cleaned.length === 0 ? undefined : cleaned;
+}
+
+/**
  * Map a raw verifier log doc's `attributes` to the on-disk PermissionResult shape.
  *
  * Mapping rules (per epic):
@@ -396,13 +421,17 @@ function buildSummaryFromBucket(
  *   - error                                → error
  *   - skipped                              → skipped (passthrough)
  *
+ * String fields sourced from the log stream (`action`, `error_code`, `message`) are
+ * sanitized here at the ingestion boundary; their final content rules are also
+ * enforced by `PermissionResultSchema` at SO-write time (defense in depth).
+ *
  * Returns null when required fields are missing.
  */
 function mapPermission(
   attrs: VerifierLogAttributes | undefined,
   bodyText: string | undefined
 ): PermissionResult | null {
-  const action = attrs?.['permission.action'];
+  const action = sanitizeString(attrs?.['permission.action']);
   const rawStatus = attrs?.['permission.status'];
   if (!action || !rawStatus) return null;
 
@@ -425,13 +454,14 @@ function mapPermission(
       return null;
   }
 
-  const errorCode = attrs?.['permission.error_code'];
+  const errorCode = sanitizeString(attrs?.['permission.error_code']);
+  const message = sanitizeString(bodyText);
   return {
     action,
     status,
     required,
     ...(errorCode ? { error_code: errorCode } : {}),
-    ...(bodyText ? { message: bodyText } : {}),
+    ...(message ? { message } : {}),
   };
 }
 

@@ -38,9 +38,27 @@ export const CloudConnectorSchemaV4 = CloudConnectorSchemaV3.extends({
   verification_failed_at: schema.maybe(schema.string()),
 });
 
+// Strict identifier patterns — restrict to characters real cloud providers actually use.
+// Reject anything else at the storage boundary so XSS / log-injection / weird-unicode
+// payloads from the verifier log stream can never reach the SO.
+//   - Action:     starts with letter or wildcard, then [A-Za-z0-9 . _ : / - *]
+//                 e.g. "s3:GetObject", "arn:aws:iam::aws:policy/SecurityAudit",
+//                      "Microsoft.Storage/storageAccounts/read", "storage.buckets.get"
+//   - Error code: starts with letter, then [A-Za-z0-9 . _ /]
+//                 e.g. "AccessDenied", "PERMISSION_DENIED",
+//                      "Microsoft.Storage/InsufficientAccountPermissions", "UnsupportedIntegration"
+const ACTION_PATTERN = /^[A-Za-z*][A-Za-z0-9._:/\-*]*$/;
+const ERROR_CODE_PATTERN = /^[A-Za-z][A-Za-z0-9._/]*$/;
+
 export const PermissionResultSchema = schema.object({
   // Permission identifiers: AWS ARNs cap ~200 chars; service:Action style ~50.
-  action: schema.string({ maxLength: 256 }),
+  action: schema.string({
+    maxLength: 256,
+    validate: (value) =>
+      ACTION_PATTERN.test(value)
+        ? undefined
+        : 'action must look like a cloud permission action (e.g. "s3:GetObject")',
+  }),
   status: schema.oneOf([
     schema.literal('verified'),
     schema.literal('required'),
@@ -50,8 +68,18 @@ export const PermissionResultSchema = schema.object({
   ]),
   required: schema.boolean(),
   // Cloud-provider error codes follow naming conventions: AccessDenied, Throttling, etc.
-  error_code: schema.maybe(schema.string({ maxLength: 100 })),
+  error_code: schema.maybe(
+    schema.string({
+      maxLength: 100,
+      validate: (value) =>
+        ERROR_CODE_PATTERN.test(value)
+          ? undefined
+          : 'error_code must look like a cloud-provider error code (e.g. AccessDenied)',
+    })
+  ),
   // Human-readable provider messages (e.g. STS errors include assumed-role principal).
+  // Free-form by design — sanitized at ingestion (control chars / bidi-overrides stripped)
+  // and length-bounded here; render-time HTML escaping handled by React/EUI.
   message: schema.maybe(schema.string({ maxLength: 2000 })),
 });
 

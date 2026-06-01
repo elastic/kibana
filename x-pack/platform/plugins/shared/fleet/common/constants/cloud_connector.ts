@@ -69,6 +69,20 @@ export const CLOUD_CONNECTOR_HIDDEN_PACKAGES: readonly string[] = [VERIFIER_PKG_
 export const CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE = 20;
 
 /**
+ * Upper bound on the number of package policies (integrations) that can use a
+ * single cloud connector. Derived from the Cloud agentless deployment limit
+ * (5 concurrent agentless agent policies). Cloud connectors require agentless
+ * mode, so at most 5 agent policies can host cloud-connector-using integrations
+ * at one time. Assuming up to ~5 integrations per agent policy can share a
+ * connector, 25 = 5 × 5 gives a comfortable ceiling. Used as:
+ *   - the `perPage` cap for the SO query in `verify_permissions_task`
+ *   - the `max` of the public usage endpoint's `perPage` (no client benefits
+ *     from asking for more than this; the SO can't physically hold more).
+ * Revisit when the agentless concurrency limit grows.
+ */
+export const MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES = 25;
+
+/**
  * Appends NOT package.name filters for {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES} and
  * `latest_revision:true` to a package-policy Kuery fragment (same pattern as usage routes;
  * latest revision excludes rollback snapshot rows such as `:prev`).
