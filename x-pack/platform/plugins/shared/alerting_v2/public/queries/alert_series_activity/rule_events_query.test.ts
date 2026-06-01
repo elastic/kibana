@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRuleEventsEsqlQuery } from './rule_events_query';
+import { buildRuleEventsEsqlQuery, PER_SERIES_EVENT_LIMIT } from './rule_events_query';
 
 describe('buildRuleEventsEsqlQuery', () => {
   it('scopes to rule id, time window, sorts descending and limits', () => {
@@ -24,5 +24,35 @@ describe('buildRuleEventsEsqlQuery', () => {
     expect(queryString).toContain('LIMIT 5000');
     expect(queryString).toContain('episode.status');
     expect(queryString).toContain('group_hash');
+  });
+
+  it('caps events per series before the global ceiling', () => {
+    const queryString = buildRuleEventsEsqlQuery({
+      ruleId: 'rule-abc',
+      gteMs: Date.parse('2026-04-01T00:00:00Z'),
+      lteMs: Date.parse('2026-04-08T00:00:00Z'),
+      pageSize: 5000,
+    }).print('basic');
+
+    // Per-series cap is inlined as a literal integer (not a bound param).
+    expect(queryString).toContain(`LIMIT ${PER_SERIES_EVENT_LIMIT} BY group_hash`);
+
+    // The per-series LIMIT ... BY must precede the global ceiling so each
+    // series keeps its most-recent events before the overall cap is applied.
+    expect(queryString.indexOf(`LIMIT ${PER_SERIES_EVENT_LIMIT} BY group_hash`)).toBeLessThan(
+      queryString.indexOf('LIMIT 5000')
+    );
+  });
+
+  it('threads an explicit per-series limit through', () => {
+    const queryString = buildRuleEventsEsqlQuery({
+      ruleId: 'rule-abc',
+      gteMs: Date.parse('2026-04-01T00:00:00Z'),
+      lteMs: Date.parse('2026-04-08T00:00:00Z'),
+      pageSize: 5000,
+      perSeriesLimit: 123,
+    }).print('basic');
+
+    expect(queryString).toContain('LIMIT 123 BY group_hash');
   });
 });

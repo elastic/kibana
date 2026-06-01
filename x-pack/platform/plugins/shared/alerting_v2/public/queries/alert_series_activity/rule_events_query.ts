@@ -25,6 +25,15 @@ const RULE_EVENT_FIELDS = [
   'group_hash',
 ] as const;
 
+/**
+ * Per-series (`group_hash`) cap on raw events. Applied via `LIMIT ... BY` so a
+ * single overactive series cannot consume the whole `pageSize` budget and
+ * starve quieter lanes (including their pre-window lookback events, which the
+ * timeline relies on to anchor each lane's left-edge status). The global
+ * `pageSize` limit is retained as a hard ceiling.
+ */
+export const PER_SERIES_EVENT_LIMIT = 500;
+
 export interface BuildRuleEventsEsqlQueryOptions {
   ruleId: string;
   gteMs: number;
@@ -32,6 +41,8 @@ export interface BuildRuleEventsEsqlQueryOptions {
   pageSize: number;
   /** When provided, restricts results to these series only. */
   groupHashes?: string[];
+  /** Max events kept per `group_hash`. Defaults to {@link PER_SERIES_EVENT_LIMIT}. */
+  perSeriesLimit?: number;
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
@@ -42,6 +53,7 @@ export const buildRuleEventsEsqlQuery = ({
   lteMs,
   pageSize,
   groupHashes,
+  perSeriesLimit = PER_SERIES_EVENT_LIMIT,
 }: BuildRuleEventsEsqlQueryOptions) => {
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);
@@ -56,8 +68,10 @@ export const buildRuleEventsEsqlQuery = ({
     query = query.where`group_hash IN (${hashLiterals})`;
   }
 
+  // prettier-ignore
   return query
     .sort([TIME_FIELD, 'DESC'])
+    .pipe`LIMIT ${perSeriesLimit} BY group_hash`
     .limit(pageSize)
     .keep(...RULE_EVENT_FIELDS);
 };
