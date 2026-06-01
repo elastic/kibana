@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiIconTip,
   EuiDescriptionListDescription,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
@@ -33,6 +34,7 @@ export const SchemaInformation = ({
   isOpen: boolean;
 }) => {
   const colorMap = useColors();
+  const schemaInfoTitleId = useGeneratedHtmlId();
   const sourceAndSchema = useSelector((state: State) =>
     selectors.resolverTreeSourceAndSchema(state.analyzer[id])
   );
@@ -70,8 +72,9 @@ export const SchemaInformation = ({
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
+      aria-labelledby={schemaInfoTitleId}
     >
-      <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
+      <EuiPopoverTitle id={schemaInfoTitleId} css={{ textTransform: 'uppercase' }}>
         {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaInfoTitle', {
           defaultMessage: 'process tree',
         })}
