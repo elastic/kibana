@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatSeriesLabel } from '../../../../utils/format_series_label';
+import { formatSeriesLabel, formatSeriesLabelValues } from '../../../../utils/format_series_label';
 
 export interface AlertTimelineSeriesLabelProps {
   groupHash: string;
@@ -21,7 +21,8 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
   groupingValues,
   episodeCount,
 }) => {
-  const label = formatSeriesLabel(groupHash, groupingValues);
+  const displayLabel = formatSeriesLabelValues(groupHash, groupingValues);
+  const tooltipLabel = formatSeriesLabel(groupHash, groupingValues);
 
   const episodeCountLabel = i18n.translate(
     'xpack.alertingV2.alertTimeline.seriesLabel.episodeCount',
@@ -34,34 +35,11 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-            <EuiText
-              size="xs"
-              className="eui-textTruncate"
-              data-test-subj="alertTimelineSeriesLabel"
-            >
-              <strong>{label}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={groupHash}>
-              {(copy) => (
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  iconSize="s"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.alertingV2.alertTimeline.seriesLabel.copyHash',
-                    { defaultMessage: 'Copy group hash' }
-                  )}
-                  onClick={copy}
-                  data-test-subj="alertTimelineSeriesCopyHash"
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiToolTip content={tooltipLabel} display="block">
+          <EuiText size="xs" className="eui-textTruncate" data-test-subj="alertTimelineSeriesLabel">
+            <strong>{displayLabel}</strong>
+          </EuiText>
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" data-test-subj="alertTimelineSeriesEpisodeCount">

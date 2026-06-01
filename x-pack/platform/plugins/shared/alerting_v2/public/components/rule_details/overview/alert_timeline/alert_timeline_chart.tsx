@@ -17,7 +17,7 @@ import { AlertTimelineRow } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineSeriesLabel } from './alert_timeline_series_label';
 import { AlertTimelineTimeAxis } from './alert_timeline_time_axis';
 
-const META_COLUMN_WIDTH_PX = 110;
+const META_COLUMN_WIDTH_PX = 180;
 const ROW_HEIGHT_PX = 44;
 
 export interface AlertTimelineChartProps {

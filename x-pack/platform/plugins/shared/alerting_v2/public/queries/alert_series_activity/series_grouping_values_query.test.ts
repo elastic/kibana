@@ -123,6 +123,21 @@ describe('parseSeriesGroupingValuesRows', () => {
     });
   });
 
+  it('normalizes a single-value grouping_fields keyword string to an array', () => {
+    // ES|QL returns single-value keyword fields as bare strings, not arrays.
+    const rows: SeriesGroupingValuesRow[] = [
+      {
+        group_hash: 'gh-1',
+        episode_data: JSON.stringify({ Carrier: 'JetBeats' }),
+        grouping_fields: 'Carrier' as unknown as string[],
+      },
+    ];
+
+    const result = parseSeriesGroupingValuesRows(rows, ['Carrier']);
+
+    expect(result).toEqual({ 'gh-1': { Carrier: 'JetBeats' } });
+  });
+
   it('returns an empty map for no rows', () => {
     expect(parseSeriesGroupingValuesRows([], ['host.name'])).toEqual({});
   });

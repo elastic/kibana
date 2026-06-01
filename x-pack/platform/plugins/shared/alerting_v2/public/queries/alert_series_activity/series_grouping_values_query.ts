@@ -24,7 +24,7 @@ export interface SeriesGroupingValuesRow {
   group_hash: string;
   episode_data?: string | null;
   /** Field names that produced this hash, stamped at write time. Absent for pre-v4 events. */
-  grouping_fields?: string[] | null;
+  grouping_fields?: string | string[] | null;
 }
 
 /**
@@ -83,7 +83,9 @@ export const parseSeriesGroupingValuesRows = (
 
   for (const row of rows) {
     const data = parseEpisodeDataJson(row.episode_data);
-    const rowFields = row.grouping_fields?.length ? row.grouping_fields : fallbackFields;
+    const rawGf = row.grouping_fields;
+    const normalizedGf = typeof rawGf === 'string' ? [rawGf] : rawGf ?? [];
+    const rowFields = normalizedGf.length > 0 ? normalizedGf : fallbackFields;
     const fields: Record<string, string | null> = {};
 
     for (const field of rowFields) {
