@@ -18,6 +18,7 @@ const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
