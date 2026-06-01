@@ -38,6 +38,7 @@
     "@kbn/workflows-yaml",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-di-browser",
-    "@kbn/core-di"
+    "@kbn/core-di",
+    "@kbn/announcement-banner"
   ]
 }
