@@ -99,7 +99,7 @@ const unwrapToolResultData = (result: unknown): Record<string, unknown> | undefi
 const getWorkflowEditResultData = (output: WorkflowTaskOutput): Array<Record<string, unknown>> => {
   const toolCalls = getToolCallSteps(output);
   return toolCalls
-    .filter((t) => t.tool_id?.includes('workflow_'))
+    .filter((t) => t.tool_id?.includes('generate_workflow'))
     .flatMap((t) => t.results ?? [])
     .map(unwrapToolResultData)
     .filter((d): d is Record<string, unknown> => d !== undefined);
@@ -110,28 +110,11 @@ const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 /**
  * Extract the resulting workflow YAML from tool call steps.
  *
- * For `setYaml` calls, the YAML is available in `params.yaml`.
- * For granular edit tools (insert/modify/delete), the final YAML lives in
- * the attachment system — use {@link extractYamlFromAttachments} as a fallback.
+ * With `generate_workflow`, the YAML lives in the attachment system rather than tool
+ * params, so this always returns `undefined` and callers fall back to
+ * {@link extractYamlFromAttachments}. Kept for parity with older eval call sites.
  */
-export const extractResultYaml = (output: WorkflowTaskOutput): string | undefined => {
-  const steps = output.steps ?? [];
-  const workflowToolSteps = steps
-    .filter((s) => s.type === 'tool_call' && s.tool_id?.includes('workflow_'))
-    .reverse();
-
-  for (const step of workflowToolSteps) {
-    if (step.tool_id?.includes('set_yaml') && typeof step.params?.yaml === 'string') {
-      const resultData = (step.results ?? []).map(unwrapToolResultData).filter(Boolean);
-      const lastResult = resultData[resultData.length - 1];
-      if (lastResult?.success === true) {
-        return step.params.yaml;
-      }
-    }
-  }
-
-  return undefined;
-};
+export const extractResultYaml = (_output: WorkflowTaskOutput): string | undefined => undefined;
 
 /**
  * Extract the workflow YAML from versioned conversation attachments.
@@ -558,7 +541,7 @@ export function createEfficiencyEvaluator() {
       expected: EfficiencyExpectations;
     }) => {
       const toolCalls = getToolCallSteps(output);
-      const workflowCalls = toolCalls.filter((t) => t.tool_id?.includes('workflow_'));
+      const workflowCalls = toolCalls.filter((t) => t.tool_id?.includes('generate_workflow'));
       const failedCalls = workflowCalls.filter((t) =>
         t.results?.some((r) => {
           const data = unwrapToolResultData(r);

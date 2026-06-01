@@ -9,10 +9,10 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiSwitch,
   EuiTitle,
   EuiCallOut,
   useGeneratedHtmlId,
@@ -54,6 +54,9 @@ export const DownsampleFieldSection = ({
     `_meta.${phaseName}.readonlyEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
+  const checkboxId = useGeneratedHtmlId({
+    prefix: `${dataTestSubj}DownsamplingCheckbox-${phaseName}`,
+  });
 
   const isEnabled = Boolean(useWatch({ control, name: enabledPath }));
   const isReadonlyEnabled = Boolean(useWatch({ control, name: readonlyPath }));
@@ -94,11 +97,9 @@ export const DownsampleFieldSection = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label=""
-            showLabel={false}
+          <EuiCheckbox
+            id={checkboxId}
             aria-labelledby={titleId}
-            compressed
             checked={isEnabled}
             data-test-subj={`${dataTestSubj}DownsamplingSwitch`}
             onChange={(e) => {
