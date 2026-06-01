@@ -7,26 +7,17 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
-  EuiSpacer,
   EuiSteps,
   EuiText,
   EuiButtonGroup,
-  EuiCopy,
-  EuiCallOut,
-  EuiSkeletonText,
 } from '@elastic/eui';
 import type { EuiStepStatus } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
@@ -35,40 +26,33 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
-import { ProgressIndicator } from '../shared/progress_indicator';
-import { GetStartedPanel } from '../shared/get_started_panel';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
-import {
-  WiredStreamsIngestionSelector,
-  type IngestionMode,
-} from '../shared/wired_streams_ingestion_selector';
+import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
-import { buildInstallCommand } from './build_install_command';
+import {
+  OtelLogsInstallStep,
+  OtelLogsStartStep,
+  OtelLogsVisualizeStep,
+  type OtelOs,
+} from './steps';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
-
-const HOST_COMMAND = i18n.translate(
-  'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
-  {
-    defaultMessage:
-      'Run the following command on your host to download and configure the collector.',
-  }
-);
-
-const FETCH_INTERVAL = 2000;
-const SHOW_TROUBLESHOOTING_DELAY = 120_000;
+import {
+  OTEL_HOST_FETCH_INTERVAL_MS,
+  OTEL_HOST_SHOW_TROUBLESHOOTING_DELAY_MS,
+} from './data_detection_constants';
 
 export const OtelLogsPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.otelLogsPanel.breadcrumb', {
       defaultMessage: 'OpenTelemetry: Logs & Metrics',
-    }),
-  });
+    })
+  );
   const { onPageReady } = usePerformanceContext();
   const {
     services: { share, docLinks },
@@ -96,7 +80,7 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [onPageReady, setupData]);
 
-  const [selectedTab, setSelectedTab] = useState('linux');
+  const [selectedTab, setSelectedTab] = useState<OtelOs>('linux');
 
   const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host' });
 
@@ -119,8 +103,8 @@ export const OtelLogsPanel: React.FC = () => {
   const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
     sessionStartTime: sessionStartTime ?? '',
-    fetchInterval: FETCH_INTERVAL,
-    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    fetchInterval: OTEL_HOST_FETCH_INTERVAL_MS,
+    troubleshootingDelay: OTEL_HOST_SHOW_TROUBLESHOOTING_DELAY_MS,
     flowType: 'otel_logs',
     onboardingId: setupData?.onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
@@ -195,69 +179,14 @@ export const OtelLogsPanel: React.FC = () => {
   );
 
   const installTabContents = useMemo(
-    () => [
-      {
-        id: 'linux',
-        name: 'Linux',
-        firstStepTitle: HOST_COMMAND,
-        content: setupData
-          ? buildInstallCommand({
-              platform: 'linux',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
-          : '',
-        start: 'sudo ./otelcol --config otel.yml',
-        codeLanguage: 'sh',
-      },
-      {
-        id: 'mac',
-        name: 'Mac',
-        firstStepTitle: HOST_COMMAND,
-        content: setupData
-          ? buildInstallCommand({
-              platform: 'mac',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
-          : '',
-        start: './otelcol --config otel.yml',
-        codeLanguage: 'sh',
-      },
-      {
-        id: 'windows',
-        name: 'Windows',
-        firstStepTitle: HOST_COMMAND,
-        content: setupData
-          ? buildInstallCommand({
-              platform: 'windows',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
-          : '',
-        start: '.\\otelcol.ps1 --config otel.yml',
-        codeLanguage: 'powershell',
-      },
-    ],
-    [setupData, isMetricsOnboardingEnabled, isManagedOtlpServiceAvailable, useWiredStreams]
+    () =>
+      [
+        { id: 'linux' as const, name: 'Linux' },
+        { id: 'mac' as const, name: 'Mac' },
+        { id: 'windows' as const, name: 'Windows' },
+      ] as const,
+    []
   );
-
-  const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
   if (error) {
     return <EmptyPrompt onboardingFlowType="otel_logs" error={error} onRetryClick={refetch} />;
@@ -283,9 +212,9 @@ export const OtelLogsPanel: React.FC = () => {
                         <EuiText size="s">
                           <strong>
                             {i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.osSelector',
+                              'xpack.observability_onboarding.otelLogsPanel.operatingSystemLabel',
                               {
-                                defaultMessage: 'OS selector',
+                                defaultMessage: 'Operating system',
                               }
                             )}
                           </strong>
@@ -306,65 +235,28 @@ export const OtelLogsPanel: React.FC = () => {
                           type="single"
                           idSelected={selectedTab}
                           onChange={(id: string) => {
-                            setSelectedTab(id);
+                            setSelectedTab(id as OtelOs);
                           }}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
 
-                  {!isWiredStreamsLoading && (
-                    <EuiFlexItem grow={false}>
-                      <WiredStreamsIngestionSelector
-                        ingestionMode={ingestionMode}
-                        onChange={setIngestionMode}
-                        streamsDocLink={docLinks?.links.observability.logsStreams}
-                        isWiredStreamsEnabled={isWiredStreamsEnabled}
-                        isEnabling={isEnabling}
-                        flowType="otel_host"
-                        onEnableWiredStreams={enableWiredStreams}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {!setupData && <EuiSkeletonText lines={6} />}
-
-                  {setupData && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup direction="column" gutterSize="s">
-                          <EuiText size="s">
-                            <strong>{selectedContent.firstStepTitle}</strong>
-                          </EuiText>
-                          <EuiCodeBlock
-                            language={selectedContent.codeLanguage}
-                            isCopyable
-                            overflowHeight={300}
-                          >
-                            {selectedContent.content}
-                          </EuiCodeBlock>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem align="left">
-                        <EuiFlexGroup>
-                          <EuiCopy textToCopy={selectedContent.content}>
-                            {(copy) => (
-                              <EuiButton
-                                data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                                iconType="copy"
-                                onClick={copy}
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-                                  { defaultMessage: 'Copy to clipboard' }
-                                )}
-                              </EuiButton>
-                            )}
-                          </EuiCopy>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </>
-                  )}
+                  <OtelLogsInstallStep
+                    os={selectedTab}
+                    setupData={setupData}
+                    ingestionMode={ingestionMode}
+                    onIngestionModeChange={setIngestionMode}
+                    isMetricsOnboardingEnabled={isMetricsOnboardingEnabled}
+                    isManagedOtlpServiceAvailable={isManagedOtlpServiceAvailable}
+                    wiredStreamsStatus={{
+                      isEnabled: isWiredStreamsEnabled,
+                      isLoading: isWiredStreamsLoading,
+                      isEnabling,
+                      enableWiredStreams,
+                    }}
+                    streamsDocLink={docLinks?.links.observability.logsStreams}
+                  />
                 </EuiFlexGroup>
               ),
             },
@@ -372,58 +264,7 @@ export const OtelLogsPanel: React.FC = () => {
               title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
                 defaultMessage: 'Start the collector',
               }),
-              children: (
-                <EuiFlexGroup direction="column">
-                  <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
-                      {
-                        defaultMessage: 'Configuration Information',
-                      }
-                    )}
-                    color="warning"
-                    iconType="info"
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
-                        {
-                          defaultMessage: 'New log messages are collected from the setup onward.',
-                        }
-                      )}
-                    </p>
-                    <p>
-                      {selectedTab === 'windows'
-                        ? i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
-                            {
-                              defaultMessage:
-                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
-                            }
-                          )
-                        : i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                            {
-                              defaultMessage:
-                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                            }
-                          )}
-                    </p>
-                  </EuiCallOut>
-
-                  <EuiText>
-                    <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
-                        {
-                          defaultMessage: 'Run the following command to start the collector',
-                        }
-                      )}
-                    </p>
-                  </EuiText>
-                  <CopyableCodeBlock content={selectedContent.start} />
-                </EuiFlexGroup>
-              ),
+              children: <OtelLogsStartStep os={selectedTab} />,
             },
             {
               title: i18n.translate(
@@ -437,74 +278,16 @@ export const OtelLogsPanel: React.FC = () => {
                 : isMonitoringStepActive
                 ? 'current'
                 : 'incomplete') as EuiStepStatus,
-              children: isMonitoringStepActive ? (
-                <>
-                  {!(hasPreExistingDataFinal && !hasData) && (
-                    <ProgressIndicator
-                      title={
-                        hasData
-                          ? i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
-                              { defaultMessage: 'We are monitoring your host' }
-                            )
-                          : i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.waitingForData',
-                              { defaultMessage: 'Waiting for data to be shipped' }
-                            )
-                      }
-                      iconType="checkInCircleFilled"
-                      isLoading={!hasData}
-                      css={css`
-                        max-width: 40%;
-                      `}
-                      data-test-subj="observabilityOnboardingOtelHostDataProgressIndicator"
-                    />
-                  )}
-
-                  {isTroubleshootingVisible && (
-                    <>
-                      <EuiSpacer />
-                      <EuiText color="subdued" size="s">
-                        <FormattedMessage
-                          id="xpack.observability_onboarding.otelLogsPanel.troubleshootingTextLabel"
-                          defaultMessage="Find more details and troubleshooting solutions in our documentation. {troubleshootingLink}"
-                          values={{
-                            troubleshootingLink: (
-                              <EuiLink
-                                data-test-subj="observabilityOnboardingOtelLogsPanelTroubleshootingLink"
-                                href="https://ela.st/elastic-otel"
-                                external
-                                target="_blank"
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.troubleshootingLinkText',
-                                  { defaultMessage: 'Open documentation' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    </>
-                  )}
-
-                  {(hasData === true || hasPreExistingDataFinal) &&
-                    visualizeActionLinks.length > 0 && (
-                      <>
-                        <EuiSpacer />
-                        <GetStartedPanel
-                          onboardingFlowType="otel_logs"
-                          dataset="otel_logs"
-                          integration="system_otel"
-                          onboardingId={setupData?.onboardingId ?? ''}
-                          newTab={false}
-                          isLoading={false}
-                          actionLinks={visualizeActionLinks}
-                        />
-                      </>
-                    )}
-                </>
-              ) : null,
+              children: (
+                <OtelLogsVisualizeStep
+                  isMonitoringStepActive={isMonitoringStepActive}
+                  hasData={hasData}
+                  hasPreExistingData={hasPreExistingDataFinal}
+                  isTroubleshootingVisible={isTroubleshootingVisible}
+                  onboardingId={setupData?.onboardingId ?? ''}
+                  actionLinks={visualizeActionLinks}
+                />
+              ),
             },
           ]}
         />
@@ -514,27 +297,3 @@ export const OtelLogsPanel: React.FC = () => {
     </EuiPanel>
   );
 };
-
-function CopyableCodeBlock({ content }: { content: string }) {
-  return (
-    <>
-      <EuiCodeBlock language="yaml">{content}</EuiCodeBlock>
-      <EuiCopy textToCopy={content}>
-        {(copy) => (
-          <EuiButton
-            data-test-subj="observabilityOnboardingCopyableCodeBlockCopyToClipboardButton"
-            iconType="copy"
-            onClick={copy}
-          >
-            {i18n.translate(
-              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-              {
-                defaultMessage: 'Copy to clipboard',
-              }
-            )}
-          </EuiButton>
-        )}
-      </EuiCopy>
-    </>
-  );
-}
