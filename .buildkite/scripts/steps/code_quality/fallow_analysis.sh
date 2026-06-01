@@ -46,6 +46,12 @@ extract_owner_health_section() {
      found { print }'
 }
 
+# Extract the full "● Per-owner health" block (summary table for all owners).
+extract_health_table() {
+  local output="$1"
+  printf '%s\n' "$output" | awk '/^● Per-owner health/{found=1} found{print}'
+}
+
 # Extract health score summary from the per-owner health section header line,
 # e.g. "@elastic/search-kibana (score: B, 72/100)" → "(score: B, 72/100)"
 extract_owner_health_header() {
@@ -99,23 +105,23 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   2>&1)
 set -e
 
+echo "--- Per-owner health score"
+health_table=$(extract_health_table "$FALLOW_OUTPUT")
+if [ -n "$health_table" ]; then
+  echo "$health_table"
+else
+  echo "No health data available"
+fi
+
 for owner in "${FALLOW_OWNERS[@]}"; do
   echo "--- ${owner}"
-
-  echo "+++ Dead code"
   section=$(extract_owner_section "$FALLOW_OUTPUT" "$owner")
-  if [ -n "$section" ]; then
-    echo "$section"
+  health=$(extract_owner_health_section "$FALLOW_OUTPUT" "$owner")
+  if [ -n "$section" ] || [ -n "$health" ]; then
+    [ -n "$section" ] && echo "$section"
+    [ -n "$health" ] && echo "$health"
   else
     echo "No issues found"
-  fi
-
-  echo "+++ Complexity hotspots"
-  health=$(extract_owner_health_section "$FALLOW_OUTPUT" "$owner")
-  if [ -n "$health" ]; then
-    echo "$health"
-  else
-    echo "No hotspots found"
   fi
 done
 
