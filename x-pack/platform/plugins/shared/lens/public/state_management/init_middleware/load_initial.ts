@@ -258,6 +258,7 @@ async function loadFromSavedObject(
   if (savedObjectId) {
     chrome.recentlyAccessed.add(getFullPath(savedObjectId), doc.title, savedObjectId);
   }
+  console.log('doc', doc);
 
   const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
     (stateMap, [datasourceId, datasourceState]) => ({

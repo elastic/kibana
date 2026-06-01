@@ -56,12 +56,45 @@ export function getContinuity(
     : 'none';
 }
 
+/**
+ * Merges a trailing same-color continuation step that was added by
+ * `fromColorByValueLensStateToAPI` to encode an open upper bound for
+ * single-stop palettes (continuity 'all' or 'above').
+ *
+ * The trailing step is identified as: same color as the previous step,
+ * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
+ */
+function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep[] {
+  if (steps.length < 2) return steps;
+
+  const last = steps.at(-1)!;
+  const prev = steps.at(-2)!;
+
+  const isTrailingContinuation =
+    last.lt == null &&
+    last.lte == null &&
+    last.color === prev.color &&
+    last.gte != null &&
+    last.gte === (prev.lt ?? prev.lte);
+
+  return isTrailingContinuation ? steps.slice(0, -1) : steps;
+}
+
 export function fromColorByValueAPIToLensState(
   config?: ColorByValueType
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
-  const stops = config.steps.map(
+  // Derive range bounds from original steps BEFORE merging, so that a trailing
+  // open-ended continuation step correctly produces rangeMax = null.
+  const rawFirst = config.steps[0];
+  const rawLast = config.steps.at(-1);
+  const rangeMin = rawFirst?.gte ?? null;
+  const rangeMax = rawLast?.lt ?? rawLast?.lte ?? null;
+
+  const effectiveSteps = mergeTrailingSameColorStep(config.steps);
+
+  const stops = effectiveSteps.map(
     ({ lt, lte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
@@ -69,16 +102,13 @@ export function fromColorByValueAPIToLensState(
     })
   );
 
-  const colorStops = config.steps.map(
+  const colorStops = effectiveSteps.map(
     ({ gte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
       stop: gte ?? null,
     })
   );
-
-  const rangeMin = colorStops.at(0)?.stop ?? null;
-  const rangeMax = stops.at(-1)?.stop ?? null;
 
   const isLegacy = config.type === 'legacy_dynamic';
   const name = isLegacy ? config.palette : 'custom';
@@ -103,7 +133,7 @@ export function fromColorByValueAPIToLensState(
             // value can be null
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
-      colorStops,
+      ...(!isLegacy && { colorStops }),
       continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
@@ -123,7 +153,7 @@ export function fromColorByValueLensStateToAPI(
 
   if (!colorParams) return;
 
-  const { rangeType, reverse } = colorParams;
+  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
   let originalStops = colorParams.stops ?? [];
 
   // config.name is the root palette identifier used by the runtime palette service
@@ -131,6 +161,12 @@ export function fromColorByValueLensStateToAPI(
   const isLegacy = palette !== 'custom';
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);
+
+  // Continuity drives the open/closed bounds on the first and last API steps.
+  // An open bound (no gte/lte) signals that the color extends beyond the defined range.
+  const continuity = rawContinuity ?? 'above';
+  const isOpenBelow = continuity === 'below' || continuity === 'all';
+  const isOpenAbove = continuity === 'above' || continuity === 'all';
   const needsPaletteShift =
     isLegacy &&
     ((rangeMin !== null && rangeMin === originalStops.at(0)?.stop) ||
@@ -157,11 +193,11 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
-  const steps = stops.map((step, i): ColorByValueStep => {
+  const mappedSteps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
       return {
-        ...(rangeMin !== null && { gte: rangeMin }),
+        ...(!isOpenBelow && rangeMin !== null && { gte: rangeMin }),
         lt: currentStop,
         color,
       };
@@ -172,8 +208,7 @@ export function fromColorByValueLensStateToAPI(
     if (i === stops.length - 1) {
       return {
         gte: prevStop,
-        // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-        ...(rangeMax !== null && { lte: rangeMax }),
+        ...(!isOpenAbove && rangeMax !== null && { lte: rangeMax }),
         color,
       };
     }
@@ -184,6 +219,21 @@ export function fromColorByValueLensStateToAPI(
       color,
     };
   });
+
+  // For single-stop palettes the i===0 branch always emits `lt`, which prevents the
+  // last-step branch from running. Add a trailing step so the full range is covered:
+  // open upper bound (continuity 'all'/'above') or closed at rangeMax ('none'/'below').
+  const steps: ColorByValueStep[] =
+    stops.length === 1
+      ? [
+          ...mappedSteps,
+          {
+            gte: stops[0].stop,
+            color: stops[0].color,
+            ...(!isOpenAbove && rangeMax !== null && { lte: rangeMax }),
+          },
+        ]
+      : mappedSteps;
 
   if (isLegacy) {
     return {
