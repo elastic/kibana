@@ -39,36 +39,42 @@ const ATTACK_DETAILS_FLYOUT_BODY_TEST_ID = 'attack-details-flyout-body';
 const FILTER_BY_ASSIGNEES_BUTTON_TEST_ID = 'filter-popover-button-assignees';
 const CONNECTOR_FILTER_BUTTON_TEST_ID = 'connectorFilterButton';
 const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
+const SCHEDULE_BUTTON_TEST_ID_TABLE = 'scheduleButton';
+const SCHEDULE_DETAILS_FLYOUT_TEST_ID = 'scheduleDetailsFlyout';
+const QUERY_TOGGLE_HEADER_TEST_ID = 'query-toggle-header';
 
 export class DetectionsAttackDiscoveryPage {
-  public standaloneAlertsNavItem: Locator;
-  public detectionsNavItem: Locator;
-  public detectionsPanelAlertsNavItem: Locator;
-  public detectionsPanelAttacksNavItem: Locator;
-  public detectionsNavItemButton: Locator;
-  public attacksPageContent: Locator;
-  public attacksPageActions: Locator;
-  public attacksPageSearchBar: Locator;
-  public attacksPageStandardFilters: Locator;
-  public attacksPageAssigneeFilter: Locator;
-  public attacksPageConnectorFilter: Locator;
-  public attacksKpisSection: Locator;
-  public attacksSummaryView: Locator;
-  public attacksListPanel: Locator;
-  public attacksVolumePanel: Locator;
-  public attacksListTable: Locator;
-  public attacksTableSection: Locator;
-  public scheduleButton: Locator;
-  public settingsFlyout: Locator;
-  public schedulesTable: Locator;
-  public attackDetailsFlyoutBody: Locator;
-  public assigneesFilterButton: Locator;
-  public connectorFilterButton: Locator;
-  public tableExpandAttackDetailsButtons: Locator;
-  public settingsButton: Locator;
-  public generateButton: Locator;
-  public runButton: Locator;
-  public globalToastList: Locator;
+  public readonly standaloneAlertsNavItem: Locator;
+  public readonly detectionsNavItem: Locator;
+  public readonly detectionsPanelAlertsNavItem: Locator;
+  public readonly detectionsPanelAttacksNavItem: Locator;
+  public readonly detectionsNavItemButton: Locator;
+  public readonly attacksPageContent: Locator;
+  public readonly attacksPageActions: Locator;
+  public readonly attacksPageSearchBar: Locator;
+  public readonly attacksPageStandardFilters: Locator;
+  public readonly attacksPageAssigneeFilter: Locator;
+  public readonly attacksPageConnectorFilter: Locator;
+  public readonly attacksKpisSection: Locator;
+  public readonly kpisSectionToggleButton: Locator;
+  public readonly attacksSummaryView: Locator;
+  public readonly attacksListPanel: Locator;
+  public readonly attacksVolumePanel: Locator;
+  public readonly attacksListTable: Locator;
+  public readonly attacksTableSection: Locator;
+  public readonly scheduleButton: Locator;
+  public readonly settingsFlyout: Locator;
+  public readonly scheduleDetailsFlyout: Locator;
+  public readonly schedulesTable: Locator;
+  public readonly attackDetailsFlyoutBody: Locator;
+  public readonly assigneesFilterButton: Locator;
+  public readonly connectorFilterButton: Locator;
+  public readonly tableExpandAttackDetailsButtons: Locator;
+  public readonly tableScheduleButtons: Locator;
+  public readonly settingsButton: Locator;
+  public readonly generateButton: Locator;
+  public readonly runButton: Locator;
+  public readonly globalToastList: Locator;
 
   constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
@@ -84,6 +90,7 @@ export class DetectionsAttackDiscoveryPage {
       ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID
     );
     this.attacksKpisSection = this.page.testSubj.locator(ATTACKS_KPIS_SECTION_TEST_ID);
+    this.kpisSectionToggleButton = this.attacksKpisSection.getByTestId(QUERY_TOGGLE_HEADER_TEST_ID);
     this.attacksSummaryView = this.page.testSubj.locator(ATTACKS_SUMMARY_VIEW_TEST_ID);
     this.attacksListPanel = this.page.testSubj.locator(ATTACKS_LIST_PANEL_TEST_ID);
     this.attacksVolumePanel = this.page.testSubj.locator(ATTACKS_VOLUME_PANEL_TEST_ID);
@@ -91,13 +98,15 @@ export class DetectionsAttackDiscoveryPage {
     this.attacksTableSection = this.page.testSubj.locator(ATTACKS_PAGE_TABLE_SECTION_TEST_ID);
     this.scheduleButton = this.page.testSubj.locator(SCHEDULE_BUTTON_TEST_ID);
     this.settingsFlyout = this.page.testSubj.locator(SETTINGS_FLYOUT_TEST_ID);
+    this.scheduleDetailsFlyout = this.page.testSubj.locator(SCHEDULE_DETAILS_FLYOUT_TEST_ID);
     this.schedulesTable = this.page.testSubj.locator(SCHEDULES_TABLE_TEST_ID);
     this.attackDetailsFlyoutBody = this.page.testSubj.locator(ATTACK_DETAILS_FLYOUT_BODY_TEST_ID);
     this.assigneesFilterButton = this.page.testSubj.locator(FILTER_BY_ASSIGNEES_BUTTON_TEST_ID);
     this.connectorFilterButton = this.page.testSubj.locator(CONNECTOR_FILTER_BUTTON_TEST_ID);
-    this.tableExpandAttackDetailsButtons = this.attacksTableSection.locator(
-      `[data-test-subj="${EXPAND_ATTACK_BUTTON_TEST_ID}"]`
+    this.tableExpandAttackDetailsButtons = this.attacksTableSection.getByTestId(
+      EXPAND_ATTACK_BUTTON_TEST_ID
     );
+    this.tableScheduleButtons = this.attacksTableSection.getByTestId(SCHEDULE_BUTTON_TEST_ID_TABLE);
     this.settingsButton = this.page.testSubj.locator('settings');
     this.generateButton = this.page.testSubj.locator('generate');
     this.runButton = this.page.testSubj.locator('run');
@@ -161,6 +170,13 @@ export class DetectionsAttackDiscoveryPage {
     await this.detectionsNavItem.click();
   }
 
+  async collapseKpisSection() {
+    if (await this.attacksSummaryView.isVisible()) {
+      await this.kpisSectionToggleButton.click();
+      await this.attacksSummaryView.waitFor({ state: 'hidden' });
+    }
+  }
+
   async openScheduleFlyout() {
     await this.scheduleButton.click();
     await this.settingsFlyout.waitFor({ state: 'visible' });
@@ -176,5 +192,16 @@ export class DetectionsAttackDiscoveryPage {
 
     await firstExpandAttackButton.click();
     await this.attackDetailsFlyoutBody.waitFor({ state: 'visible' });
+  }
+
+  async openFirstScheduleDetailsFromTable() {
+    const [firstScheduleButton] = await this.tableScheduleButtons.all();
+
+    if (!firstScheduleButton) {
+      throw new Error('No schedule button found');
+    }
+
+    await firstScheduleButton.click();
+    await this.scheduleDetailsFlyout.waitFor({ state: 'visible' });
   }
 }
