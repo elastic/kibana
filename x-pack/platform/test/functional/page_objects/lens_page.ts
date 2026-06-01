@@ -1591,7 +1591,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickAddLensPanel();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
