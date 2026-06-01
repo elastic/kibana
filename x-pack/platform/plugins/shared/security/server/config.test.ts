@@ -35,6 +35,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Object {
             "anonymous": undefined,
@@ -93,6 +94,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Object {
             "anonymous": undefined,
@@ -151,6 +153,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Object {
             "anonymous": undefined,
@@ -211,6 +214,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Object {
             "anonymous": undefined,
@@ -404,6 +408,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "oidc": Object {
             "realm": "realm-1",
@@ -436,6 +441,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "oidc": Object {
             "realm": "realm-1",
@@ -468,6 +474,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Array [
             "saml",
@@ -487,6 +494,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Array [
             "saml",
@@ -509,6 +517,7 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "sessionlessUserProfileRetrievalEnabled": true,
           },
           "providers": Array [
             "saml",
@@ -1656,6 +1665,30 @@ describe('config schema', () => {
         ).authc.http.jwt.taggedRoutesOnly
       ).toEqual(false);
     });
+
+    describe('sessionlessUserProfileRetrievalEnabled', () => {
+      it('defaults to true', () => {
+        expect(ConfigSchema.validate({}).authc.http.sessionlessUserProfileRetrievalEnabled).toBe(
+          true
+        );
+      });
+
+      it('can be explicitly set to true', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { http: { sessionlessUserProfileRetrievalEnabled: true } },
+          }).authc.http.sessionlessUserProfileRetrievalEnabled
+        ).toBe(true);
+      });
+
+      it('can be set to false to disable sessionless user profile retrieval', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { http: { sessionlessUserProfileRetrievalEnabled: false } },
+          }).authc.http.sessionlessUserProfileRetrievalEnabled
+        ).toBe(false);
+      });
+    });
   });
 
   describe('ui', () => {
@@ -2025,6 +2058,7 @@ describe('createConfig()', () => {
             "apikey",
             "bearer",
           ],
+          "sessionlessUserProfileRetrievalEnabled": true,
         },
         "providers": Object {
           "basic": Object {
