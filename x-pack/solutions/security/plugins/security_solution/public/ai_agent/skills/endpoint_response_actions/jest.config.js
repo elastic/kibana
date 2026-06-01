@@ -11,7 +11,9 @@ module.exports = {
   testMatch: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions/**/*.test.{js,mjs,ts,tsx}',
   ],
-  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/ai_agent/skills/endpoint_response_actions',
   coverageReporters: ['text', 'html'],

@@ -122,9 +122,7 @@ describe('ResultCard', () => {
     it('renders the error message', () => {
       const { getByText } = render(<ResultCard result={failedResult} />);
 
-      expect(
-        getByText('Agent unreachable: connection timed out after 30s')
-      ).toBeInTheDocument();
+      expect(getByText('Agent unreachable: connection timed out after 30s')).toBeInTheDocument();
     });
 
     it('matches snapshot', () => {

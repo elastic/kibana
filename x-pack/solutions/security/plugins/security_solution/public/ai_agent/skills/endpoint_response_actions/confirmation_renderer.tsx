@@ -44,13 +44,12 @@ export const ConfirmationCard: React.FC<ConfirmationCardProps> = ({
   ];
 
   return (
-    <EuiPanel
-      paddingSize="m"
-      hasBorder
-      data-test-subj="endpoint-response-action-confirmation"
-    >
+    <EuiPanel paddingSize="m" hasBorder data-test-subj="endpoint-response-action-confirmation">
       <EuiText size="s">
-        <h4>Confirm {actionType === 'isolate' ? 'Isolation' : 'Un-isolation'}</h4>
+        <h4>
+          {'Confirm '}
+          {actionType === 'isolate' ? 'Isolation' : 'Un-isolation'}
+        </h4>
       </EuiText>
       <EuiSpacer size="s" />
 
@@ -74,7 +73,7 @@ export const ConfirmationCard: React.FC<ConfirmationCardProps> = ({
             onClick={onCancel}
             data-test-subj="endpoint-response-action-cancel"
           >
-            Cancel
+            {'Cancel'}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -85,7 +84,8 @@ export const ConfirmationCard: React.FC<ConfirmationCardProps> = ({
             onClick={onConfirm}
             data-test-subj="endpoint-response-action-confirm"
           >
-            Confirm {actionType === 'isolate' ? 'Isolation' : 'Un-isolation'}
+            {'Confirm '}
+            {actionType === 'isolate' ? 'Isolation' : 'Un-isolation'}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

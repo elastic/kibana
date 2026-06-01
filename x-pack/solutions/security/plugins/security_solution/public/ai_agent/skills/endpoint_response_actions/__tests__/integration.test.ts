@@ -95,10 +95,11 @@ const makeActionDetailsResponse = (
 // ---------------------------------------------------------------------------
 // Helper: extract the mocked http object from KibanaServices
 // ---------------------------------------------------------------------------
-const getMockHttp = () => (KibanaServices.get as jest.Mock)().http as jest.Mocked<{
-  get: jest.Mock;
-  post: jest.Mock;
-}>;
+const getMockHttp = () =>
+  (KibanaServices.get as jest.Mock)().http as jest.Mocked<{
+    get: jest.Mock;
+    post: jest.Mock;
+  }>;
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -231,9 +232,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
   // -------------------------------------------------------------------------
   describe('step 5 — poll result', () => {
     it('returns pending status on first poll', async () => {
-      getMockHttp().get.mockResolvedValueOnce(
-        makeActionDetailsResponse(ACTION_ID, 'pending')
-      );
+      getMockHttp().get.mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'pending'));
 
       const result = await pollActionStatus(ACTION_ID);
 
@@ -243,9 +242,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
     });
 
     it('returns completed status when the action finishes', async () => {
-      getMockHttp().get.mockResolvedValueOnce(
-        makeActionDetailsResponse(ACTION_ID, 'successful')
-      );
+      getMockHttp().get.mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful'));
 
       const result = await pollActionStatus(ACTION_ID);
       expect(result.status).toBe('completed');
@@ -262,9 +259,7 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
     });
 
     it('polls the correct action-details URL', async () => {
-      getMockHttp().get.mockResolvedValueOnce(
-        makeActionDetailsResponse(ACTION_ID, 'completed')
-      );
+      getMockHttp().get.mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful'));
 
       await pollActionStatus(ACTION_ID);
 
@@ -281,8 +276,8 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
   describe('full flow — isolate', () => {
     it('completes the isolate flow end-to-end', async () => {
       // Arrange
-      getMockHttp().get
-        .mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID)) // resolve host
+      getMockHttp()
+        .get.mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID)) // resolve host
         .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful')); // poll
 
       getMockHttp().post.mockResolvedValueOnce(makeResponseActionResponse(ACTION_ID)); // execute
@@ -317,8 +312,8 @@ describe('Endpoint Response Actions — integration (mocked APIs)', () => {
   describe('full flow — unisolate', () => {
     it('completes the unisolate flow end-to-end', async () => {
       // Arrange: host is currently isolated
-      getMockHttp().get
-        .mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID, true)) // resolve host
+      getMockHttp()
+        .get.mockResolvedValueOnce(makeMetadataResponse(HOSTNAME, AGENT_ID, true)) // resolve host
         .mockResolvedValueOnce(makeActionDetailsResponse(ACTION_ID, 'successful')); // poll
 
       getMockHttp().post.mockResolvedValueOnce(makeResponseActionResponse(ACTION_ID)); // execute

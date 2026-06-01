@@ -7,11 +7,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { Semaphore } from './semaphore';
-import {
-  MAX_CONCURRENT_ACTIONS,
-  POLL_INTERVAL_MS,
-  MAX_POLL_DURATION_MS,
-} from './constants';
+import { MAX_CONCURRENT_ACTIONS, POLL_INTERVAL_MS, MAX_POLL_DURATION_MS } from './constants';
 
 /** Result of an endpoint response action. */
 export interface ActionResult {
@@ -59,7 +55,11 @@ export function useExecuteAction(
       setResult(null);
 
       // Acquire a semaphore slot (blocks if 5 are already in flight)
-      const release = await semaphoreRef.current!.acquire();
+      const semaphore = semaphoreRef.current;
+      if (!semaphore) {
+        throw new Error('Semaphore not initialized');
+      }
+      const release = await semaphore.acquire();
 
       try {
         // Execute the action

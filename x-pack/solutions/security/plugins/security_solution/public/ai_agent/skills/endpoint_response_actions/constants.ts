@@ -15,4 +15,4 @@ export const POLL_INTERVAL_MS = 3000;
 export const MAX_POLL_DURATION_MS = 30000;
 
 /** The number of concurrent actions that are currently in flight. */
-export let currentConcurrentActions = 0;
+export const currentConcurrentActions = 0;
