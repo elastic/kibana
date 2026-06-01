@@ -24,15 +24,18 @@ import {
 import React from 'react';
 import { useInferenceFeatureConnectors } from '../../../../hooks/sig_events/use_inference_feature_connectors';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
+import { LinkedCodeIndexControl } from '../linked_code_index/linked_code_index_control';
 import noSigEventsImage from './no_sig_events.svg';
 
 export function EmptyState({
+  streamName,
   isGenerating,
   isCanceling,
   isGenerateDisabled,
   onCancelGenerationClick,
   onGenerateSuggestionsClick,
 }: {
+  streamName: string;
   isGenerating: boolean;
   isCanceling: boolean;
   isGenerateDisabled: boolean;
@@ -129,6 +132,13 @@ export function EmptyState({
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <LinkedCodeIndexControl streamName={streamName} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
     />

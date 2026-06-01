@@ -478,6 +478,7 @@ const generateQueriesRoute = createServerRoute({
       scopedClusterClient,
       licensing,
       uiSettingsClient,
+      globalUiSettingsClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -502,6 +503,8 @@ const generateQueriesRoute = createServerRoute({
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),
         telemetry,
+        globalUiSettingsClient,
+        agentBuilderTools: server.agentBuilder?.tools,
       }
     );
 

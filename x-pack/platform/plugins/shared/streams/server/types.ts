@@ -62,6 +62,7 @@ export interface StreamsServer {
   ensureMemorySkillRegistered?: () => void;
   ensureMemoryTasksScheduled?: () => Promise<void>;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {

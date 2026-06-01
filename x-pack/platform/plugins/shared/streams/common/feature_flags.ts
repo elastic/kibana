@@ -10,3 +10,12 @@
  */
 export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
   'streams.significantEventsMemoryEnabled';
+
+/**
+ * Enables grounding of significant events query generation against source code indexed via
+ * Semantic Code Search (SCS). When enabled and a stream is linked to a code index, the query
+ * generation reasoning agent can consult the source code (through the installed SCS Kibana
+ * workflows) to verify hypotheses before emitting ES|QL queries.
+ */
+export const STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
+  'streams.significantEventsSemanticCodeSearchGroundingEnabled';
