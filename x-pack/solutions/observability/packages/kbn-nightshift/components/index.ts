@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-export { NightshiftOverview } from './nightshift_overview';
+export { NightshiftApp } from './nightshift_app';
 export type {
-  NightshiftOverviewProps,
   SigEventSeverity,
   ImpactedCardItem,
   HealthyMetricCardItem,
   EventDocument,
-} from './nightshift_overview';
+} from './nightshift_app';
 
 export { NightshiftIcon } from './nightshift_icon';
 

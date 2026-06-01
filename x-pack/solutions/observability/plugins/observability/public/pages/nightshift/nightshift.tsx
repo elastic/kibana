@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
-import { NightshiftOverview, useFetchLatestSignificantEvent } from '@kbn/nightshift';
+import { NightshiftApp } from '@kbn/nightshift';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
@@ -28,8 +28,6 @@ export function NightshiftPage() {
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
     false
   );
-
-  const { data: mainEvent, otherPromotedEvents } = useFetchLatestSignificantEvent();
 
   useBreadcrumbs(
     [
@@ -51,16 +49,7 @@ export function NightshiftPage() {
 
   return (
     <ObservabilityPageTemplate data-test-subj="nightshiftPage">
-      <NightshiftOverview
-        state={mainEvent?.state}
-        blastRadiusScore={mainEvent?.blastRadiusScore}
-        mainEventTitle={mainEvent?.mainEventTitle}
-        mainEventDescription={mainEvent?.description}
-        mainEventDetailFields={mainEvent?.detailFields}
-        impactedServices={mainEvent?.impactedServices}
-        impactedCards={mainEvent?.impactedCards}
-        otherPromotedEvents={otherPromotedEvents}
-      />
+      <NightshiftApp />
     </ObservabilityPageTemplate>
   );
 }

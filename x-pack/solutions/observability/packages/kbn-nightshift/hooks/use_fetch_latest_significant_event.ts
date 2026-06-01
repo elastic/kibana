@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SignificantEventDocument } from '../types/significant_event_document';
 import type { ImpactedService } from '../components/main_significant_event';
-import type { ImpactedCardItem } from '../components/nightshift_overview';
+import type { ImpactedCardItem } from '../components/nightshift_app';
 import type { SignificantEventDetailFields } from '../components/significant_event_detail_body';
 import { normalizeRecommendations, getSeverityFromScore } from '../components/event_utils';
 
@@ -151,18 +151,6 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
   };
 }
 
-// --- DEMO DENY LIST: remove to restore full event visibility ---
-// Substring patterns matched case-insensitively against event titles.
-// LLM-generated titles are non-deterministic, so we fuzzy-match on
-// keywords that will appear regardless of exact phrasing.
-export const DEMO_DENIED_TITLE_PATTERNS = ['credit card'];
-
-/** Returns true when the title matches any denied pattern (case-insensitive substring). */
-export const isDeniedTitle = (title: string): boolean => {
-  const lower = title.toLowerCase();
-  return DEMO_DENIED_TITLE_PATTERNS.some((pattern) => lower.includes(pattern));
-};
-
 export function useFetchLatestSignificantEvent(): {
   loading: boolean;
   error: Error | null;
@@ -179,9 +167,6 @@ export function useFetchLatestSignificantEvent(): {
       query: {
         bool: {
           must: [{ term: { verdict: 'promoted' } }],
-          must_not: DEMO_DENIED_TITLE_PATTERNS.map((pattern) => ({
-            wildcard: { title: { value: `*${pattern}*`, case_insensitive: true } },
-          })),
         },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
@@ -220,8 +205,7 @@ export function useFetchLatestSignificantEvent(): {
 
     const docs = result.hits.hits
       .map((hit) => hit._source)
-      .filter((doc): doc is SignificantEventDocument => doc !== undefined)
-      .filter((doc) => !isDeniedTitle(doc.title ?? ''));
+      .filter((doc): doc is SignificantEventDocument => doc !== undefined);
 
     // Primary event: highest-impact promoted event (critical > high > medium > low)
     const impactPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
