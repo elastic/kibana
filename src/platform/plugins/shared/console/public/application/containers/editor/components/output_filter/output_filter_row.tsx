@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiSelect,
   EuiSplitPanel,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
