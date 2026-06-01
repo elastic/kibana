@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { LinksState } from '../../../server';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
-import type { LinksByValueState, LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
+import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
 import { getOptions } from './get_options';
 import { injectReferences } from './references';
@@ -44,11 +44,9 @@ export function transformOut(
   }
 
   /** Inject dashboard references when by-value */
-  const byValueState = latestState as LinksByValueState;
   const updatedLinks = latestState.links?.map(({ order, id, ...link }) => link); // strip legacy properties on each link
   return {
     ...state,
-    layout: byValueState.layout,
     links: injectReferences(updatedLinks, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),
