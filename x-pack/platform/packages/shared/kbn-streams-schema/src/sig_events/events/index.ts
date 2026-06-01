@@ -40,8 +40,8 @@ export const sigEventSchema = z.object({
   grouped_into: z.string().optional(),
   // TODO: rename once the data stream fields are renamed
   // Audit fields merged from verdict docs
-  verdict_summary: z.string().optional(),
-  assessment_note: z.string().optional(),
+  verdict_summary: z.string().max(32767).optional(),
+  assessment_note: z.string().max(32767).optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;
