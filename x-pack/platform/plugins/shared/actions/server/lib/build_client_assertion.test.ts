@@ -360,7 +360,7 @@ describe('buildClientAssertion', () => {
       const r = rawSig.subarray(0, half);
       const s = rawSig.subarray(half);
       const toDerInt = (buf: Buffer) => {
-        const trimmed = buf[0] & 0x80 ? Buffer.concat([Buffer.from([0x00]), buf]) : buf;
+        const trimmed = buf[0] >= 0x80 ? Buffer.concat([Buffer.from([0x00]), buf]) : buf;
         return Buffer.concat([Buffer.from([0x02, trimmed.length]), trimmed]);
       };
       const rDer = toDerInt(r);
