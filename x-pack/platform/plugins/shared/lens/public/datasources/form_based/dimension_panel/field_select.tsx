@@ -18,7 +18,8 @@ import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { IndexPattern } from '@kbn/lens-common';
 import type { OperationType } from '../form_based';
-import { getFirstValue, type OperationSupportMatrix } from './operation_support';
+import type { OperationSupportMatrix } from './operation_support';
+import { getFirstValue } from '../pure_utils';
 import { fieldContainsData } from '../../../shared_components';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {

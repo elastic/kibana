@@ -32,7 +32,8 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
-import { getSingleValue, type OperationSupportMatrix } from './operation_support';
+import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue } from '../pure_utils';
 import {
   operationDefinitionMap,
   getOperationDisplay,

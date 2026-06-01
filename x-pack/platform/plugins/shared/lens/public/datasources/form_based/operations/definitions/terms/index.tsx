@@ -44,7 +44,7 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
-import { getFirstValue } from '../../../dimension_panel/operation_support';
+import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,

@@ -25,7 +25,8 @@ import type {
   FieldBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import { getSingleValue, type OperationSupportMatrix } from './operation_support';
+import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue } from '../pure_utils';
 import type { OperationType } from '../form_based';
 import type { RequiredReference, GenericOperationDefinition } from '../operations';
 import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
