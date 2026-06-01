@@ -27,7 +27,8 @@ Behaviour:
   Compares commits between the shipped tag and the HEAD of its release branch.
   For every PR in that gap, any label matching the version series of --shipped
   (derived from the first component that differs from --upcoming) is replaced
-  with --upcoming. PRs already carrying --upcoming are left untouched, and PRs
+  with --upcoming. PRs already carrying --upcoming are left untouched, PRs
+  carrying a label newer than --upcoming are skipped (no downgrade), and PRs
   with no matching version label are reported as warnings.
 
 Environment:
@@ -172,7 +173,13 @@ async function queryPRs(octokit, from, to) {
 async function applyLabels(octokit, prNumbers, { regex, newLabel }, dryRun) {
   if (dryRun) console.log('\n=== DRY RUN MODE — no labels will be modified ===\n');
 
-  const results = { affected: [], alreadyCorrect: [], noMatchingLabel: [], errors: [] };
+  const results = {
+    affected: [],
+    alreadyCorrect: [],
+    skippedNewer: [],
+    noMatchingLabel: [],
+    errors: [],
+  };
 
   for (const prNumber of prNumbers) {
     try {
@@ -184,6 +191,15 @@ async function applyLabels(octokit, prNumbers, { regex, newLabel }, dryRun) {
 
       const labelNames = labels.map((l) => l.name);
       const matching = labelNames.filter((name) => regex.test(name));
+
+      const newer = matching.filter((name) => isNewer(name, newLabel));
+      if (newer.length > 0) {
+        console.log(
+          `  #${prNumber}: has newer label(s) ${newer.join(', ')} — skipping (would be downgrade)`
+        );
+        results.skippedNewer.push(prNumber);
+        continue;
+      }
 
       if (matching.length === 1 && matching[0] === newLabel) {
         console.log(`  #${prNumber}: already has ${newLabel} — skipping`);
@@ -234,6 +250,7 @@ function logResults(results, { shipped, branch, pattern, upcoming, dryRun }) {
   const total =
     results.affected.length +
     results.alreadyCorrect.length +
+    results.skippedNewer.length +
     results.noMatchingLabel.length +
     results.errors.length;
 
@@ -247,12 +264,20 @@ function logResults(results, { shipped, branch, pattern, upcoming, dryRun }) {
   console.log(`  Total PRs:         ${total}`);
   console.log(`  ${dryRun ? 'Would fix' : 'Fixed'}:         ${results.affected.length}`);
   console.log(`  Already OK:        ${results.alreadyCorrect.length}`);
+  console.log(`  Skipped (newer):   ${results.skippedNewer.length}`);
   console.log(`  No matching label: ${results.noMatchingLabel.length}`);
   console.log(`  Errors:            ${results.errors.length}`);
 
   if (results.affected.length > 0) {
     console.log(
       `\n  ${dryRun ? 'Would fix' : 'Fixed'}:\n    ${results.affected
+        .map((n) => `https://github.com/${OWNER}/${REPO}/pull/${n}`)
+        .join('\n    ')}`
+    );
+  }
+  if (results.skippedNewer.length > 0) {
+    console.log(
+      `\n  Skipped (newer label):\n    ${results.skippedNewer
         .map((n) => `https://github.com/${OWNER}/${REPO}/pull/${n}`)
         .join('\n    ')}`
     );
@@ -282,6 +307,14 @@ function parseVersionLabel(label) {
     throw new Error(`Invalid version label "${label}": expected vMAJOR.MINOR.PATCH (e.g. v9.4.0)`);
   }
   return { major: +m[1], minor: +m[2], patch: +m[3] };
+}
+
+function isNewer(labelA, labelB) {
+  const a = parseVersionLabel(labelA);
+  const b = parseVersionLabel(labelB);
+  if (a.major !== b.major) return a.major > b.major;
+  if (a.minor !== b.minor) return a.minor > b.minor;
+  return a.patch > b.patch;
 }
 
 function derivePattern(oldLabel, newLabel) {

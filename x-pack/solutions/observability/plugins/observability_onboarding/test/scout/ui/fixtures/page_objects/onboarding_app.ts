@@ -258,4 +258,13 @@ export class OnboardingApp {
   async confirmEnableWiredStreamsModal() {
     await this.enableWiredStreamsConfirmButton.click();
   }
+
+  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
+    try {
+      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
+      await this.confirmEnableWiredStreamsModal();
+    } catch {
+      // Modal omitted: Wired Streams was already enabled in this session.
+    }
+  }
 }
