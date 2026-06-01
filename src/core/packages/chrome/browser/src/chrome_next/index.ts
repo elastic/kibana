@@ -12,6 +12,11 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
   AppHeaderTab,
   ChromeNext,
 } from './chrome_next';
