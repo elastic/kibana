@@ -28,12 +28,9 @@ Use `init` when you want to create a config file for a bespoke (non-golden-clust
 
 ```bash
 node scripts/evals init
-node scripts/evals init --skip-discovery
 ```
 
-| Flag               | Description                                                        |
-| ------------------ | ------------------------------------------------------------------ |
-| `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
+EIS connector discovery is automatically skipped when a valid cache exists at `~/.elastic/eis-connectors-cache.json` (7-day TTL). To force re-discovery, delete the cache file and run `init` again.
 
 #### `init config` -- Create a custom config file
 

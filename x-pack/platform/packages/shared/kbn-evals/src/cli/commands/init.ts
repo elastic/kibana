@@ -19,8 +19,6 @@ import { safeExec, getVaultAddr } from '../utils';
 import { readCachedEisConnectors, writeCachedEisConnectors } from '../eis_connectors_cache';
 import { VAULT_CONFIG_DIR, resolveVaultConfigPath, readVaultConfigFromDevVault } from '../profiles';
 
-const EIS_MODELS_PATH = 'target/eis_models.json';
-
 const CONFIG_FILENAME = 'config.json';
 const CONFIG_EXAMPLE_FILENAME = 'config.example.json';
 
@@ -385,11 +383,7 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
   }
 };
 
-export const runConnectorSetup = async (
-  repoRoot: string,
-  log: ToolingLog,
-  options?: { skipDiscovery?: boolean; useCache?: boolean }
-): Promise<void> => {
+export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
       'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
@@ -454,19 +448,17 @@ export const runConnectorSetup = async (
 
   log.info('');
 
-  if (options?.useCache !== false) {
-    const cachedConnectors = readCachedEisConnectors();
-    if (cachedConnectors) {
-      const connectorEntries = Object.entries(cachedConnectors);
-      const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
-      process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
+  const cachedConnectors = readCachedEisConnectors();
+  if (cachedConnectors) {
+    const connectorEntries = Object.entries(cachedConnectors);
+    const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
+    process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
 
-      log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
-      connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
-      log.info('');
-      log.info('To force re-discovery, run: node scripts/evals init');
-      return;
-    }
+    log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
+    connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
+    log.info('');
+    log.info('To force re-discovery, run: node scripts/evals init');
+    return;
   }
 
   const vaultAddr = getVaultAddr();
@@ -478,32 +470,11 @@ export const runConnectorSetup = async (
   const apiKey = await resolveCcmApiKey(log);
   log.info('CCM API key retrieved');
 
-  if (!(options?.skipDiscovery ?? false)) {
-    log.info('');
-    log.info('Discovering available EIS models (this starts a temporary ES cluster)...');
-    log.info('');
-    runDiscoverEisModels(repoRoot, apiKey);
-  }
-
-  const modelsPath = Path.resolve(repoRoot, EIS_MODELS_PATH);
-  if (!Fs.existsSync(modelsPath)) {
-    throw new Error(`EIS models file not found at ${modelsPath}. Run without --skip-discovery.`);
-  }
-
-  const modelsJson = JSON.parse(Fs.readFileSync(modelsPath, 'utf-8')) as {
-    models: Array<{ inferenceId: string; modelId: string }>;
-  };
-
-  if (modelsJson.models.length === 0) {
-    throw new Error(
-      'No EIS models were discovered. Check that KIBANA_EIS_CCM_API_KEY is valid and VPN is connected.'
-    );
-  }
-
-  log.info(`Found ${modelsJson.models.length} EIS model(s):`);
-  modelsJson.models.forEach((m) => log.info(`  - ${m.modelId} (${m.inferenceId})`));
-
   log.info('');
+  log.info('Discovering available EIS models (this starts a temporary ES cluster)...');
+  log.info('');
+  runDiscoverEisModels(repoRoot, apiKey);
+
   log.info('Generating connector payload...');
   const base64Payload = runGenerateEisConnectors(repoRoot);
   const connectors = listConnectorIds(base64Payload);
@@ -548,16 +519,12 @@ export const initCmd: Command<void> = {
     node scripts/evals init
     node scripts/evals init config
     node scripts/evals init config --profile mysetup
-    node scripts/evals init --skip-discovery
   `,
   flags: {
-    boolean: ['skip-discovery'],
     string: ['profile'],
-    default: { 'skip-discovery': false },
     help: `
       --profile <name>   Write config to config.<name>.json instead of config.json
                           (e.g. --profile mysetup creates config.mysetup.json)
-      --skip-discovery    Skip EIS model discovery (only applies to full init)
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -586,10 +553,7 @@ export const initCmd: Command<void> = {
     log.info('');
     await runConfigInit(repoRoot, log, { profile });
     if (!configOnly) {
-      await runConnectorSetup(repoRoot, log, {
-        skipDiscovery: flagsReader.boolean('skip-discovery'),
-        useCache: false,
-      });
+      await runConnectorSetup(repoRoot, log);
     }
   },
 };
