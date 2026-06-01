@@ -16,12 +16,6 @@ import {
 } from '../constants';
 import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
 
-const FEW_PANELS_PANEL_TITLES = [
-  'Rendering Test: heatmap',
-  'Rendering Test: guage',
-  'Rendering Test: datatable',
-] as const;
-
 let fewPanelsDashboardId = '';
 
 spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
@@ -49,18 +43,20 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
     'save as copy creates a numbered clone with the same panels',
     async ({ pageObjects, page }) => {
       await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
+      await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBeGreaterThan(1);
+
+      const sourcePanelTitles = [...(await pageObjects.dashboard.getPanelTitles())].sort();
+
       await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.saveDashboardAsCopy();
 
       await expect(page.testSubj.locator('breadcrumb last')).toContainText(
         `${FEW_PANELS_DASHBOARD_TITLE} (1)`
       );
-      await expect
-        .poll(() => pageObjects.dashboard.getPanelCount())
-        .toBe(FEW_PANELS_PANEL_TITLES.length);
+      await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(sourcePanelTitles.length);
       await expect
         .poll(async () => [...(await pageObjects.dashboard.getPanelTitles())].sort())
-        .toStrictEqual([...FEW_PANELS_PANEL_TITLES].sort());
+        .toStrictEqual(sourcePanelTitles);
     }
   );
 });
