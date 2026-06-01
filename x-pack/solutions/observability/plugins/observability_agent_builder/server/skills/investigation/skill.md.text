@@ -39,7 +39,7 @@ Follow the signal hierarchy below. Start broad, then drill into the strongest si
 Gather what's affected, what's wrong, and when it started:
 - **From the user's message** — service/host/container/endpoint, the symptom (errors, latency, failures, crashes, resource exhaustion), any explicit time range.
 - **From active alerts** — for problem diagnosis prompts, alert-related questions, or whenever the user hasn't pinned down what's wrong, call `get_alerts` early. Alerts give you the affected entity and the start time in one call.
-- **Set the time window** per "Investigating an Alert" above. If no alert is involved, use screen context, or default to the last 15 minutes.
+- **Set the time window** per "Investigating an Alert" above. If no alert is involved, use time range specified in screen context, or default to the last 15 minutes.
 
 ### Step 2: Service Health Overview
 
