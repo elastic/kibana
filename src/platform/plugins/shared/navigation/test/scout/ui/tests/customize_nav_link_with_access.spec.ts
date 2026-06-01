@@ -60,6 +60,9 @@ test.describe(
   { tag: tags.stateful.classic },
   () => {
     test.beforeAll(async ({ apiServices }) => {
+      // Delete first so a leftover space from an interrupted prior run (whose
+      // afterAll never executed) doesn't fail creation with a 409 conflict.
+      await apiServices.spaces.delete(SPACE_A.id).catch(() => {});
       await apiServices.spaces.create(SPACE_A);
       await apiServices.spaces.setSolutionView({ id: SPACE_A.id, solution: 'es' });
     });
