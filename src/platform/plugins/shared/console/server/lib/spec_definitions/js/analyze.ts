@@ -10,7 +10,6 @@
 import type { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
-
 const CHAR_FILTER_TYPES = ['html_strip', 'mapping', 'pattern_replace'] as const;
 
 const TOKEN_FILTER_TYPES = [
