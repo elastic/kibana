@@ -13,10 +13,9 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import { DataGridDensity } from '@kbn/unified-data-table';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getServiceNameCell } from './service_name_cell';
-import type { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { ContextAwarenessToolkit } from '../../../context_awareness';
 
 const core = {
   application: {
@@ -44,15 +43,12 @@ const renderCell = (
   record: DataTableRecord,
   fieldFormats: FieldFormatsStart = fieldFormatsMock
 ) => {
-  const cellRenderersExtensionParamsMock: CellRenderersExtensionParams = {
+  const toolkit: ContextAwarenessToolkit = {
     actions: {
       addFilter: jest.fn(),
     },
-    dataView: dataViewMock,
-    density: DataGridDensity.COMPACT,
-    rowHeight: 1,
   };
-  const ServiceNameCell = getServiceNameCell(serviceNameField, cellRenderersExtensionParamsMock);
+  const ServiceNameCell = getServiceNameCell(serviceNameField, toolkit);
   render(
     <ServiceNameCell
       rowIndex={0}
