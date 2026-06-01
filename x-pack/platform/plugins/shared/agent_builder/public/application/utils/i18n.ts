@@ -50,6 +50,27 @@ export const labels = {
     newToolButton: i18n.translate('xpack.agentBuilder.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
+    mcpServerConnectionButton: i18n.translate(
+      'xpack.agentBuilder.tools.mcpServerConnectionButton',
+      {
+        defaultMessage: 'Manage MCP',
+      }
+    ),
+    copyMcpServerUrlButton: i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
+      defaultMessage: 'Copy MCP Server URL',
+    }),
+    bulkImportMcpToolsButton: i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
+      defaultMessage: 'Bulk import MCP tools',
+    }),
+    manageMcpClientsButton: i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
+      defaultMessage: 'Manage MCP clients (OAuth)',
+    }),
+    aboutMcpServerDocumentationButton: i18n.translate(
+      'xpack.agentBuilder.tools.aboutMcpServerDocumentationButton',
+      {
+        defaultMessage: 'Documentation',
+      }
+    ),
     newToolTitle: i18n.translate('xpack.agentBuilder.tools.newToolTitle', {
       defaultMessage: 'Create a new tool',
     }),
@@ -537,6 +558,12 @@ export const labels = {
           defaultMessage: 'Add MCP client',
         }
       ),
+      manageApplicationConnectionsButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.manageApplicationConnectionsButtonLabel',
+        {
+          defaultMessage: 'Manage application connections',
+        }
+      ),
       searchMcpClientsPlaceholder: i18n.translate(
         'xpack.agentBuilder.mcpClients.searchMcpClientsPlaceholder',
         {
@@ -757,83 +784,6 @@ export const labels = {
         createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
           defaultMessage: 'Failed to create MCP client',
         }),
-      },
-      details: {
-        clientIdLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.clientIdLabel', {
-          defaultMessage: 'Client ID',
-        }),
-        serverUrlLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.serverUrlLabel', {
-          defaultMessage: 'MCP server URL',
-        }),
-        closeButton: i18n.translate('xpack.agentBuilder.mcpClients.details.closeButton', {
-          defaultMessage: 'Close',
-        }),
-        copyClientId: i18n.translate('xpack.agentBuilder.mcpClients.details.copyClientId', {
-          defaultMessage: 'Copy Client ID',
-        }),
-        copyServerUrl: i18n.translate('xpack.agentBuilder.mcpClients.details.copyServerUrl', {
-          defaultMessage: 'Copy MCP server URL',
-        }),
-        modal: {
-          title: (name: string) =>
-            i18n.translate('xpack.agentBuilder.mcpClients.details.modal.title', {
-              defaultMessage: 'Copy server details for {name}',
-              values: { name },
-            }),
-          description: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.description', {
-            defaultMessage:
-              'Copy the new Client ID and the Server URL into the application config file, and save your changes. To apply the new configuration, restart the application.',
-          }),
-          clientSecretLabel: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.clientSecretLabel',
-            {
-              defaultMessage: 'MCP client secret',
-            }
-          ),
-          secretWarning: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.secretWarning',
-            {
-              defaultMessage:
-                "Here's your confidential MCP client. We won't show it again, make sure to copy or download it now.",
-            }
-          ),
-          copySecret: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.copySecret', {
-            defaultMessage: 'Copy client secret',
-          }),
-          downloadSecret: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.downloadSecret',
-            {
-              defaultMessage: 'Download client secret',
-            }
-          ),
-          toggleSecretVisibility: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.toggleSecretVisibility',
-            {
-              defaultMessage: 'Toggle secret visibility',
-            }
-          ),
-        },
-        flyout: {
-          serverDetailsHeading: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.serverDetailsHeading',
-            {
-              defaultMessage: 'Server details',
-            }
-          ),
-          clientSecretRequiredTitle: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredTitle',
-            {
-              defaultMessage: 'Client secret required',
-            }
-          ),
-          clientSecretRequiredBody: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredBody',
-            {
-              defaultMessage:
-                'This client was created with a client secret. The secret is required for authentication but is not shown here. Please use the copy you saved when it was created.',
-            }
-          ),
-        },
       },
       revoke: {
         title: (name: string) =>
@@ -1592,6 +1542,69 @@ export const labels = {
       defaultMessage: 'Plugins are free - no additional credits used. Remove anytime.',
     }),
   },
+  agentConnectors: {
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateTitle', {
+      defaultMessage: 'No connectors assigned yet',
+    }),
+    emptyStateDescription: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.emptyStateDescription',
+      {
+        defaultMessage:
+          'Connectors let your agent reach into external systems like Slack, Jira, and PagerDuty, so responses are grounded in real data from your environment.',
+      }
+    ),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.emptyStateLearnMoreSuffix',
+      { defaultMessage: ' about connectors.' }
+    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateAddButton', {
+      defaultMessage: 'Add connector',
+    }),
+    emptyStateManageAll: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateManageAll', {
+      defaultMessage: 'Manage all connectors',
+    }),
+    addConnectorFromLibraryTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.title',
+      { defaultMessage: 'Add connector' }
+    ),
+    manageConnectorLibraryLink: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.manageLink',
+      { defaultMessage: 'Manage connector library' }
+    ),
+    searchAvailableConnectorsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.searchPlaceholder',
+      { defaultMessage: 'Search connectors' }
+    ),
+    noAvailableConnectorsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.noMatchMessage',
+      { defaultMessage: 'No connectors match your search.' }
+    ),
+    noAvailableConnectorsMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.noItemsMessage',
+      { defaultMessage: 'No connectors available.' }
+    ),
+    removeConnectorButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeButton',
+      { defaultMessage: 'Remove' }
+    ),
+    removeConnectorConfirmTitle: (name: string) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.removeConfirmTitle', {
+        defaultMessage: 'Remove {name}',
+        values: { name },
+      }),
+    removeConnectorConfirmBody: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeConfirmBody',
+      { defaultMessage: 'This connector will no longer be available to this agent.' }
+    ),
+    removeConnectorConfirmButton: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeConfirmButton',
+      { defaultMessage: 'Remove' }
+    ),
+    removeConnectorCancelButton: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeCancelButton',
+      { defaultMessage: 'Cancel' }
+    ),
+  },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
       defaultMessage:
@@ -2187,6 +2200,28 @@ export const labels = {
         defaultMessage: 'Clear selection',
       }
     ),
+    assignButtonLabel: i18n.translate('xpack.agentBuilder.connectors.assignButtonLabel', {
+      defaultMessage: 'Assign',
+    }),
+    chooseConnectorPlaceholder: i18n.translate(
+      'xpack.agentBuilder.connectors.chooseConnectorPlaceholder',
+      { defaultMessage: 'Choose a connector' }
+    ),
+    addExistingConnectorFlyoutTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.addExistingConnectorFlyoutTitle',
+      { defaultMessage: 'Add existing connector' }
+    ),
+    cancelButtonLabel: i18n.translate('xpack.agentBuilder.connectors.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+    assignConnectorSuccessToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorSuccessToast',
+      { defaultMessage: 'Connector added' }
+    ),
+    assignConnectorErrorToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorErrorToast',
+      { defaultMessage: 'Failed to add connector' }
+    ),
 
     // Delete modal
     deleteConnectorTitle: (name: string) =>
@@ -2252,6 +2287,39 @@ export const labels = {
         defaultMessage: 'Unable to delete {count, plural, one {# connector} other {# connectors}}',
         values: { count },
       }),
+
+    // Agent connectors page
+    manageAllLink: i18n.translate('xpack.agentBuilder.agentConnectors.manageAllLink', {
+      defaultMessage: 'Manage all connectors',
+    }),
+    addConnectorPopoverLabel: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.addConnectorPopoverLabel',
+      { defaultMessage: 'Add connector options' }
+    ),
+    addConnectorButton: i18n.translate('xpack.agentBuilder.agentConnectors.addConnectorButton', {
+      defaultMessage: 'Add connector',
+    }),
+    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.fromLibraryMenuItem', {
+      defaultMessage: 'From library',
+    }),
+    createNewMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.createNewMenuItem', {
+      defaultMessage: 'Create new connector',
+    }),
+    searchPlaceholder: i18n.translate('xpack.agentBuilder.agentConnectors.searchPlaceholder', {
+      defaultMessage: 'Search active connectors',
+    }),
+    noMatchMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noMatchMessage', {
+      defaultMessage: 'No connectors match your search.',
+    }),
+    noConnectorsAssignedMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.noConnectorsAssignedMessage',
+      {
+        defaultMessage: 'No connectors assigned yet.',
+      }
+    ),
+    noSelectionMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noSelectionMessage', {
+      defaultMessage: 'Select a connector to view details',
+    }),
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),

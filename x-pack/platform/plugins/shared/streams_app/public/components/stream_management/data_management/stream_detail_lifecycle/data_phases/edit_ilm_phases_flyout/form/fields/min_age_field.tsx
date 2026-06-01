@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { getBoundsHelpTextValues, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import { getMinAgeFieldsToValidateOnChange } from '../schema';
@@ -56,14 +56,20 @@ const MinAgeFieldControl = ({
 
   const committedValue = String(minAgeValueField.value ?? '');
   const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
-
-  const isEditingRef = useRef(false);
-  const [draftValue, setDraftValue] = useState<string>(committedValue);
-
-  useEffect(() => {
-    if (isEditingRef.current) return;
-    setDraftValue(committedValue);
-  }, [committedValue]);
+  const { draftValue, onChange, onBlur } = useBlurCommitDraft({
+    committedValue,
+    onFieldBlur: () => {
+      minAgeValueField.onBlur();
+    },
+    onCommit: (next) => {
+      minAgeValueField.onChange(next);
+    },
+    onAfterCommit: () => {
+      setTimeout(() => {
+        void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
+      }, 0);
+    },
+  });
 
   const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null =>
     getPhaseDurationMs(getValues, phase, {
@@ -114,27 +120,10 @@ const MinAgeFieldControl = ({
             data-test-subj={`${dataTestSubj}MoveAfterValue`}
             inputRef={minAgeValueField.ref}
             onChange={(e) => {
-              isEditingRef.current = true;
-              const nextValue = e.target.value;
-              setDraftValue(nextValue);
+              onChange(e.target.value);
             }}
             onBlur={() => {
-              isEditingRef.current = false;
-              minAgeValueField.onBlur();
-              const nextValue = draftValue.trim();
-              if (nextValue === '') {
-                setDraftValue(committedValue);
-                return;
-              }
-
-              // Commit only on blur.
-              if (nextValue !== committedValue.trim()) {
-                minAgeValueField.onChange(nextValue);
-              }
-
-              setTimeout(() => {
-                void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
-              }, 0);
+              onBlur();
             }}
           />
         </EuiFlexItem>
