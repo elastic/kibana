@@ -120,7 +120,6 @@ describe('pinned panels', () => {
     {
       id: 'control3',
       type: TIME_SLIDER_CONTROL,
-      ...DEFAULT_PINNED_CONTROL_STATE,
       grow: true,
       width: 'large',
       config: DEFAULT_TIME_SLIDER_STATE,
