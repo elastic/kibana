@@ -122,6 +122,7 @@ import type { VisualizationSavedObjectAttributes } from '../common/content_manag
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
 import type { VisualizeByReferenceState } from '../common/embeddable/types';
+import { VegaIcon } from './components/vega_icon';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -500,8 +501,9 @@ export class VisualizationsPlugin
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
-      getIconForSavedObject: () => {
-        return 'visualizeApp';
+      getIconForSavedObject: (savedObject) => {
+        const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
+        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(
