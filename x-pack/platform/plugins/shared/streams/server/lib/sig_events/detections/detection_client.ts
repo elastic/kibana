@@ -18,7 +18,6 @@ import {
   andWhere,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
-  runFindByIdEsqlQuery,
   queryEsql,
   esqlToObjects,
 } from '../latest_source_query';
@@ -162,18 +161,5 @@ export class DetectionClient {
         this.toDetection(raw, processedIds.has(raw.detection_id ?? ''))
       ),
     };
-  }
-
-  async findById(detectionId: string): Promise<{ hits: Detection[] }> {
-    const result = await runFindByIdEsqlQuery<RawDetection>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: DETECTIONS_DATA_STREAM,
-      idField: FIELD_DETECTION_ID,
-      idValue: detectionId,
-    });
-    // History returns all doc kinds including kind:handled.
-    // Mark each hit processed=true if it is itself a handled doc.
-    return { hits: result.hits.map((raw) => this.toDetection(raw, raw.kind === KIND_HANDLED)) };
   }
 }
