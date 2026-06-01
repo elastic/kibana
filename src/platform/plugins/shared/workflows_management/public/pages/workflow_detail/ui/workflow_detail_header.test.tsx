@@ -68,6 +68,8 @@ jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
     isLoading: false,
+    highlightDiff: false,
+    setHighlightDiff: jest.fn(),
   };
 
   const mockWorkflow = {
