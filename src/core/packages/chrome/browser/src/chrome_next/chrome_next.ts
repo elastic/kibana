@@ -123,6 +123,11 @@ export type AppHeaderTitleSaveResult = string | void;
 export interface AppHeaderEditableTitle {
   text: string;
   onSave: (nextTitle: string) => AppHeaderTitleSaveResult | Promise<AppHeaderTitleSaveResult>;
+  /**
+   * Accessible label for the edit input, naming what is being renamed (the title is the
+   * dashboard/case/etc. name, not a generic "page title"). Prefer a context-specific label
+   * such as "Edit dashboard name". Falls back to a generic label when omitted.
+   */
   ariaLabel?: string;
   /** Muted hint shown when the title is empty (read mode) and as the input placeholder (edit mode). */
   placeholder?: string;

@@ -107,8 +107,9 @@ activates, so editable and non-editable headings line up identically.
 - Editability is conveyed separately: a visually-hidden instructions span
   (`editInstructions`) referenced by `aria-describedby` on the read trigger, kept
   **outside** the `<h1>` so it doesn't pollute name-from-content.
-- The input gets `aria-label` (caller's `ariaLabel` or a default), `aria-invalid`,
-  `aria-busy` while saving, and `aria-describedby` -> the error.
+- The input gets `aria-label` (caller's `ariaLabel`, which should name the edited
+  entity e.g. "Edit dashboard name", or a generic default), `aria-invalid`, `aria-busy`
+  while saving, and `aria-describedby` -> the error.
 - The error is announced via a visually-hidden `role="alert"` span; the visible
   warning icon is supplementary.
 
