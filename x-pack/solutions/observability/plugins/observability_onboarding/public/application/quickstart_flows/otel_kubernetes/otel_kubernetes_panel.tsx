@@ -51,6 +51,7 @@ import {
   OTEL_STACK_NAMESPACE,
 } from './constants';
 import { buildValuesFileUrl } from './build_values_file_url';
+import { buildOtelKubernetesActionLinks } from './build_otel_kubernetes_action_links';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
@@ -58,11 +59,11 @@ import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
       defaultMessage: 'Kubernetes: OpenTelemetry',
-    }),
-  });
+    })
+  );
   const { data, status, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
@@ -142,51 +143,13 @@ export const OtelKubernetesPanel: React.FC = () => {
       })
     : undefined;
 
-  const otelKubernetesActionLinks: ActionLink[] = [
-    ...(isMetricsOnboardingEnabled
-      ? [
-          {
-            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-            title: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
-              { defaultMessage: 'Check your Kubernetes cluster health:' }
-            ),
-            label: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
-              { defaultMessage: 'Explore Kubernetes Cluster Dashboard' }
-            ),
-            requires: 'metrics' as const,
-            href:
-              dashboardLocator?.getRedirectUrl({
-                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-              }) ?? '',
-          },
-          {
-            id: 'services',
-            title: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
-              { defaultMessage: 'Check your application services:' }
-            ),
-            label: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
-              { defaultMessage: 'Explore Service inventory' }
-            ),
-            requires: 'metrics' as const,
-            href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-          },
-        ]
-      : []),
-    {
-      id: 'logs',
-      title: i18n.translate('xpack.observability_onboarding.otelKubernetesPanel.logsTitle', {
-        defaultMessage: 'View and analyze your logs:',
-      }),
-      label: i18n.translate('xpack.observability_onboarding.otelKubernetesPanel.logsLabel', {
-        defaultMessage: 'Explore logs',
-      }),
-      href: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
-    },
-  ];
+  const otelKubernetesActionLinks: ActionLink[] = buildOtelKubernetesActionLinks({
+    isMetricsOnboardingEnabled,
+    dashboardHref:
+      dashboardLocator?.getRedirectUrl({ dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID }) ?? '',
+    servicesHref: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
+    logsHref: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+  });
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
