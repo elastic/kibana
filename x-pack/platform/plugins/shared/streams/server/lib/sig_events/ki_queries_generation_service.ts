@@ -7,7 +7,7 @@
 
 import type {
   ElasticsearchClient,
-  IUiSettingsClient,
+  FeatureFlagsStart,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
@@ -18,10 +18,10 @@ import {
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import type { StreamsClient } from '../streams/client';
 import type { FeatureClient } from '../streams/feature/feature_client';
 import type { QueryClient } from '../streams/assets/query/query_client';
@@ -46,7 +46,7 @@ export interface GenerateKIQueriesDependencies {
   featureClient: FeatureClient;
   queryClient: QueryClient;
   esClient: ElasticsearchClient;
-  uiSettingsClient: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   request: KibanaRequest;
   logger: Logger;
@@ -71,7 +71,7 @@ export async function generateKIQueries(
     featureClient,
     queryClient,
     esClient,
-    uiSettingsClient,
+    featureFlags,
     searchInferenceEndpoints,
     request,
     logger,
@@ -93,7 +93,7 @@ export async function generateKIQueries(
   const [definition, { significantEventsPromptOverride }, useMemory] = await Promise.all([
     streamsClient.getStream(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
-    uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY),
+    isSignificantEventsMemoryEnabled(featureFlags),
   ]);
 
   const memoryTools = useMemory
