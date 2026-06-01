@@ -31,7 +31,6 @@ import {
   LINKS_SAVED_OBJECT_TYPE,
 } from '../common';
 import type { LinksCrudTypes } from '../common/content_management';
-import { getLinksClient } from './links_client/links_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 
@@ -93,48 +92,52 @@ export class LinksPlugin
       return transformOut;
     });
 
-    plugins.visualizations.registerAlias({
-      disableCreate: true, // do not allow creation through visualization listing page
-      name: CONTENT_ID,
-      title: APP_NAME,
-      icon: APP_ICON,
-      description: i18n.translate('links.description', {
-        defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
-      }),
-      stage: 'production',
-      appExtensions: {
-        visualizations: {
-          docTypes: [CONTENT_ID],
-          searchFields: ['title^3'],
-          client: getLinksClient,
-          toListItem(
-            linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
-              attributes: { title: string; description?: string };
-            }
-          ) {
-            const { id, type, updatedAt, attributes } = linkItem;
-            const { title, description } = attributes;
+    import('./links_client/links_client').then(({ getLinksClient }) =>
+      plugins.visualizations.registerAlias({
+        disableCreate: true, // do not allow creation through visualization listing page
+        name: CONTENT_ID,
+        title: APP_NAME,
+        icon: APP_ICON,
+        description: i18n.translate('links.description', {
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+        }),
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [CONTENT_ID],
+            searchFields: ['title^3'],
+            client: getLinksClient,
+            toListItem(
+              linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
+                attributes: { title: string; description?: string };
+              }
+            ) {
+              const { id, type, updatedAt, attributes } = linkItem;
+              const { title, description } = attributes;
 
-            return {
-              id,
-              title,
-              editor: {
-                onEdit: async (refId: string) => {
-                  const { onVisualizationsEdit } = await import('./editor/on_visualizations_edit');
-                  onVisualizationsEdit(refId);
+              return {
+                id,
+                title,
+                editor: {
+                  onEdit: async (refId: string) => {
+                    const { onVisualizationsEdit } = await import(
+                      './editor/on_visualizations_edit'
+                    );
+                    onVisualizationsEdit(refId);
+                  },
                 },
-              },
-              description,
-              updatedAt,
-              icon: APP_ICON,
-              typeTitle: APP_NAME,
-              stage: 'production',
-              savedObjectType: type,
-            };
+                description,
+                updatedAt,
+                icon: APP_ICON,
+                typeTitle: APP_NAME,
+                stage: 'production',
+                savedObjectType: type,
+              };
+            },
           },
         },
-      },
-    });
+      })
+    );
 
     plugins.uiActions.addTriggerActionAsync(
       ADD_PANEL_TRIGGER,
