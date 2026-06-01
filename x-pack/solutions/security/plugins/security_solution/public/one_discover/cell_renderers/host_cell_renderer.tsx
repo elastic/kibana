@@ -9,9 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { Host } from '../../flyout_v2/entity/host/main';
 import type { StartServices } from '../../types';
@@ -19,12 +21,6 @@ import type { SecurityAppStore } from '../../common/store/types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export const HOST_CELL_RENDERER_FIELDS = new Set(['host.name', 'host.hostname']);
-
-const getFirstValue = (raw: unknown): string | undefined => {
-  if (Array.isArray(raw)) return raw.length > 0 ? String(raw[0]) : undefined;
-  if (raw != null) return String(raw);
-  return undefined;
-};
 
 export interface HostCellRendererProps extends DataGridCellValueElementProps {
   services: StartServices;
@@ -39,7 +35,9 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
   ({ services, store, ...props }) => {
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { overlays } = services;
+    const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const rawValue = props.row.flattened[props.columnId];
 
     const values: string[] = useMemo(() => {
@@ -49,14 +47,8 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
     }, [rawValue]);
 
     const handleClick = useCallback(
-      (clickedValue: string) => {
-        const { flattened } = props.row;
-
-        const hostName = clickedValue;
-        const entityId =
-          getFirstValue(flattened['host.entity.id']) ?? getFirstValue(flattened['entity.id']);
-
-        if (!hostName && !entityId) return;
+      (hostName: string) => {
+        if (!hostName) return;
 
         overlays.openSystemFlyout(
           flyoutProviders({
@@ -66,18 +58,27 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
             children: (
               <>
                 {!isInSecurityApp && <DataViewManagerBootstrap />}
-                <Host hostName={hostName} entityId={entityId} />
+                <Host hostName={hostName} hit={props.row} />
               </>
             ),
           }),
           {
-            ...defaultToolsFlyoutProperties,
-            size: 's',
+            ...defaultDocumentFlyoutProperties,
+            historyKey,
             session: 'start',
           }
         );
       },
-      [props.row, overlays, services, store, history, isInSecurityApp]
+      [
+        overlays,
+        services,
+        store,
+        history,
+        isInSecurityApp,
+        historyKey,
+        props.row,
+        defaultDocumentFlyoutProperties,
+      ]
     );
 
     if (values.length === 0) {

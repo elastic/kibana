@@ -53,6 +53,8 @@ export interface ContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
+  /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 /**
@@ -72,6 +74,7 @@ export const Content = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  hideHeaderIcons = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -101,6 +104,7 @@ export const Content = ({
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
+              hideHeaderIcon={hideHeaderIcons}
             />
             <EuiHorizontalRule />
           </>
@@ -139,6 +143,7 @@ export const Content = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
+        hideHeaderIcons={hideHeaderIcons}
       />
       <ObservedDataSection
         observedHost={observedHost}

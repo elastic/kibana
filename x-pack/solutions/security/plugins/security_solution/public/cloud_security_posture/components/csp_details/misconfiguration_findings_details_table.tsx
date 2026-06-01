@@ -173,6 +173,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
+    onShowFinding,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
@@ -180,6 +181,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: string;
+    /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked. Use this in system-flyout contexts. */
+    onShowFinding?: (resourceId: string, ruleId: string) => void;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -339,6 +342,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
               );
+
+              if (onShowFinding) {
+                onShowFinding(finding.resource.id, finding.rule.id);
+                return;
+              }
 
               const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
                 id: MisconfigurationFindingsPreviewPanelKey,

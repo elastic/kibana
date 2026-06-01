@@ -64,10 +64,13 @@ export const AlertsPreview = ({
   alertsData,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcon = false,
 }: {
   alertsData: ParsedAlertsData;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** When true, hides the icon in the "Alerts" header. Defaults to false. */
+  hideHeaderIcon?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -123,7 +126,7 @@ export const AlertsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
+        iconType: !isPreviewMode && !hideHeaderIcon && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
         title: (
           <EuiText
             size="xs"

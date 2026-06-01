@@ -11,6 +11,7 @@ import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
@@ -21,7 +22,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useKibana } from '../../../../../common/lib/kibana';
 import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 interface Props {
   contextId: string;
@@ -48,8 +50,11 @@ const HostNameComponent: React.FC<Props> = ({
   const store = useStore();
   const history = useHistory();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const isInSecurityApp = useIsInSecurityApp();
+
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
@@ -76,7 +81,8 @@ const HostNameComponent: React.FC<Props> = ({
             children: <Host hostName={hostName} entityId={entityId} />,
           }),
           {
-            ...defaultToolsFlyoutProperties,
+            ...defaultDocumentFlyoutProperties,
+            historyKey,
             session: 'start',
           }
         );
@@ -108,6 +114,8 @@ const HostNameComponent: React.FC<Props> = ({
       services,
       store,
       history,
+      historyKey,
+      defaultDocumentFlyoutProperties,
     ]
   );
 

@@ -118,12 +118,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
+    onShowVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
     scopeId: string;
     entityId?: string;
     entityType?: string;
+    onShowVulnerability?: (params: {
+      vulnerabilityId: string;
+      resourceId: string;
+      packageName: string;
+      packageVersion: string;
+      eventId: string;
+    }) => void;
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -321,43 +329,71 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         render: (
           vulnerability: VulnerabilitiesPackage,
           finding: VulnerabilitiesFindingDetailFields
-        ) => (
-          <EuiButtonIcon
-            iconType="maximize"
-            onClick={() => {
-              const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
-                id: VulnerabilityFindingsPreviewPanelKey,
-                params: {
-                  vulnerabilityId: vulnerability?.id,
-                  resourceId: finding?.resource?.id,
-                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
-                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
-                  eventId: finding?.event?.id,
-                  scopeId,
-                  isPreviewMode: true,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview vulnerability details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
-                  },
-                },
-              };
+        ) => {
+          const vulnerabilityId = Array.isArray(vulnerability?.id)
+            ? vulnerability.id[0]
+            : vulnerability?.id;
+          const resourceId = finding?.resource?.id;
+          const packageName = finding?.[VULNERABILITY_FINDING.PACKAGE_NAME];
+          const packageVersion = finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION];
+          const eventId = finding?.event?.id;
 
-              openPreviewPanel(previewPanelProps);
-            }}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
-              {
-                defaultMessage: 'Preview vulnerability details',
-              }
-            )}
-          />
-        ),
+          return (
+            <EuiButtonIcon
+              iconType="maximize"
+              onClick={() => {
+                if (
+                  onShowVulnerability &&
+                  vulnerabilityId &&
+                  resourceId &&
+                  packageName &&
+                  packageVersion &&
+                  eventId
+                ) {
+                  onShowVulnerability({
+                    vulnerabilityId,
+                    resourceId,
+                    packageName,
+                    packageVersion,
+                    eventId,
+                  });
+                  return;
+                }
+
+                const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
+                  id: VulnerabilityFindingsPreviewPanelKey,
+                  params: {
+                    vulnerabilityId,
+                    resourceId,
+                    packageName,
+                    packageVersion,
+                    eventId,
+                    scopeId,
+                    isPreviewMode: true,
+                    banner: {
+                      title: i18n.translate(
+                        'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
+                        {
+                          defaultMessage: 'Preview vulnerability details',
+                        }
+                      ),
+                      backgroundColor: 'warning',
+                      textColor: 'warning',
+                    },
+                  },
+                };
+
+                openPreviewPanel(previewPanelProps);
+              }}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+                {
+                  defaultMessage: 'Preview vulnerability details',
+                }
+              )}
+            />
+          );
+        },
       },
       {
         field: 'score',

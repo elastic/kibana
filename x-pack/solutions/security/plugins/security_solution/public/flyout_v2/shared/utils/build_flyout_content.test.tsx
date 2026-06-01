@@ -28,7 +28,11 @@ jest.mock('../../network/main', () => ({
 }));
 
 jest.mock('../../entity/host/main', () => ({
-  Host: ({ hostName }: { hostName: string }) => <div data-test-subj="mockHost">{hostName}</div>,
+  Host: ({ hostName, hit }: { hostName: string; hit?: { flattened: Record<string, unknown> } }) => (
+    <div data-test-subj="mockHost" data-has-hit={hit ? 'true' : 'false'}>
+      {hostName}
+    </div>
+  ),
 }));
 
 jest.mock(
@@ -66,6 +70,21 @@ describe('buildFlyoutContent', () => {
 
     const { getByTestId } = render(result!);
     expect(getByTestId('mockHost')).toHaveTextContent('my-host');
+  });
+
+  it('should pass hit to Host element when provided', () => {
+    const mockHit = {
+      id: 'test-doc-id',
+      raw: { _id: 'test-doc-id', _index: 'test-index' },
+      flattened: { 'host.name': 'my-host' },
+    } as unknown as Parameters<typeof buildFlyoutContent>[2];
+
+    const result = buildFlyoutContent('host.name', 'my-host', mockHit);
+
+    expect(result).not.toBeNull();
+
+    const { getByTestId } = render(result!);
+    expect(getByTestId('mockHost')).toHaveAttribute('data-has-hit', 'true');
   });
 
   it('should return null for an unknown field', () => {
