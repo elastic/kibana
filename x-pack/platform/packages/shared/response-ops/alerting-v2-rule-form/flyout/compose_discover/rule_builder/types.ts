@@ -17,11 +17,17 @@ export interface RuleBuilderStepProps {
   services: RuleFormServices;
 }
 
+export interface RuleBuilderRecoveryProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
+
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
   stepTitle: string;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
+  renderRecoveryStep?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
   validate?: (state: ComposeDiscoverState, builderState?: TState) => boolean;
-  parseState?: (query: string) => TState | null;
+  parseState?: (query: string, recoveryQuery?: string) => TState | null;
 }
