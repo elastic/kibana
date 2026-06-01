@@ -49,7 +49,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
-  EvaluationRunSummary,
+  EvaluationExperimentSummary,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
@@ -58,7 +58,7 @@ import {
   useDeleteExample,
   useEvalsTraceFetcher,
   useExampleScores,
-  useEvaluationRuns,
+  useEvaluationExperiments,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
@@ -111,7 +111,7 @@ export const DatasetDetailPage: React.FC = () => {
     data: runsData,
     isLoading: isRunsLoading,
     error: runsError,
-  } = useEvaluationRuns({
+  } = useEvaluationExperiments({
     datasetId,
     page: 1,
     perPage: 100,
@@ -365,20 +365,35 @@ export const DatasetDetailPage: React.FC = () => {
     []
   );
 
-  const runsColumns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+  const runsColumns: Array<EuiBasicTableColumn<EvaluationExperimentSummary>> = useMemo(
     () => [
       {
-        field: 'run_id',
-        name: i18n.COLUMN_RUN_ID,
-        render: (runId: string) => (
-          <EuiLink
-            onClick={() =>
-              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
-            }
-          >
-            {truncate(runId, 12)}
-          </EuiLink>
-        ),
+        field: 'experiment_name',
+        name: i18n.COLUMN_RUN_NAME,
+        render: (_name: string | null | undefined, row: EvaluationExperimentSummary) => {
+          const isSuiteRun = !!row.suite_id;
+          const displayName = isSuiteRun
+            ? row.suite_id ?? row.experiment_name ?? truncate(row.experiment_id, 12)
+            : row.experiment_name ?? truncate(row.experiment_id, 12);
+          const executionId = row.execution_id ?? row.experiment_id;
+          const dsParam = encodeURIComponent(datasetId);
+          const query = `?execution_id=${encodeURIComponent(executionId)}&dataset_id=${dsParam}`;
+          const modelId = row.task_model?.id;
+          return (
+            <EuiToolTip content={executionId}>
+              <div tabIndex={0}>
+                <EuiLink onClick={() => history.push(`/experiments/${row.experiment_id}${query}`)}>
+                  {displayName}
+                </EuiLink>
+                {modelId ? (
+                  <EuiText size="xs" color="subdued">
+                    {modelId}
+                  </EuiText>
+                ) : null}
+              </div>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'timestamp',
@@ -386,19 +401,21 @@ export const DatasetDetailPage: React.FC = () => {
         render: (timestamp: string) => formatDate(timestamp),
       },
       {
-        field: 'suite_id',
-        name: i18n.COLUMN_RUN_SUITE,
-        render: (value?: string) => value ?? '-',
-      },
-      {
-        field: 'task_model',
-        name: i18n.COLUMN_RUN_TASK_MODEL,
-        render: (value: EvaluationRunSummary['task_model']) => value?.id ?? '-',
-      },
-      {
         field: 'evaluator_model',
         name: i18n.COLUMN_RUN_EVALUATOR_MODEL,
-        render: (value: EvaluationRunSummary['evaluator_model']) => value?.id ?? '-',
+        render: (value: EvaluationExperimentSummary['evaluator_model']) => value?.id ?? '-',
+      },
+      {
+        field: 'git_branch',
+        name: i18n.COLUMN_RUN_BRANCH,
+        render: (value: string | null | undefined) =>
+          value ? <EuiBadge color="hollow">{value}</EuiBadge> : '-',
+      },
+      {
+        field: 'total_repetitions',
+        name: i18n.COLUMN_RUN_REPS,
+        width: '80px',
+        render: (value: number | undefined) => String(value ?? 1),
       },
     ],
     [datasetId, history]
@@ -416,21 +433,23 @@ export const DatasetDetailPage: React.FC = () => {
     return parts.join(' · ');
   }, [dataset]);
 
-  interface RunScoreRow {
+  interface ExperimentScoreRow {
     runId: string;
+    experimentName?: string;
     timestamp?: string;
     taskModelId?: string;
     scores: EvaluationScoreDocument[];
     traceIds: string[];
   }
 
-  const exampleRunRows = useMemo<RunScoreRow[]>(() => {
-    const groupedRuns = new Map<string, RunScoreRow>();
+  const exampleRunRows = useMemo<ExperimentScoreRow[]>(() => {
+    const groupedRuns = new Map<string, ExperimentScoreRow>();
     for (const score of exampleScoresData?.scores ?? []) {
-      const existing = groupedRuns.get(score.run_id);
+      const existing = groupedRuns.get(score.experiment_id);
       if (!existing) {
-        groupedRuns.set(score.run_id, {
-          runId: score.run_id,
+        groupedRuns.set(score.experiment_id, {
+          runId: score.experiment_id,
+          experimentName: score.experiment_name,
           timestamp: score['@timestamp'],
           taskModelId: score.task.model.id,
           scores: [score],
@@ -459,32 +478,40 @@ export const DatasetDetailPage: React.FC = () => {
     });
   }, [exampleScoresData?.scores]);
 
-  const exampleRunColumns: Array<EuiBasicTableColumn<RunScoreRow>> = useMemo(
+  const exampleRunColumns: Array<EuiBasicTableColumn<ExperimentScoreRow>> = useMemo(
     () => [
       {
         field: 'runId',
-        name: i18n.COLUMN_EXPERIMENT_RUN_ID,
-        width: '180px',
-        render: (runId: string) => (
-          <EuiLink
-            onClick={() =>
-              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
-            }
-          >
-            {truncate(runId, 12)}
-          </EuiLink>
-        ),
+        name: i18n.COLUMN_RUN_NAME,
+        render: (_runId: string, row: ExperimentScoreRow) => {
+          const displayName = row.experimentName ?? truncate(row.runId, 12);
+          return (
+            <EuiToolTip content={row.runId}>
+              <div tabIndex={0}>
+                <EuiLink
+                  onClick={() =>
+                    history.push(
+                      `/experiments/${row.runId}?dataset_id=${encodeURIComponent(datasetId)}`
+                    )
+                  }
+                >
+                  {displayName}
+                </EuiLink>
+                {row.taskModelId ? (
+                  <EuiText size="xs" color="subdued">
+                    {row.taskModelId}
+                  </EuiText>
+                ) : null}
+              </div>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'timestamp',
         name: i18n.COLUMN_EXPERIMENT_TIMESTAMP,
         width: '180px',
         render: (timestamp?: string) => formatDate(timestamp),
-      },
-      {
-        field: 'taskModelId',
-        name: i18n.COLUMN_EXPERIMENT_TASK_MODEL,
-        render: (taskModelId?: string) => taskModelId ?? '-',
       },
       {
         field: 'scores',
@@ -694,9 +721,9 @@ export const DatasetDetailPage: React.FC = () => {
               <h3>{i18n.RUNS_SECTION_TITLE}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiBasicTable<EvaluationRunSummary>
+            <EuiBasicTable<EvaluationExperimentSummary>
               tableCaption={i18n.RUNS_SECTION_TITLE}
-              items={runsData?.runs ?? []}
+              items={runsData?.experiments ?? []}
               columns={runsColumns}
               loading={isRunsLoading}
               noItemsMessage={i18n.RUNS_EMPTY_MESSAGE}
@@ -735,12 +762,17 @@ export const DatasetDetailPage: React.FC = () => {
                           </EuiButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                            iconType="trash"
-                            color="danger"
-                            onClick={() => setDeletingExample(selectedExample)}
-                          />
+                          <EuiToolTip
+                            content={i18n.DELETE_EXAMPLE_BUTTON}
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                              iconType="trash"
+                              color="danger"
+                              onClick={() => setDeletingExample(selectedExample)}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </>
                     ) : null}
@@ -854,7 +886,7 @@ export const DatasetDetailPage: React.FC = () => {
                     <p>{i18n.getExperimentRunsLoadError(String(exampleScoresError))}</p>
                   </EuiText>
                 ) : (
-                  <EuiBasicTable<RunScoreRow>
+                  <EuiBasicTable<ExperimentScoreRow>
                     tableCaption={i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}
                     items={exampleRunRows}
                     columns={exampleRunColumns}
