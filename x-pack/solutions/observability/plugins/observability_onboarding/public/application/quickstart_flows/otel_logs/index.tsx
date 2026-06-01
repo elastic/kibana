@@ -106,7 +106,9 @@ export const OtelLogsPanel: React.FC = () => {
     onboardingId: setupData?.onboardingId,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+  const [manuallyTriggered, setManuallyTriggered] = useState(false);
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly || manuallyTriggered;
 
   // Set sessionStartTime when monitoring begins, not on mount.
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
@@ -504,7 +506,19 @@ export const OtelLogsPanel: React.FC = () => {
                       </>
                     )}
                 </>
-              ) : null,
+              ) : (
+                <EuiButton
+                  data-test-subj="observabilityOnboardingOtelHostCheckForDataButton"
+                  onClick={() => setManuallyTriggered(true)}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.otelLogsPanel.checkForDataButton',
+                    {
+                      defaultMessage: 'Check for data',
+                    }
+                  )}
+                </EuiButton>
+              ),
             },
           ]}
         />
