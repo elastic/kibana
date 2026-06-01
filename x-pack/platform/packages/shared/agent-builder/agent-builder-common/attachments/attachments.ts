@@ -44,6 +44,11 @@ export interface Attachment<
      * Set when `updateOrigin` is called. Undefined when the attachment has never been saved to an origin.
      */
     originSyncedAt?: string;
+    /**
+     * Data from the immediately preceding version, if one exists.
+     * Used by attachment renderers to compute diffs between the current and previous version.
+     */
+    previousVersionData?: DataType;
   };
 }
 

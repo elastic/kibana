@@ -146,6 +146,8 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
+    const previousVersionData = attachment.versions.find((v) => v.version === versionToUse - 1);
+
     return (
       <InlineAttachmentWithActions
         attachment={{
@@ -159,6 +161,7 @@ export const createRenderAttachmentRenderer = ({
             versionCount: attachment.versions.length,
             createdAt: versionData.created_at,
             originSyncedAt: attachment.origin_snapshot_at,
+            previousVersionData: previousVersionData?.data,
           },
         }}
         conversationId={conversationId}

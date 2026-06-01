@@ -14,6 +14,10 @@ export const SKILL_ATTACHMENT_TYPE = 'skill' as const;
 export const skillAttachmentDataSchema = z.object({
   mode: z.enum(['create', 'edit']),
   skill: skillCreateRequestSchema,
+  /**
+   * Only present for `mode: 'edit'` attachments.
+   */
+  originalContent: z.string().optional(),
 });
 
 /**

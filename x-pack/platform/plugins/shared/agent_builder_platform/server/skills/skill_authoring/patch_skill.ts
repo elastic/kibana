@@ -276,7 +276,13 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       };
     }
 
-    const merged: SkillAttachmentData = { mode: current.mode, skill: validated.data };
+    const merged: SkillAttachmentData = {
+      mode: current.mode,
+      skill: validated.data,
+      ...(current.originalContent !== undefined
+        ? { originalContent: current.originalContent }
+        : {}),
+    };
     const toolValidation = await validateToolIdsAgainstRegistry(context, merged.skill.tool_ids);
     if (!toolValidation.ok) {
       return {

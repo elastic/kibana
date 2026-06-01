@@ -74,6 +74,7 @@ export const createLoadSkillForEditingTool = (): BuiltinSkillBoundedTool<
         tool_ids: toolIds,
         ...(skill.referencedContent?.length ? { referenced_content: skill.referencedContent } : {}),
       },
+      originalContent: skill.content,
     };
 
     try {

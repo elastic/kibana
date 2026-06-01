@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,7 +35,12 @@ import {
   SKILLS_API_PATH,
   type CreateSkillResponse,
 } from '@kbn/agent-builder-plugin/public';
-import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
+import {
+  SKILL_ATTACHMENT_TYPE,
+  type SkillAttachment,
+  type SkillAttachmentData,
+} from '../../../common/attachments';
+import { SkillDiffViewer } from './skill_diff_viewer';
 
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
@@ -143,40 +150,133 @@ const previewInstructionsStyles = css`
     margin-block-end: 0;
   }
 `;
+
+type DiffBase = 'previous' | 'original';
+
 const SkillInstructions = ({
   showFullContent,
   content,
+  previousContent,
+  originalContent,
+  mode,
 }: {
   showFullContent: boolean;
   content: string;
+  previousContent?: string;
+  originalContent?: string;
+  mode: SkillAttachmentData['mode'];
 }) => {
+  const [showDiff, setShowDiff] = useState(false);
+  const [diffBase, setDiffBase] = useState<DiffBase>('previous');
+
+  // Only offer the diff toggle when there is a genuine previous version to compare against
+  const hasPreviousVersion = previousContent !== undefined && previousContent !== content;
+  // Only offer the "vs original" secondary option in edit mode when the original content differs
+  const hasOriginalDiff =
+    mode === 'edit' && originalContent !== undefined && originalContent !== content;
+
+  const beforeContent =
+    diffBase === 'original' && originalContent ? originalContent : previousContent;
+
+  const label = showFullContent ? (
+    <FormattedMessage
+      id="xpack.agentBuilderPlatform.attachments.skill.instructionsFullLabel"
+      defaultMessage="Instructions"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.agentBuilderPlatform.attachments.skill.instructionsLabel"
+      defaultMessage="Instructions preview"
+    />
+  );
+
   return (
     <>
-      <EuiText size="xs" color="subdued">
-        <strong>
-          {showFullContent ? (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skill.instructionsFullLabel"
-              defaultMessage="Instructions"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skill.instructionsLabel"
-              defaultMessage="Instructions preview"
-            />
-          )}
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiCodeBlock
-        language="markdown"
-        fontSize="s"
-        overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
-        isCopyable={showFullContent}
-        css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
       >
-        {content}
-      </EuiCodeBlock>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>{label}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {hasPreviousVersion && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
+                { defaultMessage: 'Instructions view' }
+              )}
+              options={[
+                {
+                  id: 'current',
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
+                    { defaultMessage: 'Current' }
+                  ),
+                },
+                {
+                  id: 'diff',
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
+                    { defaultMessage: 'Changes' }
+                  ),
+                },
+              ]}
+              idSelected={showDiff ? 'diff' : 'current'}
+              onChange={(id) => {
+                setShowDiff(id === 'diff');
+              }}
+              buttonSize="compressed"
+              color="text"
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      {showDiff && hasPreviousVersion && beforeContent ? (
+        <>
+          <SkillDiffViewer
+            beforeContent={beforeContent}
+            afterContent={content}
+            showFullContent={showFullContent}
+          />
+          {hasOriginalDiff && (
+            <EuiButtonEmpty
+              size="xs"
+              color="primary"
+              onClick={() => {
+                setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
+              }}
+            >
+              {diffBase === 'original' ? (
+                <FormattedMessage
+                  id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
+                  defaultMessage="vs previous version"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
+                  defaultMessage="vs original content"
+                />
+              )}
+            </EuiButtonEmpty>
+          )}
+        </>
+      ) : (
+        <EuiCodeBlock
+          language="markdown"
+          fontSize="s"
+          overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
+          isCopyable={showFullContent}
+          css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
+        >
+          {content}
+        </EuiCodeBlock>
+      )}
     </>
   );
 };
@@ -193,11 +293,11 @@ const fullContentPanelStyles = css`
 
 const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
   const {
-    content,
-    description,
-    tool_ids: toolIds,
-    referenced_content: referencedContent,
-  } = attachment.data.skill;
+    mode,
+    originalContent,
+    skill: { content, description, tool_ids: toolIds, referenced_content: referencedContent },
+  } = attachment.data;
+  const previousContent = attachment.versionData?.previousVersionData?.skill?.content;
   const showFullContent = isCanvas === true;
 
   return (
@@ -222,7 +322,13 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
 
       <EuiHorizontalRule margin="m" />
 
-      <SkillInstructions showFullContent={showFullContent} content={content} />
+      <SkillInstructions
+        showFullContent={showFullContent}
+        content={content}
+        previousContent={previousContent}
+        originalContent={originalContent}
+        mode={mode}
+      />
 
       <EuiHorizontalRule margin="m" />
 
