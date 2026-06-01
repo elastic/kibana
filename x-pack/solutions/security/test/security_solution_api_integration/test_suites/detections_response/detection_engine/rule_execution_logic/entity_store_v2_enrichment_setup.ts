@@ -51,9 +51,10 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   /**
    * Installs Entity Store V2 engines and seeds entities.
    *
-   * Returns `false` when Entity Store V2 is not available in the current environment
-   * (e.g. ESS / non-MKI stateful). Callers should call `this.skip()` when `false` is
-   * returned so the test suite is skipped rather than failing.
+   * Returns `false` when Entity Store V2 is unavailable in the current environment
+   * (e.g. when the `securitySolution:entityStoreEnableV2` feature flag is disabled, or
+   * the entity_store plugin is not registered). Callers should call `this.skip()` when
+   * `false` is returned so the test suite is skipped rather than failing.
    *
    * Returns `true` when setup completed successfully.
    */
@@ -70,7 +71,9 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
 
     if (installRes.status !== 200 && installRes.status !== 201) {
       log.debug(
-        `Entity Store V2 is not available in this environment (status ${installRes.status}), skipping`
+        `Entity Store V2 install returned ${installRes.status} — skipping enrichment tests. ` +
+          `This is expected when the 'securitySolution:entityStoreEnableV2' feature flag is ` +
+          `disabled or the entity_store plugin is not registered in this environment.`
       );
       return false;
     }
