@@ -284,9 +284,9 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: { content: 'test comment' },
           metadata: {
             command: 'isolate',
-            comment: 'test comment',
             targets: [
               {
                 agentType: 'endpoint',
@@ -312,10 +312,12 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: {
+            content:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+          },
           metadata: {
             command: 'isolate',
-            comment:
-              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
             targets: [
               {
                 agentType: 'endpoint',
