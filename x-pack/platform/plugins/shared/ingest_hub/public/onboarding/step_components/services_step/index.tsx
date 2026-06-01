@@ -21,9 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
-import type { SignalType } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, SignalType, DeliveryMethod } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { ServiceRow } from './service_row';
+import type { ServiceGroupData } from './service_row';
 
 interface ServicesStepProps {
   onNext: () => void;
@@ -48,6 +49,51 @@ const SIGNAL_FILTER_OPTIONS = [
   },
 ];
 
+/** Groups an array of matrix entries by policyTemplate (falling back to id). */
+function buildServiceGroups(entries: AwsServiceMatrixEntry[]): ServiceGroupData[] {
+  const groupMap = new Map<
+    string,
+    {
+      name: string;
+      signalTypes: Set<SignalType>;
+      deliveryMethods: Map<DeliveryMethod, { method: DeliveryMethod; preferred?: boolean }>;
+      entryIds: string[];
+    }
+  >();
+
+  for (const entry of entries) {
+    const key = entry.policyTemplate ?? entry.id;
+    if (!groupMap.has(key)) {
+      groupMap.set(key, {
+        name: entry.name,
+        signalTypes: new Set([entry.signalType]),
+        deliveryMethods: new Map(entry.deliveryMethods.map((dm) => [dm.method, dm])),
+        entryIds: [entry.id],
+      });
+    } else {
+      const group = groupMap.get(key)!;
+      group.signalTypes.add(entry.signalType);
+      for (const dm of entry.deliveryMethods) {
+        if (!group.deliveryMethods.has(dm.method)) {
+          group.deliveryMethods.set(dm.method, dm);
+        }
+      }
+      group.entryIds.push(entry.id);
+    }
+  }
+
+  return Array.from(groupMap.entries()).map(([key, g]) => ({
+    key,
+    name: g.name,
+    signalTypes: Array.from(g.signalTypes),
+    deliveryMethods: Array.from(g.deliveryMethods.values()),
+    entryIds: g.entryIds,
+  }));
+}
+
+// All visible groups computed once from the static matrix.
+const ALL_GROUPS = buildServiceGroups(AWS_SERVICES_MATRIX.filter((s) => s.showInUI));
+
 export function ServicesStep({ onNext }: ServicesStepProps) {
   const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -55,7 +101,7 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredServices = useMemo(() => {
+  const filteredEntries = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return AWS_SERVICES_MATRIX.filter(
       (s) =>
@@ -65,37 +111,52 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
     );
   }, [signalFilter, searchQuery]);
 
+  // Groups derived from currently visible (filtered) entries.
+  const serviceGroups = useMemo(() => buildServiceGroups(filteredEntries), [filteredEntries]);
+
   const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
 
-  const isReady = useMemo(() => {
-    return selectedServiceIds.length > 0;
-  }, [selectedServiceIds]);
+  // A group is selected when all of its entries are in the selection.
+  const isGroupSelected = useCallback(
+    (group: ServiceGroupData) => group.entryIds.every((id) => selectedSet.has(id)),
+    [selectedSet]
+  );
 
-  const handleToggle = useCallback(
-    (serviceId: string, checked: boolean) => {
-      const next = checked
-        ? [...new Set([...selectedServiceIds, serviceId])]
-        : selectedServiceIds.filter((id) => id !== serviceId);
-      setSelectedServiceIds(next);
+  // Count of fully-selected groups across all visible entries (independent of current filter).
+  const selectedGroupCount = useMemo(
+    () => ALL_GROUPS.filter((g) => g.entryIds.every((id) => selectedSet.has(id))).length,
+    [selectedSet]
+  );
+
+  const isReady = selectedServiceIds.length > 0;
+
+  const handleGroupToggle = useCallback(
+    (key: string, checked: boolean) => {
+      const group = serviceGroups.find((g) => g.key === key);
+      if (!group) return;
+      if (checked) {
+        setSelectedServiceIds([...new Set([...selectedServiceIds, ...group.entryIds])]);
+      } else {
+        const toRemove = new Set(group.entryIds);
+        setSelectedServiceIds(selectedServiceIds.filter((id) => !toRemove.has(id)));
+      }
     },
-    [selectedServiceIds, setSelectedServiceIds]
+    [serviceGroups, selectedServiceIds, setSelectedServiceIds]
   );
 
   const handleSelectAll = useCallback(() => {
-    const filteredIdSet = new Set(filteredServices.map((s) => s.id));
-    const existing = selectedServiceIds.filter((id) => !filteredIdSet.has(id));
-    setSelectedServiceIds([...existing, ...filteredIdSet]);
-  }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
+    const allVisibleIds = new Set(serviceGroups.flatMap((g) => g.entryIds));
+    const existing = selectedServiceIds.filter((id) => !allVisibleIds.has(id));
+    setSelectedServiceIds([...existing, ...allVisibleIds]);
+  }, [serviceGroups, selectedServiceIds, setSelectedServiceIds]);
 
   const handleDeselectAll = useCallback(() => {
-    const filteredIds = new Set(filteredServices.map((s) => s.id));
-    setSelectedServiceIds(selectedServiceIds.filter((id) => !filteredIds.has(id)));
-  }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
+    const allVisibleIds = new Set(serviceGroups.flatMap((g) => g.entryIds));
+    setSelectedServiceIds(selectedServiceIds.filter((id) => !allVisibleIds.has(id)));
+  }, [serviceGroups, selectedServiceIds, setSelectedServiceIds]);
 
   const handleNext = useCallback(() => {
-    if (!isReady) {
-      return;
-    }
+    if (!isReady) return;
     onNext();
   }, [isReady, onNext]);
 
@@ -136,7 +197,7 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
             <FormattedMessage
               id="xpack.ingestHub.servicesStep.selectedCount"
               defaultMessage="{count} {count, plural, one {service} other {services}} selected"
-              values={{ count: selectedServiceIds.length }}
+              values={{ count: selectedGroupCount }}
             />
           </EuiText>
         </EuiFlexItem>
@@ -173,12 +234,12 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
       <EuiSpacer size="m" />
 
       <EuiFlexGrid columns={2} gutterSize="s">
-        {filteredServices.map((service) => (
-          <EuiFlexItem key={service.id}>
+        {serviceGroups.map((group) => (
+          <EuiFlexItem key={group.key}>
             <ServiceRow
-              service={service}
-              isSelected={selectedSet.has(service.id)}
-              onToggle={handleToggle}
+              group={group}
+              isSelected={isGroupSelected(group)}
+              onToggle={handleGroupToggle}
             />
           </EuiFlexItem>
         ))}

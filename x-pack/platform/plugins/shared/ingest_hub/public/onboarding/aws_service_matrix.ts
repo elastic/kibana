@@ -201,7 +201,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 'cloudwatch_logs',
-    name: 'AWS CloudWatch Logs',
+    name: 'AWS CloudWatch',
     category: 'Monitoring',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -214,7 +214,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 'cloudwatch_metrics',
-    name: 'AWS CloudWatch Metrics',
+    name: 'AWS CloudWatch',
     category: 'Monitoring',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -530,7 +530,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3_daily_storage',
-    name: 'AWS S3 (Storage metrics)',
+    name: 'AWS S3',
     category: 'Storage',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -543,7 +543,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3_request',
-    name: 'AWS S3 (Request metrics)',
+    name: 'AWS S3',
     category: 'Storage',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -556,7 +556,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3access',
-    name: 'AWS S3 (Access logs)',
+    name: 'AWS S3',
     category: 'Storage',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],

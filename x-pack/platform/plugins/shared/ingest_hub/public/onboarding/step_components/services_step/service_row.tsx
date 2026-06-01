@@ -8,35 +8,48 @@
 import React from 'react';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { SignalType, DeliveryMethodEntry } from '../../aws_service_matrix';
 import { SignalTypeBadge } from './signal_type_badge';
 import { DeliveryMethodBadge } from './delivery_method_badge';
 
-interface ServiceRowProps {
-  service: AwsServiceMatrixEntry;
-  isSelected: boolean;
-  onToggle: (id: string, checked: boolean) => void;
+export interface ServiceGroupData {
+  /** policyTemplate when present, otherwise the data stream id */
+  key: string;
+  /** Display name taken from the group's first entry */
+  name: string;
+  signalTypes: SignalType[];
+  deliveryMethods: DeliveryMethodEntry[];
+  /** Individual data stream ids that belong to this group */
+  entryIds: string[];
 }
 
-export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onToggle }) => {
+interface ServiceRowProps {
+  group: ServiceGroupData;
+  isSelected: boolean;
+  onToggle: (key: string, checked: boolean) => void;
+}
+
+export const ServiceRow: React.FC<ServiceRowProps> = ({ group, isSelected, onToggle }) => {
   return (
-    <div data-test-subj={`servicesStep-serviceRow-${service.id}`}>
+    <div data-test-subj={`servicesStep-serviceRow-${group.key}`}>
       <EuiCheckableCard
-        id={`service-toggle-${service.id}`}
+        id={`service-toggle-${group.key}`}
         label={
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem>
               <EuiText size="s">
-                <strong>{service.name}</strong>
+                <strong>{group.name}</strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <SignalTypeBadge signalType={service.signalType} />
-                </EuiFlexItem>
+                {group.signalTypes.map((signalType) => (
+                  <EuiFlexItem key={signalType} grow={false}>
+                    <SignalTypeBadge signalType={signalType} />
+                  </EuiFlexItem>
+                ))}
                 {/* firehose not supported for V1 */}
-                {service.deliveryMethods
+                {group.deliveryMethods
                   .filter((entry) => entry.method !== 'firehose')
                   .map((entry) => (
                     <EuiFlexItem key={entry.method} grow={false}>
@@ -49,8 +62,8 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onT
         }
         checkableType="checkbox"
         checked={isSelected}
-        onChange={(e) => onToggle(service.id, e.target.checked)}
-        data-test-subj={`servicesStep-toggle-${service.id}`}
+        onChange={(e) => onToggle(group.key, e.target.checked)}
+        data-test-subj={`servicesStep-toggle-${group.key}`}
       />
     </div>
   );
