@@ -65,8 +65,6 @@ All commands support --help for usage information.
 - **Functions**: function name { ... } or name() { ... }
 - **Local variables**: local VAR=value
 - **Loops**: for, while, until
-- **Symbolic links**: ln -s target link
-- **Hard links**: ln target link
 
 ## Custom commands
 
