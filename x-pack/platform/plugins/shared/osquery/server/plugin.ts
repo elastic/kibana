@@ -64,6 +64,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
   private readonly schemaService: SchemaService;
+  private rruleSchedulingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -77,6 +78,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
     const experimentalFeatures = config.experimentalFeatures;
+    this.rruleSchedulingEnabled = experimentalFeatures.rruleScheduling;
 
     registerFeatures(plugins.features);
 
@@ -137,6 +139,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
               abortController,
+              isRruleFeatureEnabled: this.rruleSchedulingEnabled,
             });
 
             return { state: { completed: !hadFailures } };
@@ -246,7 +249,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     spaceScopedClient,
                     allPacks.saved_objects,
                     this.osqueryAppContextService,
-                    soClient.getCurrentNamespace()
+                    soClient.getCurrentNamespace(),
+                    this.rruleSchedulingEnabled
                   );
                 }
               }

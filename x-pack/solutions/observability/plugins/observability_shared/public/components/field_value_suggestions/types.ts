@@ -32,6 +32,9 @@ interface CommonProps {
   keepHistory?: boolean;
   showLogicalConditionSwitch?: boolean;
   useLogicalAND?: boolean;
+  isDisabled?: boolean;
+  disabledTooltip?: string;
+  dataTestSubj?: string;
   onChange: (val?: string[], excludedValue?: string[], isLogicalAND?: boolean) => void;
 }
 
@@ -54,4 +57,5 @@ export type FieldValueSelectionProps = CommonProps & {
 export interface ListItem {
   label: string;
   count: number;
+  tooltip?: string;
 }
