@@ -306,11 +306,13 @@ describe('WHERE Autocomplete', () => {
         '($0)',
         '(FROM $0)',
         '(ROW $0)',
+        '(TS $0)',
       ]);
       await whereExpectSuggestions('from index | WHERE doubleField not in ', [
         '($0)',
         '(FROM $0)',
         '(ROW $0)',
+        '(TS $0)',
       ]);
 
       await whereExpectSuggestions(
