@@ -149,7 +149,7 @@ describe('Integration package with custom dataset create and edit package policy
       .click()
       .type('/var/log/test.log');
 
-    cy.getBySel('textInput-dataset-name').click().type(datasetName);
+    cy.getBySel(POLICY_EDITOR.DATASET_SELECT).click().type(datasetName);
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
