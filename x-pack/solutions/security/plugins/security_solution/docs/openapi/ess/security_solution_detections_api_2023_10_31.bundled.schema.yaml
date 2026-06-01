@@ -1,9 +1,8 @@
 openapi: 3.0.3
 info:
-  description: >-
-    Use the detections APIs to create and manage detection rules. Detection
-    rules search events and external alerts sent to Elastic Security and
-    generate detection alerts from any hits. Alerts are displayed on the
+  description: Use the detections APIs to create and manage detection rules.
+    Detection rules search events and external alerts sent to Elastic Security
+    and generate detection alerts from any hits. Alerts are displayed on the
     **Alerts** page and can be assigned and triaged, using the alert status to
     mark them as open, closed, or acknowledged.
   title: Security Detections API (Elastic Cloud and self-hosted)
@@ -285,10 +284,9 @@ paths:
                     execution_summary:
                       last_execution:
                         date: '2022-03-23T16:06:12.787Z'
-                        message: >-
-                          This rule attempted to query data from Elasticsearch
-                          indices listed in the "Index pattern" section of the
-                          rule definition, but no matching index was found.
+                        message: This rule attempted to query data from Elasticsearch indices listed in
+                          the "Index pattern" section of the rule definition,
+                          but no matching index was found.
                         metrics:
                           execution_gap_duration_s: 0
                           total_indexing_duration_ms: 15
@@ -309,9 +307,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: MS Office child process
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -418,9 +414,7 @@ paths:
                 summary: Patch threshold rule
                 value:
                   id: 005d2c4f-51ca-493d-a2bd-20ef076339b1
-                  query: >-
-                    agent.version : * and agent.id :
-                    "243d9b4f-ca01-4311-8e5c-9abbee91afd8"
+                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
                   threshold:
                     cardinality: []
                     field: []
@@ -449,10 +443,9 @@ paths:
                 summary: Patch indicator match rule
                 value:
                   id: 462f1986-10fe-40a3-a22c-2b1c9c4c48fd
-                  threat_query: >-
-                    @timestamp >= "now-30d/d" and event.module:(threatintel or
-                    ti_*) and threat.indicator.ip:* and not
-                    labels.is_ioc_transform_source:"false"
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*)
+                    and threat.indicator.ip:* and not
+                    labels.is_ioc_transform_source:"false"'
               example7:
                 summary: Patch machine learning rule
                 value:
@@ -489,9 +482,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: Updated Rule Name
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -522,141 +513,61 @@ paths:
         - Security Detections API
         - Rules API
     post:
-      description: >
+      description: |
         Create a new detection rule.
-
         > warn
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
-        > When used with [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
-        the user's key gets assigned to the affected rules. If the user's key
-        gets deleted or the user becomes inactive, the rules will stop running.
-
-
-        > If the API key that is used for authorization has different privileges
-        than the key that created or most recently updated the rule, the rule
-        behavior might change.
-
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
         You can create the following types of rules:
 
-
-        * **Custom query**: Searches the defined indices and creates an alert
-        when a document matches the rule's KQL query.
-
-        * **Event correlation**: Searches the defined indices and creates an
-        alert when results match an [Event Query Language
-        (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html)
-        query.
-
-        * **Threshold**: Searches the defined indices and creates an alert when
-        the number of times the specified field's value meets the threshold
-        during a single execution. When there are multiple values that meet the
-        threshold, an alert is generated for each value.
+        * **Custom query**: Searches the defined indices and creates an alert when a document matches the rule's KQL query.
+        * **Event correlation**: Searches the defined indices and creates an alert when results match an [Event Query Language (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) query.
+        * **Threshold**: Searches the defined indices and creates an alert when the number of times the specified field's value meets the threshold during a single execution. When there are multiple values that meet the threshold, an alert is generated for each value.
           For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
-        * **Indicator match**: Creates an alert when fields match values defined
-        in the specified [Elasticsearch
-        index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html).
-        For example, you can create an index for IP addresses and use this index
-        to create an alert whenever an event's `destination.ip` equals a value
-        in the index. The index's field mappings should be
-        [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
-
-        * **New terms**: Generates an alert for each new term detected in source
-        documents within a specified time range.
-
-        * **ES|QL**: Uses [Elasticsearch Query Language
-        (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)
-        to find events and aggregate search results.
-
-        * **Machine learning rules**: Creates an alert when a machine learning
-        job discovers an anomaly above the defined threshold.
-
+        * **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
+        * **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
+        * **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
+        * **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
         > info
+        > To create machine learning rules, you must have the [appropriate license](https://www.elastic.co/subscriptions) or use a [cloud deployment](https://cloud.elastic.co/registration). Additionally, for the machine learning rule to function correctly, the associated machine learning job must be running.
 
-        > To create machine learning rules, you must have the [appropriate
-        license](https://www.elastic.co/subscriptions) or use a [cloud
-        deployment](https://cloud.elastic.co/registration). Additionally, for
-        the machine learning rule to function correctly, the associated machine
-        learning job must be running.
-
-
-        To retrieve machine learning job IDs, which are required to create
-        machine learning jobs, call the [Elasticsearch Get jobs
-        API](https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job.html).
-        Machine learning jobs that contain `siem` in the `groups` field can be
-        used to create rules:
-
+        To retrieve machine learning job IDs, which are required to create machine learning jobs, call the [Elasticsearch Get jobs API](https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job.html). Machine learning jobs that contain `siem` in the `groups` field can be used to create rules:
 
         ```json
-
         ...
-
         "job_id": "linux_anomalous_network_activity_ecs",
-
         "job_type": "anomaly_detector",
-
         "job_version": "7.7.0",
-
         "groups": [
           "auditbeat",
           "process",
           "siem"
         ],
-
         ...
-
         ```
 
-
-        Additionally, you can set up notifications for when rules create alerts.
-        The notifications use the [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html).
-        Each action type requires a connector. Connectors store the information
-        required to send notifications via external systems. The following
-        connector types are supported for rule notifications:
-
+        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
-
         * Email
-
         * PagerDuty
-
         * Webhook
-
         * Microsoft Teams
-
         * IBM Resilient
-
         * Jira
-
         * ServiceNow ITSM
-
         > info
+        > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
-        > For more information on PagerDuty fields, see [Send a v2
-        Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
+        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
 
+        For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-        To retrieve connector IDs, which are required to configure rule
-        notifications, call the [Find objects
-        API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html)
-        with `"type": "action"` in the request payload.
-
-
-        For detailed information on Kibana actions and alerting, and additional
-        API calls, see:
-
-
-        * [Alerting
-        API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-
-        * [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
-
-        * [Connectors
-        API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
+        * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+        * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
         content:
@@ -678,9 +589,7 @@ paths:
                   interval: 1h
                   language: kuery
                   name: MS Office child process
-                  query: >-
-                    process.parent.name:EXCEL.EXE or
-                    process.parent.name:MSPUB.EXE or
+                  query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                     process.parent.name:OUTLOOK.EXE or
                     process.parent.name:POWERPNT.EXE or
                     process.parent.name:VISIO.EXE or
@@ -699,14 +608,12 @@ paths:
                     - ms office
                   type: query
               example2:
-                description: >-
-                  Threshold rule that detects multiple failed login attempts to
-                  a Windows host from the same external source IP address
+                description: Threshold rule that detects multiple failed login attempts to a
+                  Windows host from the same external source IP address
                 summary: Threshold rule
                 value:
-                  description: >-
-                    Detects when there are 20 or more failed login attempts from
-                    the same IP address with a 2 minute time frame.
+                  description: Detects when there are 20 or more failed login attempts from the
+                    same IP address with a 2 minute time frame.
                   enabled: true
                   exceptions_list:
                     - id: int-ips
@@ -717,8 +624,7 @@ paths:
                     - winlogbeat-*
                   interval: 2m
                   name: Windows server prml-19
-                  query: >-
-                    host.name:prml-19 and event.category:authentication and
+                  query: host.name:prml-19 and event.category:authentication and
                     event.outcome:failure
                   required_fields:
                     - name: source.ip
@@ -750,8 +656,7 @@ paths:
                     value: 20
                   type: threshold
               example3:
-                description: >-
-                  Machine learning rule that creates alerts, and sends Slack
+                description: Machine learning rule that creates alerts, and sends Slack
                   notifications, when the linux_anomalous_network_activity_ecs
                   machine learning job discovers anomalies with a threshold of
                   70 or above.
@@ -780,18 +685,16 @@ paths:
                     - Linux
                   type: machine_learning
               example4:
-                description: >-
-                  Event correlation rule that creates alerts when the Windows
+                description: Event correlation rule that creates alerts when the Windows
                   rundll32.exe process makes unusual network connections
                 summary: EQL rule
                 value:
                   description: Unusual rundll32.exe network connection
                   language: eql
                   name: rundll32.exe network connection
-                  query: >-
-                    sequence by process.entity_id with maxspan=2h [process where
-                    event.type in ("start", "process_started") and (process.name
-                    == "rundll32.exe" or process.pe.original_file_name ==
+                  query: sequence by process.entity_id with maxspan=2h [process where event.type
+                    in ("start", "process_started") and (process.name ==
+                    "rundll32.exe" or process.pe.original_file_name ==
                     "rundll32.exe") and ((process.args == "rundll32.exe" and
                     process.args_count == 1) or (process.args != "rundll32.exe"
                     and process.args_count == 0))] [network where event.type ==
@@ -828,9 +731,7 @@ paths:
                 summary: Indicator match rule
                 value:
                   actions: []
-                  description: >-
-                    Checks for bad IP addresses listed in the ip-threat-list
-                    index
+                  description: Checks for bad IP addresses listed in the ip-threat-list index
                   index:
                     - packetbeat-*
                   name: Bad IP threat match
@@ -861,9 +762,8 @@ paths:
                   threat_query: '*:*'
                   type: threat_match
               example6:
-                description: >-
-                  New terms rule that creates alerts a new IP address is
-                  detected for a user
+                description: New terms rule that creates alerts a new IP address is detected for
+                  a user
                 summary: New terms rule
                 value:
                   description: Detects a user associated with a new IP address
@@ -885,8 +785,7 @@ paths:
                   severity: medium
                   type: new_terms
               example7:
-                description: >-
-                  esql rule that creates alerts from events that match an Excel
+                description: esql rule that creates alerts from events that match an Excel
                   parent process
                 summary: Esql rule
                 value:
@@ -896,8 +795,7 @@ paths:
                   interval: 5m
                   language: esql
                   name: Find Excel events
-                  query: >-
-                    from auditbeat-8.10.2 METADATA _id, _version, _index | where
+                  query: from auditbeat-8.10.2 METADATA _id, _version, _index | where
                     process.parent.name == "EXCEL.EXE"
                   required_fields:
                     - name: process.parent.name
@@ -908,10 +806,9 @@ paths:
                   to: now
                   type: esql
               example8:
-                description: >-
-                  Query rule that searches for processes started by MS Office
-                  and suppresses alerts by the process.parent.name field within
-                  a 5-hour time period
+                description: Query rule that searches for processes started by MS Office and
+                  suppresses alerts by the process.parent.name field within a
+                  5-hour time period
                 summary: Query rule 2
                 value:
                   alert_suppression:
@@ -933,9 +830,7 @@ paths:
                   interval: 1h
                   language: kuery
                   name: MS Office child process
-                  query: >-
-                    process.parent.name:EXCEL.EXE or
-                    process.parent.name:MSPUB.EXE or
+                  query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                     process.parent.name:OUTLOOK.EXE or
                     process.parent.name:POWERPNT.EXE or
                     process.parent.name:VISIO.EXE or
@@ -978,9 +873,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: MS Office child process
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -1063,9 +956,8 @@ paths:
                     author: []
                     created_at: '2020-07-22T10:27:23.486Z'
                     created_by: elastic
-                    description: >-
-                      Detects when there are 20 or more failed login attempts
-                      from the same IP address with a 2 minute time frame.
+                    description: Detects when there are 20 or more failed login attempts from the
+                      same IP address with a 2 minute time frame.
                     enabled: true
                     exceptions_list:
                       - id: int-ips
@@ -1081,8 +973,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: Windows server prml-19
-                    query: >-
-                      host.name:prml-19 and event.category:authentication and
+                    query: host.name:prml-19 and event.category:authentication and
                       event.outcome:failure
                     references: []
                     related_integrations:
@@ -1143,16 +1034,15 @@ paths:
                     language: eql
                     max_signals: 100
                     name: rundll32.exe network connection
-                    query: >-
-                      sequence by process.entity_id with maxspan=2h [process
-                      where event.type in ("start", "process_started") and
-                      (process.name == "rundll32.exe" or
-                      process.pe.original_file_name == "rundll32.exe") and
-                      ((process.args == "rundll32.exe" and process.args_count ==
-                      1) or (process.args != "rundll32.exe" and
-                      process.args_count == 0))] [network where event.type ==
-                      "connection" and (process.name == "rundll32.exe" or
-                      process.pe.original_file_name == "rundll32.exe")]
+                    query: sequence by process.entity_id with maxspan=2h [process where event.type
+                      in ("start", "process_started") and (process.name ==
+                      "rundll32.exe" or process.pe.original_file_name ==
+                      "rundll32.exe") and ((process.args == "rundll32.exe" and
+                      process.args_count == 1) or (process.args !=
+                      "rundll32.exe" and process.args_count == 0))] [network
+                      where event.type == "connection" and (process.name ==
+                      "rundll32.exe" or process.pe.original_file_name ==
+                      "rundll32.exe")]
                     references: []
                     related_integrations:
                       - package: o365
@@ -1200,9 +1090,7 @@ paths:
                     author: []
                     created_at: '2020-10-06T07:07:58.227Z'
                     created_by: elastic
-                    description: >-
-                      Checks for bad IP addresses listed in the ip-threat-list
-                      index
+                    description: Checks for bad IP addresses listed in the ip-threat-list index
                     enabled: true
                     exceptions_list: []
                     false_positives: []
@@ -1327,9 +1215,8 @@ paths:
                     max_signals: 100
                     name: Find Excel events
                     output_index: ''
-                    query: >-
-                      from auditbeat-8.10.2 METADATA _id | where
-                      process.parent.name == "EXCEL.EXE"
+                    query: from auditbeat-8.10.2 METADATA _id | where process.parent.name ==
+                      "EXCEL.EXE"
                     references: []
                     related_integrations:
                       - package: o365
@@ -1414,9 +1301,7 @@ paths:
                   id: 005d2c4f-51ca-493d-a2bd-20ef076339b1
                   language: kuery
                   name: New name for threat rule
-                  query: >-
-                    agent.version : * and agent.id :
-                    "243d9b4f-ca01-4311-8e5c-9abbee91afd8"
+                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
                   risk_score: 21
                   severity: low
                   tags:
@@ -1485,10 +1370,9 @@ paths:
                         - field: destination.ip
                           type: mapping
                           value: threat.indicator.ip
-                  threat_query: >-
-                    @timestamp >= "now-30d/d" and event.module:(threatintel or
-                    ti_*) and threat.indicator.ip:* and not
-                    labels.is_ioc_transform_source:"true"
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*)
+                    and threat.indicator.ip:* and not
+                    labels.is_ioc_transform_source:"true"'
                   type: threat_match
               example7:
                 summary: Update machine learning rule
@@ -1533,9 +1417,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: Updated Rule Name
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -1649,8 +1531,7 @@ paths:
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
               example04:
-                description: >-
-                  The following request duplicates rules with the specified IDs,
+                description: The following request duplicates rules with the specified IDs,
                   including exceptions but not expired exceptions.
                 summary: Duplicate - Duplicate rules with specific IDs
                 value:
@@ -1669,9 +1550,8 @@ paths:
                   ids:
                     - cf4abfd1-7c37-4519-ab0f-5ea5c75fac60
               example06:
-                description: >-
-                  The following request runs the rule with the specified ID
-                  within the given date range.
+                description: The following request runs the rule with the specified ID within
+                  the given date range.
                 summary: Run - Run a specific rule by ID
                 value:
                   action: run
@@ -1681,20 +1561,16 @@ paths:
                     end_date: '2025-03-10T23:59:59.999Z'
                     start_date: '2025-03-01T00:00:00.000Z'
               example07:
-                description: >-
-                  The following request exports the rules with the specified
-                  IDs.
+                description: The following request exports the rules with the specified IDs.
                 summary: Export - Export specific rules by ID
                 value:
                   action: export
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
               example08:
-                description: >-
-                  The following request will validate that the
-                  add_index_patterns bulk action can be successfully applied to
-                  three rules. The dry_run parameter is specified in query
-                  parameters, e.g. POST
+                description: The following request will validate that the add_index_patterns
+                  bulk action can be successfully applied to three rules. The
+                  dry_run parameter is specified in query parameters, e.g. POST
                   api/detection_engine/rules/_bulk_action?dry_run=true
                 summary: Edit - dry run - Validate add_index_patterns bulk action
                 value:
@@ -1708,9 +1584,8 @@ paths:
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
                     - de8f5af0-0831-11ed-ac8b-05a222bd8d4a
               example09:
-                description: >-
-                  The following request adds the tag "tag-1" to the rules with
-                  the specified IDs. If the tag already exists for a rule, no
+                description: The following request adds the tag "tag-1" to the rules with the
+                  specified IDs. If the tag already exists for a rule, no
                   changes are made.
                 summary: Edit - Add a tag to rules (idempotent)
                 value:
@@ -1723,10 +1598,9 @@ paths:
                     - 8bc7dad0-9320-11ec-9265-8b772383a08d
                     - 8e5c1a40-9320-11ec-9265-8b772383a08d
               example10:
-                description: >-
-                  The following request adds two tags at the same time, tag-1
-                  and tag-2, to the rules that have the IDs sent in the payload.
-                  If the tags already exist for a rule, no changes are made.
+                description: The following request adds two tags at the same time, tag-1 and
+                  tag-2, to the rules that have the IDs sent in the payload. If
+                  the tags already exist for a rule, no changes are made.
                 summary: Edit - Add two tags to rules (idempotent)
                 value:
                   action: edit
@@ -1739,10 +1613,9 @@ paths:
                     - 8bc7dad0-9320-11ec-9265-8b772383a08d
                     - 8e5c1a40-9320-11ec-9265-8b772383a08d
               example11:
-                description: >-
-                  The following request removes the tag "tag-1" from the rules
-                  with the specified IDs. If the tag does not exist for a rule,
-                  no changes are made.
+                description: The following request removes the tag "tag-1" from the rules with
+                  the specified IDs. If the tag does not exist for a rule, no
+                  changes are made.
                 summary: Edit - Delete a tag from rules (idempotent)
                 value:
                   action: edit
@@ -1754,10 +1627,9 @@ paths:
                     - 8bc7dad0-9320-11ec-9265-8b772383a08d
                     - 8e5c1a40-9320-11ec-9265-8b772383a08d
               example12:
-                description: >-
-                  The following request sets the tags "tag-1" and "tag-2" for
-                  the rules with the specified IDs, overwriting any existing
-                  tags. If the set of tags is the same as the existing tags, no
+                description: The following request sets the tags "tag-1" and "tag-2" for the
+                  rules with the specified IDs, overwriting any existing tags.
+                  If the set of tags is the same as the existing tags, no
                   changes are made.
                 summary: Edit - Set (overwrite existing) tags for rules (idempotent)
                 value:
@@ -1771,10 +1643,9 @@ paths:
                     - 8bc7dad0-9320-11ec-9265-8b772383a08d
                     - 8e5c1a40-9320-11ec-9265-8b772383a08d
               example13:
-                description: >-
-                  The following request adds the index pattern "test-*" to the
-                  rules with the specified IDs. If the index pattern already
-                  exists for a rule, no changes are made.
+                description: The following request adds the index pattern "test-*" to the rules
+                  with the specified IDs. If the index pattern already exists
+                  for a rule, no changes are made.
                 summary: Edit - Add index patterns to rules (idempotent)
                 value:
                   action: edit
@@ -1786,10 +1657,9 @@ paths:
                     - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
               example14:
-                description: >-
-                  The following request removes the index pattern "test-*" from
-                  the rules with the specified IDs. If the index pattern does
-                  not exist for a rule, no changes are made.
+                description: The following request removes the index pattern "test-*" from the
+                  rules with the specified IDs. If the index pattern does not
+                  exist for a rule, no changes are made.
                 summary: Edit - Remove index patterns from rules (idempotent)
                 value:
                   action: edit
@@ -1801,14 +1671,12 @@ paths:
                     - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
               example15:
-                description: >-
-                  The following request sets the index patterns "test-*" and
-                  "prod-*" for the rules with the specified IDs, overwriting any
-                  existing index patterns. If the set of index patterns is the
-                  same as the existing index patterns, no changes are made.
-                summary: >-
-                  Edit - Set (overwrite existing) index patterns for rules
-                  patterns (idempotent)
+                description: The following request sets the index patterns "test-*" and "prod-*"
+                  for the rules with the specified IDs, overwriting any existing
+                  index patterns. If the set of index patterns is the same as
+                  the existing index patterns, no changes are made.
+                summary: Edit - Set (overwrite existing) index patterns for rules patterns
+                  (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1819,9 +1687,8 @@ paths:
                     - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
               example16:
-                description: >-
-                  The following request adds investigation field to the rules
-                  with the specified IDs.
+                description: The following request adds investigation field to the rules with
+                  the specified IDs.
                 summary: Edit - Add investigation field to rules
                 value:
                   action: edit
@@ -1834,10 +1701,9 @@ paths:
                     - 12345678-1234-1234-1234-1234567890ab
                     - 87654321-4321-4321-4321-0987654321ba
               example17:
-                description: >-
-                  The following request deletes investigation fields from the
-                  rules with the specified IDs. If the field does not exist for
-                  a rule, no changes are made.
+                description: The following request deletes investigation fields from the rules
+                  with the specified IDs. If the field does not exist for a
+                  rule, no changes are made.
                 summary: Edit - Delete investigation fields from rules (idempotent)
                 value:
                   action: edit
@@ -1850,13 +1716,11 @@ paths:
                     - field1
                     - field2
               example18:
-                description: >-
-                  The following request sets investigation fields for the rules
-                  with the specified IDs, overwriting any existing investigation
+                description: The following request sets investigation fields for the rules with
+                  the specified IDs, overwriting any existing investigation
                   fields. If the set of investigation fields is the same as the
                   existing investigation fields, no changes are made.
-                summary: >-
-                  Edit - Set (overwrite existing) investigation fields for rules
+                summary: Edit - Set (overwrite existing) investigation fields for rules
                   (idempotent)
                 value:
                   action: edit
@@ -1869,12 +1733,10 @@ paths:
                     - 12345678-1234-1234-1234-1234567890ab
                     - 87654321-4321-4321-4321-0987654321ba
               example19:
-                description: >-
-                  The following request sets a timeline template for the rules
-                  with the specified IDs. If the same timeline template is
-                  already set for a rule, no changes are made.
-                summary: >-
-                  Edit - Set (overwrite existing) timeline template for rules
+                description: The following request sets a timeline template for the rules with
+                  the specified IDs. If the same timeline template is already
+                  set for a rule, no changes are made.
+                summary: Edit - Set (overwrite existing) timeline template for rules
                   (idempotent)
                 value:
                   action: edit
@@ -1886,13 +1748,10 @@ paths:
                   ids:
                     - eacdfc95-e007-41c9-986e-4b2cbdfdc71b
               example20:
-                description: >-
-                  The following request sets a schedule for the rules with the
+                description: The following request sets a schedule for the rules with the
                   specified IDs. If the same schedule is already set for a rule,
                   no changes are made.
-                summary: >-
-                  Edit - Set (overwrite existing) schedule for rules
-                  (idempotent)
+                summary: Edit - Set (overwrite existing) schedule for rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1903,8 +1762,7 @@ paths:
                   ids:
                     - 99887766-5544-3322-1100-aabbccddeeff
               example21:
-                description: >-
-                  The following request adds rule actions to the rules with the
+                description: The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
                 summary: Edit - Add rule actions to rules (non-idempotent)
                 value:
@@ -1920,12 +1778,9 @@ paths:
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191928
               example22:
-                description: >-
-                  The following request sets rule actions for the rules with the
+                description: The following request sets rule actions for the rules with the
                   specified IDs. Each action receives its own unique ID.
-                summary: >-
-                  Edit - Set (overwrite existing) rule actions for rules
-                  (non-idempotent)
+                summary: Edit - Set (overwrite existing) rule actions for rules (non-idempotent)
                 value:
                   action: edit
                   edit:
@@ -1939,8 +1794,7 @@ paths:
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191928
               example23:
-                description: >-
-                  The following request adds rule actions to the rules with the
+                description: The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
                 summary: Edit - Add rule actions to rules for a webhook connector
                 value:
@@ -1956,8 +1810,7 @@ paths:
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example24:
-                description: >-
-                  The following request adds rule actions to the rules with the
+                description: The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
                 summary: Edit - Add rule actions to rules for an email connector
                 value:
@@ -1975,8 +1828,7 @@ paths:
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example25:
-                description: >-
-                  The following request adds rule actions to the rules with the
+                description: The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
                 summary: Edit - Add rule actions to rules for a slack connector
                 value:
@@ -1992,8 +1844,7 @@ paths:
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example26:
-                description: >-
-                  The following request adds rule actions to the rules with the
+                description: The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
                 summary: Edit - Add rule actions to rules for a PagerDuty connector
                 value:
@@ -2008,13 +1859,12 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: 2023-10-31T00:00:00.000Z
+                              timestamp: '2023-10-31T00:00:00Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:
-                description: >-
-                  The following request set alert suppression to the rules with
-                  the specified IDs.
+                description: The following request set alert suppression to the rules with the
+                  specified IDs.
                 summary: Edit - Set alert suppression to rules (idempotent)
                 value:
                   action: edit
@@ -2031,9 +1881,8 @@ paths:
                     - 12345678-1234-1234-1234-1234567890ab
                     - 87654321-4321-4321-4321-0987654321ba
               example28:
-                description: >-
-                  The following request set alert suppression to threshold rules
-                  with the specified IDs.
+                description: The following request set alert suppression to threshold rules with
+                  the specified IDs.
                 summary: Edit - Set alert suppression to threshold rules (idempotent)
                 value:
                   action: edit
@@ -2047,10 +1896,9 @@ paths:
                     - 12345678-1234-1234-1234-1234567890ab
                     - 87654321-4321-4321-4321-0987654321ba
               example29:
-                description: >-
-                  The following request removes alert suppression from the rules
-                  with the specified IDs. If the rules do not have alert
-                  suppression, no changes are made.
+                description: The following request removes alert suppression from the rules with
+                  the specified IDs. If the rules do not have alert suppression,
+                  no changes are made.
                 summary: Edit - Removes alert suppression from rules (idempotent)
                 value:
                   action: edit
@@ -2060,12 +1908,9 @@ paths:
                     - 12345678-1234-1234-1234-1234567890ab
                     - 87654321-4321-4321-4321-0987654321ba
               example30:
-                description: >-
-                  The following request triggers the filling of gaps for the
+                description: The following request triggers the filling of gaps for the
                   specified rule ids and time range
-                summary: >-
-                  Fill Gaps - Manually trigger the filling of gaps for specified
-                  rules
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
                 value:
                   action: fill_gaps
                   ids:
@@ -2090,10 +1935,9 @@ paths:
             application/json:
               examples:
                 example01:
-                  description: >-
-                    In this response one rule was updated and one was skipped.
-                    Objects returned in attributes.results.skipped will only
-                    include rules' id, name, and skip_reason.
+                  description: In this response one rule was updated and one was skipped. Objects
+                    returned in attributes.results.skipped will only include
+                    rules' id, name, and skip_reason.
                   summary: Successful response
                   value:
                     attributes:
@@ -2110,25 +1954,22 @@ paths:
                               - Elastic
                             created_at: '2022-02-21T14:14:13.801Z'
                             created_by: elastic
-                            description: >-
-                              A machine learning job detected unusually large
-                              numbers of DNS queries for a single top-level DNS
-                              domain, which is often used for DNS tunneling. DNS
-                              tunneling can be used for command-and-control,
-                              persistence, or data exfiltration activity. For
-                              example, dnscat tends to generate many DNS
-                              questions for a top-level domain as it uses the
-                              DNS protocol to tunnel data.
+                            description: A machine learning job detected unusually large numbers of DNS
+                              queries for a single top-level DNS domain, which
+                              is often used for DNS tunneling. DNS tunneling can
+                              be used for command-and-control, persistence, or
+                              data exfiltration activity. For example, dnscat
+                              tends to generate many DNS questions for a
+                              top-level domain as it uses the DNS protocol to
+                              tunnel data.
                             enabled: true
                             exceptions_list: []
                             execution_summary:
                               last_execution:
                                 date: '2022-03-23T16:06:12.787Z'
-                                message: >-
-                                  This rule attempted to query data from
-                                  Elasticsearch indices listed in the "Index
-                                  pattern" section of the rule definition, but
-                                  no matching index was found.
+                                message: This rule attempted to query data from Elasticsearch indices listed in
+                                  the "Index pattern" section of the rule
+                                  definition, but no matching index was found.
                                 metrics:
                                   execution_gap_duration_s: 0
                                   total_indexing_duration_ms: 15
@@ -2136,8 +1977,7 @@ paths:
                                 status: partial failure
                                 status_order: 20
                             false_positives:
-                              - >-
-                                DNS domains that use large numbers of child
+                              - DNS domains that use large numbers of child
                                 domains, such as software or content
                                 distribution networks, can trigger this alert
                                 and such parent domains can be excluded.
@@ -2151,8 +1991,7 @@ paths:
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
-                              - >-
-                                https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                              - https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -2180,9 +2019,8 @@ paths:
                     rules_count: 1
                     success: true
                 example02:
-                  description: >-
-                    If processing of any rule fails, a partial error outputs the
-                    ID and/or name of the affected rule and the corresponding
+                  description: If processing of any rule fails, a partial error outputs the ID
+                    and/or name of the affected rule and the corresponding
                     error, as well as successfully processed rules (in the same
                     format as a successful 200 request).
                   summary: Partial failure
@@ -2190,9 +2028,8 @@ paths:
                     value:
                       attributes:
                         errors:
-                          - message: >-
-                              Index patterns can't be added. Machine learning
-                              rule doesn't have index patterns property
+                          - message: Index patterns can't be added. Machine learning rule doesn't have index
+                              patterns property
                             rules:
                               - id: 8bc7dad0-9320-11ec-9265-8b772383a08d
                                 name: DNS Tunneling [Duplicate]
@@ -2207,21 +2044,18 @@ paths:
                                 - Elastic
                               created_at: '2022-02-21T14:14:17.883Z'
                               created_by: elastic
-                              description: >-
-                                Generates a detection alert for each external
-                                alert written to the configured indices.
-                                Enabling this rule allows you to immediately
-                                begin investigating external alerts in the app.
+                              description: Generates a detection alert for each external alert written to the
+                                configured indices. Enabling this rule allows
+                                you to immediately begin investigating external
+                                alerts in the app.
                               enabled: true
                               exceptions_list: []
                               execution_summary:
                                 last_execution:
                                   date: '2022-03-23T16:06:12.787Z'
-                                  message: >-
-                                    This rule attempted to query data from
-                                    Elasticsearch indices listed in the "Index
-                                    pattern" section of the rule definition, but
-                                    no matching index was found.
+                                  message: This rule attempted to query data from Elasticsearch indices listed in
+                                    the "Index pattern" section of the rule
+                                    definition, but no matching index was found.
                                   metrics:
                                     execution_gap_duration_s: 0
                                     total_indexing_duration_ms: 15
@@ -2302,11 +2136,10 @@ paths:
                       status_code: 500
                       success: false
                 example03:
-                  description: >-
-                    The attributes.errors section of the response shows that two
-                    rules failed to update and one succeeded. The same results
-                    would be returned if you ran the request without dry run
-                    mode enabled. Notice that there are no arrays in
+                  description: The attributes.errors section of the response shows that two rules
+                    failed to update and one succeeded. The same results would
+                    be returned if you ran the request without dry run mode
+                    enabled. Notice that there are no arrays in
                     attributes.results. In dry run mode, rule updates are not
                     applied and saved to Elasticsearch, so the endpoint wouldn’t
                     return results for rules that have been updated, created, or
@@ -2340,11 +2173,10 @@ paths:
                     message: Bulk edit partially failed
                     status_code: 500
                 example04:
-                  description: >-
-                    This example presents the successful setting of tags for 2
-                    rules. There was a difference between the set of tags that
-                    were being added and the tags that were already set in the
-                    rules, that's why the rules were updated.
+                  description: This example presents the successful setting of tags for 2 rules.
+                    There was a difference between the set of tags that were
+                    being added and the tags that were already set in the rules,
+                    that's why the rules were updated.
                   summary: Set tags successsully for 2 rules
                   value:
                     attributes:
@@ -2374,7 +2206,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -2436,13 +2268,12 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - >-
-                                  Endpoint.policy.applied.artifacts.global.channel
+                                - Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
@@ -2483,11 +2314,10 @@ paths:
                     rules_count: 2
                     success: true
                 example05:
-                  description: >-
-                    This example presents the idempotent behavior of the edit
-                    action with set_tags request. Both rules already had exactly
-                    the same tags that were being added, so no changes were made
-                    in any of them.
+                  description: This example presents the idempotent behavior of the edit action
+                    with set_tags request. Both rules already had exactly the
+                    same tags that were being added, so no changes were made in
+                    any of them.
                   summary: Idempotent behavior of set_tags
                   value:
                     attributes:
@@ -2510,11 +2340,10 @@ paths:
                     rules_count: 2
                     success: true
                 example06:
-                  description: >-
-                    This example presents the idempotent behavior of the edit
-                    action with add_tags request. One rule was updated and one
-                    was skipped. The rule that was skipped already had all the
-                    tags that were being added.
+                  description: This example presents the idempotent behavior of the edit action
+                    with add_tags request. One rule was updated and one was
+                    skipped. The rule that was skipped already had all the tags
+                    that were being added.
                   summary: Idempotent behavior of add_tags
                   value:
                     attributes:
@@ -2557,13 +2386,12 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - >-
-                                  Endpoint.policy.applied.artifacts.global.channel
+                                - Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
@@ -2605,11 +2433,10 @@ paths:
                     rules_count: 2
                     success: true
                 example07:
-                  description: >-
-                    This example shows a non-idempotent nature of the
-                    set_rule_actions requests. Regardless if the actions are the
-                    same as the existing actions for a rule, the actions are
-                    always set in the rule and receive a new unique ID.
+                  description: This example shows a non-idempotent nature of the set_rule_actions
+                    requests. Regardless if the actions are the same as the
+                    existing actions for a rule, the actions are always set in
+                    the rule and receive a new unique ID.
                   summary: Non-idempotent behavior for set_rule_actions
                   value:
                     attributes:
@@ -2649,13 +2476,12 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - >-
-                                  Endpoint.policy.applied.artifacts.global.channel
+                                - Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
@@ -2697,11 +2523,10 @@ paths:
                     rules_count: 1
                     success: true
                 example08:
-                  description: >-
-                    This example shows a non-idempotent nature of the
-                    add_rule_actions requests. Regardless if the added action is
-                    the same as another existing action for a rule, the new
-                    action is added to the rule and receives a new unique ID.
+                  description: This example shows a non-idempotent nature of the add_rule_actions
+                    requests. Regardless if the added action is the same as
+                    another existing action for a rule, the new action is added
+                    to the rule and receives a new unique ID.
                   summary: Non-idempotent behavior for add_rule_actions
                   value:
                     attributes:
@@ -2751,7 +2576,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -2838,9 +2663,7 @@ paths:
                     interval: 5m
                     language: kuery
                     name: MS Office child process
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -2902,8 +2725,7 @@ paths:
                   rule_id:
                     $ref: '#/components/schemas/RuleSignatureId'
               type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to
           delete.
         required: true
       responses:
@@ -2961,8 +2783,7 @@ paths:
                   rule_id:
                     $ref: '#/components/schemas/RuleSignatureId'
               type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to
           delete.
         required: true
       responses:
@@ -3087,11 +2908,10 @@ paths:
             examples:
               example1:
                 value:
-                  - description: >-
-                      Detects when a previously suspended user's account is
-                      renewed in Google Workspace. An adversary may renew a
-                      suspended user account to maintain access to the Google
-                      Workspace organization with a valid account.
+                  - description: Detects when a previously suspended user's account is renewed in
+                      Google Workspace. An adversary may renew a suspended user
+                      account to maintain access to the Google Workspace
+                      organization with a valid account.
                     id: 7d2f5ed8-6c05-44ab-81ce-9160ae147057
                     name: Updated Google Workspace Suspended User Account Renewed
                     risk_score: 21
@@ -3099,13 +2919,11 @@ paths:
                     tags:
                       - new_tag
                     type: query
-                  - description: >-
-                      Identifies the creation of an Amazon Redshift cluster.
-                      Unexpected creation of this cluster by a
-                      non-administrative user may indicate a permission or role
-                      issue with current users. If unexpected, the resource may
-                      not properly be configured and could introduce security
-                      vulnerabilities.
+                  - description: Identifies the creation of an Amazon Redshift cluster. Unexpected
+                      creation of this cluster by a non-administrative user may
+                      indicate a permission or role issue with current users. If
+                      unexpected, the resource may not properly be configured
+                      and could introduce security vulnerabilities.
                     id: 43b2dc3b-4f21-4a10-95e2-0dbc19e6e974
                     name: Updated AWS Redshift Cluster Creation
                     risk_score: 21
@@ -3140,37 +2958,16 @@ paths:
         - Bulk API
   /api/detection_engine/rules/_export:
     post:
-      description: >
-        Export detection rules to an `.ndjson` file. The following configuration
-        items are also included in the `.ndjson` file:
-
+      description: |
+        Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
         - Actions
-
         - Exception lists
-
         > info
+        > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > Rule actions and connectors are included in the exported file, but
-        sensitive information about the connector (such as authentication
-        credentials) is not included. You must re-add missing connector details
-        after importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-
-        > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
-        UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
-        (experimental) to
-        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
-        and
-        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
-        any necessary connectors before importing detection rules.
-
-
-        > Similarly, any value lists used for rule exceptions are not included
-        in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
-        UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
-        import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
         - description: Determines whether a summary of the exported rules is returned.
@@ -3201,9 +2998,8 @@ paths:
               type: object
               properties:
                 objects:
-                  description: >-
-                    Array of objects with a rule's `rule_id` field. Do not use
-                    rule's `id` here. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's
+                    `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -3236,11 +3032,8 @@ paths:
         - Import/Export API
       x-codeSamples:
         - lang: cURL
-          source: >
-            curl -X POST
-            "localhost:5601/api/detection_engine/rules/_export?exclude_export_details=true&file_name=exported_rules.ndjson"
-            -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
-
+          source: |
+            curl -X POST "localhost:5601/api/detection_engine/rules/_export?exclude_export_details=true&file_name=exported_rules.ndjson" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
             {
               "objects": [
                 {
@@ -3253,9 +3046,8 @@ paths:
             }
   /api/detection_engine/rules/_find:
     get:
-      description: >-
-        Retrieve a paginated list of detection rules. By default, the first page
-        is returned, with 20 results per page.
+      description: Retrieve a paginated list of detection rules. By default, the first
+        page is returned, with 20 results per page.
       operationId: FindRules
       parameters:
         - in: query
@@ -3344,20 +3136,17 @@ paths:
                     data:
                       - created_at: '2020-02-02T10:05:19.613Z'
                         created_by: elastic
-                        description: >-
-                          Identifies a PowerShell process launched by either
-                          cscript.exe or wscript.exe. Observing Windows
-                          scripting processes executing a PowerShell script, may
-                          be indicative of malicious activity.
+                        description: Identifies a PowerShell process launched by either cscript.exe or
+                          wscript.exe. Observing Windows scripting processes
+                          executing a PowerShell script, may be indicative of
+                          malicious activity.
                         enabled: false
                         execution_summary:
                           last_execution:
                             date: '2022-03-23T16:06:12.787Z'
-                            message: >-
-                              This rule attempted to query data from
-                              Elasticsearch indices listed in the "Index
-                              pattern" section of the rule definition, but no
-                              matching index was found.
+                            message: This rule attempted to query data from Elasticsearch indices listed in
+                              the "Index pattern" section of the rule
+                              definition, but no matching index was found.
                             metrics:
                               execution_gap_duration_s: 0
                               total_indexing_duration_ms: 15
@@ -3374,10 +3163,9 @@ paths:
                         language: kuery
                         max_signals: 33
                         name: Windows Script Executing PowerShell
-                        query: >-
-                          event.action:"Process Create (rule: ProcessCreate)"
-                          and process.parent.name:("wscript.exe" or
-                          "cscript.exe") and process.name:"powershell.exe"
+                        query: 'event.action:"Process Create (rule: ProcessCreate)" and
+                          process.parent.name:("wscript.exe" or "cscript.exe")
+                          and process.name:"powershell.exe"'
                         references: []
                         related_integrations:
                           - package: o365
@@ -3447,70 +3235,30 @@ paths:
         - Rules API
       x-codeSamples:
         - lang: cURL
-          source: >
-            curl -X GET
-            "localhost:5601/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:windows"
-            -H 'kbn-xsrf: true'
+          source: |
+            curl -X GET "localhost:5601/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:windows" -H 'kbn-xsrf: true'
   /api/detection_engine/rules/_import:
     post:
-      description: >
-        Import detection rules from an `.ndjson` file, including actions and
-        exception lists. The request must include:
-
+      description: |
+        Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-
         - A link to the `.ndjson` file containing the rules.
-
         > warn
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
-        > When used with [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
-        the user's key gets assigned to the affected rules. If the user's key
-        gets deleted or the user becomes inactive, the rules will stop running.
-
-
-        > If the API key that is used for authorization has different privileges
-        than the key that created or most recently updated the rule, the rule
-        behavior might change.
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+        > info
+        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
 
         > info
+        > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > To import rules with actions, you need at least Read privileges for
-        the Action and Connectors feature. To overwrite or add new connectors,
-        you need All privileges for the Actions and Connectors feature. To
-        import rules without actions, you don’t need Actions and Connectors
-        privileges. Refer to [Enable and access
-        detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
-        for more information.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-
-        > info
-
-        > Rule actions and connectors are included in the exported file, but
-        sensitive information about the connector (such as authentication
-        credentials) is not included. You must re-add missing connector details
-        after importing detection rules.
-
-
-        > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
-        UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
-        (experimental) to
-        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
-        and
-        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
-        any necessary connectors before importing detection rules.
-
-
-        > Similarly, any value lists used for rule exceptions are not included
-        in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
-        UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
-        import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: >-
-            Determines whether existing rules with the same `rule_id` are
+        - description: Determines whether existing rules with the same `rule_id` are
             overwritten.
           in: query
           name: overwrite
@@ -3518,8 +3266,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: >-
-            Determines whether existing exception lists with the same `list_id`
+        - description: Determines whether existing exception lists with the same `list_id`
             are overwritten. Both the exception list container and its items are
             overwritten.
           in: query
@@ -3528,8 +3275,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: >-
-            Determines whether existing actions with the same
+        - description: Determines whether existing actions with the same
             `kibana.alert.rule.actions.id` are overwritten.
           in: query
           name: overwrite_action_connectors
@@ -3743,9 +3489,7 @@ paths:
                     minimum: 0
                     type: integer
                   rules_not_installed:
-                    description: >-
-                      The total number of available prebuilt rules that are not
-                      installed
+                    description: The total number of available prebuilt rules that are not installed
                     minimum: 0
                     type: integer
                   rules_not_updated:
@@ -3757,9 +3501,8 @@ paths:
                     minimum: 0
                     type: integer
                   timelines_not_installed:
-                    description: >-
-                      The total number of available prebuilt timelines that are
-                      not installed
+                    description: The total number of available prebuilt timelines that are not
+                      installed
                     minimum: 0
                     type: integer
                   timelines_not_updated:
@@ -3783,8 +3526,7 @@ paths:
     post:
       operationId: RulePreview
       parameters:
-        - description: >-
-            Enables logging and returning in response ES queries, performed
+        - description: Enables logging and returning in response ES queries, performed
             during rule execution
           in: query
           name: enable_logged_requests
@@ -3822,9 +3564,8 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -4099,8 +3840,7 @@ paths:
   /api/detection_engine/signals/migration_status:
     post:
       deprecated: true
-      description: >-
-        Retrieve indices that contain detection alerts of a particular age,
+      description: Retrieve indices that contain detection alerts of a particular age,
         along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -4239,9 +3979,8 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/SetAlertsStatusByIds'
                 - $ref: '#/components/schemas/SetAlertsStatusByQuery'
-        description: >-
-          An object containing desired status and explicit alert ids or a query
-          to select alerts
+        description: An object containing desired status and explicit alert ids or a
+          query to select alerts
         required: true
       responses:
         '200':
@@ -4296,9 +4035,8 @@ paths:
               required:
                 - ids
                 - tags
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -4366,8 +4104,7 @@ components:
       properties:
         add:
           items:
-            description: >-
-              A list of user profile `uid`s to assign. Users need to activate
+            description: A list of user profile `uid`s to assign. Users need to activate
               their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
@@ -4375,8 +4112,7 @@ components:
           type: array
         remove:
           items:
-            description: >-
-              A list of user profile `uid`s to unassign. Users need to activate
+            description: A list of user profile `uid`s to unassign. Users need to activate
               their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
@@ -4524,21 +4260,15 @@ components:
         - version
         - count
     AnomalyThreshold:
-      description: >-
-        Anomaly score threshold above which the rule creates an alert. Valid
-        values are from 0 to 100.
+      description: Anomaly score threshold above which the rule creates an alert.
+        Valid values are from 0 to 100.
       minimum: 0
       type: integer
     BuildingBlockType:
-      description: >
-        Determines if the rule acts as a building block. If yes, the value must
-        be `default`.
-
-        By default, building-block alerts are not displayed in the UI. These
-        rules are used as a foundation for other rules that do generate alerts.
-
-        For more information, refer to [About building block
-        rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+      description: |
+        Determines if the rule acts as a building block. If yes, the value must be `default`.
+        By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
+        For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
       type: string
     BulkActionEditPayload:
       anyOf:
@@ -4552,8 +4282,7 @@ components:
     BulkActionEditPayloadAlertSuppression:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
@@ -4679,9 +4408,8 @@ components:
           type: object
           properties:
             interval:
-              description: >-
-                Interval in which the rule runs. For example, `"1h"` means the
-                rule runs every hour.
+              description: Interval in which the rule runs. For example, `"1h"` means the rule
+                runs every hour.
               example: 1h
               pattern: ^[1-9]\d*[smh]$
               type: string
@@ -4960,11 +4688,10 @@ components:
         - deleted
         - skipped
     BulkEditActionSummary:
-      description: >-
-        A rule can only be skipped when the bulk action to be performed on it
-        results in nothing being done. For example, if the `edit` action is used
-        to add a tag to a rule that already has that tag, or to delete an index
-        pattern that is not specified in a rule. Objects returned in
+      description: A rule can only be skipped when the bulk action to be performed on
+        it results in nothing being done. For example, if the `edit` action is
+        used to add a tag to a rule that already has that tag, or to delete an
+        index pattern that is not specified in a rule. Objects returned in
         `attributes.results.skipped` will only include rules' `id`, `name`, and
         `skip_reason`.
       type: object
@@ -5091,8 +4818,7 @@ components:
             - fill_gaps
           type: string
         fill_gaps:
-          description: >-
-            Object that describes applying a manual gap fill action for the
+          description: Object that describes applying a manual gap fill action for the
             specified time range.
           type: object
           properties:
@@ -5197,9 +4923,9 @@ components:
               - items:
                   type: string
                 type: array
-      description: >-
-        Map Osquery results columns or static values to Elastic Common Schema
-        (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}
+      description: 'Map Osquery results columns or static values to Elastic Common
+        Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field":
+        "pid"}}'
       type: object
     EndpointResponseAction:
       type: object
@@ -5258,8 +4984,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -5391,8 +5116,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -5518,8 +5242,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -5631,8 +5354,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -5776,8 +5498,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -5909,8 +5630,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6026,8 +5746,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6164,8 +5883,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6287,9 +6005,8 @@ components:
         - endpoint_blocklists
       type: string
     ExternalRuleSource:
-      description: >-
-        Type of rule source for externally sourced rules, i.e. rules that have
-        an external source, such as the Elastic Prebuilt rules repo.
+      description: Type of rule source for externally sourced rules, i.e. rules that
+        have an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
         is_customized:
@@ -6319,12 +6036,11 @@ components:
         - updatedAt
       type: string
     HistoryWindowStart:
-      description: >-
-        Start date to use when checking if a term has been seen before. Supports
-        relative dates – for example, now-30d will search the last 30 days of
-        data when checking if a term is new. We do not recommend using absolute
-        dates, which can cause issues with rule performance due to querying
-        increasing amounts of data over time.
+      description: Start date to use when checking if a term has been seen before.
+        Supports relative dates – for example, now-30d will search the last 30
+        days of data when checking if a term is new. We do not recommend using
+        absolute dates, which can cause issues with rule performance due to
+        querying increasing amounts of data over time.
       format: nonempty
       minLength: 1
       type: string
@@ -6364,9 +6080,8 @@ components:
         type: string
       type: array
     InternalRuleSource:
-      description: >-
-        Type of rule source for internally sourced rules, i.e. created within
-        the Kibana apps.
+      description: Type of rule source for internally sourced rules, i.e. created
+        within the Kibana apps.
       type: object
       properties:
         type:
@@ -6395,19 +6110,17 @@ components:
       description: Notes to help investigate alerts produced by the rule.
       type: string
     IsExternalRuleCustomized:
-      description: >-
-        Determines whether an external/prebuilt rule has been customized by the
-        user (i.e. any of its fields have been modified and diverged from the
-        base value).
+      description: Determines whether an external/prebuilt rule has been customized by
+        the user (i.e. any of its fields have been modified and diverged from
+        the base value).
       type: boolean
     IsRuleEnabled:
       description: Determines whether the rule is enabled. Defaults to true.
       type: boolean
     IsRuleImmutable:
       deprecated: true
-      description: >-
-        This field determines whether the rule is a prebuilt Elastic rule. It
-        will be replaced with the `rule_source` field.
+      description: This field determines whether the rule is a prebuilt Elastic rule.
+        It will be replaced with the `rule_source` field.
       type: boolean
     ItemsPerSearch:
       minimum: 1
@@ -6430,8 +6143,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6563,8 +6275,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6694,8 +6405,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6823,8 +6533,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -6934,21 +6643,10 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
     MaxSignals:
       default: 100
-      description: >
-        Maximum number of alerts the rule can create during a single run (the
-        rule’s Max alerts per run [advanced
-        setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params)
-        value).
-
+      description: |
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
         > info
-
-        > This setting can be superseded by the [Kibana configuration
-        setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings)
-        `xpack.alerting.rules.run.alerts.max`, which determines the maximum
-        alerts generated by any rule in the Kibana alerting framework. For
-        example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the
-        rule can generate no more than 1000 alerts even if `max_signals` is set
-        higher.
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
       type: integer
     MigrationCleanupResult:
@@ -7061,8 +6759,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -7195,8 +6892,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -7340,8 +7036,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -7478,8 +7173,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -7632,31 +7326,27 @@ components:
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         pack_id:
-          description: >-
-            To specify a query pack, use the packId field. Example: "packId":
-            "processes_elastic"
+          description: 'To specify a query pack, use the packId field. Example: "packId":
+            "processes_elastic"'
           type: string
         queries:
           items:
             $ref: '#/components/schemas/OsqueryQuery'
           type: array
         query:
-          description: >-
-            To run a single query, use the query field and enter a SQL query.
-            Example: "query": "SELECT * FROM processes;"
+          description: 'To run a single query, use the query field and enter a SQL query.
+            Example: "query": "SELECT * FROM processes;"'
           type: string
         saved_query_id:
-          description: >-
-            To run a saved query, use the saved_query_id field and specify the
-            saved query ID. Example: "saved_query_id": "processes_elastic"
+          description: 'To run a saved query, use the saved_query_id field and specify the
+            saved query ID. Example: "saved_query_id": "processes_elastic"'
           type: string
         timeout:
-          description: >-
-            A timeout period, in seconds, after which the query will stop
+          description: 'A timeout period, in seconds, after which the query will stop
             running. Overwriting the default timeout allows you to support
             queries that require more time to complete. The default and minimum
             supported value is 60. The maximum supported value is 900. Example:
-            "timeout": 120.
+            "timeout": 120.'
           type: number
     OsqueryQuery:
       type: object
@@ -7710,18 +7400,16 @@ components:
       type: object
       properties:
         command:
-          description: >-
-            To run an endpoint response action, specify a value for the command
-            field. Example: "command": "isolate"
+          description: 'To run an endpoint response action, specify a value for the
+            command field. Example: "command": "isolate"'
           enum:
             - kill-process
             - suspend-process
           type: string
         comment:
-          description: >-
-            Add a note that explains or describes the action. You can find your
-            comment in the response actions history log. Example: "comment":
-            "Check processes"
+          description: 'Add a note that explains or describes the action. You can find
+            your comment in the response actions history log. Example:
+            "comment": "Check processes"'
           type: string
         config:
           type: object
@@ -7743,8 +7431,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -7877,8 +7564,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -8020,8 +7706,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -8152,8 +7837,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -8359,8 +8043,7 @@ components:
       type: object
       properties:
         ecs:
-          description: >-
-            Indicates whether the field is ECS-compliant. This property is only
+          description: Indicates whether the field is ECS-compliant. This property is only
             present in responses. Its value is computed based on field’s name
             and type.
           type: boolean
@@ -8383,10 +8066,9 @@ components:
         $ref: '#/components/schemas/RequiredField'
       type: array
     RequiredFieldInput:
-      description: >-
-        Input parameters to create a RequiredField. Does not include the `ecs`
-        field, because `ecs` is calculated on the backend based on the field
-        name and type.
+      description: Input parameters to create a RequiredField. Does not include the
+        `ecs` field, because `ecs` is calculated on the backend based on the
+        field name and type.
       type: object
       properties:
         name:
@@ -8456,9 +8138,7 @@ components:
       minimum: 0
       type: integer
     RiskScoreMapping:
-      description: >-
-        Overrides generated alerts' risk_score with a value from the source
-        event
+      description: Overrides generated alerts' risk_score with a value from the source event
       items:
         type: object
         properties:
@@ -8521,7 +8201,7 @@ components:
         - params
     RuleActionAlertsFilter:
       additionalProperties: true
-      description: >
+      description: >+
         Object containing an action’s conditional filters.
 
 
@@ -8539,17 +8219,16 @@ components:
               
       type: object
     RuleActionFrequency:
-      description: >-
-        The action frequency defines when the action runs (for example, only on
-        rule execution or at specific time intervals).
+      description: The action frequency defines when the action runs (for example,
+        only on rule execution or at specific time intervals).
       type: object
       properties:
         notifyWhen:
           $ref: '#/components/schemas/RuleActionNotifyWhen'
         summary:
-          description: >-
-            Action summary indicates whether we will send a summary notification
-            about all the generate alerts or notification per individual alert
+          description: Action summary indicates whether we will send a summary
+            notification about all the generate alerts or notification per
+            individual alert
           type: boolean
         throttle:
           $ref: '#/components/schemas/RuleActionThrottle'
@@ -8559,8 +8238,7 @@ components:
         - notifyWhen
         - throttle
     RuleActionGroup:
-      description: >-
-        Optionally groups actions by use cases. Use `default` for alert
+      description: Optionally groups actions by use cases. Use `default` for alert
         notifications.
       type: string
     RuleActionId:
@@ -8649,11 +8327,8 @@ components:
       required:
         - id
     RuleExceptionList:
-      description: >
-        Array of [exception
-        containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html),
-        which define exceptions that prevent the rule from generating alerts
-        even when its other criteria are met.
+      description: |
+        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       type: object
       properties:
         id:
@@ -8687,8 +8362,7 @@ components:
           minimum: 0
           type: integer
         frozen_indices_queried_count:
-          description: >-
-            Count of frozen indices queried during the rule execution. These
+          description: Count of frozen indices queried during the rule execution. These
             indices could not be entirely excluded after applying the time range
             filter.
           minimum: 0
@@ -8707,20 +8381,17 @@ components:
             - gte
             - lte
         total_enrichment_duration_ms:
-          description: >-
-            Total time spent enriching documents during current rule execution
+          description: Total time spent enriching documents during current rule execution
             cycle
           minimum: 0
           type: integer
         total_indexing_duration_ms:
-          description: >-
-            Total time spent indexing documents during current rule execution
+          description: Total time spent indexing documents during current rule execution
             cycle
           minimum: 0
           type: integer
         total_search_duration_ms:
-          description: >-
-            Total time spent performing ES searches as measured by Kibana;
+          description: Total time spent performing ES searches as measured by Kibana;
             includes network latency and time spent serializing/deserializing
             request/response
           minimum: 0
@@ -8792,8 +8463,7 @@ components:
       required:
         - last_execution
     RuleFalsePositiveArray:
-      description: >-
-        String array used to describe common reasons why the rule may issue
+      description: String array used to describe common reasons why the rule may issue
         false-positive alerts. Defaults to an empty array.
       items:
         type: string
@@ -8809,16 +8479,14 @@ components:
       items: {}
       type: array
     RuleInterval:
-      description: >-
-        Frequency of rule execution, using a date math range. For example, "1h"
-        means the rule runs every hour. Defaults to 5m (5 minutes).
+      description: Frequency of rule execution, using a date math range. For example,
+        "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
       type: string
     RuleIntervalFrom:
-      description: >-
-        Time from which data is analyzed each time the rule runs, using a date
-        math range. For example, now-4200s means the rule analyzes data from 70
-        minutes before its start time. Defaults to now-6m (analyzes data from 6
-        minutes before the start time).
+      description: Time from which data is analyzed each time the rule runs, using a
+        date math range. For example, now-4200s means the rule analyzes data
+        from 70 minutes before its start time. Defaults to now-6m (analyzes data
+        from 6 minutes before the start time).
       format: date-math
       type: string
     RuleIntervalTo:
@@ -8842,16 +8510,14 @@ components:
       minLength: 1
       type: string
     RuleNameOverride:
-      description: >-
-        Sets which field in the source event is used to populate the alert's
-        `signal.rule.name` value (in the UI, this value is displayed on the
-        Rules page in the Rule column). When unspecified, the rule’s `name`
+      description: Sets which field in the source event is used to populate the
+        alert's `signal.rule.name` value (in the UI, this value is displayed on
+        the Rules page in the Rule column). When unspecified, the rule’s `name`
         value is used. The source field must be a string data type.
       type: string
     RuleObjectId:
       $ref: '#/components/schemas/UUID'
-      description: >-
-        A dynamic unique identifier for the rule object. It is randomly
+      description: A dynamic unique identifier for the rule object. It is randomly
         generated when a rule is created and cannot be changed after that. It is
         always a UUID. It is unique within a given Kibana space. The same
         prebuilt Elastic rule, when installed in two different Kibana spaces or
@@ -8913,22 +8579,15 @@ components:
         - invocationCount
         - timeframeEnd
     RuleQuery:
-      description: >
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by
-        the rule to create alerts.
+      description: |
+        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
 
-
-        - For indicator match rules, only the query’s results are used to
-        determine whether an alert is generated.
-
-        - ES|QL rules have additional query requirements. Refer to [Create
-        ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule)
-        rules for more information.
+        - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
+        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
       type: string
     RuleReferenceArray:
-      description: >-
-        Array containing notes about or references to relevant information about
-        the rule. Defaults to an empty array.
+      description: Array containing notes about or references to relevant information
+        about the rule. Defaults to an empty array.
       items:
         type: string
       type: array
@@ -8964,8 +8623,7 @@ components:
       minimum: 0
       type: integer
     RuleSignatureId:
-      description: >-
-        A stable unique identifier for the rule object. It can be assigned
+      description: A stable unique identifier for the rule object. It can be assigned
         during rule creation. It can be any string, but often is a UUID. It
         should be unique not only within a given Kibana space, but also across
         spaces and Elastic environments. The same prebuilt Elastic rule, when
@@ -8973,8 +8631,7 @@ components:
         environments, will have the same `rule_id`s.
       type: string
     RuleSource:
-      description: >-
-        Discriminated union that determines whether the rule is internally
+      description: Discriminated union that determines whether the rule is internally
         sourced (created within the Kibana app) or has an external source, such
         as the Elastic Prebuilt rules repo.
       discriminator:
@@ -8983,9 +8640,8 @@ components:
         - $ref: '#/components/schemas/ExternalRuleSource'
         - $ref: '#/components/schemas/InternalRuleSource'
     RuleTagArray:
-      description: >-
-        String array containing words and phrases to help categorize, filter,
-        and search rules. Defaults to an empty array.
+      description: String array containing words and phrases to help categorize,
+        filter, and search rules. Defaults to an empty array.
       items:
         type: string
       type: array
@@ -9033,8 +8689,7 @@ components:
         - conflict
       type: string
     SavedQueryId:
-      description: >-
-        Kibana [saved
+      description: Kibana [saved
         search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html)
         used by the rule to create alerts.
       type: string
@@ -9043,8 +8698,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -9177,8 +8831,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -9320,8 +8973,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -9452,8 +9104,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -9565,9 +9216,9 @@ components:
       type: object
       properties:
         signal_ids:
-          description: >-
-            List of alert ids. Use field `_id` on alert document or
-            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+          description: 'List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for
+            alerts.'
           items:
             $ref: '#/components/schemas/NonEmptyString'
           minItems: 1
@@ -9605,10 +9256,9 @@ components:
         - tags_to_add
         - tags_to_remove
     SetupGuide:
-      description: >-
-        Populates the rule’s setup guide with instructions on rule prerequisites
-        such as required integrations, configuration steps, and anything else
-        needed for the rule to work correctly.
+      description: Populates the rule’s setup guide with instructions on rule
+        prerequisites such as required integrations, configuration steps, and
+        anything else needed for the rule to work correctly.
       type: string
     Severity:
       description: >
@@ -9701,8 +9351,7 @@ components:
       type: array
     ThreatFilters:
       items:
-        description: >-
-          Query and filter context array used to filter documents from the
+        description: Query and filter context array used to filter documents from the
           Elasticsearch index containing the threat values
       type: array
     ThreatIndex:
@@ -9711,8 +9360,7 @@ components:
         type: string
       type: array
     ThreatIndicatorPath:
-      description: >-
-        Defines the path to the threat indicator in the indicator documents
+      description: Defines the path to the threat indicator in the indicator documents
         (optional)
       type: string
     ThreatMapping:
@@ -9762,8 +9410,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -9896,8 +9543,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10055,8 +9701,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10196,8 +9841,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10306,9 +9950,8 @@ components:
             - severity
         - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
     ThreatQuery:
-      description: >-
-        Query used to determine which fields in the Elasticsearch index are used
-        for generating alerts.
+      description: Query used to determine which fields in the Elasticsearch index are
+        used for generating alerts.
       type: string
     ThreatSubtechnique:
       type: object
@@ -10395,8 +10038,7 @@ components:
             description: The field on which to calculate and compare the cardinality.
             type: string
           value:
-            description: >-
-              The threshold value from which an alert is generated based on
+            description: The threshold value from which an alert is generated based on
               unique number of values of cardinality.field.
             minimum: 0
             type: integer
@@ -10405,10 +10047,9 @@ components:
           - value
       type: array
     ThresholdField:
-      description: >-
-        The field on which the threshold is applied. If you specify an empty
-        array ([]), alerts are generated when the query returns at least the
-        number of results specified in the value field.
+      description: The field on which the threshold is applied. If you specify an
+        empty array ([]), alerts are generated when the query returns at least
+        the number of results specified in the value field.
       oneOf:
         - type: string
         - items:
@@ -10419,8 +10060,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10553,8 +10193,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10698,8 +10337,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10833,8 +10471,7 @@ components:
         - type: object
           properties:
             actions:
-              description: >-
-                Array defining the automated actions (notifications) taken when
+              description: Array defining the automated actions (notifications) taken when
                 alerts are generated.
               items:
                 $ref: '#/components/schemas/RuleAction'
@@ -10976,17 +10613,15 @@ components:
       description: Timeline template title
       type: string
     TimestampField:
-      description: >-
-        Specifies the name of the event timestamp field used for sorting a
+      description: Specifies the name of the event timestamp field used for sorting a
         sequence of events. Not to be confused with `timestamp_override`, which
         specifies the more general field used for querying events within a
         range. Defaults to the @timestamp ECS field.
       type: string
     TimestampOverride:
-      description: >-
-        Sets the time field used to query indices. When unspecified, rules query
-        the `@timestamp` field. The source field must be an Elasticsearch date
-        data type.
+      description: Sets the time field used to query indices. When unspecified, rules
+        query the `@timestamp` field. The source field must be an Elasticsearch
+        date data type.
       type: string
     TimestampOverrideFallbackDisabled:
       description: Disables the fallback to the event's @timestamp field
@@ -11017,43 +10652,21 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >
-      Use the detections APIs to create and manage detection rules. Detection
-      rules search events and external alerts sent to Elastic Security and
-      generate detection alerts from any hits. Alerts are displayed on the
-      **Alerts** page and can be assigned and triaged, using the alert status to
-      mark them as open, closed, or acknowledged.
-
+  - description: |
+      Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
 
       This API supports both key-based authentication and basic authentication.
 
+      To use key-based authentication, create an API key, then specify the key in the header of your API calls.
 
-      To use key-based authentication, create an API key, then specify the key
-      in the header of your API calls.
+      To use basic authentication, provide a username and password; this automatically creates an API key that matches the current user’s privileges.
 
-
-      To use basic authentication, provide a username and password; this
-      automatically creates an API key that matches the current user’s
-      privileges.
-
-
-      In both cases, the API key is subsequently used for authorization when the
-      rule runs.
-
+      In both cases, the API key is subsequently used for authorization when the rule runs.
       > warn
+      > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
 
-      > If the API key used for authorization has different privileges than the
-      key that created or most recently updated a rule, the rule behavior might
-      change.
+      > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
 
-
-      > If the API key that created a rule is deleted, or the user that created
-      the rule becomes inactive, the rule will stop running.
-
-
-      To create and run rules, the user must meet specific requirements for the
-      Kibana space. Refer to the [Detections
-      requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html)
-      for a complete list of requirements.
+      To create and run rules, the user must meet specific requirements for the Kibana space. Refer to the [Detections requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html) for a complete list of requirements.
     name: Security Detections API
     x-displayName: Security detections
