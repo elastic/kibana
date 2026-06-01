@@ -321,6 +321,22 @@ export const Default: StoryFn = () => (
   />
 );
 
+export const WithHeaderActions: StoryFn = () => (
+  <TransactionsTable
+    items={items}
+    isLoading={false}
+    maxCountExceeded={false}
+    latencyAggregationType={LatencyAggregationType.p95}
+    headerActions={[
+      {
+        label: 'View transactions',
+        href: '#',
+        ebt: { action: 'viewTransactions', element: 'transactionsTableHeader' },
+      },
+    ]}
+  />
+);
+
 export const Loading: StoryFn = () => (
   <TransactionsTable
     items={[]}

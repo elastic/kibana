@@ -13,24 +13,34 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
+  EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LatencyAggregationType } from '@kbn/apm-types';
-import type { TransactionGroup, TransactionGroupInteraction } from './types';
+import type {
+  TransactionGroup,
+  TransactionGroupInteraction,
+  TransactionsTableHeaderAction,
+} from './types';
 import { getBuiltInColumns, DEFAULT_COLUMNS } from './get_columns';
 import type { ColumnId } from './get_columns';
 
-export type { TransactionGroup, TransactionGroupInteraction };
+export type { TransactionGroup, TransactionGroupInteraction, TransactionsTableHeaderAction };
 export type { ColumnId };
 
 interface TransactionsTableProps {
   items: TransactionGroup[];
   isLoading: boolean;
   maxCountExceeded: boolean;
+  title?: string;
+  headerActions?: TransactionsTableHeaderAction[];
   latencyAggregationType?: LatencyAggregationType;
   columns?: Array<ColumnId | EuiBasicTableColumn<TransactionGroup>>;
   showMaxTransactionGroupsExceededWarning?: boolean;
@@ -62,6 +72,10 @@ export function TransactionsTable({
   items,
   isLoading,
   maxCountExceeded,
+  title = i18n.translate('apmUiShared.transactionsTable.title', {
+    defaultMessage: 'Transactions',
+  }),
+  headerActions,
   latencyAggregationType,
   columns,
   showMaxTransactionGroupsExceededWarning = false,
@@ -121,6 +135,40 @@ export function TransactionsTable({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {headerActions && headerActions.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                {headerActions.map((action) => (
+                  <EuiFlexItem grow={false} key={action.label}>
+                    <EuiLink
+                      {...(action.href ? { href: action.href } : { onClick: action.onClick })}
+                      {...getEbtProps(action.ebt)}
+                    >
+                      {action.icon && (
+                        <EuiIcon
+                          type={action.icon}
+                          size="s"
+                          style={{ marginRight: 4 }}
+                          aria-hidden={true}
+                        />
+                      )}
+                      {action.label}
+                    </EuiLink>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
       {showMaxTransactionGroupsExceededWarning && maxCountExceeded && (
         <EuiFlexItem>
           <EuiCallOut
@@ -144,6 +192,7 @@ export function TransactionsTable({
 
       <EuiFlexItem>
         <EuiInMemoryTable
+          tableCaption={title}
           items={items}
           columns={resolvedColumns}
           loading={isLoading}

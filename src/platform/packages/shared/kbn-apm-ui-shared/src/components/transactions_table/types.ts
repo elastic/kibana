@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import type { Coordinate } from '../sparkline/utils';
 
 export type { Coordinate };
@@ -24,6 +25,14 @@ export interface TransactionMetric {
 export interface TransactionGroupInteraction {
   onClick?: (item: TransactionGroup) => void;
   href?: (item: TransactionGroup) => string | undefined;
+}
+
+export interface TransactionsTableHeaderAction {
+  label: string;
+  icon?: string;
+  href?: string;
+  onClick?: () => void;
+  ebt: EbtClickAttrs;
 }
 
 export interface TransactionGroup {

@@ -74,6 +74,68 @@ describe('TransactionsTable', () => {
     ).not.toBeInTheDocument();
   });
 
+  describe('title and header actions', () => {
+    it('renders the default title "Transactions"', () => {
+      render(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument();
+    });
+
+    it('renders a custom title when the title prop is provided', () => {
+      render(
+        <TransactionsTable
+          items={[]}
+          isLoading={false}
+          maxCountExceeded={false}
+          title="My custom title"
+        />
+      );
+      expect(screen.getByRole('heading', { name: 'My custom title' })).toBeInTheDocument();
+    });
+
+    it('does not render header action links when headerActions is not provided', () => {
+      render(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('renders header action links when headerActions is provided', () => {
+      render(
+        <TransactionsTable
+          items={[]}
+          isLoading={false}
+          maxCountExceeded={false}
+          headerActions={[
+            {
+              label: 'View transactions',
+              href: '#transactions',
+              ebt: { action: 'viewTransactions', element: 'transactionsTableHeader' },
+            },
+          ]}
+        />
+      );
+      expect(screen.getByRole('link', { name: 'View transactions' })).toBeInTheDocument();
+    });
+
+    it('calls onClick when a header action with onClick is clicked', () => {
+      const onClick = jest.fn();
+      render(
+        <TransactionsTable
+          items={[]}
+          isLoading={false}
+          maxCountExceeded={false}
+          headerActions={[
+            {
+              label: 'Go somewhere',
+              onClick,
+              ebt: { action: 'goSomewhere', element: 'transactionsTableHeader' },
+            },
+          ]}
+        />
+      );
+      fireEvent.click(screen.getByText('Go somewhere'));
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('search behavior', () => {
     beforeEach(() => {
       jest.useFakeTimers();
