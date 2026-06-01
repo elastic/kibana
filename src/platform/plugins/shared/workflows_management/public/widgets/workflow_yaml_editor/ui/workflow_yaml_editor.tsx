@@ -175,11 +175,20 @@ export const WorkflowYAMLEditor = ({
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
+  const workflow = useSelector(selectWorkflow);
+  const isExecutionYaml = useSelector(selectIsExecutionsTab);
+  const isManagedWorkflow = workflow?.managed === true;
+  const isReadOnlyYaml = isExecutionYaml || isManagedWorkflow;
+  const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
+  isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
     (yaml: string) => {
+      if (isReadOnlyYaml) {
+        return;
+      }
       dispatch(setYamlString(yaml));
     },
-    [dispatch]
+    [dispatch, isReadOnlyYaml]
   );
 
   const onSyncStateChange = useCallback(
@@ -190,9 +199,7 @@ export const WorkflowYAMLEditor = ({
   );
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
-  const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const hasChanges = useSelector(selectHasChanges);
-  const workflow = useSelector(selectWorkflow);
 
   const originalValue = workflow?.yaml ?? '';
 
@@ -239,6 +246,7 @@ export const WorkflowYAMLEditor = ({
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const workflowLookupRef = useRef(workflowLookup);
   workflowLookupRef.current = workflowLookup;
+  const lastRevealedHighlightedStepIdRef = useRef<string | undefined>(undefined);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -356,14 +364,14 @@ export const WorkflowYAMLEditor = ({
   const keyboardHandlers = useMemo(
     () => ({
       save: () => {
-        if (isSavingRef.current) {
+        if (isSavingRef.current || isReadOnlyYamlRef.current) {
           return;
         }
         saveYaml();
       },
       run: () => dispatch(setIsTestModalOpen(true)),
       saveAndRun: () => {
-        if (isSavingRef.current) {
+        if (isSavingRef.current || isReadOnlyYamlRef.current) {
           return;
         }
         saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
@@ -507,7 +515,7 @@ export const WorkflowYAMLEditor = ({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
-    readOnly: isExecutionYaml,
+    readOnly: isReadOnlyYaml,
   });
 
   useWorkflowEventsOnDecorations({
@@ -515,7 +523,7 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     yamlLineCounter,
     isEditorMounted,
-    readOnly: isExecutionYaml,
+    readOnly: isReadOnlyYaml,
   });
 
   useWorkflowIdDecorations({
@@ -563,25 +571,40 @@ export const WorkflowYAMLEditor = ({
   }, [isEditorMounted, dispatch]);
 
   // Scroll editor to highlighted step when selected from execution flyout.
-  // workflowLookup is a dependency because the line numbers may shift, but in
-  // practice this only fires in execution mode where the editor is read-only,
-  // so re-scrolling on lookup changes is harmless.
+  // Do not re-scroll on workflow lookup updates; editing can change line numbers
+  // while a step remains highlighted for reference.
   useEffect(() => {
-    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+    if (!highlightedStepId) {
+      lastRevealedHighlightedStepIdRef.current = undefined;
       return;
     }
+    if (!isEditorMounted) {
+      return;
+    }
+    if (lastRevealedHighlightedStepIdRef.current === highlightedStepId) {
+      return;
+    }
+    const currentWorkflowLookup = workflowLookupRef.current;
+    if (!currentWorkflowLookup) {
+      return;
+    }
+
     const lineStart =
       highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
-        ? workflowLookup.triggersLineStart
-        : workflowLookup.steps[highlightedStepId]?.lineStart;
+        ? currentWorkflowLookup.triggersLineStart
+        : currentWorkflowLookup.steps[highlightedStepId]?.lineStart;
     if (lineStart != null) {
       editorRef.current?.revealLineInCenter(lineStart);
+      lastRevealedHighlightedStepIdRef.current = highlightedStepId;
     }
-  }, [isEditorMounted, highlightedStepId, workflowLookup]);
+  }, [isEditorMounted, highlightedStepId]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
   const openActionsPopover = useCallback(() => {
+    if (isReadOnlyYamlRef.current) {
+      return;
+    }
     setActionsPopoverOpen(true);
   }, []);
   const closeActionsPopover = useCallback(() => {
@@ -589,6 +612,9 @@ export const WorkflowYAMLEditor = ({
   }, []);
   const onActionSelected = useCallback(
     (action: ActionOptionData) => {
+      if (isReadOnlyYaml) {
+        return;
+      }
       const model = editorRef.current?.getModel();
       const yamlDocumentCurrent = yamlDocumentRef.current;
       const cursorPosition = editorRef.current?.getPosition();
@@ -610,7 +636,7 @@ export const WorkflowYAMLEditor = ({
       }
       closeActionsPopover();
     },
-    [closeActionsPopover]
+    [closeActionsPopover, isReadOnlyYaml]
   );
 
   const editorCommands: EditorCommand[] = useMemo(
@@ -683,8 +709,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly: isExecutionYaml };
-  }, [isExecutionYaml]);
+    return { ...editorOptions, readOnly: isReadOnlyYaml };
+  }, [isReadOnlyYaml]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -758,8 +784,8 @@ export const WorkflowYAMLEditor = ({
   // These were triggering rerendering of the actions containers on every scroll, because they were
   // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
   const extraActionElement = useMemo(
-    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
-    [extraActions, isExecutionYaml]
+    () => <ExtraActionsBar actions={extraActions} isReadOnly={isReadOnlyYaml} />,
+    [extraActions, isReadOnlyYaml]
   );
 
   const actionsMenuPanelProps = useMemo(() => {
@@ -800,7 +826,7 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
+      {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
         <div css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}

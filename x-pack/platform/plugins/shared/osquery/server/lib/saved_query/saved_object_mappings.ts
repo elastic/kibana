@@ -12,6 +12,7 @@ import {
   packAssetSavedObjectModelVersion1,
   packSavedObjectModelVersion1,
   packSavedObjectModelVersion2,
+  packSavedObjectModelVersion3,
   savedQueryModelVersion1,
   savedQueryModelVersion2,
 } from './saved_object_model_versions';
@@ -159,6 +160,17 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    schedule_type: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    interval: {
+      type: 'integer',
+    },
+    rrule_schedule: {
+      dynamic: false,
+      properties: {},
+    },
     queries: {
       dynamic: false,
       properties: {
@@ -201,6 +213,7 @@ export const packType: SavedObjectsType = {
   modelVersions: {
     1: packSavedObjectModelVersion1,
     2: packSavedObjectModelVersion2,
+    3: packSavedObjectModelVersion3,
   },
   management: {
     defaultSearchField: 'name',
