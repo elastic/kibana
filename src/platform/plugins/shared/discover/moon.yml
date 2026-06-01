@@ -75,6 +75,7 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/resizable-layout'
   - '@kbn/rule-data-utils'
+  - '@kbn/app-header'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-plugins-server'
   - '@kbn/shared-ux-button-toolbar'

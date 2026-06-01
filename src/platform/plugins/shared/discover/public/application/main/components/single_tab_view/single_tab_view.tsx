@@ -143,6 +143,7 @@ export const SingleTabView = ({
   }
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
+    // HD test this case
     return (
       <HideTabsBar customizationContext={customizationContext}>
         <NoDataPage

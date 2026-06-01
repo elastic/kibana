@@ -42,6 +42,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -77,6 +78,8 @@ import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const DISCOVER_TOP_NAV_HEIGHT_OFFSET = '40px';
+const DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET = '120px';
 
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   // QueryClientProvider is used to allow querying the authorized rules api hook
@@ -100,7 +103,9 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    chrome,
   } = useDiscoverServices();
+  const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -450,6 +455,16 @@ export function DiscoverLayout() {
     [dispatch, onDataViewCreatedAction]
   );
 
+  const fullBodyHeightOffset = useMemo(
+    () =>
+      customizationContext.displayMode === 'standalone' &&
+      chrome.next.isEnabled &&
+      chrome.getChromeStyle() === 'project'
+        ? DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET
+        : DISCOVER_TOP_NAV_HEIGHT_OFFSET,
+    [customizationContext.displayMode, chrome]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -460,7 +475,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss('40px')}
+            ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
           }
         `,
       ]}

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { AppHeader } from '@kbn/app-header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -29,17 +30,25 @@ import { useAppMenuData } from './use_app_menu_data';
 
 const MAX_TABS_COUNT = 25;
 
-export const TabsView = (props: SingleTabViewProps) => {
+interface TabsViewProps extends SingleTabViewProps {
+  headerTitle?: string;
+}
+
+export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const { getPreviewData } = usePreviewData(singleTabViewProps.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isChromeNextProjectHeader = useMemo(
+    () => services.chrome.next.isEnabled && services.chrome.getChromeStyle() === 'project',
+    [services.chrome]
+  );
 
   const {
     shouldCollapseAppMenu,
@@ -72,9 +81,32 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
-    () => <SingleTabView key={currentTabId} {...props} />,
-    [currentTabId, props]
+    () => <SingleTabView key={currentTabId} {...singleTabViewProps} />,
+    [currentTabId, singleTabViewProps]
   );
+
+  const renderTabsBar = useMemo((): UnifiedTabsProps['renderTabsBar'] => {
+    if (!isChromeNextProjectHeader) {
+      return undefined;
+    }
+
+    return (tabsBar) => (
+      <AppHeader
+        title={headerTitle ?? 'Discover'}
+        menu={topNavMenuItems}
+        sticky={false}
+        padding="m"
+        titleAppend={tabsBar}
+      />
+    );
+  }, [isChromeNextProjectHeader, headerTitle, topNavMenuItems]);
+
+  const appendRight = useMemo(() => {
+    if (!isChromeNextProjectHeader) {
+      return <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />;
+    }
+    return undefined;
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
 
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {
@@ -117,9 +149,8 @@ export const TabsView = (props: SingleTabViewProps) => {
             onTabLimitReached={onTabLimitReached}
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-            appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-            }
+            renderTabsBar={renderTabsBar}
+            appendRight={appendRight}
           />
         </div>
       )}

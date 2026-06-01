@@ -8,7 +8,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import {
   internalStateActions,
@@ -25,6 +25,10 @@ export const HideTabsBar: FC<{
 }> = ({ customizationContext, children }) => {
   const dispatch = useInternalStateDispatch();
   const { chrome } = useDiscoverServices();
+  const isChromeNextProjectHeader = useMemo(
+    () => chrome.next.isEnabled && chrome.getChromeStyle() === 'project',
+    [chrome]
+  );
   const topNavMenuItems = useTopNavMenuItems();
 
   useEffect(() => {
@@ -40,9 +44,9 @@ export const HideTabsBar: FC<{
         /**
          * The tabs bar renders the app menu, but it still needs to be shown when tabs are hidden
          */
-        customizationContext.displayMode === 'standalone' && topNavMenuItems && (
-          <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
-        )
+        !isChromeNextProjectHeader &&
+          customizationContext.displayMode === 'standalone' &&
+          topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
       }
       {children}
     </>

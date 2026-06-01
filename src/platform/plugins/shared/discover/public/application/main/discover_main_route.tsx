@@ -110,7 +110,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled =
+  const tabsEnabled = // HD when are tabs disabled?
     !services.embeddableEditor.isByValueEditor() &&
     customizationContext.displayMode === 'standalone';
 
@@ -237,12 +237,14 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     areTabsInitializing;
 
   if (isLoading) {
+    // HD is the header well displayed when loading?
     return <BrandedLoadingIndicator />;
   }
 
   const error = mainRouteInitializationState.error || tabsInitializationState.error;
 
   if (error) {
+    // HD is the header well displayed after an error?
     return <InitializationError error={error} />;
   }
 
@@ -251,6 +253,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     !mainRouteInitializationState.value.hasUserDataView
   ) {
     return (
+      // HD is the header well displayed with no data?
       <NoDataPage
         {...mainRouteInitializationState.value}
         onDataViewCreated={() => {
@@ -284,11 +287,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView {...props} />
+              <TabsView {...props} headerTitle={persistedDiscoverSession?.title} /> // HD CHeck the title.
             ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
             ) : (
-              <SingleTabViewWithAppMenu {...props} />
+              <SingleTabViewWithAppMenu {...props} headerTitle={persistedDiscoverSession?.title} />
             )
           }
         </>
