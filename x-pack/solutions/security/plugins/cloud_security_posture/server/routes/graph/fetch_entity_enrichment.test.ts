@@ -191,12 +191,12 @@ describe('fetchEntityEnrichment', () => {
     expect(enrichment?.sourceFields).toBeUndefined();
   });
 
-  it('chunks 101 entity IDs into two queries', async () => {
+  it('chunks 1001 entity IDs into two queries', async () => {
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({ records: [] }),
     });
 
-    const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
+    const ids = Array.from({ length: 1001 }, (_, i) => `user:entity${i}`);
     await fetchEntityEnrichment({
       esClient,
       logger,

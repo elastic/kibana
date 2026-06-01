@@ -22,6 +22,10 @@ export interface EntityEnrichmentFields {
   sourceFields?: Record<string, string | string[]>;
 }
 
+// Capped at 1000 to stay under Elasticsearch's dynamic boolean-clause limit
+// (heuristic min 1024). Same precedent as alerting's MAX_RULES_IDS_IN_RETRY.
+const ENRICHMENT_CHUNK_SIZE = 1000;
+
 const BASE_ENRICHMENT_COLUMNS = new Set([
   'entity.id',
   'entity.name',
@@ -120,7 +124,7 @@ export const fetchEntityEnrichment = async ({
   const result = new Map<string, EntityEnrichmentFields>();
 
   await Promise.all(
-    chunk([...new Set(entityIds)], 100).map(async (entityIdChunk) => {
+    chunk([...new Set(entityIds)], ENRICHMENT_CHUNK_SIZE).map(async (entityIdChunk) => {
       const paramNames = entityIdChunk.map((_, i) => `?entityId${i}`).join(', ');
       // Some entity-store mappings (e.g. tests inserting minimal entities) omit columns we
       // KEEP below. unmapped_fields=nullify makes ESQL return NULL for those instead of erroring.
