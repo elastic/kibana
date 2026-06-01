@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiProgress,
   EuiText,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -376,7 +377,7 @@ export const Complete: StoryFn = () => (
       alerts: { onClick: (item) => alert(`View alerts for: ${item.name}`) },
     }}
     remainingTransactionsCellTooltipContent={
-      <EuiText size="s" style={{ width: 280 }}>
+      <EuiText size="s" style={{ maxWidth: 448 }}>
         The cardinality of APM data being collected is too high. Please review{' '}
         <EuiLink
           href="https://www.elastic.co/guide/en/kibana/8.7/troubleshooting.html#troubleshooting-too-many-transactions"

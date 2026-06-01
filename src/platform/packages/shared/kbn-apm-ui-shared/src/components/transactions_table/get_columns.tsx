@@ -119,7 +119,7 @@ function MetricCell({
 }
 
 const DEFAULT_REMAINING_TRANSACTIONS_TOOLTIP = (
-  <EuiText size="s">
+  <EuiText size="s" style={{ maxWidth: 448 }}>
     {i18n.translate('apmUiShared.transactionsTable.remainingTransactionsDefaultTooltip', {
       defaultMessage:
         'The maximum number of transaction groups has been reached. Try narrowing down your query.',
@@ -146,24 +146,17 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
             { defaultMessage: 'Remaining transactions information' }
           )}
           button={
-            <EuiToolTip
-              content={i18n.translate(
+            // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
+            <EuiButtonIcon
+              iconType="warning"
+              color="primary"
+              size="xs"
+              aria-label={i18n.translate(
                 'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
                 { defaultMessage: 'More information about remaining transactions' }
               )}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="warning"
-                color="primary"
-                size="xs"
-                aria-label={i18n.translate(
-                  'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
-                  { defaultMessage: 'More information about remaining transactions' }
-                )}
-                onClick={() => setIsOpen(true)}
-              />
-            </EuiToolTip>
+              onClick={() => setIsOpen(true)}
+            />
           }
           isOpen={isOpen}
           closePopover={() => setIsOpen(false)}
