@@ -202,15 +202,22 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: '',
         width: '32px',
         render: (rule: RuleApiResponse) => (
-          <EuiButtonIcon
-            iconType="expand"
-            color="text"
-            onClick={() => onExpand(rule)}
-            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
               defaultMessage: 'Open rule summary',
             })}
-            data-test-subj={`expandRule-${rule.id}`}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="expand"
+              color="text"
+              onClick={() => onExpand(rule)}
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+                defaultMessage: 'Open rule summary',
+              })}
+              data-test-subj={`expandRule-${rule.id}`}
+            />
+          </EuiToolTip>
         ),
       },
       {
@@ -364,15 +371,22 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             justifyContent="flexEnd"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="pencil"
-                color="text"
-                onClick={() => onQuickEdit(rule)}
-                aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
                   defaultMessage: 'Quick edit rule',
                 })}
-                data-test-subj={`quickEditRule-${rule.id}`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="pencil"
+                  color="text"
+                  onClick={() => onQuickEdit(rule)}
+                  aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                    defaultMessage: 'Quick edit rule',
+                  })}
+                  data-test-subj={`quickEditRule-${rule.id}`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RuleActionsMenu

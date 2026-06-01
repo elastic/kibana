@@ -12,6 +12,7 @@ import {
   buildEpisodeEventDataQuery,
   type EpisodeEventDataRow,
 } from '../queries/episode_event_data_query';
+import { QUERY_STALE_TIME } from '../constants';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { normalizeTags } from '../utils/normalize_tags';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
@@ -84,5 +85,6 @@ export const useFetchEpisodeEventDataQuery = ({
       };
     },
     enabled: Boolean(episodeId),
+    staleTime: QUERY_STALE_TIME,
   });
 };

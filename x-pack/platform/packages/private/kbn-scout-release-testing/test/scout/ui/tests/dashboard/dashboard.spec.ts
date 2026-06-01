@@ -56,13 +56,13 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('add ES|QL panel', async () => {
-      await pageObjects.dashboard.addNewPanel('ES|QL');
+      await pageObjects.dashboard.addNewESQLPanel();
       await pageObjects.dashboard.applyAndCloseESQLPanel();
       await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
     });
 
     await test.step('add Lens panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -192,7 +192,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('add a Lens panel with a title', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 
@@ -419,7 +419,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('save a lens panel to the library', async () => {
       await pageObjects.dashboard.openNewDashboard();
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 
@@ -452,7 +452,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('create a Lens panel with a title', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 

@@ -11,12 +11,12 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useLeadGenerationPrivileges } from '../../../api/hooks/use_lead_generation_privileges';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
-const LEAD_GENERATION_PRIVILEGES_QUERY_KEY = 'lead-generation-privileges';
 
 const POLL_INTERVAL_MS = 2_000;
 const MAX_POLLS = 30;
@@ -43,7 +43,6 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     fetchLeadGenerationStatus,
     enableLeadGeneration,
     disableLeadGeneration,
-    fetchLeadGenerationPrivileges,
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -53,11 +52,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   const [readPermissionError, setReadPermissionError] = useState(false);
   const [writePermissionError, setWritePermissionError] = useState(false);
 
-  const { data: privileges } = useQuery({
-    queryKey: [LEAD_GENERATION_PRIVILEGES_QUERY_KEY],
-    queryFn: fetchLeadGenerationPrivileges,
-    enabled: isEnabled,
-  });
+  const { data: privileges } = useLeadGenerationPrivileges(isEnabled);
 
   const proactiveReadPermissionError =
     isEnabled && privileges != null && !privileges.has_read_permissions;
