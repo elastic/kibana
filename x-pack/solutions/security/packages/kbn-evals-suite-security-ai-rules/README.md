@@ -43,11 +43,13 @@ kbn-evals-suite-security-ai-rules/
 ## Prerequisites
 
 1. **Elasticsearch running locally**:
+
    ```bash
    yarn es snapshot
    ```
 
 2. **Kibana with AI rule creation enabled**:
+
    - Ensure `kibana.dev.yml` has AI connectors configured
    - Feature flag `aiRuleCreationEnabled: true` is set
 
@@ -62,30 +64,30 @@ kbn-evals-suite-security-ai-rules/
 Run the suite with `node scripts/evals run`. Results are persisted to an Elasticsearch cluster and a summary table is printed at the end.
 
 ```bash
-EVALUATIONS_ES_URL=<ES_URL> \
-EVALUATIONS_ES_API_KEY=<API_KEY> \
+EVALUATIONS_KBN_URL=<KBN_URL> \
+EVALUATIONS_KBN_API_KEY=<API_KEY> \
 EVALUATION_CONNECTOR_ID=gpt-4o \
   node scripts/evals run --suite security-ai-rules
 ```
 
-Replace `<ES_URL>` and `<API_KEY>` with the Elasticsearch endpoint and API key for the cluster where evaluation scores should be stored (this can be a remote/cloud cluster, not necessarily the local one Kibana is connected to).
+Replace `<KBN_URL>` and `<API_KEY>` with the Kibana endpoint and API key for the target environment where the evals plugin is enabled.
 
 ### Environment variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `EVALUATIONS_ES_URL` | Elasticsearch URL for storing results | `http://elastic:changeme@localhost:9220` |
-| `EVALUATIONS_ES_API_KEY` | API key for the results Elasticsearch cluster (used instead of basic auth) | (none) |
-| `EVALUATION_CONNECTOR_ID` | Connector ID for the task model | required |
-| `EVALUATION_REPETITIONS` | Number of times to run each example | `1` |
-| `SELECTED_EVALUATORS` | Comma-separated evaluator names to run | (all) |
+| Variable                  | Description                                                | Default                                  |
+| ------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
+| `EVALUATIONS_KBN_URL`     | Kibana URL used for score ingestion and reads              | `http://elastic:changeme@localhost:5620` |
+| `EVALUATIONS_KBN_API_KEY` | API key for the target Kibana (used instead of basic auth) | (none)                                   |
+| `EVALUATION_CONNECTOR_ID` | Connector ID for the task model                            | required                                 |
+| `EVALUATION_REPETITIONS`  | Number of times to run each example                        | `1`                                      |
+| `SELECTED_EVALUATORS`     | Comma-separated evaluator names to run                     | (all)                                    |
 
 ### Example: Local Elasticsearch (no API key)
 
 When storing results in a local dev cluster with basic auth, set the URL with embedded credentials:
 
 ```bash
-EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 \
+EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5620 \
 EVALUATION_CONNECTOR_ID=gpt-4o \
   node scripts/evals run --suite security-ai-rules
 ```
@@ -93,8 +95,8 @@ EVALUATION_CONNECTOR_ID=gpt-4o \
 ### Example: Run specific evaluators only
 
 ```bash
-EVALUATIONS_ES_URL=<ES_URL> \
-EVALUATIONS_ES_API_KEY=<API_KEY> \
+EVALUATIONS_KBN_URL=<KBN_URL> \
+EVALUATIONS_KBN_API_KEY=<API_KEY> \
 EVALUATION_CONNECTOR_ID=gpt-4o \
 SELECTED_EVALUATORS="Query Syntax Validity,Field Coverage,MITRE Accuracy" \
   node scripts/evals run --suite security-ai-rules
@@ -151,7 +153,7 @@ All evaluators except Rejection are wrapped with `skipNegativeCases` (returns N/
 
 ## Viewing Results
 
-Results are automatically exported to Elasticsearch in the `.kibana-evaluations` datastream.
+Results are automatically exported to Elasticsearch in the `.evaluation-scores` datastream.
 
 ### Query Results in Kibana
 
@@ -160,7 +162,7 @@ Navigate to **Kibana > Dev Tools** and paste the queries below. Replace `<run-id
 #### All scores for a specific run
 
 ```
-GET .kibana-evaluations/_search
+GET .evaluation-scores/_search
 {
   "query": {
     "term": { "run_id": "<run-id>" }
@@ -173,7 +175,7 @@ GET .kibana-evaluations/_search
 #### Per-evaluator mean scores for a run (aggregation)
 
 ```
-GET .kibana-evaluations/_search
+GET .evaluation-scores/_search
 {
   "size": 0,
   "query": {
@@ -193,7 +195,7 @@ GET .kibana-evaluations/_search
 #### Compare two runs side-by-side
 
 ```
-GET .kibana-evaluations/_search
+GET .evaluation-scores/_search
 {
   "size": 0,
   "query": {
@@ -218,7 +220,7 @@ GET .kibana-evaluations/_search
 #### Filter by model and suite (without a run ID)
 
 ```
-GET .kibana-evaluations/_search
+GET .evaluation-scores/_search
 {
   "query": {
     "bool": {
@@ -267,6 +269,7 @@ GET .kibana-evaluations/_search
 **Problem**: The specified connector ID is not configured.
 
 **Solution**:
+
 1. Check available connectors in `config/kibana.dev.yml`
 2. Verify the connector ID matches exactly (case-sensitive)
 3. Ensure Kibana has loaded the connector configuration
@@ -276,6 +279,7 @@ GET .kibana-evaluations/_search
 **Problem**: The AI rule creation APIs are not available.
 
 **Solution**:
+
 1. Verify feature flag is enabled in `kibana.dev.yml`:
    ```yaml
    xpack.securitySolution.enableExperimental:
@@ -291,6 +295,7 @@ GET .kibana-evaluations/_search
 This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in the Elasticsearch instance. All evaluators for the affected example will return N/A.
 
 **Solution**:
+
 1. Check the task logs for a summary line: `[Summary] ... X/Y examples scored (Z skipped due to missing indices)`
 2. Ingest sample data for the missing index patterns, or use a cluster that has the required data
 3. If many examples are skipped, the reported metrics may not be representative
@@ -300,21 +305,24 @@ This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in 
 **Problem**: All evaluations scoring near 0.
 
 **Possible causes**:
+
 1. **API returning errors**: Check Kibana logs for errors
 2. **Wrong connector**: LLM model may not support the task well
 3. **No rule returned**: The agent may not have invoked `security.create_detection_rule`
 
 **Solution**:
+
 1. Check Kibana server logs for errors
 2. Try a different connector (e.g., Claude Sonnet)
 3. Review the `chat_client.ts` diagnostics logged at `warning` level
 
 ### Results Not Appearing in Elasticsearch
 
-**Problem**: No results in `.kibana-evaluations` datastream.
+**Problem**: No results in `.evaluation-scores` datastream.
 
 **Solution**:
-1. Verify `EVALUATIONS_ES_URL` is set correctly
+
+1. Verify `EVALUATIONS_KBN_URL` is set correctly
 2. Check Elasticsearch is running and accessible
 3. Review eval logs for export errors
 4. Ensure the Elasticsearch cluster has sufficient permissions
@@ -328,6 +336,7 @@ The evaluation suite runs three datasets:
 3. **negative-cases** (5 examples): Prompts that should NOT produce a valid rule given the stated available data. Tests the model's ability to refuse impossible detection requests.
 
 Domains covered include:
+
 - **Collection**: File encryption with WinRAR/7z
 - **Credential Access**: LSASS access, Mimikatz usage
 - **Defense Evasion**: Windows Defender tampering, event log clearing, UAC bypass
@@ -348,14 +357,14 @@ export const sampleRules: ReferenceRule[] = [
     name: 'Your New Rule',
     prompt: 'Describe the detection...\n\nAvailable data: logs-endpoint.events.*',
     description: 'Detects XYZ behavior',
-    query: 'process where ...',  // reference query (EQL or ES|QL)
+    query: 'process where ...', // reference query (EQL or ES|QL)
     threat: [{ technique: 'T1234', tactic: 'TA0001' }],
     severity: 'high',
     tags: ['Domain: Endpoint', 'OS: Windows'],
     riskScore: 73,
     from: 'now-9m',
     category: 'execution',
-    esqlQuery: 'FROM logs-endpoint.events.* ...',  // optional: ES|QL translation for non-ES|QL rules
+    esqlQuery: 'FROM logs-endpoint.events.* ...', // optional: ES|QL translation for non-ES|QL rules
   },
 ];
 ```

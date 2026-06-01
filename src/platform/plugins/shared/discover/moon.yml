@@ -151,6 +151,7 @@ dependsOn:
   - '@kbn/reporting-public'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
+  - '@kbn/react-hooks'
 tags:
   - plugin
   - prod

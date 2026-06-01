@@ -13,6 +13,7 @@ import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { AppHeader } from '@kbn/app-header';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -27,9 +28,6 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
-
-const MAX_TABS_COUNT = 25;
-
 interface TabsViewProps extends SingleTabViewProps {
   headerTitle?: string;
 }
@@ -117,7 +115,7 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
         text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
           defaultMessage:
             'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
-          values: { droppedCount, maxTabs: MAX_TABS_COUNT },
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
         }),
       });
     },
@@ -138,7 +136,7 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
             selectedItemId={currentTabId}
             recentlyClosedItems={recentlyClosedItems}
             unsavedItemIds={unsavedTabIds}
-            maxItemsCount={MAX_TABS_COUNT}
+            maxItemsCount={MAX_DISCOVER_SESSION_TABS}
             hideTabsBar={hideTabsBar}
             createItem={createItem}
             getPreviewData={getPreviewData}
