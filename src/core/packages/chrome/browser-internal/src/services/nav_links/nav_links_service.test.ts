@@ -28,7 +28,7 @@ const availableApps: ReadonlyMap<string, App> = new Map([
           order: 50,
           title: 'Deep App 1',
           path: '/deepapp1',
-          visibleIn: ['sideNav'],
+          visibleIn: ['classicSideNav', 'projectSideNav'],
           deepLinks: [
             {
               id: 'deepApp2',
