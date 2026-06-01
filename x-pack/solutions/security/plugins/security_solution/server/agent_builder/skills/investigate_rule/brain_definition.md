@@ -58,9 +58,30 @@ period or the 24-hour sample is too small (fewer than 10 alerts).
 
 ### Step 3: Analyse the Alert Pattern
 
+#### Prior Disposition Signal (fast path)
+
+Before analysing entity patterns, check the `workflow_reasons` field in the
+result. If analysts have closed alerts from this rule with
+`kibana.alert.workflow_reason` values such as `false_positive` or
+`benign_positive`, that is direct evidence of a confirmed FP pattern:
+
+- **>= 30% of alerts carry FP/benign-positive dispositions**: strong
+  confirmation; proceed directly to a `tune-rule` recommendation without
+  waiting for further evidence.
+- **Some FP dispositions mixed with open alerts**: treat as supporting evidence;
+  combine with entity analysis below.
+- **No dispositions or only `acknowledged`**: skip this fast path; rely on
+  entity pattern analysis.
+
+Do not filter hard on specific reason strings. Custom close reasons (available
+since 9.4) may use non-standard wording; let the model interpret the intent.
+Standard reasons are `false_positive` and `benign_positive`.
+
+#### Entity Pattern Analysis
+
 Examine the `top_entities` aggregation in the result. Recurring `host.name`,
 `user.name`, or `source.ip` values that account for a disproportionate share
-of alerts are the primary FP signal.
+of alerts are the primary FP signal when disposition data is absent.
 
 Cross-reference with Security Labs (`security_labs_search`) if the rule name
 or MITRE technique is available. Known-good activity documented in Labs content
@@ -71,6 +92,7 @@ positive**, not a rule defect.
 
 | Pattern observed | Root cause | Recommended action |
 |---|---|---|
+| Many alerts closed with `false_positive` or `benign_positive` workflow_reason | Confirmed FP by analyst disposition | Add exceptions for top entities or narrow the query via `tune-rule` |
 | One or two entities generating >= 70% of alerts | Benign activity from known entities | Add an exception for those entities via `tune-rule` |
 | Alerts spread across many entities, query very broad | Overly broad query or missing index filter | Propose query refinement via `tune-rule` |
 | Alert volume spikes during business hours only | Noisy but legitimate behavior | Add alert suppression rule via `tune-rule` |

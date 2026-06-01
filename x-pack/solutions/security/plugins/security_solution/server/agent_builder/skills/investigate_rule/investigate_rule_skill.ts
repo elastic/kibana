@@ -74,9 +74,30 @@ period or the 24-hour sample is too small (fewer than 10 alerts).
 
 ### Step 3: Analyse the Alert Pattern
 
+#### Prior Disposition Signal (fast path)
+
+Before analysing entity patterns, check the \`workflow_reasons\` field in the
+result. If analysts have closed alerts from this rule with
+\`kibana.alert.workflow_reason\` values such as \`false_positive\` or
+\`benign_positive\`, that is direct evidence of a confirmed FP pattern:
+
+- **>= 30% of alerts carry FP/benign-positive dispositions**: strong
+  confirmation; proceed directly to a \`tune-rule\` recommendation without
+  waiting for further evidence.
+- **Some FP dispositions mixed with open alerts**: treat as supporting evidence;
+  combine with entity analysis below.
+- **No dispositions or only \`acknowledged\`**: skip this fast path; rely on
+  entity pattern analysis.
+
+Do not filter hard on specific reason strings. Custom close reasons (available
+since 9.4) may use non-standard wording; let the model interpret the intent.
+Standard reasons are \`false_positive\` and \`benign_positive\`.
+
+#### Entity Pattern Analysis
+
 Examine the \`top_entities\` aggregation in the result. Recurring \`host.name\`,
 \`user.name\`, or \`source.ip\` values that account for a disproportionate share
-of alerts are the primary FP signal.
+of alerts are the primary FP signal when disposition data is absent.
 
 Cross-reference with Security Labs (\`security_labs_search\`) if the rule name
 or MITRE technique is available. Known-good activity documented in Labs content
@@ -87,6 +108,7 @@ positive**, not a rule defect.
 
 | Pattern observed | Root cause | Recommended action |
 |---|---|---|
+| Many alerts closed with \`false_positive\` or \`benign_positive\` workflow_reason | Confirmed FP by analyst disposition | Add exceptions for top entities or narrow the query via \`tune-rule\` |
 | One or two entities generating >= 70% of alerts | Benign activity from known entities | Add an exception for those entities via \`tune-rule\` |
 | Alerts spread across many entities, query very broad | Overly broad query or missing index filter | Propose query refinement via \`tune-rule\` |
 | Alert volume spikes during business hours only | Noisy but legitimate behavior | Add alert suppression rule via \`tune-rule\` |
@@ -294,10 +316,13 @@ export const investigateRuleSkill = defineSkillType({
       id: 'investigate-rule.get_rule_alerts',
       type: ToolType.builtin,
       description:
-        'Fetches recent alerts produced by a specific detection rule, with entity aggregations for FP pattern detection. ' +
-        'Returns total_count, a sample of recent alerts (timestamp, severity, key entity fields), ' +
-        'and top_entities (aggregated counts of host.name, user.name, source.ip). ' +
-        'top_entities is the primary FP signal: a single entity generating most alerts indicates ' +
+        'Fetches recent alerts produced by a specific detection rule, with entity and disposition aggregations for FP pattern detection. ' +
+        'Returns total_count, a sample of recent alerts (timestamp, severity, key entity fields, workflow_reason), ' +
+        'top_entities (aggregated counts of host.name, user.name, source.ip), ' +
+        'and workflow_reasons (aggregated counts of kibana.alert.workflow_reason values). ' +
+        'Check workflow_reasons first: if a significant share of alerts carry false_positive or benign_positive ' +
+        'dispositions, that is direct analyst confirmation of the FP pattern and takes precedence over entity analysis. ' +
+        'top_entities is the secondary FP signal: a single entity generating most alerts indicates ' +
         'benign activity from a known source rather than a true threat.',
       schema: z.object({
         rule_id: z.string().describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
@@ -339,6 +364,7 @@ export const investigateRuleSkill = defineSkillType({
               'kibana.alert.severity',
               'kibana.alert.risk_score',
               'kibana.alert.workflow_status',
+              'kibana.alert.workflow_reason',
               'host.name',
               'user.name',
               'source.ip',
@@ -355,6 +381,9 @@ export const investigateRuleSkill = defineSkillType({
               },
               top_source_ips: {
                 terms: { field: 'source.ip', size: 10 },
+              },
+              workflow_reasons: {
+                terms: { field: 'kibana.alert.workflow_reason', size: 10 },
               },
             },
             ignore_unavailable: true,
@@ -389,6 +418,11 @@ export const investigateRuleSkill = defineSkillType({
             })),
           };
 
+          const workflowReasons = (aggs?.workflow_reasons?.buckets ?? []).map((b) => ({
+            reason: b.key,
+            count: b.doc_count,
+          }));
+
           return {
             results: [
               {
@@ -401,6 +435,7 @@ export const investigateRuleSkill = defineSkillType({
                   total_count: totalCount,
                   alerts,
                   top_entities: topEntities,
+                  workflow_reasons: workflowReasons,
                 },
               },
             ],
@@ -421,6 +456,5 @@ export const investigateRuleSkill = defineSkillType({
         }
       },
     },
-
   ],
 });

@@ -28,6 +28,119 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 });
 
 evaluate.describe(
+  'Security Skills - Investigate Rule (Known FP by Analyst Disposition)',
+  { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+  () => {
+    evaluate(
+      'rules with analyst FP dispositions are fast-pathed to a tune-rule recommendation',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-investigate-rule-fp-disposition',
+            description:
+              'Validates that the skill surfaces kibana.alert.workflow_reason as the primary ' +
+              'FP signal when analysts have already closed alerts as false_positive or benign_positive, ' +
+              'and routes to a tune-rule recommendation without requiring entity analysis.',
+            examples: [
+              {
+                // Analyst dispositions referenced explicitly: the skill should call
+                // get_rule_alerts, read workflow_reasons, and fast-path to tune-rule.
+                input: {
+                  question:
+                    'Most of the recent alerts from rule d4b14cb2-3c4e-4d7a-8b02-d3a1e5f9c7e1 ' +
+                    'have been closed as false positives by our analysts. What is driving the ' +
+                    'noise and how do I fix it?',
+                },
+                output: {
+                  expected:
+                    'I will fetch recent alerts for this rule and check the workflow_reason ' +
+                    'dispositions. Since many alerts have been closed as false_positive, I will ' +
+                    'treat this as confirmed FP evidence and recommend a tune-rule action for ' +
+                    'the top contributing entities.',
+                },
+                metadata: {
+                  query_intent: 'Known FP by analyst disposition',
+                  expectedSkill: 'investigate-rule',
+                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                },
+              },
+              {
+                // "Benign positive" is a distinct standard reason alongside "false_positive".
+                // Both should be treated as analyst-confirmed FP signals.
+                input: {
+                  question:
+                    'Analysts have been marking alerts from the "Linux Sudo Privilege Escalation" ' +
+                    'rule as benign positive for weeks. Can you analyze the pattern and suggest ' +
+                    'a tuning action?',
+                },
+                output: {
+                  expected:
+                    'I will retrieve the alert data for this rule and examine the workflow_reason ' +
+                    'distribution. benign_positive dispositions are a strong signal that this rule ' +
+                    'is generating noise from expected activity; I will identify the top entities ' +
+                    'and recommend an exception or suppression via tune-rule.',
+                },
+                metadata: {
+                  query_intent: 'Known FP by benign_positive disposition',
+                  expectedSkill: 'investigate-rule',
+                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                },
+              },
+              {
+                // Mixed signals: some FP closures but also open alerts. The skill should
+                // treat the dispositions as supporting evidence and combine with entity
+                // analysis, rather than fast-pathing directly to a recommendation.
+                input: {
+                  question:
+                    'Some alerts from rule 7f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c have been ' +
+                    'closed as false positives but most are still open. Is there enough evidence ' +
+                    'to tune the rule?',
+                },
+                output: {
+                  expected:
+                    'I will fetch recent alerts and check both the workflow_reason distribution ' +
+                    'and the top entity breakdown. Partial FP dispositions are supporting evidence ' +
+                    'but I will also examine which entities drive the open alerts before making ' +
+                    'a recommendation.',
+                },
+                metadata: {
+                  query_intent: 'Mixed FP signal: dispositions + open alerts',
+                  expectedSkill: 'investigate-rule',
+                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                },
+              },
+              {
+                // Implicit disposition signal: the user says "keep closing" without
+                // using the technical term. The skill should still route correctly and
+                // call get_rule_alerts to verify the workflow_reason data.
+                input: {
+                  question:
+                    'Every time this rule fires for host "admin-workstation-42" I close it ' +
+                    'as a false positive. Is there a way to stop the rule from generating ' +
+                    'these alerts in the first place?',
+                },
+                output: {
+                  expected:
+                    'I will load the alert data for this rule to confirm that the alerts for ' +
+                    'admin-workstation-42 carry a false_positive workflow_reason, then recommend ' +
+                    'adding a host-level exception via tune-rule to prevent future alerts from ' +
+                    'that host.',
+                },
+                metadata: {
+                  query_intent: 'Implicit FP disposition from repeated manual closure',
+                  expectedSkill: 'investigate-rule',
+                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+  }
+);
+
+evaluate.describe(
   'Security Skills - Investigate Rule (FP / Noise)',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
