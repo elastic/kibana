@@ -1,9 +1,10 @@
 ---
 name: exploratory-tester
 description: >
-  Use when proactively exploring a Kibana feature area for unknown bugs without a specific
-  defect in mind. Also triggered by requests to validate a new feature, check for regressions,
-  or exercise a user flow before release — in stateful or serverless environments.
+  Use when proactively exploring a Kibana feature area for unknown bugs, testing a PR for
+  regressions, smoke-testing a feature before release, or validating a user flow in a real
+  browser — not code analysis. Triggered by: "test this PR", "check for bugs", "exploratory
+  testing", "browser testing", "manual testing". Works in stateful and serverless environments.
 ---
 
 # Exploratory Tester
@@ -610,61 +611,12 @@ skipped: time budget exhausted (N minutes elapsed)
 
 ## Finding Format
 
-At the top of each `.exploratory-session/findings-flow-<N>.md` file, write a flow header once (before the first finding):
-
-```markdown
-<!-- flow: <flow name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->
+Read the template before writing any finding:
+```
+x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/finding-format.md
 ```
 
-Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
-
-```markdown
-## Finding: [short descriptive title]
-
-**Level:** <1 | 2 | 3>
-**Flow:** <flow name from config.json>
-**Role:** <resolved_role from config.json>
-**Checklist step:** <N — step description>
-
-### Steps followed
-1. <exact action — literal, not a summary>
-2. <exact action>
-
-### Current behavior
-<what actually happened — include error messages verbatim, HTTP status codes, console output>
-
-### Expected behavior
-<what should have happened — derive from: (1) the `expected` field in config.json, (2) what the UI communicates via labels, tooltips, help text, or in-product copy, (3) standard UX heuristics (actions give feedback, destructive operations ask confirmation, successful saves navigate away), (4) official docs at https://www.elastic.co/docs/solutions/security, (5) test files for intended user flows. Never read source code or component internals — the implementation may be incorrect.>
-
-### Why this might be an issue
-<mandatory for Level 1 and 2: commit to reasoning, explain user impact>
-
-### Evidence
-- Screenshot: `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
-- Console: `<relevant line — one line>` — relevant = appeared after the triggering action AND contains error/exception keywords or HTTP 5xx; ignore CSP violations, 404s on `/internal/cloud/solution`, browser extension messages
-- Network: <METHOD> `<path>` → <status> `<relevant response snippet>`
-```
-
-**Level rules:**
-- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, a 2xx response whose body contains an `error` key, a toast notification with error/failure wording, React "Maximum update depth exceeded" warning, or current behavior directly contradicts the `expected` field in `config.json` → agent decides: confirmed bug
-- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback, a loading indicator that hasn't resolved after 10 seconds, any React DevTools warning other than maximum update depth, or the same API endpoint called 2+ times for a single user action → agent flags: user decides
-- **Level 3** — `console.warn`, transient spinner, unclassifiable observation → listed, not flagged
-
-**For Level 3 findings** — use this shorter format:
-```markdown
-## Observation: [title]
-
-**Level:** 3
-**Flow:** <flow name>
-**Role:** <resolved_role>
-**Checklist step:** <N — description>
-
-### Current behavior
-<what was observed>
-
-### Evidence
-- Console: `<line>`
-```
+Use the **Level 1/2 finding** format for confirmed bugs and suspicious observations. Use the **Level 3 observation** (short) format for `console.warn`, transient spinners, and unclassifiable notes. Level rules are in the template.
 
 ---
 
@@ -676,62 +628,9 @@ First enumerate which findings files exist:
 ```bash
 ls .exploratory-session/findings-flow-*.md 2>/dev/null | sort -V
 ```
-Read each file in that list, then write `.exploratory-session/report.md`:
-
-```markdown
-# Exploratory Testing Report
-
-**Area:** <area>
-**Environment:** <environment.type> at <environment.url>
-**Space:** <space_id>
-**Role:** <resolved_role>
-**User:** <test_user.username>
-**Date:** <today's date>
-**Mode:** <single | parallel>
-**Flows explored:** <N>
-**Session started:** <session_started_at from config.json>
-**Session duration:** <total elapsed from session_started_at to now>
-
-## Summary
-- Level 1 (confirmed bugs): N
-- Level 2 (suspicious — your review needed): N
-- Level 3 (observations): N
-- Known / suppressed: N
-- **Flows completed:** N of N
-- **Flows not fully completed:** N — list each with its status (timed out / blocked / not started / session lost)
-
-## Timing
-| Flow | Source | Started | Duration | Budget | Over? | Status |
-|---|---|---|---|---|---|---|
-| <flow name> | specified / agent | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost |
-| **Total session** | — | <session_started_at> | **<Xh Ym>** | — | — | — |
-
-**Status definitions:**
-- `completed` — all 5 checklist steps were attempted (individual steps may still have been skipped for valid reasons such as missing prerequisites)
-- `timed out` — time budget exhausted before all steps were attempted; list which steps were skipped
-- `blocked` — flow could not run due to an unresolvable prerequisite (e.g. no data, required feature disabled); state the blocker
-- `not started` — flow was in `config.json` but was never reached (e.g. session ended early)
-- `session lost` — browser session was lost mid-flow before the checklist completed
-
-## Level 1 — Confirmed Bugs
-<all Level 1 findings in full finding format>
-
-## Level 2 — Suspicious
-<all Level 2 findings in full finding format>
-
-## Level 3 — Observations
-<all Level 3 findings in short observation format>
-
-## Skipped
-| Flow | Checklist step | Reason |
-|---|---|---|
-| <flow name> | <step> | time budget exhausted / session lost |
-
-## Known / Suppressed
-| Finding | Reason suppressed |
-|---|---|
-| <title> | Matches knowledge/<area_slug>.md: "<entry>" |
-| <title> | Matches known open bug #<number>: "<title>" |
+Read each file in that list, then write `.exploratory-session/report.md` using the template:
+```
+x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/report-format.md
 ```
 
 ### Step 3b — Filter known noise
