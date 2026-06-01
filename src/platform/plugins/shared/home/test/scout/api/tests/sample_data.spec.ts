@@ -180,7 +180,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
           expect(response).toHaveStatusCode(200);
           const flights = findFlightsDataset(response.body);
           expect(flights.status).toBe('installed');
-          // createNewCopies: false preserves IDs across spaces; the prior FTR expectation of a regenerated ID was stale.
           expect(flights.overviewDashboard).toBe(FLIGHTS_OVERVIEW_DASHBOARD_ID);
         }
       );
@@ -214,8 +213,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
 function findFlightsDataset(
   body: Array<{ id: string; status: string; overviewDashboard: string }>
 ) {
-  expect(Array.isArray(body)).toBe(true);
-  expect(body.length).toBeGreaterThan(0);
   const dataset = body.find(({ id }) => id === FLIGHTS_DATASET_ID);
   if (!dataset) {
     throw new Error(`"${FLIGHTS_DATASET_ID}" dataset not found in sample data list response`);
