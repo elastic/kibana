@@ -36,7 +36,9 @@ export const SingleMetricViewerAttachmentPayloadSchema = buildMlAttachmentPayloa
 
 type AnomalySwimLaneAttachmentPayload = z.infer<typeof AnomalySwimLaneAttachmentPayloadSchema>;
 type AnomalyChartsAttachmentPayload = z.infer<typeof AnomalyChartsAttachmentPayloadSchema>;
-type SingleMetricViewerAttachmentPayload = z.infer<typeof SingleMetricViewerAttachmentPayloadSchema>;
+type SingleMetricViewerAttachmentPayload = z.infer<
+  typeof SingleMetricViewerAttachmentPayloadSchema
+>;
 
 export type AnomalySwimLaneAttachmentData = AnomalySwimLaneAttachmentPayload['data'];
 export type AnomalyChartsAttachmentData = AnomalyChartsAttachmentPayload['data'];
