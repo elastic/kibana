@@ -64,6 +64,59 @@ export interface AppHeaderTab {
 }
 
 /** @public */
+export type AppHeaderMetadataItem =
+  | AppHeaderMetadataTextItem
+  | AppHeaderMetadataButtonItem
+  | AppHeaderMetadataHealthItem;
+
+/** @public */
+export type AppHeaderMetadataItems = readonly [
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItem?,
+  AppHeaderMetadataItem?
+];
+
+/** @public */
+export interface AppHeaderMetadataTextItem {
+  type: 'text';
+  label: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export type AppHeaderMetadataButtonItem =
+  | AppHeaderMetadataButtonAction
+  | AppHeaderMetadataButtonLink;
+
+/** @public */
+export interface AppHeaderMetadataButtonBase {
+  type: 'button';
+  label: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonAction extends AppHeaderMetadataButtonBase {
+  onClick: () => void;
+  href?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonLink extends AppHeaderMetadataButtonBase {
+  href: string;
+  onClick?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataHealthItem {
+  type: 'health';
+  label: string;
+  color: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
 export interface AppHeaderConfig {
   title?: string;
   back?: AppHeaderBack;
@@ -71,6 +124,7 @@ export interface AppHeaderConfig {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: ReactNode;
+  metadata?: AppHeaderMetadataItems;
 }
 
 /**
