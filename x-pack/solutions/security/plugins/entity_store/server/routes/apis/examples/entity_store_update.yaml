@@ -10,6 +10,15 @@ requestBody:
               lookbackPeriod: "6h"
               frequency: "10m"
               fieldHistoryLength: 15
+        updateFrequencyPerEntityTypeExample:
+          summary: "Update frequency for specific entity types"
+          description: "Update the extraction frequency for the specified entity types only. Other entity types are unaffected."
+          value:
+            entityTypes:
+              - host
+              - service
+            logExtraction:
+              frequency: "5m"
 responses:
   200:
     description: "Indicates a successful response."
@@ -33,6 +42,13 @@ responses:
               statusCode: 400
               error: "Bad Request"
               message: "[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)"
+          enginesNotInstalledExample:
+            summary: "Entity type not installed"
+            description: "One or more entity types in the request do not have a corresponding installed engine."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Requested entity types are not installed: [service]. Installed: [user, host]"
   404:
     description: "Entity Store not found."
     content:
@@ -45,6 +61,18 @@ responses:
               statusCode: 404
               error: "Not Found"
               message: "Entity store is not installed"
+  409:
+    description: "Conflict — engine in a non-actionable state."
+    content:
+      application/json:
+        examples:
+          engineNotActionableExample:
+            summary: "Engine is installing or updating"
+            description: "One or more target engines are in a transient state and cannot have their frequency updated. Retry once they settle to `started` or `stopped`."
+            value:
+              statusCode: 409
+              error: "Conflict"
+              message: "Engine is in a non-actionable state: host (installing)"
 x-codeSamples:
   - lang: curl
     source: |
@@ -60,5 +88,22 @@ x-codeSamples:
           "lookbackPeriod": "6h",
           "frequency": "10m",
           "fieldHistoryLength": 15
+        }
+      }
+  - lang: curl
+    label: "Frequency per entity type"
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityTypes":["host","service"],"logExtraction":{"frequency":"5m"}}' \
+        "${KIBANA_URL}/api/security/entity_store"
+  - lang: Console
+    label: "Frequency per entity type"
+    source: |
+      PUT kbn://api/security/entity_store
+      {
+        "entityTypes": ["host", "service"],
+        "logExtraction": {
+          "frequency": "5m"
         }
       }

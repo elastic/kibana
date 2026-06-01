@@ -14,7 +14,7 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { LogExtractionConfig } from '../../domain/saved_objects';
+import { type LogExtractionConfig, resolveEffectiveFrequency } from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
@@ -42,7 +42,7 @@ interface LegacyEngineDescriptorV1 {
 
 type StatusEngine = Omit<
   GetStatusSuccessResult['engines'][number],
-  'versionState' | 'logExtractionState'
+  'versionState' | 'logExtractionState' | 'config'
 > &
   LegacyEngineDescriptorV1;
 
@@ -62,11 +62,10 @@ function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
-  const { versionState, logExtractionState, ...rest } = engine;
+  const { versionState, logExtractionState, config, ...rest } = engine;
   const {
     delay,
     timeout,
-    frequency,
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage,
@@ -81,7 +80,7 @@ function toPublicEngine(
     filter: '',
     delay,
     timeout,
-    frequency,
+    frequency: resolveEffectiveFrequency(engine),
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage: capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow),

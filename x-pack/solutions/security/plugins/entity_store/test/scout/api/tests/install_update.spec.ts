@@ -13,7 +13,13 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
 } from '../fixtures/constants';
+import { getStatus } from '../fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2, type GetEntityMaintainersResponse } from '../../../../common';
+
+interface EngineFrequency {
+  type: string;
+  frequency: string;
+}
 
 apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -217,4 +223,139 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       });
     }
   );
+
+  apiTest('Install without frequency uses per-type defaults', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+
+    const { body } = await getStatus(apiClient, defaultHeaders);
+    const byType = Object.fromEntries(
+      (body.engines as EngineFrequency[]).map((e) => [e.type, e.frequency])
+    );
+
+    expect(byType.host).toBe('1m');
+    expect(byType.user).toBe('1m');
+    expect(byType.service).toBe('10m');
+    expect(byType.generic).toBe('30m');
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
+
+  apiTest(
+    'Install with frequency override seeds all engines with that frequency',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '5m' } },
+      });
+
+      const { body } = await getStatus(apiClient, defaultHeaders);
+      expect(body.engines.length).toBeGreaterThan(0);
+      expect((body.engines as EngineFrequency[]).every((e) => e.frequency === '5m')).toBe(true);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest('Update frequency changes all engines', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { frequency: '7m' } },
+    });
+    expect(update.statusCode).toBe(200);
+
+    const { body } = await getStatus(apiClient, defaultHeaders);
+    expect(body.engines.length).toBeGreaterThan(0);
+    expect((body.engines as EngineFrequency[]).every((e) => e.frequency === '7m')).toBe(true);
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
+
+  apiTest(
+    'Update frequency with entityTypes only changes targeted engines',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['host'], logExtraction: { frequency: '7m' } },
+      });
+      expect(update.statusCode).toBe(200);
+
+      const { body } = await getStatus(apiClient, defaultHeaders);
+      const byType = Object.fromEntries(
+        (body.engines as EngineFrequency[]).map((e) => [e.type, e.frequency])
+      );
+
+      expect(byType.host).toBe('7m');
+      expect(byType.user).toBe('1m');
+      expect(byType.service).toBe('10m');
+      expect(byType.generic).toBe('30m');
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest('Update with uninstalled entityType returns 400', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { entityTypes: ['user'] },
+    });
+
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { entityTypes: ['service'], logExtraction: { frequency: '5m' } },
+    });
+    expect(update.statusCode).toBe(400);
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 });
