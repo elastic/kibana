@@ -17,6 +17,10 @@ import {
   IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
+<<<<<<< Updated upstream
+=======
+  EXCLUDED,
+>>>>>>> Stashed changes
   ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
@@ -102,9 +106,11 @@ export class IndicatorReader {
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(STREAM_NAME, [stream])
     );
-    const docs = await this.revisionReader.fetchLatestRevisions(where, esql.exp`excluded == true`, [
-      ['@timestamp', 'DESC'],
-    ]);
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      where,
+      esql.exp`${esql.col(EXCLUDED)} == true`,
+      [['@timestamp', 'DESC']]
+    );
     const hits = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     return { hits };
   }

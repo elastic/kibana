@@ -9,8 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { isComputedFeature } from '@kbn/streams-schema';
 import { isConditionComplete } from '@kbn/streamlang';
 import type { StoredFeatureKnowledgeIndicator, StoredKnowledgeIndicator } from '../data_stream';
-import { inPredicate, IS_NOT_DELETED } from '../esql_helpers';
-import { STREAM_NAME } from '../fields';
+import { combineWhere, inPredicate, IS_NOT_DELETED } from '../esql_helpers';
+import { ID, STREAM_NAME } from '../fields';
 import { fromStoredFeature, toStoredFeature, toStoredQuery, toTombstone } from './serializers';
 import {
   bulkCreateWithInferenceFallback,
@@ -172,6 +172,10 @@ export class IndicatorWriter {
   /**
    * Delete requires a pre-read so we can skip unknown/non-existent ids
    * rather than writing tombstones for them (which would count as applied).
+   *
+   * Deletes target both features and queries (query deletes flow through this
+   * path too), and identity is `(type, id)` — so the existence check spans all
+   * types and matches on `type:id`, not feature revisions alone.
    */
   private async prepareDeletes(
     stream: string,
@@ -188,11 +192,15 @@ export class IndicatorWriter {
       return { deletableOps: [], skipped: 0 };
     }
 
-    const deleteLatest = await this.revisionReader.fetchLatestFeatures(stream, [...deleteIds]);
+    const deleteLatest = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(STREAM_NAME, [stream]), inPredicate(ID, [...deleteIds])),
+      IS_NOT_DELETED
+    );
+    const presentByTypeId = new Set(deleteLatest.map((doc) => `${doc.type}:${doc.id}`));
     const deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>> = [];
     let skipped = 0;
     for (const op of deleteOps) {
-      if (deleteLatest.find((doc) => doc.id === op.delete.id)) {
+      if (presentByTypeId.has(`${op.delete.type}:${op.delete.id}`)) {
         deletableOps.push(op);
       } else {
         skipped += 1;
