@@ -15,6 +15,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { AttackDiscoveryGeneration } from '../../../generation.gen';
 
@@ -24,6 +25,10 @@ export const GetAttackDiscoveryGenerationsRequestQuery = lazySchema(() =>
      * End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
      */
     end: z.string().optional(),
+    /**
+     * Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
+     */
+    scheduled: BooleanFromString.optional(),
     /**
      * The maximum number of generations to retrieve
      */
