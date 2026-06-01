@@ -254,4 +254,15 @@ describe('writeEntityIds', () => {
       expect(result.errors).toBe(1);
     });
   });
+
+  describe('hashEntityId sync guard', () => {
+    // update_entities.ts keeps a local copy of hashEuid from @kbn/entity-store to avoid a
+    // cross-plugin private import. This test pins the output so a future algorithm change
+    // in entity_store causes a visible test failure here rather than silent data corruption.
+    it('produces the same SHA-256 hex digest as the entity_store hashEuid function', () => {
+      const input = 'user:alice@corp.example.com';
+      const expected = createHash('sha256').update(input).digest('hex');
+      expect(hashEntityId(input)).toBe(expected);
+    });
+  });
 });

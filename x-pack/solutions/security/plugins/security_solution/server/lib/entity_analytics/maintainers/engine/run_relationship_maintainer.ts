@@ -363,7 +363,9 @@ export const runRelationshipMaintainer = async ({
     totalIterations += iterations;
     if (integrationTruncated) truncated = true;
 
-    if (outcome !== 'error') {
+    if (outcome === 'error') {
+      logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
+    } else {
       totalBuckets += buckets;
       totalRecords += recordsCount;
       totalWritten += write.updated;
