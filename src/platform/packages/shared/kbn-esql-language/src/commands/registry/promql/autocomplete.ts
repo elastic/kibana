@@ -56,6 +56,8 @@ export async function autocomplete(
       cursorRelative: position.cursorRelative,
       columns: context?.columns,
       shouldWrap: position.shouldWrap,
+      variables: context?.variables,
+      supportsControls: context?.supportsControls,
     });
   }
 
