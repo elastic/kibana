@@ -36,11 +36,10 @@ type RawAttachmentState = RawLogRateAnalysisState & {
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, LogRateAnalysisComponent: LogRateAnalysisEmbeddableWrapper) => {
     return React.memo((props: LogRateAnalysisViewProps) => {
-      const rawState = props.data.state;
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
-      const rawState = props.data.state as unknown as RawAttachmentState;
+      const rawState = props.data.state as RawAttachmentState;
 
       const normalized = normalizeLogRateAnalysisLegacyFields(rawState);
       const inputProps = {
