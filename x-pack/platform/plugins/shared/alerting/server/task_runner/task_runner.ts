@@ -273,8 +273,7 @@ export class TaskRunner<
   private async runRule({
     fakeRequest,
     rule,
-    apiKey,
-    uiamApiKey,
+    effectiveApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
@@ -367,7 +366,6 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
@@ -408,7 +406,7 @@ export class TaskRunner<
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey,
+      apiKey: effectiveApiKey,
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,

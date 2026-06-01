@@ -103,7 +103,7 @@ describe('rule_loader', () => {
           context,
         });
 
-        expect(result.apiKey).toBe(apiKey);
+        expect(result.effectiveApiKey).toBe(apiKey);
         expect(result.fakeRequest.headers.authorization).toEqual(`ApiKey ${apiKey}`);
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
@@ -245,7 +245,7 @@ describe('rule_loader', () => {
 
   describe('getFakeKibanaRequest()', () => {
     test('has API key, in default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', apiKey);
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
@@ -257,10 +257,11 @@ describe('rule_loader', () => {
       expect(fakeRequest.route.path).toEqual('/');
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
+      expect(effectiveApiKey).toEqual(apiKey);
     });
 
     test('has API key, in non-default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+      const { fakeRequest } = getFakeKibanaRequest(context, spaceId, apiKey);
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/s/rule-spaceId']);
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
@@ -275,7 +276,7 @@ describe('rule_loader', () => {
     });
 
     test('does not have API key, in default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, 'default', null);
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', null);
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
 
@@ -287,10 +288,11 @@ describe('rule_loader', () => {
       expect(fakeRequest.route.path).toEqual('/');
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
+      expect(effectiveApiKey).toBeNull();
     });
 
     test('returns UIAM API key when config is set to uiam', async () => {
-      const fakeRequest = getFakeKibanaRequest(
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
         { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
         'default',
         null,
@@ -299,6 +301,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_uiam_api_key`,
       });
+      expect(effectiveApiKey).toEqual('essu_uiam_api_key');
     });
 
     test('logs a warning when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
@@ -380,6 +383,22 @@ describe('rule_loader', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
         expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
+    test('includes the rule id in the UIAM log tags when provided', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false, undefined, ruleId);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        { tags: expect.arrayContaining([ruleId]) }
       );
     });
   });
