@@ -20,7 +20,7 @@ export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ): LinksEmbeddableState {
-  const { enhancements, ...latestState } = isLegacyState(storedState)
+  const { enhancements, disabledActions, ...latestState } = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
   const state = {
