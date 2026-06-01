@@ -90,14 +90,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -197,7 +197,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -244,7 +244,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML job behavior maintainer
+   */
+  entityAnalyticsMlJobBehaviorMaintainer: false,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -261,6 +266,16 @@ export const allowedExperimentalValues = Object.freeze({
    * records. Both must be enabled for the API to return non-empty results.
    */
   ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
+   */
+  securityClassicNavExternalLinks: false,
+  /**
+   * Enables public Detection Engine attacks REST APIs
+   * (`/api/detection_engine/attacks/*`).
+   */
+  publicAttacksApiEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

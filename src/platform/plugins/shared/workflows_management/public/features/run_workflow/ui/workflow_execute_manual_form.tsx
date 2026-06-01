@@ -161,7 +161,9 @@ export const WorkflowExecuteManualForm = ({
       direction="column"
       gutterSize="s"
       css={css`
+        flex: 1;
         min-height: 0;
+        align-self: stretch;
       `}
     >
       {errors && (
@@ -171,7 +173,10 @@ export const WorkflowExecuteManualForm = ({
       )}
 
       <EuiFlexItem
+        grow
         css={css`
+          flex: 1;
+          min-height: 0;
           overflow: hidden;
         `}
       >

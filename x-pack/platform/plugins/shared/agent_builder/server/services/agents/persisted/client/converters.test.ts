@@ -63,6 +63,9 @@ describe('fromEs', () => {
       avatar_symbol: 'star',
       visibility: AgentVisibility.Shared,
       created_by: { id: 'user-id-1', username: 'test-user' },
+      acl: {
+        entries: [],
+      },
     });
   });
 
@@ -95,6 +98,9 @@ describe('fromEs', () => {
       avatar_symbol: 'star',
       visibility: AgentVisibility.Shared,
       created_by: { id: 'user-id-1', username: 'test-user' },
+      acl: {
+        entries: [],
+      },
     });
   });
 
@@ -197,6 +203,9 @@ describe('createRequestToEs', () => {
       created_by_name: 'test-user',
       created_at: expect.any(String),
       updated_at: expect.any(String),
+      acl: {
+        entries: [],
+      },
     });
   });
 
