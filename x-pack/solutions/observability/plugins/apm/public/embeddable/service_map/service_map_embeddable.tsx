@@ -26,7 +26,10 @@ import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
-import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import {
+  ServiceMapGraph,
+  type ServiceMapFlyoutOptions,
+} from '../../components/app/service_map/graph';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import {
   SloOverviewFlyout,
@@ -80,6 +83,8 @@ export interface ServiceMapEmbeddableProps {
   searchQuery?: string;
   /** Push in-panel search edits back to the state manager. */
   onSearchQueryChange?: (next: string) => void;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceMapFlyoutOptions;
 }
 
 function LoadingSpinner() {
@@ -117,6 +122,7 @@ export function ServiceMapEmbeddable({
   onViewFiltersChange,
   searchQuery,
   onSearchQueryChange,
+  flyoutOptions,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -351,6 +357,7 @@ export function ServiceMapEmbeddable({
           onViewFiltersChange={onViewFiltersChange}
           searchQuery={searchQuery}
           onSearchQueryChange={onSearchQueryChange}
+          flyoutOptions={flyoutOptions}
         />
       </div>
       {sloOverviewFlyout && (

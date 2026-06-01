@@ -15,6 +15,7 @@ import {
   useReactFlow,
   useStore as useReactFlowStore,
   ReactFlowProvider,
+  type Node,
   type NodeTypes,
   type EdgeTypes,
   type FitViewOptions,
@@ -76,8 +77,12 @@ import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
   type ServiceMapNode,
+  type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
 } from '../../../../common/service_map';
+import { ServiceFlyout } from '../../shared/service_flyout';
+
+type ServiceMapServiceNode = Node<ServiceNodeData>;
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -89,6 +94,13 @@ const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
 };
 
+export interface ServiceMapFlyoutOptions {
+  initialTransactionType?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  kuery?: string;
+}
+
 interface GraphProps {
   height: number | string;
   nodes: ServiceMapNode[];
@@ -99,6 +111,7 @@ interface GraphProps {
   kuery: string;
   start: string;
   end: string;
+  flyoutOptions?: ServiceMapFlyoutOptions;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   /** When set, shows a "View full service map" button that links to the full map (focused map only) */
@@ -149,6 +162,7 @@ function GraphInner({
   kuery,
   start,
   end,
+  flyoutOptions,
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
@@ -177,6 +191,8 @@ function GraphInner({
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
+  const [selectedServiceNodeForFlyout, setSelectedServiceNodeForFlyout] =
+    useState<ServiceMapServiceNode | null>(null);
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
     null
   );
@@ -241,6 +257,8 @@ function GraphInner({
   selectedNodeIdRef.current = selectedNodeId;
   const selectedEdgeForPopoverRef = useRef<string | null>(null);
   selectedEdgeForPopoverRef.current = selectedEdgeForPopover?.id ?? null;
+  const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
+  selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
 
   const { applyEdgeHighlighting } = useEdgeHighlighting();
 
@@ -389,7 +407,8 @@ function GraphInner({
           selectedEdgeId: null,
         })
       );
-      setSelectedNodeForPopover(newSelectedId ? node : null);
+      setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
+      setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
       setSelectedEdgeForPopover(null);
     },
     [setEdges, applyEdgeHighlighting]
@@ -398,6 +417,7 @@ function GraphInner({
     (_, edge) => {
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
+      setSelectedServiceNodeForFlyout(null);
       const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
       setSelectedEdgeForPopover(newSelectedEdge);
       setEdges((currentEdges) =>
@@ -411,8 +431,11 @@ function GraphInner({
   );
 
   const handlePaneClick = useCallback(() => {
+    if (selectedServiceNodeForFlyoutRef.current) return;
+
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
+    setSelectedServiceNodeForFlyout(null);
     setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
@@ -426,6 +449,7 @@ function GraphInner({
   const handlePopoverClose = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
+    setSelectedServiceNodeForFlyout(null);
     setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
@@ -475,7 +499,6 @@ function GraphInner({
     return () => window.removeEventListener('keydown', onKeyDown, true);
   }, []);
 
-  // Close popover when user starts dragging (map panning or node dragging)
   const handleDragStart = useCallback(() => {
     if (selectedNodeForPopover || selectedEdgeForPopover) {
       handlePopoverClose();
@@ -487,7 +510,8 @@ function GraphInner({
     (node: ServiceMapNode | null) => {
       if (node) {
         setSelectedNodeId(node.id);
-        setSelectedNodeForPopover(node);
+        setSelectedNodeForPopover(!isServiceNode(node) ? node : null);
+        setSelectedServiceNodeForFlyout(isServiceNode(node) ? node : null);
         setSelectedEdgeForPopover(null);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
@@ -508,6 +532,7 @@ function GraphInner({
       if (edge) {
         setSelectedNodeId(null);
         setSelectedNodeForPopover(null);
+        setSelectedServiceNodeForFlyout(null);
         setSelectedEdgeForPopover(edge);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
@@ -857,6 +882,18 @@ function GraphInner({
             alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnNavigation={clearKueryOnPopoverNavigation}
           />
+          {selectedServiceNodeForFlyout && (
+            <ServiceFlyout
+              key={selectedServiceNodeForFlyout.data.id}
+              service={selectedServiceNodeForFlyout.data}
+              environment={environment}
+              kuery={flyoutOptions?.kuery ?? kuery}
+              initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
+              initialRangeTo={flyoutOptions?.rangeTo ?? end}
+              initialTransactionType={flyoutOptions?.initialTransactionType}
+              onClose={handlePopoverClose}
+            />
+          )}
         </div>
       </ServiceMapAlertsNavigateProvider>
     </ServiceMapSearchProvider>

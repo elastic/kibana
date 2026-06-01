@@ -79,6 +79,16 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     return pills;
   }, [alert]);
 
+  const flyoutOptions = useMemo(() => {
+    const initialTransactionType =
+      alert.fields[TRANSACTION_TYPE] != null ? alert.fields[TRANSACTION_TYPE] : undefined;
+
+    return {
+      kuery: '',
+      initialTransactionType,
+    };
+  }, [alert]);
+
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
@@ -165,6 +175,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 core={embeddableDeps.coreStart}
                 onEmptyStateChange={setHasNoServices}
                 filterPills={filterPills}
+                flyoutOptions={flyoutOptions}
               />
             </ApmEmbeddableContext>
           </EuiPanel>
