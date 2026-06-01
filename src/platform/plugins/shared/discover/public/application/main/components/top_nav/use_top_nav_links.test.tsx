@@ -202,7 +202,7 @@ describe('useTopNavLinks', () => {
 
       const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
       expect(exportItem).toBeDefined();
-      expect(exportItem?.label).toBe('Export tab');
+      expect(exportItem?.label).toBe('Export tab results');
 
       expect(exportItem?.items).toBeDefined();
       expect(exportItem?.items?.length).toBeGreaterThan(0);
