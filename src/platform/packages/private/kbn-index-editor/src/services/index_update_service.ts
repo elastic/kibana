@@ -72,6 +72,7 @@ import { IndexEditorErrors } from '../types';
 import { parsePrimitive } from '../utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import type { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
+import { reportIndexEditorError } from '../report_error';
 import { RowsVirtualIndexes } from './rows_virtual_indexes';
 import { bulkUpdate, type BulkUpdateOperations } from './bulk_update_service';
 
@@ -715,7 +716,8 @@ export class IndexUpdateService {
               updates: updates.filter(isDocUpdate).map((update) => update.payload),
             });
           },
-          error: () => {
+          error: (error) => {
+            reportIndexEditorError(error, { errorType: 'BulkSave' });
             this.setError(
               IndexEditorErrors.GENERIC_SAVING_ERROR,
               i18n.translate('indexEditor.indexUpdateService.savingGenericErrorMessageDetail', {
@@ -761,6 +763,7 @@ export class IndexUpdateService {
               )
               .pipe(
                 catchError((e) => {
+                  reportIndexEditorError(e, { errorType: 'DocsFetch' });
                   this.notifications.toasts.addError(e, {
                     title: i18n.translate('indexEditor.indexUpdateService.fetchErrorTitle', {
                       defaultMessage: 'Error fetching documents',
@@ -1016,6 +1019,10 @@ export class IndexUpdateService {
         }
       );
     } catch (error) {
+      reportIndexEditorError(error, {
+        errorType: 'UpdateMappings',
+        labels: { index_name: indexName },
+      });
       this.notifications.toasts.addError(error, {
         title: i18n.translate('indexEditor.indexManagement.updateMappingErrorTitle', {
           defaultMessage: 'Error updating index mapping',
