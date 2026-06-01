@@ -8,6 +8,7 @@
 import { discoverySchema, type Discovery } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -16,7 +17,7 @@ const discoveriesSearchRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get latest discoveries',
-    description: 'Search discovery entities using their latest derived state.',
+    description: 'Search discovery entities using their latest derived state with pagination.',
   },
   security: {
     authz: {
@@ -27,6 +28,39 @@ const discoveriesSearchRoute = createServerRoute({
     query: z.object({
       from: z.iso.datetime().optional(),
       to: z.iso.datetime().optional(),
+      page: z.coerce.number().int().min(1).optional(),
+      perPage: z.coerce.number().int().min(1).max(1000).optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<PaginatedResponse<Discovery>> => {
+    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getDiscoveryClient().findLatestPaginated(params.query);
+  },
+});
+
+const discoveriesHistoryRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/discoveries/{id}/history',
+  options: {
+    access: 'internal',
+    summary: 'Get discovery history',
+    description: 'Get all historical versions of a discovery entity.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
     }),
   }),
   handler: async ({
@@ -39,7 +73,7 @@ const discoveriesSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDiscoveryClient().findLatest(params.query);
+    return getDiscoveryClient().findBySlug(params.path.id);
   },
 });
 
@@ -69,5 +103,6 @@ const discoveriesBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
+  ...discoveriesHistoryRoute,
   ...discoveriesBulkCreateRoute,
 };

@@ -430,7 +430,11 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryTab-warm').click();
 
         // Scope to the visible "Downsampling" section (hot/warm/cold all exist in the DOM)
-        await flyout.getByRole('switch', { name: 'Downsampling' }).click();
+        const downsamplingToggle = page.locator(
+          '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingSwitch"]:visible'
+        );
+        await expect(downsamplingToggle).toBeVisible();
+        await downsamplingToggle.click();
 
         // Set an explicit interval to keep the rendered step deterministic
         const intervalValue = page.locator(

@@ -20,13 +20,17 @@ const matcherDataFieldsQuerySchema = z.object({
   matcher: z.string().min(1).max(2048).optional(),
 });
 
+const matcherDataFieldsResponseSchema = z
+  .array(z.string())
+  .describe('The list of available matcher data field names');
+
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
@@ -38,6 +42,10 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
       query: matcherDataFieldsQuerySchema,
     },
     response: {
+      200: {
+        body: () => matcherDataFieldsResponseSchema,
+        description: 'Returns the available matcher data field names.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates invalid query parameters.',

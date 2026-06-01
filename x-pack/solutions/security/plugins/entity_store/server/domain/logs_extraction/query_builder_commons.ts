@@ -7,7 +7,6 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
-  conditionToESQL,
   isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
@@ -16,6 +15,8 @@ import {
   isOrCondition,
   type Condition,
 } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
+import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
@@ -32,6 +33,8 @@ import {
   getFieldEvaluationsEsqlFromDefinition,
 } from '../../../common/domain/euid/esql';
 import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
+
+export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
   'entity.EngineMetadata.FirstSeenLogInPage';
@@ -119,10 +122,10 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
     .map((field) => {
       const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
-      const castedSrc = castSrcType(field);
+      const castedSrc = castEntityField(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
+          return `${finalDest} = VALUES(${castedSrc})`;
         case 'prefer_newest_value':
           return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':
@@ -150,29 +153,6 @@ export function fieldsToKeep(definitionFields: EntityField[], defaultFields: str
     });
 
   return [...new Set(allFieldPatterns)].join(',\n');
-}
-
-export function castSrcType(field: EntityField): string {
-  switch (field.mapping?.type) {
-    case 'keyword':
-      return `TO_STRING(${field.source})`;
-    case 'date':
-      return `TO_DATETIME(${field.source})`;
-    case 'boolean':
-      return `TO_BOOLEAN(${field.source})`;
-    case 'long':
-      return `TO_LONG(${field.source})`;
-    case 'integer':
-      return `TO_INTEGER(${field.source})`;
-    case 'float':
-      return `TO_DOUBLE(${field.source})`;
-    case 'ip':
-      return `TO_IP(${field.source})`;
-    case 'scaled_float':
-      return `${field.source}`;
-    default:
-      return field.source;
-  }
 }
 
 export function extractPaginationParams(
@@ -223,10 +203,11 @@ function fieldValueToEsqlExpression(value: FieldValueSchema): string {
     return `"${escapeEsqlStringLiteral(value)}"`;
   }
   if ('source' in value) {
-    return `TO_STRING(${value.source})`;
+    return castField(value.source);
   }
   const { fields, sep } = value.composition;
   const escapedSep = escapeEsqlStringLiteral(sep);
+  // CONCAT requires string arguments — always use TO_STRING for compositions.
   const parts = fields.flatMap((f, i) =>
     i === 0 ? [`TO_STRING(${f})`] : [`"${escapedSep}"`, `TO_STRING(${f})`]
   );
@@ -272,7 +253,7 @@ export function buildSetFieldsByCondition(
   const conditionEsql = conditionToESQL(condition);
   const evals = Object.entries(overrideFields).map(([field, value]) => {
     const valueExpr = fieldValueToEsqlExpression(value);
-    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${field})`;
+    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
   });
   return `| EVAL ${evals.join(',\n    ')}`;
 }
