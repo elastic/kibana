@@ -7,6 +7,14 @@
 
 import type { UserProfile, UserProfileWithSecurity } from '@kbn/security-plugin-types-common';
 
+declare module '@kbn/core-user-profile-common' {
+  // Augment user profile data here to model data that is returned from Elasticsearch.
+  interface UserProfileData {
+    [index: string]: unknown;
+    kibana?: Record<string, unknown>;
+  }
+}
+
 function createUserProfileMock(userProfile: Partial<UserProfile> = {}) {
   return {
     uid: 'some-profile-uid',
