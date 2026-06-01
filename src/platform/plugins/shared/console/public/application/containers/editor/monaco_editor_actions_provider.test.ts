@@ -281,6 +281,24 @@ describe('Editor actions provider', () => {
       );
     });
 
+    it('orders method suggestions with GET first and DELETE last using sortText', async () => {
+      // Monaco sorts completion items by sortText, falling back to label. Without
+      // an explicit sortText, alphabetical sorting puts DELETE first (#259251).
+      mockGetParsedRequests.mockResolvedValue([]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext
+      );
+      const sortedByMonaco = [...(completionItems?.suggestions ?? [])].sort((a, b) =>
+        String(a.sortText ?? a.label).localeCompare(String(b.sortText ?? b.label))
+      );
+      const orderedLabels = sortedByMonaco.map((s) => s.label);
+      expect(orderedLabels[0]).toBe('GET');
+      expect(orderedLabels[orderedLabels.length - 1]).toBe('DELETE');
+      expect(orderedLabels).toEqual(['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE']);
+    });
+
     it('returns completion items for url path if method already typed in', async () => {
       // mock a parsed request that only has a method
       mockGetParsedRequests.mockResolvedValue([

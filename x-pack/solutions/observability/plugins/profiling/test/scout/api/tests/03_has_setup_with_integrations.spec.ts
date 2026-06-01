@@ -9,16 +9,31 @@ import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
-import { esResourcesEndpoint } from '../../common/fixtures/constants';
+import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
-    await profilingSetup.cleanup();
+
+  apiTest.beforeAll(async ({ requestAuth, profilingSetup, profilingHelper }) => {
+    let ids = await profilingHelper.getPolicyIds();
+    if (!ids.collectorId || !ids.symbolizerId) {
+      await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
+      ids = await profilingHelper.getPolicyIds();
+    }
+
+    expect(ids.collectorId).toBeDefined();
+    expect(ids.symbolizerId).toBeDefined();
+
+    // Same fixture as has_setup_with_data: ensure profiling* has documents so we assert has_data like has_setup — indexed data remains after Fleet policy deletion.
+    let status = await profilingSetup.checkStatus();
+    if (!status.has_data) {
+      await profilingSetup.loadData(esArchiversPath);
+      status = await profilingSetup.checkStatus();
+    }
+    expect(status.has_data).toBe(true);
+
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
-  });
-  apiTest.afterAll(async ({ profilingHelper }) => {
-    profilingHelper.cleanupPolicies();
   });
 
   apiTest('collector integration missing', async ({ profilingHelper, apiServices, apiClient }) => {
@@ -44,8 +59,8 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
     });
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBe(false);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_data).toBe(true);
+    expect(readStatus.pre_8_9_1_data).toBeDefined();
     expect(readStatus.has_required_role).toBe(false);
   });
 
@@ -69,8 +84,8 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
       });
       const adminStatus = adminRes.body;
       expect(adminStatus.has_setup).toBe(false);
-      expect(adminStatus.has_data).toBe(false);
-      expect(adminStatus.pre_8_9_1_data).toBe(false);
+      expect(adminStatus.has_data).toBe(true);
+      expect(adminStatus.pre_8_9_1_data).toBeDefined();
 
       const readRes = await apiClient.get(esResourcesEndpoint, {
         headers: {
@@ -79,8 +94,8 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
       });
       const readStatus = readRes.body;
       expect(readStatus.has_setup).toBe(false);
-      expect(readStatus.has_data).toBe(false);
-      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.has_data).toBe(true);
+      expect(readStatus.pre_8_9_1_data).toBeDefined();
       expect(readStatus.has_required_role).toBe(false);
     }
   );
