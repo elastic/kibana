@@ -286,15 +286,18 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
-                      aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.controlsActionsAriaLabel', {
-                        defaultMessage: 'Actions',
-                      })}
+                      aria-label={i18n.translate(
+                        'xpack.ml.timeSeriesExplorer.controlsActionsAriaLabel',
+                        {
+                          defaultMessage: 'Actions',
+                        }
+                      )}
                       color="text"
                       display="base"
                       isSelected={isMenuOpen}
                       iconType="boxesVertical"
                       onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                      data-test-subj="mlAnomalyTimelinePanelMenu"
+                      data-test-subj="mlTimeSeriesExplorerActionsMenu"
                       size="m"
                     />
                   </EuiToolTip>
