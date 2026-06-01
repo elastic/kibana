@@ -38,10 +38,10 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.compositeSlo.deleteAll();
       await apiServices.core.settings({
         'feature_flags.overrides': { 'slo.compositeSloEnabled': false },
       });
-      await apiServices.compositeSlo.deleteAll();
     });
 
     apiTest(
