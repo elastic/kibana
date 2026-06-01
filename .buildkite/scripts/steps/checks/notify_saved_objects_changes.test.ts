@@ -15,6 +15,7 @@ import {
   buildCommentBody,
   buildFailureBody,
   buildSuccessBody,
+  formatFindingForComment,
   type SavedObjectsCheckFinding,
   type SavedObjectsCheckReport,
   type TypeChangeDetails,
@@ -267,6 +268,48 @@ describe('buildFailureBody', () => {
     );
 
     expect(body).not.toContain('_Fix:_');
+  });
+
+  it('renders fixture mismatch diffs in a diff code block without ANSI codes', () => {
+    const body = buildFailureBody(
+      report({
+        status: 'fail',
+        findings: [
+          finding({
+            ruleId: 'documents/fixture-mismatch',
+            typeName: 'search',
+            message:
+              "A document of type 'search' did NOT match any of the fixtures. Closest match: fixtures['10.13.0'][0] (path/to/fixture.json)\n\u001B[32m- Expected\u001B[39m",
+            details: `- Expected - 1
++ Received + 1
+
+  Object {
+-   "id": "old",
++   "id": "new",
+  }`,
+          }),
+        ],
+      })
+    );
+
+    expect(body).toContain('```diff');
+    expect(body).toContain('-   "id": "old",');
+    expect(body).not.toContain('\u001B[');
+    expect(body).not.toContain('[32m');
+  });
+
+  it('strips ANSI codes from legacy fixture mismatch messages without details', () => {
+    const formatted = formatFindingForComment(
+      finding({
+        ruleId: 'documents/fixture-mismatch',
+        message: `summary line\n\u001B[31m+ Received + 1\u001B[39m\n+   "id": "new",`,
+      })
+    );
+
+    expect(formatted).toContain('summary line');
+    expect(formatted).toContain('```diff');
+    expect(formatted).toContain('+   "id": "new",');
+    expect(formatted).not.toContain('\u001B[');
   });
 
   describe('when the run failed but no findings were collected', () => {

@@ -57,6 +57,8 @@ export interface SavedObjectsCheckFinding {
   severity: FindingSeverity;
   typeName?: string;
   message: string;
+  /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
+  details?: string;
   fixHint?: string;
   /**
    * Path fragment appended to the Saved Objects docs base URL.
