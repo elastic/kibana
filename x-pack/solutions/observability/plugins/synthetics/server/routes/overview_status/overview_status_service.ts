@@ -77,6 +77,29 @@ export class OverviewStatusService {
       this.getQueryResult(),
     ]);
 
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  /**
+   * Same output as {@link getOverviewStatus}, but reuses monitor saved objects already loaded
+   * (e.g. diagnostics bundle) to avoid a second full `getAll` over synthetics monitors.
+   */
+  async getOverviewStatusWithPrefetchedMonitors(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >
+  ) {
+    this.filterData = await getMonitorFilters(this.routeContext);
+    const statusResult = await this.getQueryResult();
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  private buildOverviewStatusResult(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >,
+    statusResult: Map<string, LocationStatus>
+  ) {
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
 
