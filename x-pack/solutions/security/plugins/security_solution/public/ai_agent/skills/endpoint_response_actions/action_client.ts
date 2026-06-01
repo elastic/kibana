@@ -14,7 +14,10 @@ import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../common/api/endpoint';
-import type { ResponseActionApiResponse, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ResponseActionApiResponse,
+  ActionDetailsApiResponse,
+} from '../../../../common/endpoint/types';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const executeAction = async (
@@ -29,8 +32,7 @@ export const executeAction = async (
     agent_type: 'endpoint',
   };
 
-  const route =
-    actionType === 'isolate' ? ISOLATE_HOST_ROUTE_V2 : UNISOLATE_HOST_ROUTE_V2;
+  const route = actionType === 'isolate' ? ISOLATE_HOST_ROUTE_V2 : UNISOLATE_HOST_ROUTE_V2;
 
   const response = await http.post<ResponseActionApiResponse>(route, {
     body: JSON.stringify(body),
@@ -43,12 +45,8 @@ export const executeAction = async (
 export const pollActionStatus = async (actionId: string): Promise<ActionResult> => {
   const http = KibanaServices.get().http;
 
-  const { resolvePathVariables } = await import(
-    '../../../common/utils/resolve_path_variables'
-  );
-  const { ACTION_DETAILS_ROUTE } = await import(
-    '../../../../common/endpoint/constants'
-  );
+  const { resolvePathVariables } = await import('../../../common/utils/resolve_path_variables');
+  const { ACTION_DETAILS_ROUTE } = await import('../../../../common/endpoint/constants');
 
   const path = resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId });
 

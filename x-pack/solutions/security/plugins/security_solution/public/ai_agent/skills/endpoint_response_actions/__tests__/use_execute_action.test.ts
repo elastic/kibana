@@ -29,9 +29,7 @@ describe('useExecuteAction', () => {
       timestamp: new Date().toISOString(),
     });
 
-    const { result } = renderHook(() =>
-      useExecuteAction(mockExecuteAction, mockPollActionStatus)
-    );
+    const { result } = renderHook(() => useExecuteAction(mockExecuteAction, mockPollActionStatus));
 
     expect(result.current.isExecuting).toBe(false);
 
@@ -50,9 +48,7 @@ describe('useExecuteAction', () => {
   it('handles execution errors', async () => {
     mockExecuteAction.mockRejectedValue(new Error('Network error'));
 
-    const { result } = renderHook(() =>
-      useExecuteAction(mockExecuteAction, mockPollActionStatus)
-    );
+    const { result } = renderHook(() => useExecuteAction(mockExecuteAction, mockPollActionStatus));
 
     act(() => {
       result.current.execute('isolate', 'agent-1');
@@ -77,9 +73,7 @@ describe('useExecuteAction', () => {
         timestamp: new Date().toISOString(),
       });
 
-    const { result } = renderHook(() =>
-      useExecuteAction(mockExecuteAction, mockPollActionStatus)
-    );
+    const { result } = renderHook(() => useExecuteAction(mockExecuteAction, mockPollActionStatus));
 
     // Start execute without awaiting so we can advance timers in parallel
     act(() => {
@@ -108,9 +102,7 @@ describe('useExecuteAction', () => {
       timestamp: new Date().toISOString(),
     });
 
-    const { result } = renderHook(() =>
-      useExecuteAction(mockExecuteAction, mockPollActionStatus)
-    );
+    const { result } = renderHook(() => useExecuteAction(mockExecuteAction, mockPollActionStatus));
 
     // Start execute without blocking
     act(() => {

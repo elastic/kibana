@@ -25,12 +25,7 @@ describe('ConfirmationCard', () => {
   describe('isolate action', () => {
     it('renders hostName in the description list', () => {
       const { getByText } = render(
-        <ConfirmationCard
-          hostRef={hostRef}
-          actionType="isolate"
-          onConfirm={noOp}
-          onCancel={noOp}
-        />
+        <ConfirmationCard hostRef={hostRef} actionType="isolate" onConfirm={noOp} onCancel={noOp} />
       );
 
       expect(getByText('WIN-PROD-042')).toBeInTheDocument();
@@ -38,12 +33,7 @@ describe('ConfirmationCard', () => {
 
     it('renders agentId in the description list', () => {
       const { getByText } = render(
-        <ConfirmationCard
-          hostRef={hostRef}
-          actionType="isolate"
-          onConfirm={noOp}
-          onCancel={noOp}
-        />
+        <ConfirmationCard hostRef={hostRef} actionType="isolate" onConfirm={noOp} onCancel={noOp} />
       );
 
       expect(getByText('agent-abc-123')).toBeInTheDocument();
@@ -51,12 +41,7 @@ describe('ConfirmationCard', () => {
 
     it('renders Isolate host as the action label', () => {
       const { getByText } = render(
-        <ConfirmationCard
-          hostRef={hostRef}
-          actionType="isolate"
-          onConfirm={noOp}
-          onCancel={noOp}
-        />
+        <ConfirmationCard hostRef={hostRef} actionType="isolate" onConfirm={noOp} onCancel={noOp} />
       );
 
       expect(getByText('Isolate host')).toBeInTheDocument();
@@ -64,12 +49,7 @@ describe('ConfirmationCard', () => {
 
     it('renders the isolation impact statement', () => {
       const { getByText } = render(
-        <ConfirmationCard
-          hostRef={hostRef}
-          actionType="isolate"
-          onConfirm={noOp}
-          onCancel={noOp}
-        />
+        <ConfirmationCard hostRef={hostRef} actionType="isolate" onConfirm={noOp} onCancel={noOp} />
       );
 
       expect(
@@ -79,12 +59,7 @@ describe('ConfirmationCard', () => {
 
     it('matches snapshot', () => {
       const { container } = render(
-        <ConfirmationCard
-          hostRef={hostRef}
-          actionType="isolate"
-          onConfirm={noOp}
-          onCancel={noOp}
-        />
+        <ConfirmationCard hostRef={hostRef} actionType="isolate" onConfirm={noOp} onCancel={noOp} />
       );
 
       expect(container).toMatchSnapshot();
