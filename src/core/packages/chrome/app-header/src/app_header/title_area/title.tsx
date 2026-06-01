@@ -21,7 +21,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AppHeaderEditableTitle, AppHeaderTitle } from '../../types';
 
 const defaultAriaLabel = i18n.translate('core.ui.chrome.appHeader.editableTitle.ariaLabel', {
-  defaultMessage: 'Edit page title',
+  defaultMessage: 'Edit title',
 });
 
 const editInstructions = i18n.translate('core.ui.chrome.appHeader.editableTitle.editInstructions', {
