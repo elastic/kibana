@@ -17,7 +17,7 @@ import { resolveCcmApiKey } from '@kbn/es';
 import { isTTY, parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, getVaultAddr } from '../utils';
 import { readCachedEisConnectors, writeCachedEisConnectors } from '../eis_connectors_cache';
-import { VAULT_CONFIG_DIR, resolveVaultConfigPath } from '../profiles';
+import { VAULT_CONFIG_DIR, resolveVaultConfigPath, readVaultConfigFromDevVault } from '../profiles';
 
 const EIS_MODELS_PATH = 'target/eis_models.json';
 
@@ -41,16 +41,78 @@ const LOCAL_DEFAULTS = {
   tracingExporters: [{ http: { url: 'http://localhost:4318/v1/traces' } }],
 };
 
-export const ensureLocalConfig = (repoRoot: string, log: ToolingLog): void => {
+const buildKbnUrl = (basePath: string): string => {
+  const trimmed = basePath.trim().replace(/^\/+|\/+$/g, '');
+  return trimmed
+    ? `http://elastic:changeme@localhost:5601/${trimmed}`
+    : 'http://elastic:changeme@localhost:5601';
+};
+
+export const ensureLocalConfig = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = resolveVaultConfigPath(repoRoot, 'local');
   if (Fs.existsSync(configPath)) return;
 
-  const config = {
-    description: 'kbn-evals local config (hardcoded defaults)',
+  const config: Record<string, unknown> = {
+    description: 'kbn-evals local config',
     owner: resolveUserIdentifier(),
     environment: 'local',
-    ...LOCAL_DEFAULTS,
+    evaluationsEs: { ...LOCAL_DEFAULTS.evaluationsEs },
+    tracingEs: { ...LOCAL_DEFAULTS.tracingEs },
+    tracingExporters: [...LOCAL_DEFAULTS.tracingExporters],
   };
+
+  if (isTTY()) {
+    const { basePath } = await inquirer.prompt<{ basePath: string }>({
+      type: 'input',
+      name: 'basePath',
+      message: 'Kibana base path (e.g. /dev, or empty for none):',
+      default: '/dev',
+    });
+
+    config.evaluationsKbn = { url: buildKbnUrl(basePath), apiKey: '' };
+
+    type GcsChoice = 'vault' | 'file' | 'skip';
+    const { gcsChoice } = await inquirer.prompt<{ gcsChoice: GcsChoice }>({
+      type: 'list',
+      name: 'gcsChoice',
+      message: 'GCS dataset credentials (needed for snapshot restore):',
+      choices: [
+        { name: 'Pull from dev-vault (requires Vault auth)', value: 'vault' },
+        { name: 'Load from local JSON file', value: 'file' },
+        { name: 'Skip (configure later)', value: 'skip' },
+      ],
+    });
+
+    if (gcsChoice === 'vault') {
+      await ensureVaultAuth(log);
+      const vaultCfg = readVaultConfigFromDevVault();
+      if (vaultCfg?.gcsDatasetAccessCredentials) {
+        config.gcsDatasetAccessCredentials = vaultCfg.gcsDatasetAccessCredentials;
+        log.info('GCS credentials pulled from dev-vault.');
+      } else {
+        log.warning('Could not retrieve GCS credentials from dev-vault.');
+      }
+    } else if (gcsChoice === 'file') {
+      const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
+        type: 'input',
+        name: 'gcsPath',
+        message: 'Path to GCS service account JSON file:',
+        default: '',
+      });
+      if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
+        try {
+          const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
+          config.gcsDatasetAccessCredentials = gcsCreds;
+          log.info('GCS credentials loaded from file.');
+        } catch {
+          log.warning('Failed to parse GCS credentials file. Edit config.local.json manually.');
+        }
+      }
+    }
+  } else {
+    config.evaluationsKbn = { ...LOCAL_DEFAULTS.evaluationsKbn };
+  }
+
   Fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
   log.info(`Written local config to ${configPath}`);
 };

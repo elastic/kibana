@@ -225,7 +225,7 @@ export const startCmd: Command<void> = {
         });
 
         if (choice === 'local') {
-          ensureLocalConfig(repoRoot, log);
+          await ensureLocalConfig(repoRoot, log);
           profile = 'local';
         } else if (choice === 'golden-cluster') {
           await ensureVaultAuth(log);
@@ -236,7 +236,7 @@ export const startCmd: Command<void> = {
       } else if (isDevVaultProfile(profile)) {
         await ensureVaultAuth(log);
       } else if (profile === 'local') {
-        ensureLocalConfig(repoRoot, log);
+        await ensureLocalConfig(repoRoot, log);
       } else {
         const configPath = resolveVaultConfigPath(repoRoot, profile);
         if (!Fs.existsSync(configPath)) {
