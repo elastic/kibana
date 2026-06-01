@@ -113,6 +113,12 @@ spaceTest.describe(
           // Register interceptors here — immediately before submit — so the 30s proxy
           // timeout doesn't expire during the earlier waitForRuleAlert / waitForAttachmentPillsRow
           // steps. autoSendInitialMessage: false guarantees no LLM call fires before this point.
+          //
+          // The agent builder makes exactly 2 LLM calls in non-structured mode:
+          //   1. set_title  — forced tool call to generate a conversation title
+          //   2. research-agent — the research agent gathers context and returns a plain-text
+          //      handover note; in non-structured mode this note IS the final answer
+          //      (graph.ts finalize() returns it directly, no third answering-agent call).
           void llmProxy
             .intercept({
               name: 'set_title',
@@ -126,20 +132,7 @@ spaceTest.describe(
 
           void llmProxy
             .intercept({
-              name: 'handover-to-answer',
-              when: (body) => {
-                const sys = body.messages.find((m) => m.role === 'system');
-                return String(sys?.content ?? '').includes(
-                  'This response will serve as a handover note for the answering agent'
-                );
-              },
-              responseMock: 'ready to answer',
-            })
-            .completeAfterIntercept();
-
-          void llmProxy
-            .intercept({
-              name: 'final-answer',
+              name: 'research-agent',
               when: () => true,
               responseMock: 'Here is the alert triage summary.',
             })
@@ -148,12 +141,12 @@ spaceTest.describe(
           await agentBuilderPage.submitButton.click();
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          const handoverRequest = llmProxy.interceptedRequests.find(
-            (r) => r.matchingInterceptorName === 'handover-to-answer'
+          const researchAgentRequest = llmProxy.interceptedRequests.find(
+            (r) => r.matchingInterceptorName === 'research-agent'
           )?.requestBody;
 
-          expect(handoverRequest).toBeDefined();
-          const messages: Array<{ content?: unknown }> = handoverRequest?.messages ?? [];
+          expect(researchAgentRequest).toBeDefined();
+          const messages: Array<{ content?: unknown }> = researchAgentRequest?.messages ?? [];
           const allContent = messages.map((m) => String(m.content ?? '')).join('\n');
 
           // Verify multiple alerts were delivered: each alert block contains the rule name field.
