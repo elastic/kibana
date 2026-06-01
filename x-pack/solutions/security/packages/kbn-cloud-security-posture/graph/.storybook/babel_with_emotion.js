@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import babelJest from 'babel-jest';
+// CommonJS so Node's native .ts loader doesn't load this file in ES module
+// scope (which would break the require.resolve below). Mirrors the pattern in
+// src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js.
 
-// eslint-disable-next-line import/no-default-export
-export default babelJest.createTransformer({
+const babelJest = require('babel-jest');
+
+module.exports = babelJest.createTransformer({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
