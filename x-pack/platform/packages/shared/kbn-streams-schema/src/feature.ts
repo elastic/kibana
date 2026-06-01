@@ -83,7 +83,7 @@ export const featureSchema = baseFeatureSchema.and(
     excluded_at: z.string().optional(),
     run_id: z.string().optional(),
     excluded: z.boolean().optional(),
-    updated_at: z.string().optional(),
+    updated_at: z.iso.datetime().optional(),
   })
 );
 
