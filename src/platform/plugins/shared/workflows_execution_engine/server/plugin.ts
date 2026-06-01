@@ -52,6 +52,8 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
+import { initializeTriggerEventsClient } from './trigger_events/event_logs';
+import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -1316,6 +1318,8 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
+
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
       workflowRepository,
@@ -1324,6 +1328,7 @@ export class WorkflowsExecutionEnginePlugin
       scheduleWorkflow,
       logger: this.logger,
       config: this.config.eventDriven,
+      triggerEventsClientPromise,
     });
 
     const triggerEvents: TriggerEventsContract = {
@@ -1331,6 +1336,10 @@ export class WorkflowsExecutionEnginePlugin
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+      searchTriggerEventLog: async (params) => {
+        const triggerEventsClient = await triggerEventsClientPromise;
+        return querySearchTriggerEventLog(triggerEventsClient, params);
+      },
     };
 
     return {
