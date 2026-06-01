@@ -65,9 +65,14 @@ describe('AWS_SERVICES_MATRIX', () => {
     });
 
     it('has only valid delivery method values', () => {
-      entry.deliveryMethods.forEach((method) => {
+      entry.deliveryMethods.forEach(({ method }) => {
         expect(VALID_DELIVERY_METHODS).toContain(method);
       });
+    });
+
+    it('has exactly one preferred delivery method', () => {
+      const preferred = entry.deliveryMethods.filter((dm) => dm.preferred === true);
+      expect(preferred).toHaveLength(1);
     });
 
     it('has a non-empty packageName', () => {
