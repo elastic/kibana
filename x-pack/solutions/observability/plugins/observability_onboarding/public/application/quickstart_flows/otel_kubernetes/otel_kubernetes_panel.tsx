@@ -59,11 +59,11 @@ import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
       defaultMessage: 'Kubernetes: OpenTelemetry',
-    }),
-  });
+    })
+  );
   const { data, status, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
