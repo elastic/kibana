@@ -31,15 +31,11 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
     credentials = await requestAuth.getApiKeyForAdmin();
 
-    try {
-      await kbnClient.spaces.create({ id: TEST_SPACE_ID, name: 'Scout sample data test space' });
-    } catch {
-      // Space already exists — proceed; afterAll will delete it.
-    }
+    await kbnClient.spaces.create({ id: TEST_SPACE_ID, name: 'Scout sample data test space' });
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.spaces.delete(TEST_SPACE_ID).catch(() => {});
+    await kbnClient.spaces.delete(TEST_SPACE_ID);
   });
 
   // ---------------------------------------------------------------------------
@@ -96,7 +92,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
         async () => {
           const nowString = '2000-01-01T00:00:00';
           const reinstallResponse = await apiClient.post(
-            `${apiPath}/${FLIGHTS_DATASET_ID}?now=${nowString}`,
+            `${apiPath}/${FLIGHTS_DATASET_ID}?now=${encodeURIComponent(nowString)}`,
             { headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader } }
           );
           expect(reinstallResponse).toHaveStatusCode(200);
@@ -180,6 +176,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
           expect(response).toHaveStatusCode(200);
           const flights = findFlightsDataset(response.body);
           expect(flights.status).toBe('installed');
+          // The installer uses createNewCopies: false, so saved object IDs are identical across all spaces.
           expect(flights.overviewDashboard).toBe(FLIGHTS_OVERVIEW_DASHBOARD_ID);
         }
       );
