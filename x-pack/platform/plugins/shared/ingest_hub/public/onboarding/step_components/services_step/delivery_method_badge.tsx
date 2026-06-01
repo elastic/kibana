@@ -26,7 +26,7 @@ const LABELS: Record<DeliveryMethod, string> = {
 const TOOLTIPS: Partial<Record<DeliveryMethod, string>> = {
   cloud_forwarder: i18n.translate(
     'xpack.ingestHub.servicesStep.deliveryMethod.cloudForwarderTooltip',
-    { defaultMessage: 'EDOT Cloud Forwarder' }
+    { defaultMessage: 'Elastic Cloud Forwarder' }
   ),
 };
 

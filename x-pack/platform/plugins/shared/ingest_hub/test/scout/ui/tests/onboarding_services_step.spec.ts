@@ -96,13 +96,13 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     // switch to Logs filter
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Logs').click();
 
+    // wait for a known metrics-only row to disappear before counting (ensures DOM has settled)
+    await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeHidden();
+
     const rows = page.locator('[data-test-subj^="servicesStep-serviceRow-"]');
     // only log-signal services are shown; metrics rows are hidden
     const count = await rows.count();
     expect(count).toBeLessThan(TOTAL_SERVICES);
-
-    // a metrics-only row must not be visible
-    await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeHidden();
 
     // switch to Metrics
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();

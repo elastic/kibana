@@ -35,11 +35,14 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onT
                 <EuiFlexItem grow={false}>
                   <SignalTypeBadge signalType={service.signalType} />
                 </EuiFlexItem>
-                {service.deliveryMethods.map((entry) => (
-                  <EuiFlexItem key={entry.method} grow={false}>
-                    <DeliveryMethodBadge method={entry.method} preferred={entry.preferred} />
-                  </EuiFlexItem>
-                ))}
+                {/* firehose not supported for V1 */}
+                {service.deliveryMethods
+                  .filter((entry) => entry.method !== 'firehose')
+                  .map((entry) => (
+                    <EuiFlexItem key={entry.method} grow={false}>
+                      <DeliveryMethodBadge method={entry.method} preferred={entry.preferred} />
+                    </EuiFlexItem>
+                  ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
