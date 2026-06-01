@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -79,6 +80,14 @@ export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
   prunedSnoozedInstances?: RawRuleSnoozedInstance[];
+  /**
+   * Audit context for `alert_auto_unsnooze`
+   */
+  autoUnsnoozeAudit?: {
+    expired: RawRuleSnoozedInstance[];
+    conditionExpired: RawRuleSnoozedInstance[];
+    ruleName: string;
+  };
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
@@ -178,6 +187,7 @@ export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
   alertsService: AlertsService | null;
+  auditService?: AuditServiceSetup;
   backfillClient: BackfillClient;
   basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;

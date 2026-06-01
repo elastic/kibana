@@ -43,6 +43,7 @@ import {
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -171,6 +172,7 @@ describe('Task Runner', () => {
   const alertsService = alertsServiceMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
   const rulesSettingsService = rulesSettingsServiceMock.create();
+  const auditService = securityServiceMock.createStart().audit;
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -182,6 +184,7 @@ describe('Task Runner', () => {
     actionsConfigMap: { default: { max: 1000 } },
     actionsPlugin: actionsMock.createStart(),
     alertsService,
+    auditService,
     backfillClient,
     basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
@@ -3664,6 +3667,25 @@ describe('Task Runner', () => {
       }),
       expect.anything()
     );
+
+    expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(1);
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'alert_auto_unsnooze',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: expect.objectContaining({ type: RULE_SAVED_OBJECT_TYPE }),
+        }),
+        message: expect.stringContaining('alert-1'),
+      })
+    );
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('reason: ttl_expired'),
+      })
+    );
   });
 
   test('should remove snoozed instance when field_change condition is met', async () => {
@@ -3715,6 +3737,22 @@ describe('Task Runner', () => {
         }),
       }),
       expect.anything()
+    );
+
+    expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(1);
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'alert_auto_unsnooze',
+          outcome: 'success',
+        }),
+        message: expect.stringContaining('alert-1'),
+      })
+    );
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('reason: condition_met'),
+      })
     );
   });
 
@@ -3768,6 +3806,8 @@ describe('Task Runner', () => {
       }),
       expect.anything()
     );
+
+    expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
   });
 
   test('should NOT remove snoozed instance with conditions when alert is not currently firing', async () => {
@@ -3818,6 +3858,8 @@ describe('Task Runner', () => {
       }),
       expect.anything()
     );
+
+    expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
   });
 
   test('should prune both time-expired and condition-expired instances in one pass', async () => {
@@ -3881,6 +3923,66 @@ describe('Task Runner', () => {
       }),
       expect.anything()
     );
+
+    expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(2);
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'alert_auto_unsnooze' }),
+        message: expect.stringContaining('alert-expired-time'),
+      })
+    );
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('reason: ttl_expired'),
+      })
+    );
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'alert_auto_unsnooze' }),
+        message: expect.stringContaining('alert-condition-change'),
+      })
+    );
+    expect(auditService.withoutRequest.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('reason: condition_met'),
+      })
+    );
+  });
+
+  test('should NOT emit alert_auto_unsnooze audit events when the rule SO update fails', async () => {
+    const expiredSnooze = {
+      instanceId: 'alert-1',
+      expiresAt: '1969-12-31T23:59:59.000Z',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [expiredSnooze],
+      },
+    };
+
+    elasticsearchService.client.asInternalUser.update.mockRejectedValueOnce(
+      new Error('simulated ES update failure')
+    );
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    expect(auditService.withoutRequest.log).not.toHaveBeenCalled();
   });
 
   function testAlertingEventLogCalls({
