@@ -50,13 +50,13 @@ export const createChangePointDataSourceProfileProvider =
     profileId: CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
     profile: {
       getChartSectionConfiguration:
-        (prev, { context }) =>
-        (params) => ({
-          ...prev(params),
+        (prev, { toolkit }) =>
+        () => ({
+          ...prev(),
           renderChartSection: (props) =>
             React.createElement(ChangePointChartSectionSync, {
               gridProps: props,
-              actions: params.actions,
+              actions: toolkit.actions,
               chartSectionProps$: context.chartSectionProps$,
             }),
           replaceDefaultChart: true as const,

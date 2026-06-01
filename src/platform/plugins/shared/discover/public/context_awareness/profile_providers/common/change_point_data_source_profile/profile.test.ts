@@ -19,6 +19,7 @@ import {
   CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
   type ChangePointChartSectionSnapshot,
 } from './change_point_context';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createChangePointDataSourceProfileProvider } from './profile';
 
 const RESOLUTION_MISMATCH = { isMatch: false };
@@ -141,10 +142,14 @@ describe('createChangePointDataSourceProfileProvider', () => {
 
   describe('getChartSectionConfiguration', () => {
     it('returns replaceDefaultChart: true and a renderChartSection function', () => {
-      const getConfig = provider.profile.getChartSectionConfiguration!(() => ({} as never), {
-        context: buildContext(),
-      });
-      const config = getConfig({ actions: {} } as never);
+      const getConfig = provider.profile.getChartSectionConfiguration!(
+        () => ({ replaceDefaultChart: false }),
+        {
+          context: buildContext(),
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+      const config = getConfig();
       expect(config.replaceDefaultChart).toBe(true);
       if (config.replaceDefaultChart) {
         expect(typeof config.renderChartSection).toBe('function');
@@ -156,6 +161,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
     it('customises the pvalue column when pvalueColumnId is present', () => {
       const getColumns = provider.profile.getColumnsConfiguration!(() => ({}), {
         context: buildContext({ pvalueColumnId: 'my_pvalue' }),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getColumns()).toHaveProperty('my_pvalue');
     });
@@ -164,6 +170,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const base = { existing: {} as never };
       const getColumns = provider.profile.getColumnsConfiguration!(() => base, {
         context: buildContext({ pvalueColumnId: '' }),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getColumns()).toBe(base);
     });
@@ -173,10 +180,10 @@ describe('createChangePointDataSourceProfileProvider', () => {
     const buildRenderers = (pvalueColumnId: string) => {
       const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), {
         context: buildContext({ pvalueColumnId }),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       return getCellRenderers({
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       });
@@ -193,10 +200,10 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const prevRenderers = { some_col: existingRenderer };
       const getCellRenderers = provider.profile.getCellRenderers!(() => prevRenderers, {
         context: buildContext({ pvalueColumnId: '' }),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const renderers = getCellRenderers({
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       });

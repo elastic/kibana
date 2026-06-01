@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
@@ -26,17 +26,27 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
     <EuiPopover
       data-test-subj="risk-inputs-actions"
       button={
-        <EuiButtonIcon
-          onClick={togglePopover}
-          iconType="boxesVertical"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel',
             {
               defaultMessage: 'Actions',
             }
           )}
-          color="text"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={togglePopover}
+            iconType="boxesVertical"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel',
+              {
+                defaultMessage: 'Actions',
+              }
+            )}
+            color="text"
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
