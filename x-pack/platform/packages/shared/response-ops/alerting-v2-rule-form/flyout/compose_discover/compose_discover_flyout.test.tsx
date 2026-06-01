@@ -73,11 +73,34 @@ jest.mock('./use_split_query_completion', () => ({
 
 jest.mock('../../form/utils/yaml_form_utils', () => ({
   serializeFormToYaml: () => '',
-  parseYamlToFormValues: () => ({ values: null }),
+  parseYamlToFormValues: (yaml: string) => ({
+    values: yaml
+      ? {
+          kind: 'signal',
+          metadata: { name: 'changed', enabled: true, description: '', tags: [] },
+          timeField: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: '' } },
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransitionRecoveryDelayMode: 'immediate',
+          artifacts: [],
+        }
+      : null,
+  }),
 }));
 
 jest.mock('../../form/yaml_rule_form', () => ({
-  YamlRuleForm: () => <div data-test-subj="yamlRuleFormMock" />,
+  YamlRuleForm: ({ setYamlText }: { setYamlText: (yaml: string) => void }) => (
+    <div data-test-subj="yamlRuleFormMock">
+      <button
+        data-test-subj="mockMakeYamlDirty"
+        onClick={() => setYamlText('name: changed\n')}
+        type="button"
+      >
+        Make YAML dirty
+      </button>
+    </div>
+  ),
 }));
 
 const createMockServices = (): RuleFormServices => ({
@@ -231,6 +254,61 @@ describe('ComposeDiscoverFlyout', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows confirmation in YAML mode when text differs from baseline', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
+      const yamlButton =
+        toggleGroup.querySelector('button[data-test-subj="yaml"]') ??
+        toggleGroup.querySelectorAll('button')[1];
+      fireEvent.click(yamlButton!);
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('closes immediately in YAML mode when text matches baseline', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
+      const yamlButton =
+        toggleGroup.querySelector('button[data-test-subj="yaml"]') ??
+        toggleGroup.querySelectorAll('button')[1];
+      fireEvent.click(yamlButton!);
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows confirmation after editing in YAML mode and switching back to form mode', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
+      const yamlButton =
+        toggleGroup.querySelector('button[data-test-subj="yaml"]') ??
+        toggleGroup.querySelectorAll('button')[1];
+      const formButton =
+        toggleGroup.querySelector('button[data-test-subj="form"]') ??
+        toggleGroup.querySelectorAll('button')[0];
+
+      fireEvent.click(yamlButton!);
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(formButton!);
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
     });
   });
 });

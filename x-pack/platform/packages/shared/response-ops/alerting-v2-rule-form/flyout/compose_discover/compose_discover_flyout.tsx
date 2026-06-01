@@ -301,8 +301,19 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
 
+  // methods.reset() (used by YAML sync and mode-toggle) clears isDirty because
+  // it establishes new default values. Two extra refs compensate:
+  // - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
+  // - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
+  //   editing still shows the confirmation dialog.
+  const yamlBaselineRef = useRef<string | null>(null);
+  const yamlTextRef = useRef('');
+  const hasBeenEditedRef = useRef(false);
+
   const handleRequestClose = useCallback(() => {
-    if (isDirtyRef.current) {
+    const yamlDirty =
+      yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
       setIsConfirmCloseVisible(true);
     } else {
       onClose();
@@ -459,6 +470,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
+  yamlTextRef.current = yamlText;
 
   // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF.
   // The Sandbox watches RHF via props, so it sees YAML edits live.
@@ -490,8 +502,15 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
-        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
+        const serialized = serializeFormToYaml(
+          composeFormValuesForYamlSerialize(methods.getValues())
+        );
+        setYamlText(serialized);
+        yamlBaselineRef.current = serialized;
       } else {
+        const yamlWasDirty =
+          yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
+        yamlBaselineRef.current = null;
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
@@ -500,6 +519,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
           syncSandbox();
           if (getBreachQuery(compose.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
+          }
+          if (yamlWasDirty) {
+            hasBeenEditedRef.current = true;
           }
         }
         // No syncSandbox() on parse-failure path: the debounced parse always calls
