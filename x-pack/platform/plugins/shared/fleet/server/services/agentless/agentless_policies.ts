@@ -6,6 +6,7 @@
  */
 
 import {
+  type AuthenticatedUser,
   type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
@@ -299,7 +300,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     });
   }
 
-  private async deleteOrphanedAgentlessResources(policyId: string, user?: any) {
+  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
     const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
       this.soClient,
       policyId
