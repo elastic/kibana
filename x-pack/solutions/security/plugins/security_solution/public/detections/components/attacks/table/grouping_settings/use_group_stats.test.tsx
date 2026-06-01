@@ -6,7 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 import type { RawBucket } from '@kbn/grouping';
 import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_settings/types';
 
@@ -34,7 +37,12 @@ describe('useGroupStats', () => {
         {
           attacks: {
             filter: {
-              term: { 'kibana.alert.rule.rule_type_id': ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID },
+              terms: {
+                'kibana.alert.rule.rule_type_id': [
+                  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+                  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+                ],
+              },
             },
           },
         },
@@ -43,8 +51,11 @@ describe('useGroupStats', () => {
             filter: {
               bool: {
                 must_not: {
-                  term: {
-                    'kibana.alert.rule.rule_type_id': ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+                  terms: {
+                    'kibana.alert.rule.rule_type_id': [
+                      ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+                      ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+                    ],
                   },
                 },
               },
