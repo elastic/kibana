@@ -35,17 +35,16 @@ export const DiscoverLink = ({
   });
 
   let link = (
-    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
-      <EuiButtonIcon
-        onClick={onClick}
-        display="empty"
-        size="xs"
-        iconType="discoverApp"
-        aria-label={tooltipContent}
-        data-test-subj="discoverIconLink"
-        css={{ margin: '0 0.3em' }}
-      />
-    </EuiToolTip>
+    // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- link is already wrapped with tooltip below
+    <EuiButtonIcon
+      onClick={onClick}
+      display="empty"
+      size="xs"
+      iconType="discoverApp"
+      aria-label={tooltipContent}
+      data-test-subj="discoverIconLink"
+      css={{ margin: '0 0.3em' }}
+    />
   );
   if (asButton) {
     link = fill ? (
