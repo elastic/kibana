@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
+export declare const aggPercentilesFnName = "aggPercentiles";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggPercentilesFnName, Input, AggArgs, Output>;
+export declare const aggPercentiles: () => FunctionDefinition;
+export {};

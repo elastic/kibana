@@ -1,0 +1,1 @@
+export type SolutionNameType = 'App Search' | 'Beats' | 'Business Analytics' | 'Cloud' | 'Cloud Enterprise' | 'Code' | 'Elastic' | 'Elastic Stack' | 'Elasticsearch' | 'Enterprise Search' | 'Logstash' | 'Maps' | 'Metrics' | 'Observability' | 'Security' | 'Site Search' | 'Uptime' | 'Webhook' | 'Workplace Search';
