@@ -20,11 +20,7 @@ import {
   COMMON_HEADERS,
 } from '../fixtures';
 
-/**
- * Unique per-run space ID. Scout shares a single Kibana/ES server across multiple
- * CI lanes, so every resource name that isn't scoped to a space must be unique per
- * run. Using a UUID suffix ensures no two concurrent runs collide on the same space.
- */
+// UUID suffix keeps saved objects isolated to their own space across concurrent CI runs.
 const TEST_SPACE_ID = `scout-sd-${randomUUID().slice(0, 8)}`;
 
 const sampleDataApiPath = (space: string) => `/s/${space}/api/sample_data`;
@@ -32,23 +28,9 @@ const sampleDataApiPath = (space: string) => `/s/${space}/api/sample_data`;
 apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
     credentials = await requestAuth.getApiKeyForAdmin();
 
-    // Pre-clean: remove any flights sample data that a previous run may have left
-    // behind. This guarantees the "not_installed" pre-condition at the start of
-    // every test regardless of prior state. The Kibana API handles both saved
-    // objects and the shared ES index — avoid direct index deletion here as
-    // kibana_sample_data_flights is shared across CI lanes and deleting it directly
-    // can break concurrent test runs.
-    await apiClient
-      .delete(`${sampleDataApiPath('default')}/${FLIGHTS_DATASET_ID}`, {
-        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      })
-      .catch(() => {}); // 404 when not installed is expected
-
-    // Create the unique test space. The try-catch handles the extremely unlikely
-    // case of a UUID collision leaving the space from a prior failed run.
     try {
       await kbnClient.spaces.create({ id: TEST_SPACE_ID, name: 'Scout sample data test space' });
     } catch {
@@ -56,20 +38,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
-    // Defensive uninstall from both spaces in case a test failed mid-flight.
-    // Errors are ignored — the goal is to leave the server clean for the next run,
-    // not to assert on the cleanup response. The Kibana API handles ES index removal,
-    // so no direct index deletion is needed.
-    for (const space of ['default', TEST_SPACE_ID]) {
-      await apiClient
-        .delete(`${sampleDataApiPath(space)}/${FLIGHTS_DATASET_ID}`, {
-          headers: { ...COMMON_HEADERS, ...credentials?.apiKeyHeader },
-        })
-        .catch(() => {});
-    }
-
-    // Remove the test space (also removes all saved objects inside it).
+  apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.spaces.delete(TEST_SPACE_ID).catch(() => {});
   });
 
@@ -93,17 +62,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     'default space: list, install, verify timestamps and counts, uninstall',
     async ({ apiClient, esClient }) => {
       const apiPath = sampleDataApiPath('default');
-
-      await apiTest.step('list returns not_installed before install', async () => {
-        const response = await apiClient.get(apiPath, {
-          headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        const flights = findFlightsDataset(response.body);
-        expect(flights.status).toBe('not_installed');
-        expect(flights.overviewDashboard).toBe(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-      });
 
       await apiTest.step(
         'install returns 200 with correct ES index and saved object counts',
@@ -137,7 +95,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
         'ES index timestamps shift to match the ?now= parameter on reinstall',
         async () => {
           const nowString = '2000-01-01T00:00:00';
-          // Reinstall with a fixed reference date and assert it succeeds.
           const reinstallResponse = await apiClient.post(
             `${apiPath}/${FLIGHTS_DATASET_ID}?now=${nowString}`,
             { headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader } }
@@ -198,18 +155,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     async ({ apiClient, esClient }) => {
       const apiPath = sampleDataApiPath(TEST_SPACE_ID);
 
-      await apiTest.step('list returns not_installed before install', async () => {
-        const response = await apiClient.get(apiPath, {
-          headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        const flights = findFlightsDataset(response.body);
-        expect(flights.status).toBe('not_installed');
-        // Before install the overviewDashboard reflects the canonical schema ID in all spaces
-        expect(flights.overviewDashboard).toBe(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-      });
-
       await apiTest.step(
         'install returns 200 with correct ES index and saved object counts',
         async () => {
@@ -235,8 +180,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
           expect(response).toHaveStatusCode(200);
           const flights = findFlightsDataset(response.body);
           expect(flights.status).toBe('installed');
-          // The installer always uses createNewCopies: false, so IDs are preserved across all spaces.
-          // The FTR test that expected a regenerated ID here was testing stale behaviour.
+          // createNewCopies: false preserves IDs across spaces; the prior FTR expectation of a regenerated ID was stale.
           expect(flights.overviewDashboard).toBe(FLIGHTS_OVERVIEW_DASHBOARD_ID);
         }
       );

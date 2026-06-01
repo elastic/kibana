@@ -11,10 +11,7 @@ export const FLIGHTS_DATASET_ID = 'flights';
 
 export const FLIGHTS_ES_INDEX = 'kibana_sample_data_flights';
 
-/**
- * Default ID of the flights overview dashboard.
- * @see src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/index.ts
- */
+// @see src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/index.ts
 export const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
 
 export const COMMON_HEADERS = {
@@ -22,11 +19,7 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 } as const;
 
-/**
- * Time span in milliseconds between the earliest and latest timestamps in the flights
- * sample dataset (2018-01-01T00:00:00 → 2018-02-11T14:54:34).
- * Used to assert that installed timestamps are relative to the install time.
- * @see src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/flights.json.gz
- */
+// Earliest-to-latest timestamp delta in the flights dataset; used to verify timestamps shift relative to install time.
+// @see src/platform/plugins/shared/home/server/services/sample_data/data_sets/flights/flights.json.gz
 export const FLIGHTS_DATA_TIME_SPAN_MS =
   new Date('2018-02-11T14:54:34').getTime() - new Date('2018-01-01T00:00:00').getTime();
