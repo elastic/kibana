@@ -42,6 +42,7 @@ import {
   setupMlModulesWithRetry,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -50,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const config = getService('config');
   const retry = getService('retry');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -1100,21 +1102,36 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@skipInServerlessMKI with enrichments', () => {
-        before(async () => {
-          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
+      describe('with enrichments', () => {
+        before(async function () {
+          // ML anomaly docs use host.name only (no host.id) → EUID is name-based.
+          if (
+            !(await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'zeek-newyork-sha-aa8df15' },
+                  entity: {
+                    id: 'host:zeek-newyork-sha-aa8df15',
+                    type: 'host',
+                    risk: { calculated_level: 'Low', calculated_score_norm: 23 },
+                  },
+                  asset: { criticality: 'medium_impact' },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: { id: 'user:root@unknown', type: 'user' },
+                  asset: { criticality: 'extreme_impact' },
+                },
+              ],
+            }))
+          )
+            return this.skip();
         });
 
         after(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-          );
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
+          await entityStoreV2.teardown();
         });
 
         beforeEach(async () => {
