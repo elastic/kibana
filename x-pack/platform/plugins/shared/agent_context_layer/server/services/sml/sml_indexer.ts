@@ -19,9 +19,6 @@ import type {
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
-import { SmlAccessError } from './sml_access_error';
-
-export { SmlAccessError } from './sml_access_error';
 
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
@@ -143,6 +140,11 @@ class SmlIndexerImpl implements SmlIndexer {
       logger: contextLogger,
     };
 
+    this.logger.info(
+      `SML indexer: calling getSmlData for origin '${originId}' of type '${attachmentType}'`
+    );
+    const smlData = await definition.getSmlData(originId, context);
+    if (!smlData || smlData.chunks.length === 0) {
       this.logger.info(
         `SML indexer: no SML data returned for origin '${originId}' of type '${attachmentType}' — deleting existing crawled chunks (manual entries preserved)`
       );

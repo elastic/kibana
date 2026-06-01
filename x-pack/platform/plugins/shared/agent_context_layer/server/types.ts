@@ -99,21 +99,6 @@ interface SmlIndexAttachmentBaseParams {
   action: SmlIndexAction;
   spaceId?: string;
   includedHiddenTypes?: string[];
-  /**
-   * Optional pre-computed chunks. When provided (for `create`/`update`), the
-   * SML service skips the registered type's `getSmlData` hook and indexes the
-   * supplied chunks directly. Ignored for `action: 'delete'`.
-   */
-  chunks?: SmlChunk[];
-  /**
-   * Explicit source for this operation. When not provided, defaults to
-   * `'direct'` if `chunks` is set, otherwise `'resolved'`.
-   *
-   * `direct` writes override any existing chunks for the `originId`.
-   * `resolved` writes are skipped when `direct` chunks already exist for the
-   * `originId` (preserving the user's override).
-   */
-  source?: SmlDocumentSource;
 }
 
 export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &

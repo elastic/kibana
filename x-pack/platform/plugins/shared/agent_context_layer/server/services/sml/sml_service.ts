@@ -118,18 +118,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       indexAttachment: async (params) => {
-        return this.getIndexer().indexAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: params.spaces,
-          spaceId: params.spaceId,
-          esClient: params.esClient,
-          savedObjectsClient: params.savedObjectsClient,
-          logger: params.logger,
-          chunks: params.chunks,
-          source: params.source,
-        });
+        return this.getIndexer().indexAttachment(params);
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });

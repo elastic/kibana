@@ -29,12 +29,7 @@ jest.mock('./sml_service', () => ({
 
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 
-const createMockEsClient = (
-  overrides: Partial<{
-    deleteByQuery: jest.Mock;
-    count: jest.Mock;
-  }> = {}
-): jest.Mocked<ElasticsearchClient> =>
+const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     // Default: no existing manual entries for any origin_id.
@@ -54,15 +49,6 @@ const createMockSmlTypeDefinition = (
   list: jest.fn(),
   getSmlData: jest.fn(),
   toAttachment: jest.fn(),
-  // Permissive default: grants access in the caller's space with no extra
-  // permission requirements. Individual tests override this when they need
-  // to exercise rejection paths (missing hook, cross-space, etc).
-  resolveOriginAccess: jest
-    .fn()
-    .mockImplementation(async (_id: string, _ctx: unknown, spaceId: string) => ({
-      spaces: [spaceId],
-      permissions: [],
-    })),
   ...overrides,
 });
 
@@ -79,7 +65,6 @@ const createIndexerParams = (
     attachmentType: string;
     action: 'create' | 'update' | 'delete';
     spaces: string[];
-    spaceId: string;
     esClient: jest.Mocked<ElasticsearchClient>;
     logger: ReturnType<typeof createMockLogger>;
   }> = {}
@@ -88,10 +73,6 @@ const createIndexerParams = (
   attachmentType: 'lens',
   action: 'create' as const,
   spaces: ['default'],
-  // `spaceId` is required by the indexer's direct-mode access gate.
-  // Resolved-mode tests don't read it, so providing a default here keeps
-  // both modes simple.
-  spaceId: 'default',
   esClient: createMockEsClient(),
   savedObjectsClient: {} as unknown as ISavedObjectsRepository,
   logger: createMockLogger(),
