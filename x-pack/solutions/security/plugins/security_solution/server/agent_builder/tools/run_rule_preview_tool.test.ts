@@ -57,7 +57,7 @@ describe('runRulePreviewTool', () => {
   ]);
 
   const deps = {
-    config: {} as never,
+    config: { experimentalFeatures: { esqlRulesDisabled: false } } as never,
     ml: undefined,
     security: undefined,
     securityRuleTypeOptions: {} as never,
