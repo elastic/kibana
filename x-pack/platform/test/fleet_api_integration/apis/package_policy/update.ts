@@ -740,7 +740,7 @@ export default function (providerContext: FtrProviderContext) {
           .send(updatedPolicy)
           .expect(400);
         expect(body.message).eql(
-          'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
+          'Package policy dataset cannot be modified, please create a new package policy.'
         );
       });
 
