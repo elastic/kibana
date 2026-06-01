@@ -8,6 +8,7 @@
  */
 
 import { ReplaySubject, takeUntil } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type {
   ChromeProjectNavigationNode,
@@ -142,7 +143,18 @@ export class NavigationCustomizationService {
         computeMoves,
         onChange: (c) => chrome.project.setNavigationCustomization(c),
         onSave: (c) => {
-          core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c);
+          // The live nav was already updated optimistically via onChange. The
+          // server write can still fail (e.g. a read-only user lacks write
+          // access to the user-storage saved object), so surface a toast rather
+          // than letting the failure pass silently and the change vanish on the
+          // next page load.
+          core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c).catch((error: Error) => {
+            core.notifications.toasts.addError(error, {
+              title: i18n.translate('navigation.customization.saveErrorTitle', {
+                defaultMessage: 'Unable to save navigation customization',
+              }),
+            });
+          });
           closeModal();
         },
         onReset: () => {

@@ -9,6 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import {
   NAV_CUSTOMIZATION_STORAGE_KEY,
   NAV_CALLOUT_DISMISSED_STORAGE_KEY,
@@ -32,6 +33,26 @@ const SPACE_A = {
   id: 'nav-customization-space-a',
   name: 'Nav Customization Space A',
   disabledFeatures: [] as string[],
+};
+
+// Minimal (read-only) privileges in SPACE_A:
+// - discover/dashboard `read` so those nav items are visible and SAML login
+//   activates a user profile (so userStorage.isAvailable() is true and the
+//   "Customize navigation" link renders).
+// - Write access to the `user-storage` saved object type is only granted by a
+//   feature's `all` privilege, so this read-only user CANNOT persist a
+//   customization: the save (PUT /internal/user_storage/{key}) fails and the UI
+//   surfaces an error toast. That behavior is what the test below verifies.
+// - No ES index privileges are needed because the test stays on the home app.
+const MINIMAL_NAV_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { discover: ['read'], dashboard: ['read'] },
+      spaces: [SPACE_A.id],
+    },
+  ],
 };
 
 test.describe(
@@ -99,6 +120,41 @@ test.describe(
       await pageObjects.navigation.getCustomizeNavLink().click();
 
       await expect(pageObjects.navigation.getCustomizeNavModal()).toBeVisible();
+    });
+
+    /**
+     * Graceful-degradation test — a read-only user can open the customize modal
+     * (the link is gated on userStorage read availability) but cannot persist a
+     * change, because write access to the `user-storage` saved object is only
+     * granted by a feature's `all` privilege. When the save fails, the UI must
+     * surface an error toast rather than failing silently.
+     *
+     * 1. Hide Discover via the modal and apply.
+     * 2. The save (PUT /internal/user_storage/{key}) fails server-side.
+     * 3. Assert: an error toast titled "Unable to save navigation customization"
+     *    appears.
+     */
+    test('surfaces an error toast when a read-only user cannot persist a customization', async ({
+      browserAuth,
+      pageObjects,
+      kbnUrl,
+      page,
+    }) => {
+      const nav = pageObjects.navigation;
+
+      await browserAuth.loginWithCustomRole(MINIMAL_NAV_ROLE);
+      await page.goto(kbnUrl.app('home', { space: SPACE_A.id }));
+      await page.testSubj.locator('kbnChromeNav-primaryNavigation').waitFor({ state: 'visible' });
+
+      await nav.openCustomizeNavModal();
+      await nav.toggleItemVisibility('discover');
+      await nav.applyCustomization();
+
+      // The read-only user lacks write access to user-storage, so the save
+      // fails and an error toast is shown.
+      await expect(page.testSubj.locator('globalToastList')).toContainText(
+        'Unable to save navigation customization'
+      );
     });
   }
 );

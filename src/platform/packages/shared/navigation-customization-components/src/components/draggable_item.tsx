@@ -35,7 +35,11 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
     usePortal
   >
     {(provided) => (
-      <EuiPanel paddingSize="s" hasShadow={false}>
+      <EuiPanel
+        paddingSize="s"
+        hasShadow={false}
+        data-test-subj={`customizeNavigationItem-${item.id}`}
+      >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <div
@@ -66,6 +70,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
               showLabel={false}
               checked={!item.hidden}
               onChange={() => toggleItemVisibility(item.id)}
+              data-test-subj={`customizeNavigationItemToggle-${item.id}`}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
