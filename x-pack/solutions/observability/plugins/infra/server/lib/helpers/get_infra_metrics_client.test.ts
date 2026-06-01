@@ -22,8 +22,17 @@ const withExcludedDataTiers = (tiers: DataTier[]) => ({
 
 const mockedInfra = { getMetricsIndices: () => Promise.resolve(['*.indices']) };
 
+// Asserts the final `query` shape passed to `callWithRequest('search', …)`.
+// The client only wraps the caller's query in an extra `bool` when there is
+// an excluded-tier filter to apply; otherwise the query is passed through
+// untouched (no redundant Lucene rewrite layer).
 const infraMetricsTestHarness =
-  (tiers: DataTier[], input: QueryDslQueryContainer | undefined, expectedBool: any) => async () => {
+  (
+    tiers: DataTier[],
+    input: QueryDslQueryContainer | undefined,
+    expectedQuery: QueryDslQueryContainer | undefined
+  ) =>
+  async () => {
     const callWithRequest = jest.fn().mockResolvedValue({});
     const mockedCore = withExcludedDataTiers(tiers);
 
@@ -52,75 +61,151 @@ const infraMetricsTestHarness =
         track_total_hits: false,
         ignore_unavailable: true,
         index: ['*.indices'],
-        query: {
-          bool: expectedBool,
-        },
+        query: expectedQuery,
       },
       {}
     );
   };
 
 describe('getInfraMetricsClient', () => {
-  it(
-    'defines an empty bool query if given no data tiers to filter by and no query',
-    infraMetricsTestHarness([], undefined, {
-      filter: undefined,
-      must: [undefined],
-    })
-  );
+  describe('search', () => {
+    it(
+      'passes the query through untouched when there are no excluded data tiers and no query',
+      infraMetricsTestHarness([], undefined, undefined)
+    );
 
-  it(
-    'includes excluded data tiers in the request filter by default',
-    infraMetricsTestHarness(['data_frozen'], undefined, {
-      filter: [
+    it(
+      'passes the input query through untouched when there are no excluded data tiers',
+      infraMetricsTestHarness(
+        [],
+        { exists: { field: 'a-field' } },
+        { exists: { field: 'a-field' } }
+      )
+    );
+
+    it(
+      'wraps the query in a bool and includes excluded data tiers in the filter',
+      infraMetricsTestHarness(['data_frozen'], undefined, {
+        bool: {
+          filter: [
+            {
+              bool: {
+                must_not: [
+                  {
+                    terms: {
+                      _tier: ['data_frozen'],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [undefined],
+        },
+      })
+    );
+
+    it(
+      'merges the provided query into must alongside the excluded data tier filter',
+      infraMetricsTestHarness(
+        ['data_frozen'],
+        { exists: { field: 'a-field' } },
         {
           bool: {
-            must_not: [
+            filter: [
               {
-                terms: {
-                  _tier: ['data_frozen'],
+                bool: {
+                  must_not: [
+                    {
+                      terms: {
+                        _tier: ['data_frozen'],
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            must: [{ exists: { field: 'a-field' } }],
           },
-        },
-      ],
-      must: [undefined],
-    })
-  );
+        }
+      )
+    );
+  });
 
-  it(
-    'puts the input query in must if no excluded data tiers',
-    infraMetricsTestHarness(
-      [],
-      { exists: { field: 'a-field' } },
-      {
-        must: [{ exists: { field: 'a-field' } }],
-      }
-    )
-  );
+  describe('esql', () => {
+    const setup = async (tiers: DataTier[]) => {
+      const query = jest.fn().mockResolvedValue({
+        columns: [{ name: 'cpuUsage', type: 'double' }],
+        values: [[0.42]],
+      });
 
-  it(
-    'merges provided filters with the excluded data tier filter',
-    infraMetricsTestHarness(
-      ['data_frozen'],
-      { exists: { field: 'a-field' } },
-      {
-        filter: [
-          {
+      const mockedCore = {
+        ...withExcludedDataTiers(tiers),
+        elasticsearch: { client: { asCurrentUser: { esql: { query } } } },
+      };
+
+      const context = {
+        infra: Promise.resolve(mockedInfra),
+        core: Promise.resolve(mockedCore),
+      } as unknown as InfraPluginRequestHandlerContext;
+
+      const client = await getInfraMetricsClient({
+        libs: { framework: { callWithRequest: jest.fn() } } as unknown as InfraBackendLibs,
+        context,
+        request: {} as unknown as KibanaRequest,
+      });
+
+      return { client, query };
+    };
+
+    it('maps columns + values into row objects', async () => {
+      const { client, query } = await setup([]);
+
+      const result = await client.esql<{ cpuUsage: number }>({ query: 'FROM x | STATS …' });
+
+      expect(query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM x | STATS …', drop_null_columns: false })
+      );
+      expect(result.rows).toEqual([{ cpuUsage: 0.42 }]);
+    });
+
+    it('forwards the caller filter when there are no excluded data tiers', async () => {
+      const { client, query } = await setup([]);
+
+      await client.esql({
+        query: 'FROM x',
+        filter: { range: { '@timestamp': { gte: 'now-1h' } } },
+      });
+
+      expect(query).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: { range: { '@timestamp': { gte: 'now-1h' } } } })
+      );
+    });
+
+    it('merges the caller filter with the excluded data tier filter', async () => {
+      const { client, query } = await setup(['data_frozen']);
+
+      await client.esql({
+        query: 'FROM x',
+        filter: { range: { '@timestamp': { gte: 'now-1h' } } },
+      });
+
+      expect(query).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: {
             bool: {
-              must_not: [
+              filter: [
+                { range: { '@timestamp': { gte: 'now-1h' } } },
                 {
-                  terms: {
-                    _tier: ['data_frozen'],
+                  bool: {
+                    must_not: [{ terms: { _tier: ['data_frozen'] } }],
                   },
                 },
               ],
             },
           },
-        ],
-        must: [{ exists: { field: 'a-field' } }],
-      }
-    )
-  );
+        })
+      );
+    });
+  });
 });

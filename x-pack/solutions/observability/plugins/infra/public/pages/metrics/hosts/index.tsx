@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -19,8 +19,17 @@ import { HostsContainer } from './components/hosts_container';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostsTimeRangeMetadataProvider } from './hooks/use_hosts_metadata_provider';
 import { SearchBar } from './components/search_bar/search_bar';
+import { markOnce } from './utils/perf_marks';
 
 export const HostsPage = () => {
+  // Anchor for the first-paint performance measures (`tableReadyDuration`,
+  // `hostCountReadyDuration`, `kpiReadyDuration`). The KPI render path is
+  // regression-gated by the `infra_hosts_view_kpi` performance journey,
+  // which reads these `performance.measure` entries.
+  useEffect(() => {
+    markOnce('infra.hosts.navigationStart');
+  }, []);
+
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 

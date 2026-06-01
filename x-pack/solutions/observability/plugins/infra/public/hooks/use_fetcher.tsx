@@ -33,7 +33,9 @@ export interface FetcherOptions {
   reloadRequestTimeUpdateEnabled?: boolean;
 }
 
-type InferApiCallReturnType<Fn> = Fn extends (callApi: ApiCallClient) => Promise<infer R>
+type InferApiCallReturnType<Fn> = Fn extends (
+  callApi: ApiCallClient
+) => Promise<infer R> | undefined
   ? R
   : never;
 
@@ -118,7 +120,15 @@ function createInfraApiClient(
   }) as ApiCallClient;
 }
 
-export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Promise<TReturn>>(
+// The callback may synchronously return `undefined` to signal "do not
+// fetch yet". The runtime already guards on this below; the type widening
+// here makes the contract explicit so consumers can gate the request on
+// async-resolved prerequisites without firing a wasted dispatch. See the
+// `useHostsPageReady` gate consumed by the Hosts page hooks.
+export function useFetcher<
+  TReturn,
+  Fn extends (apiClient: ApiCallClient) => Promise<TReturn> | undefined
+>(
   fn: Fn,
   fnDeps: DependencyList = [],
   options: FetcherOptions = {}

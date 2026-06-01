@@ -4,149 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import type {
-  InfraEntityMetricType,
-  InfraEntityMetricsItem,
-} from '../../../../../../common/http_api';
-import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
-import { HostKpiCharts } from '../../../../../components/asset_details';
-import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { useHostCountContext } from '../../hooks/use_host_count';
-import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
-import {
-  MAX_AS_FIRST_FUNCTION_PATTERN,
-  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
-} from '../../../../../components/asset_details/constants';
 
-const HOST_KPI_METRICS: Record<string, InfraEntityMetricType> = {
-  cpuUsage: 'cpuV2',
-  normalizedLoad1m: 'normalizedLoad1m',
-  memoryUsage: 'memory',
-  diskUsage: 'diskSpaceUsage',
-};
+import React from 'react';
+import { HostKpiTiles } from './host_kpi_tiles';
 
-export const getMetricDataAvailability = (
-  hostNodes: InfraEntityMetricsItem[]
-): Record<string, boolean> =>
-  Object.fromEntries(
-    Object.entries(HOST_KPI_METRICS).map(([chartId, metricName]) => [
-      chartId,
-      hostNodes.some((hostNode) =>
-        hostNode.metrics?.some((metric) => metric.name === metricName && metric.value !== null)
-      ),
-    ])
-  );
-
-export const getSubtitle = ({
-  formulaValue,
-  limit,
-  hostCount,
-}: {
-  formulaValue: string;
-  limit: number;
-  hostCount: number;
-}) => {
-  // Check if 'max' is the first word/function in the formula
-  // Handles: "max(...)", "1 - max(...)", "100 * max(...)", etc.
-  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(formulaValue)) {
-    return limit < hostCount
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
-          defaultMessage: 'Max (of {limit} hosts)',
-          values: {
-            limit,
-          },
-        })
-      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
-          defaultMessage: 'Max',
-        });
-  }
-  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(formulaValue)) {
-    return limit < hostCount
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-          defaultMessage: 'Average (of {limit} hosts)',
-          values: {
-            limit,
-          },
-        })
-      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
-          defaultMessage: 'Average',
-        });
-  }
-  return limit < hostCount
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-        defaultMessage: 'of {limit} hosts',
-        values: {
-          limit,
-        },
-      })
-    : '';
-};
-
-export const KpiCharts = () => {
-  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
-  const { reloadRequestTime } = useReloadRequestTimeContext();
-  const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
-  const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
-  const { metricsView } = useMetricsDataViewContext();
-
-  const shouldUseSearchCriteria = hostNodes.length === 0;
-  const loading = hostsLoading || hostCountLoading;
-  const metricDataAvailability = useMemo(() => getMetricDataAvailability(hostNodes), [hostNodes]);
-
-  const filters = shouldUseSearchCriteria
-    ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
-    : [
-        buildCombinedAssetFilter({
-          field: 'host.name',
-          values: hostNodes.map((p) => p.name),
-          dataView: metricsView?.dataViewReference,
-        }),
-      ];
-
-  const getSubtitleFn = useMemo(() => {
-    return (formulaValue: string) =>
-      getSubtitle({
-        limit: searchCriteria.limit,
-        hostCount,
-        formulaValue,
-      });
-  }, [searchCriteria.limit, hostCount]);
-
-  // prevents requests and searchCriteria state from reloading the chart
-  // we want it to reload only once the table has finished loading.
-  // attributes passed to useAfterLoadedState don't need to be memoized.
-  //
-  // Use the resolved absolute timestamps (parsedDateRange) instead of the raw
-  // relative strings from searchCriteria.dateRange so that Lens queries the
-  // exact same window the table was populated from. This keeps KPIs consistent
-  // with the hosts table and prevents N/A when relative ranges drift between
-  // the two after the page has been idle.
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    dateRange: parsedDateRange,
-    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
-    filters,
-    reloadRequestTime,
-    getSubtitle: getSubtitleFn,
-  });
-
-  return (
-    <HostKpiCharts
-      dataView={metricsView?.dataViewReference}
-      dateRange={afterLoadedState.dateRange}
-      filters={afterLoadedState.filters}
-      query={afterLoadedState.query}
-      lastReloadRequestTime={afterLoadedState.reloadRequestTime}
-      getSubtitle={afterLoadedState.getSubtitle}
-      loading={loading}
-      error={error}
-      hasData={!!hostNodes.length}
-      metricDataAvailability={metricDataAvailability}
-      schema={searchCriteria.preferredSchema}
-    />
-  );
-};
+// Hosts page KPI strip — four headline tiles (CPU Usage, Normalized Load,
+// Memory Usage, Disk Usage). The values come from a single server-side
+// summary request (`POST /api/metrics/infra/host/kpis`, see
+// `host_kpi_tiles.tsx` / `use_hosts_kpis.ts`) instead of four parallel
+// Lens charts: one ES|QL `STATS` round-trip on semconv data, one DSL
+// search on ECS. The request fires in parallel with the `/host` table
+// fetch (both gated on `useHostsPageReady`), so user-perceived KPI
+// latency is `max(/host, /kpis)` rather than `/host + /kpis`.
+export const KpiCharts = () => <HostKpiTiles />;

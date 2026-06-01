@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -20,6 +20,12 @@ import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
+// First-paint double-fire gate. The same gate is used by `useHostCount`
+// and `useHostsKpis` so all three fetchers fire once after the unified
+// search context settles instead of twice — and so `/host` and
+// `/host/kpis` start in the same animation frame (max, not sum).
+import { useHostsPageReady } from './use_hosts_page_ready';
+import { markOnce, measureSince } from '../utils/perf_marks';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
@@ -44,6 +50,7 @@ export const useHostsView = () => {
     services: { telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const isReady = useHostsPageReady();
 
   const payload = useMemo(
     () =>
@@ -59,29 +66,47 @@ export const useHostsView = () => {
   );
 
   const { data, error, status } = useFetcher(
-    async (callApi) => {
-      const start = performance.now();
-      const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
-        `${BASE_INFRA_METRICS_PATH}/host`,
-        {
-          method: 'POST',
-          body: payload,
-        }
-      );
-      const duration = performance.now() - start;
-      telemetry.reportPerformanceMetricEvent(
-        'infra_hosts_table_load',
-        duration,
-        { key1: 'data_load', value1: duration },
-        { limit: searchCriteria.limit }
-      );
-      return metricsResponse;
+    (callApi) => {
+      // Return `undefined` until prerequisites settle so `useFetcher`
+      // skips the initial double-fire. See `useHostsPageReady`.
+      if (!isReady) return;
+      return (async () => {
+        const start = performance.now();
+        const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
+          `${BASE_INFRA_METRICS_PATH}/host`,
+          {
+            method: 'POST',
+            body: payload,
+          }
+        );
+        const duration = performance.now() - start;
+        telemetry.reportPerformanceMetricEvent(
+          'infra_hosts_table_load',
+          duration,
+          { key1: 'data_load', value1: duration },
+          { limit: searchCriteria.limit }
+        );
+        return metricsResponse;
+      })();
     },
-    [payload, searchCriteria.limit, telemetry]
+    [isReady, payload, searchCriteria.limit, telemetry]
   );
 
+  const loading = isPending(status);
+  const hasMarkedTableReadyRef = useRef(false);
+  const prevLoadingRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (prevLoadingRef.current === true && !loading && !hasMarkedTableReadyRef.current) {
+      markOnce('infra.hosts.tableReady');
+      measureSince('infra.hosts.tableReadyDuration', 'infra.hosts.navigationStart');
+      hasMarkedTableReadyRef.current = true;
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
+
   return {
-    loading: isPending(status),
+    loading,
     error,
     hostNodes: data?.nodes ?? [],
   };

@@ -6,9 +6,8 @@
  */
 
 import {
-  BooleanRelation,
-  buildCombinedFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
@@ -16,6 +15,20 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
+/**
+ * Build a filter that matches when `field` is one of `values` (`field IN
+ * values`).
+ *
+ * We emit a single `terms` clause rather than an `OR` of `match_phrase`
+ * filters: at scale (e.g. the Hosts UI with up to 500 host names) the
+ * `bool.should` shape forces Elasticsearch to rewrite into a disjunction of
+ * N `TermQuery` instances, while a `terms` clause becomes a single
+ * `TermInSetQuery` and runs materially faster on keyword fields.
+ *
+ * The `meta` is built via `buildPhrasesFilter` so the filter bar still
+ * renders the familiar "field is one of [...]" pill with the full value
+ * list.
+ */
 export const buildCombinedAssetFilter = ({
   field,
   values,
@@ -26,19 +39,20 @@ export const buildCombinedAssetFilter = ({
   dataView?: DataView;
 }) => {
   const indexField = dataView?.getFieldByName(field);
+
+  const termsQuery = { terms: { [field]: values } };
+
   if (!dataView || !indexField) {
     return {
-      query: {
-        terms: {
-          [field]: values,
-        },
-      },
+      query: termsQuery,
       meta: {},
     };
   }
 
-  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
-  return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
+  return {
+    ...buildPhrasesFilter(indexField, values, dataView),
+    query: termsQuery,
+  };
 };
 
 export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = []) => {

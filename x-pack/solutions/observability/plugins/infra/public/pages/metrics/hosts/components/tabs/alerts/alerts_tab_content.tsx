@@ -44,7 +44,13 @@ export const AlertsTabContent = () => {
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+  // KQL `host.name: (a or b or c)` compiles to a single terms-style clause,
+  // which is materially cheaper than emitting one `match_phrase` per host
+  // name when the table is at 500-host capacity. Same semantics as the
+  // per-host OR'd form it replaces.
+  const hostNamesKuery = hostNodes.length
+    ? `host.name: (${hostNodes.map((host) => `"${host.name}"`).join(' or ')})`
+    : '';
 
   const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 
