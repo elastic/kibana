@@ -179,25 +179,22 @@ FROM ${indexName}
       for (const record of response.records) {
         const id = record['entity.id'];
         if (!id) continue;
-        if (!result.has(id)) {
-          // First-seen wins; entity.id should be unique but may appear across namespaces
-          const rawHostIp = record['host.ip'];
-          const hostIps =
-            rawHostIp != null
-              ? Array.isArray(rawHostIp)
-                ? rawHostIp.map(String)
-                : [String(rawHostIp)]
-              : [];
-          const sourceFields = buildSourceFields(id, record);
-          result.set(id, {
-            name: record['entity.name'] ?? null,
-            type: record['entity.type'] ?? null,
-            subType: record['entity.sub_type'] ?? null,
-            engineType: record['entity.EngineMetadata.Type'] ?? null,
-            hostIps,
-            ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
-          });
-        }
+        const rawHostIp = record['host.ip'];
+        const hostIps =
+          rawHostIp != null
+            ? Array.isArray(rawHostIp)
+              ? rawHostIp.map(String)
+              : [String(rawHostIp)]
+            : [];
+        const sourceFields = buildSourceFields(id, record);
+        result.set(id, {
+          name: record['entity.name'] ?? null,
+          type: record['entity.type'] ?? null,
+          subType: record['entity.sub_type'] ?? null,
+          engineType: record['entity.EngineMetadata.Type'] ?? null,
+          hostIps,
+          ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
+        });
       }
     })
   );

@@ -324,40 +324,6 @@ describe('fetchEntityEnrichment', () => {
     expect(result.get('host:myhost')?.hostIps).toEqual(['192.168.1.1', '10.0.0.1']);
   });
 
-  it('first-seen value wins when entity.id appears twice', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
-        records: [
-          {
-            'entity.id': 'user:alice',
-            'entity.name': 'First Alice',
-            'entity.type': 'user',
-            'entity.sub_type': null,
-            'entity.EngineMetadata.Type': null,
-            'host.ip': null,
-          },
-          {
-            'entity.id': 'user:alice',
-            'entity.name': 'Second Alice',
-            'entity.type': 'user',
-            'entity.sub_type': null,
-            'entity.EngineMetadata.Type': null,
-            'host.ip': null,
-          },
-        ],
-      }),
-    });
-
-    const result = await fetchEntityEnrichment({
-      esClient,
-      logger,
-      entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
-    });
-    expect(result.get('user:alice')?.name).toBe('First Alice');
-  });
-
   it('uses parameterized query format', async () => {
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({ records: [] }),
