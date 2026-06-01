@@ -186,6 +186,99 @@ describe('console parser', () => {
     ]);
   });
 
+  describe('request-line method boundary', () => {
+    // The first token of a request line must have one canonical method
+    // interpretation. A valid method prefix followed by non-whitespace
+    // characters (e.g. `GETT`, `POSTS`, `PUThjjkjoj`) must not be silently
+    // accepted as the matching method with a malformed url tail.
+    const methodBoundaryError = 'Expected one of GET/POST/PUT/DELETE/HEAD/PATCH';
+
+    it('rejects a valid method prefix followed by extra letters (`GETT _search`)', () => {
+      const { errors } = parser('GETT _search')!;
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0].text).toBe(methodBoundaryError);
+    });
+
+    it('rejects a valid method prefix followed by an `S` suffix (`POSTS _search`)', () => {
+      const { errors } = parser('POSTS _search')!;
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0].text).toBe(methodBoundaryError);
+    });
+
+    it('rejects a method with arbitrary trailing characters (`PUThjjkjoj /my-index`)', () => {
+      const { errors } = parser('PUThjjkjoj /my-index')!;
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0].text).toBe(methodBoundaryError);
+    });
+
+    it('recovers and continues parsing the next request after an invalid method line', () => {
+      const input = 'GETT _search\nPOST _bulk';
+      const { requests, errors } = parser(input)!;
+      // First request is invalid: errors are recorded
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0].text).toBe(methodBoundaryError);
+      // Second request is parsed correctly
+      const validRequest = requests.find(
+        (r) => r.endOffset !== undefined && r.endOffset >= 'GETT _search\n'.length
+      );
+      expect(validRequest).toBeDefined();
+    });
+
+    it('marks every consecutive invalid-method-prefix line, not only the first', () => {
+      const input = 'PUThjjkjoj /my-index\nGETT _search\nPOSTS _bulk\nGET _ok';
+      const { requests, errors } = parser(input)!;
+      // Each of the three invalid-prefix lines must produce its own marker
+      // so users see them all, not only the first one.
+      const boundaryErrors = errors.filter((e) => e.text === methodBoundaryError);
+      expect(boundaryErrors.length).toBe(3);
+      // The final valid request must also be captured despite the preceding
+      // boundary errors.
+      const validRequest = requests.find(
+        (r) =>
+          r.startOffset === 'PUThjjkjoj /my-index\nGETT _search\nPOSTS _bulk\n'.length &&
+          r.endOffset !== undefined
+      );
+      expect(validRequest).toBeDefined();
+    });
+
+    // The boundary is "next character separates the method from the URL/body".
+    // These tables lock in which inputs are accepted vs rejected.
+    it.each([
+      ['GET_index', 'underscore'],
+      ['GET2 _x', 'digit'],
+      ['GETSomething', 'letter'],
+      ['HEADX _x', 'letter'],
+      ['DELETEX _x', 'letter'],
+      ['PATCHX _x', 'letter'],
+      ['GET/_search', 'slash'],
+      ['GET?q=1', 'question mark'],
+      ['GET-foo', 'dash'],
+      ['GET*', 'star'],
+    ])('rejects invalid method boundary: %s (%s)', (input) => {
+      const { errors } = parser(input)!;
+      expect(errors.length).toBe(1);
+      expect(errors[0].text).toBe(methodBoundaryError);
+      expect(errors[0].offset).toBe(0);
+      expect(errors[0].endOffset).toBe(input.split(/[ \t\r\n]/)[0].length);
+    });
+
+    it.each([
+      ['GET _search', 'space'],
+      ['GET\t_search', 'tab'],
+      ['GET', 'end-of-input'],
+    ])('accepts request-line separator after method: %s (%s)', (input) => {
+      const { errors, requests } = parser(input)!;
+      expect(errors.filter((e) => e.text === methodBoundaryError)).toEqual([]);
+      expect(requests.length).toBe(1);
+    });
+
+    it('does not falsely flag a method whose url contains identifier chars (`GET _index_internal`)', () => {
+      const { errors, requests } = parser('GET _index_internal')!;
+      expect(errors).toEqual([]);
+      expect(requests.length).toBe(1);
+    });
+  });
+
   it('handles # and // comment lines between requests', () => {
     const input = '# c\nGET _search\n// c2\nPOST _test';
     const { requests, errors } = parser(input)!;
