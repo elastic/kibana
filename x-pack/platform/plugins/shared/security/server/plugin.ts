@@ -362,6 +362,7 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      serverlessProjectId: cloud?.serverless?.projectId,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
