@@ -7,7 +7,7 @@ source .buildkite/scripts/common/util.sh
 FALLOW_VERSION="2.76.0"
 FALLOW_OWNERS=("@elastic/search-kibana" "@elastic/workchat-eng")
 
-# Extract section body for a specific owner from grouped human output.
+# Extract dead code section body for a specific owner.
 # Stops at the next owner section or the health score table.
 extract_owner_section() {
   local output="$1"
@@ -22,7 +22,7 @@ extract_owner_section() {
      found { print }'
 }
 
-# Extract count summary from the section header line,
+# Extract count summary from the dead code section header line,
 # e.g. "@elastic/workchat-eng (46 issues: 31 exports · 13 types)" → "(46 issues: 31 exports · 13 types)"
 extract_owner_count() {
   local output="$1"
@@ -44,6 +44,21 @@ extract_owner_health_section() {
      found && /^@elastic\// { found=0 }
      found && /^\(unowned\)/ { found=0 }
      found { print }'
+}
+
+# Extract health score summary from the per-owner health section header line,
+# e.g. "@elastic/search-kibana (score: B, 72/100)" → "(score: B, 72/100)"
+extract_owner_health_header() {
+  local output="$1"
+  local owner="$2"
+  printf '%s\n' "$output" | awk \
+    -v owner="${owner}" \
+    '/^● Per-owner health/{in_health=1; next}
+     in_health && $0 ~ ("^" owner "[ (]") {
+       match($0, /\([^)]+\)/)
+       if (RSTART) print substr($0, RSTART, RLENGTH)
+       exit
+     }'
 }
 
 
@@ -70,7 +85,8 @@ echo "  search-kibana: npx fallow dead-code --workspace 'x-pack/solutions/search
 echo "  workchat-eng:  npx fallow dead-code --workspace 'src/platform/packages/shared/kbn-connector-specs/**' --production"
 echo ""
 echo "See hotspots for your team:"
-echo "  npx fallow health --workspace 'x-pack/solutions/search/**'"
+echo "  search-kibana: npx fallow health --workspace 'x-pack/solutions/search/**'"
+echo "  workchat-eng:  npx fallow health --workspace 'src/platform/packages/shared/kbn-connector-specs/**'"
 set +e
 # shellcheck disable=SC2086
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
@@ -83,20 +99,18 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   2>&1)
 set -e
 
-echo "--- Dead code"
 for owner in "${FALLOW_OWNERS[@]}"; do
-  echo "+++ ${owner}"
+  echo "--- ${owner}"
+
+  echo "+++ Dead code"
   section=$(extract_owner_section "$FALLOW_OUTPUT" "$owner")
   if [ -n "$section" ]; then
     echo "$section"
   else
     echo "No issues found"
   fi
-done
 
-echo "--- Complexity hotspots"
-for owner in "${FALLOW_OWNERS[@]}"; do
-  echo "+++ ${owner}"
+  echo "+++ Complexity hotspots"
   health=$(extract_owner_health_section "$FALLOW_OUTPUT" "$owner")
   if [ -n "$health" ]; then
     echo "$health"
@@ -107,15 +121,21 @@ done
 
 echo "--- Post Buildkite annotation"
 
-ANNOTATION="**Code Quality** · dead code · duplication\n\n"
+ANNOTATION="**Code Quality** · dead code · complexity\n\n"
 for owner in "${FALLOW_OWNERS[@]}"; do
   count=$(extract_owner_count "$FALLOW_OUTPUT" "$owner")
+  health_header=$(extract_owner_health_header "$FALLOW_OUTPUT" "$owner")
   team_short="${owner#@elastic/}"
+  line="- **${team_short}**:"
   if [ -n "$count" ]; then
-    ANNOTATION+="- **${team_short}**: ${count}\n"
+    line+=" dead code ${count}"
   else
-    ANNOTATION+="- **${team_short}**: no dead code\n"
+    line+=" no dead code"
   fi
+  if [ -n "$health_header" ]; then
+    line+=" · health ${health_header}"
+  fi
+  ANNOTATION+="${line}\n"
 done
 
 buildkite-agent annotate --style info --context fallow-report "$(printf "%b" "$ANNOTATION")"
