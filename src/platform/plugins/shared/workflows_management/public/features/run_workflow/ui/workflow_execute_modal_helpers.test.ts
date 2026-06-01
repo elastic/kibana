@@ -13,7 +13,9 @@ import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers'
 import {
   buildDefaultTriggerEventSearchQuery,
   buildWorkflowTriggerScopeKql,
+  ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
+  getVisibleWorkflowTriggerTabs,
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
   isDefaultTriggerEventSearchScope,
@@ -156,6 +158,36 @@ describe('buildDefaultTriggerEventSearchQuery', () => {
   });
 });
 
+describe('getVisibleWorkflowTriggerTabs', () => {
+  it('returns all tabs when the workflow has no triggers', () => {
+    expect(getVisibleWorkflowTriggerTabs(null)).toEqual([
+      'alert',
+      'index',
+      'event',
+      'manual',
+      'historical',
+    ]);
+  });
+
+  it('returns alert, manual, and historical for alert-only workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] })
+    ).toEqual(['alert', 'manual', 'historical']);
+  });
+
+  it('returns document, manual, and historical for manual-only workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'manual' }] })
+    ).toEqual(['index', 'manual', 'historical']);
+  });
+
+  it('returns event, manual, and historical for custom event-driven workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs(workflowWithExtensionTriggers([{ type: 'cases.created' }]))
+    ).toEqual(['event', 'manual', 'historical']);
+  });
+});
+
 describe('getFallbackTriggerTab', () => {
   const normalizedWithOneField: NormalizedWorkflowInputs = normalizeFieldsToJsonSchema([
     { name: 'x', type: 'string', required: true },
@@ -182,6 +214,38 @@ describe('getFallbackTriggerTab', () => {
   });
 });
 
+describe('ensureSelectedTriggerTabVisible', () => {
+  const allEnabled = {
+    hasAlertRacAccess: true,
+    canReadWorkflowExecution: true,
+    eventDrivenExecutionEnabled: true,
+  };
+
+  it('keeps the selected tab when it is visible and enabled', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('manual', ['alert', 'manual', 'historical'], allEnabled)
+    ).toBe('manual');
+  });
+
+  it('chooses the first visible enabled tab when the selected tab is not visible', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['alert', 'manual', 'historical'], {
+        ...allEnabled,
+        hasAlertRacAccess: false,
+      })
+    ).toBe('manual');
+  });
+
+  it('skips event when execution read is denied', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['event', 'manual', 'historical'], {
+        ...allEnabled,
+        canReadWorkflowExecution: false,
+      })
+    ).toBe('manual');
+  });
+});
+
 describe('resolveInitialSelectedTrigger', () => {
   const customOnly = workflowWithExtensionTriggers([{ type: 'example.custom_trigger' }]);
 
@@ -191,10 +255,22 @@ describe('resolveInitialSelectedTrigger', () => {
     );
   });
 
-  it('falls back when custom triggers exist but execution read is denied', () => {
+  it('falls back to manual when custom triggers exist but execution read is denied', () => {
     expect(resolveInitialSelectedTrigger(customOnly, undefined, true, false, undefined)).toBe(
-      'index'
+      'manual'
     );
+  });
+
+  it('falls back to manual for alert-only workflows without RAC access', () => {
+    expect(
+      resolveInitialSelectedTrigger(
+        { ...baseDefinition, triggers: [{ type: 'alert' }] },
+        undefined,
+        false,
+        true,
+        undefined
+      )
+    ).toBe('manual');
   });
 
   it('prefers alert when an alert trigger exists alongside custom triggers', () => {
