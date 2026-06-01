@@ -13,7 +13,7 @@ spaceTest.describe(
   'GenAI Settings - Page Display without Agent Builder Privileges',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
       ...tags.serverless.search,

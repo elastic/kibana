@@ -15,7 +15,7 @@ spaceTest.describe(
   'GenAI Settings - Documentation Section',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],
