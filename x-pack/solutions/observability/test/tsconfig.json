@@ -55,7 +55,6 @@
     "@kbn/profiling-data-access-plugin",
     "@kbn/alerting-comparators",
     "@kbn/logging",
-    "@kbn/core-saved-objects-server",
     "@kbn/data-forge",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/inference-common",
