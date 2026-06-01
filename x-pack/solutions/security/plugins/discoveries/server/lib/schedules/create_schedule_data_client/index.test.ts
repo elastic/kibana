@@ -57,7 +57,7 @@ describe('createScheduleDataClient', () => {
     );
   });
 
-  it('creates an AttackDiscoveryScheduleDataClient with filterTags that only include the schedule tag', async () => {
+  it('does not set a filterTags include filter so the internal API surfaces both its own and legacy (untagged) schedules', async () => {
     await createScheduleDataClient({
       alertingContext: mockAlertingContext,
       logger: mockLogger,
@@ -65,11 +65,11 @@ describe('createScheduleDataClient', () => {
       startPlugins: mockStartPlugins,
     });
 
-    expect(AttackDiscoveryScheduleDataClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filterTags: { includeTags: [ATTACK_DISCOVERY_SCHEDULE_TAG] },
-      })
-    );
+    // Migration continuity: schedules created while the feature flag was off
+    // are untagged and must remain visible once the flag is on, so the internal
+    // API must not filter by tag at find time.
+    const [params] = (AttackDiscoveryScheduleDataClient as jest.Mock).mock.calls[0];
+    expect(params.filterTags).toBeUndefined();
   });
 
   it('passes the rules client obtained from alertingContext', async () => {
