@@ -280,13 +280,13 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
               <EuiPopover
                 button={
                   <EuiToolTip
-                    content={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                    content={i18n.translate('xpack.ml.timeSeriesExplorer.controlsActionsTooltip', {
                       defaultMessage: 'Actions',
                     })}
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
-                      aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                      aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.controlsActionsAriaLabel', {
                         defaultMessage: 'Actions',
                       })}
                       color="text"

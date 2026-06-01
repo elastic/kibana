@@ -58,9 +58,9 @@ export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
               iconType="cross"
               size="s"
               aria-label={i18n.translate(
-                'xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel',
+                'xpack.ml.newJob.wizard.pickFieldsStep.deleteButtonAriaLabel',
                 {
-                  defaultMessage: 'Next',
+                  defaultMessage: 'Delete',
                 }
               )}
             />
