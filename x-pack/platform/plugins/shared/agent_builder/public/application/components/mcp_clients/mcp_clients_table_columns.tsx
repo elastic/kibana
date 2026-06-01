@@ -17,9 +17,9 @@ import {
 import type { OAuthClient } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
+import { McpClientLogo } from '@kbn/agent-builder-browser';
 import { useMcpClientsActions } from '../../context/mcp_clients_provider';
 import { labels } from '../../utils/i18n';
-import { McpClientLogo } from './mcp_client_logo';
 import { McpClientStatusIndicator } from './mcp_client_status_indicator';
 import { McpClientActionsMenu } from './mcp_client_actions_button';
 

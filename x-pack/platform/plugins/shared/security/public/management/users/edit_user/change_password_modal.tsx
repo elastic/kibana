@@ -237,7 +237,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
               >
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="user" />
+                    <EuiIcon type="user" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiSpacer size="xs" />
