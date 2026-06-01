@@ -9,7 +9,6 @@
 
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { ListingTable } from './listing_table';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 
@@ -29,7 +28,6 @@ interface TimeoutOptions {
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
-  private readonly listingTable: ListingTable;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -75,7 +73,6 @@ export class DashboardApp {
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
-    this.listingTable = new ListingTable(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
