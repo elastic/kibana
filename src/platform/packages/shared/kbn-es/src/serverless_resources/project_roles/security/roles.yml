@@ -19,7 +19,6 @@ viewer:
         - '.alerts*'
         - '.preview.alerts*'
         - '.adhoc.alerts*'
-        - '.internal.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -196,7 +195,6 @@ t1_analyst:
         - '.alerts-security*'
         - '.siem-signals-*'
         - '.adhoc.alerts-security*'
-        - '.internal.adhoc.alerts-security*'
       privileges:
         - read
         - write
@@ -267,7 +265,6 @@ t2_analyst:
         - .alerts-security*
         - .siem-signals-*
         - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -359,7 +356,6 @@ t3_analyst:
         - .alerts-security*
         - .siem-signals-*
         - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -463,7 +459,6 @@ threat_intelligence_analyst:
         - .alerts-security*
         - .siem-signals-*
         - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write

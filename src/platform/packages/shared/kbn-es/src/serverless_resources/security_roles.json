@@ -8,8 +8,7 @@
           "names": [
             ".alerts-security*",
             ".siem-signals-*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*"
+            ".adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
@@ -91,8 +90,7 @@
           "names": [
             ".alerts-security*",
             ".siem-signals-*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*"
+            ".adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
@@ -194,8 +192,7 @@
           "names": [
             ".alerts-security*",
             ".siem-signals-*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*"
+            ".adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
