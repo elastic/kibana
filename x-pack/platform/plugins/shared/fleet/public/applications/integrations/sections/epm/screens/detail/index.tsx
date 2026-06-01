@@ -71,7 +71,6 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { PermissionsError } from '../../../../../fleet/layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
-import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
@@ -164,8 +163,6 @@ export function Detail() {
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
-  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
-    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
   const isOverviewPage = panel === 'overview';
 
@@ -254,8 +251,6 @@ export function Detail() {
     setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
   }, [packageInfoLatestPrereleaseData?.item.version]);
 
-  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
@@ -272,10 +267,7 @@ export function Detail() {
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
   const isLoading =
-    packageInfoLoading ||
-    isPermissionCheckLoading ||
-    firstTimeUserLoading ||
-    !packageInfoIsFetchedAfterMount;
+    packageInfoLoading || isPermissionCheckLoading || !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
@@ -409,13 +401,16 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
         isCloud,
-        isExperimentalAddIntegrationPageEnabled,
-        isFirstTimeAgentUser,
         isGuidedOnboardingActive,
         pkgkey,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
@@ -451,8 +446,6 @@ export function Detail() {
       isAgentlessIntegration,
       isAgentlessDefault,
       isCloud,
-      isExperimentalAddIntegrationPageEnabled,
-      isFirstTimeAgentUser,
       isGuidedOnboardingActive,
       returnAppId,
       returnPath,
