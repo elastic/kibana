@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sha256 } from 'js-sha256';
+import { createHash } from 'crypto';
 import type {
   QueryDslQueryContainer,
   Duration,
@@ -137,7 +137,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
 
   private createId(resource: CreateRuleMigrationResourceInput): string {
     const key = `${resource.migration_id}-${resource.type}-${resource.name}`;
-    return sha256.create().update(key).hex();
+    return createHash('sha256').update(key).digest('hex');
   }
 
   private getFilterQuery(
