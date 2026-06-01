@@ -117,8 +117,23 @@ export interface AppHeaderMetadataHealthItem {
 }
 
 /** @public */
+export type AppHeaderTitleSaveResult = string | void;
+
+/** @public */
+export interface AppHeaderEditableTitle {
+  text: string;
+  onSave: (nextTitle: string) => AppHeaderTitleSaveResult | Promise<AppHeaderTitleSaveResult>;
+  ariaLabel?: string;
+  /** Muted hint shown when the title is empty (read mode) and as the input placeholder (edit mode). */
+  placeholder?: string;
+}
+
+/** @public */
+export type AppHeaderTitle = string | AppHeaderEditableTitle;
+
+/** @public */
 export interface AppHeaderConfig {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];

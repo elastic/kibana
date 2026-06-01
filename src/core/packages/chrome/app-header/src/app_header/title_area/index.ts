@@ -7,20 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderBadgeItem,
-  AppHeaderConfig,
-  AppHeaderEditableTitle,
-  AppHeaderMetadataButtonItem,
-  AppHeaderMetadataHealthItem,
-  AppHeaderMetadataItem,
-  AppHeaderMetadataItems,
-  AppHeaderMetadataTextItem,
-  AppHeaderTab,
-  AppHeaderTitle,
-  AppHeaderTitleSaveResult,
-  ChromeNext,
-} from './chrome_next';
-export type { GlobalSearchConfig } from './global_search';
+export { TitleArea } from './title_area';
+export type { TitleAreaProps } from './title_area';
