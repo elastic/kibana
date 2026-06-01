@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
+/**
+ * Purpose: Verifies file upload wizard
+ *
+ * Migration: Duplicate of geojson.js tests. Remove
+ */
 export default function ({ getPageObjects, getService }) {
   const { geoFileUpload, maps } = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
