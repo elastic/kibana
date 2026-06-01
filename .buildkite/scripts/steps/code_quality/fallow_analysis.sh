@@ -6,8 +6,6 @@ source .buildkite/scripts/common/util.sh
 
 FALLOW_VERSION="2.76.0"
 FALLOW_OWNERS=("@elastic/search-kibana" "@elastic/workchat-eng")
-SNAPSHOT_FILE="fallow-snapshot.json"
-SNAPSHOT_DIR=".fallow/snapshots"
 
 # Extract section body for a specific owner from grouped human output.
 # Stops at the next owner section or the health score table.
@@ -52,20 +50,6 @@ extract_owner_health() {
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
 
-# Snapshot: save only from the weekly standalone pipeline, not PR runs.
-# Trend comparison will be added once weekly pipeline is running.
-IS_WEEKLY_PIPELINE=false
-if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ]; then
-  IS_WEEKLY_PIPELINE=true
-fi
-
-SAVE_SNAPSHOT_FLAG=""
-if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
-  mkdir -p "$SNAPSHOT_DIR"
-  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
-  echo "Weekly pipeline — snapshot will be saved after analysis"
-fi
-
 echo "--- Run fallow analysis"
 echo "Checks: dead code (unused exports/types/files) · duplication · complexity hotspots"
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, production files only)"
@@ -80,14 +64,12 @@ echo ""
 echo "See hotspots for your team:"
 echo "  npx fallow health --workspace 'x-pack/solutions/search/**'"
 set +e
-# shellcheck disable=SC2086
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
   --production-dead-code \
   --format human \
   --quiet \
   --score \
-  $SAVE_SNAPSHOT_FLAG \
   2>&1)
 set -e
 
@@ -105,11 +87,6 @@ done
 echo "--- Health scores (complexity + maintainability, 0-100)"
 echo "Columns: score | grade | files analyzed | hotspots (high complexity + high churn) | p90 cyclomatic"
 printf '%s\n' "$FALLOW_OUTPUT" | awk '/^● Per-owner health/,0'
-
-if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
-  echo "--- Save snapshot for next run"
-  buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
-fi
 
 echo "--- Post Buildkite annotation"
 
