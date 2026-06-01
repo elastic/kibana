@@ -73,7 +73,6 @@ export const PlotByFunctionControls = ({
         toastNotificationService,
         mlResultsService
       );
-      console.log('functionToPlot: ', functionToPlot);
       setFunctionDescription(functionToPlot);
     },
     [setFunctionDescription, toastNotificationService, mlResultsService]
