@@ -120,7 +120,7 @@ The token map is **call-scoped state owned by the inference plugin** for the dur
 | Constraint        | Requirement                                                                                                         |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
 | **Size cap**      | Hard limit on entries per call (e.g. 10k); exceed → fail-closed with actionable error                               |
-| **Log redaction** | `tokenMap` values (originals) **must never** appear in workflow event logs, APM attributes, EBT, or server logs     |
+| **Log redaction** | `tokenMap` values (originals) and `salt` **must never** appear in workflow event logs, APM attributes, EBT, or server logs. `salt` enables confirmation attacks (enumerate candidate values, compute token, match against known tokens from anonymized text) even though it cannot directly reverse a token. The `StepDispatcher` log redaction policy must strip both fields from step input/output payloads before write. |
 | **Serialization** | By-value only within one process; no cross-node handoff without a separate encrypted ephemeral store (out of scope) |
 | **Schema**        | `tokenMap: Record<token, { original, entityClass }>` — declared on trigger `outputSchema` / `eventSchema`           |
 
