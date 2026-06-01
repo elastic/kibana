@@ -39,10 +39,9 @@ const SPACE_A = {
 // - discover/dashboard `read` so those nav items are visible and SAML login
 //   activates a user profile (so userStorage.isAvailable() is true and the
 //   "Customize navigation" link renders).
-// - Write access to the `user-storage` saved object type is only granted by a
-//   feature's `all` privilege, so this read-only user CANNOT persist a
-//   customization: the save (PUT /internal/user_storage/{key}) fails and the UI
-//   surfaces an error toast. That behavior is what the test below verifies.
+// - `applyAutomaticReadPrivilegeGrants` grants every read privilege write access
+//   to the `user-storage` / `user-storage-global` saved object types, so even
+//   this read-only user can persist navigation customizations.
 // - No ES index privileges are needed because the test stays on the home app.
 const MINIMAL_NAV_ROLE: KibanaRole = {
   elasticsearch: { cluster: [] },
@@ -126,18 +125,19 @@ test.describe(
     });
 
     /**
-     * Graceful-degradation test — a read-only user can open the customize modal
-     * (the link is gated on userStorage read availability) but cannot persist a
-     * change, because write access to the `user-storage` saved object is only
-     * granted by a feature's `all` privilege. When the save fails, the UI must
-     * surface an error toast rather than failing silently.
+     * Persistence test — a read-only user can customize and persist navigation.
+     *
+     * `applyAutomaticReadPrivilegeGrants` grants write access to `user-storage`
+     * for every feature `read` privilege, so customizations survive a page reload
+     * even for minimally-privileged users.
      *
      * 1. Hide Discover via the modal and apply.
-     * 2. The save (PUT /internal/user_storage/{key}) fails server-side.
-     * 3. Assert: an error toast titled "Unable to save navigation customization"
-     *    appears.
+     * 2. The save (PUT /internal/user_storage/{key}) succeeds.
+     * 3. Reload the page.
+     * 4. Assert: Discover is still hidden from the primary nav, and Dashboards
+     *    is the first visible item (it was directly below Discover for this user).
      */
-    test('surfaces an error toast when a read-only user cannot persist a customization', async ({
+    test('persists navigation customizations across reloads for a read-only user', async ({
       browserAuth,
       pageObjects,
       kbnUrl,
@@ -149,14 +149,30 @@ test.describe(
       await page.goto(kbnUrl.app('home', { space: SPACE_A.id }));
       await page.testSubj.locator('kbnChromeNav-primaryNavigation').waitFor({ state: 'visible' });
 
+      // Hide Discover and save — applyCustomization awaits the PUT response
+      // before returning, so the customization is persisted before we reload.
       await nav.openCustomizeNavModal();
       await nav.toggleItemVisibility('discover');
       await nav.applyCustomization();
 
-      // The read-only user lacks write access to user-storage, so the save
-      // fails and an error toast is shown.
-      await expect(page.testSubj.locator('globalToastList')).toContainText(
-        'Unable to save navigation customization'
+      // Reload and re-assert. The discover link should remain hidden from the
+      // primary nav, confirming the customization was persisted server-side.
+      await page.reload();
+      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
+      await primaryNav.waitFor({ state: 'visible' });
+
+      // Discover is no longer in the primary nav.
+      await expect(
+        primaryNav.locator('[data-test-subj~="nav-item-id-discover"]')
+      ).not.toBeVisible();
+
+      // Dashboards is now the top link in the primary nav — visible in the strip
+      // rather than pushed into the More overflow, and the first item rendered.
+      const dashboardsItem = primaryNav.locator('[data-test-subj~="nav-item-id-dashboards"]');
+      await expect(dashboardsItem).toBeVisible();
+      await expect(primaryNav.locator('[data-test-subj~="nav-item"]').first()).toHaveAttribute(
+        'data-test-subj',
+        /nav-item-id-dashboards/
       );
     });
   }
