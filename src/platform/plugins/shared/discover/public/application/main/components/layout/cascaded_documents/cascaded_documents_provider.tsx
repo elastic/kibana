@@ -13,7 +13,7 @@ import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
@@ -32,6 +32,7 @@ export type CascadedDocumentsDataGridUiStateMap = Record<
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
+  cascadedColumnsMeta: DataTableColumnsMeta;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
@@ -48,7 +49,7 @@ export interface CascadedDocumentsContext
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
 }
 
 const cascadedDocumentsContext = createContext<CascadedDocumentsContext | undefined>(undefined);

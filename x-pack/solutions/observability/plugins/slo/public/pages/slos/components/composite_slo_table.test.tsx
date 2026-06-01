@@ -81,8 +81,11 @@ const buildCompositeSloDetails = (
       weight: 1,
       normalisedWeight: 1,
       sliValue: 0.995,
-      contribution: 0.995,
       status: 'HEALTHY',
+      errorBudget: { initial: 0.01, consumed: 0.005, remaining: 0.5, isEstimated: false },
+      fiveMinuteBurnRate: 1.2,
+      oneHourBurnRate: 0.8,
+      oneDayBurnRate: 0.6,
     },
   ],
   ...overrides,
@@ -114,7 +117,7 @@ describe('CompositeSloTable', () => {
         uiSettings: {
           get: (key: string) => (key === 'format:percent:defaultPattern' ? '0.0%' : ''),
         },
-        application: { navigateToUrl: jest.fn() },
+        application: { navigateToApp: jest.fn() },
         http: { basePath: { prepend: (url: string) => url } },
         share: {
           url: {
@@ -248,10 +251,14 @@ describe('CompositeSloTable', () => {
   });
 
   describe('active alerts column', () => {
+    const activeAlertsButtonName = 'View active alerts in a new browser tab';
+
     it('does not show an alert badge when there are no active alerts', () => {
       const item = buildCompositeSloItem();
       render(<CompositeSloTable {...defaultTableProps} results={[item]} total={1} />);
-      expect(screen.queryByLabelText('active alerts badge')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: activeAlertsButtonName })
+      ).not.toBeInTheDocument();
     });
 
     it('shows an alert badge with the aggregated count across member SLOs', () => {
@@ -271,7 +278,7 @@ describe('CompositeSloTable', () => {
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} total={1} />);
 
-      expect(screen.getByLabelText('active alerts badge')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: activeAlertsButtonName })).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
     });
   });

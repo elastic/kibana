@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    ".storybook/**/*",
     "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -24,7 +25,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/spaces-utils",
     "@kbn/core-di",
     "@kbn/core-di-browser",
     "@kbn/core-di-server",
@@ -47,8 +47,6 @@
     "@kbn/core-di-internal",
     "@kbn/i18n",
     "@kbn/zod-helpers",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/test",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/apm-utils",
     "@kbn/default-tracer",
@@ -89,6 +87,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
+    "@kbn/unified-histogram",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -97,9 +96,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
     "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-agent-builder",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core-user-profile-browser",
-    "@kbn/user-profile-components",
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
@@ -108,7 +106,13 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-context-layer-plugin",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-user-profile-browser",
+    "@kbn/code-editor",
+    "@kbn/workflows-yaml",
+    "@kbn/workflows-ui",
+    "@kbn/datemath",
+    "@kbn/triggers-actions-ui-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

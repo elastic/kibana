@@ -7,6 +7,7 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
+import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -21,9 +22,12 @@ apiTest.describe(
   () => {
     let authHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    apiTest.beforeAll(async ({ apiClient, kbnClient, config: { organizationId, projectType } }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
+      });
+
       const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
         username: '1234567890',
         email: 'elastic_admin@elastic.co',
         roles: ['admin'],
@@ -42,11 +46,14 @@ apiTest.describe(
       authHeaders = { ...COMMON_UNSAFE_HEADERS, Cookie: cookie };
     });
 
+    apiTest.afterAll(async ({ kbnClient }) => {
+      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
+    });
+
     apiTest(
       'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;
-        const resource = `https://scout-crud-${Date.now()}.kb.us-central1.gcp.elastic.cloud`;
         const initialRedirectUri = 'https://example.com/callback';
         const secondRedirectUri = 'https://example.com/callback-2';
 
@@ -58,7 +65,6 @@ apiTest.describe(
               headers: authHeaders,
               responseType: 'json',
               body: {
-                resource,
                 client_name: clientName,
                 client_type: 'public',
                 client_metadata: { owner: 'scout-crud' },
@@ -137,7 +143,6 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'https://scout-crud-bad.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad',
             client_type: 'not-a-valid-type',
           },
@@ -148,7 +153,6 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'https://scout-crud-bad2.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad2',
             client_type: 'public',
             client_logo: { media_type: 'application/json', data: 'abc' },

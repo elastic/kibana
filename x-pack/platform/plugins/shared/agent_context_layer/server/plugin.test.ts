@@ -34,10 +34,6 @@ jest.mock('./features', () => ({
   registerFeatures: jest.fn(),
 }));
 
-jest.mock('./ui_settings', () => ({
-  registerUISettings: jest.fn(),
-}));
-
 jest.mock('./routes/search', () => ({
   registerSearchRoute: jest.fn(),
 }));
@@ -56,6 +52,7 @@ describe('AgentContextLayerPlugin', () => {
       updated_at: '2024-01-01T00:00:00Z',
       spaces: ['default'],
       permissions: ['saved_object:dashboard/get'],
+      ingestion_method: 'crawled',
     });
 
     const setupPlugin = ({

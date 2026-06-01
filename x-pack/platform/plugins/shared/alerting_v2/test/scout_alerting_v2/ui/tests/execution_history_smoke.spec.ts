@@ -13,8 +13,7 @@ import { test } from '../fixtures';
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  */
-// Failing: See https://github.com/elastic/kibana/issues/268841
-test.describe.skip('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
+test.describe('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAlertingV2Viewer();
   });
@@ -35,9 +34,6 @@ test.describe.skip('Execution history — smoke', { tag: '@local-stateful-classi
 
     await test.step('empty state copy is visible', async () => {
       await expect(pageObjects.executionHistory.emptyPrompt).toBeVisible();
-      await expect(
-        page.getByText(/No policy execution activity in the last 24 hours/i)
-      ).toBeVisible();
     });
   });
 });

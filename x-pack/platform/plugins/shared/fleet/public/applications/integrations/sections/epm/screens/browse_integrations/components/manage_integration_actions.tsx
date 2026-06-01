@@ -223,7 +223,6 @@ export const ManageIntegrationActions: React.FC<{
           closePopover={closePopover}
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="review"

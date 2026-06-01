@@ -42,6 +42,10 @@ interface LocationStatusEntry {
   monitorIntervalSeconds?: number;
   configId?: string;
   tags?: string[];
+  // Human-readable location label from observer.geo.name. Resolved via a
+  // terms sub-agg because the field is wildcard-typed and top_metrics cannot
+  // collect it. Falls back to locationId when unavailable.
+  locationLabel?: string;
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -73,6 +77,29 @@ export class OverviewStatusService {
       this.getQueryResult(),
     ]);
 
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  /**
+   * Same output as {@link getOverviewStatus}, but reuses monitor saved objects already loaded
+   * (e.g. diagnostics bundle) to avoid a second full `getAll` over synthetics monitors.
+   */
+  async getOverviewStatusWithPrefetchedMonitors(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >
+  ) {
+    this.filterData = await getMonitorFilters(this.routeContext);
+    const statusResult = await this.getQueryResult();
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  private buildOverviewStatusResult(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >,
+    statusResult: Map<string, LocationStatus>
+  ) {
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
 
@@ -199,7 +226,7 @@ export class OverviewStatusService {
         // Note: _index is NOT included here because top_metrics does not support
         // metadata fields. We use a separate terms sub-aggregation for _index instead.
         // observer.geo.name is also excluded because it is a wildcard type field
-        // which top_metrics cannot collect. We fall back to locationId for remote monitors.
+        // which top_metrics cannot collect. We use a separate terms sub-agg instead.
         ...(ccsEnabled
           ? [
               { field: 'kibanaUrl' },
@@ -261,11 +288,20 @@ export class OverviewStatusService {
                   // so we use a separate terms agg to determine the source index.
                   // For a given monitor+location bucket the latest ping typically
                   // comes from a single index, so size:1 is sufficient.
+                  // observer.geo.name is a wildcard field which top_metrics
+                  // cannot collect, so we use a terms sub-agg to resolve
+                  // the human-readable location label for remote monitors.
                   ...(ccsEnabled
                     ? {
                         index_name: {
                           terms: {
                             field: '_index',
+                            size: 1,
+                          },
+                        },
+                        location_name: {
+                          terms: {
+                            field: 'observer.geo.name',
                             size: 1,
                           },
                         },
@@ -358,9 +394,11 @@ export class OverviewStatusService {
             monitorByIds.set(monitorId, []);
           }
 
-          // _index comes from the terms sub-agg, not top_metrics
+          // _index and observer.geo.name come from terms sub-aggs, not top_metrics
           const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
           const indexName = indexNameAgg?.buckets?.[0]?.key;
+          const locationNameAgg = ccsEnabled ? (rest as any).location_name : undefined;
+          const locationLabel = locationNameAgg?.buckets?.[0]?.key;
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = ccsEnabled ? metrics?.['monitor.name'] : undefined;
           const monitorType = ccsEnabled ? metrics?.['monitor.type'] : undefined;
@@ -374,6 +412,7 @@ export class OverviewStatusService {
             timestamp,
             monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
             ...(indexName ? { index: String(indexName) } : {}),
+            ...(locationLabel ? { locationLabel: String(locationLabel) } : {}),
             ...(kibanaUrl ? { kibanaUrl: String(kibanaUrl) } : {}),
             ...(monitorName ? { monitorName: String(monitorName) } : {}),
             ...(monitorType ? { monitorType: String(monitorType) } : {}),
@@ -583,7 +622,7 @@ export class OverviewStatusService {
           const isDown = status === MONITOR_STATUS_ENUM.DOWN;
           const location = {
             id: locData.locationId,
-            label: locData.locationId,
+            label: locData.locationLabel || locData.locationId,
             status,
             ...(isDown && locData.error ? { error: locData.error } : {}),
             ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
@@ -606,7 +645,11 @@ export class OverviewStatusService {
             overallStatus: status,
           };
 
-          const monLocId = `${configId}-${locData.locationId}`;
+          // Include the remote cluster name in the bucket key so that two
+          // remote clusters that host the same monitor configId in the same
+          // locationId (e.g. an imported project monitor synced to both)
+          // don't collide and silently overwrite each other
+          const monLocId = `${remote.remoteName}-${configId}-${locData.locationId}`;
           if (status === MONITOR_STATUS_ENUM.DOWN) {
             down += 1;
             downConfigs[monLocId] = meta;

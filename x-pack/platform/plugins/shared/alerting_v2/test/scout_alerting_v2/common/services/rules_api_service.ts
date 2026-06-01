@@ -9,6 +9,7 @@ import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type {
+  BulkGetRulesResponse,
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
@@ -24,13 +25,15 @@ export interface WaitForEnabledStateParams {
 }
 
 export interface RulesApiService {
-  create: (data: CreateRuleData, options?: { id?: string }) => Promise<RuleResponse>;
+  create: (data: CreateRuleData) => Promise<RuleResponse>;
+  upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkEnable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -68,14 +71,22 @@ export const getRulesApiService = ({
     });
 
   return {
-    create: (data, options) =>
+    create: (data) =>
       measurePerformanceAsync(log, 'rules.create', async () => {
-        const path = options?.id
-          ? `${RULE_API_PATH}/${encodeURIComponent(options.id)}`
-          : RULE_API_PATH;
         const response = await kbnClient.request<RuleResponse>({
           method: 'POST',
-          path,
+          path: RULE_API_PATH,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    upsert: (id, data) =>
+      measurePerformanceAsync(log, 'rules.upsert', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'PUT',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,
         });
@@ -133,6 +144,16 @@ export const getRulesApiService = ({
             intervals: [POLL_INTERVAL_MS],
           })
           .toBe(enabled);
+      }),
+    bulkGet: (ids) =>
+      measurePerformanceAsync(log, 'rules.bulkGet', async () => {
+        const response = await kbnClient.request<BulkGetRulesResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_get`,
+          headers: COMMON_HEADERS,
+          body: { ids },
+        });
+        return response.data;
       }),
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {

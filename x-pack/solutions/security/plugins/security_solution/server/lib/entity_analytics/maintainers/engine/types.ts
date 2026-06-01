@@ -249,10 +249,31 @@ export type RelationshipIntegrationConfig =
   | OverrideRelationshipIntegrationConfig;
 
 /**
- * Output record from the generic postprocessor.
- * Each relationship's targets are stored as optimistic EUIDs computed in the ES|QL layer.
+ * Output record from the relationship-maintainer postprocessor.
+ *
+ * `entityType` is currently fixed to `'user'` because every shipped config
+ * computes its actor EUID via `getEuidEvaluation('user', …)` and the engine
+ * hardcodes `'user'` at every producer/builder site. Broadening to
+ * `'user' | 'host' | 'service'` is tracked under the actorEntityType
+ * follow-up (#266748). Agents/engineers implementing #266748 should change
+ * **all** of these sites in lockstep — `grep -rn "266748"` from the
+ * `maintainers/` root surfaces them:
+ *
+ *   1. `engine/types.ts` (this file) — widen `entityType` here and add
+ *      `actorEntityType` to `RelationshipIntegrationConfig`.
+ *   2. `engine/build_actor_discovery_query.ts` — Step 1 user-EUID existence
+ *      filter is parameterized on entity type.
+ *   3. `engine/build_targets_per_actor_query.ts` — Step 2 actor EVAL uses
+ *      `getEuidEvaluation('user', …)`; thread the configured type through.
+ *   4. `engine/parse_targets_per_actor_rows.ts` — drop the `'user' as const`
+ *      on the produced records.
+ *   5. `engine/update_entities.ts` — drop `type: 'user'` on the
+ *      `bulkUpdateEntity` payload.
+ *
+ * Step 1 of the customActor presence-gate fix already derives actor *fields*
+ * from `customActor.fields`; #266748 is what derives the actor *entity type*.
  */
-export interface ProcessedEngineRecord {
+export interface EntityRelationshipRecord {
   /** Full EUID with type prefix, e.g. "user:alice@okta". Null if actor eval failed. */
   entityId: string | null;
   entityType: 'user';

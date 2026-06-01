@@ -29,11 +29,11 @@ import { DurationInput } from './duration_input/duration_input';
 
 export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
-  const groupingMode = useWatch({ control, name: 'groupingMode' });
-  const groupBy = useWatch({ control, name: 'groupBy' });
-  const throttleStrategy = useWatch({ control, name: 'throttleStrategy' });
-  const throttleInterval = useWatch({ control, name: 'throttleInterval' });
-  const { data: dataFieldNames } = useFetchDataFields();
+  const [groupingMode, groupBy, throttleStrategy, throttleInterval, matcher] = useWatch({
+    control,
+    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
+  });
+  const { data: dataFieldNames } = useFetchDataFields(matcher);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {

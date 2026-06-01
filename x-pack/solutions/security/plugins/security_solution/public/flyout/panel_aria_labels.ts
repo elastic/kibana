@@ -29,11 +29,6 @@ export const DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Document preview' }
 );
 
-export const DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAlertReason',
-  { defaultMessage: 'Alert reason' }
-);
-
 export const GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.graphGroupedNodePreview',
   { defaultMessage: 'Graph preview' }
@@ -47,11 +42,6 @@ export const RULE_PANEL_ARIA_LABEL = i18n.translate(
 export const RULE_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.rulePreview',
   { defaultMessage: 'Rule preview' }
-);
-
-export const DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost',
-  { defaultMessage: 'Isolate host' }
 );
 
 export const DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL = i18n.translate(

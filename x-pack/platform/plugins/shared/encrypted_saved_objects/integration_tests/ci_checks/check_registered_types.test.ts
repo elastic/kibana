@@ -128,6 +128,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|13",
         "alert|12",
         "alert|11",
         "alert|10",
@@ -165,6 +166,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|10",
         "task|1",
         "user_connector_token|1",
       ]

@@ -26,6 +26,7 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
+import { EntitiesOverview } from './entities_overview';
 import { PrevalenceDetails } from '../../tools/prevalence';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
@@ -213,6 +214,7 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
+        <EntitiesOverview hit={hit} renderCellActions={renderCellActions} showIcon={false} />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

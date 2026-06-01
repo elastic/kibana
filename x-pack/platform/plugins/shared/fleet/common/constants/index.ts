@@ -12,6 +12,7 @@ export {
   INGEST_SAVED_OBJECT_INDEX,
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 export * from './routes';
 export * from './agent';

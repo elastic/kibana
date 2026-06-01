@@ -151,11 +151,11 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules.
+Recovery only applies to `kind: alert` rules and is optional. A rule without a `recovery_policy` never emits recovery events.
 
 ### `no_breach` recovery
 
-Default mode. The executor:
+Selected when `recovery_policy.type` is `no_breach`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state
 2. compares that active set to the current breach batch
@@ -163,16 +163,53 @@ Default mode. The executor:
 
 ### `query` recovery
 
-If `recovery_policy.query.base` is configured, the executor runs a separate recovery ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
+If `recovery_policy.type` is `query`, the executor runs the configured `recovery_policy.query.base` ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| Mode | Recovery is emitted when |
+| `recovery_policy` | Recovery is emitted when |
 | --- | --- |
+| _absent_ | Never. The executor skips the active-group lookup entirely. |
 | `no_breach` | An active group is absent from the current breach batch. |
 | `query` | A recovery query row matches a currently active group. |
 
 Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
+
+## Severity behavior
+
+Severity is a best-effort enrichment applied when the executor materializes
+breached rule events in `CreateAlertEventsStep`.
+
+The framework supports the following fixed severity values:
+
+- `info`
+- `low`
+- `medium`
+- `high`
+- `critical`
+
+Rules do **not** define arbitrary framework severities. Instead, the rule's
+ES\|QL query is expected to map source data into one of the supported values and
+emit that result as a `severity` column.
+
+### How extraction works
+
+For each breached ES\|QL row, the executor:
+
+1. Looks for a `severity` column in the row payload returned by the ES\QL query.
+2. Skips enrichment if the value is not a string.
+3. Lowercases the string value.
+4. Checks whether the normalized value matches the fixed supported set.
+5. If it matches, writes it to the top-level event field `severity`.
+6. If it does not match, leaves the top-level field unset.
+
+### Important constraints
+
+- Severity is only considered for `breached` events.
+- `recovered` and `no_data` events do not carry severity.
+- The original ES\|QL row is still stored in `data`, so `data.severity`
+  is preserved even when the top-level `severity` field is absent or normalized.
+- Unsupported values never fail the rule execution.
 
 ## Halt reasons
 

@@ -20,6 +20,8 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
+import { GraphPreviewContainer } from './graph_preview_container';
+import { useGraphPreview } from '../hooks/use_graph_preview';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../tools/analyzer';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
@@ -64,6 +66,7 @@ export const VisualizationsSection = memo(
     const store = useStore();
     const history = useHistory();
     const sessionViewConfig = useSessionViewConfig(hit);
+    const { hasGraphData } = useGraphPreview({ hit });
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -156,6 +159,7 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
+        {hasGraphData && <GraphPreviewContainer disableNavigation hit={hit} showIcon={false} />}
       </ExpandableSection>
     );
   }

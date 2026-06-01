@@ -6,13 +6,14 @@
  */
 
 import {
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  useGeneratedHtmlId,
   EuiButton,
-  EuiIcon,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -116,25 +117,37 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-stream-type={streamType}
     >
       {mode === 'prominent' ? createTextProminent : createText}
-      {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="chevronSingleDown" /> : null}
+      {mode === 'prominent' || mode === 'subdued' ? (
+        <EuiIcon type="chevronSingleDown" aria-hidden={true} />
+      ) : null}
     </EuiButton>
   );
 
   const inlineButton = (
-    <EuiButtonIcon
-      data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
-      data-stream-type={streamType}
-      size="xs"
-      iconType="plusCircle"
-      onClick={togglePopover}
-      disabled={!canAddStep}
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.createStepButtonInlineAriaLabel',
         {
           defaultMessage: 'Create nested step',
         }
       )}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
+        data-stream-type={streamType}
+        size="xs"
+        iconType="plusCircle"
+        onClick={togglePopover}
+        disabled={!canAddStep}
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.createStepButtonInlineAriaLabel',
+          {
+            defaultMessage: 'Create nested step',
+          }
+        )}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -146,7 +159,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

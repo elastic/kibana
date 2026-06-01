@@ -104,7 +104,7 @@ export const toolToLangchain = async ({
   toolId,
   logger,
   sendEvent,
-  addReasoningParam = true,
+  addReasoningParam = false,
 }: {
   tool: ExecutableTool;
   toolId?: string;

@@ -27,6 +27,7 @@ exports[`DocumentsPanel renders 1`] = `
             <React.Fragment>
               Upserted
               <EuiIcon
+                aria-hidden={true}
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
@@ -55,6 +56,7 @@ exports[`DocumentsPanel renders 1`] = `
             <React.Fragment>
               Deleted
               <EuiIcon
+                aria-hidden={true}
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
@@ -83,6 +85,7 @@ exports[`DocumentsPanel renders 1`] = `
             <React.Fragment>
               Volume
               <EuiIcon
+                aria-hidden={true}
                 className="eui-alignTop"
                 color="subdued"
                 size="s"

@@ -37,6 +37,8 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+  generateEsqlCompletion,
+  type GenerateEsqlCompletionResponse,
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,

@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { Connector } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../../common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
@@ -36,7 +36,7 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   scopes: AssistantScope[];
-  connector?: Connector;
+  connector?: InferenceConnector;
   screenDescription: string;
   messages: Message[];
   logger: Logger;

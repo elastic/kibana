@@ -1,5 +1,5 @@
 {
-  "sha1": "387d211614a5a1593a0ef464631f6bc41a18894d",
+  "sha1": "b84bb9c3f088b03c96a4c9ae86a029ea5ffd9425",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -191,7 +191,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 14
       }
     },
@@ -217,7 +217,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 142,
+        "line": 143,
         "column": 14
       }
     },
@@ -347,7 +347,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 165,
+        "line": 162,
         "column": 12
       }
     },
@@ -373,7 +373,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 193,
+        "line": 190,
         "column": 12
       }
     },
@@ -399,7 +399,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 208,
+        "line": 205,
         "column": 12
       }
     },
@@ -555,7 +555,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 12
       }
     },
@@ -581,7 +581,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 12
       }
     },
@@ -607,7 +607,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 12
       }
     },
@@ -633,7 +633,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 115,
+        "line": 116,
         "column": 12
       }
     },
@@ -659,7 +659,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 121,
+        "line": 122,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-c6c6d2f4fff9686",
+      "title": "GET /api/workflows/aggs rejects an empty field value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 130,
         "column": 12
       }
     },
