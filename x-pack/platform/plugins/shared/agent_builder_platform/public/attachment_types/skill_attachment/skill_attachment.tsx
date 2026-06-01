@@ -239,11 +239,7 @@ const SkillInstructions = ({
       <EuiSpacer size="xs" />
       {showDiff && hasPreviousVersion && beforeContent ? (
         <>
-          <SkillDiffViewer
-            beforeContent={beforeContent}
-            afterContent={content}
-            showFullContent={showFullContent}
-          />
+          <SkillDiffViewer beforeContent={beforeContent} afterContent={content} />
           {hasOriginalDiff && (
             <EuiButtonEmpty
               size="xs"
