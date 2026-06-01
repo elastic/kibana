@@ -1,0 +1,76 @@
+# Phase 3: Report
+
+---
+
+## Step 3a — Merge findings
+
+Enumerate which findings files exist:
+```bash
+ls .exploratory-session/findings-flow-*.md 2>/dev/null | sort -V
+```
+Read each file in that list, then write `.exploratory-session/report.md` using the template:
+```
+x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/report-format.md
+```
+
+---
+
+## Step 3b — Filter known noise
+
+For each Level 2 and Level 3 finding, check in order:
+1. Matches an entry in `knowledge/<area_slug>.md`? → move to "Known / Suppressed", cite the entry.
+2. Matches a `known_open_bugs` entry in `config.json`? → move to "Known / Suppressed", cite the issue number.
+
+**Never silently drop a finding.** Every suppressed finding must appear in "Known / Suppressed" with its reason.
+
+Level 1 findings are never suppressed — a confirmed bug is always reported.
+
+---
+
+## Step 3c — Present report
+
+Present `report.md` to the user and ask:
+
+> "Review complete. Are there any Level 2 or Level 3 findings you want to reclassify as false positives before I update the knowledge file?"
+
+Wait for the user's response. Apply any reclassifications to `report.md`.
+
+---
+
+## Step 3d — Update knowledge file
+
+After user review, update `knowledge/<area_slug>.md`.
+
+If the file does not exist, create it at:
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md`
+
+Initial structure:
+```markdown
+# Knowledge: <area name>
+
+## Known non-bugs
+<!-- Behaviours the agent should not re-report as findings -->
+
+## Navigation patterns
+<!-- How to reach features in this area — built up across sessions -->
+```
+
+Append confirmed false positives to `## Known non-bugs`. Append new navigation patterns to `## Navigation patterns`.
+
+Check line count before updating:
+```bash
+wc -l < x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
+```
+If count exceeds 100, archive first:
+```bash
+TODAY=$(date -u +%Y-%m-%d)
+cp x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md \
+   x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>-archive-$TODAY.md
+```
+Then start fresh with the initial structure and copy the most recently added entries from each section.
+
+Commit the knowledge file:
+```bash
+git add x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
+git commit -m "knowledge(exploratory-tester): update <area_slug> after session on $(date -u +%Y-%m-%d)"
+```
