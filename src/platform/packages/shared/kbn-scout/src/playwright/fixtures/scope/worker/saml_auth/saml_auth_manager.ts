@@ -72,12 +72,19 @@ export class SamlAuthManager {
   }
 
   private async getEsRoleData(roleName: string) {
-    const response = await this.esClient.security.getRole({ name: roleName });
-    const roleData = response[roleName];
-    if (!roleData) {
-      throw new Error(`Role '${roleName}' not found in Elasticsearch`);
+    try {
+      const response = await this.esClient.security.getRole({ name: roleName });
+      const roleData = response[roleName];
+      if (!roleData) {
+        throw new Error(`Role '${roleName}' not found in Elasticsearch`);
+      }
+      return roleData;
+    } catch (error: any) {
+      if (error?.statusCode === 404 || error?.meta?.statusCode === 404) {
+        throw new Error(`Role '${roleName}' not found in Elasticsearch`);
+      }
+      throw error;
     }
-    return roleData;
   }
 
   /**
