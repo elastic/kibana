@@ -9,7 +9,7 @@ import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assist
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
-import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
+import { SearchAttacksRequestBody } from '../../../../../common/api/detection_engine/attacks';
 import { DETECTION_ENGINE_ATTACKS_SEARCH_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { searchAlertsHandler } from '../common/search_alerts_handler';
@@ -33,7 +33,7 @@ export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
+            body: buildRouteValidationWithZod(SearchAttacksRequestBody),
           },
         },
       },
