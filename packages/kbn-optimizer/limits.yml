@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29547
+  esql: 29485
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
@@ -108,7 +108,7 @@ pageLoadAssetSize:
   lens: 99147
   licenseManagement: 8193
   licensing: 10073
-  links: 8620
+  links: 10073
   lists: 5093
   logsDataAccess: 7900
   logsShared: 82701
