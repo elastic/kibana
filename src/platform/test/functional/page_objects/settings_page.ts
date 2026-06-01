@@ -689,9 +689,16 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPatternIdFromUrl() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const indexPatternId = currentUrl.match(/.*\/(.*)/)![1];
+    // The edit data view page syncs its app state into a hash fragment
+    // (e.g. `/dataView/<id>#/?_a=(tab:indexedFields)`), so we must extract the
+    // id from the `/dataView/<id>` path segment and stop at any `/`, `?` or `#`.
+    const indexPatternId = currentUrl.match(/\/dataView\/([^/?#]+)/)?.[1];
 
     this.log.debug('index pattern ID: ', indexPatternId);
+
+    if (!indexPatternId) {
+      throw new Error(`Unable to extract data view id from URL: ${currentUrl}`);
+    }
 
     return indexPatternId;
   }
