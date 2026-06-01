@@ -12,6 +12,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { MouseEvent } from 'react';
