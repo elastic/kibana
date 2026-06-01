@@ -148,9 +148,9 @@ describe('createRuleAttachmentDefinition', () => {
       expect(buttonLabels).toContain('View rule');
     });
 
-    it('labels "Update rule" using in-session last-saved id before server write completes', () => {
+    it('shows "Create rule" even when an in-session id exists — intent is attachment-driven', () => {
       aiRuleCreation.setLastSavedRuleId('rule-session');
-      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Update rule');
+      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Create rule');
     });
 
     it('returns no buttons when the user cannot edit rules', () => {

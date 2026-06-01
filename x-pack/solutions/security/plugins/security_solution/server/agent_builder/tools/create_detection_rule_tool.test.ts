@@ -238,6 +238,7 @@ describe('createDetectionRuleTool', () => {
         data: {
           text: JSON.stringify(mockRule),
           attachmentLabel: 'Test Rule',
+          intent: 'create',
         },
         description: 'Rule: Test Rule',
       });

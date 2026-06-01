@@ -149,6 +149,7 @@ describe('AddRuleAttachmentToChatButton', () => {
       attachmentData: {
         text: JSON.stringify({ name: 'Formatted Rule' }),
         attachmentLabel: 'Formatted Rule',
+        intent: 'create',
       },
       attachmentDescription: 'Formatted Rule',
     });
