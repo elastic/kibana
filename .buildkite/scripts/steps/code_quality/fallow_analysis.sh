@@ -31,21 +31,6 @@ extract_owner_count() {
   printf '%s\n' "$output" | grep -oE "^${escaped} \([^)]+\)" | grep -oE '\([^)]+\)' || true
 }
 
-# Extract health score, grade and hotspot count from the score table
-# e.g. "  @elastic/workchat-eng  52.5  D  108  46  2" → "52.5 D · 46 hotspots"
-extract_owner_health() {
-  local output="$1"
-  local owner="$2"
-  local escaped="${owner//\//\\/}"
-  local line
-  line=$(printf '%s\n' "$output" | grep -oE "^[[:space:]]+${escaped}[[:space:]]+[0-9.]+[[:space:]]+[A-F][[:space:]]+[0-9]+[[:space:]]+[0-9]+" || true)
-  if [ -z "$line" ]; then return; fi
-  local score grade hotspots
-  score=$(printf '%s\n' "$line" | grep -oE "[0-9]+\.[0-9]+" | head -1)
-  grade=$(printf '%s\n' "$line" | grep -oE "[A-F]" | head -1)
-  hotspots=$(printf '%s\n' "$line" | grep -oE "[0-9]+" | sed -n '4p')
-  printf '%s %s · %s hotspots' "$score" "$grade" "$hotspots"
-}
 
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
@@ -55,7 +40,7 @@ echo "Checks: dead code (unused exports/types/files) · duplication · complexit
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, production files only)"
 echo ""
 echo "Run locally (same as CI, grouped by team):"
-echo "  npx fallow --group-by owner --production-dead-code --score"
+echo "  npx fallow --group-by owner --production"
 echo ""
 echo "See ALL files for your team (no truncation):"
 echo "  search-kibana: npx fallow dead-code --workspace 'x-pack/solutions/search/**' --production"
@@ -66,10 +51,9 @@ echo "  npx fallow health --workspace 'x-pack/solutions/search/**'"
 set +e
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
-  --production-dead-code \
+  --production \
   --format human \
   --quiet \
-  --score \
   2>&1)
 set -e
 
@@ -84,26 +68,16 @@ for owner in "${FALLOW_OWNERS[@]}"; do
   fi
 done
 
-echo "--- Health scores (complexity + maintainability, 0-100)"
-echo "Columns: score | grade | files analyzed | hotspots (high complexity + high churn) | p90 cyclomatic"
-printf '%s\n' "$FALLOW_OUTPUT" | awk '/^● Per-owner health/,0'
-
 echo "--- Post Buildkite annotation"
 
-ANNOTATION="**Code Quality** · dead code · duplication · complexity\n\n"
+ANNOTATION="**Code Quality** · dead code · duplication\n\n"
 for owner in "${FALLOW_OWNERS[@]}"; do
   count=$(extract_owner_count "$FALLOW_OUTPUT" "$owner")
-  health=$(extract_owner_health "$FALLOW_OUTPUT" "$owner")
   team_short="${owner#@elastic/}"
   if [ -n "$count" ]; then
-    dead_str="${count}"
+    ANNOTATION+="- **${team_short}**: ${count}\n"
   else
-    dead_str="no dead code"
-  fi
-  if [ -n "$health" ]; then
-    ANNOTATION+="- **${team_short}**: ${dead_str} · health ${health}\n"
-  else
-    ANNOTATION+="- **${team_short}**: ${dead_str}\n"
+    ANNOTATION+="- **${team_short}**: no dead code\n"
   fi
 done
 
