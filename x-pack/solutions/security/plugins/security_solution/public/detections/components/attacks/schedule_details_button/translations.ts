@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const OPEN_SCHEDULE_DETAILS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.openScheduleDetailsLabel',
+  'xpack.securitySolution.detectionEngine.attacks.scheduleDetailsButton.openScheduleDetailsLabel',
   {
     defaultMessage: 'Open schedule details',
   }
 );
 
 export const SCHEDULED_ATTACK_DISCOVERY = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.scheduledAttackDiscoveryTooltipTitle',
+  'xpack.securitySolution.detectionEngine.attacks.scheduleDetailsButton.scheduledAttackDiscoveryTooltipTitle',
   {
     defaultMessage: 'Scheduled Attack discovery',
   }
