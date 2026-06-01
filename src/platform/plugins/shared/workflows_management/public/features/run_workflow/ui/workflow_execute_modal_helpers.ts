@@ -113,6 +113,21 @@ export function buildDefaultTriggerEventSearchQuery(workflowTriggerIds: readonly
   return { query: scopeKql ?? '', language: 'kuery' };
 }
 
+function normalizeTriggerEventSearchKql(query: Query): string {
+  return typeof query.query === 'string' ? query.query.trim() : '';
+}
+
+/** True when the submitted KQL matches the workflow's default trigger scope (not user-filtered). */
+export function isDefaultTriggerEventSearchScope(
+  submittedQuery: Query,
+  workflowTriggerIds: readonly string[]
+): boolean {
+  return (
+    normalizeTriggerEventSearchKql(submittedQuery) ===
+    normalizeTriggerEventSearchKql(buildDefaultTriggerEventSearchQuery(workflowTriggerIds))
+  );
+}
+
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';

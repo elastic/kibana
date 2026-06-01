@@ -536,6 +536,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                       handleEventTriggerTableSelectionCountChange
                     }
                     onEventGridFullScreenChange={setIsEventGridFullScreen}
+                    onOpenManualTab={() => handleChangeTrigger('manual')}
                   />
                 )}
                 {selectedTrigger === 'historical' && (

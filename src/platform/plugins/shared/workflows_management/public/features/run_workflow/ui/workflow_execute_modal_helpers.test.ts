@@ -16,6 +16,7 @@ import {
   getFallbackTriggerTab,
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
+  isDefaultTriggerEventSearchScope,
   resolveInitialSelectedTrigger,
 } from './workflow_execute_modal_helpers';
 
@@ -120,6 +121,22 @@ describe('buildWorkflowTriggerScopeKql', () => {
     expect(buildWorkflowTriggerScopeKql(['workflow.execution.failed', 'cases.created'])).toBe(
       'triggerId: ("workflow.execution.failed" or "cases.created")'
     );
+  });
+});
+
+describe('isDefaultTriggerEventSearchScope', () => {
+  it('returns true for the default workflow trigger scope query', () => {
+    const defaultQuery = buildDefaultTriggerEventSearchQuery(['custom.trigger']);
+    expect(isDefaultTriggerEventSearchScope(defaultQuery, ['custom.trigger'])).toBe(true);
+  });
+
+  it('returns false when the user changes the KQL query', () => {
+    const defaultQuery = buildDefaultTriggerEventSearchQuery(['custom.trigger']);
+    expect(
+      isDefaultTriggerEventSearchScope({ ...defaultQuery, query: 'eventId: abc' }, [
+        'custom.trigger',
+      ])
+    ).toBe(false);
   });
 });
 
