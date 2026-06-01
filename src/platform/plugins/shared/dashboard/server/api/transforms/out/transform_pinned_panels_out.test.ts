@@ -24,21 +24,54 @@ import {
   transformPinnedPanelsOut,
   type StoredPinnedPanels,
 } from './transform_pinned_panels_out';
+import {
+  optionsListDSLControlSchema,
+  rangeSliderControlSchema,
+  timeSliderControlSchema,
+} from '@kbn/controls-schemas';
 
-jest.mock('../../../kibana_services', () => ({
-  embeddableService: {
-    getTransforms: jest.fn().mockImplementation((type) => {
-      return { transformOut: jest.fn().mockImplementation((val) => val) };
-    }),
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
-  },
-}));
+const mockGetTransforms = jest.fn();
+
+beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../../kibana_services').embeddableService = {
+    getTransforms: mockGetTransforms,
+  };
+
+  mockGetTransforms.mockImplementation((type) => {
+    function getSchema(type: string) {
+      if (type === OPTIONS_LIST_CONTROL) {
+        return optionsListDSLControlSchema;
+      }
+
+      if (type === RANGE_SLIDER_CONTROL) {
+        return rangeSliderControlSchema;
+      }
+
+      if (type === TIME_SLIDER_CONTROL) {
+        return timeSliderControlSchema;
+      }
+
+      if (type === 'invalidPanel') {
+        return {
+          validate: jest.fn().mockImplementation(() => {
+            throw new Error('Boo!');
+          }),
+        };
+      }
+    }
+    return {
+      transformOut: jest.fn().mockImplementation((val) => val),
+      schema: getSchema(type),
+    };
+  });
+});
 
 describe('pinned panels', () => {
   const mockPinnedPanels = {
     control1: {
       id: 'control1',
-      type: 'optionsListControl',
+      type: OPTIONS_LIST_CONTROL,
       grow: true,
       config: { data_view_id: 'dataViewId', field_name: 'fieldName' },
       order: 0,
@@ -108,9 +141,9 @@ describe('pinned panels', () => {
 
   it('drops any invalid panels', () => {
     const invalidPanel = {
-      type: 'does-not-exist',
+      type: 'invalidPanel',
       grow: true,
-      config: { boo: 'bear' },
+      config: {},
       unsupportedProperty: 'unsupported',
       order: 3,
     };
@@ -125,14 +158,16 @@ describe('pinned panels', () => {
       []
     );
     expect(result.panels).toEqual(transformedPinnedPanels);
-    expect(result.warnings).toEqual([
-      {
-        type: 'dropped_panel',
-        panel_type: invalidPanel.type,
-        panel_config: invalidPanel.config,
-        message: `Unable to transform pinned panel config. Error: expected "type" to be one of ["esql_control", "options_list_control", "range_slider_control", "time_slider_control"] but got ["does-not-exist"]`,
-      },
-    ]);
+    expect(result.warnings).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Unable to transform pinned panel config. Error: Boo!",
+          "panel_config": Object {},
+          "panel_type": "invalidPanel",
+          "type": "dropped_panel",
+        },
+      ]
+    `);
   });
 
   describe('transform <9.4 legacy controls', () => {
