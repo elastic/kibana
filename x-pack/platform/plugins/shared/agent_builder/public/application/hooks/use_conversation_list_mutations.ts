@@ -88,9 +88,10 @@ export const useConversationListMutations = ({
         });
       });
 
-      conversationsService
-        .updateReadStatus({ conversationId, read })
-        .catch(() => void queryClient.invalidateQueries({ queryKey: listQueryKey }));
+      conversationsService.updateReadStatus({ conversationId, read }).catch(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        queryClient.invalidateQueries({ queryKey: listQueryKey });
+      });
     },
     [conversationsService, queryClient, listQueryKey]
   );
