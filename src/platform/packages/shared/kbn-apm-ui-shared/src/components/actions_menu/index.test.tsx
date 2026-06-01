@@ -77,39 +77,34 @@ describe('ActionsMenu', () => {
   });
 
   const renderMenu = (props: Partial<React.ComponentProps<typeof ActionsMenu>> = {}) =>
-    render(
-      <ActionsMenu
-        button={<button data-test-subj="trigger-button">Actions</button>}
-        actions={mockActions}
-        dataTestSubjPrefix="testMenu"
-        {...props}
-      />
-    );
+    render(<ActionsMenu actions={mockActions} dataTestSubjPrefix="testMenu" {...props} />);
+
+  const getTrigger = () => screen.getByRole('button', { name: 'Actions' });
 
   it('renders the trigger button', () => {
     renderMenu();
-    expect(screen.getByTestId('trigger-button')).toBeInTheDocument();
+    expect(getTrigger()).toBeInTheDocument();
   });
 
   it('opens the popover when the button is clicked', () => {
     renderMenu();
     expect(screen.queryByTestId('testMenuGroup-alerts')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
 
     expect(screen.getByTestId('testMenuGroup-alerts')).toBeInTheDocument();
   });
 
   it('renders action groups with correct test subjects', () => {
     renderMenu();
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
 
     expect(screen.getByTestId('testMenuGroup-alerts')).toBeInTheDocument();
   });
 
   it('renders action items with correct test subjects', () => {
     renderMenu();
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
 
     expect(screen.getByTestId('testMenuItem-openInDiscover')).toBeInTheDocument();
     expect(screen.getByTestId('testMenuItem-createThresholdRule')).toBeInTheDocument();
@@ -125,7 +120,7 @@ describe('ActionsMenu', () => {
       },
     ];
     renderMenu({ actions, dataTestSubjPrefix: 'menu' });
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
 
     fireEvent.click(screen.getByTestId('menuItem-action1'));
 
@@ -137,7 +132,7 @@ describe('ActionsMenu', () => {
 
   it('navigates to the sub-panel when a parent action is clicked', async () => {
     renderMenu();
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
     fireEvent.click(screen.getByTestId('testMenuItem-createThresholdRule'));
 
     await waitFor(() => {
@@ -168,7 +163,7 @@ describe('ActionsMenu', () => {
       },
     ];
     renderMenu({ actions, dataTestSubjPrefix: 'menu' });
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
     fireEvent.click(screen.getByTestId('menuItem-parent'));
 
     await waitFor(() => {
@@ -185,7 +180,7 @@ describe('ActionsMenu', () => {
 
   it('does not render actions column when actions are empty', () => {
     renderMenu({ actions: [] });
-    fireEvent.click(screen.getByTestId('trigger-button'));
+    fireEvent.click(getTrigger());
 
     expect(screen.queryByTestId('testMenuItem-openInDiscover')).not.toBeInTheDocument();
   });
