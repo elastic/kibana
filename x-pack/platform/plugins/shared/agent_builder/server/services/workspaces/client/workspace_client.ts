@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { WorkspaceStorage } from './storage';
 import {
   WORKSPACE_SCHEMA_VERSION,
@@ -20,9 +21,11 @@ export interface IWorkspaceClient {
 
 export class WorkspaceClient implements IWorkspaceClient {
   private readonly storage: WorkspaceStorage;
+  private readonly space: string;
 
-  constructor({ storage }: { storage: WorkspaceStorage }) {
+  constructor({ storage, space }: { storage: WorkspaceStorage; space: string }) {
     this.storage = storage;
+    this.space = space;
   }
 
   async load(workspaceId: string): Promise<WorkspaceSnapshot | undefined> {
@@ -36,6 +39,7 @@ export class WorkspaceClient implements IWorkspaceClient {
     const existing = await this.loadDocument(workspaceId);
     const document: WorkspaceDocument = {
       workspace_id: workspaceId,
+      space: this.space,
       schema_version: WORKSPACE_SCHEMA_VERSION,
       created_at: existing?.created_at ?? now,
       updated_at: now,
@@ -46,14 +50,17 @@ export class WorkspaceClient implements IWorkspaceClient {
 
   /** Internal — full document fetch including metadata. */
   private async loadDocument(workspaceId: string): Promise<WorkspaceDocument | undefined> {
-    try {
-      const response = await this.storage.getClient().get({ id: workspaceId });
-      return response._source as WorkspaceDocument | undefined;
-    } catch (err) {
-      if ((err as { statusCode?: number }).statusCode === 404) {
-        return undefined;
-      }
-      throw err;
-    }
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { term: { _id: workspaceId } }],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) return undefined;
+    return response.hits.hits[0]._source as WorkspaceDocument | undefined;
   }
 }

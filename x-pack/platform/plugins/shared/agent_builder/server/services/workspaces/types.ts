@@ -28,6 +28,7 @@ export interface WorkspaceSnapshot {
  */
 export interface WorkspaceDocument {
   workspace_id: string;
+  space: string;
   schema_version: number;
   created_at: string;
   updated_at: string;

@@ -20,10 +20,12 @@ export const createFilesystemServices = async ({
   manager,
   experimentalFeatures,
   workspaceId,
+  spaceId,
 }: {
   manager: RunnerManager;
   experimentalFeatures: ExperimentalFeatures;
   workspaceId?: string;
+  spaceId: string;
 }): Promise<{
   filesystemService: FilesystemService;
   bashService?: BashService;
@@ -34,7 +36,7 @@ export const createFilesystemServices = async ({
     logger,
     esClient: elasticsearch.client.asScoped(request).asInternalUser,
   });
-  const workspaceClient = new WorkspaceClient({ storage: workspaceStorage });
+  const workspaceClient = new WorkspaceClient({ storage: workspaceStorage, space: spaceId });
   const workspaceVolume = new WorkspaceVolume({
     workspaceClient,
     initialWorkspaceId: workspaceId,

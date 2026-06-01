@@ -79,6 +79,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     manager,
     experimentalFeatures,
     workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    spaceId,
   });
 
   return {
