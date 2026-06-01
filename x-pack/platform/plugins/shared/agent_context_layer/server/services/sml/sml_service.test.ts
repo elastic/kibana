@@ -27,6 +27,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     search: jest.fn(),
     count: jest.fn(),
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockScopedClient = (
@@ -402,6 +403,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: makePermissions(['saved_object:lens/get']),
+        ingestion_method: 'crawled',
         score: 1.5,
       });
       expect(result.total).toBe(1);
@@ -423,8 +425,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'r1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: [],
                 permissions: makePermissions(),
               },
@@ -437,8 +439,8 @@ describe('SmlService', () => {
                 title: 'B',
                 origin_id: 'r2',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: [],
                 permissions: makePermissions(),
               },
@@ -522,8 +524,8 @@ describe('SmlService', () => {
                 title: 'Lens',
                 origin_id: 'r1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(['saved_object:lens/get']),
               },
@@ -536,8 +538,8 @@ describe('SmlService', () => {
                 title: 'Dashboard',
                 origin_id: 'r2',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(['saved_object:dashboard/get']),
               },
@@ -577,8 +579,8 @@ describe('SmlService', () => {
                 title: 'Lens',
                 origin_id: 'r1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(['saved_object:lens/get']),
               },
@@ -591,8 +593,8 @@ describe('SmlService', () => {
                 title: 'Dashboard',
                 origin_id: 'r2',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(['saved_object:dashboard/get']),
               },
@@ -645,8 +647,8 @@ describe('SmlService', () => {
           title: 'Viz',
           origin_id: 'r1',
           content: '',
-          created_at: '',
-          updated_at: '',
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
           spaces: ['default'],
           permissions: makePermissions(['saved_object:lens/get'], overrides.indices ?? []),
         },
@@ -1230,6 +1232,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: makePermissions(),
+        ingestion_method: 'crawled',
       });
       expect(result.get('doc-2')).toEqual({
         id: 'doc-2',
@@ -1244,6 +1247,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: makePermissions(),
+        ingestion_method: 'crawled',
       });
     });
 
@@ -1349,6 +1353,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: makePermissions(),
+        ingestion_method: 'crawled' as const,
       },
     };
 
@@ -1814,6 +1819,72 @@ describe('SmlService', () => {
       ).rejects.toThrow('boom');
       expect(smlClient.index).not.toHaveBeenCalled();
     });
+
+    it("tags the written document with ingestion_method='manual'", async () => {
+      smlClient.get.mockRejectedValue(createNotFoundError());
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const result = await smlService.upsertDocument({
+        id: 'doc-manual',
+        spaceId: 'default',
+        document: {
+          type: 'lens',
+          title: 'Manual Doc',
+          origin_id: 'ref-manual',
+          content: 'c',
+        },
+        esClient: scopedClient,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result!.document.ingestion_method).toBe('manual');
+      expect(smlClient.index).toHaveBeenCalledWith({
+        id: 'doc-manual',
+        document: expect.objectContaining({ ingestion_method: 'manual' }),
+      });
+    });
+
+    it('deletes stale crawled chunks for the same origin after a manual upsert', async () => {
+      smlClient.get.mockRejectedValue(createNotFoundError());
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      await smlService.upsertDocument({
+        id: 'doc-manual',
+        spaceId: 'default',
+        document: {
+          type: 'lens',
+          title: 'Manual Doc',
+          origin_id: 'ref-manual',
+          content: 'c',
+        },
+        esClient: scopedClient,
+      });
+
+      // After writing the manual chunk, the upsert should wipe any chunks for the same
+      // origin that carry ingestion_method=crawled, so search/list reflect the curator's
+      // intent immediately and stale crawled output doesn't linger forever (the crawler
+      // would otherwise skip this origin because of the manual entry).
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+        index: smlIndexName,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { origin_id: 'ref-manual' } },
+              { term: { ingestion_method: 'crawled' } },
+            ],
+          },
+        },
+        refresh: false,
+      });
+    });
   });
 
   describe('deleteDocument', () => {
@@ -1859,8 +1930,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(),
               },
@@ -1896,8 +1967,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(),
               },
@@ -1932,8 +2003,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(),
               },
@@ -1968,8 +2039,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '',
-                updated_at: '',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
                 spaces: ['default'],
                 permissions: makePermissions(),
               },

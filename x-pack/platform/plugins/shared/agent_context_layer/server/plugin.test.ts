@@ -55,6 +55,7 @@ describe('AgentContextLayerPlugin', () => {
         kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
         elasticsearch: { indices: [] },
       },
+      ingestion_method: 'crawled',
     });
 
     const setupPlugin = ({

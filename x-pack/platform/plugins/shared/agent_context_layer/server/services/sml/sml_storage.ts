@@ -54,6 +54,7 @@ const smlStorageSchemaProperties = {
       }),
     },
   }),
+  ingestion_method: types.keyword({}),
 };
 
 export const storageSettings = {

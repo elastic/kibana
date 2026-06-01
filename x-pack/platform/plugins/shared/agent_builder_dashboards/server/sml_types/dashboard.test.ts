@@ -208,6 +208,7 @@ describe('dashboardSmlType', () => {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
           elasticsearch: { indices: [] },
         },
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -268,6 +269,7 @@ describe('dashboardSmlType', () => {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
           elasticsearch: { indices: [] },
         },
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,

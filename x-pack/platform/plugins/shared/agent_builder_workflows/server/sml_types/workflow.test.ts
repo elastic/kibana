@@ -49,6 +49,7 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
     kibana: { privileges: [] },
     elasticsearch: { indices: [] },
   },
+  ingestion_method: 'crawled',
   ...overrides,
 });
 

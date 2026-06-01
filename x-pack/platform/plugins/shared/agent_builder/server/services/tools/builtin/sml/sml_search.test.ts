@@ -77,6 +77,7 @@ describe('createSmlSearchTool', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        ingestion_method: 'crawled',
       },
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });

@@ -63,6 +63,8 @@ export interface SmlHttpItem {
     kibana: { privileges: Array<{ name: string }> };
     elasticsearch: { indices: Array<{ name: string }> };
   };
+  /** How this chunk was produced. */
+  ingestion_method: 'manual' | 'crawled';
 }
 
 /**

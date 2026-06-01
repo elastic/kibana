@@ -12,19 +12,18 @@ import type { SmlHttpItem } from '../../common/http_api/sml';
 import type { SmlDocument } from '../services/sml/types';
 import { apiPrivileges } from '../../common/features';
 
-export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => {
-  return {
-    id: doc.id,
-    type: doc.type,
-    title: doc.title,
-    origin_id: doc.origin_id,
-    content: doc.content,
-    created_at: doc.created_at,
-    updated_at: doc.updated_at,
-    spaces: doc.spaces,
-    permissions: doc.permissions,
-  };
-};
+export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => ({
+  id: doc.id,
+  type: doc.type,
+  title: doc.title,
+  origin_id: doc.origin_id,
+  content: doc.content,
+  created_at: doc.created_at,
+  updated_at: doc.updated_at,
+  spaces: doc.spaces,
+  permissions: doc.permissions,
+  ingestion_method: doc.ingestion_method,
+});
 
 export const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readAgentContextLayer] },

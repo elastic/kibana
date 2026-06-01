@@ -232,6 +232,7 @@ describe('createRuleSmlType', () => {
       updated_at: '2026-04-10T00:00:00.000Z',
       spaces: ['default'],
       permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+      ingestion_method: 'crawled' as const,
       ...overrides,
     });
 
