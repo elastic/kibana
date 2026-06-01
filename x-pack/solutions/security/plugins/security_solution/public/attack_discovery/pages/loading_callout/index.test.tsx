@@ -304,6 +304,35 @@ describe('LoadingCallout', () => {
       });
     });
 
+    it('does not allow navigating to the workflow execution details flyout when the feature flag is disabled', async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
+          http: {},
+          telemetry: { reportEvent: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      render(
+        <TestProviders>
+          <LoadingCallout {...defaultProps} workflowId="workflow-123" workflowRunId="run-456" />
+        </TestProviders>
+      );
+
+      // Wait for the async feature flag read to resolve so a late-arriving
+      // `true` value could not have re-rendered the button.
+      await waitFor(() => {
+        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+      });
+
+      // With the flag off there is no entry point to open the flyout, so it
+      // must never be reachable.
+      expect(screen.queryByTestId('detailsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowExecutionDetailsFlyout')).not.toBeInTheDocument();
+    });
+
     it('renders the Details button when feature flag is enabled and workflow IDs are present', async () => {
       mockUseKibana.mockReturnValue({
         services: {
