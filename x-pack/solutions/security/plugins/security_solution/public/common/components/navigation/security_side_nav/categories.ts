@@ -6,16 +6,21 @@
  */
 
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
+  chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
-  isNewEAHomePageEnabled?: boolean
+  isNewEAHomePageEnabled?: boolean,
+  securityClassicNavExternalLinks?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.dashboards],
+      linkIds: securityClassicNavExternalLinks
+        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
+        : [SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -26,6 +31,14 @@ export const getNavCategories = (
           : SecurityPageName.alerts,
         SecurityPageName.alertsV2,
         SecurityPageName.rulesV2,
+        ...(securityClassicNavExternalLinks
+          ? [
+              ...(chatExperience === AIChatExperience.Agent
+                ? [SecurityPageName.externalLinkAgentBuilder]
+                : []),
+              SecurityPageName.externalLinkWorkflows,
+            ]
+          : []),
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
