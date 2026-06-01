@@ -14,15 +14,6 @@ import { getKpiUniquePrivateIpsAreaLensAttributes } from './kpi_unique_private_i
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
