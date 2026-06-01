@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   htmlIdGenerator,
   EuiToolTip,
 } from '@elastic/eui';
@@ -130,6 +131,10 @@ export const ArgumentFileSelector = memo<
         closePopover={handleClosePopover}
         anchorPosition="upCenter"
         initialFocus={`[id="${filePickerUUID}"]`}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.consoleArgumentSelectors.fileSelector.popover.ariaLabel',
+          { defaultMessage: 'Select file' }
+        )}
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
