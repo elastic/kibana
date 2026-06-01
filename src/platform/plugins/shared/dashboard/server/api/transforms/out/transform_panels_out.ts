@@ -14,7 +14,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
-import { embeddableService } from '../../../kibana_services';
+import { embeddableService, logger } from '../../../kibana_services';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
@@ -40,7 +40,15 @@ export function transformPanelsOut(
     };
   });
 
-  JSON.parse(panelsJSON).forEach((storedPanel: SavedDashboardPanel) => {
+  let parsedPanels;
+  try {
+    parsedPanels = JSON.parse(panelsJSON);
+  } catch (parseError) {
+    logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
+    return { panels: [], warnings };
+  }
+
+  parsedPanels.forEach((storedPanel: SavedDashboardPanel) => {
     const storedPanelReferences = getPanelReferences(containerReferences ?? [], storedPanel);
     const { sectionId } = storedPanel.gridData;
     const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
