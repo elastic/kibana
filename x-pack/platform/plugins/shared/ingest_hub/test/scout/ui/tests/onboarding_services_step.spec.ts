@@ -9,9 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-// cloudwatch_logs and cloudwatch_metrics have defaultEnabled: false; all others are enabled by default.
-const TOTAL_SERVICES = 14;
-const DEFAULT_SELECTED_COUNT = 12;
+// 54 services have showInUI: true. 7 of those have defaultEnabled: false:
+// cloudwatch_logs, cloudwatch_metrics, cloudtrail_otel, vpcflow_otel, waf_otel, aws_logs, firehose.
+const TOTAL_SERVICES = 54;
+const DEFAULT_SELECTED_COUNT = 47;
 
 test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
@@ -38,9 +39,11 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     const rows = page.locator('[data-test-subj^="servicesStep-serviceRow-"]');
     await expect(rows).toHaveCount(TOTAL_SERVICES);
 
-    // cloudwatch_logs and cloudwatch_metrics are off by default
+    // services with defaultEnabled: false are unchecked
     await expect(page.testSubj.locator('servicesStep-toggle-cloudwatch_logs')).not.toBeChecked();
     await expect(page.testSubj.locator('servicesStep-toggle-cloudwatch_metrics')).not.toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-toggle-cloudtrail_otel')).not.toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-toggle-firehose')).not.toBeChecked();
 
     // a defaultEnabled service is checked
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).toBeChecked();

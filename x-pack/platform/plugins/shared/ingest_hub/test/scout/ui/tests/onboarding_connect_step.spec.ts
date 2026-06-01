@@ -13,7 +13,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': true,
+        'ingestHub.onboardingEnabled': 'true',
       },
     });
   });
@@ -21,7 +21,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': false,
+        'ingestHub.onboardingEnabled': 'false',
       },
     });
   });
@@ -53,10 +53,16 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await browserAuth.loginAsAdmin();
+
+    // Deselect all services so selectedServiceIds is empty → showIdentityFederation = true
+    await page.gotoApp('onboarding/aws#services');
+    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await page.testSubj.locator('servicesStep-deselectAllButton').click();
+
     await page.gotoApp('onboarding/aws#connect');
     await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
-    // Identity federation is the default auth type; with no connectors the New Identity tab is shown
+    // Identity federation is shown when no services are selected; with no connectors the New Identity tab is shown
     await expect(page.testSubj.locator('awsIdentityFederationSetup-roleArn')).toBeVisible();
     await expect(
       page.testSubj.locator('awsIdentityFederationSetup-launchCloudFormation')
@@ -127,6 +133,12 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
       connectorId = response.data.item.id;
 
       await browserAuth.loginAsAdmin();
+
+      // Deselect all services so selectedServiceIds is empty → showIdentityFederation = true
+      await page.gotoApp('onboarding/aws#services');
+      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+      await page.testSubj.locator('servicesStep-deselectAllButton').click();
+
       await page.gotoApp('onboarding/aws#connect');
       await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 

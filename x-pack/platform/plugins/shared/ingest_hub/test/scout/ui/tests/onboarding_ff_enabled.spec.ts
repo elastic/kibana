@@ -21,7 +21,7 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': false,
+        'ingestHub.onboardingEnabled': 'false',
       },
     });
   });
@@ -34,15 +34,15 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
 
     await test.step('redirects to first step hash when no hash is present', async () => {
       await page.gotoApp('onboarding/aws');
-      await expect(page).toHaveURL(/#connect/);
+      await expect(page).toHaveURL(/#services/);
     });
 
     await test.step('renders the onboarding step shell', async () => {
       await expect(page.testSubj.locator('onboardingShell')).toBeVisible();
     });
 
-    await test.step('shows the connect step as current', async () => {
-      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+    await test.step('shows the services step as current', async () => {
+      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
     });
 
     await test.step('renders 5 step indicators', async () => {
