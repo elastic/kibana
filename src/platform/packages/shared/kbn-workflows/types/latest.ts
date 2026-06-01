@@ -45,6 +45,9 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
@@ -84,6 +87,8 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+  WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,

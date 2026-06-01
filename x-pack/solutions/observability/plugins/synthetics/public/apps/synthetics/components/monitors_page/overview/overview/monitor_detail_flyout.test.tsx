@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as reduxHooks from 'react-redux';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
@@ -14,8 +15,9 @@ import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { getMonitorAction } from '../../../../state';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -28,6 +30,18 @@ useFetcherMock.mockReturnValue({
   data: { monitor: { tags: ['tag1', 'tag2'] } },
   status: 200,
   refetch: jest.fn(),
+});
+
+// `jest.mock('@kbn/observability-shared-plugin/public')` auto-mocks every export
+// with `() => undefined`. The flyout renders `MonitorStatusPanel`, which now
+// reaches `useRemoteMonitor` via `useSelectedMonitor`; that hook destructures
+// `useEsSearch(...)`, so the mock must return a non-undefined result.
+const useEsSearchMock = useEsSearch as jest.Mock;
+
+useEsSearchMock.mockReturnValue({
+  data: undefined,
+  loading: false,
+  error: undefined,
 });
 
 describe('Monitor Detail Flyout', () => {
@@ -112,6 +126,57 @@ describe('Monitor Detail Flyout', () => {
     getByText(testErrorText, { exact: false });
   });
 
+  it('hides the fetch-error callout when overview heartbeat data is available (cross-space)', () => {
+    const testErrorText = 'This is a test error';
+
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        configId="cross-space-config-id"
+        id="cross-space-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+            syntheticsMonitorError: {
+              body: { statusCode: 404, error: 'Not Found', message: testErrorText },
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                'cross-space-config-id-us-east': {
+                  monitorQueryId: 'cross-space-id',
+                  configId: 'cross-space-config-id',
+                  name: 'Cross-space monitor',
+                  type: 'http',
+                  schedule: '1',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  spaces: ['team-a'],
+                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    expect(queryByText(testErrorText, { exact: false })).toBeNull();
+  });
+
   it('renders loading state while fetching', () => {
     const { getByRole, getByText } = render(
       <MonitorDetailFlyout
@@ -137,6 +202,49 @@ describe('Monitor Detail Flyout', () => {
     expect(getByText('Overview')).toBeInTheDocument();
     expect(getByText('Performance')).toBeInTheDocument();
     expect(getByText('Details')).toBeInTheDocument();
+  });
+
+  it('does not dispatch getMonitorAction before the active space resolves', () => {
+    // Simulate `useKibanaSpace` (which is the only `useFetcher` consumer in
+    // this component) still loading — `space` is undefined across renders.
+    // Previously the flyout would dispatch `getMonitorAction.get` without
+    // `spaceId`, hit the active space, and 404 for cross-space monitors.
+    // The retry that fires once `space` resolves was then silently dropped
+    // by the `takeLeading` saga while the first call was still in flight,
+    // leaving the 404 in Redux state forever.
+    const previousFetcherImpl = useFetcherMock.getMockImplementation();
+    useFetcherMock.mockReturnValue({
+      data: undefined,
+      loading: true,
+      refetch: jest.fn(),
+    });
+
+    const mockDispatch = jest.fn();
+    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="cross-space-monitor"
+          id="cross-space-monitor"
+          location="US East"
+          locationId="us-east"
+          spaces={['team-a']}
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(0);
+    } finally {
+      if (previousFetcherImpl) {
+        useFetcherMock.mockImplementation(previousFetcherImpl);
+      }
+    }
   });
 
   it('renders details for fetch success', () => {

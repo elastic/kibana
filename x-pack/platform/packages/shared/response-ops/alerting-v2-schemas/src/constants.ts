@@ -40,3 +40,12 @@ export const MAX_NAME_LENGTH = 256;
 
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
+
+/** Maximum number of destinations per action policy. */
+export const ACTION_POLICY_MAX_DESTINATIONS = 10;
+
+/**
+ * Maximum length for the `version` field. Used by the optimistic concurrency control check on `PATCH /{id}`
+ * and `PUT /{id}`.
+ */
+export const VERSION_MAX_LENGTH = 256;

@@ -33,12 +33,7 @@ const smlStorageSchemaProperties = {
   updated_at: types.date({}),
   spaces: types.keyword({}),
   permissions: types.keyword({}),
-  /**
-   * How this chunk was produced. `resolved` = crawler / `getSmlData` hook;
-   * `direct` = caller supplied chunks (HTTP, workflow step, ...). Used to
-   * enforce the per-origin-id mutual-exclusion invariant.
-   */
-  source: types.keyword({}),
+  ingestion_method: types.keyword({}),
 };
 
 export const storageSettings = {

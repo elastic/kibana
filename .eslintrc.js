@@ -190,6 +190,7 @@ const DEV_PATTERNS = [
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -1021,6 +1022,7 @@ module.exports = {
       rules: {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
+        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
@@ -2990,6 +2992,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2999,8 +3002,8 @@ module.exports = {
               '@kbn/*',
               '!@kbn/i18n',
               '!@kbn/i18n-react',
-              '!@kbn/core-chrome-layout-constants',
-              '!@kbn/core-chrome-layout-utils',
+              '!@kbn/ui-chrome-layout-constants',
+              '!@kbn/ui-chrome-layout-utils',
             ],
           },
         ],
@@ -3021,6 +3024,19 @@ module.exports = {
           'error',
           ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
+      },
+    },
+    {
+      // These files are allowed to reference 'npx playwright' — either because they define
+      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
+      // to explain what went wrong.
+      files: [
+        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+      ],
+      rules: {
+        '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
   ],

@@ -52,6 +52,50 @@ describe('getCustomAgents', () => {
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
   });
 
+  test('passes target SSL overrides to the CONNECT-upgraded TLS request', async () => {
+    const callbackSpy = jest
+      .spyOn(HttpsProxyAgent.prototype, 'callback')
+      .mockResolvedValue({} as Awaited<ReturnType<HttpsProxyAgent['callback']>>);
+    const proxySettings = {
+      proxyUrl: 'http://someproxyhost',
+      proxySSLSettings: {
+        verificationMode: 'full',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslOverrides: {
+        verificationMode: 'none',
+      },
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+
+    try {
+      await (httpsAgent as unknown as HttpsProxyAgent).callback(
+        {} as Parameters<HttpsProxyAgent['callback']>[0],
+        {
+          host: targetHost,
+          port: 443,
+          secureEndpoint: true,
+        } as Parameters<HttpsProxyAgent['callback']>[1]
+      );
+
+      expect(callbackSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          rejectUnauthorized: false,
+        })
+      );
+    } finally {
+      callbackSpy.mockRestore();
+    }
+  });
+
   test('return default agents for invalid proxy URL', () => {
     const proxySettings = {
       proxyUrl: ':nope: not a valid URL',

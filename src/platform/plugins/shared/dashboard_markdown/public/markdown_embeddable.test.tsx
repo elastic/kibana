@@ -336,4 +336,36 @@ describe('MarkdownEmbeddable', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: MarkdownEditorApi;
+    beforeEach((done) => {
+      renderEmbeddable(
+        markdownEmbeddableSchema.validate({
+          content: 'hello',
+        })
+      )
+        .then(({ embeddable }) => {
+          embeddableApi = embeddable.api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
+    });
+  });
 });

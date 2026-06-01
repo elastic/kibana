@@ -146,18 +146,15 @@ export interface SmlTypeDefinition {
 }
 
 /**
- * Where a chunk was produced.
+ * How a chunk was produced.
  *
- * - `resolved`: produced by the crawler or any caller relying on the registered
- *   type's `getSmlData(originId)` hook.
- * - `direct`: produced by a caller that supplied chunks directly (HTTP API,
- *   workflow step, ...).
- *
- * The two modes are mutually exclusive per `origin_id`: a `direct` write
- * overrides any existing chunks, and a `resolved` write is skipped when
- * `direct` chunks already exist.
+ * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
+ *   origin-mode call (content fetched via `getSmlData`).
+ * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
+ *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
+ *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
  */
-export type SmlDocumentSource = 'resolved' | 'direct';
+export type SmlIngestionMethod = 'manual' | 'crawled';
 
 /**
  * An SML document as stored in the system index.
@@ -187,16 +184,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
-  /**
-   * How this chunk was produced. See {@link SmlDocumentSource}.
-   *
-   * Optional on the type so callers can construct `SmlDocument` literals
-   * (tests, hook contexts) without specifying it. When omitted the field is
-   * treated as `'resolved'` (the historical default before direct-mode
-   * writes existed). The indexer always writes an explicit value; the SML
-   * service applies the `'resolved'` default when reading documents back.
-   */
-  source?: SmlDocumentSource;
+  /** How this chunk was produced. */
+  ingestion_method: SmlIngestionMethod;
 }
 
 /**
@@ -246,10 +235,92 @@ export interface SmlCrawler {
 }
 
 /**
+ * Input fields for upserting an SML document.
+ *
+ * `created_at` / `updated_at` are managed server-side; `id` is the URL path id;
+ * `spaces` is derived from the caller's space (on create) or preserved from the
+ * existing document (on update) — callers cannot specify it directly.
+ */
+export interface SmlDocumentInput {
+  type: string;
+  title: string;
+  origin_id: string;
+  content: string;
+  permissions?: string[];
+}
+
+/**
+ * Result of an upsert operation.
+ */
+export interface SmlUpsertResult {
+  document: SmlDocument;
+  /** Whether the document was newly created (vs. updated in place). */
+  created: boolean;
+}
+
+/**
  * Per-type filter parameters for SML search.
  * Re-exported from the shared HTTP API types so server and client use a single definition.
  */
 export type { SmlSearchFilters } from '../../../common/http_api/sml';
+
+/**
+ * Mode discriminator for `indexAttachment`.
+ *
+ * The two mixins below define the discriminated half of the parameter object. They are
+ * combined with a layer-specific "base" (public vs internal) to form the full unions:
+ * `SmlIndexAttachmentParams` (public, in `server/types.ts`) and `SmlIndexerParams`
+ * (internal, below).
+ *
+ * Origin mode — content is produced by the registered type's `getSmlData` hook.
+ * Resulting chunks are tagged `ingestion_method: 'crawled'`. If the target `origin_id`
+ * already has any `ingestion_method: 'manual'` chunks, the call is a no-op unless
+ * `force: true` is provided.
+ */
+export interface SmlIndexAttachmentOriginMode {
+  /** Override existing manual entries. Default: false. */
+  force?: boolean;
+  content?: undefined;
+}
+
+/**
+ * Content mode — caller supplies pre-built chunks directly; `getSmlData` is not called.
+ * Resulting chunks are tagged `ingestion_method: 'manual'`. Always overwrites existing
+ * chunks for the `origin_id`.
+ */
+export interface SmlIndexAttachmentContentMode {
+  /** Pre-built chunks; skips getSmlData; marks `ingestion_method='manual'`. */
+  content: SmlChunk[];
+  force?: undefined;
+}
+
+/**
+ * Common params shared by both modes of the internal `indexAttachment` flow
+ * (`SmlService.indexAttachment` and `SmlIndexer.indexAttachment`).
+ *
+ * Unlike the public-contract `SmlIndexAttachmentParams` (`server/types.ts`), this
+ * type has no `request` / `spaceId` — by the time the call reaches the service or
+ * indexer, the public wrapper has already resolved a scoped saved-objects client,
+ * an internal ES client, and the space list.
+ */
+interface SmlIndexerBaseParams {
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  spaces: string[];
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  logger: Logger;
+}
+
+export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;
+export type SmlIndexerContentParams = SmlIndexerBaseParams & SmlIndexAttachmentContentMode;
+
+/**
+ * Discriminated union for the internal `indexAttachment` flow. Shared between
+ * `SmlService.indexAttachment` and `SmlIndexer.indexAttachment`.
+ */
+export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
 
 /**
  * SML service interface — exposed on the plugin start contract.
@@ -287,46 +358,8 @@ export interface SmlService {
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
-  /**
-   * Index a single attachment (event-driven).
-   *
-   * Behavior depends on the effective `source`:
-   * - `direct`: caller supplies `chunks` (and **must** supply `spaceId`).
-   *   The indexer calls the type's `resolveOriginAccess(originId, ctx,
-   *   spaceId)` hook to determine the effective `spaces` and `permissions`,
-   *   wipes any pre-existing chunks for `originId` (regardless of source),
-   *   and writes the supplied chunks tagged with `source: 'direct'`. For
-   *   `action: 'delete'` it wipes all chunks for the origin after the same
-   *   access check.
-   * - `resolved`: the indexer calls `getSmlData(originId)` via the registered
-   *   type. If chunks tagged `source: 'direct'` already exist for this origin,
-   *   the operation is **skipped** to preserve the user's override.
-   *
-   * `source` is inferred when not provided: `'direct'` if `chunks` is set,
-   * otherwise `'resolved'`.
-   */
-  indexAttachment: (params: {
-    originId: string;
-    attachmentType: string;
-    action: SmlIndexAction;
-    /**
-     * Target spaces for **resolved** writes (typically supplied by the
-     * crawler from `SmlListItem.spaces`). Ignored in direct mode — the
-     * effective spaces are read from `resolveOriginAccess` instead.
-     */
-    spaces: string[];
-    /**
-     * Caller's current space. Required for **direct** writes — used to call
-     * `resolveOriginAccess` and to reject cross-space attempts. Optional /
-     * unused for resolved writes.
-     */
-    spaceId?: string;
-    esClient: ElasticsearchClient;
-    savedObjectsClient: SavedObjectsClientContract;
-    logger: Logger;
-    chunks?: SmlChunk[];
-    source?: SmlDocumentSource;
-  }) => Promise<void>;
+  /** Index a single attachment (event-driven or manual). See {@link SmlIndexerParams}. */
+  indexAttachment: (params: SmlIndexerParams) => Promise<void>;
 
   /**
    * Fetch SML documents by their chunk IDs, scoped to a space.
@@ -343,6 +376,43 @@ export interface SmlService {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
+
+  /** List SML documents in a space with optional filters and pagination. */
+  listDocuments: (params: {
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    page?: number;
+    perPage?: number;
+    type?: string;
+    originId?: string;
+  }) => Promise<{ total: number; results: SmlDocument[] }>;
+
+  /**
+   * Upsert an SML document by id, scoped to a space.
+   *
+   * On create the new document's `spaces` is `[spaceId]`. On update the
+   * existing document's `spaces` is preserved.
+   *
+   * Resolves to `null` when a document with this id exists but is not
+   * visible from `spaceId` (caller cannot clobber across spaces).
+   */
+  upsertDocument: (params: {
+    id: string;
+    spaceId: string;
+    document: SmlDocumentInput;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlUpsertResult | null>;
+
+  /**
+   * Delete an SML document by id, scoped to a space.
+   * Resolves to `true` when a document was deleted, `false` when no
+   * matching document was found.
+   */
+  deleteDocument: (params: {
+    id: string;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<boolean>;
 
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;

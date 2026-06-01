@@ -8,46 +8,68 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
+import { createFieldFormatMock } from '../test_utils';
 import { DateFormatEditor } from './date';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const fieldType = 'date';
-const format = {
-  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
+
+const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: 'MMMM Do YYYY, HH:mm:ss.SSS' };
   }),
-};
+  convertToReact: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
+});
+
 const formatParams = { pattern: '' };
+
+const mockedTimeNow = 1529097045190;
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderDateFormatEditor = () =>
+  renderWithI18n(
+    <DateFormatEditor
+      fieldType={fieldType}
+      format={format}
+      formatParams={formatParams}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('DateFormatEditor', () => {
-  it('should have a formatId', () => {
-    expect(DateFormatEditor.formatId).toEqual('date');
+  beforeEach(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(mockedTimeNow);
   });
 
-  it('should render normally', async () => {
-    const component = shallow(
-      <DateFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-    // Date editor samples uses changing values - Date.now() - so we
-    // hardcode samples to avoid ever-changing snapshots
-    component.setState({
-      sampleInputs: [1529097045190, 1514793600000, 1546329599999],
-    });
+  it('should have a formatId', () => {
+    expect(DateFormatEditor.formatId).toEqual(formatId);
+  });
 
-    component.instance().forceUpdate();
-    component.update();
-    expect(component).toMatchSnapshot();
+  it('should render normally', () => {
+    renderDateFormatEditor();
+
+    expect(
+      screen.getByText((_, element) =>
+        Boolean(
+          element?.tagName === 'LABEL' &&
+            element?.textContent?.includes(
+              'Moment.js format pattern (Default: MMMM Do YYYY, HH:mm:ss.SSS)'
+            )
+        )
+      )
+    ).toBeVisible();
+    expect(screen.getByText('MMMM Do YYYY, HH:mm:ss.SSS')).toBeVisible();
+    expect(screen.getByText('Documentation')).toBeVisible();
+    expect(screen.getByText(mockedTimeNow)).toBeVisible();
+    expect(screen.getByText(`converted date for ${mockedTimeNow}`)).toBeVisible();
   });
 });
