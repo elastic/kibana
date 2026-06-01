@@ -11,19 +11,22 @@ import { css } from '@emotion/react';
 import { monaco } from '@kbn/code-editor';
 
 const LINE_HEIGHT = 18;
-const CONTEXT_LINE_COUNT = 3;
-const MINIMUM_LINE_COUNT = 3;
 const EDITOR_HEIGHT = 240;
 
 const wrapperCss = css`
-  .diff-hidden-lines .center {
-    gap: 8px;
-  }
   /* Workaround for https://github.com/microsoft/monaco-editor/issues/3873:
      lightbulb on deleted lines ignores the lightbulb.enabled option. */
   .codicon.codicon-light-bulb.lightbulb-glyph {
     display: none;
   }
+`;
+
+// Applied in canvas view so the diff editor grows to fill the remaining flex space,
+// leaving room for the badges below — identical to how EuiCodeBlock behaves.
+const fullContentWrapperCss = css`
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
 `;
 
 interface UseDiffEditorParams {
@@ -34,7 +37,7 @@ interface UseDiffEditorParams {
 
 /** Creates and manages a Monaco inline diff editor bound to `containerRef`. */
 const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEditorParams) => {
-  const { colorMode } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -42,7 +45,15 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
       return;
     }
 
-    const theme = colorMode === 'DARK' ? 'vs-dark' : 'vs';
+    // Redefine before creating the editor so the background tracks the EUI token value.
+    const theme = colorMode === 'DARK' ? 'skill-diff-dark' : 'skill-diff-light';
+    monaco.editor.defineTheme(theme, {
+      base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
+      inherit: true,
+      rules: [],
+      colors: { 'editor.background': euiTheme.components.codeBackground },
+    });
+
     const originalModel = monaco.editor.createModel(beforeContent, 'markdown');
     const modifiedModel = monaco.editor.createModel(afterContent, 'markdown');
 
@@ -62,16 +73,11 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
         horizontal: 'hidden',
         handleMouseWheel: true,
       },
-      hideUnchangedRegions: {
-        enabled: true,
-        revealLineCount: 2,
-        minimumLineCount: MINIMUM_LINE_COUNT,
-        contextLineCount: CONTEXT_LINE_COUNT,
-      },
       renderOverviewRuler: false,
       fontSize: 12,
       lineHeight: LINE_HEIGHT,
       padding: { top: 24, bottom: 24 },
+      lineDecorationsWidth: 24,
       lightbulb: { enabled: false },
       contextmenu: false,
       domReadOnly: true,
@@ -86,24 +92,29 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
       originalModel.dispose();
       modifiedModel.dispose();
     };
-  }, [containerRef, beforeContent, afterContent, colorMode]);
+  }, [containerRef, beforeContent, afterContent, colorMode, euiTheme]);
 };
 
 interface SkillDiffViewerProps {
   beforeContent: string;
   afterContent: string;
+  /** When true (canvas), grows to fill available flex space. When false (conversation), fixed 240px height. */
+  showFullContent: boolean;
 }
 
 export const SkillDiffViewer: React.FC<SkillDiffViewerProps> = ({
   beforeContent,
   afterContent,
+  showFullContent,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   useDiffEditor({ containerRef, beforeContent, afterContent });
 
+  const containerHeight = showFullContent ? '100%' : EDITOR_HEIGHT;
+
   return (
-    <div css={wrapperCss}>
-      <div ref={containerRef} style={{ height: EDITOR_HEIGHT, width: '100%' }} />
+    <div css={[wrapperCss, showFullContent && fullContentWrapperCss]}>
+      <div ref={containerRef} style={{ height: containerHeight, width: '100%' }} />
     </div>
   );
 };

@@ -191,101 +191,105 @@ const SkillInstructions = ({
   );
 
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {hasPreviousVersion && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
-                { defaultMessage: 'Instructions view' }
-              )}
-              options={[
-                {
-                  id: 'current',
-                  label: i18n.translate(
-                    'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
-                    { defaultMessage: 'Current' }
-                  ),
-                },
-                {
-                  id: 'diff',
-                  label: i18n.translate(
-                    'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
-                    { defaultMessage: 'Changes' }
-                  ),
-                },
-              ]}
-              idSelected={showDiff ? 'diff' : 'current'}
-              onChange={(id) => {
-                setShowDiff(id === 'diff');
-              }}
-              buttonSize="compressed"
-              color="text"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      {showDiff && hasPreviousVersion && beforeContent ? (
-        <>
-          <SkillDiffViewer beforeContent={beforeContent} afterContent={content} />
-          {hasOriginalDiff && (
-            <EuiButtonEmpty
-              size="xs"
-              color="primary"
-              onClick={() => {
-                setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
-              }}
-            >
-              {diffBase === 'original' ? (
-                <FormattedMessage
-                  id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
-                  defaultMessage="vs previous version"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
-                  defaultMessage="vs original content"
-                />
-              )}
-            </EuiButtonEmpty>
-          )}
-        </>
-      ) : (
-        <EuiCodeBlock
-          language="markdown"
-          fontSize="s"
-          overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
-          isCopyable={showFullContent}
-          css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
+    <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          css={css`
+            flex-grow: 0;
+          `}
         >
-          {content}
-        </EuiCodeBlock>
-      )}
-    </>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <strong>{label}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          {hasPreviousVersion && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
+                  { defaultMessage: 'Instructions view' }
+                )}
+                options={[
+                  {
+                    id: 'current',
+                    label: i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
+                      { defaultMessage: 'Current' }
+                    ),
+                  },
+                  {
+                    id: 'diff',
+                    label: i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
+                      { defaultMessage: 'Changes' }
+                    ),
+                  },
+                ]}
+                idSelected={showDiff ? 'diff' : 'current'}
+                onChange={(id) => {
+                  setShowDiff(id === 'diff');
+                }}
+                buttonSize="compressed"
+                color="text"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {showDiff && hasPreviousVersion && beforeContent ? (
+          <>
+            <SkillDiffViewer
+              beforeContent={beforeContent}
+              afterContent={content}
+              showFullContent={showFullContent}
+            />
+            {hasOriginalDiff && (
+              <EuiButtonEmpty
+                size="xs"
+                color="primary"
+                onClick={() => {
+                  setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
+                }}
+              >
+                {diffBase === 'original' ? (
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
+                    defaultMessage="vs previous version"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
+                    defaultMessage="vs original content"
+                  />
+                )}
+              </EuiButtonEmpty>
+            )}
+          </>
+        ) : (
+          <EuiCodeBlock
+            language="markdown"
+            fontSize="s"
+            overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
+            isCopyable={showFullContent}
+            css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
+          >
+            {content}
+          </EuiCodeBlock>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
 interface SkillCardProps extends AttachmentRenderProps<SkillAttachment> {
   isCanvas?: boolean;
 }
-
-const fullContentPanelStyles = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
 
 const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
   const {
@@ -301,34 +305,42 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
       hasShadow={false}
       hasBorder={false}
       paddingSize="m"
-      css={showFullContent && fullContentPanelStyles}
+      css={showFullContent && { height: '100%' }}
     >
-      <EuiText size="xs" color="subdued">
-        <strong>
-          <FormattedMessage
-            id="xpack.agentBuilderPlatform.attachments.skill.descriptionLabel"
-            defaultMessage="Description"
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={showFullContent && { height: '100%' }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              <FormattedMessage
+                id="xpack.agentBuilderPlatform.attachments.skill.descriptionLabel"
+                defaultMessage="Description"
+              />
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>{description}</p>
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <SkillInstructions
+            showFullContent={showFullContent}
+            content={content}
+            previousContent={previousContent}
+            originalContent={originalContent}
+            mode={mode}
           />
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-
-      <EuiHorizontalRule margin="m" />
-
-      <SkillInstructions
-        showFullContent={showFullContent}
-        content={content}
-        previousContent={previousContent}
-        originalContent={originalContent}
-        mode={mode}
-      />
-
-      <EuiHorizontalRule margin="m" />
-
-      <SkillReferences toolIds={toolIds} referencedContent={referencedContent} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="m" />
+          <SkillReferences toolIds={toolIds} referencedContent={referencedContent} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
