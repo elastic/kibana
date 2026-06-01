@@ -5383,6 +5383,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-navigation-customization@link:src/core/packages/chrome/navigation-customization":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar-components":
   version "0.0.0"
   uid ""

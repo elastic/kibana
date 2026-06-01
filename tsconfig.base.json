@@ -468,6 +468,8 @@
       "@kbn/core-chrome-layout-constants/*": ["src/core/packages/chrome/layout/core-chrome-layout-constants/*"],
       "@kbn/core-chrome-layout-utils": ["src/core/packages/chrome/layout/core-chrome-layout-utils"],
       "@kbn/core-chrome-layout-utils/*": ["src/core/packages/chrome/layout/core-chrome-layout-utils/*"],
+      "@kbn/core-chrome-navigation-customization": ["src/core/packages/chrome/navigation-customization"],
+      "@kbn/core-chrome-navigation-customization/*": ["src/core/packages/chrome/navigation-customization/*"],
       "@kbn/core-chrome-sidebar": ["src/core/packages/chrome/sidebar/sidebar"],
       "@kbn/core-chrome-sidebar/*": ["src/core/packages/chrome/sidebar/sidebar/*"],
       "@kbn/core-chrome-sidebar-components": ["src/core/packages/chrome/sidebar/sidebar-components"],

@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  CustomizeNavigationModal,
-  CustomizeNavigationUserMenuLink,
-  openCustomizeNavigationModal,
-  createCustomizeNavMenuLink,
-} from './src';
-
-export type { NavigationItemInfo, OpenCustomizeNavigationModalDeps } from './src';
+export { computeMoves } from './src/compute_moves';
+export { replayMoves } from './src/replay_moves';

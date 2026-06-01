@@ -8,7 +8,7 @@
  */
 
 import type { CloudLinks, ChromeNavLink, NavigationCustomization } from '@kbn/core-chrome-browser';
-import { applyCustomization } from './apply_customization';
+import { applyCustomization, type ParsedNavigation } from './apply_customization';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -29,7 +29,7 @@ const buildDef = (ids: string[]) => ({
 });
 
 /** Extract the render-ready IDs (home, definition-hidden, and no-leaf nodes pruned). */
-const renderableIds = (result: ReturnType<typeof applyCustomization>): string[] =>
+const renderableIds = (result: ParsedNavigation): string[] =>
   result.renderableNodes.map((n) => n.id);
 
 /** Build a minimal NavigationCustomization. */
@@ -180,7 +180,7 @@ describe('applyCustomization', () => {
     });
   });
 
-  describe('moves', () => {
+  describe('moves (integration smoke tests — full coverage in replay_moves.test.ts)', () => {
     it('moves an item to the front when afterId is null', () => {
       const result = applyCustomization(
         SOLUTION_ID,
@@ -191,143 +191,6 @@ describe('applyCustomization', () => {
       );
 
       expect(renderableIds(result)).toEqual(['c', 'a', 'b']);
-    });
-
-    it('moves an item to directly after a specified sibling', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c', 'd']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'd', afterId: 'a' }])
-      );
-
-      expect(renderableIds(result)).toEqual(['a', 'd', 'b', 'c']);
-    });
-
-    it('applies multiple moves sequentially (each move sees the result of the previous)', () => {
-      // Start: [a, b, c, d]
-      // Move 1: move d after a  → [a, d, b, c]
-      // Move 2: move b to front → [b, a, d, c]
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c', 'd']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([
-          { id: 'd', afterId: 'a' },
-          { id: 'b', afterId: null },
-        ])
-      );
-
-      expect(renderableIds(result)).toEqual(['b', 'a', 'd', 'c']);
-    });
-
-    it('skips a move whose id no longer exists in the navigation', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'removed_item', afterId: 'a' }])
-      );
-
-      // Original order preserved
-      expect(renderableIds(result)).toEqual(['a', 'b', 'c']);
-    });
-
-    it('skips a move whose afterId no longer exists in the navigation', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'a', afterId: 'removed_anchor' }])
-      );
-
-      // Original order preserved
-      expect(renderableIds(result)).toEqual(['a', 'b', 'c']);
-    });
-
-    it('does not skip a move when afterId is null (move to front is always valid)', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'c', afterId: null }])
-      );
-
-      expect(renderableIds(result)[0]).toBe('c');
-    });
-
-    it('moves an item that is currently at the front to a new position', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'a', afterId: 'b' }])
-      );
-
-      expect(renderableIds(result)).toEqual(['b', 'a', 'c']);
-    });
-
-    it('moves an item to the end when afterId is the last item', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c', 'd']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'a', afterId: 'd' }])
-      );
-
-      expect(renderableIds(result)).toEqual(['b', 'c', 'd', 'a']);
-    });
-
-    it('moves an item whose id is defined via the `link` field', () => {
-      // A `link`-based node is only rendered when a matching deepLink is resolved,
-      // otherwise it is removed during parsing (`sideNavStatus: 'remove'`).
-      const deepLinks: Record<string, ChromeNavLink> = {
-        discover: {
-          id: 'discover',
-          title: 'Discover',
-          baseUrl: '',
-          url: '/app/discover',
-          href: 'https://localhost/app/discover',
-          visibleIn: ['globalSearch'],
-        },
-      };
-      const def = {
-        id: SOLUTION_ID,
-        body: [
-          { link: 'discover' as any, title: 'Discover' },
-          { id: 'b', title: 'B', href: 'https://localhost/app/b' },
-          { id: 'c', title: 'C', href: 'https://localhost/app/c' },
-        ],
-      };
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        def,
-        deepLinks,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'discover', afterId: 'c' }])
-      );
-
-      expect(renderableIds(result)).toEqual(['b', 'c', 'discover']);
-    });
-
-    it('records no change for a no-op move (afterId equals current predecessor)', () => {
-      const result = applyCustomization(
-        SOLUTION_ID,
-        buildDef(['a', 'b', 'c']),
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        customization([{ id: 'b', afterId: 'a' }])
-      );
-
-      expect(renderableIds(result)).toEqual(['a', 'b', 'c']);
     });
   });
 
@@ -467,19 +330,16 @@ describe('applyCustomization', () => {
     });
   });
 
-  describe('version skew (old customization, newer tree)', () => {
-    it('replays a still-valid move and ignores parts that reference removed items', () => {
-      // v1 default: [discover, dashboards, ml, maps]. The user moved `maps` after
-      // `discover`, hid `ml`, and (in v1) also moved `ml` after `dashboards`.
+  describe('version skew (smoke test — full coverage in replay_moves.test.ts)', () => {
+    it('replays a still-valid move and ignores a stale move that references a removed item', () => {
       const oldCustomization = customization(
         [
           { id: 'maps', afterId: 'discover' }, // still valid in v2
           { id: 'ml', afterId: 'dashboards' }, // `ml` removed in v2 → skipped
         ],
-        ['ml' as any] // hidden id removed in v2 → harmlessly stale
+        ['ml' as any]
       );
 
-      // v2 default: `ml` removed, `alerts` added.
       const v2 = buildDef(['discover', 'dashboards', 'maps', 'alerts']);
 
       const result = applyCustomization(
@@ -490,44 +350,8 @@ describe('applyCustomization', () => {
         oldCustomization
       );
 
-      // Valid move applied; the new item keeps its default slot.
       expect(renderableIds(result)).toEqual(['discover', 'maps', 'dashboards', 'alerts']);
-      // Stale hidden id passes through, even though no such node exists anymore.
-      expect(result.overflowItemIds).toEqual(['ml']);
-      // defaultItemIds reflects the current (v2) tree.
       expect(result.defaultItemIds).toEqual(['discover', 'dashboards', 'maps', 'alerts']);
-    });
-
-    it('skips a move whose anchor (afterId) was removed in the newer tree', () => {
-      const oldCustomization = customization([{ id: 'maps', afterId: 'ml' }]);
-      const v2 = buildDef(['discover', 'dashboards', 'maps', 'alerts']);
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        v2,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        oldCustomization
-      );
-
-      // Anchor gone → move skipped → v2 default order preserved.
-      expect(renderableIds(result)).toEqual(['discover', 'dashboards', 'maps', 'alerts']);
-    });
-
-    it('keeps newly added default items when older moves reorder existing ones', () => {
-      // v1: [a, b, c]; user moved `c` to front. v2 adds `d` at the end.
-      const oldCustomization = customization([{ id: 'c', afterId: null }]);
-      const v2 = buildDef(['a', 'b', 'c', 'd']);
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        v2,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        oldCustomization
-      );
-
-      expect(renderableIds(result)).toEqual(['c', 'a', 'b', 'd']);
     });
   });
 

@@ -11,6 +11,20 @@ import { Subject } from 'rxjs';
 import type { NavigationCustomization } from '@kbn/core-chrome-browser';
 import { NavigationCustomizationService } from './navigation_customization_service';
 
+jest.mock('@kbn/navigation-customization-components', () => ({
+  createCustomizeNavMenuLink: jest.fn((openModal: () => void) => ({
+    iconType: 'controls',
+    label: 'Customize navigation',
+    href: '',
+    order: 500,
+    content: jest.fn(),
+  })),
+  openCustomizeNavigationModal: jest.fn(),
+}));
+
+/** Flush pending microtasks + macrotask so a dynamic import()'s .then() callback runs. */
+const flushAsyncImport = () => new Promise((resolve) => setImmediate(resolve));
+
 const makeDeps = (overrides?: {
   isUnauthenticated?: boolean;
   userStorageValue?: NavigationCustomization | undefined;
@@ -122,11 +136,12 @@ describe('NavigationCustomizationService', () => {
       expect(chrome.project.registerCustomizeNavigationHandler).toHaveBeenCalledTimes(1);
     });
 
-    it('adds the user-menu link when security is provided', () => {
+    it('adds the user-menu link when security is provided', async () => {
       const { core, chrome, security } = makeDeps();
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, security });
+      await flushAsyncImport();
 
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
       const [links] = (security.navControlService.addUserMenuLinks as jest.Mock).mock.calls[0];
@@ -134,26 +149,28 @@ describe('NavigationCustomizationService', () => {
       expect(links[0]).toMatchObject({ iconType: 'controls', order: 500 });
     });
 
-    it('does not add the menu link when security is absent', () => {
+    it('does not add the menu link when security is absent', async () => {
       const { core, chrome, security } = makeDeps();
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome }); // no security
+      await flushAsyncImport();
 
       expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
     });
 
-    it('adds the menu link once even when enableUi is called multiple times with security', () => {
+    it('adds the menu link once even when enableUi is called multiple times with security', async () => {
       const { core, chrome, security } = makeDeps();
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, security });
       service.enableUi({ core, chrome, security });
+      await flushAsyncImport();
 
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
     });
 
-    it('adds the menu link on a later call after the handler was registered without security', () => {
+    it('adds the menu link on a later call after the handler was registered without security', async () => {
       const { core, chrome, security } = makeDeps();
       const service = new NavigationCustomizationService();
 
@@ -161,6 +178,7 @@ describe('NavigationCustomizationService', () => {
       service.enableUi({ core, chrome });
       // Later: active space confirmed, add menu link
       service.enableUi({ core, chrome, security });
+      await flushAsyncImport();
 
       expect(chrome.project.registerCustomizeNavigationHandler).toHaveBeenCalledTimes(1);
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);

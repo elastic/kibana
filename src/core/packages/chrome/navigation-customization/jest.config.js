@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  CustomizeNavigationModal,
-  CustomizeNavigationUserMenuLink,
-  openCustomizeNavigationModal,
-  createCustomizeNavMenuLink,
-} from './src';
-
-export type { NavigationItemInfo, OpenCustomizeNavigationModalDeps } from './src';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/navigation-customization'],
+};

@@ -372,6 +372,7 @@
     "@kbn/core-chrome-layout": "link:src/core/packages/chrome/layout/core-chrome-layout",
     "@kbn/core-chrome-layout-constants": "link:src/core/packages/chrome/layout/core-chrome-layout-constants",
     "@kbn/core-chrome-layout-utils": "link:src/core/packages/chrome/layout/core-chrome-layout-utils",
+    "@kbn/core-chrome-navigation-customization": "link:src/core/packages/chrome/navigation-customization",
     "@kbn/core-chrome-sidebar": "link:src/core/packages/chrome/sidebar/sidebar",
     "@kbn/core-chrome-sidebar-components": "link:src/core/packages/chrome/sidebar/sidebar-components",
     "@kbn/core-chrome-sidebar-context": "link:src/core/packages/chrome/sidebar/sidebar-context",

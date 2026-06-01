@@ -16,6 +16,7 @@ import type {
   NavigationTreeDefinitionUI,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import { replayMoves } from '@kbn/core-chrome-navigation-customization';
 import { flattenNav, getRenderableNodes, parseNavigationTree } from './utils';
 
 export interface ParsedNavigation {
@@ -64,25 +65,8 @@ export const applyCustomization = (
     .filter(Boolean);
 
   if (customization) {
-    const { moves, hidden } = customization;
-    overflowItemIds = hidden;
-
-    // Replay each move sequentially on top of the default order.
-    // Skip moves whose id or afterId no longer exists in the current nav.
-    for (const { id, afterId } of moves) {
-      const fromIdx = body.findIndex((item) => getId(item) === id);
-      if (fromIdx === -1) continue; // item no longer in nav — skip
-
-      if (afterId !== null && !body.some((item) => getId(item) === afterId)) continue; // reference item gone — skip
-
-      const [moving] = body.splice(fromIdx, 1);
-      if (afterId === null) {
-        body = [moving, ...body];
-      } else {
-        const afterIdx = body.findIndex((item) => getId(item) === afterId);
-        body.splice(afterIdx + 1, 0, moving);
-      }
-    }
+    overflowItemIds = customization.hidden;
+    body = replayMoves(body, customization.moves, getId);
   }
 
   const { navigationTree, navigationTreeUI } = parseNavigationTree(

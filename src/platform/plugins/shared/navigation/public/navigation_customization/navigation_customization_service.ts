@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense } from 'react';
 import { ReplaySubject, takeUntil } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type {
-  AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationCustomization,
 } from '@kbn/core-chrome-browser';
@@ -19,18 +17,10 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { i18n } from '@kbn/i18n';
 import {
   NAV_CUSTOMIZATION_STORAGE_KEY,
   NAV_CALLOUT_DISMISSED_STORAGE_KEY,
 } from '../../common/constants';
-
-const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
-  const { CustomizeNavigationUserMenuLink } = await import(
-    '@kbn/navigation-customization-components'
-  );
-  return { default: CustomizeNavigationUserMenuLink };
-});
 
 export interface NavigationCustomizationServiceStartDeps {
   core: CoreStart;
@@ -52,6 +42,9 @@ export interface NavigationCustomizationServiceUiDeps {
  * callers can invoke `enableUi` from different code paths (stateful handler
  * registration is synchronous; menu-link registration is async after the
  * active space resolves) without double-registering either capability.
+ *
+ * This file has no React or JSX. All UI is delegated to
+ * `@kbn/navigation-customization-components` via dynamic imports.
  */
 export class NavigationCustomizationService {
   private readonly stop$ = new ReplaySubject<void>(1);
@@ -106,27 +99,12 @@ export class NavigationCustomizationService {
 
     if (!this.menuLinkAdded && security) {
       this.menuLinkAdded = true;
-
       const openModal = () => this.openModal(core, chrome);
-
-      security.navControlService.addUserMenuLinks([
-        {
-          iconType: 'controls',
-          label: i18n.translate('navigation.userMenuLinkLabel', {
-            defaultMessage: 'Customize navigation',
-          }),
-          href: '',
-          order: 500,
-          content: ({ closePopover }) => (
-            <Suspense fallback={null}>
-              <LazyCustomizeNavigationUserMenuLink
-                closePopover={closePopover}
-                onClick={openModal}
-              />
-            </Suspense>
-          ),
-        },
-      ]);
+      // Lazy-load the helper — it pulls in React + EUI that must stay out of
+      // the page-load bundle.
+      import('@kbn/navigation-customization-components').then(({ createCustomizeNavMenuLink }) => {
+        security.navControlService.addUserMenuLinks([createCustomizeNavMenuLink(openModal)]);
+      });
     }
   }
 
@@ -136,12 +114,11 @@ export class NavigationCustomizationService {
 
   private openModal(core: CoreStart, chrome: InternalChromeStart): void {
     const run = async () => {
-      // Lazy-load the modal and computeMoves together — they pull in heavy
-      // dnd + EUI dependencies and the LCS algorithm that should not be in
+      // Lazy-load the modal helper and computeMoves together so neither hits
       // the page-load bundle.
-      const [{ CustomizeNavigationModal }, { computeMoves }] = await Promise.all([
+      const [{ openCustomizeNavigationModal }, { computeMoves }] = await Promise.all([
         import('@kbn/navigation-customization-components'),
-        import('./compute_moves'),
+        import('@kbn/core-chrome-navigation-customization'),
       ]);
 
       const { items, defaultItemIds } = this.getNavigationItems(chrome);
@@ -154,44 +131,40 @@ export class NavigationCustomizationService {
         false
       );
 
-      const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
-        moves: computeMoves(defaultItemIds, order),
-        hidden: hiddenIds as AppDeepLinkId[],
-      });
+      // Captured after mountModal is called synchronously by openCustomizeNavigationModal.
+      let closeModal: () => void = () => {};
 
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          core.rendering.addContext(
-            <CustomizeNavigationModal
-              items={items}
-              isCalloutDismissed={isCalloutDismissed}
-              onChange={(order, hiddenIds) => {
-                chrome.project.setNavigationCustomization(toCustomization(order, hiddenIds));
-              }}
-              onSave={(order, hiddenIds) => {
-                core.userStorage.set(
-                  NAV_CUSTOMIZATION_STORAGE_KEY,
-                  toCustomization(order, hiddenIds)
-                );
-                modal.close();
-              }}
-              onReset={() => {
-                chrome.project.setNavigationCustomization(undefined);
-                core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
-                return this.getNavigationItems(chrome).items;
-              }}
-              onClose={() => {
-                chrome.project.setNavigationCustomization(savedCustomization);
-                modal.close();
-              }}
-              onDismissCallout={() => {
-                core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
-              }}
-            />
-          ),
-          core
-        )
-      );
+      openCustomizeNavigationModal({
+        items,
+        defaultItemIds,
+        isCalloutDismissed,
+        savedCustomization,
+        computeMoves,
+        onChange: (c) => chrome.project.setNavigationCustomization(c),
+        onSave: (c) => {
+          core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c);
+          closeModal();
+        },
+        onReset: () => {
+          chrome.project.setNavigationCustomization(undefined);
+          core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
+          return this.getNavigationItems(chrome).items;
+        },
+        onClose: () => {
+          chrome.project.setNavigationCustomization(savedCustomization);
+          closeModal();
+        },
+        onDismissCallout: () => {
+          core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
+        },
+        // toMountPoint is a regular function (no JSX) — safe to import in .ts.
+        mountModal: (element) => {
+          const ref = core.overlays.openModal(
+            toMountPoint(core.rendering.addContext(element), core)
+          );
+          closeModal = () => ref.close();
+        },
+      });
     };
 
     run();
