@@ -37,6 +37,10 @@ export function WorkflowSearchField({
   placeholder,
 }: WorkflowSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
+  // `isUserChange` distinguishes typing/Enter (we want to fire `onSearch`)
+  // from prop syncs (we don't). The flag is set before calling `setSearchText`
+  // and consulted inside the debounce; it's flipped back to `false` after a
+  // user-driven event so the same value doesn't fire twice.
   const isUserChange = useRef(false);
   const onSearchRef = useRef(onSearch);
   onSearchRef.current = onSearch;
@@ -44,6 +48,16 @@ export function WorkflowSearchField({
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     isUserChange.current = true;
     setSearchText(e.target.value);
+  }, []);
+
+  // Pressing Enter (or the native clear-X) flushes immediately and clears the
+  // user-change flag so the debounce that fires for this value sees `false`
+  // and skips — avoids the duplicate `onSearch` that would otherwise land
+  // 300 ms after the immediate one.
+  const handleImmediateSearch = useCallback((value: string) => {
+    isUserChange.current = false;
+    setSearchText(value);
+    onSearchRef.current(value);
   }, []);
 
   useEffect(() => {
@@ -66,11 +80,15 @@ export function WorkflowSearchField({
       <EuiFieldSearch
         aria-label={i18n.SEARCH_WORKFLOWS}
         fullWidth
-        incremental
+        // `incremental={false}` ties EuiFieldSearch's native `onSearch` event
+        // to Enter / clear-X only. Typing is handled by the debounce above —
+        // running both paths in parallel raced and defeated the debounce
+        // (review feedback on the original PR).
+        incremental={false}
         placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
         value={searchText}
         onChange={handleChange}
-        onSearch={onSearch}
+        onSearch={handleImmediateSearch}
         data-test-subj="workflowSearchField"
       />
     </SearchBarWrapper>
