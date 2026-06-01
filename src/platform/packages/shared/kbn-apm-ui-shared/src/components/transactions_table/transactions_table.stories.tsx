@@ -363,7 +363,7 @@ export const Complete: StoryFn = () => (
           target="_blank"
         >
           docs
-        </EuiLink>
+        </EuiLink>{' '}
         to mitigate the situation.
       </EuiText>
     }

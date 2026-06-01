@@ -135,7 +135,7 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
       <EuiFlexItem grow={false}>
         <span style={{ fontStyle: 'italic' }}>
           {i18n.translate('apmUiShared.transactionsTable.remainingTransactionsLabel', {
-            defaultMessage: 'Remaining transactions',
+            defaultMessage: 'Remaining Transactions',
           })}
         </span>
       </EuiFlexItem>
@@ -148,7 +148,7 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
           button={
             <EuiButtonIcon
               iconType="warning"
-              color="warning"
+              color="primary"
               size="xs"
               aria-label={i18n.translate(
                 'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
