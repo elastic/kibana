@@ -263,8 +263,14 @@ describe('CommandRegistry', () => {
 
     test('should only return subquery source commands when starting a subquery', () => {
       const fromCommand = createMockCommand('from', undefined, { subquerySource: true });
-      const rowCommand = createMockCommand('row', undefined, { subquerySource: true, subquerySourceHidden: true });
-      const tsCommand = createMockCommand('ts', undefined, { subquerySource: true, subquerySourceHidden: true });
+      const rowCommand = createMockCommand('row', undefined, {
+        subquerySource: true,
+        subquerySourceHidden: true,
+      });
+      const tsCommand = createMockCommand('ts', undefined, {
+        subquerySource: true,
+        subquerySourceHidden: true,
+      });
       const evalCommand = createMockCommand('eval');
       const whereCommand = createMockCommand('where');
 
