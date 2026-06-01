@@ -108,6 +108,7 @@ export const WorkflowExecuteEventForm = ({
     totalHits,
     onFetchMoreRecords,
     tableLoadingState,
+    isFetching,
     handleQueryChange,
     handleQuerySubmit,
     handleRefresh,
@@ -135,6 +136,7 @@ export const WorkflowExecuteEventForm = ({
 
   const showNoEventsEmptyState =
     tableLoadingState === DataLoadingState.loaded &&
+    !isFetching &&
     !isError &&
     documentCount === 0 &&
     Boolean(dataView);
