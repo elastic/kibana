@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security', function () {
-    loadTestFile(require.resolve('./api_keys'));
-  });
-}
+export type HostOs = 'linux' | 'mac' | 'windows';
