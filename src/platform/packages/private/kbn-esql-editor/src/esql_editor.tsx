@@ -899,6 +899,7 @@ const ESQLEditorInternal = function ESQLEditor({
       {!hideQuickSearch && (
         <QuickSearchVisor
           query={code}
+          isInline={Boolean(editorIsInline)}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
           onUpdateAndSubmitQuery={(newQuery) =>

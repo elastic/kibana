@@ -941,6 +941,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
       api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
+      managedOtlp: `${ELASTIC_DOCS}reference/opentelemetry/motlp`,
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
       installAndUninstallIntegrationAssets: `${ELASTIC_DOCS}reference/fleet/install-uninstall-integration-assets`,
       elasticAgentInputConfiguration: `${ELASTIC_DOCS}reference/fleet/elastic-agent-input-configuration`,
