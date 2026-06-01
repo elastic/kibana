@@ -2774,7 +2774,7 @@
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
       "piscina": ["node_modules/piscina/dist/src/index.d.ts"],
-      "canvg": ["node_modules/canvg/lib/index.d.ts"],
+      "canvg": ["typings/canvg"],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "zod": ["node_modules/zod/v4/index.d.ts"],
       "zod/v4": ["node_modules/zod/v4/index.d.ts"],
