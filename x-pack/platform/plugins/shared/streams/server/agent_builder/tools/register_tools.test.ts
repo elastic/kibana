@@ -27,7 +27,7 @@ describe('registerAgentBuilderTools', () => {
     trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
   } as unknown as EbtTelemetryClient;
 
-  it('registers all expected tools', async () => {
+  it('registers all expected tools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
@@ -50,7 +50,7 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID);
   });
 
-  it('registers tools with non-empty descriptions and schemas', async () => {
+  it('registers tools with non-empty descriptions and schemas', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
@@ -69,7 +69,7 @@ describe('registerAgentBuilderTools', () => {
     }
   });
 
-  it('does not register any tools when agentBuilder is falsy', async () => {
+  it('does not register any tools when agentBuilder is falsy', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
 
