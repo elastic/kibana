@@ -37,15 +37,6 @@ export interface AwsConnectSetupProps {
   onTemporaryKeysChange?: (keys: AwsTemporaryKeyCredentials | undefined) => void;
 }
 
-// TODO should come from the package?
-// https://github.com/elastic/integrations/blob/651caee873002cbf73c9972ac5a81162c4b8fc80/packages/cloud_security_posture/manifest.yml#L160C22-L160C250
-const IAC_TEMPLATE_URL =
-  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-9.2.0.yml&param_ElasticResourceId=RESOURCE_ID';
-
-// TODO: replace with the obs-specific static-keys CFN template URL once available
-const IAC_STATIC_KEYS_TEMPLATE_URL: string | undefined =
-  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-direct-access-key-organization-account-9.2.0.yml';
-
 export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   hasInvalidRequiredVars = false,
   cloud,
@@ -101,13 +92,13 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         onChange={handleAuthTypeChange}
       />
       <EuiSpacer size="l" />
+      {/* TODO: for IDF and static keys, generate a CFN template to download and show instructions to run it (AWS CLI) */}
       {authType === 'identity_federation' && (
         <AwsIdentityFederationSetup
           cloud={cloud}
           accountType={accountType}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           isEditPage={isEditPage}
-          iacTemplateUrl={IAC_TEMPLATE_URL}
           initialConnectorId={initialConnectorId}
           onReadyChange={setIsFormReady}
           onConnectorIdChange={onConnectorIdChange}
@@ -117,7 +108,6 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         <AwsStaticKeysForm
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           initialValues={initialStaticKeys}
-          iacTemplateUrl={IAC_STATIC_KEYS_TEMPLATE_URL}
           onReadyChange={setIsFormReady}
           onFieldsChange={onStaticKeysChange}
         />

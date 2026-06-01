@@ -37,7 +37,6 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
 
     await expect(page.testSubj.locator('awsStaticKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeVisible();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
@@ -92,9 +91,9 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('temporary_keys');
 
-    // Temporary keys form has no CloudFormation button
+    // Temporary keys form is visible; static keys form is hidden
     await expect(page.testSubj.locator('awsTemporaryKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeHidden();
+    await expect(page.testSubj.locator('awsStaticKeysForm')).toBeHidden();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await expect(page.testSubj.locator('awsTemporaryKeysForm-sessionToken')).toBeVisible();
