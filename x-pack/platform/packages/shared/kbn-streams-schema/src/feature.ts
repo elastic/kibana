@@ -82,7 +82,6 @@ export const featureSchema = baseFeatureSchema.and(
     expires_at: z.string().optional(),
     excluded_at: z.string().optional(),
     run_id: z.string().optional(),
-    // New KI data stream fields (additive; replaces uuid/status/last_seen in PR 2)
     excluded: z.boolean().optional(),
     updated_at: z.string().optional(),
   })

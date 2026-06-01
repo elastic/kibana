@@ -137,8 +137,6 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
     excluded: doc.excluded,
     updated_at: doc['@timestamp'],
     expires_at: doc.expires_at,
-    // Bridge: legacy fields retained until PR 2 drops the old FeatureClient.
-    // `id` is the stable natural key; `@timestamp` serves as last_seen.
     uuid: doc.id,
     status: doc.excluded ? 'stale' : 'active',
     last_seen: doc['@timestamp'],
@@ -158,7 +156,6 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const ruleBacked = type === QUERY_TYPE_STATS ? false : rule_backed;
 
   return {
-    // Bridge: legacy asset fields retained until PR 2 drops the old QueryClient.
     'asset.uuid': doc.id,
     'asset.type': 'query',
     'asset.id': doc.id,

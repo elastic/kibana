@@ -338,8 +338,6 @@ export const runFindByIdsEsqlQuery = async <T>({
   return { hits };
 };
 
-// ─── New KI data-stream helpers (additive; old functions above stay intact) ───
-
 export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
 
 export type LatestSourceWhereCondition = ESQLAstExpression;

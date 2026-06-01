@@ -56,7 +56,6 @@ export class QueryRuleOrchestrator {
       if (!current) {
         const ruleBacked = !isStats;
         const link: QueryLink = {
-          // Bridge: legacy asset fields retained until PR 2 removes old QueryClient.
           'asset.uuid': query.id,
           'asset.type': 'query',
           'asset.id': query.id,
@@ -74,7 +73,6 @@ export class QueryRuleOrchestrator {
         allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
-          // Bridge: legacy asset fields retained until PR 2 removes old QueryClient.
           'asset.uuid': query.id,
           'asset.type': 'query',
           'asset.id': query.id,
