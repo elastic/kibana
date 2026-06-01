@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
-import type { RenameConversationResponse } from '../../../common/http_api/conversations';
+import type {
+  MarkReadConversationResponse,
+  RenameConversationResponse,
+} from '../../../common/http_api/conversations';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 
@@ -51,6 +54,42 @@ export function registerInternalConversationRoutes({
         body: {
           id: updatedConversation.id,
           title: updatedConversation.title,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_mark_read`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          read: schema.boolean(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { read } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.update({
+        id: conversationId,
+        read,
+      });
+
+      return response.ok<MarkReadConversationResponse>({
+        body: {
+          id: updatedConversation.id,
+          read: updatedConversation.read!,
         },
       });
     })
