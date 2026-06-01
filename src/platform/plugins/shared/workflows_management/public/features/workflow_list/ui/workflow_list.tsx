@@ -243,6 +243,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          workflowDefinition: item.definition ?? undefined,
           skipRefetch: true,
         },
         {

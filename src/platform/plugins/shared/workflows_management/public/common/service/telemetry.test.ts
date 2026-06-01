@@ -363,6 +363,52 @@ describe('WorkflowsBaseTelemetry', () => {
       );
     });
 
+    it('includes hasCustomEventTrigger on enable/disable when workflowDefinition is provided', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        workflowDefinition: {
+          triggers: [{ type: 'scheduled' }, { type: 'cases.created' }],
+        } as Partial<WorkflowYaml>,
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          hasCustomEventTrigger: true,
+          origin: 'workflow_list',
+        })
+      );
+    });
+
+    it('does not report hasCustomEventTrigger true on enable/disable when workflowDefinition is omitted', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          enabled: true,
+          origin: 'workflow_list',
+        })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.not.objectContaining({
+          hasCustomEventTrigger: true,
+        })
+      );
+    });
+
     it('determines editorType as yaml when yaml is in the update', () => {
       telemetry.reportWorkflowUpdated({
         workflowId: 'wf-1',
