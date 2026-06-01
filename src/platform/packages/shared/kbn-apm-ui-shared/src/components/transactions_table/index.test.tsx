@@ -10,8 +10,12 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionsTable } from '.';
 import type { TransactionGroup } from './types';
+
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -37,17 +41,17 @@ describe('TransactionsTable', () => {
   });
 
   it('renders the loading message when isLoading is true', () => {
-    render(<TransactionsTable items={[]} isLoading={true} maxCountExceeded={false} />);
+    renderWithIntl(<TransactionsTable items={[]} isLoading={true} maxCountExceeded={false} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders the no-results message when items are empty and not loading', () => {
-    render(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+    renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
     expect(screen.getByText('No transactions found')).toBeInTheDocument();
   });
 
   it('shows the cardinality warning when maxCountExceeded and showMaxTransactionGroupsExceededWarning are true', () => {
-    render(
+    renderWithIntl(
       <TransactionsTable
         items={items}
         isLoading={false}
@@ -61,7 +65,7 @@ describe('TransactionsTable', () => {
   });
 
   it('does not show the cardinality warning when maxCountExceeded is false', () => {
-    render(
+    renderWithIntl(
       <TransactionsTable
         items={items}
         isLoading={false}
@@ -76,12 +80,12 @@ describe('TransactionsTable', () => {
 
   describe('title and header actions', () => {
     it('renders the default title "Transactions"', () => {
-      render(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
       expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument();
     });
 
     it('renders a custom title when the title prop is provided', () => {
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={[]}
           isLoading={false}
@@ -93,12 +97,12 @@ describe('TransactionsTable', () => {
     });
 
     it('does not render header action links when headerActions is not provided', () => {
-      render(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
     it('renders header action links when headerActions is provided', () => {
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={[]}
           isLoading={false}
@@ -117,7 +121,7 @@ describe('TransactionsTable', () => {
 
     it('calls onClick when a header action with onClick is clicked', () => {
       const onClick = jest.fn();
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={[]}
           isLoading={false}
@@ -147,7 +151,7 @@ describe('TransactionsTable', () => {
 
     it('calls onSearchQueryChange after debounce when the new query does not include the previous one', () => {
       const onSearchQueryChange = jest.fn();
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={items}
           isLoading={false}
@@ -175,7 +179,7 @@ describe('TransactionsTable', () => {
 
     it('does not call onSearchQueryChange when the new query extends the previous one', () => {
       const onSearchQueryChange = jest.fn();
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={items}
           isLoading={false}
@@ -201,7 +205,7 @@ describe('TransactionsTable', () => {
 
     it('calls onSearchQueryChange when maxCountExceeded is true even if query extends the previous one', () => {
       const onSearchQueryChange = jest.fn();
-      render(
+      renderWithIntl(
         <TransactionsTable
           items={items}
           isLoading={false}
