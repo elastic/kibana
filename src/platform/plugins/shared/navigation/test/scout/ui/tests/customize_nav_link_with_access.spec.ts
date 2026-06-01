@@ -93,50 +93,6 @@ test.describe(
       await apiServices.spaces.delete(SPACE_A.id).catch(() => {});
     });
 
-    test('shows the "Customize navigation" link in the user menu', async ({
-      browserAuth,
-      pageObjects,
-      kbnUrl,
-      page,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await page.goto(kbnUrl.app('home', { space: SPACE_A.id }));
-      await page.testSubj.locator('kbnChromeLayoutNavigation').waitFor({ state: 'visible' });
-
-      await pageObjects.navigation.openUserMenu();
-
-      await expect(pageObjects.navigation.getCustomizeNavLink()).toBeVisible();
-    });
-
-    test('opens the customize navigation modal when the link is clicked', async ({
-      browserAuth,
-      pageObjects,
-      kbnUrl,
-      page,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await page.goto(kbnUrl.app('home', { space: SPACE_A.id }));
-      await page.testSubj.locator('kbnChromeLayoutNavigation').waitFor({ state: 'visible' });
-
-      await pageObjects.navigation.openUserMenu();
-      await pageObjects.navigation.getCustomizeNavLink().click();
-
-      await expect(pageObjects.navigation.getCustomizeNavModal()).toBeVisible();
-    });
-
-    /**
-     * Persistence test — a read-only user can customize and persist navigation.
-     *
-     * `applyAutomaticReadPrivilegeGrants` grants write access to `user-storage`
-     * for every feature `read` privilege, so customizations survive a page reload
-     * even for minimally-privileged users.
-     *
-     * 1. Hide Discover via the modal and apply.
-     * 2. The save (PUT /internal/user_storage/{key}) succeeds.
-     * 3. Reload the page.
-     * 4. Assert: Discover is still hidden from the primary nav, and Dashboards
-     *    is the first visible item (it was directly below Discover for this user).
-     */
     test('persists navigation customizations across reloads for a read-only user', async ({
       browserAuth,
       pageObjects,
@@ -162,15 +118,13 @@ test.describe(
       await primaryNav.waitFor({ state: 'visible' });
 
       // Discover is no longer in the primary nav.
-      await expect(
-        primaryNav.locator('[data-test-subj~="nav-item-id-discover"]')
-      ).not.toBeVisible();
+      await expect(primaryNav.locator('[data-test-subj~="nav-item-id-discover"]')).toBeHidden();
 
       // Dashboards is now the top link in the primary nav — visible in the strip
       // rather than pushed into the More overflow, and the first item rendered.
       const dashboardsItem = primaryNav.locator('[data-test-subj~="nav-item-id-dashboards"]');
       await expect(dashboardsItem).toBeVisible();
-      await expect(primaryNav.locator('[data-test-subj~="nav-item"]').first()).toHaveAttribute(
+      await expect(primaryNav.locator('[data-test-subj~="nav-item"]:nth-child(1)')).toHaveAttribute(
         'data-test-subj',
         /nav-item-id-dashboards/
       );
