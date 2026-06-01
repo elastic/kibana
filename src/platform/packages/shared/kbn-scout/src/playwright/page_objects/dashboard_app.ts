@@ -137,16 +137,6 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
-  /**
-   * Navigates to the dashboard listing, searches for the given title, and opens
-   * the matching dashboard in view mode.
-   */
-  async loadSavedDashboard(dashboardTitle: string) {
-    await this.goto();
-    await this.listingTable.searchForItemTitle(dashboardTitle);
-    await this.clickDashboardTitleLink(dashboardTitle);
-  }
-
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
@@ -288,8 +278,6 @@ export class DashboardApp {
 
   /**
    * Opens the "Add from library" flyout.
-   * Used both as a building block for addEmbeddable() and directly by specs that
-   * need to interact with the library finder beyond simple add-by-name flows.
    */
   async openLibraryFlyout(options?: TimeoutOptions) {
     await this.addTopNavButton.click();

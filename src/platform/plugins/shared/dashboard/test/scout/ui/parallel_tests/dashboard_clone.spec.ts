@@ -13,6 +13,7 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const SOURCE_DASHBOARD_TITLE = 'Dashboard Clone Test';
+let sourceDashboardId = '';
 
 // Each panel marker is unique so the test can assert every original panel
 // survived the clone, not just that the right count of panels exists.
@@ -62,12 +63,13 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
     // The cloning UX is what's under test; the source dashboard is pure setup,
     // so seed it via the saved-objects API instead of paying ~15s of UI flake
     // for openNewDashboard + 3x addMarkdownPanel + saveDashboard.
-    await kbnClient.savedObjects.create({
+    const sourceDashboard = await kbnClient.savedObjects.create({
       type: 'dashboard',
       space: scoutSpace.id,
       overwrite: true,
       attributes: buildSourceDashboardAttributes(),
     });
+    sourceDashboardId = sourceDashboard.id;
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -108,7 +110,7 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
       let clone1Id = '';
 
       await spaceTest.step('clone suggests "(1)"', async () => {
-        await pageObjects.dashboard.loadSavedDashboard(SOURCE_DASHBOARD_TITLE);
+        await pageObjects.dashboard.openDashboardWithId(sourceDashboardId);
         await pageObjects.dashboard.ensureEditMode();
         await pageObjects.dashboard.saveDashboardAsCopy();
         clone1Id = getCurrentDashboardId();

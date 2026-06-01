@@ -9,9 +9,11 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
-
-const FEW_PANELS_DASHBOARD = 'few panels';
+import {
+  DASHBOARD_DEFAULT_INDEX_TITLE,
+  DASHBOARD_SAVED_SEARCH_ARCHIVE,
+  FEW_PANELS_DASHBOARD_ID,
+} from '../constants';
 
 spaceTest.describe('Panel expand toggle', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -30,7 +32,7 @@ spaceTest.describe('Panel expand toggle', { tag: tags.deploymentAgnostic }, () =
   });
 
   spaceTest('expands and restores panels', async ({ pageObjects }) => {
-    await pageObjects.dashboard.loadSavedDashboard(FEW_PANELS_DASHBOARD);
+    await pageObjects.dashboard.openDashboardWithId(FEW_PANELS_DASHBOARD_ID);
 
     const initialPanelCount = await pageObjects.dashboard.getPanelCount();
     expect(initialPanelCount).toBeGreaterThan(1);
