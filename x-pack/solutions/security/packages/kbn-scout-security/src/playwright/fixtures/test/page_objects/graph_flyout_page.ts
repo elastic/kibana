@@ -6,10 +6,13 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import {
-  GRAPH_INVESTIGATION_TEST_ID,
-  GRAPH_ENTITY_NODE_ID,
-} from '@kbn/cloud-security-posture-graph/src/components/test_ids';
+
+// Inlined to avoid a cross-package dep on @kbn/cloud-security-posture-graph,
+// which would create a project-reference cycle through entity_store's scout deps.
+// Mirrors GRAPH_INVESTIGATION_TEST_ID / GRAPH_ENTITY_NODE_ID in
+// @kbn/cloud-security-posture-graph/src/components/test_ids.
+const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation' as const;
+const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
 
 const EXPAND_DETAILS_BUTTON_TEST_ID = 'securitySolutionFlyoutNavigationExpandDetailButton' as const;
 const VISUALIZE_TAB_TEST_ID = 'securitySolutionFlyoutVisualizeTab' as const;
