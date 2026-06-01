@@ -10,11 +10,11 @@
     "skipLibCheck": true,
     "declaration": false,
     "paths": {
-      "@kbn/core-chrome-layout-constants": [
-        "./react/services/layout_constants.ts"
+      "@kbn/ui-chrome-layout-constants": [
+        "src/platform/kbn-ui/chrome-layout-constants/target/index.d.ts"
       ],
-      "@kbn/core-chrome-layout-utils": [
-        "./react/services/layout_utils.ts"
+      "@kbn/ui-chrome-layout-utils": [
+        "src/platform/kbn-ui/chrome-layout-utils/target/index.d.ts"
       ]
     }
   },
