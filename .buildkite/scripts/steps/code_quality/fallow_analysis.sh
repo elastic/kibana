@@ -35,6 +35,14 @@ extract_owner_count() {
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
 
+SNAPSHOT_DIR=".fallow/snapshots"
+SNAPSHOT_FILE="fallow-snapshot.json"
+SAVE_SNAPSHOT_FLAG=""
+if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ]; then
+  mkdir -p "$SNAPSHOT_DIR"
+  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+fi
+
 echo "--- Run fallow analysis"
 echo "Checks: dead code (unused exports/types/files) · duplication · complexity hotspots"
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, production files only)"
@@ -49,11 +57,13 @@ echo ""
 echo "See hotspots for your team:"
 echo "  npx fallow health --workspace 'x-pack/solutions/search/**'"
 set +e
+# shellcheck disable=SC2086
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
   --production \
   --format human \
   --quiet \
+  $SAVE_SNAPSHOT_FLAG \
   2>&1)
 set -e
 
@@ -82,3 +92,8 @@ for owner in "${FALLOW_OWNERS[@]}"; do
 done
 
 buildkite-agent annotate --style info --context fallow-report "$(printf "%b" "$ANNOTATION")"
+
+if [ -n "$SAVE_SNAPSHOT_FLAG" ]; then
+  echo "--- Save snapshot for next run"
+  buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+fi
