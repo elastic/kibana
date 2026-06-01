@@ -22,6 +22,8 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/search-types'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/discover-utils'
 tags:
   - shared-common
   - package
