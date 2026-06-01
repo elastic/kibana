@@ -79,6 +79,7 @@ export {
   formatEsqlLiteral,
   isComputedColumn,
   getQuerySummary,
+  getColumnsWithHighlights,
   buildRenameSourceFieldMap,
   getEsqlControls,
   getAllEsqlControls,
@@ -86,6 +87,8 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
+  type ESQLColumnsWithHighlights,
+  type ESQLHighlightTags,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
