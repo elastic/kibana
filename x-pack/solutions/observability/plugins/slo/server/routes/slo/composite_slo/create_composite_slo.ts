@@ -9,10 +9,9 @@ import { createCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
 import { createCompositeSlo } from '../../../services/composites/create_composite_slo';
 import { DefaultSummaryClient } from '../../../services/summary_client';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
-export const createCompositeSLORoute = createSloServerRoute({
+export const createCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'POST /api/observability/slo_composites 2023-10-31',
   options: { access: 'public' },
   security: {
@@ -21,8 +20,8 @@ export const createCompositeSLORoute = createSloServerRoute({
     },
   },
   params: createCompositeSLOParamsSchema,
-  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
-    await assertPlatinumLicense(plugins);
+  handler: async ({ context, params, logger, request, getScopedClients }) => {
+    const core = await context.core;
 
     const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
       await getScopedClients({
@@ -30,7 +29,6 @@ export const createCompositeSLORoute = createSloServerRoute({
         logger,
       });
 
-    const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
