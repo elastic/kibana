@@ -229,50 +229,50 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
               <EuiProgress size="xs" color="accent" />
             </div>
           )}
-          {dataView ? (
-            emptyStateContent ?? (
-            <div
-              css={css({
-                flex: 1,
-                minHeight: 0,
-                display: 'flex',
-                flexDirection: 'column',
-              })}
-            >
-              <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
-                <UnifiedDataTable
-                  ariaLabelledBy={ariaLabelledBy ?? dataTestSubj}
-                  columns={visibleTableColumns}
-                  columnsMeta={columnsMeta}
-                  rows={dataTableRows}
-                  dataView={dataView}
-                  loadingState={tableLoadingState}
-                  sampleSizeState={rowsLength}
-                  services={unifiedDataTableServices}
-                  onSetColumns={handleUnifiedDataTableSetColumns}
-                  showTimeCol={showTimeColumn}
-                  sort={sort}
-                  onSort={handleSortChange}
-                  isSortEnabled={true}
-                  isPaginationEnabled={true}
-                  paginationMode="infinite"
-                  totalHits={totalHits}
-                  onFetchMoreRecords={onFetchMoreRecords}
-                  dataGridDensityState={DataGridDensity.NORMAL}
-                  isPlainRecord={true}
-                  showFullScreenButton={false}
-                  showKeyboardShortcuts={false}
-                  enableInTableSearch={true}
-                  controlColumnIds={[SELECT_ROW]}
-                  customGridColumnsConfiguration={customGridColumnsConfiguration}
-                  renderCustomToolbar={resolvedRenderCustomToolbar}
-                  renderCellPopover={renderCellPopover}
-                  externalCustomRenderers={externalCustomRenderers}
-                />
-              </CellActionsProvider>
-            </div>
-            )
-          ) : null}
+          {dataView
+            ? emptyStateContent ?? (
+                <div
+                  css={css({
+                    flex: 1,
+                    minHeight: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  })}
+                >
+                  <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
+                    <UnifiedDataTable
+                      ariaLabelledBy={ariaLabelledBy ?? dataTestSubj}
+                      columns={visibleTableColumns}
+                      columnsMeta={columnsMeta}
+                      rows={dataTableRows}
+                      dataView={dataView}
+                      loadingState={tableLoadingState}
+                      sampleSizeState={rowsLength}
+                      services={unifiedDataTableServices}
+                      onSetColumns={handleUnifiedDataTableSetColumns}
+                      showTimeCol={showTimeColumn}
+                      sort={sort}
+                      onSort={handleSortChange}
+                      isSortEnabled={true}
+                      isPaginationEnabled={true}
+                      paginationMode="infinite"
+                      totalHits={totalHits}
+                      onFetchMoreRecords={onFetchMoreRecords}
+                      dataGridDensityState={DataGridDensity.NORMAL}
+                      isPlainRecord={true}
+                      showFullScreenButton={false}
+                      showKeyboardShortcuts={false}
+                      enableInTableSearch={true}
+                      controlColumnIds={[SELECT_ROW]}
+                      customGridColumnsConfiguration={customGridColumnsConfiguration}
+                      renderCustomToolbar={resolvedRenderCustomToolbar}
+                      renderCellPopover={renderCellPopover}
+                      externalCustomRenderers={externalCustomRenderers}
+                    />
+                  </CellActionsProvider>
+                </div>
+              )
+            : null}
         </div>
       </EuiFlexItem>
     </>
