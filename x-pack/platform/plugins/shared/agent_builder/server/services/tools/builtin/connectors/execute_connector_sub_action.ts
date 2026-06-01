@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -128,6 +129,31 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
+    const askForAuthorization = ({
+      authMethod,
+      connectorName,
+    }: {
+      authMethod: unknown;
+      connectorName?: string;
+    }) => {
+      if (!isAuthorizationMethod(authMethod)) {
+        return undefined;
+      }
+      const promptId = `tools.${context.callContext.toolId}.authorization.${connectorId}`;
+      const { status } = context.prompts.checkAuthorizationStatus(promptId);
+
+      if (status !== AuthorizationStatus.unprompted) {
+        return undefined;
+      }
+      return context.prompts.askForAuthorization({
+        id: promptId,
+        connector_id: connectorId,
+        connector_name: connectorName ?? connectorId,
+        connector_type: connectorType,
+        auth_method: authMethod,
+      });
+    };
+
     let executeResult;
     try {
       executeResult = await actionsClient.execute({
@@ -153,6 +179,18 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      if (executeResult.errorName === 'ConnectorAuthorizationError') {
+        const { errorMeta } = executeResult;
+        const connectorName =
+          typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
+        const authPrompt = askForAuthorization({
+          authMethod: errorMeta?.authMethod,
+          connectorName,
+        });
+        if (authPrompt) {
+          return authPrompt;
+        }
+      }
       return {
         results: [
           createErrorResult({
