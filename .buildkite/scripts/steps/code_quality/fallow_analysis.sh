@@ -31,6 +31,21 @@ extract_owner_count() {
   printf '%s\n' "$output" | grep -oE "^${escaped} \([^)]+\)" | grep -oE '\([^)]+\)' || true
 }
 
+# Extract per-owner section from the "● Per-owner health" block.
+extract_owner_health_section() {
+  local output="$1"
+  local owner="$2"
+  printf '%s\n' "$output" | awk \
+    -v owner="${owner}" \
+    'BEGIN{in_health=0; found=0}
+     /^● Per-owner health/ { in_health=1; next }
+     !in_health { next }
+     $0 ~ ("^" owner "[ (]") { found=1; next }
+     found && /^@elastic\// { found=0 }
+     found && /^\(unowned\)/ { found=0 }
+     found { print }'
+}
+
 
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
@@ -48,7 +63,7 @@ echo "Checks: dead code (unused exports/types/files) · duplication · complexit
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, production files only)"
 echo ""
 echo "Run locally (same as CI, grouped by team):"
-echo "  npx fallow --group-by owner --production"
+echo "  npx fallow --group-by owner --production --score"
 echo ""
 echo "See ALL files for your team (no truncation):"
 echo "  search-kibana: npx fallow dead-code --workspace 'x-pack/solutions/search/**' --production"
@@ -61,6 +76,7 @@ set +e
 FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
   --production \
+  --score \
   --format human \
   --quiet \
   $SAVE_SNAPSHOT_FLAG \
@@ -75,6 +91,17 @@ for owner in "${FALLOW_OWNERS[@]}"; do
     echo "$section"
   else
     echo "No issues found"
+  fi
+done
+
+echo "--- Complexity hotspots"
+for owner in "${FALLOW_OWNERS[@]}"; do
+  echo "+++ ${owner}"
+  health=$(extract_owner_health_section "$FALLOW_OUTPUT" "$owner")
+  if [ -n "$health" ]; then
+    echo "$health"
+  else
+    echo "No hotspots found"
   fi
 done
 
