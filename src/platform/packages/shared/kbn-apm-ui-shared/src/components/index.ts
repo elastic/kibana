@@ -14,5 +14,6 @@ export * from './http_status_code';
 export * from './span_icon';
 export * from './sparkline';
 export * from './timestamp';
+export * from './transactions_table';
 
 export { getSpanIcon } from './span_icon/get_span_icon';
