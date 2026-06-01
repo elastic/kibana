@@ -20,19 +20,15 @@ export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ): LinksEmbeddableState {
-  const latestState = isLegacyState(storedState)
+  const { enhancements, ...latestState } = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
-
-  /** Handle title state, which is shared for both by-ref and by-value links panels */
-  const transformedTitleState = transformTitlesOut(latestState);
-  const titleState = {
-    ...(transformedTitleState.title?.length && { title: transformedTitleState.title }),
-    ...(transformedTitleState.description?.length && {
-      description: transformedTitleState.description,
-    }),
-    ...(transformedTitleState.hide_border && { hide_border: transformedTitleState.hide_border }),
-    ...(transformedTitleState.hide_title && { hide_title: transformedTitleState.hide_title }),
+  const state = {
+    ...transformTitlesOut(latestState),
+    // Strip legacy properties
+    ...(latestState.links
+      ? { links: latestState.links.map(({ order, id, ...link }) => link) }
+      : {}),
   };
 
   /** Inject saved object reference when by-reference */
@@ -40,8 +36,9 @@ export function transformOut(
     ({ name, type }) => name === 'savedObjectRef' && type === LINKS_SAVED_OBJECT_TYPE
   );
   if (savedObjectRef) {
+    const { links, ...rest } = state; // some by-ref panels had links serialized for some reason
     return {
-      ...titleState,
+      ...rest,
       ref_id: savedObjectRef.id,
     };
   }
@@ -50,7 +47,7 @@ export function transformOut(
   const byValueState = latestState as LinksByValueState;
   const updatedLinks = latestState.links?.map(({ order, id, ...link }) => link); // strip legacy properties on each link
   return {
-    ...titleState,
+    ...state,
     layout: byValueState.layout,
     links: injectReferences(updatedLinks, references).map((link) => ({
       ...link,
