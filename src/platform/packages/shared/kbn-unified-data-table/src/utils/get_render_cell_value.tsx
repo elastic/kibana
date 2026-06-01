@@ -86,7 +86,7 @@ const HEAVY_NESTED_OBJECT_PREVIEW: CellTreeJsonValue = Object.fromEntries(
     ];
   })
 );
-const ENABLE_CELL_TREE_HEAVY_DEMO = true;
+const ENABLE_CELL_TREE_HEAVY_DEMO = false;
 
 const renderCellTreeValue = (value: CellTreePreviewValue) => (
   <span
