@@ -79,15 +79,11 @@ export const rebuildDocData = (
       ...(sourceFields ? { sourceFields } : {}),
     };
 
-    if (enrichment) {
-      if (enrichment.name != null) entityData.name = enrichment.name;
-      if (enrichment.type != null) entityData.type = enrichment.type;
-      if (enrichment.subType != null) entityData.sub_type = enrichment.subType;
-      if (enrichment.engineType != null) entityData.engine_type = enrichment.engineType;
-      if (enrichment.hostIps && enrichment.hostIps.length > 0) {
-        entityData.host = { ip: enrichment.hostIps };
-      }
-    }
+    if (enrichment?.name != null) entityData.name = enrichment.name;
+    if (enrichment?.type != null) entityData.type = enrichment.type;
+    if (enrichment?.subType != null) entityData.sub_type = enrichment.subType;
+    if (enrichment?.engineType != null) entityData.engine_type = enrichment.engineType;
+    if (enrichment?.hostIps?.length) entityData.host = { ip: enrichment.hostIps };
 
     if (topLevelSourceFields !== undefined) delete doc.sourceFields;
     doc.entity = entityData;
