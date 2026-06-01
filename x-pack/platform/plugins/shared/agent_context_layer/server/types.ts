@@ -22,6 +22,8 @@ import type {
   SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
@@ -80,7 +82,15 @@ export interface AgentContextLayerPluginStart {
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
 }
 
-export interface SmlIndexAttachmentParams {
+/**
+ * Common params shared by both modes of `AgentContextLayerPluginStart.indexAttachment`.
+ *
+ * The mode is selected by the discriminator fields from
+ * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
+ * shared with the internal `SmlIndexerParams` so the public and internal unions cannot
+ * drift on the discriminator.
+ */
+interface SmlIndexAttachmentBaseParams {
   request: KibanaRequest;
   originId: string;
   attachmentType: string;
@@ -88,3 +98,18 @@ export interface SmlIndexAttachmentParams {
   spaceId?: string;
   includedHiddenTypes?: string[];
 }
+
+export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentOriginMode;
+
+export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentContentMode;
+
+/**
+ * Discriminated union — `content` selects the mode:
+ * - omitted → origin mode (calls `getSmlData`, marks `'crawled'`)
+ * - provided → content mode (skips `getSmlData`, marks `'manual'`)
+ */
+export type SmlIndexAttachmentParams =
+  | SmlIndexAttachmentOriginParams
+  | SmlIndexAttachmentContentParams;
