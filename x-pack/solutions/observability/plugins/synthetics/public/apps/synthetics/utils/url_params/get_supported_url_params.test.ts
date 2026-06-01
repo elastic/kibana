@@ -81,6 +81,10 @@ describe('getSupportedUrlParams', () => {
       tags: [],
       useLogicalAndFor: [],
       view: undefined,
+      browserResourceTypes: [],
+      party: [],
+      issuers: [],
+      expiringWithin: undefined,
     });
   });
 
