@@ -217,8 +217,7 @@ export const handleIsolateSkill = async (
     const message_ = err instanceof Error ? err.message : 'Unknown error';
     return {
       status: 'failed',
-      message:
-        `Action ${actionId} was submitted but status could not be retrieved: ${message_}`,
+      message: `Action ${actionId} was submitted but status could not be retrieved: ${message_}`,
       intent,
       host,
       result: {
