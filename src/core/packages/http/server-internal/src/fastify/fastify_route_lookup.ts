@@ -13,7 +13,11 @@ import type { KibanaRouteOptions, RouterRoute } from '@kbn/core-http-server';
 import { omitBy, isNil } from 'lodash';
 
 import { applyHapiCompatRequestTimeouts } from './apply_hapi_compat_request_timeouts';
-import { routeMatchHasEmptyNamedPathParam } from './find_my_way_lookup_path';
+import {
+  findMyWayRouteMatch,
+  restoreTrailingSlashInWildcardParam,
+  routeMatchHasEmptyNamedPathParam,
+} from './find_my_way_lookup_path';
 import { toPlainRouteParams } from './fastify_to_hapi_request';
 import { attachFastifyPayloadReceiveTimeout } from './register_fastify_payload_timeout_pre_parsing';
 
@@ -74,7 +78,7 @@ export function populateMatchedRouteFromFindMyWay(
   } = options;
 
   const lookupPath = getLookupPath(req);
-  const match = fmw.find(req.method as any, lookupPath);
+  const match = findMyWayRouteMatch(fmw, String(req.method ?? 'GET'), req);
   const app = ((req as any).app = (req as any).app ?? {});
   let matchedKibanaRoute: RouterRoute | undefined;
 
@@ -123,6 +127,7 @@ export function populateMatchedRouteFromFindMyWay(
       } else if (params[wildcardName] === undefined) {
         params[wildcardName] = '';
       }
+      restoreTrailingSlashInWildcardParam(req, params, wildcardName);
     }
     const plainParams = toPlainRouteParams(params);
     // Unusual paths (e.g. double slashes) can still yield empty named captures; trailing slashes

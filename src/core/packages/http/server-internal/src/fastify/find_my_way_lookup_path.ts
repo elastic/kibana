@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HTTPVersion, Instance as FmwInstance } from 'find-my-way';
 import type { FastifyRequest } from 'fastify';
 
 /**
@@ -53,7 +54,32 @@ export function getFindMyWayLookupPath(req: FastifyRequest): string {
 }
 
 /**
- * Redirect target when the client sent a trailing slash (Hapi parity: 302 to the slashless path).
+ * find-my-way lookup with Hapi-style trailing-slash normalization: try the slashless path
+ * first (avoids empty named captures on `/alerts/{id}`), then the raw pathname (routes
+ * registered as `/prefix/` only match with the slash).
+ *
+ * @internal
+ */
+export function findMyWayRouteMatch(
+  fmw: FmwInstance<HTTPVersion.V1>,
+  method: string,
+  req: FastifyRequest
+) {
+  const pathname = getRequestPathname(req);
+  const lookupPath = stripTrailingSlashForFindMyWayLookup(pathname);
+  if (pathname !== lookupPath) {
+    const slashMatch = fmw.find(method as any, pathname);
+    if (slashMatch) {
+      return slashMatch;
+    }
+  }
+  return fmw.find(method as any, lookupPath);
+}
+
+/**
+ * Builds the slashless path (and preserved query) for a request that included a trailing slash.
+ * Used by core app `/{path*}` base-path redirects and tests; the global dispatcher must not
+ * redirect here — Hapi serves many SPA URLs with a trailing slash without a framework redirect.
  *
  * @internal
  */
@@ -70,6 +96,34 @@ export function redirectLocationWithoutTrailingSlash(
     return lookupPath;
   }
   return `${lookupPath}${raw.slice(pathname.length)}`;
+}
+
+/**
+ * find-my-way lookup strips trailing slashes, but Hapi wildcard routes (e.g. core `/{path*}`)
+ * still expose the slash in `params.path` when the client requested it.
+ *
+ * @internal
+ */
+export function restoreTrailingSlashInWildcardParam(
+  req: FastifyRequest,
+  params: Record<string, string | undefined>,
+  wildcardName?: string
+): void {
+  if (!wildcardName) {
+    return;
+  }
+  const pathname = getRequestPathname(req);
+  const lookupPath = stripTrailingSlashForFindMyWayLookup(pathname);
+  if (pathname.length <= 1 || !pathname.endsWith('/') || pathname === lookupPath) {
+    return;
+  }
+  const value = params[wildcardName];
+  if (value === undefined || value === '') {
+    return;
+  }
+  if (!value.endsWith('/')) {
+    params[wildcardName] = `${value}/`;
+  }
 }
 
 /**

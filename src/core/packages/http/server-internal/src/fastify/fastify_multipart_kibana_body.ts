@@ -10,11 +10,13 @@
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
+import type { FastifyError } from '@fastify/error';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
 import type { RouterRoute } from '@kbn/core-http-server';
 
 import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
+import { KIBANA_LIFECYCLE_SHORT_CIRCUITED } from './fastify_lifecycle';
 import { routeHasUnparsedPayload } from './fastify_route_body_options';
 
 /** Matches the default `parts` limit in `@fastify/multipart` unless overridden at register time. */
@@ -69,7 +71,31 @@ async function readRawRequestBody(raw: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-async function drainMultipartBody(req: FastifyRequest, maxFileSize: number): Promise<void> {
+function isMultipartPayloadTooLarge(error: unknown): error is FastifyError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as FastifyError).code === 'FST_REQ_FILE_TOO_LARGE'
+  );
+}
+
+function sendPayloadTooLarge(req: FastifyRequest, reply: FastifyReply, maxBytes: number): void {
+  const app = ((req as FastifyRequest & { app?: Record<symbol, boolean> }).app =
+    (req as FastifyRequest & { app?: Record<symbol, boolean> }).app ?? {});
+  app[KIBANA_LIFECYCLE_SHORT_CIRCUITED] = true;
+  void reply.code(413).send({
+    statusCode: 413,
+    error: 'Request Entity Too Large',
+    message: `Payload content length greater than maximum allowed: ${maxBytes}`,
+  });
+}
+
+async function drainMultipartBody(
+  req: FastifyRequest,
+  reply: FastifyReply,
+  maxFileSize: number
+): Promise<void> {
   try {
     for await (const part of req.parts(multipartRequestOptions(maxFileSize))) {
       if (part.type === 'file') {
@@ -77,7 +103,11 @@ async function drainMultipartBody(req: FastifyRequest, maxFileSize: number): Pro
         await finished(part.file);
       }
     }
-  } catch {
+  } catch (error) {
+    if (isMultipartPayloadTooLarge(error)) {
+      sendPayloadTooLarge(req, reply, maxFileSize);
+      return;
+    }
     // Malformed multipart or aborted request — ignore so the request cycle can finish.
   }
 }
@@ -133,7 +163,7 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
     }
 
     if (!parseMultipart) {
-      await drainMultipartBody(req, maxPayloadBytes);
+      await drainMultipartBody(req, reply, maxPayloadBytes);
       return;
     }
 
@@ -154,17 +184,25 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
     // PassThrough backpressure stops the pipe before preValidation finishes. Buffer each file with
     // `toBuffer()` (respects multipart fileSize limits) then expose a small Readable — bounded by
     // `savedObjects.maxImportPayloadBytes` / route maxBytes, same as loading the upload in memory.
-    for await (const part of req.parts(multipartRequestOptions(maxBytes))) {
-      if (part.type === 'file') {
-        const buf = await (part as { toBuffer: () => Promise<Buffer> }).toBuffer();
-        const stream = Readable.from(buf);
-        Object.assign(stream as { hapi?: { filename: string } }, {
-          hapi: { filename: part.filename ?? 'upload.ndjson' },
-        });
-        body[part.fieldname] = stream;
-      } else if (part.type === 'field') {
-        body[part.fieldname] = part.value;
+    try {
+      for await (const part of req.parts(multipartRequestOptions(maxBytes))) {
+        if (part.type === 'file') {
+          const buf = await (part as { toBuffer: () => Promise<Buffer> }).toBuffer();
+          const stream = Readable.from(buf);
+          Object.assign(stream as { hapi?: { filename: string } }, {
+            hapi: { filename: part.filename ?? 'upload.ndjson' },
+          });
+          body[part.fieldname] = stream;
+        } else if (part.type === 'field') {
+          body[part.fieldname] = part.value;
+        }
       }
+    } catch (error) {
+      if (isMultipartPayloadTooLarge(error)) {
+        sendPayloadTooLarge(req, reply, maxBytes);
+        return;
+      }
+      throw error;
     }
 
     req.body = body;

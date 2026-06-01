@@ -92,8 +92,9 @@ import {
 } from './fastify/fastify_lifecycle';
 import { getEcsResponseLog } from './logging';
 import {
+  findMyWayRouteMatch,
   getFindMyWayLookupPath,
-  redirectLocationWithoutTrailingSlash,
+  restoreTrailingSlashInWildcardParam,
   routeMatchHasEmptyNamedPathParam,
 } from './fastify/find_my_way_lookup_path';
 import { extractHapiWildcardName, translateHapiPathToFastify } from './fastify/translate_path';
@@ -112,6 +113,7 @@ import {
 } from './fastify/install_fastify_compression';
 import { installFastifyCors } from './fastify/install_fastify_cors';
 import { populateMatchedRouteFromFindMyWay } from './fastify/fastify_route_lookup';
+import { KIBANA_LIFECYCLE_SHORT_CIRCUITED } from './fastify/fastify_lifecycle';
 
 /** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
 const FASTIFY_BODY_LIMIT_CEILING_BYTES = 36 * 1024 * 1024;
@@ -1025,13 +1027,7 @@ export class FastifyHttpServer {
       ) {
         return;
       }
-      const lookupPath = getFindMyWayLookupPath(req);
-      const redirectLocation = redirectLocationWithoutTrailingSlash(req, lookupPath);
-      if (redirectLocation) {
-        void reply.redirect(redirectLocation);
-        return;
-      }
-      const match = fmw.find(req.method as any, lookupPath);
+      const match = findMyWayRouteMatch(fmw, String(req.method ?? 'GET'), req);
       if (!match) {
         if (this.fallbackHandler) {
           (req as { params: unknown }).params = {};
@@ -1056,6 +1052,7 @@ export class FastifyHttpServer {
         } else if (params[wildcardName] === undefined) {
           params[wildcardName] = '';
         }
+        restoreTrailingSlashInWildcardParam(req, params, wildcardName);
       }
       const plainParams = toPlainRouteParams(params);
       const hasEmptyNamedParam = routeMatchHasEmptyNamedPathParam(plainParams, wildcardName);
@@ -1111,6 +1108,25 @@ export class FastifyHttpServer {
     };
     fastify.addHook('preParsing', async (req, reply, payload) => {
       populateMatchedRouteFromFindMyWay(req, reply, lookupOptions);
+
+      const route = (req as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
+      const maxBytes = route?.options?.body?.maxBytes;
+      const contentLengthHeader = req.headers['content-length'];
+      if (maxBytes != null && contentLengthHeader !== undefined && contentLengthHeader !== '') {
+        const contentLength = Number(contentLengthHeader);
+        if (!Number.isNaN(contentLength) && contentLength > maxBytes) {
+          const app = ((req as { app?: Record<symbol, boolean> }).app =
+            (req as { app?: Record<symbol, boolean> }).app ?? {});
+          app[KIBANA_LIFECYCLE_SHORT_CIRCUITED] = true;
+          await reply.code(413).send({
+            statusCode: 413,
+            error: 'Request Entity Too Large',
+            message: `Payload content length greater than maximum allowed: ${maxBytes}`,
+          });
+          return Buffer.alloc(0);
+        }
+      }
+
       // Fastify's `preParsingHookRunner` assumes a defined payload (reads `.length` on streams);
       // GET/HEAD/DELETE without a body may pass `undefined` here; Fastify expects a
       // stream/buffer/string (reads `.length`), not `undefined`.

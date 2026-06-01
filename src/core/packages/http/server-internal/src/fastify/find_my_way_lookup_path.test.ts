@@ -12,6 +12,7 @@ import type { FastifyRequest } from 'fastify';
 import {
   getFindMyWayLookupPath,
   redirectLocationWithoutTrailingSlash,
+  restoreTrailingSlashInWildcardParam,
   routeMatchHasEmptyNamedPathParam,
   stripTrailingSlashForFindMyWayLookup,
 } from './find_my_way_lookup_path';
@@ -33,6 +34,13 @@ describe('find_my_way_lookup_path', () => {
     expect(redirectLocationWithoutTrailingSlash(req, lookupPath)).toBe(
       '/api/cases/alerts?owner=foo'
     );
+  });
+
+  it('restores trailing slash on wildcard params after slashless lookup', () => {
+    const req = makeReq('/some-path/');
+    const params: Record<string, string | undefined> = { path: 'some-path' };
+    restoreTrailingSlashInWildcardParam(req, params, 'path');
+    expect(params.path).toBe('some-path/');
   });
 
   it('detects empty named captures from find-my-way', () => {

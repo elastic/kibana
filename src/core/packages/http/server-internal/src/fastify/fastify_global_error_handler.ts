@@ -15,7 +15,10 @@ import { isReplyCommitted } from './fastify_reply_utils';
 
 const INTERNAL_MESSAGE = 'An internal server error occurred. Check Kibana server logs for details.';
 
-function httpStatusToErrorLabel(statusCode: number): string {
+function httpStatusToErrorLabel(statusCode: number, error?: FastifyError): string {
+  if (statusCode === 413) {
+    return 'Request Entity Too Large';
+  }
   const labels: Record<number, string> = {
     400: 'Bad Request',
     401: 'Unauthorized',
@@ -23,7 +26,7 @@ function httpStatusToErrorLabel(statusCode: number): string {
     404: 'Not Found',
     408: 'Request Timeout',
     409: 'Conflict',
-    413: 'Payload Too Large',
+    413: 'Request Entity Too Large',
     415: 'Unsupported Media Type',
     429: 'Too Many Requests',
     500: 'Internal Server Error',
@@ -70,7 +73,7 @@ export function installFastifyGlobalErrorHandler(fastify: FastifyInstance, log: 
 
     reply.code(statusCode).send({
       statusCode,
-      error: httpStatusToErrorLabel(statusCode),
+      error: httpStatusToErrorLabel(statusCode, error),
       message,
     });
   });
