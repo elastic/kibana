@@ -50,7 +50,7 @@ export const createChangePointDataSourceProfileProvider =
     profileId: CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
     profile: {
       getChartSectionConfiguration:
-        (prev, { toolkit }) =>
+        (prev, { context, toolkit }) =>
         () => ({
           ...prev(),
           renderChartSection: (props) =>
