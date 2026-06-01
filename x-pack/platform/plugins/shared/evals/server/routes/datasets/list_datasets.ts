@@ -77,10 +77,8 @@ export const registerListDatasetsRoute = ({
           }
 
           const { page, per_page: perPage } = request.query;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const datasets = await datasetClient.list({ page, perPage });
 
           return response.ok({
