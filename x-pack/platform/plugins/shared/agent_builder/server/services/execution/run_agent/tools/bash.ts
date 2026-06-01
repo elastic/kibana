@@ -29,7 +29,7 @@ Default cwd is /tmp; use absolute paths under /workspace to persist
 
 ### File Operations
 
-cat, cp, file, ln, ls, mkdir, mv, readlink, rm, rmdir, split, stat, touch, tree
+cat, cp, file, ls, mkdir, mv, rm, rmdir, split, stat, touch, tree
 
 ### Text Processing
 
