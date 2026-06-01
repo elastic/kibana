@@ -31,10 +31,4 @@ export const FETCH_BATCH_SIZE = 500;
  */
 export const GET_STATUS_BATCH_SIZE = 500;
 
-/**
- * UIAM convert error code returned when the Elasticsearch API key creator is not a Cloud user.
- * Source: https://github.com/elastic/uiam/blob/main/modules/domain/src/main/java/co/elastic/cloud/uiam/domain/errors/ErrorCode.java
- */
-export const NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE = '0x357391';
-
 export const TAGS = ['serverless', 'task-manager', 'uiam-api-key-provisioning', 'background-task'];

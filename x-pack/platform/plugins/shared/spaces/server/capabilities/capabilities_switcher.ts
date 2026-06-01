@@ -12,11 +12,11 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../common';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
-import type { PluginsStart } from '../plugin';
 import type { SpacesServiceStart } from '../spaces_service';
+import type { SpacesPluginStartDeps } from '../types';
 
 export function setupCapabilitiesSwitcher(
-  core: CoreSetup<PluginsStart>,
+  core: CoreSetup<SpacesPluginStartDeps>,
   getSpacesService: () => SpacesServiceStart,
   logger: Logger
 ): CapabilitiesSwitcher {
