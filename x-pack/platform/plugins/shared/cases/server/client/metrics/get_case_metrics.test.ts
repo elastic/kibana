@@ -145,7 +145,7 @@ describe('getCaseMetrics', () => {
       );
     } catch (error) {
       expect(error.message).toMatchInlineSnapshot(
-        `"Failed to retrieve metrics within client for case id: 1: Error: Invalid input: expected \\"alerts.count\\", Invalid input: expected \\"alerts.users\\", Invalid input: expected \\"alerts.hosts\\", Invalid input: expected \\"actions.isolateHost\\", Invalid input: expected \\"connectors\\", and 1 more"`
+        `"Failed to retrieve metrics within client for case id: 1: Error: Invalid input: expected \\"alerts.count\\", Invalid input: expected \\"alerts.users\\", Invalid input: expected \\"alerts.hosts\\", Invalid input: expected \\"connectors\\", Invalid input: expected \\"lifespan\\""`
       );
     }
   });
