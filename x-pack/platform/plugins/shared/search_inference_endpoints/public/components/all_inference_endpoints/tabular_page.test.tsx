@@ -446,8 +446,6 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should not show the three-dots actions menu when view and delete are hidden', () => {
-      // With view + delete both gated by canManage=false only copy remains (1 action),
-      // so EUI renders it inline and the overflow popover button is absent.
       expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
     });
 
