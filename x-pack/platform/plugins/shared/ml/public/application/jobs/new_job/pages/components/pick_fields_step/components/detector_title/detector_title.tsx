@@ -48,7 +48,7 @@ export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
         {deleteDetector !== undefined && (
           <EuiToolTip
             content={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.deleteButtonAriaLabel', {
-              defaultMessage: 'Next',
+              defaultMessage: 'Delete',
             })}
             disableScreenReaderOutput
           >
