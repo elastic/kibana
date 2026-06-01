@@ -298,7 +298,6 @@ export const ConfigSchema = schema.object({
           taggedRoutesOnly: schema.boolean({ defaultValue: true }),
         }),
       }),
-      sessionlessUserProfileRetrievalEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
   audit: schema.object({

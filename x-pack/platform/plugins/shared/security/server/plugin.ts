@@ -417,8 +417,6 @@ export class SecurityPlugin
     this.userProfileStart = this.userProfileService.start({
       clusterClient,
       session,
-      sessionlessUserProfileRetrievalEnabled:
-        this.getConfig().authc.http.sessionlessUserProfileRetrievalEnabled,
     });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.

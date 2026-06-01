@@ -68,7 +68,6 @@ export interface UserProfileServiceSetupParams {
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
-  sessionlessUserProfileRetrievalEnabled: boolean;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -117,19 +116,10 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({
-    clusterClient,
-    session,
-    sessionlessUserProfileRetrievalEnabled,
-  }: UserProfileServiceStartParams) {
+  start({ clusterClient, session }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      getCurrent: this.getCurrent.bind(
-        this,
-        clusterClient,
-        session,
-        sessionlessUserProfileRetrievalEnabled
-      ),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -353,7 +343,6 @@ export class UserProfileService {
   private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
     session: PublicMethodsOf<Session>,
-    sessionlessUserProfileRetrievalEnabled: boolean,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
     if (!this.license?.isEnabled()) {
@@ -375,9 +364,6 @@ export class UserProfileService {
     if (await session.getSID(request)) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
-    } else if (!sessionlessUserProfileRetrievalEnabled) {
-      this.logger.debug(`Skipping user profile retrieval: sessionless retrieval is disabled.`);
-      return null;
     } else if (request.headers[RUNAS_HEADER]) {
       // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
       // credential (e.g. `elastic`), not the effective user. Activating a profile from those
