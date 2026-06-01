@@ -77,17 +77,4 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', read: true });
   });
-
-  it('returns 500 when the persisted read value does not match the requested value', async () => {
-    // Simulates ES returning a stale/legacy doc where `read` is undefined
-    update.mockResolvedValue({ id: 'conv-1', read: undefined });
-
-    const response = await routeHandler(
-      createMockContext() as any,
-      createRequest(),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(500);
-  });
 });

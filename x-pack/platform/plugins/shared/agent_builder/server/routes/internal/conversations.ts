@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createInternalError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -87,18 +86,10 @@ export function registerInternalConversationRoutes({
         read,
       });
 
-      // Enables `read` to be mandatory in the response and not `read?`.
-      if (read !== updatedConversation.read) {
-        throw createInternalError(
-          `Failed to persist read state for conversation ${conversationId}: expected ${read}, got ${updatedConversation.read}`,
-          { conversationId, expected: read, actual: updatedConversation.read }
-        );
-      }
-
       return response.ok<MarkReadConversationResponse>({
         body: {
           id: updatedConversation.id,
-          read: updatedConversation.read,
+          read: updatedConversation.read!,
         },
       });
     })
