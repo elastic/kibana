@@ -54,8 +54,10 @@ export class Semaphore {
    */
   private dispatch(): void {
     if (this.queue.length > 0 && this.count < this.max) {
-      const waiter = this.queue.shift()!;
-      waiter();
+      const waiter = this.queue.shift();
+      if (waiter) {
+        waiter();
+      }
     }
   }
 

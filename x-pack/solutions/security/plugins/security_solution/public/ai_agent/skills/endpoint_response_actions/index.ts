@@ -15,11 +15,7 @@ export { useExecuteAction } from './use_execute_action';
 export { ConfirmationCard } from './confirmation_renderer';
 export { ResultCard } from './result_renderer';
 export { Semaphore } from './semaphore';
-export {
-  MAX_CONCURRENT_ACTIONS,
-  POLL_INTERVAL_MS,
-  MAX_POLL_DURATION_MS,
-} from './constants';
+export { MAX_CONCURRENT_ACTIONS, POLL_INTERVAL_MS, MAX_POLL_DURATION_MS } from './constants';
 export {
   isolateSkill,
   handleIsolateSkill,

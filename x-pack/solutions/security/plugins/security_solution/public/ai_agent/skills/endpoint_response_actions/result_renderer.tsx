@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiSpacer } from '@elastic/eui';
 import type { ActionResult } from './types';
 
 interface ResultCardProps {
@@ -60,7 +53,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
-            Action ID: {result.actionId} &middot; {result.timestamp}
+            {'Action ID: '}
+            {result.actionId}
+            {' \u00b7 '}
+            {result.timestamp}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
