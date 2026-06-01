@@ -25,8 +25,7 @@ import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
-// Failing: See https://github.com/elastic/kibana/issues/268548
-describe.skip(
+describe(
   'Detection rules, Prebuilt Rules Install Notifications',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

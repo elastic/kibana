@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
-  useEuiTheme,
   type EuiComboBoxOptionOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
