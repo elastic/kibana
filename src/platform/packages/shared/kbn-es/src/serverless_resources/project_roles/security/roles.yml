@@ -18,7 +18,8 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -113,8 +114,9 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
-        - '.internal.adhoc.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -194,7 +196,13 @@ t1_analyst:
     - names:
         - '.alerts-security*'
         - '.siem-signals-*'
-        - '.adhoc.alerts-security*'
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
       privileges:
         - read
         - write
@@ -264,7 +272,13 @@ t2_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
-        - .adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -355,7 +369,13 @@ t3_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
-        - .adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -458,7 +478,13 @@ threat_intelligence_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
-        - .adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -532,8 +558,9 @@ rule_author:
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
-        - .internal.adhoc.alerts-security*
-        - .adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -625,8 +652,9 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -712,8 +740,9 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -789,8 +818,9 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - risk-score.risk-score-*
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -889,8 +919,14 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -998,8 +1034,9 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
