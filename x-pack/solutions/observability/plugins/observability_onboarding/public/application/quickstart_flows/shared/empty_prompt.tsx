@@ -19,12 +19,15 @@ interface EmptyPromptProps {
   error: IHttpFetchError<ResponseErrorBody>;
   telemetryEventContext?: OnboardingFlowEventContext;
   onRetryClick(): void;
+  // Shrinks padding so the prompt nests inside a wizard step body.
+  inline?: boolean;
 }
 export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
   onboardingFlowType,
   error,
   telemetryEventContext,
   onRetryClick,
+  inline = false,
 }) => {
   const {
     services: { analytics },
@@ -43,6 +46,8 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
       <EuiEmptyPrompt
         color="plain"
         iconType="lock"
+        paddingSize={inline ? 's' : 'm'}
+        data-test-subj="observabilityOnboardingEmptyPrompt"
         title={
           <h2>
             {i18n.translate(
@@ -70,6 +75,8 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
     <EuiEmptyPrompt
       color="danger"
       iconType="error"
+      paddingSize={inline ? 's' : 'm'}
+      data-test-subj="observabilityOnboardingEmptyPrompt"
       title={
         <h2>
           {i18n.translate(
@@ -94,7 +101,7 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
           color="danger"
           iconType="refresh"
           fill
-          data-test-subj="observabilityOnboardingAutoDetectPanelGoBackButton"
+          data-test-subj="observabilityOnboardingEmptyPromptRetryButton"
           onClick={onRetryClick}
         >
           {i18n.translate(

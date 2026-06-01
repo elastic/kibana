@@ -271,6 +271,7 @@ export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+export const CREATE_MANAGED_OTLP_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_managed_otlp_api_key`;
 
 // Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {
