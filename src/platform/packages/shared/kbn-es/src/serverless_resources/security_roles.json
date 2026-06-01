@@ -7,12 +7,15 @@
         {
           "names": [
             ".alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
             "write",
-            "maintenance"
+            "maintenance",
+            "view_index_metadata"
           ]
         },
         {
@@ -54,7 +57,7 @@
             "all"
           ],
           "securitySolutionAttackDiscovery": [
-            "all"
+            "minimal_all"
           ],
           "securitySolutionCasesV2": [
             "read"
@@ -87,12 +90,15 @@
         {
           "names": [
             ".alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
             "write",
-            "maintenance"
+            "maintenance",
+            "view_index_metadata"
           ]
         },
         {
@@ -136,7 +142,7 @@
             "all"
           ],
           "securitySolutionAttackDiscovery": [
-            "all"
+            "minimal_all"
           ],
           "securitySolutionCasesV2": [
             "read"
@@ -187,12 +193,15 @@
         {
           "names": [
             ".alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*"
           ],
           "privileges": [
             "read",
             "write",
-            "maintenance"
+            "maintenance",
+            "view_index_metadata"
           ]
         },
         {

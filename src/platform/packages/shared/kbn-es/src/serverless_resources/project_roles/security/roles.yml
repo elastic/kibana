@@ -19,6 +19,7 @@ viewer:
         - '.alerts*'
         - '.preview.alerts*'
         - '.adhoc.alerts*'
+        - '.internal.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -194,10 +195,13 @@ t1_analyst:
     - names:
         - '.alerts-security*'
         - '.siem-signals-*'
+        - '.adhoc.alerts-security*'
+        - '.internal.adhoc.alerts-security*'
       privileges:
         - read
         - write
         - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -236,7 +240,7 @@ t1_analyst:
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -262,10 +266,13 @@ t2_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -310,7 +317,7 @@ t2_analyst:
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -351,10 +358,13 @@ t3_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -452,10 +462,13 @@ threat_intelligence_analyst:
     - names:
         - .alerts-security*
         - .siem-signals-*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -887,6 +900,7 @@ endpoint_operations_analyst:
         - read
         - write
         - maintenance
+        - view_index_metadata
     - names:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.security_*'
