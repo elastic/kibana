@@ -58,9 +58,7 @@ function ruleMatchesDep(rule: PackageRule, dep: string): boolean {
  * Returns a function that, given a dep name, returns its renovate reviewer team
  * and group, or marks it as an orphan if no enabled rule covers it.
  */
-export function buildRenovateMatcher(
-  renovatePath?: string
-): (dep: string) => RenovateMatch {
+export function buildRenovateMatcher(renovatePath?: string): (dep: string) => RenovateMatch {
   const configPath = renovatePath ?? nodePath.join(REPO_ROOT, 'renovate.json');
   let config: RenovateConfig = {};
   try {
