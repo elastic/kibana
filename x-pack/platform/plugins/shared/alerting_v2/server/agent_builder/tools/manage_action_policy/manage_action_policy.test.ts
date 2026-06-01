@@ -183,41 +183,39 @@ describe('manageActionPolicyTool', () => {
     });
   });
 
-  describe('rule scoping via set_matcher', () => {
-    it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
-      const deps = createDeps();
-      const tool = manageActionPolicyTool(deps);
-      const ctx = createContext();
+  it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
+    const deps = createDeps();
+    const tool = manageActionPolicyTool(deps);
+    const ctx = createContext();
 
-      const result = await tool.handler(
-        {
-          operations: [
-            { operation: 'set_metadata', name: 'Rule-scoped Policy', description: 'desc' },
-            {
-              operation: 'set_destinations',
-              destinations: [{ type: 'workflow', id: 'wf-1' }],
-            },
-            { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
-          ],
-        },
-        ctx
-      );
+    const result = await tool.handler(
+      {
+        operations: [
+          { operation: 'set_metadata', name: 'Rule-scoped Policy', description: 'desc' },
+          {
+            operation: 'set_destinations',
+            destinations: [{ type: 'workflow', id: 'wf-1' }],
+          },
+          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+        ],
+      },
+      ctx
+    );
 
-      const { results } = result as {
-        results: Array<{
-          type: string;
-          data?: {
-            actionPolicyAttachment?: {
-              matcher?: string | null;
-              name?: string;
-            };
+    const { results } = result as {
+      results: Array<{
+        type: string;
+        data?: {
+          actionPolicyAttachment?: {
+            matcher?: string | null;
+            name?: string;
           };
-        }>;
-      };
-      expect(results[0].type).toBe(ToolResultType.other);
-      expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
-      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
-    });
+        };
+      }>;
+    };
+    expect(results[0].type).toBe(ToolResultType.other);
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 
   describe('logger severity', () => {

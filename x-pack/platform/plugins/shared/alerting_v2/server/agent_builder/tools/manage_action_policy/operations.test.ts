@@ -144,22 +144,20 @@ describe('executeActionPolicyOperations', () => {
     });
   });
 
-  describe('rule scoping via set_matcher', () => {
-    it('passes validation for a complete rule-scoped policy', () => {
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_metadata', name: 'My Policy', description: 'desc' },
-        {
-          operation: 'set_destinations',
-          destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
-        },
-        { operation: 'set_matcher', matcher: 'rule.id: "rule-123"' },
-        { operation: 'validate' },
-      ];
+  it('passes validation for a complete rule-scoped policy', () => {
+    const ops: ActionPolicyOperation[] = [
+      { operation: 'set_metadata', name: 'My Policy', description: 'desc' },
+      {
+        operation: 'set_destinations',
+        destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
+      },
+      { operation: 'set_matcher', matcher: 'rule.id: "rule-123"' },
+      { operation: 'validate' },
+    ];
 
-      const result = executeActionPolicyOperations({}, ops, { isNew: true });
+    const result = executeActionPolicyOperations({}, ops, { isNew: true });
 
-      expect(result.matcher).toBe('rule.id: "rule-123"');
-    });
+    expect(result.matcher).toBe('rule.id: "rule-123"');
   });
 
   describe('throttle / grouping compatibility', () => {

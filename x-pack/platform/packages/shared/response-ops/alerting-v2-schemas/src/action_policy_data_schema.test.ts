@@ -219,12 +219,8 @@ describe('createActionPolicyDataSchema', () => {
 });
 
 describe('updateActionPolicyDataSchema', () => {
-  describe('strictness', () => {
-    
-
-    it('rejects any unknown key (strict)', () => {
-      expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
-    });
+  it('rejects any unknown key (strict)', () => {
+    expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
   });
 
   describe('valid payloads', () => {
