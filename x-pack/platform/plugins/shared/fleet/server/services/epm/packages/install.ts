@@ -1302,6 +1302,7 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
+  spaceId: string,
   saveAsAdditionnalSpace = false,
   append = false
 ) => {
@@ -1311,8 +1312,6 @@ export const saveKibanaAssetsRefs = async (
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
@@ -1332,13 +1331,40 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        const primarySpaceId = installation?.attributes?.installed_kibana_space_id;
+
+        if (primarySpaceId && primarySpaceId === spaceId) {
+          appContextService
+            .getLogger()
+            .error(
+              `saveKibanaAssetsRefs: unexpectedly received spaceId '${spaceId}' for package '${pkgName}' for saving as additional space that matches primary installation space. Skipping.`
+            );
+          return; // no-op: skip SO update
+        }
+
+        // Strip the primary-space key if it was unexpectedly written there
+        const keysToOmit = primarySpaceId ? [spaceId, primarySpaceId] : [spaceId];
+
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs =
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? [];
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
+
         return savedObjectsClient.update<Installation>(
           PACKAGES_SAVED_OBJECT_TYPE,
           pkgName,
           {
             additional_spaces_installed_kibana: {
-              ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
-              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+              ...omit(
+                installation?.attributes?.additional_spaces_installed_kibana ?? {},
+                keysToOmit
+              ),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },
           { refresh: false }
