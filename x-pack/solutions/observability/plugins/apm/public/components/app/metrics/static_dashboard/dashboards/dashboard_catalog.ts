@@ -20,6 +20,9 @@ const dashboardFileNames = [
   'otel_native-otel_other-java',
   'classic_apm-edot-dotnet',
   'classic_apm-edot-dotnet-lte-v8',
+  'otel_native-edot-dotnet',
+  'otel_native-otel_other-dotnet',
+  'otel_native-edot-dotnet-lte-v8',
   'otel_native-edot-python',
   'otel_native-otel_other-python',
   'classic_apm-otel_other-go',
@@ -43,6 +46,7 @@ export interface VersionRule {
  */
 export const versionedDashboardRules: Record<string, VersionRule[]> = {
   'classic_apm-edot-dotnet': [{ condition: '<=8', fileName: 'classic_apm-edot-dotnet-lte-v8' }],
+  'otel_native-edot-dotnet': [{ condition: '<=8', fileName: 'otel_native-edot-dotnet-lte-v8' }],
 };
 
 export const parseVersionCondition = (

@@ -219,5 +219,26 @@ describe('APM metrics static dashboard helpers', () => {
         })
       ).toBe(false);
     });
+
+    it('returns true for OTel-native EDOT .NET 9', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          telemetrySdkName: 'opentelemetry',
+          telemetrySdkLanguage: 'dotnet',
+          runtimeVersion: '9.0.0',
+        })
+      ).toBe(true);
+    });
+
+    it('returns true for OTel-native vanilla .NET', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet',
+          telemetrySdkName: 'opentelemetry',
+          telemetrySdkLanguage: 'dotnet',
+        })
+      ).toBe(true);
+    });
   });
 });
