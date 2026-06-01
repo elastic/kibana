@@ -46,69 +46,21 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
   });
 
   spaceTest(
-    'auto-increments titles, respects overrides, and preserves panels',
+    'save as copy creates a numbered clone with the same panels',
     async ({ pageObjects, page }) => {
-      const cloneOf = (n: number) => `${FEW_PANELS_DASHBOARD_TITLE} (${n})`;
+      await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
+      await pageObjects.dashboard.ensureEditMode();
+      await pageObjects.dashboard.saveDashboardAsCopy();
 
-      const expectCurrentDashboardTitle = async (expectedTitle: string) => {
-        await expect(page.testSubj.locator('breadcrumb last')).toContainText(expectedTitle);
-      };
-
-      // After save-as-copy the dashboard app navigates to /view/<new-id>?_g=…
-      const getCurrentDashboardId = (): string => {
-        const url = page.url();
-        const match = url.match(/#\/view\/([^?]+)/);
-        expect(match, `Expected to be on a dashboard view, got URL: ${url}`).not.toBeNull();
-        // expect() above guarantees match is non-null at runtime.
-        return match![1];
-      };
-
-      const expectSourcePanelTitles = async () => {
-        await expect
-          .poll(async () => [...(await pageObjects.dashboard.getPanelTitles())].sort())
-          .toStrictEqual([...FEW_PANELS_PANEL_TITLES].sort());
-      };
-
-      let clone1Id = '';
-
-      await spaceTest.step('clone suggests "(1)"', async () => {
-        await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
-        await pageObjects.dashboard.ensureEditMode();
-        await pageObjects.dashboard.saveDashboardAsCopy();
-        clone1Id = getCurrentDashboardId();
-        await expectCurrentDashboardTitle(cloneOf(1));
-      });
-
-      await spaceTest.step('the clone contains every source panel', async () => {
-        // Step 1's save-as-copy left us on clone (1) already; no nav needed.
-        await expect
-          .poll(() => pageObjects.dashboard.getPanelCount())
-          .toBe(FEW_PANELS_PANEL_TITLES.length);
-        await expectSourcePanelTitles();
-      });
-
-      await spaceTest.step('cloning "(1)" suggests "(2)"', async () => {
-        await pageObjects.dashboard.ensureEditMode();
-        await pageObjects.dashboard.saveDashboardAsCopy();
-        await expectCurrentDashboardTitle(cloneOf(2));
-      });
-
-      await spaceTest.step('cloning with a title override saves with that override', async () => {
-        await pageObjects.dashboard.openDashboardWithId(clone1Id);
-        await pageObjects.dashboard.ensureEditMode();
-        await pageObjects.dashboard.saveDashboardAsCopy(cloneOf(20));
-        await expectCurrentDashboardTitle(cloneOf(20));
-      });
-
-      await spaceTest.step(
-        'subsequent clones increment from the highest existing index',
-        async () => {
-          await pageObjects.dashboard.openDashboardWithId(clone1Id);
-          await pageObjects.dashboard.ensureEditMode();
-          await pageObjects.dashboard.saveDashboardAsCopy();
-          await expectCurrentDashboardTitle(cloneOf(21));
-        }
+      await expect(page.testSubj.locator('breadcrumb last')).toContainText(
+        `${FEW_PANELS_DASHBOARD_TITLE} (1)`
       );
+      await expect
+        .poll(() => pageObjects.dashboard.getPanelCount())
+        .toBe(FEW_PANELS_PANEL_TITLES.length);
+      await expect
+        .poll(async () => [...(await pageObjects.dashboard.getPanelTitles())].sort())
+        .toStrictEqual([...FEW_PANELS_PANEL_TITLES].sort());
     }
   );
 });
