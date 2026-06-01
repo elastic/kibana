@@ -17,6 +17,7 @@ import { ToolResultType, type ToolResult } from '@kbn/agent-builder-common/tools
  */
 export const SCS_SEMANTIC_SEARCH_TOOL_ID = 'scs.semantic_search';
 export const SCS_READ_FILE_TOOL_ID = 'scs.read_file_from_chunks';
+export const SCS_SYMBOL_ANALYSIS_TOOL_ID = 'scs.symbol_analysis';
 
 export interface SemanticCodeSearchTools {
   tools: Record<string, ToolDefinition>;
@@ -107,6 +108,21 @@ export const createSemanticCodeSearchTools = ({
         required: ['file_paths'] as const,
       },
     },
+    analyze_symbol: {
+      description:
+        'Resolve a specific code symbol (an exact name found via code_search, e.g. an error/exception class, a logger wrapper, or a constant holding a message template) to its definitions, usages, and documentation. Use it to confirm the precise wording or error types behind a log site — not for open-ended code exploration.',
+      schema: {
+        type: 'object' as const,
+        properties: {
+          symbol_name: {
+            type: 'string' as const,
+            description:
+              'Exact symbol name to analyze (e.g. "ConnectionRefusedError", "logRequestFailure"). Must be an exact identifier discovered via code_search.',
+          },
+        },
+        required: ['symbol_name'] as const,
+      },
+    },
   };
 
   const runScsTool = async (toolId: string, toolParams: Record<string, unknown>) => {
@@ -146,12 +162,20 @@ export const createSemanticCodeSearchTools = ({
       }
       return runScsTool(SCS_READ_FILE_TOOL_ID, { file_paths: filePaths });
     },
+    analyze_symbol: async (toolCall) => {
+      const { symbol_name: symbolName } = toolCall.function.arguments as { symbol_name?: string };
+      if (!symbolName) {
+        return { response: { results: [], count: 0, error: '"symbol_name" is required.' } };
+      }
+      return runScsTool(SCS_SYMBOL_ANALYSIS_TOOL_ID, { symbol_name: symbolName });
+    },
   };
 
   const promptSnippet = `
 You can also consult the source code that produces this stream's logs, indexed in code index "${codeIndex}". Use it to *verify* hypotheses — never as a starting point:
 - **code_search** — semantically search the code for the exact log/error strings, error types, and dependency calls it emits.
 - **read_code_file** — read full files to inspect surrounding implementation.
+- **analyze_symbol** — resolve a specific symbol you already found via code_search (e.g. an exception class or a logging helper) to confirm its message wording or the error types it covers. Do not use it to explore unfamiliar code.
 
 Analyze the stream features and dataset_analysis first; they reflect what is actually emitted. Use code only to refine query terms (e.g. confirm the precise wording of a logged message before choosing \`MATCH_PHRASE\` vs \`:\`) and to corroborate dependencies. The code may be a different version than what is running, so it is a hint, not ground truth — never let it override dataset_analysis. When a query is grounded in code, record it in that query's \`evidence\` as \`code: <file>:<line> <snippet>\`.`;
 

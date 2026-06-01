@@ -14,6 +14,7 @@ import {
   createSemanticCodeSearchTools,
   SCS_READ_FILE_TOOL_ID,
   SCS_SEMANTIC_SEARCH_TOOL_ID,
+  SCS_SYMBOL_ANALYSIS_TOOL_ID,
 } from './semantic_code_search_tools';
 
 const makeToolCall = (name: string, args: Record<string, unknown>): ToolCall => ({
@@ -37,10 +38,14 @@ describe('createSemanticCodeSearchTools', () => {
     agentBuilderTools = { execute } as unknown as ToolsStart;
   });
 
-  it('exposes code_search and read_code_file tools and a prompt snippet mentioning the index', () => {
+  it('exposes the code search tools and a prompt snippet mentioning the index', () => {
     const { tools, callbacks, promptSnippet } = build();
-    expect(Object.keys(tools).sort()).toEqual(['code_search', 'read_code_file']);
-    expect(Object.keys(callbacks).sort()).toEqual(['code_search', 'read_code_file']);
+    expect(Object.keys(tools).sort()).toEqual(['analyze_symbol', 'code_search', 'read_code_file']);
+    expect(Object.keys(callbacks).sort()).toEqual([
+      'analyze_symbol',
+      'code_search',
+      'read_code_file',
+    ]);
     expect(promptSnippet).toContain(codeIndex);
   });
 
@@ -75,6 +80,32 @@ describe('createSemanticCodeSearchTools', () => {
       toolId: SCS_READ_FILE_TOOL_ID,
       toolParams: { file_paths: 'a.go,b.go', index: codeIndex },
       request,
+    });
+  });
+
+  it('analyze_symbol executes the SCS symbol analysis tool with symbol_name and index', async () => {
+    execute.mockResolvedValue({ results: [] });
+    const { callbacks } = build();
+
+    await callbacks.analyze_symbol(
+      makeToolCall('analyze_symbol', { symbol_name: 'ConnectionRefusedError' })
+    );
+
+    expect(execute).toHaveBeenCalledWith({
+      toolId: SCS_SYMBOL_ANALYSIS_TOOL_ID,
+      toolParams: { symbol_name: 'ConnectionRefusedError', index: codeIndex },
+      request,
+    });
+  });
+
+  it('analyze_symbol returns an error response when symbol_name is missing', async () => {
+    const { callbacks } = build();
+    const result = await callbacks.analyze_symbol(makeToolCall('analyze_symbol', {}));
+    expect(execute).not.toHaveBeenCalled();
+    expect(result.response).toEqual({
+      results: [],
+      count: 0,
+      error: '"symbol_name" is required.',
     });
   });
 
