@@ -74,16 +74,26 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                 ],
                 { meta: { description: 'Field or fields to aggregate on.' } }
               ),
+              managed: schema.maybe(
+                schema.oneOf(
+                  [schema.literal('all'), schema.literal('managed'), schema.literal('unmanaged')],
+                  {
+                    meta: { description: 'Filter aggregations by managed status.' },
+                  }
+                )
+              ),
             }),
           },
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { fields: rawFields } = request.query;
+          const { fields: rawFields, managed } = request.query;
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
-          const aggs = await api.getWorkflowAggs(fields, spaceId);
+          const aggs = managed
+            ? await api.getWorkflowAggs(fields, spaceId, { managedFilter: managed })
+            : await api.getWorkflowAggs(fields, spaceId);
           return response.ok({ body: aggs || {} });
         } catch (error) {
           return handleRouteError(response, error);

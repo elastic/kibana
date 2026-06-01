@@ -224,6 +224,7 @@ describe('WorkflowsService (facade)', () => {
       });
       await service.getWorkflowStats('default', { includeExecutionStats: true });
       await service.getWorkflowAggs(['name'], 'default');
+      await service.getWorkflowAggs(['tags'], 'default', { managedFilter: 'all' });
 
       expect(searchSpies.getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith('trig-1', 'default');
       expect(searchSpies.getWorkflows).toHaveBeenCalledWith({ page: 1, size: 10 }, 'default', {
@@ -233,6 +234,9 @@ describe('WorkflowsService (facade)', () => {
         includeExecutionStats: true,
       });
       expect(searchSpies.getWorkflowAggs).toHaveBeenCalledWith(['name'], 'default');
+      expect(searchSpies.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default', {
+        managedFilter: 'all',
+      });
     });
 
     it('delegates execution reads to WorkflowExecutionQueryService', async () => {
