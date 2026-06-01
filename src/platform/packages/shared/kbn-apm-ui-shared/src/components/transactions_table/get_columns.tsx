@@ -41,6 +41,16 @@ const SPARKLINE_COLORS = {
 
 const IMPACT_BAR_WIDTH = 96;
 
+const truncationStyle = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+  display: 'block',
+  width: '100%',
+};
+
+const outerStyle = { overflow: 'hidden', width: '100%' };
+
 export type ColumnId = 'alerts' | 'name' | 'latency' | 'throughput' | 'errorRate';
 
 export const DEFAULT_COLUMNS: ColumnId[] = ['name', 'latency', 'throughput', 'errorRate'];
@@ -231,14 +241,6 @@ export function getBuiltInColumns({
           );
         }
         const nameHref = nameInteraction?.href?.(item);
-        const truncationStyle = {
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap' as const,
-          display: 'block',
-          width: '100%',
-        };
-        const outerStyle = { overflow: 'hidden', width: '100%' };
         const ebtNameProps = getEbtProps({
           action: 'viewTransactionGroup',
           element: 'transactionsTableName',
