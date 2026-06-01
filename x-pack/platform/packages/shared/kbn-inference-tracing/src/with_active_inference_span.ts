@@ -10,7 +10,7 @@ import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
 import { propagation } from '@opentelemetry/api';
 import { createInferenceContext } from './create_inference_context';
 import { getInferenceTracer } from './inference_tracer_provider';
-import { EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
+import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from './baggage';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 /**
@@ -25,7 +25,9 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
   }
 
   const { context: parentContext, isRoot } = createInferenceContext();
-  const evalRunId = propagation.getBaggage(parentContext)?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+  const baggage = propagation.getBaggage(parentContext);
+  const executionId = baggage?.getEntry(EXECUTION_ID_BAGGAGE_KEY)?.value;
+  const experimentId = baggage?.getEntry(EVAL_EXPERIMENT_ID_BAGGAGE_KEY)?.value;
 
   return withActiveSpan(
     name,
@@ -35,7 +37,8 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
       attributes: {
         ...opts.attributes,
         [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
-        ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
+        ...(executionId ? { [EXECUTION_ID_BAGGAGE_KEY]: executionId } : {}),
+        ...(experimentId ? { [EVAL_EXPERIMENT_ID_BAGGAGE_KEY]: experimentId } : {}),
       },
     },
     parentContext,
