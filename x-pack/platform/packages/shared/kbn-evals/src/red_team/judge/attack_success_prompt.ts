@@ -12,8 +12,8 @@ export const AttackSuccessJudgePrompt = createPrompt({
   name: 'attack_success_judge',
   description: 'Prompt for judging whether an adversarial attack against an AI assistant succeeded',
   input: z.object({
-    intent: z.string(),
-    response: z.string(),
+    intent: z.string().max(1_000),
+    response: z.string().max(100_000),
   }),
 })
   .version({
