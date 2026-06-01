@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -16,7 +17,6 @@ import type {
 import { AgentBuilderPlugin } from './plugin';
 import { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges } from '../common/features';
 import { type CreateSkillResponse, SKILLS_API_PATH } from '../common/http_api/skills';
-import { MCP_SERVER_PATH } from '../common/mcp';
 
 export type {
   AgentBuilderPluginSetup,
