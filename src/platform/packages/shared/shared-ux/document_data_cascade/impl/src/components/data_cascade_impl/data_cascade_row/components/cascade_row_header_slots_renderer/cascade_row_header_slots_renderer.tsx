@@ -9,7 +9,7 @@
 
 import React, { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { useRowHeaderSlotsScrollSync } from './row_header_slots_scroll_sync';
 import { useStyles as useCascadeRowHeaderSlotsRendererStyles } from './cascade_row_header_slots_renderer.styles';
 
@@ -93,15 +93,17 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       onMouseLeave={handleMouseLeave}
     >
       <EuiPanel grow={false} paddingSize="none" css={styles.slotsLeftScrollButton}>
-        <EuiButtonIcon
-          iconType="arrowLeft"
-          color="text"
-          size="xs"
-          aria-label={scrollLeftLabel}
-          onClick={scrollLeft}
-          data-test-subj="cascadeHeaderSlots-scrollLeft"
-          display="empty"
-        />
+        <EuiToolTip content={scrollLeftLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="arrowLeft"
+            color="text"
+            size="xs"
+            aria-label={scrollLeftLabel}
+            onClick={scrollLeft}
+            data-test-subj="cascadeHeaderSlots-scrollLeft"
+            display="empty"
+          />
+        </EuiToolTip>
       </EuiPanel>
       <EuiFlexItem grow ref={containerRef} css={styles.slotsContainer} tabIndex={0}>
         <EuiFlexGroup
@@ -119,15 +121,17 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiPanel grow={false} paddingSize="none" css={styles.slotsRightScrollButton}>
-        <EuiButtonIcon
-          iconType="arrowRight"
-          color="text"
-          size="xs"
-          aria-label={scrollRightLabel}
-          onClick={scrollRight}
-          data-test-subj="cascadeHeaderSlots-scrollRight"
-          display="empty"
-        />
+        <EuiToolTip content={scrollRightLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="arrowRight"
+            color="text"
+            size="xs"
+            aria-label={scrollRightLabel}
+            onClick={scrollRight}
+            data-test-subj="cascadeHeaderSlots-scrollRight"
+            display="empty"
+          />
+        </EuiToolTip>
       </EuiPanel>
     </EuiFlexGroup>
   );
