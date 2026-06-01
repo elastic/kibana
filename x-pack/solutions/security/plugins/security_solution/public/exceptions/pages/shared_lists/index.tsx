@@ -22,6 +22,7 @@ import {
   EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -29,7 +30,6 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
@@ -106,10 +106,9 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: { http, application, cps, notifications, timelines },
+    services: { http, application, notifications, timelines },
   } = useKibana();
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -539,6 +538,7 @@ export const SharedLists = React.memo(() => {
         }
         rightSideItems={[
           <EuiPopover
+            aria-label={i18n.CREATE_BUTTON}
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditExceptions && (
@@ -689,6 +689,7 @@ export const SharedLists = React.memo(() => {
               <EuiFlexGroup alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.allExceptionsRowPerPage(rowSize)}
                     button={rowSizeButton}
                     isOpen={isRowSizePopoverOpen}
                     closePopover={closeRowSizePopover}

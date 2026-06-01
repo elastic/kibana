@@ -119,6 +119,18 @@ describe('reducer', () => {
       expect(next.activeTab).toBe('recovery');
     });
 
+    it('does not open child when switching to custom in builder mode', () => {
+      const state = createState({ recoveryType: 'default', childOpen: false });
+      const next = reducer(state, {
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: 'custom',
+        isBuilderMode: true,
+      });
+
+      expect(next.recoveryType).toBe('custom');
+      expect(next.childOpen).toBe(false);
+    });
+
     it('does not open child when switching to default', () => {
       const state = createState({ recoveryType: 'custom', childOpen: false });
       const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'default' });
