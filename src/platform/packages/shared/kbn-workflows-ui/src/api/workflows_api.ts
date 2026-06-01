@@ -44,6 +44,8 @@ import type {
   MgetWorkflowsParams,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
   TestWorkflowParams,
   UpdateWorkflowParams,
   ValidateWorkflowParams,
@@ -289,6 +291,15 @@ export class WorkflowApi {
 
   async getConfig(): Promise<WorkflowsConfig> {
     return this.http.get(`${INTERNAL_BASE}/config`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async searchTriggerEvents(
+    params: SearchTriggerEventLogParams
+  ): Promise<SearchTriggerEventLogResult> {
+    return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
+      body: JSON.stringify(params),
       version: INTERNAL_API_VERSION,
     });
   }

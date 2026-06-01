@@ -16,6 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
@@ -121,13 +123,32 @@ const ToolHeaderActions = ({
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiLink href={editInLibraryUrl} target="_blank" external>
+          <EuiLink
+            href={editInLibraryUrl}
+            target="_blank"
+            external
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
+          >
             {labels.agentTools.editInLibraryLink}
           </EuiLink>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+        <EuiButtonEmpty
+          iconType="cross"
+          size="xs"
+          color="danger"
+          onClick={openConfirmRemove}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
+        >
           {labels.agentTools.removeToolButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>

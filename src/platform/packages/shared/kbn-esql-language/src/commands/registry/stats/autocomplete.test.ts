@@ -29,11 +29,7 @@ import {
 } from '../../definitions/all_operators';
 import type { ICommandCallbacks } from '../types';
 import type { FunctionReturnType } from '../../definitions/types';
-import {
-  ESQL_NUMBER_TYPES,
-  FunctionDefinitionTypes,
-  ESQL_COMMON_NUMERIC_TYPES,
-} from '../../definitions/types';
+import { FunctionDefinitionTypes, ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import {
@@ -307,7 +303,7 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ESQL_NUMBER_TYPES,
+              roundParameterTypes,
               { scalar: true, grouping: true },
               undefined,
               ['round']
@@ -321,7 +317,7 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ESQL_NUMBER_TYPES,
+              roundParameterTypes,
               { scalar: true, grouping: true },
               undefined,
               ['round']

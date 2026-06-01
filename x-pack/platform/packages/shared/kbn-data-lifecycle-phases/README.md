@@ -4,6 +4,8 @@ Canonical phase labels, titles, descriptions, and colors for Elasticsearch data 
 
 Used by both Index Lifecycle Management (ILM) and Data Lifecycle Management (DLM) features.
 
+This package also provides shared UI building blocks for inspecting retention policies and configuring data lifecycle in flyouts (Streams, Index Management).
+
 ## Components
 
 ### `FlyoutWithTabs`
@@ -75,6 +77,96 @@ import { InspectIlmPolicyFlyout } from '@kbn/data-lifecycle-phases';
   onSelectAndApply={(name) => applyPolicy(name)}
 />
 ```
+
+### `RetentionSelector`
+
+A searchable selector for retention options, with optional inspect affordances (e.g. “Inspect ILM policy”).
+
+```typescript
+import type { RetentionOption } from '@kbn/data-lifecycle-phases';
+import { RetentionSelector } from '@kbn/data-lifecycle-phases';
+
+const options: RetentionOption[] = [
+  { name: 'logs-default', descriptionParts: ['30 days', '3 phases'], inspectable: true },
+  { name: 'metrics-long', descriptionParts: ['180 days', '2 phases'] },
+];
+
+<RetentionSelector
+  options={options}
+  selectedOptionName="logs-default"
+  onSelectOption={(name) => setSelected(name)}
+  onInspect={(name) => openInspectFlyout(name)}
+  searchPlaceholder="Search policies"
+  inspectButtonLabel={(name) => `Inspect ${name}`}
+/>
+```
+
+### `EditDataLifecycleFlyoutBody`
+
+Flyout body content for configuring a stream/index lifecycle:
+
+- Optional **inherit lifecycle** section (disabled state + pinned inherited values while inheriting)
+- Optional **lifecycle method** picker (`dlm` vs `ilm`)
+- ILM policy selection (uses `RetentionSelector` under the hood)
+- Optional custom content area when Data Stream Lifecycle is active (consumer-provided)
+
+```typescript
+import { EditDataLifecycleFlyoutBody } from '@kbn/data-lifecycle-phases';
+
+<EditDataLifecycleFlyoutBody
+  inherit={{
+    value: inheritLifecycle,
+    onChange: setInheritLifecycle,
+    link: { href: inheritedFromUrl, label: 'View source' },
+  }}
+  method={{ value: lifecycleMethod, onChange: setLifecycleMethod }}
+  ilm={{
+    policies: ilmPolicies,
+    selectedPolicyName: selectedIlmPolicyName,
+    onSelect: setSelectedIlmPolicyName,
+    onInspect: openInspectIlmPolicyFlyout,
+  }}
+  dataStreamLifecycleContent={<MyDataStreamLifecycleContent />}
+/>
+```
+
+### `FlyoutFooterWithRetentionWarning` and `useRetentionWarning`
+
+A shared flyout footer with **Cancel / Apply** actions and an optional warning callout. The `useRetentionWarning` hook helps determine whether to show the warning based on the selected ILM policy (e.g. when downsampling steps cannot be applied).
+
+```typescript
+import { FlyoutFooterWithRetentionWarning, useRetentionWarning } from '@kbn/data-lifecycle-phases';
+
+const showWarning = useRetentionWarning({
+  ilmPolicies,
+  selectedIlmPolicyName,
+  canUseDownsampling,
+  inheritLifecycle,
+});
+
+<FlyoutFooterWithRetentionWarning
+  onCancel={closeFlyout}
+  onApply={applyChanges}
+  isApplyDisabled={!isValid}
+  showWarning={showWarning}
+/>
+```
+### `EnterpriseGatingModal`
+
+A stateless modal for gating Enterprise-only data lifecycle actions (for example, enabling the frozen data phase). Consumers control visibility via `isOpen` and should hide/unmount the modal when `onCancel` is called.
+
+The primary action is intentionally callback-based through `onPrimaryAction` because the final action behavior is consumer-defined. The component chooses the visible primary action from the environment/permission/trial inputs:
+
+- Self-managed: primary action is `contactUs`
+- Cloud + no subscription management permission: no primary action
+- Cloud + subscription management permission: `startTrial` (default) or `upgrade` when `trialStatus` is `expired`
+
+The “Review subscription features” link defaults to:
+
+- Cloud: `https://www.elastic.co/subscriptions/cloud`
+- Self-managed: `https://www.elastic.co/subscriptions`
+
+Consumers can override this via `subscriptionFeaturesUrl`.
 
 ## Development
 

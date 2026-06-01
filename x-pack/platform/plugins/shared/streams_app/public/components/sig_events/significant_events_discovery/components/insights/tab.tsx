@@ -57,7 +57,7 @@ export function InsightsTab() {
         title={
           <h2>
             {i18n.translate('xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle', {
-              defaultMessage: 'Significant Events',
+              defaultMessage: 'Insights',
             })}
           </h2>
         }
@@ -67,7 +67,7 @@ export function InsightsTab() {
               'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
               {
                 defaultMessage:
-                  'To start discovering Significant Events, onboard your streams, extract Knowledge Indicators, and promote rules to begin detecting events.',
+                  'To start discovering Insights, onboard your streams, extract Knowledge Indicators, and promote rules to begin detecting events.',
               }
             )}
           </p>
