@@ -143,11 +143,12 @@ describe('AttackFlyoutHeader', () => {
 
     expect(mockHeaderTitle).toHaveBeenCalledWith(
       expect.objectContaining({
-        hit,
+        attack: expect.objectContaining({ id: 'attack-1' }),
         browserFields: {},
         refetch: mockRefetch,
       })
     );
+    expect(mockHeaderTitle).toHaveBeenCalledWith(expect.not.objectContaining({ hit }));
   });
 
   it('forwards onAlertUpdated to useAttackDetails as the refresh option so synchronous-resolution paths can still refetch', async () => {

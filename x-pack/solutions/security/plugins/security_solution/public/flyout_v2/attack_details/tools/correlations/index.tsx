@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { ATTACK_CORRELATIONS_FLYOUT_TEST_ID } from '../../main/constants/test_ids';
 import { AttackRelatedAlertsDetails } from './components/attack_related_alerts_details';
@@ -25,11 +26,18 @@ const TITLE = i18n.translate(
 export interface AttackCorrelationsProps {
   /**
    * The attack-discovery alert document this child flyout is opened from.
-   * Threaded through to {@link AttackRelatedAlertsDetails} so
-   * `useHeaderData` can derive `originalAlertIds` directly from
-   * `hit.flattened`.
+   * Threaded into the shared {@link ToolsFlyoutHeader}, which reads generic
+   * alert fields (severity, rule name) that are not on
+   * {@link AttackDiscoveryAlert}.
    */
   hit: DataTableRecord;
+  /**
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Threaded through to {@link AttackRelatedAlertsDetails} so
+   * `useHeaderData` can derive `originalAlertIds` directly off the typed
+   * alert.
+   */
+  attack: AttackDiscoveryAlert;
   /**
    * Callback invoked when the preview button on an alert row is clicked.
    * Mirrors the `onShowAlert` callback wired by the canonical correlations
@@ -49,25 +57,27 @@ export interface AttackCorrelationsProps {
  * sections (cases, ancestry from same source, session, related attacks, …)
  * that live in the generic `flyout_v2/correlations/CorrelationsDetails`.
  */
-export const AttackCorrelations: FC<AttackCorrelationsProps> = memo(({ hit, onShowAlert }) => {
-  const { euiTheme } = useEuiTheme();
+export const AttackCorrelations: FC<AttackCorrelationsProps> = memo(
+  ({ hit, attack, onShowAlert }) => {
+    const { euiTheme } = useEuiTheme();
 
-  return (
-    <>
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          padding-block: ${euiTheme.size.s} !important;
-        `}
-        data-test-subj={ATTACK_CORRELATIONS_FLYOUT_TEST_ID}
-      >
-        <ToolsFlyoutHeader hit={hit} title={TITLE} />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <AttackRelatedAlertsDetails hit={hit} onShowAlert={onShowAlert} />
-      </EuiFlyoutBody>
-    </>
-  );
-});
+    return (
+      <>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-block: ${euiTheme.size.s} !important;
+          `}
+          data-test-subj={ATTACK_CORRELATIONS_FLYOUT_TEST_ID}
+        >
+          <ToolsFlyoutHeader hit={hit} title={TITLE} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <AttackRelatedAlertsDetails attack={attack} onShowAlert={onShowAlert} />
+        </EuiFlyoutBody>
+      </>
+    );
+  }
+);
 
 AttackCorrelations.displayName = 'AttackCorrelations';

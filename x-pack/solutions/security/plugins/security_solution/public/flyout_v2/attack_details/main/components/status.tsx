@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { find } from 'lodash/fp';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../../../flyout/document_details/right/utils/enriched_field_info';
@@ -33,10 +33,11 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
 
 export interface StatusProps {
   /**
-   * The attack-discovery document hit. Provides `attackId` (`hit.raw._id`)
-   * and `indexName` (`hit.raw._index`) for the workflow-status popover.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Provides `attackId` (`attack.id`) and `indexName` (`attack.index`) for
+   * the workflow-status popover.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Browser fields used to enrich the workflow-status field.
    */
@@ -48,46 +49,52 @@ export interface StatusProps {
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
-export const Status = memo(({ hit, browserFields, dataFormattedForFieldBrowser }: StatusProps) => {
-  const attackId = hit.raw._id ?? '';
-  const indexName = hit.raw._index ?? '';
-  const currentSpaceId = useSpaceId();
-  const isRemoteDocument = isNonLocalIndexName(indexName);
-  const statusData = useMemo(() => {
-    const item = find(
-      { field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' },
-      dataFormattedForFieldBrowser
-    );
-    return (
-      item &&
-      getEnrichedFieldInfo({
-        eventId: attackId,
-        contextId: `${currentSpaceId}-attack-details-flyout-status`,
-        scopeId: currentSpaceId || '',
-        browserFields,
-        item,
-      })
-    );
-  }, [dataFormattedForFieldBrowser, attackId, currentSpaceId, browserFields]);
+export const Status = memo(
+  ({ attack, browserFields, dataFormattedForFieldBrowser }: StatusProps) => {
+    const attackId = attack.id;
+    const indexName = attack.index ?? '';
+    const currentSpaceId = useSpaceId();
+    const isRemoteDocument = isNonLocalIndexName(indexName);
+    const statusData = useMemo(() => {
+      const item = find(
+        { field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' },
+        dataFormattedForFieldBrowser
+      );
+      return (
+        item &&
+        getEnrichedFieldInfo({
+          eventId: attackId,
+          contextId: `${currentSpaceId}-attack-details-flyout-status`,
+          scopeId: currentSpaceId || '',
+          browserFields,
+          item,
+        })
+      );
+    }, [dataFormattedForFieldBrowser, attackId, currentSpaceId, browserFields]);
 
-  return (
-    <FlyoutHeaderBlock
-      hasBorder
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.attackDetailsFlyout.header.statusTitle"
-          defaultMessage="Status"
-        />
-      }
-      data-test-subj={HEADER_STATUS_BLOCK_TEST_ID}
-    >
-      {!statusData || !hasData(statusData) ? (
-        getEmptyTagValue()
-      ) : (
-        <StatusPopoverButton hit={hit} enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
-      )}
-    </FlyoutHeaderBlock>
-  );
-});
+    return (
+      <FlyoutHeaderBlock
+        hasBorder
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.attackDetailsFlyout.header.statusTitle"
+            defaultMessage="Status"
+          />
+        }
+        data-test-subj={HEADER_STATUS_BLOCK_TEST_ID}
+      >
+        {!statusData || !hasData(statusData) ? (
+          getEmptyTagValue()
+        ) : (
+          <StatusPopoverButton
+            attack={attack}
+            enrichedFieldInfo={statusData}
+            disabled={isRemoteDocument}
+          />
+        )}
+      </FlyoutHeaderBlock>
+    );
+  }
+);
 
 Status.displayName = 'Status';

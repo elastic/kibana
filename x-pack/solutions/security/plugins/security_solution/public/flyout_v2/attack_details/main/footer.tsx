@@ -10,7 +10,6 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { AttacksGroupTakeActionItems } from '../../../detections/components/attacks/table/attacks_group_take_action_items';
 import { AttackAiAssistantButton } from '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import {
@@ -20,13 +19,9 @@ import {
 
 export interface FooterProps {
   /**
-   * The attack-discovery document hit. Provides `indexName` from
-   * `hit.raw._index` for the remote-document gating.
-   */
-  hit: DataTableRecord;
-  /**
    * The parsed attack object from {@link useAttackDetails}. Required by the
-   * take-action items and the AI-assistant button.
+   * take-action items and the AI-assistant button; also provides `indexName`
+   * from `attack.index` for the remote-document gating.
    */
   attack: AttackDiscoveryAlert;
   /**
@@ -40,8 +35,8 @@ export interface FooterProps {
  * Footer of the v2 attack details flyout. Mirrors the legacy `PanelFooter`
  * minus the `<EuiFlyoutFooter>` wrapper (the parent index.tsx provides it).
  */
-export const Footer = memo(({ hit, attack, refetch }: FooterProps) => {
-  const indexName = hit.raw._index ?? '';
+export const Footer = memo(({ attack, refetch }: FooterProps) => {
+  const indexName = attack.index ?? '';
   const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

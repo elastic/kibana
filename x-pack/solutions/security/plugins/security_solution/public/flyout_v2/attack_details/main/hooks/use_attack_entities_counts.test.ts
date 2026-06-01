@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useAttackEntitiesCounts } from './use_attack_entities_counts';
 import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
@@ -19,11 +19,11 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_query',
   useQueryAlerts: jest.fn(),
 }));
 
-const hit: DataTableRecord = {
+const attack = {
   id: 'attack-1',
-  raw: { _id: 'attack-1', _index: '.alerts', _source: {} },
-  flattened: {},
-};
+  index: '.alerts',
+  alertIds: [],
+} as unknown as AttackDiscoveryAlert;
 
 const mockHeaderData = (originalAlertIds: string[]) =>
   ({ originalAlertIds } as unknown as ReturnType<typeof useHeaderData>);
@@ -48,7 +48,7 @@ describe('useAttackEntitiesCounts', () => {
   it('returns zero counts and skips query when alertIds is empty', () => {
     mockUseHeaderData.mockReturnValue(mockHeaderData([]));
 
-    const { result } = renderHook(() => useAttackEntitiesCounts(hit));
+    const { result } = renderHook(() => useAttackEntitiesCounts(attack));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -63,7 +63,7 @@ describe('useAttackEntitiesCounts', () => {
   it('passes query with ids filter and cardinality aggs when alertIds exist', () => {
     mockUseHeaderData.mockReturnValue(mockHeaderData(['id1', 'id2']));
 
-    renderHook(() => useAttackEntitiesCounts(hit));
+    renderHook(() => useAttackEntitiesCounts(attack));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -100,7 +100,7 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts(hit));
+    const { result } = renderHook(() => useAttackEntitiesCounts(attack));
 
     expect(result.current.relatedUsers).toBe(6);
     expect(result.current.relatedHosts).toBe(10);
@@ -125,8 +125,59 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts(hit));
+    const { result } = renderHook(() => useAttackEntitiesCounts(attack));
 
+    expect(result.current.relatedUsers).toBe(0);
+    expect(result.current.relatedHosts).toBe(0);
+  });
+
+  it('does not report error on initial render before the first fetch attempt', () => {
+    // data=null, loading=false is the initial state of useQueryAlerts — it must
+    // not be misread as a failed fetch.
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: null,
+      setQuery: jest.fn(),
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result } = renderHook(() => useAttackEntitiesCounts(attack));
+
+    expect(result.current.error).toBe(false);
+  });
+
+  it('reports error after a fetch attempt completes with null data', () => {
+    // Simulate the loading=true → loading=false(null) cycle that occurs on
+    // a failed network request.
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
+    const setQuery = jest.fn();
+    mockUseQueryAlerts.mockReturnValue({
+      loading: true,
+      data: null,
+      setQuery,
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result, rerender } = renderHook(() => useAttackEntitiesCounts(attack));
+    expect(result.current.error).toBe(false);
+
+    // Fetch completes but data is null (network/server error)
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: null,
+      setQuery,
+      response: '',
+      request: '',
+      refetch: null,
+    });
+    rerender();
+
+    expect(result.current.error).toBe(true);
     expect(result.current.relatedUsers).toBe(0);
     expect(result.current.relatedHosts).toBe(0);
   });

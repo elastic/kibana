@@ -90,7 +90,7 @@ const AttackFlyoutFooterContent = ({ hit, onAlertUpdated }: AttackFlyoutFooterCo
 
   return (
     <div data-test-subj="discover-attack-flyout-footer">
-      <Footer hit={hit} attack={attack} refetch={refetch} />
+      <Footer attack={attack} refetch={refetch} />
     </div>
   );
 };

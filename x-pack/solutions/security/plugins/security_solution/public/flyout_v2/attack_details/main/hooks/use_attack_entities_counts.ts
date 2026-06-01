@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useEffect } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { useMemo, useEffect, useRef } from 'react';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/api';
@@ -28,8 +28,10 @@ export interface UseAttackEntitiesCountsResult {
  * Hook that returns distinct user and host counts across all alerts that belong to the current attack.
  * Queries the detection alerts index filtered by the attack's alert IDs and uses cardinality aggregations.
  */
-export const useAttackEntitiesCounts = (hit: DataTableRecord): UseAttackEntitiesCountsResult => {
-  const { originalAlertIds } = useHeaderData(hit);
+export const useAttackEntitiesCounts = (
+  attack: AttackDiscoveryAlert
+): UseAttackEntitiesCountsResult => {
+  const { originalAlertIds } = useHeaderData(attack);
 
   const query = useMemo(
     () => ({
@@ -66,10 +68,18 @@ export const useAttackEntitiesCounts = (hit: DataTableRecord): UseAttackEntities
     setQuery(query);
   }, [query, setQuery]);
 
+  // Latches true the first time a fetch is attempted so that the initial
+  // render state (loading=false, data=null before the effect fires) is not
+  // misread as an error — useQueryAlerts resets data to null on failure, so
+  // the only way to distinguish "never fetched" from "fetch failed" is to
+  // track whether loading has ever been true.
+  const hasQueriedRef = useRef(false);
+  if (loading) hasQueriedRef.current = true;
+
   return useMemo(() => {
     const relatedUsers = data?.aggregations?.unique_users?.value ?? 0;
     const relatedHosts = data?.aggregations?.unique_hosts?.value ?? 0;
-    const error = !loading && data === undefined && originalAlertIds.length > 0;
+    const error = !loading && data === null && originalAlertIds.length > 0 && hasQueriedRef.current;
 
     return {
       relatedUsers,

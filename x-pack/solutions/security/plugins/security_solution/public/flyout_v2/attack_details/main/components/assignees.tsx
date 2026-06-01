@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -64,11 +64,12 @@ AssigneesButton.displayName = 'AssigneesButton';
 
 export interface AssigneesProps {
   /**
-   * The attack-discovery document hit. Provides `attackId` (`hit.raw._id`)
-   * and `indexName` (`hit.raw._index`), and is forwarded to `useHeaderData`
-   * to derive `alertIds` / `assignees` for the popover.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Provides `attackId` (`attack.id`) and `indexName` (`attack.index`),
+   * and is forwarded to `useHeaderData` to derive `alertIds` / `assignees`
+   * for the popover.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Callback invoked after assignee mutations succeed; refetches the attack
    * document so the avatar group reflects the new assignees.
@@ -79,14 +80,14 @@ export interface AssigneesProps {
 /**
  * Assignees block for the Attack details flyout header.
  * Mirrors `StatusPopoverButton`: reads `alertIds` / `assignees` from
- * `useHeaderData(hit)` and combines them with `useAttackAssigneesContextMenuItems`
+ * `useHeaderData(attack)` and combines them with `useAttackAssigneesContextMenuItems`
  * to render an `EuiPopover` + `EuiContextMenu`.
  */
-export const Assignees = memo(({ hit, refetch }: AssigneesProps) => {
-  const attackId = hit.raw._id ?? '';
-  const indexName = hit.raw._index ?? '';
+export const Assignees = memo(({ attack, refetch }: AssigneesProps) => {
+  const attackId = attack.id;
+  const indexName = attack.index ?? '';
   const isRemoteDocument = isNonLocalIndexName(indexName);
-  const { alertIds, assignees } = useHeaderData(hit);
+  const { alertIds, assignees } = useHeaderData(attack);
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();
   const isPlatinumPlus = useLicense().isPlatinumPlus();

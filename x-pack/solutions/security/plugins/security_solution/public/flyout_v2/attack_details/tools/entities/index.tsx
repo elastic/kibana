@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { ATTACK_ENTITIES_FLYOUT_TEST_ID } from '../../main/constants/test_ids';
 import { AttackEntitiesDetails } from './components/attack_entities_details';
@@ -22,11 +23,18 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.attackDetails.attack
 export interface AttackEntitiesProps {
   /**
    * The attack-discovery alert document this child flyout is opened from.
-   * Threaded through to {@link AttackEntitiesDetails} so the
-   * `useAttackEntitiesLists` / `useHeaderData` hooks can derive
-   * `originalAlertIds` and `timestamp` directly from `hit.flattened`.
+   * Threaded into the shared {@link ToolsFlyoutHeader}, which reads generic
+   * alert fields (severity, rule name) that are not on
+   * {@link AttackDiscoveryAlert}.
    */
   hit: DataTableRecord;
+  /**
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Threaded through to {@link AttackEntitiesDetails} so the
+   * `useAttackEntitiesLists` / `useHeaderData` hooks can derive
+   * `originalAlertIds` and `timestamp` directly off the typed alert.
+   */
+  attack: AttackDiscoveryAlert;
 }
 
 /**
@@ -35,7 +43,7 @@ export interface AttackEntitiesProps {
  * left-panel Entities sub-tab (`UserDetails` + `HostDetails` for users and
  * hosts attached to the attack), wrapped in a v2 tools-flyout shell.
  */
-export const AttackEntities: FC<AttackEntitiesProps> = memo(({ hit }) => {
+export const AttackEntities: FC<AttackEntitiesProps> = memo(({ hit, attack }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -50,7 +58,7 @@ export const AttackEntities: FC<AttackEntitiesProps> = memo(({ hit }) => {
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <AttackEntitiesDetails hit={hit} />
+        <AttackEntitiesDetails attack={attack} />
       </EuiFlyoutBody>
     </>
   );

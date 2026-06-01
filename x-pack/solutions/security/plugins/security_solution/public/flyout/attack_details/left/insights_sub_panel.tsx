@@ -14,6 +14,9 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AttackEntitiesDetails } from '../../../flyout_v2/attack_details/tools/entities/components/attack_entities_details';
 import { AttackRelatedAlertsDetails } from '../../../flyout_v2/attack_details/tools/correlations/components/attack_related_alerts_details';
+import { useAttackDetails } from '../../../flyout_v2/attack_details/main/hooks/use_attack_details';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { ALERT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
@@ -70,6 +73,7 @@ export const InsightsSubPanel: React.FC<InsightsSubPanelProps> = memo(
   ({ hit, attackId, indexName, subTab }) => {
     const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
     const scopeId = useSpaceId() ?? '';
+    const { attack, loading } = useAttackDetails(hit);
 
     const setSubTab = useCallback(
       (nextSubTab: string) =>
@@ -96,6 +100,14 @@ export const InsightsSubPanel: React.FC<InsightsSubPanelProps> = memo(
       [openPreviewPanel, scopeId]
     );
 
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!attack) {
+      return <FlyoutError />;
+    }
+
     return (
       <>
         <EuiButtonGroup
@@ -109,9 +121,9 @@ export const InsightsSubPanel: React.FC<InsightsSubPanelProps> = memo(
           data-test-subj="attack-details-left-insights-button-group"
         />
         <EuiSpacer size="m" />
-        {subTab === ENTITIES_TAB_ID && <AttackEntitiesDetails hit={hit} />}
+        {subTab === ENTITIES_TAB_ID && <AttackEntitiesDetails attack={attack} />}
         {subTab === CORRELATION_TAB_ID && (
-          <AttackRelatedAlertsDetails hit={hit} onShowAlert={onShowAlert} />
+          <AttackRelatedAlertsDetails attack={attack} onShowAlert={onShowAlert} />
         )}
       </>
     );

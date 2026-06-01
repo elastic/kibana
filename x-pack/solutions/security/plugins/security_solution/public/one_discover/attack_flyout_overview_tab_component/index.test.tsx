@@ -174,11 +174,12 @@ describe('AttackFlyoutOverviewTab', () => {
 
     expect(mockOverviewTab).toHaveBeenCalledWith(
       expect.objectContaining({
-        hit,
+        attack: expect.objectContaining({ id: 'attack-1' }),
         onShowAttackEntities: expect.any(Function),
         onShowAttackCorrelations: expect.any(Function),
       })
     );
+    expect(mockOverviewTab).toHaveBeenCalledWith(expect.not.objectContaining({ hit }));
   });
 
   it('opens AttackEntities in a nested system flyout', async () => {

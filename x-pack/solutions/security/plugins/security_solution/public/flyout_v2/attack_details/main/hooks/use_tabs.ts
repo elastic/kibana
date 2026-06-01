@@ -87,7 +87,7 @@ export const useTabs = ({
 
   const tabsDisplayed = useMemo<AttackDetailsPanelTabType[]>(
     () => [
-      tabs.overviewTab({ hit, attack, onShowAttackEntities, onShowAttackCorrelations }),
+      tabs.overviewTab({ attack, onShowAttackEntities, onShowAttackCorrelations }),
       tabs.tableTab({ hit, browserFields, dataFormattedForFieldBrowser }),
       tabs.jsonTab({ hit }),
     ],

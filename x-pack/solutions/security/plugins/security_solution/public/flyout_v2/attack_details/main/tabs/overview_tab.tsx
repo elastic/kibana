@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { OVERVIEW_TAB_TEST_ID } from '../constants/test_ids';
 import { AISummarySection } from '../components/ai_summary_section';
@@ -18,14 +17,9 @@ import { InsightsSection } from '../components/insights_section';
 
 export interface OverviewTabProps {
   /**
-   * The attack-discovery document hit. Forwarded to every child section.
-   */
-  hit: DataTableRecord;
-  /**
-   * Parsed attack-discovery alert resolved by {@link useAttackDetails};
-   * forwarded to {@link AISummarySection} so the markdown bodies are sourced
-   * from the alert (the hit's flattened/source data is unreliable across
-   * entry points).
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Forwarded to every child section so the Overview tree no longer needs
+   * to dereference `hit.flattened` / `hit.raw`.
    */
   attack: AttackDiscoveryAlert;
   /**
@@ -44,7 +38,7 @@ export interface OverviewTabProps {
  * Renders the Overview tab content in the Attack Details flyout.
  */
 export const OverviewTab: React.FC<OverviewTabProps> = memo(
-  ({ hit, attack, onShowAttackEntities, onShowAttackCorrelations }) => {
+  ({ attack, onShowAttackEntities, onShowAttackCorrelations }) => {
     return (
       <EuiPanel
         hasBorder={false}
@@ -58,10 +52,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = memo(
       >
         <AISummarySection attack={attack} />
         <EuiHorizontalRule margin="m" />
-        <VisualizationsSection hit={hit} />
+        <VisualizationsSection attack={attack} />
         <EuiHorizontalRule margin="m" />
         <InsightsSection
-          hit={hit}
+          attack={attack}
           onShowAttackEntities={onShowAttackEntities}
           onShowAttackCorrelations={onShowAttackCorrelations}
         />

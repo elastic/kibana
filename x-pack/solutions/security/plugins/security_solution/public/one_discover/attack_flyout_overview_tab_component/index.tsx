@@ -188,21 +188,21 @@ const AttackFlyoutOverviewTabContent = ({
     [history, historyKey, services, store]
   );
 
-  const onShowAttackEntities = useCallback(
-    () => openAttackTool(<AttackEntities hit={hit} />),
-    [hit, openAttackTool]
-  );
-
-  const onShowAttackCorrelations = useCallback(
-    () => openAttackTool(<AttackCorrelations hit={hit} onShowAlert={onShowAlert} />),
-    [hit, onShowAlert, openAttackTool]
-  );
-
   // Resolve the parsed attack-discovery alert so the Overview tab's AI
   // Summary section can source markdown from it (the hit's flattened/source
   // data isn't reliable across entry points). Discover's hit already carries
   // a populated `_source`, so this short-circuits without firing a fetch.
   const { attack, loading } = useAttackDetails(hit, { refresh: onAlertUpdated });
+
+  const onShowAttackEntities = useCallback(() => {
+    if (!attack) return;
+    openAttackTool(<AttackEntities hit={hit} attack={attack} />);
+  }, [attack, hit, openAttackTool]);
+
+  const onShowAttackCorrelations = useCallback(() => {
+    if (!attack) return;
+    openAttackTool(<AttackCorrelations hit={hit} attack={attack} onShowAlert={onShowAlert} />);
+  }, [attack, hit, onShowAlert, openAttackTool]);
 
   if (loading) {
     return <FlyoutLoading />;
@@ -216,7 +216,6 @@ const AttackFlyoutOverviewTabContent = ({
     <div data-test-subj="discover-attack-flyout-overview-tab">
       <EuiSpacer size="m" />
       <OverviewTab
-        hit={hit}
         attack={attack}
         onShowAttackEntities={onShowAttackEntities}
         onShowAttackCorrelations={onShowAttackCorrelations}

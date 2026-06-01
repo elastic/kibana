@@ -10,7 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
   FlyoutHeaderBlock,
   flyoutHeaderBlockStyles,
@@ -37,9 +37,11 @@ const ATTACK_HEADER_BADGE = i18n.translate(
 
 export interface HeaderTitleProps {
   /**
-   * The attack-discovery document hit.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Forwarded to the Status / Assignees blocks and used to derive the
+   * Notes block's `attackId`.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Browser fields used by the Status block to enrich the workflow-status
    * field for the popover button.
@@ -66,14 +68,14 @@ export interface HeaderTitleProps {
  */
 export const HeaderTitle = memo(
   ({
-    hit,
+    attack,
     browserFields,
     dataFormattedForFieldBrowser,
     refetch,
     onShowNotes,
   }: HeaderTitleProps) => {
-    const { title, timestamp, alertsCount } = useHeaderData(hit);
-    const attackId = hit.raw._id ?? '';
+    const { title, timestamp, alertsCount } = useHeaderData(attack);
+    const attackId = attack.id;
 
     return (
       <>
@@ -99,7 +101,7 @@ export const HeaderTitle = memo(
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <Status
-                  hit={hit}
+                  attack={attack}
                   browserFields={browserFields}
                   dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
                 />
@@ -133,7 +135,7 @@ export const HeaderTitle = memo(
                   }
                   data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
                 >
-                  <Assignees hit={hit} refetch={refetch} />
+                  <Assignees attack={attack} refetch={refetch} />
                 </FlyoutHeaderBlock>
               </EuiFlexItem>
               <EuiFlexItem>

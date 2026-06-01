@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useHeaderData } from '../../../main/hooks/use_header_data';
 import { useAttackEntitiesLists } from '../../../main/hooks/use_attack_entities_lists';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
@@ -21,10 +21,11 @@ import {
 
 export interface AttackEntitiesDetailsProps {
   /**
-   * The attack-discovery document hit. `timestamp`, alert ids, and entity
-   * lists are all derived from `hit.flattened`.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * `timestamp`, alert ids, and entity lists are all derived from this
+   * typed alert.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
 }
 
 /**
@@ -35,11 +36,11 @@ export interface AttackEntitiesDetailsProps {
  * components from the document_details flyout (per the spec exception for
  * presentation-shared components).
  */
-export const AttackEntitiesDetails: React.FC<AttackEntitiesDetailsProps> = memo(({ hit }) => {
+export const AttackEntitiesDetails: React.FC<AttackEntitiesDetailsProps> = memo(({ attack }) => {
   const scopeId = useSpaceId() ?? '';
-  const { timestamp } = useHeaderData(hit);
+  const { timestamp } = useHeaderData(attack);
   const { userEntityIdentifiers, hostEntityIdentifiers, loading, error } =
-    useAttackEntitiesLists(hit);
+    useAttackEntitiesLists(attack);
 
   const timestampOrFallback = timestamp ?? '';
 

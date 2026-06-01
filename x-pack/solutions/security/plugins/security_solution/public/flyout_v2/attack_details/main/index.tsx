@@ -122,6 +122,82 @@ export const AttackDetails: FC<AttackDetailsProps> = memo(
     onShowAttackCorrelations: onShowAttackCorrelationsOverride,
     padded = false,
   }) => {
+    const { attack, browserFields, dataFormattedForFieldBrowser, loading, refetch } =
+      useAttackDetails(hit, { refresh: onAlertUpdated });
+
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!attack || !dataFormattedForFieldBrowser) {
+      return <FlyoutError />;
+    }
+
+    return (
+      <>
+        <RemoteDocumentCallout hit={hit} />
+        <AttackDetailsInner
+          hit={hit}
+          attack={attack}
+          browserFields={browserFields}
+          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+          refetch={refetch}
+          onShowNotes={onShowNotes}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+          onShowAttackEntitiesOverride={onShowAttackEntitiesOverride}
+          onShowAttackCorrelationsOverride={onShowAttackCorrelationsOverride}
+          padded={padded}
+        />
+      </>
+    );
+  }
+);
+
+AttackDetails.displayName = 'AttackDetails';
+
+interface AttackDetailsInnerProps {
+  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
+  browserFields: BrowserFields;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  refetch: () => Promise<void>;
+  onShowNotes: () => void;
+  renderCellActions: CellActionRenderer;
+  onAlertUpdated: () => void;
+  onShowAttackEntitiesOverride?: () => void;
+  onShowAttackCorrelationsOverride?: () => void;
+  padded: boolean;
+}
+
+/**
+ * When the parent flyout uses `paddingSize: 'none'` (the legacy
+ * expandable-flyout surface), {@link EuiFlyoutHeader} / {@link EuiFlyoutBody}
+ * / {@link EuiFlyoutFooter} render their content flush against the panel
+ * edge. Wrapping the section content in a transparent {@link EuiPanel}
+ * restores the recommended 16px padding without affecting v2 surfaces, which
+ * already get padding from `paddingSize: 'm'` on their system flyout.
+ */
+const PaddedSection: FC<{ children: ReactNode }> = ({ children }) => (
+  <EuiPanel hasShadow={false} color="transparent">
+    {children}
+  </EuiPanel>
+);
+
+const AttackDetailsInner: FC<AttackDetailsInnerProps> = memo(
+  ({
+    hit,
+    attack,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    refetch,
+    onShowNotes,
+    renderCellActions,
+    onAlertUpdated,
+    onShowAttackEntitiesOverride,
+    onShowAttackCorrelationsOverride,
+    padded,
+  }) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -129,9 +205,6 @@ export const AttackDetails: FC<AttackDetailsProps> = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-
-    const { attack, browserFields, dataFormattedForFieldBrowser, loading, refetch } =
-      useAttackDetails(hit, { refresh: onAlertUpdated });
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) =>
@@ -177,86 +250,20 @@ export const AttackDetails: FC<AttackDetailsProps> = memo(
     );
 
     const onShowAttackEntitiesDefault = useCallback(
-      () => openAttackTool(<AttackEntities hit={hit} />),
-      [hit, openAttackTool]
+      () => openAttackTool(<AttackEntities hit={hit} attack={attack} />),
+      [attack, hit, openAttackTool]
     );
 
     const onShowAttackCorrelationsDefault = useCallback(
-      () => openAttackTool(<AttackCorrelations hit={hit} onShowAlert={onShowAlert} />),
-      [hit, onShowAlert, openAttackTool]
+      () =>
+        openAttackTool(<AttackCorrelations hit={hit} attack={attack} onShowAlert={onShowAlert} />),
+      [attack, hit, onShowAlert, openAttackTool]
     );
 
     const onShowAttackEntities = onShowAttackEntitiesOverride ?? onShowAttackEntitiesDefault;
     const onShowAttackCorrelations =
       onShowAttackCorrelationsOverride ?? onShowAttackCorrelationsDefault;
 
-    if (loading) {
-      return <FlyoutLoading />;
-    }
-
-    if (!attack || !dataFormattedForFieldBrowser) {
-      return <FlyoutError />;
-    }
-
-    return (
-      <>
-        <RemoteDocumentCallout hit={hit} />
-        <AttackDetailsInner
-          hit={hit}
-          attack={attack}
-          browserFields={browserFields}
-          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-          refetch={refetch}
-          onShowNotes={onShowNotes}
-          onShowAttackEntities={onShowAttackEntities}
-          onShowAttackCorrelations={onShowAttackCorrelations}
-          padded={padded}
-        />
-      </>
-    );
-  }
-);
-
-AttackDetails.displayName = 'AttackDetails';
-
-interface AttackDetailsInnerProps {
-  hit: DataTableRecord;
-  attack: AttackDiscoveryAlert;
-  browserFields: BrowserFields;
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
-  refetch: () => Promise<void>;
-  onShowNotes: () => void;
-  onShowAttackEntities: () => void;
-  onShowAttackCorrelations: () => void;
-  padded: boolean;
-}
-
-/**
- * When the parent flyout uses `paddingSize: 'none'` (the legacy
- * expandable-flyout surface), {@link EuiFlyoutHeader} / {@link EuiFlyoutBody}
- * / {@link EuiFlyoutFooter} render their content flush against the panel
- * edge. Wrapping the section content in a transparent {@link EuiPanel}
- * restores the recommended 16px padding without affecting v2 surfaces, which
- * already get padding from `paddingSize: 'm'` on their system flyout.
- */
-const PaddedSection: FC<{ children: ReactNode }> = ({ children }) => (
-  <EuiPanel hasShadow={false} color="transparent">
-    {children}
-  </EuiPanel>
-);
-
-const AttackDetailsInner: FC<AttackDetailsInnerProps> = memo(
-  ({
-    hit,
-    attack,
-    browserFields,
-    dataFormattedForFieldBrowser,
-    refetch,
-    onShowNotes,
-    onShowAttackEntities,
-    onShowAttackCorrelations,
-    padded,
-  }) => {
     const { tabsDisplayed, selectedTabId, setSelectedTabId } = useTabs({
       hit,
       attack,
@@ -273,7 +280,7 @@ const AttackDetailsInner: FC<AttackDetailsInnerProps> = memo(
         <EuiFlyoutHeader hasBorder data-test-subj={ATTACK_DETAILS_FLYOUT_TEST_ID}>
           <SectionWrapper>
             <Header
-              hit={hit}
+              attack={attack}
               browserFields={browserFields}
               dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
               refetch={refetch}
@@ -291,7 +298,7 @@ const AttackDetailsInner: FC<AttackDetailsInnerProps> = memo(
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <SectionWrapper>
-            <Footer hit={hit} attack={attack} refetch={refetch} />
+            <Footer attack={attack} refetch={refetch} />
           </SectionWrapper>
         </EuiFlyoutFooter>
       </>

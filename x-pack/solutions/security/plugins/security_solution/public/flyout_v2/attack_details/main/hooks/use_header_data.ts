@@ -6,69 +6,29 @@
  */
 
 import { useMemo } from 'react';
-import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 
-const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
-const FIELD_TIMESTAMP = '@timestamp' as const;
-const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
-const FIELD_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements' as const;
-
 const EMPTY_REPLACEMENTS: Record<string, string> = {};
-
-/**
- * Normalize a value into a string array
- */
-export const normalizeToStringArray = (value: string | string[] | null | undefined): string[] => {
-  if (!value) {
-    return [];
-  }
-
-  return Array.isArray(value) ? value : [value];
-};
+const EMPTY_ASSIGNEES: string[] = [];
 
 /**
  * Centralized hook for Attack header data only.
  *
- * Reads fields directly off the `DataTableRecord` `flattened` map. Scalar
- * fields go through `getFieldValue` (which unwraps single-element arrays);
- * fields the legacy flyout treated as arrays (alert ids, replacements
- * object) are read raw from `hit.flattened` so the multi-value shape is
- * preserved.
+ * Reads typed fields directly off the resolved `AttackDiscoveryAlert` so
+ * consumers no longer need to know how to dereference `hit.flattened` /
+ * `hit.raw`.
  */
-export const useHeaderData = (hit: DataTableRecord) => {
-  const title = useMemo(
-    () => (getFieldValue(hit, FIELD_ATTACK_TITLE) as string | undefined) ?? '',
-    [hit]
-  );
-  const timestamp = useMemo(() => getFieldValue(hit, FIELD_TIMESTAMP) as string | undefined, [hit]);
-  const alertIds = useMemo(
-    () =>
-      normalizeToStringArray(
-        hit.flattened[FIELD_ALERT_IDS] as string | string[] | null | undefined
-      ),
-    [hit]
-  );
+export const useHeaderData = (attack: AttackDiscoveryAlert) => {
+  const title = attack.title;
+  const timestamp = attack.timestamp;
+  const alertIds = attack.alertIds;
 
   // Remove duplicated alert IDs for the update status action
   const nonDuplicatedAlertIds = useMemo(() => [...new Set(alertIds)], [alertIds]);
 
-  const replacements = useMemo(() => {
-    const value = hit.flattened[FIELD_REPLACEMENTS];
-
-    if (!value || typeof value === 'string' || Array.isArray(value)) {
-      return EMPTY_REPLACEMENTS;
-    }
-
-    return value as Record<string, string>;
-  }, [hit]);
-
-  const assignees = useMemo(() => {
-    const value = hit.flattened[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[] | string | undefined;
-    return normalizeToStringArray(value);
-  }, [hit]);
+  const replacements = attack.replacements ?? EMPTY_REPLACEMENTS;
+  const assignees = attack.assignees ?? EMPTY_ASSIGNEES;
 
   const originalAlertIds = useMemo(
     () => getOriginalAlertIds({ alertIds, replacements }),

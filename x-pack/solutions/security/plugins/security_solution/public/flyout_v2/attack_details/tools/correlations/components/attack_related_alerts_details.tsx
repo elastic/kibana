@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { CorrelationsDetailsAlertsTable } from '../../../../document/tools/correlations/components/correlations_details_alerts_table';
 import { useHeaderData } from '../../../main/hooks/use_header_data';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
@@ -16,11 +16,11 @@ import { ATTACK_CORRELATIONS_RELATED_ALERTS_TABLE_TEST_ID } from '../../../main/
 
 export interface AttackRelatedAlertsDetailsProps {
   /**
-   * The attack-discovery document hit. `originalAlertIds` and `attackId`
-   * (used as `eventId` on the table) are derived from `hit.flattened` /
-   * `hit.raw._id`.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * `originalAlertIds` and `attackId` (used as `eventId` on the table) are
+   * derived from `attack`.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Callback invoked when the preview button on an alert row is clicked.
    * The v2 wiring opens the alert in a child document flyout via
@@ -39,10 +39,10 @@ export interface AttackRelatedAlertsDetailsProps {
  * system-flyout flow.
  */
 export const AttackRelatedAlertsDetails: React.FC<AttackRelatedAlertsDetailsProps> = memo(
-  ({ hit, onShowAlert }) => {
+  ({ attack, onShowAlert }) => {
     const scopeId = useSpaceId() ?? '';
-    const attackId = hit.raw._id ?? '';
-    const { originalAlertIds: alertIds } = useHeaderData(hit);
+    const attackId = attack.id;
+    const { originalAlertIds: alertIds } = useHeaderData(attack);
 
     const columns = useMemo(
       () =>

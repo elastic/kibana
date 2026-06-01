@@ -96,9 +96,10 @@ const AttackFlyoutHeaderContent = ({ hit, onAlertUpdated }: AttackFlyoutHeaderCo
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const { browserFields, dataFormattedForFieldBrowser, refetch, loading } = useAttackDetails(hit, {
-    refresh: onAlertUpdated,
-  });
+  const { attack, browserFields, dataFormattedForFieldBrowser, refetch, loading } =
+    useAttackDetails(hit, {
+      refresh: onAlertUpdated,
+    });
 
   const openNotesFlyout = useCallback(() => {
     services.overlays?.openSystemFlyout(
@@ -115,14 +116,14 @@ const AttackFlyoutHeaderContent = ({ hit, onAlertUpdated }: AttackFlyoutHeaderCo
     );
   }, [history, historyKey, hit, services, store]);
 
-  if (loading || !dataFormattedForFieldBrowser) {
+  if (loading || !attack || !dataFormattedForFieldBrowser) {
     return null;
   }
 
   return (
     <div data-test-subj="discover-attack-flyout-header">
       <HeaderTitle
-        hit={hit}
+        attack={attack}
         browserFields={browserFields}
         dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
         refetch={refetch}

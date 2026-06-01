@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useEffect } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { useMemo, useEffect, useRef } from 'react';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useHeaderData } from './use_header_data';
@@ -68,8 +68,10 @@ export interface UseAttackEntitiesListsResult {
  * by user.name vs user.entity.id). Queries the detection alerts index filtered by the attack's alert IDs,
  * with terms aggregations on the EUID runtime fields and top_hits to get a sample document per entity for identifier extraction.
  */
-export const useAttackEntitiesLists = (hit: DataTableRecord): UseAttackEntitiesListsResult => {
-  const { originalAlertIds } = useHeaderData(hit);
+export const useAttackEntitiesLists = (
+  attack: AttackDiscoveryAlert
+): UseAttackEntitiesListsResult => {
+  const { originalAlertIds } = useHeaderData(attack);
   const euidApi = useEntityStoreEuidApi();
 
   const query = useMemo(() => {
@@ -119,6 +121,11 @@ export const useAttackEntitiesLists = (hit: DataTableRecord): UseAttackEntitiesL
     setQuery(query);
   }, [query, setQuery]);
 
+  // Latches true the first time a fetch is attempted — see the same pattern
+  // in use_attack_entities_counts.ts for the full rationale.
+  const hasQueriedRef = useRef(false);
+  if (loading) hasQueriedRef.current = true;
+
   return useMemo(() => {
     const userEntityIdentifiers = extractEntityIdentifiersFromBuckets(
       euidApi ?? undefined,
@@ -130,7 +137,7 @@ export const useAttackEntitiesLists = (hit: DataTableRecord): UseAttackEntitiesL
       data?.aggregations?.unique_hosts_by_euid?.buckets,
       'host'
     );
-    const error = !loading && data === undefined && originalAlertIds.length > 0;
+    const error = !loading && data === null && originalAlertIds.length > 0 && hasQueriedRef.current;
 
     return {
       userEntityIdentifiers,

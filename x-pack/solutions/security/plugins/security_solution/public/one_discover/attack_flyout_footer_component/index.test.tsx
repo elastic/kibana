@@ -6,6 +6,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from 'redux';
@@ -14,9 +15,9 @@ import type { StartServices } from '../../types';
 import { useAttackDetails } from '../../flyout_v2/attack_details/main/hooks/use_attack_details';
 
 const mockFooter = jest.fn((props: unknown) => {
-  const { hit } = props as { hit?: DataTableRecord };
+  const { attack } = props as { attack?: AttackDiscoveryAlert };
 
-  return <div>{`MockAttackFooter:${hit?.id ?? ''}`}</div>;
+  return <div>{`MockAttackFooter:${attack?.id ?? ''}`}</div>;
 });
 
 const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
@@ -125,16 +126,16 @@ describe('AttackFlyoutFooter', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('MockAttackFooter:1')).toBeInTheDocument();
+      expect(screen.getByText('MockAttackFooter:attack-1')).toBeInTheDocument();
     });
 
     expect(mockFooter).toHaveBeenCalledWith(
       expect.objectContaining({
-        hit,
         attack: { id: 'attack-1' },
         refetch: mockRefetch,
       })
     );
+    expect(mockFooter).toHaveBeenCalledWith(expect.not.objectContaining({ hit }));
     expect(mockFlyoutProviders).toHaveBeenCalledWith(
       expect.objectContaining({
         services: servicesMock,

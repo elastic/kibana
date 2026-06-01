@@ -10,15 +10,16 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { HeaderTitle } from './components/header_title';
 import type { AttackDetailsPanelPaths, AttackDetailsPanelTabType } from './types';
 
 export interface HeaderProps {
   /**
-   * The attack-discovery document hit forwarded to {@link HeaderTitle}.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Forwarded to {@link HeaderTitle}.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Browser fields used by the Status block inside the header title.
    */
@@ -59,7 +60,7 @@ export interface HeaderProps {
  */
 export const Header: FC<HeaderProps> = memo(
   ({
-    hit,
+    attack,
     browserFields,
     dataFormattedForFieldBrowser,
     refetch,
@@ -81,7 +82,7 @@ export const Header: FC<HeaderProps> = memo(
     return (
       <>
         <HeaderTitle
-          hit={hit}
+          attack={attack}
           browserFields={browserFields}
           dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
           refetch={refetch}

@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useAttackEntitiesCounts } from '../hooks/use_attack_entities_counts';
 import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
@@ -37,10 +37,11 @@ const TOOLTIP = (
 
 export interface EntitiesOverviewProps {
   /**
-   * The attack-discovery document hit. Forwarded to `useAttackEntitiesCounts`
-   * which derives the alert-id list it queries against.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Forwarded to `useAttackEntitiesCounts` which derives the alert-id list
+   * it queries against.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
   /**
    * Callback that opens the attack-specific Entities child flyout when the
    * section title link is clicked. The wiring lives in
@@ -55,9 +56,9 @@ export interface EntitiesOverviewProps {
  * opens the attack-specific Entities child flyout.
  */
 export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
-  ({ hit, onShowAttackEntities }) => {
+  ({ attack, onShowAttackEntities }) => {
     const { euiTheme } = useEuiTheme();
-    const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(hit);
+    const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(attack);
 
     const link = useMemo(
       () => ({ callback: onShowAttackEntities, tooltip: TOOLTIP }),

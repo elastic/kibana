@@ -6,16 +6,16 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useHeaderData } from './use_header_data';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
-const hit: DataTableRecord = {
+const attack = {
   id: 'attack-1',
-  raw: { _id: 'attack-1', _index: '.alerts', _source: {} },
-  flattened: {},
-};
+  index: '.alerts',
+  alertIds: [],
+} as unknown as AttackDiscoveryAlert;
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
@@ -57,7 +57,7 @@ describe('useAttackEntitiesLists', () => {
   it('returns empty lists and skips query when alertIds is empty', () => {
     mockUseHeaderData.mockReturnValue(mockHeaderData([]));
 
-    const { result } = renderHook(() => useAttackEntitiesLists(hit));
+    const { result } = renderHook(() => useAttackEntitiesLists(attack));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -72,7 +72,7 @@ describe('useAttackEntitiesLists', () => {
   it('passes query with ids filter, EUID runtime_mappings and terms aggs when alertIds exist', () => {
     mockUseHeaderData.mockReturnValue(mockHeaderData(['id1', 'id2']));
 
-    renderHook(() => useAttackEntitiesLists(hit));
+    renderHook(() => useAttackEntitiesLists(attack));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -189,7 +189,7 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists(hit));
+    const { result } = renderHook(() => useAttackEntitiesLists(attack));
 
     expect(result.current.userEntityIdentifiers).toEqual([
       {
@@ -228,8 +228,54 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists(hit));
+    const { result } = renderHook(() => useAttackEntitiesLists(attack));
 
+    expect(result.current.userEntityIdentifiers).toEqual([]);
+    expect(result.current.hostEntityIdentifiers).toEqual([]);
+  });
+
+  it('does not report error on initial render before the first fetch attempt', () => {
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: null,
+      setQuery: jest.fn(),
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result } = renderHook(() => useAttackEntitiesLists(attack));
+
+    expect(result.current.error).toBe(false);
+  });
+
+  it('reports error after a fetch attempt completes with null data', () => {
+    mockUseHeaderData.mockReturnValue(mockHeaderData(['id1']));
+    const setQuery = jest.fn();
+    mockUseQueryAlerts.mockReturnValue({
+      loading: true,
+      data: null,
+      setQuery,
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result, rerender } = renderHook(() => useAttackEntitiesLists(attack));
+    expect(result.current.error).toBe(false);
+
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: null,
+      setQuery,
+      response: '',
+      request: '',
+      refetch: null,
+    });
+    rerender();
+
+    expect(result.current.error).toBe(true);
     expect(result.current.userEntityIdentifiers).toEqual([]);
     expect(result.current.hostEntityIdentifiers).toEqual([]);
   });
@@ -286,7 +332,7 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists(hit));
+    const { result } = renderHook(() => useAttackEntitiesLists(attack));
 
     expect(result.current.userEntityIdentifiers).toEqual([
       { 'user.name': 'user1', 'host.id': 'h1', 'entity.namespace': 'local' },

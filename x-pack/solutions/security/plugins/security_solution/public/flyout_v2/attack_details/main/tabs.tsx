@@ -18,15 +18,10 @@ import type { AttackDetailsPanelTabType } from './types';
 
 export interface OverviewTabFactoryProps {
   /**
-   * Attack-discovery document hit forwarded to the Overview tab.
-   */
-  hit: DataTableRecord;
-  /**
-   * Parsed attack-discovery alert resolved by {@link useAttackDetails}. Used
-   * by the AI Summary section to render the markdown bodies — sourcing the
-   * markdown from the resolved alert (rather than `hit.flattened` /
-   * `hit.raw._source`) keeps it working regardless of which entry point
-   * built the hit.
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}. The
+   * Overview tab subtree reads every field it needs (title, markdown,
+   * MITRE tactics, alert ids, replacements, …) directly off the typed
+   * alert, so the underlying `hit` is no longer needed.
    */
   attack: AttackDiscoveryAlert;
   /**
@@ -48,7 +43,6 @@ export interface OverviewTabFactoryProps {
  * with `tableTab`/`jsonTab` while allowing per-instance props.
  */
 export const overviewTab = ({
-  hit,
   attack,
   onShowAttackEntities,
   onShowAttackCorrelations,
@@ -63,7 +57,6 @@ export const overviewTab = ({
   ),
   content: (
     <OverviewTab
-      hit={hit}
       attack={attack}
       onShowAttackEntities={onShowAttackEntities}
       onShowAttackCorrelations={onShowAttackCorrelations}
