@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asDuration, toMicroseconds } from './duration';
+import { asDuration, asMillisecondDuration, toMicroseconds } from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -31,6 +31,25 @@ describe('duration formatters', () => {
 
     it('falls back to default value', () => {
       expect(asDuration(undefined, { defaultValue: 'nope' })).toEqual('nope');
+    });
+  });
+
+  describe('asMillisecondDuration', () => {
+    it('returns N/A for null and undefined', () => {
+      expect(asMillisecondDuration(null)).toEqual('N/A');
+      expect(asMillisecondDuration(undefined)).toEqual('N/A');
+    });
+
+    it('formats zero', () => {
+      expect(asMillisecondDuration(0)).toEqual('0 ms');
+    });
+
+    it('formats sub-10ms values as decimals', () => {
+      expect(asMillisecondDuration(1500)).toEqual('1.5 ms');
+    });
+
+    it('formats large values as integers', () => {
+      expect(asMillisecondDuration(1200000)).toEqual('1,200 ms');
     });
   });
 
