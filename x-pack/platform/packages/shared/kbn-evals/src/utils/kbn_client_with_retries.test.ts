@@ -137,4 +137,42 @@ describe('wrapKbnClientWithRetries', () => {
     expect(log.error).toHaveBeenCalledTimes(1);
     expect(log.error.mock.calls[0][0]).toMatch(/413|payload too large/i);
   });
+
+  it('skips retries when params.retries is 0', async () => {
+    const err = makeStatusError(503);
+    const request = jest.fn().mockRejectedValue(err);
+    const inner = { request } as unknown as KbnClient;
+    const log = createLog();
+
+    const wrapped = wrapKbnClientWithRetries({ kbnClient: inner, log });
+
+    await expect(
+      wrapped.request({
+        path: '/x',
+        method: 'GET',
+        retries: 0,
+      } as Parameters<KbnClient['request']>[0])
+    ).rejects.toBe(err);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(log.warning).not.toHaveBeenCalled();
+  });
+
+  it('still retries when params.retries is not 0', async () => {
+    const request = jest
+      .fn()
+      .mockRejectedValueOnce(makeStatusError(429))
+      .mockResolvedValueOnce({ data: 'ok' });
+    const inner = { request } as unknown as KbnClient;
+    const log = createLog();
+
+    const wrapped = wrapKbnClientWithRetries({ kbnClient: inner, log });
+    const result = await wrapped.request({
+      path: '/x',
+      method: 'GET',
+      retries: 2,
+    } as Parameters<KbnClient['request']>[0]);
+
+    expect(result).toEqual({ data: 'ok' });
+    expect(request).toHaveBeenCalledTimes(2);
+  });
 });
