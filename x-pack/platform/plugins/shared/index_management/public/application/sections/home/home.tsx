@@ -9,8 +9,7 @@ import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import type { AppHeaderTab } from '@kbn/app-header';
 import { PageHeader } from '../../components/page_header';
@@ -110,22 +109,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         tabs={tabs}
         padding={{ bleed: 'l' }}
         docLink={documentationService.getIdxMgmtDocumentationLink()}
-        fallback={{
-          'data-test-subj': 'indexManagementHeaderContent',
-          rightSideItems: [
-            <EuiButtonEmpty
-              href={documentationService.getIdxMgmtDocumentationLink()}
-              target="_blank"
-              iconType="question"
-              data-test-subj="documentationLink"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
-                defaultMessage="Index Management docs"
-              />
-            </EuiButtonEmpty>,
-          ],
-        }}
       />
       <EuiSpacer size="l" />
 

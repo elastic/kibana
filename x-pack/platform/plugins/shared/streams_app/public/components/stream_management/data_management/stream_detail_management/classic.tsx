@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../../redirect_to';
@@ -114,18 +114,6 @@ export function ClassicStreamDetailManagement({
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: lifecycleTabLabel,
-    fallbackLabel: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-          defaultMessage:
-            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-        })}
-      >
-        <span data-test-subj="retentionTab" tabIndex={0}>
-          {lifecycleTabLabel}
-        </span>
-      </EuiToolTip>
-    ),
   };
 
   if (queryStreams.enabled) {
@@ -160,17 +148,6 @@ export function ClassicStreamDetailManagement({
       <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: dataQualityTabLabel,
-    fallbackLabel: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-          defaultMessage: 'View details about this classic stream’s data quality',
-        })}
-      >
-        <span data-test-subj="dataQualityTab" tabIndex={0}>
-          {dataQualityTabLabel}
-        </span>
-      </EuiToolTip>
-    ),
   };
 
   tabs.attachments = {
@@ -193,16 +170,6 @@ export function ClassicStreamDetailManagement({
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: advancedTabLabel,
-      fallbackLabel: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
-            defaultMessage:
-              'View technical details about this classic stream’s underlying index setup',
-          })}
-        >
-          <span tabIndex={0}>{advancedTabLabel}</span>
-        </EuiToolTip>
-      ),
     };
   }
 

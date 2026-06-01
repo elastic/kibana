@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiLoadingElastic,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -31,10 +25,7 @@ import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
-import {
-  CreateQueryStreamFlyout,
-  CreateQueryStreamFlyoutContent,
-} from '../query_streams/create_query_stream_flyout';
+import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
@@ -173,16 +164,6 @@ export function StreamListView() {
       defaultMessage: 'Create Query stream',
     }
   );
-  const pageDescription = i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
-    defaultMessage:
-      'Manage how your data is ingested, structured, and retained across all your streams.',
-  });
-  const learnMoreLabel = i18n.translate(
-    'xpack.streams.streamsListView.pageHeaderDescriptionLearnMoreLink',
-    {
-      defaultMessage: 'Learn more',
-    }
-  );
   const showSignificantEventsDiscovery =
     significantEventsDiscovery?.available && significantEventsDiscovery.enabled;
   const showQueryStreams = queryStreams?.enabled;
@@ -251,67 +232,9 @@ export function StreamListView() {
     significantEventsLabel,
   ]);
 
-  const classicHeaderActions = [
-    <EuiButtonEmpty
-      key="settings"
-      iconType="gear"
-      size="s"
-      onClick={() => setIsSettingsFlyoutOpen(true)}
-      aria-label={settingsLabel}
-    >
-      {settingsLabel}
-    </EuiButtonEmpty>,
-    <EuiButton
-      key="createClassicStream"
-      onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
-      size="s"
-      disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
-    >
-      {createClassicStreamLabel}
-    </EuiButton>,
-    ...(showSignificantEventsDiscovery
-      ? [
-          <EuiButton
-            key="significantEventsDiscovery"
-            href={significantEventsDiscoveryHref}
-            iconType="crosshairs"
-            size="s"
-            data-test-subj="streamsSignificantEventsDiscoveryButton"
-          >
-            {significantEventsLabel}
-          </EuiButton>,
-        ]
-      : []),
-    ...(showQueryStreams
-      ? [
-          <CreateQueryStreamFlyout
-            key="createQueryStream"
-            onQueryStreamCreated={streamsListFetch.refresh}
-          />,
-        ]
-      : []),
-  ];
-  const fallbackRightSideItems = [...classicHeaderActions].reverse();
-
   return (
     <>
-      <StreamsAppHeader
-        title={pageTitle}
-        menu={menu}
-        docLink={streamsDocsLink}
-        fallback={{
-          pageTitle,
-          rightSideItems: fallbackRightSideItems,
-          description: (
-            <>
-              {pageDescription}{' '}
-              <EuiLink href={streamsDocsLink} target="_blank">
-                {learnMoreLabel}
-              </EuiLink>
-            </>
-          ),
-        }}
-      />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
       <StreamsAppPageTemplate.Body grow>
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt

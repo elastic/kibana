@@ -93,16 +93,12 @@ type Story = StoryObj<typeof WorkflowDetailHeader>;
 export const Default: Story = {
   args: {
     isLoading: false,
-    highlightDiff: false,
-    setHighlightDiff: () => {},
   },
 };
 
 export const JustNow: Story = {
   args: {
     isLoading: false,
-    highlightDiff: false,
-    setHighlightDiff: () => {},
   },
   parameters: {
     initialDispatch: (dispatch: AppDispatch) => {
@@ -119,16 +115,12 @@ export const JustNow: Story = {
 export const Loading: Story = {
   args: {
     isLoading: true,
-    highlightDiff: false,
-    setHighlightDiff: () => {},
   },
 };
 
 export const LongTitle: Story = {
   args: {
     isLoading: false,
-    highlightDiff: false,
-    setHighlightDiff: () => {},
   },
   parameters: {
     initialDispatch: (dispatch: AppDispatch) => {
@@ -145,8 +137,6 @@ export const LongTitle: Story = {
 export const UnsavedChanges: Story = {
   args: {
     isLoading: false,
-    highlightDiff: false,
-    setHighlightDiff: () => {},
   },
   parameters: {
     initialDispatch: (dispatch: AppDispatch) => {

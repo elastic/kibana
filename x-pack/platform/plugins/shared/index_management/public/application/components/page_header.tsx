@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AppHeaderWithFallback as PageHeader } from '@kbn/app-header';
+export { AppHeader as PageHeader } from '@kbn/app-header';

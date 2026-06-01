@@ -111,7 +111,9 @@
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser-hooks",
-    "@kbn/ui-chrome-layout"
+    "@kbn/ui-chrome-layout",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

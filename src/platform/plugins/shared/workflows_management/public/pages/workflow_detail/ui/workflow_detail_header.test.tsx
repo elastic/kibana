@@ -9,6 +9,8 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import {
@@ -66,8 +68,6 @@ jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
     isLoading: false,
-    highlightDiff: false,
-    setHighlightDiff: jest.fn(),
   };
 
   const mockWorkflow = {
@@ -120,7 +120,11 @@ describe('WorkflowDetailHeader', () => {
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return <TestWrapper store={store}>{children}</TestWrapper>;
+      return (
+        <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+          <TestWrapper store={store}>{children}</TestWrapper>
+        </ChromeServiceProvider>
+      );
     };
 
     return { ...render(component, { wrapper }), store };

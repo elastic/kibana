@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPageHeader, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -104,15 +104,6 @@ export function QueryStreamDetailManagement({
       <QueryStreamsAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: advancedTabLabel,
-    fallbackLabel: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.queryStreamDetailManagement.advanced.tooltip', {
-          defaultMessage: 'View technical details about this query stream’s underlying setup',
-        })}
-      >
-        <span tabIndex={0}>{advancedTabLabel}</span>
-      </EuiToolTip>
-    ),
   };
 
   if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {
@@ -138,8 +129,8 @@ export function QueryStreamDetailManagement({
             <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabs).map(([tabKey, { label, fallbackLabel }]) => ({
-          label: fallbackLabel ?? label,
+        tabs={Object.entries(tabs).map(([tabKey, { label }]) => ({
+          label,
           href: router.link('/{key}/management/{tab}', {
             path: { key, tab: tabKey },
             query: { rangeFrom, rangeTo },

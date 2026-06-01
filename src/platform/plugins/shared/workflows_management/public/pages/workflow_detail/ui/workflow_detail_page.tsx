@@ -9,7 +9,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
@@ -127,9 +127,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
   }, [selectedExecutionId, dispatch]);
 
-  // TODO: manage it in a workflow state context
-  const [highlightDiff, setHighlightDiff] = useState(false);
-
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
   }, [setSelectedExecution]);
@@ -171,18 +168,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
-        <WorkflowDetailHeader
-          isLoading={isLoadingWorkflow}
-          highlightDiff={highlightDiff}
-          setHighlightDiff={setHighlightDiff}
-        />
+        <WorkflowDetailHeader isLoading={isLoadingWorkflow} />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
         {!isReady ? (
           <WorkflowDetailLoadingState />
         ) : (
           <WorkflowEditorLayout
-            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+            editor={<WorkflowDetailEditor />}
             executionList={
               id &&
               activeTab === 'executions' &&

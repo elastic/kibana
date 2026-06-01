@@ -7,9 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps } from 'react-router-dom';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
@@ -26,9 +25,6 @@ import type { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../commo
 import { INDEX_OPEN, IndexDetailsSection, Section } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
-import { DiscoverLink } from '../../../../lib/discover_link';
-import { renderBadges } from '../../../../lib/render_badges';
-import { ManageIndexButton } from './manage_index_button';
 import { useManageIndexMenu } from './use_manage_index_menu';
 import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
@@ -198,16 +194,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     return result;
   }, [extensionsService.badges, index]);
 
-  const fallbackPageTitle = useMemo(
-    () => (
-      <>
-        {index.name}
-        {renderBadges(index, extensionsService)}
-      </>
-    ),
-    [extensionsService, index]
-  );
-
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
       primaryActionItem: discoverLocator
@@ -266,38 +252,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         badges={badges}
         menu={appMenu}
         padding={{ bleed: 'l' }}
-        fallback={{
-          'data-test-subj': 'indexDetailsHeader',
-          pageTitle: fallbackPageTitle,
-          rightSideItems: [
-            <ManageIndexButton
-              index={index}
-              reloadIndexDetails={fetchIndexDetails}
-              navigateToIndicesList={navigateToIndicesList}
-              onIndexRefresh={onIndexRefresh}
-              fill={true}
-            />,
-            <DiscoverLink indexName={index.name} asButton={true} fill={false} />,
-            <EuiButtonEmpty
-              onClick={() =>
-                openWiredConnectionDetails({
-                  props: { options: { defaultTabId: 'apiKeys' } },
-                }).catch((error) => {
-                  notificationService.showDangerToast(
-                    error?.body?.message ?? error?.message ?? 'An unexpected error occurred'
-                  );
-                })
-              }
-              iconType="plugs"
-              data-test-subj="openConnectionDetails"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.connectionDetailsButtonLabel"
-                defaultMessage="Connection details"
-              />
-            </EuiButtonEmpty>,
-          ],
-        }}
       />
       <EuiSpacer size="l" />
       {indexErrors.length > 0 && <IndexErrorCallout errors={indexErrors} />}

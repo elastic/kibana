@@ -278,9 +278,6 @@ export const TemplateForm = ({
         title={title}
         back="/app/management/data/index_management/templates"
         padding={{ bleed: 'l' }}
-        fallback={{
-          'data-test-subj': 'pageTitle',
-        }}
       />
       <EuiSpacer size="m" />
 
