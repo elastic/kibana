@@ -14,7 +14,6 @@ import {
   throttleStrategySchema,
   durationSchema,
   tagsSchema,
-  actionPolicyTypeAndRuleIdSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -67,10 +66,6 @@ export const setThrottleOperationSchema = z.object({
   interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
 });
 
-export const setTypeOperationSchema = actionPolicyTypeAndRuleIdSchema.extend({
-  operation: z.literal('set_type'),
-});
-
 export const validateOperationSchema = z.object({
   operation: z.literal('validate'),
 });
@@ -83,7 +78,6 @@ export const actionPolicyOperationSchema = z.discriminatedUnion('operation', [
   setMatcherOperationSchema,
   setGroupingOperationSchema,
   setThrottleOperationSchema,
-  setTypeOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -175,14 +169,6 @@ export const executeActionPolicyOperations = (
             ...(op.strategy !== undefined ? { strategy: op.strategy } : {}),
             ...(op.interval !== undefined ? { interval: op.interval ?? null } : { interval: null }),
           },
-        };
-        break;
-
-      case 'set_type':
-        next = {
-          ...next,
-          type: op.type,
-          ruleId: op.type === 'single_rule' ? op.ruleId : null,
         };
         break;
 

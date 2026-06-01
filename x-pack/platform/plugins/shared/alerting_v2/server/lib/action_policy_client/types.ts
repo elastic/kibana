@@ -52,8 +52,6 @@ export interface FindActionPoliciesParams {
   createdBy?: string;
   enabled?: boolean;
   tags?: string[];
-  ruleId?: string;
-  type?: 'global' | 'single_rule';
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
 
 export type RuleId = string;
@@ -63,7 +62,7 @@ export interface Rule {
   updatedAt: string;
 }
 
-interface BaseActionPolicy {
+export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
@@ -88,19 +87,6 @@ interface BaseActionPolicy {
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
-
-export interface GlobalActionPolicy extends BaseActionPolicy {
-  type: 'global';
-}
-
-export interface SingleRuleActionPolicy extends BaseActionPolicy {
-  type: 'single_rule';
-  ruleId: string;
-}
-
-export type ActionPolicy = GlobalActionPolicy | SingleRuleActionPolicy;
-
-export type { ActionPolicyType };
 
 export interface MatchedPair {
   episode: AlertEpisode;

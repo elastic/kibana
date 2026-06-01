@@ -183,8 +183,8 @@ describe('manageActionPolicyTool', () => {
     });
   });
 
-  describe('set_type operation', () => {
-    it('creates a single_rule policy with type and ruleId in the result', async () => {
+  describe('rule scoping via set_matcher', () => {
+    it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
       const deps = createDeps();
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
@@ -192,12 +192,12 @@ describe('manageActionPolicyTool', () => {
       const result = await tool.handler(
         {
           operations: [
-            { operation: 'set_metadata', name: 'Single Rule Policy', description: 'desc' },
+            { operation: 'set_metadata', name: 'Rule-scoped Policy', description: 'desc' },
             {
               operation: 'set_destinations',
               destinations: [{ type: 'workflow', id: 'wf-1' }],
             },
-            { operation: 'set_type', type: 'single_rule', ruleId: 'rule-abc' },
+            { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
           ],
         },
         ctx
@@ -208,38 +208,15 @@ describe('manageActionPolicyTool', () => {
           type: string;
           data?: {
             actionPolicyAttachment?: {
-              type?: string;
-              ruleId?: string;
+              matcher?: string | null;
               name?: string;
             };
           };
         }>;
       };
       expect(results[0].type).toBe(ToolResultType.other);
-      expect(results[0].data?.actionPolicyAttachment?.type).toBe('single_rule');
-      expect(results[0].data?.actionPolicyAttachment?.ruleId).toBe('rule-abc');
-      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Single Rule Policy');
-    });
-
-    it('rejects set_type global with a ruleId at schema level', () => {
-      const result = actionPolicyOperationSchema.safeParse({
-        operation: 'set_type',
-        type: 'global',
-        ruleId: 'rule-abc',
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error!.issues[0].message).toContain('ruleId is only allowed');
-    });
-
-    it('rejects set_type single_rule without ruleId at schema level', () => {
-      const result = actionPolicyOperationSchema.safeParse({
-        operation: 'set_type',
-        type: 'single_rule',
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error!.issues[0].message).toContain('ruleId is required');
+      expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
     });
   });
 

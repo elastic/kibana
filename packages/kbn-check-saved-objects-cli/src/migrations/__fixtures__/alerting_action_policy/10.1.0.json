@@ -3,8 +3,6 @@
     {
       "name": "My global policy",
       "description": "Routes all alerts to the on-call workflow",
-      "type": "global",
-      "ruleId": null,
       "enabled": true,
       "destinations": [{ "type": "workflow", "id": "on-call-workflow-id" }],
       "matcher": "env : 'production' and region : 'us-east-1'",
@@ -26,13 +24,11 @@
       "updatedAt": "2026-01-01T00:00:00.000Z"
     },
     {
-      "name": "My single rule policy",
+      "name": "My rule-scoped policy",
       "description": "Notifies on status change for a single rule",
-      "type": "single_rule",
-      "ruleId": "rule-1",
       "enabled": true,
       "destinations": [{ "type": "workflow", "id": "wf-1" }],
-      "matcher": null,
+      "matcher": "rule.id : \"rule-1\"",
       "groupBy": null,
       "tags": null,
       "groupingMode": "per_episode",
@@ -54,8 +50,6 @@
     {
       "name": "My global policy",
       "description": "Routes all alerts to the on-call workflow",
-      "type": "global",
-      "ruleId": null,
       "enabled": true,
       "destinations": [{ "type": "workflow", "id": "on-call-workflow-id" }],
       "matcher": "env : 'production' and region : 'us-east-1'",
@@ -77,13 +71,11 @@
       "updatedAt": "2026-01-01T00:00:00.000Z"
     },
     {
-      "name": "My single rule policy",
+      "name": "My rule-scoped policy",
       "description": "Notifies on status change for a single rule",
-      "type": "single_rule",
-      "ruleId": "rule-1",
       "enabled": true,
       "destinations": [{ "type": "workflow", "id": "wf-1" }],
-      "matcher": null,
+      "matcher": "rule.id : \"rule-1\"",
       "groupBy": null,
       "tags": null,
       "groupingMode": "per_episode",

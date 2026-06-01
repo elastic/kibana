@@ -96,7 +96,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
-          actionPolicyClient: get(ActionPolicyClient),
         },
         options: {
           spaceId: get(RequestSpaceIdToken),
