@@ -660,7 +660,9 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.getByTestId('noAdvancedSettingsPermissionCallout')).toBeInTheDocument();
-      expect(screen.getByText(/Advanced Settings: All privilege/)).toBeInTheDocument();
+      expect(
+        screen.getByTestId('noAdvancedSettingsPermissionCalloutDescription')
+      ).toHaveTextContent(/Advanced Settings: All privilege/);
     });
 
     it('passes disabled={true} to DefaultModelSection when advancedSettings.save is false', () => {

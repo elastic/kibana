@@ -210,5 +210,22 @@ describe('DefaultModelSection', () => {
       fireEvent.click(screen.getByTestId('featureSpecificModelsSwitch'));
       expect(setFeatureSpecificModels).not.toHaveBeenCalled();
     });
+
+    it('does not call setDefaultModelId when the global model combobox is disabled', () => {
+      const setDefaultModelId = jest.fn();
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings({ setDefaultModelId })}
+            validation={validResult}
+            disabled={true}
+          />
+        </Wrapper>
+      );
+
+      const input = screen.getByTestId('globalModelComboBox').querySelector('input');
+      fireEvent.change(input!, { target: { value: 'some-model' } });
+      expect(setDefaultModelId).not.toHaveBeenCalled();
+    });
   });
 });

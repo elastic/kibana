@@ -121,8 +121,7 @@ export const ModelSettings: React.FC = () => {
 
   const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
-  const hasAdvancedSettingsSavePermission =
-    application.capabilities?.advancedSettings?.save === true;
+  const hasAdvancedSettingsSavePermission = application.capabilities.advancedSettings.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
@@ -266,7 +265,7 @@ export const ModelSettings: React.FC = () => {
               data-test-subj="noAdvancedSettingsPermissionCallout"
               announceOnMount={false}
             >
-              <p>
+              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
                 {i18n.translate(
                   'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
                   {
