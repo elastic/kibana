@@ -29,7 +29,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 548600
+  core: 606422
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -78,7 +78,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 229970
+  fleet: 235000
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 31212
@@ -91,8 +91,9 @@ pageLoadAssetSize:
   indexLifecycleManagement: 47110
   indexManagement: 39694
   inference: 10368
+  inferenceWorkflows: 25000
   infra: 56302
-  ingestHub: 12728
+  ingestHub: 14788
   ingestPipelines: 17866
   inputControlVis: 7638
   inspectComponent: 4590
@@ -141,7 +142,7 @@ pageLoadAssetSize:
   queryActivity: 4326
   reindexService: 3469
   remoteClusters: 10170
-  reporting: 46602
+  reporting: 48178
   rollup: 12692
   runtimeFields: 11828
   sampleDataIngest: 2640
@@ -154,7 +155,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 7079
-  searchGettingStarted: 6678
+  searchGettingStarted: 7548
   searchHomepage: 9005
   searchInferenceEndpoints: 9765
   searchNavigation: 8900
@@ -168,7 +169,7 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
-  serverlessObservability: 19200
+  serverlessObservability: 21437
   serverlessSearch: 26287
   serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
@@ -180,7 +181,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595
-  streamsApp: 25375
+  streamsApp: 29825
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
