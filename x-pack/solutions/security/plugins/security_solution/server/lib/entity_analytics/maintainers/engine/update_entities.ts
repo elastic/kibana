@@ -64,6 +64,19 @@ export interface WriteEntityIdsResult {
   errors: number;
 }
 
+/**
+ * Extracts the entity type prefix from a full EUID string.
+ * EUIDs are formatted as "<type>:<identity>", e.g. "user:alice@corp.com" or
+ * "host:workstation-01.corp.com". Falls back to 'user' for EUIDs that do not
+ * follow this pattern (backward-compatible with existing log-based maintainers
+ * whose actors are always users).
+ */
+function entityTypeFromEuid(entityId: string): 'user' | 'host' | 'service' {
+  const prefix = entityId.split(':')[0];
+  if (prefix === 'host' || prefix === 'service') return prefix;
+  return 'user';
+}
+
 export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
@@ -85,9 +98,8 @@ export const writeEntityIds = async (
       }
     }
     if (Object.keys(relationships).length > 0) {
-      // TODO(#266748): entity type hardcoded to 'user' — use actorEntityType from config.
       objects.push({
-        type: 'user',
+        type: entityTypeFromEuid(entityId),
         doc: {
           entity: {
             id: entityId,
