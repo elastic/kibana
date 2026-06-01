@@ -20,6 +20,7 @@ export interface AppHeaderShellProps {
   badges?: ReactNode;
   titleActions?: ReactNode;
   trailing?: ReactNode;
+  metadata?: ReactNode;
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
@@ -63,7 +64,8 @@ const resolveLayoutProps = (
 const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
-  hasTabs: boolean
+  hasTabs: boolean,
+  hasMetadata: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -117,7 +119,7 @@ const useHeaderStyles = (
       ${paddingBlock &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
+        padding-block-end: ${hasTabs || hasMetadata ? euiTheme.size.xs : paddingBlock};
       `}
     `;
 
@@ -147,6 +149,19 @@ const useHeaderStyles = (
       align-items: stretch;
     `;
 
+    const metadataRow = css`
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: ${euiTheme.size.m};
+      row-gap: ${euiTheme.size.xs};
+      min-width: 0;
+      ${paddingBlock &&
+      css`
+        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
+      `}
+    `;
+
     const titleActionsReveal = css`
       display: flex;
       flex-shrink: 0;
@@ -164,14 +179,15 @@ const useHeaderStyles = (
       titleGroup,
       titleClusterSpacer,
       titleActionsReveal,
+      metadataRow,
       tabsRow,
     };
-  }, [euiTheme, sticky, padding, hasTabs]);
+  }, [euiTheme, sticky, padding, hasTabs, hasMetadata]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, trailing, tabs, sticky = true, padding }) => {
-    const styles = useHeaderStyles(sticky, padding, !!tabs);
+  ({ title, badges, titleActions, trailing, metadata, tabs, sticky = true, padding }) => {
+    const styles = useHeaderStyles(sticky, padding, !!tabs, !!metadata);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
@@ -190,6 +206,11 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           </div>
           {trailing}
         </div>
+        {metadata && (
+          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
+            {metadata}
+          </div>
+        )}
         {tabs && (
           <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
             {tabs}
