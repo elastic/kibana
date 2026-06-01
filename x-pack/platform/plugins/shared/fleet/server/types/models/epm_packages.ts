@@ -22,8 +22,6 @@ export const EpmPackagesSchemaV6 = schema.object({
         type: schema.string(),
         version: schema.maybe(schema.string()),
         deferred: schema.maybe(schema.boolean()),
-        customDataStreamOriginDataset: schema.maybe(schema.string()),
-        customDataStreamOriginType: schema.maybe(schema.string()),
       }),
       { maxSize: 10000 }
     )
@@ -101,6 +99,22 @@ export const EpmPackagesSchemaV9 = EpmPackagesSchemaV8.extends({
         }),
         { maxSize: 1000 }
       )
+    )
+  ),
+});
+
+export const EpmPackagesSchemaV10 = EpmPackagesSchemaV9.extends({
+  installed_es: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        type: schema.string(),
+        version: schema.maybe(schema.string()),
+        deferred: schema.maybe(schema.boolean()),
+        customDataStreamOriginDataset: schema.maybe(schema.string()),
+        customDataStreamOriginType: schema.maybe(schema.string()),
+      }),
+      { maxSize: 10000 }
     )
   ),
 });
