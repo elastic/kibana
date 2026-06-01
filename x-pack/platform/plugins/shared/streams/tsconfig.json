@@ -97,6 +97,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/data-streams",
     "@kbn/es-mappings",
+    "@kbn/elastic-agent-utils",
+    "@kbn/sample-log-parser",
     "@kbn/workflows-extensions"
   ]
 }

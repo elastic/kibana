@@ -42,6 +42,8 @@ export const createConversation$ = ({
         title,
         agent_id: agentId,
         state: roundCompletedEvent.data.conversation_state,
+        status: roundCompletedEvent.data.round.status,
+        read: false,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
@@ -87,6 +89,8 @@ export const updateConversation$ = ({
         title,
         rounds: updatedRound,
         state: conversation_state,
+        status: round.status,
+        read: false,
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),

@@ -9,10 +9,8 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import type { ActionTypeSource } from '@kbn/actions-types';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
   fetchConnectorSpec,
@@ -29,28 +27,27 @@ export interface UseActionTypeModelResult {
   isLoading: boolean;
   /** Error if fetching the spec failed */
   error: Error | null;
-  /** Whether the model was derived from a spec (vs from registry) */
-  isFromSpec: boolean;
   /** Re-runs the connector spec query (no-op when the model is from the registry) */
   refetch: () => void;
 }
 
 /**
- * Hook to get an ActionTypeModel for a given action type id and source.
+ * Hook to get an ActionTypeModel for a given action type id.
  *
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
+ *
+ * Routing is driven by the registry: if the connector type is registered, the registry model is
+ * used; if not, the spec endpoint is tried as a fallback.
  */
 export function useActionTypeModel({
   actionTypeRegistry,
   actionTypeId,
-  source,
   http,
   uiSettings,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
-  source?: ActionTypeSource;
   http: HttpSetup;
   uiSettings?: IUiSettingsClient;
 }): UseActionTypeModelResult {
@@ -64,7 +61,10 @@ export function useActionTypeModel({
     return null;
   }, [actionTypeId, actionTypeRegistry]);
 
-  const shouldFetchSpec = !!actionTypeId && source === ACTION_TYPE_SOURCES.spec;
+  // Fetch the spec whenever the connector type is not in the registry. Stack connectors are
+  // always registered; spec connectors never are. A 404 from the spec endpoint means the type
+  // is unknown and we return null quietly (no error callout shown to the user).
+  const shouldFetchSpec = !!actionTypeId && registeredModel === null;
 
   const {
     data = null,
@@ -97,10 +97,9 @@ export function useActionTypeModel({
   );
 
   return {
-    actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
+    actionTypeModel: registeredModel ?? specBasedModel,
     isLoading: shouldFetchSpec && isLoading,
     error,
-    isFromSpec: shouldFetchSpec && specBasedModel != null,
     refetch: () => {
       void refetch();
     },
