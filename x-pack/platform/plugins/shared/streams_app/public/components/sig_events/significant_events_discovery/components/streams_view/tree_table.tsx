@@ -22,8 +22,12 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams, TaskStatus } from '@kbn/streams-schema';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import {
+  Streams,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
@@ -63,7 +67,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
+  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusResult>;
   loading?: boolean;
   searchQuery?: Query;
   selection: EuiTableSelectionType<TableRow>;
@@ -355,22 +359,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case TaskStatus.InProgress:
-                  case TaskStatus.BeingCanceled:
+                  case StreamsKIsOnboardingStatus.InProgress:
+                  case StreamsKIsOnboardingStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case TaskStatus.NotStarted:
-                  case TaskStatus.Canceled:
+                  case StreamsKIsOnboardingStatus.NotStarted:
+                  case StreamsKIsOnboardingStatus.Canceled:
                     return '-';
-                  case TaskStatus.Completed:
-                  case TaskStatus.Acknowledged:
+                  case StreamsKIsOnboardingStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case TaskStatus.Stale:
-                    return (
-                      <EuiIcon type="checkCircleFill" color="subdued" size="m" aria-hidden={true} />
-                    );
-                  case TaskStatus.Failed:
+                  case StreamsKIsOnboardingStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -432,11 +431,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (
-                  [TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(
-                    onboardingResult?.status
-                  )
-                ) {
+                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"
@@ -447,7 +442,9 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={onboardingResult.status === TaskStatus.BeingCanceled}
+                        disabled={
+                          onboardingResult.status === StreamsKIsOnboardingStatus.BeingCanceled
+                        }
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>
