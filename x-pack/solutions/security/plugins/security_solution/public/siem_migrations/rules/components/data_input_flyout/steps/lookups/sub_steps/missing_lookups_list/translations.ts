@@ -11,3 +11,8 @@ export const LOOKUPS_DATA_INPUT_COPY_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingLookupsList.title',
   { defaultMessage: 'Lookups found in your rules' }
 );
+
+export const SENTINAL_WACTHLISTS_DATA_INPUT_COPY_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingSentinelWatchlistsList.title',
+  { defaultMessage: 'Watchlists found in your rules' }
+);

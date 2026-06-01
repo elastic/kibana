@@ -113,6 +113,16 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
    * Onboarding configuration.
    */
   onboarding: {
@@ -397,6 +407,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
       },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
