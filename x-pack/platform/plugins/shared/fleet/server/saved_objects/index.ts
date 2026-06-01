@@ -1585,6 +1585,14 @@ export const getSavedObjectTypes = (
             create: EpmPackagesSchemaV9,
           },
         },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false on installed_es
+            },
+          ],
+        },
       },
       migrations: {
         '7.14.0': migrateInstallationToV7140,
