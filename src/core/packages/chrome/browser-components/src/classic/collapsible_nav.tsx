@@ -113,13 +113,12 @@ interface Props {
 
 const overviewIDsToHide = [
   'kibanaOverview',
-  'securitySolutionUI:get_started',
-  'securitySolutionUI:ai_value',
-  'securitySolutionUI:siem_migrations',
   'securitySolutionUI:siem_readiness',
+  'securitySolutionUI:siem_migrations',
+  'securitySolutionUI:ai_value',
 ];
 const overviewIDs = [
-  ...overviewIDsToHide,
+  'securitySolutionUI:get_started',
   'observability-overview',
   'management',
   'enterpriseSearch',
@@ -140,7 +139,7 @@ export function CollapsibleNav({
     () =>
       allLinks.filter(
         (link) =>
-          // Filterting out hidden links,
+          // Filtering out hidden links,
           link.visibleIn.includes('classicSideNav') &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
