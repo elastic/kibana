@@ -70,10 +70,15 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   const sortedConversations = useMemo(
     () =>
-      [...conversations].sort(
-        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    [conversations]
+      [...conversations].sort((a, b) => {
+        const aInProgress =
+          activeStreams.has(a.id) || a.status === ConversationRoundStatus.inProgress;
+        const bInProgress =
+          activeStreams.has(b.id) || b.status === ConversationRoundStatus.inProgress;
+        if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      }),
+    [conversations, activeStreams]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
