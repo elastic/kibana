@@ -49,8 +49,7 @@ extract_owner_health() {
   printf '%s %s · %s hotspots' "$score" "$grade" "$hotspots"
 }
 
-echo "--- Install fallow v${FALLOW_VERSION}"
-npm ci --prefix .buildkite
+echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
 
 # Snapshot: save only from the weekly standalone pipeline, not PR runs.
