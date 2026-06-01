@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, type PropsWithChildren } from 'react';
+import React, { useCallback, useState, type PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -19,45 +19,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NightshiftAttachmentPill } from './nightshift_attachment_pill';
-import {
-  clearNightshiftAttachments,
-  nightshiftAttachments$,
-  removeNightshiftAttachment,
-  type NightshiftAttachment,
-  type NightshiftAttachmentPayload,
-} from './nightshift_attachments';
-
 /* ----------------------------------------------------------------------- *
- * Agent chat input for the Nightshift Search homepage.
+ * Agent chat input for the Daybreak surface.
  *
- * Mirrors the obs Nightshift `NightshiftInput` 1:1 visually — same
- * `InputContainer` styling, same `<textarea>` editor, same submit
- * button on the right and connector-selector stand-in on the left.
- * Copied (not re-exported) into the searchHomepage plugin because
- * cross-solution imports from observability are forbidden by module
- * visibility rules.
+ * Visually identical to the obs Nightshift `NightshiftInput` and the
+ * Search homepage `NightshiftSearchHomepageInput` — same Agent Builder
+ * `InputContainer` styling (768px max-width rounded card), same
+ * Anthropic-glyph model selector stand-in, same submit button. Copied
+ * (not re-exported) into the security plugin because cross-solution
+ * imports are forbidden by module visibility rules.
  *
- * Attachments are subscribed from `nightshiftAttachments$` and rendered
- * as pills above the editor (the per-row paperclip in the "Expiring API
- * keys" summary stages one attachment per key). On submit the input
- * drains the staged payloads and forwards them to `onSubmit` alongside
- * the prompt so the parent can pass them through to Agent Builder's
- * `initialAttachments` navigation state.
+ * Two intentional simplifications vs. the obs version:
+ *  - No attachments stream (Daybreak Critical doesn't stage row
+ *    attachments yet; the per-row paperclip is a placeholder).
+ *  - The model selector is a static Anthropic Claude label — the
+ *    real Agent Builder `ConnectorSelector` lives in agent_builder's
+ *    internal context which isn't available here.
  *
- * Single intentional simplification vs. Agent Builder: no model-selector
- * popover wiring — the Anthropic Claude label is a static stand-in for
- * the real `ConnectorSelector`.
+ * Submitting calls `onSubmit(prompt)`; the parent is expected to
+ * wire that to a hand-off into Agent Builder.
  * ----------------------------------------------------------------------- */
 
 const INPUT_MIN_HEIGHT = '150px';
 const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
 
-/**
- * Inline SVG mimicking Anthropic's brand mark — a six-pointed orange
- * asterisk. Used as the model-selector icon next to "Anthropic Claude
- * Opus 4.6", same as in the obs `NightshiftInput`.
- */
 const AnthropicGlyph: React.FC<{ size?: number; color?: string }> = ({
   size = 14,
   color = '#D97757',
@@ -108,15 +93,10 @@ const useInputShadowStyles = () => {
 };
 
 const containerAriaLabel = i18n.translate(
-  'xpack.searchHomepage.nightshift.input.containerAriaLabel',
+  'xpack.securitySolution.daybreak.input.containerAriaLabel',
   { defaultMessage: 'Message input form' }
 );
 
-/**
- * Outer container — 1:1 copy of Agent Builder's `InputContainer`. The
- * 768px max-width matches the in-conversation Agent Builder textbox so
- * the visual jump on hand-off is zero.
- */
 const InputContainer: React.FC<
   PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
 > = ({ children, isDisabled, isCollapsed }) => {
@@ -156,65 +136,37 @@ const InputContainer: React.FC<
   );
 };
 
-const enabledPlaceholder = i18n.translate('xpack.searchHomepage.nightshift.input.placeholder', {
-  defaultMessage:
-    'Welcome to your Search workspace, you can start by asking questions or giving tasks.',
-});
+const enabledPlaceholder = i18n.translate(
+  'xpack.securitySolution.daybreak.input.placeholder',
+  {
+    defaultMessage:
+      'Ask Daybreak to investigate alerts, contain threats, or summarise activity.',
+  }
+);
 
-interface NightshiftSearchHomepageInputProps {
+interface DaybreakInputProps {
   /**
-   * Called with the trimmed prompt text + the currently staged
-   * attachment payloads when the user submits. The parent forwards
-   * `attachments` into Agent Builder's `initialAttachments` navigation
-   * state so the new conversation lands with the same pills the user
-   * staged on the homepage.
+   * Called with the trimmed prompt text when the user submits. Wire
+   * to the parent's hand-off flow so the page fades out and the
+   * prompt auto-sends on the Agent Builder side.
    */
-  onSubmit: (prompt: string, attachments: NightshiftAttachmentPayload[]) => void;
+  onSubmit: (prompt: string) => void;
   /** Disable the input while the page is fading away. */
   isDisabled?: boolean;
 }
 
-/**
- * Bottom-anchored prompt input. Visually identical to Agent Builder's
- * `ConversationInput` so the hand-off to a new conversation feels
- * continuous: the textbox sits at the same coordinate, the submit
- * button is the same shape, and the connector label/icon match.
- */
-export const NightshiftSearchHomepageInput: React.FC<NightshiftSearchHomepageInputProps> = ({
-  onSubmit,
-  isDisabled,
-}) => {
+export const DaybreakInput: React.FC<DaybreakInputProps> = ({ onSubmit, isDisabled }) => {
   const isInputDisabled = Boolean(isDisabled);
-  // Render collapsed from the start — this surface is the entry point
-  // into a conversation, not the conversation itself.
   const shouldCollapseInput = true;
 
   const { euiTheme } = useEuiTheme();
   const [value, setValue] = useState('');
   const isSubmitEmpty = !value.trim();
 
-  /*
-   * Subscribe to the module-singleton attachment stream populated by
-   * the "Expiring API keys" paperclip button. Pills render above the
-   * editor, matching Agent Builder's `AttachmentPillsRow` placement.
-   */
-  const [attachments, setAttachments] = useState<NightshiftAttachment[]>(() =>
-    nightshiftAttachments$.getValue()
-  );
-  useEffect(() => {
-    const subscription = nightshiftAttachments$.subscribe(setAttachments);
-    return () => subscription.unsubscribe();
-  }, []);
-
   const submit = useCallback(() => {
     const trimmed = value.trim();
     if (!trimmed || isInputDisabled) return;
-    const payloads = nightshiftAttachments$.getValue().map((a) => a.payload);
-    onSubmit(trimmed, payloads);
-    // Drain staged attachments — they're "consumed" by the hand-off,
-    // matching Agent Builder's pattern where AttachmentInputs are
-    // forwarded into the new round and the input resets.
-    clearNightshiftAttachments();
+    onSubmit(trimmed);
   }, [value, isInputDisabled, onSubmit]);
 
   const onKeyDown = useCallback(
@@ -256,30 +208,6 @@ export const NightshiftSearchHomepageInput: React.FC<NightshiftSearchHomepageInp
 
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-      {attachments.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            wrap
-            responsive={false}
-            role="list"
-            aria-label={i18n.translate(
-              'xpack.searchHomepage.nightshift.input.attachmentsAriaLabel',
-              { defaultMessage: 'Staged attachments' }
-            )}
-            data-test-subj="nightshiftAttachmentPillsRow"
-          >
-            {attachments.map((attachment) => (
-              <EuiFlexItem key={attachment.id} grow={false}>
-                <NightshiftAttachmentPill
-                  attachment={attachment}
-                  onRemove={() => removeNightshiftAttachment(attachment.id)}
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem css={editorContainerStyles}>
         <textarea
           value={value}
@@ -314,7 +242,7 @@ export const NightshiftSearchHomepageInput: React.FC<NightshiftSearchHomepageInp
               flush="both"
               iconType={() => <AnthropicGlyph size={14} />}
               aria-label={i18n.translate(
-                'xpack.searchHomepage.nightshift.input.modelSelectorAriaLabel',
+                'xpack.securitySolution.daybreak.input.modelSelectorAriaLabel',
                 { defaultMessage: 'Select model, Anthropic Claude Opus 4.6' }
               )}
               data-test-subj="agentBuilderConnectorSelectorButton"
@@ -331,7 +259,7 @@ export const NightshiftSearchHomepageInput: React.FC<NightshiftSearchHomepageInp
                 // `ConnectorSelector` popover here once exposed.
               }}
             >
-              {i18n.translate('xpack.searchHomepage.nightshift.input.modelLabel', {
+              {i18n.translate('xpack.securitySolution.daybreak.input.modelLabel', {
                 defaultMessage: 'Anthropic Claude Opus 4.6',
               })}
             </EuiButtonEmpty>
@@ -341,7 +269,7 @@ export const NightshiftSearchHomepageInput: React.FC<NightshiftSearchHomepageInp
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'xpack.searchHomepage.nightshift.input.submitAriaLabel',
+                    'xpack.securitySolution.daybreak.input.submitAriaLabel',
                     { defaultMessage: 'Submit' }
                   )}
                   data-test-subj="agentBuilderConversationInputSubmitButton"

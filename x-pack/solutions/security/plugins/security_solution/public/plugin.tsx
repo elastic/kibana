@@ -339,6 +339,42 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         : ProjectRoutingAccess.DISABLED
     );
 
+    // Register the Daybreak status dropdown in the right side of the
+    // chrome header. The control hides itself unless the active
+    // space's solution is `'daybreak'`, so it only appears in the
+    // Daybreak solution view. Uses `Number.MAX_SAFE_INTEGER` for
+    // `order` so it renders at the very right edge of the chrome
+    // (chrome controls are sorted ascending by order — higher =
+    // further right). Mirrors how observability registers the
+    // Nightshift status control.
+    if (plugins.spaces) {
+      const daybreakActiveSpace$ = plugins.spaces.getActiveSpace$();
+      core.chrome.navControls.registerRight({
+        order: Number.MAX_SAFE_INTEGER,
+        mount: (element) => {
+          let cleanup: (() => void) | undefined;
+          Promise.all([
+            import('react'),
+            import('react-dom'),
+            import('./app/daybreak/daybreak_status_control'),
+          ]).then(([React, ReactDOM, { DaybreakStatusControl }]) => {
+            ReactDOM.render(
+              React.createElement(DaybreakStatusControl, {
+                activeSpace$: daybreakActiveSpace$,
+              }),
+              element
+            );
+            cleanup = () => {
+              ReactDOM.unmountComponentAtNode(element);
+            };
+          });
+          return () => {
+            cleanup?.();
+          };
+        },
+      });
+    }
+
     return this.contract.getStartContract(core);
   }
 

@@ -22,12 +22,16 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  EXPIRING_API_KEYS,
+  NIGHTSHIFT_API_KEY_TYPE,
+} from './agent_brief/nightshift_api_key_constants';
+import type { NightshiftAttachmentPayload } from './nightshift_attachments';
+import { NightshiftExpiringKeysSummary } from './nightshift_expiring_keys_summary';
 import { NightshiftSearchHomepageInput } from './nightshift_search_homepage_input';
 import { ShellSpinner } from './shell_spinner';
-import searchLabsHero from './search_labs_hero.webp';
 
 /* ----------------------------------------------------------------------- *
  * Nightshift "Search" homepage — mirrors the obs Nightshift Healthy
@@ -53,15 +57,17 @@ const NIGHTSHIFT_AGENT_ID = 'elastic-ai-agent';
 const EXIT_FADE_DURATION_MS = 225;
 
 /**
- * Prompt sent to Agent Builder when the user clicks "Onboard with Agent" —
- * kicks off a guided flow that asks the agent to walk the user through
- * creating an API key and connecting their Elasticsearch project.
+ * Prompt sent to Agent Builder when the user clicks the footer's
+ * "Create new API keys" CTA — kicks off a guided rotation flow asking
+ * the agent to create new keys with the same scopes as the ones that
+ * are about to expire, and to walk the user through rotating them
+ * safely (i.e. without breaking active integrations).
  */
-const ONBOARD_WITH_AGENT_PROMPT = i18n.translate(
-  'xpack.searchHomepage.nightshift.onboardWithAgentPrompt',
+const ROTATE_API_KEYS_PROMPT = i18n.translate(
+  'xpack.searchHomepage.nightshift.rotateApiKeysPrompt',
   {
     defaultMessage:
-      'Help me connect my Elasticsearch project: create an API key and walk me through the next steps.',
+      'Two API keys in my project are about to expire (`ingest-pipeline` in 1 day and `production-read-write` in 3 days). Please create replacement keys with the same scopes and walk me through rotating them safely so my integrations don\u2019t break.',
   }
 );
 
@@ -193,7 +199,7 @@ const useStartAgentConversation = () => {
   }, []);
 
   const start = useCallback(
-    (initialMessage: string) => {
+    (initialMessage: string, initialAttachments?: NightshiftAttachmentPayload[]) => {
       if (timeoutRef.current) return;
       setIsExiting(true);
       timeoutRef.current = setTimeout(() => {
@@ -203,6 +209,17 @@ const useStartAgentConversation = () => {
             initialMessage,
             agentId: NIGHTSHIFT_AGENT_ID,
             sidebarCondensed: true,
+            /*
+             * `initialAttachments` is consumed by Agent Builder's
+             * `RoutedConversationsProvider`: each entry's `type` maps
+             * to a registered `AttachmentUIDefinition` and the `data`
+             * is rendered by that definition. For the prototype we
+             * forward the attachment payloads drained from the
+             * homepage input (one per API key the user pinned via the
+             * per-row paperclip).
+             */
+            initialAttachments:
+              initialAttachments && initialAttachments.length > 0 ? initialAttachments : undefined,
           },
         });
       }, EXIT_FADE_DURATION_MS);
@@ -274,36 +291,6 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
         width: 100%;
         min-height: var(--kbn-application--content-height, 100vh);
         padding: 64px 16px 0;
-        position: relative;
-        isolation: isolate;
-        /*
-         * Hero background — Elastic Search Labs' \`hp-header::before\`
-         * webp (sanity-hosted, downloaded locally during prototype
-         * setup). Pinned to the top of the column and faded so the
-         * Nightshift content + sticky input stay legible. The fade
-         * is implemented with a mask-image bottom-to-top gradient
-         * instead of touching the image asset itself, so swapping
-         * the webp is a one-line change.
-         */
-        &::before {
-          content: '';
-          position: absolute;
-          inset: 0 0 auto 0;
-          height: 520px;
-          background-image: url('${searchLabsHero}');
-          background-repeat: no-repeat;
-          background-size: cover;
-          background-position: center top;
-          mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
-          -webkit-mask-image: linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.85) 0%,
-            rgba(0, 0, 0, 0) 100%
-          );
-          opacity: 0.65;
-          pointer-events: none;
-          z-index: -1;
-        }
       `}
     >
       <div
@@ -328,7 +315,16 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
             max-width: 753px;
             margin: 0 auto;
             opacity: ${isExiting ? 0 : 1};
-            transform: ${isExiting ? 'translateY(-6px)' : 'translateY(0)'};
+            /*
+             * Critical: keep \`transform\` as \`none\` in the rest state.
+             * \`translateY(0)\` looks like a no-op but creates a new
+             * containing block for any descendant with \`position: fixed\`,
+             * which broke EuiFlyout (type="push") — the flyout pinned
+             * itself to this 753px column instead of the viewport edge.
+             * Browsers happily interpolate between \`none\` and
+             * \`translateY(...)\`, so the exit transition still plays.
+             */
+            transform: ${isExiting ? 'translateY(-6px)' : 'none'};
             transition: opacity ${exitDurationMs}ms ease-out, transform ${exitDurationMs}ms ease-out;
             pointer-events: ${isExiting ? 'none' : 'auto'};
             @media (prefers-reduced-motion: reduce) {
@@ -352,35 +348,35 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
                     justify-content: center;
                   `}
                 >
-                  <EuiIcon type="productAgent" size="l" color={euiTheme.colors.textSuccess} />
+                  <EuiIcon type="faceHappy" size="l" color={euiTheme.colors.textSuccess} />
                 </div>
               </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate('xpack.searchHomepage.nightshift.title', {
-                  defaultMessage: 'All systems operating as expected',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="s"
-              color="subdued"
-              textAlign="center"
-              css={css`
-                max-width: 596px;
-              `}
-            >
-              <p>
-                {i18n.translate('xpack.searchHomepage.nightshift.description', {
-                  defaultMessage:
-                    "No big spikes or drops to flag \u2014 this is the steady pattern we'd expect based on the recent activity in the Overview below.",
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="m">
+                  <h2>
+                    {i18n.translate('xpack.searchHomepage.nightshift.title', {
+                      defaultMessage: 'All systems operating as expected',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  textAlign="center"
+                  css={css`
+                    max-width: 596px;
+                  `}
+                >
+                  <p>
+                    {i18n.translate('xpack.searchHomepage.nightshift.description', {
+                      defaultMessage:
+                        "No big spikes or drops to flag \u2014 this is the steady pattern we'd expect based on the recent activity in the Overview below.",
+                    })}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -414,69 +410,69 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
                   responsive={false}
                   gutterSize="s"
                 >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h6>
-                    {i18n.translate('xpack.searchHomepage.nightshift.overviewLabel', {
-                      defaultMessage: 'Overview',
-                    })}
-                  </h6>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  color="text"
-                  data-test-subj="nightshiftSearchGoToAgents"
-                  // Placeholder — wire to the Agents deep link in
-                  // Agent Builder when the destination is finalised.
-                  onClick={() => {}}
-                >
-                  {i18n.translate('xpack.searchHomepage.nightshift.goToAgents', {
-                    defaultMessage: 'Go to Agents',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h6>
+                        {i18n.translate('xpack.searchHomepage.nightshift.overviewLabel', {
+                          defaultMessage: 'Overview',
+                        })}
+                      </h6>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="text"
+                      data-test-subj="nightshiftSearchGoToAgents"
+                      // Placeholder — wire to the Agents deep link in
+                      // Agent Builder when the destination is finalised.
+                      onClick={() => {}}
+                    >
+                      {i18n.translate('xpack.searchHomepage.nightshift.goToAgents', {
+                        defaultMessage: 'Go to Agents',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-            <EuiFlexGrid columns={3} gutterSize="s">
-              {OVERVIEW_STATS.map((stat) => {
-                const showGlyph =
-                  stat.variant !== 'none' && (Boolean(stat.iconType) || stat.isSpinner);
-                const { background, iconColor } = getStatGlyphColors(stat.variant, euiTheme);
-                return (
-                  <EuiFlexItem key={stat.id}>
-                    <EuiPanel paddingSize="s" hasShadow={false} hasBorder color="plain">
-                      <EuiText size="xs">
-                        <strong>{stat.label}</strong>
-                      </EuiText>
-                      <EuiSpacer size="xs" />
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        {showGlyph && (
-                          <EuiFlexItem grow={false}>
-                            <span
-                              css={css`
-                                display: inline-flex;
-                                align-items: center;
-                                justify-content: center;
-                                width: ${STAT_GLYPH_BG_SIZE}px;
-                                height: ${STAT_GLYPH_BG_SIZE}px;
-                                border-radius: ${euiTheme.border.radius.small};
-                                background: ${background};
-                              `}
-                            >
-                              {stat.isSpinner ? (
-                                <ShellSpinner size={14} aria-label={`${stat.label} running`} />
-                              ) : (
-                                <EuiIcon
-                                  type={stat.iconType ?? 'empty'}
-                                  size="s"
-                                  color={iconColor}
-                                />
-                              )}
-                            </span>
-                          </EuiFlexItem>
-                        )}
+                <EuiFlexGrid columns={3} gutterSize="s">
+                  {OVERVIEW_STATS.map((stat) => {
+                    const showGlyph =
+                      stat.variant !== 'none' && (Boolean(stat.iconType) || stat.isSpinner);
+                    const { background, iconColor } = getStatGlyphColors(stat.variant, euiTheme);
+                    return (
+                      <EuiFlexItem key={stat.id}>
+                        <EuiPanel paddingSize="s" hasShadow={false} hasBorder color="plain">
+                          <EuiText size="xs">
+                            <strong>{stat.label}</strong>
+                          </EuiText>
+                          <EuiSpacer size="xs" />
+                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                            {showGlyph && (
+                              <EuiFlexItem grow={false}>
+                                <span
+                                  css={css`
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    width: ${STAT_GLYPH_BG_SIZE}px;
+                                    height: ${STAT_GLYPH_BG_SIZE}px;
+                                    border-radius: ${euiTheme.border.radius.small};
+                                    background: ${background};
+                                  `}
+                                >
+                                  {stat.isSpinner ? (
+                                    <ShellSpinner size={14} aria-label={`${stat.label} running`} />
+                                  ) : (
+                                    <EuiIcon
+                                      type={stat.iconType ?? 'empty'}
+                                      size="s"
+                                      color={iconColor}
+                                    />
+                                  )}
+                                </span>
+                              </EuiFlexItem>
+                            )}
                             <EuiFlexItem grow={false}>
                               <EuiText size="m">
                                 <strong>{stat.value}</strong>
@@ -490,54 +486,41 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
                 </EuiFlexGrid>
               </div>
 
+              {/*
+               * Footer section — VectorDB "Expiring API keys" summary.
+               * Mirrors the obs Nightshift Morning footer (accordion of
+               * actionable items + single AI CTA): two keys nearing
+               * expiry, with a primary button that hands off to the
+               * Elastic AI Agent to mint replacements and walk the user
+               * through rotating them.
+               */}
               <div
                 css={css`
                   padding: ${euiTheme.size.base} ${euiTheme.size.l};
                   background: ${euiTheme.colors.backgroundBasePlain};
                 `}
-                data-test-subj="nightshiftSearchHomepageConnectFooter"
+                data-test-subj="nightshiftSearchHomepageExpiringKeysFooter"
               >
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate('xpack.searchHomepage.nightshift.connectCopy', {
-                      defaultMessage:
-                        'You can connect Elasticsearch to your project by creating an API key.',
-                    })}
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <AiButton
-                      variant="base"
-                      size="s"
-                      iconType="productAgent"
-                      data-test-subj="nightshiftSearchHomepageOnboardWithAgent"
-                      isDisabled={isExiting}
-                      onClick={() => start(ONBOARD_WITH_AGENT_PROMPT)}
-                    >
-                      {i18n.translate('xpack.searchHomepage.nightshift.onboardWithAgent', {
-                        defaultMessage: 'Onboard with Agent',
-                      })}
-                    </AiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <AiButton
-                      variant="empty"
-                      size="s"
-                      data-test-subj="nightshiftSearchHomepageGoToManagement"
-                      isDisabled={isExiting}
-                      // Placeholder — wire to the API keys / Stack Management
-                      // deep link when the destination is finalised for the
-                      // Search Nightshift surface.
-                      onClick={() => {}}
-                    >
-                      {i18n.translate('xpack.searchHomepage.nightshift.goToManagement', {
-                        defaultMessage: 'Go to Management',
-                      })}
-                    </AiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <NightshiftExpiringKeysSummary
+                  isExiting={isExiting}
+                  onRotateKeys={() =>
+                    start(
+                      ROTATE_API_KEYS_PROMPT,
+                      /*
+                       * Footer "Create new API keys" CTA: hand off to
+                       * the agent with one attachment per expiring
+                       * key, mirroring the obs Nightshift "Morning"
+                       * pattern where every fixed event ships as its
+                       * own attachment on the new conversation.
+                       */
+                      EXPIRING_API_KEYS.map((apiKey) => ({
+                        id: `nightshift-api-key-${apiKey.id}`,
+                        type: NIGHTSHIFT_API_KEY_TYPE,
+                        data: apiKey,
+                      }))
+                    )
+                  }
+                />
               </div>
             </EuiPanel>
           </EuiFlexItem>
@@ -545,7 +528,7 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
       </div>
       <div css={bottomBarStyles}>
         <NightshiftSearchHomepageInput
-          onSubmit={(prompt) => start(prompt)}
+          onSubmit={(prompt, attachments) => start(prompt, attachments)}
           isDisabled={isExiting}
         />
       </div>

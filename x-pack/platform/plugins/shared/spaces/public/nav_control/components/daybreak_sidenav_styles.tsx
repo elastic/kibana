@@ -12,6 +12,7 @@ import {
   getDaybreakNavIconSvg,
   type DaybreakNavIconSvgOptions,
 } from '../../../common/daybreak_icon';
+import { DAYBREAK_SIDENAV_ICON_ANIMATION_CSS } from '../../../common/daybreak_sidenav_icon_animation';
 
 /* ----------------------------------------------------------------------- *
  * Daybreak side-nav home: brand colours + inline sun SVG.
@@ -38,6 +39,7 @@ const ICON_HOST_CLASS = 'daybreak-nav-icon-host';
 const DAYBREAK_STYLED_ATTR = 'data-daybreak-styled';
 const DAYBREAK_HOVER_ATTR = 'data-daybreak-nav-hover';
 const DAYBREAK_LISTENERS_ATTR = 'data-daybreak-nav-listeners';
+const ANIMATION_STYLE_ID = 'daybreak-sidenav-icon-animation';
 
 interface DaybreakStyles {
   unselectedBg: string;
@@ -171,6 +173,22 @@ export const DaybreakSidenavGlobalStyles: React.FC = () => {
   const isApplyingRef = useRef(false);
 
   useEffect(() => {
+    /*
+     * Inject the hover-only animation CSS once per app boot. The
+     * `<style>` tag is keyed by `ANIMATION_STYLE_ID` so the second
+     * mount of this component (e.g. React-strict-mode double render)
+     * doesn't duplicate the rules.
+     */
+    if (!document.getElementById(ANIMATION_STYLE_ID)) {
+      const style = document.createElement('style');
+      style.id = ANIMATION_STYLE_ID;
+      style.textContent = `
+        .${ICON_HOST_CLASS} .daybreak-nav-icon { display: block; }
+        ${DAYBREAK_SIDENAV_ICON_ANIMATION_CSS}
+      `;
+      document.head.appendChild(style);
+    }
+
     const runApply = () => {
       if (isApplyingRef.current) {
         return;
@@ -222,6 +240,7 @@ export const DaybreakSidenavGlobalStyles: React.FC = () => {
       observer.disconnect();
       document.body.removeEventListener('pointerover', handlePointerOver);
       document.body.removeEventListener('pointerout', handlePointerOut);
+      document.getElementById(ANIMATION_STYLE_ID)?.remove();
       restoreDefaults();
     };
   }, [styles]);

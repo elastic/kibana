@@ -5,137 +5,98 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { DaybreakCritical } from './daybreak_critical';
+import { DaybreakHealthy } from './daybreak_healthy';
+import { DaybreakInput } from './daybreak_input';
+import { daybreakStatus$, type DaybreakStatus } from './daybreak_state';
+import { useStartDaybreakConversation } from './use_start_daybreak_conversation';
+
+/**
+ * Common props every status page receives. The page owns one
+ * `useStartDaybreakConversation` instance and shares it with each
+ * mounted status page so any CTA — the bottom chat input, the
+ * Critical footer "Investigate" button, future per-row actions —
+ * triggers the same page-level fade + Agent Builder hand-off.
+ */
+interface DaybreakStatusPageProps {
+  onStartConversation: (prompt: string) => void;
+  isExiting: boolean;
+}
 
 /**
  * Daybreak landing page for the Security solution.
  *
- * Mounted at `/app/security/daybreak`. Renders the "Healthy" state of
- * the autonomous Security mode — same visual language as the
- * Nightshift / VectorDB surfaces (centered header avatar + title +
- * description, single Overview panel with a stat grid).
+ * Mounted at `/app/security/daybreak`. Subscribes to the global
+ * `daybreakStatus$` BehaviorSubject (driven by the chrome dropdown
+ * registered in the security plugin's `start` lifecycle) and
+ * delegates to the matching content component:
  *
- * Intentionally kept lightweight: the standard Security `HomePage`
- * pulls in heavy initialization machinery (sourcerer, drag-drop
- * context, data view manager, etc.) which is unnecessary for a
- * read-only status page. We render outside `HomePage` so first-paint
- * is fast.
+ *   healthy  → DaybreakHealthy   ("steady" overview + stat grid)
+ *   critical → DaybreakCritical  (impact summary + risk + queue)
+ *
+ * Layout mirrors obs Nightshift / Search VectorDB:
+ *  - Column flex container at least one viewport tall (uses Kibana's
+ *    `--kbn-application--content-height` custom property when present)
+ *    so the input can sticky-pin to the bottom even on short content.
+ *  - Top section is `flex: 1` and renders the active status page.
+ *  - Bottom section is `position: sticky; bottom: 0` so the agent
+ *    chat input bar stays visible when the page content scrolls.
+ *
+ * Submitting the input — from any state — flips `isExiting`, fades
+ * the page out, then `navigateToApp('agent_builder', …)` opens a new
+ * conversation with the prompt pre-staged. Same behaviour as the obs
+ * Nightshift and Search VectorDB surfaces.
+ *
+ * Direct subscription to the status observable (not `useObservable`)
+ * is deliberate: the chrome dropdown lives in a separate React root
+ * and we want both ends to share the exact same BehaviorSubject
+ * instance and re-render reliably.
  */
-
-type StatVariant = 'success' | 'warning' | 'subdued' | 'none';
-
-interface OverviewStat {
-  id: string;
-  label: string;
-  iconType?: IconType;
-  value: string;
-  variant: StatVariant;
-}
-
-const OVERVIEW_STATS: OverviewStat[] = [
-  {
-    id: 'openCases',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.openCases', {
-      defaultMessage: 'Open cases',
-    }),
-    iconType: 'casesApp',
-    value: '0',
-    variant: 'success',
-  },
-  {
-    id: 'rulesRunning',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.rulesRunning', {
-      defaultMessage: 'Rules running',
-    }),
-    iconType: 'gear',
-    value: '42',
-    variant: 'subdued',
-  },
-  {
-    id: 'detections',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.detections', {
-      defaultMessage: 'Detections (24h)',
-    }),
-    iconType: 'alert',
-    value: '8',
-    variant: 'subdued',
-  },
-  {
-    id: 'criticalAlerts',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.criticalAlerts', {
-      defaultMessage: 'Critical alerts',
-    }),
-    iconType: 'warningFilled',
-    value: '0',
-    variant: 'success',
-  },
-  {
-    id: 'endpoints',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.endpoints', {
-      defaultMessage: 'Endpoints',
-    }),
-    iconType: 'desktop',
-    value: '128',
-    variant: 'subdued',
-  },
-  {
-    id: 'integrations',
-    label: i18n.translate('xpack.securitySolution.daybreak.stat.integrations', {
-      defaultMessage: 'Integrations',
-    }),
-    iconType: 'package',
-    value: '14',
-    variant: 'subdued',
-  },
-];
-
-const STAT_GLYPH_BG_SIZE = 24;
-
-const getStatGlyphColors = (
-  variant: StatVariant,
-  theme: ReturnType<typeof useEuiTheme>['euiTheme']
-): { background: string; iconColor: string } => {
-  switch (variant) {
-    case 'success':
-      return {
-        background: theme.colors.backgroundBaseSuccess,
-        iconColor: theme.colors.textSuccess,
-      };
-    case 'warning':
-      return {
-        background: theme.colors.backgroundBaseWarning,
-        iconColor: theme.colors.textWarning,
-      };
-    case 'subdued':
-    default:
-      return {
-        background: theme.colors.borderBaseSubdued,
-        iconColor: theme.colors.textSubdued,
-      };
-  }
+const STATUS_PAGES: Record<DaybreakStatus, React.FC<DaybreakStatusPageProps>> = {
+  healthy: DaybreakHealthy,
+  critical: DaybreakCritical,
 };
 
 export const DaybreakPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const [status, setStatus] = useState<DaybreakStatus>(() => daybreakStatus$.getValue());
+  useEffect(() => {
+    const subscription = daybreakStatus$.subscribe(setStatus);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const { isExiting, start, exitDurationMs } = useStartDaybreakConversation();
+
+  /*
+   * Bottom-anchored input bar. The opaque page-color background
+   * prevents scrolling content from bleeding through, and the
+   * subtle top border separates the bar from the content scrolling
+   * beneath it. Negative horizontal margin + matching padding
+   * extend the background to the full content width.
+   */
+  const bottomBarStyles = useMemo(
+    () => css`
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      width: calc(100% + 32px);
+      margin: 0 -16px;
+      padding: 8px 16px 16px;
+      background: ${euiTheme.colors.backgroundBasePlain};
+    `,
+    [euiTheme]
+  );
+
+  const StatusPage = STATUS_PAGES[status];
 
   return (
     <div
       data-test-subj="daybreakPage"
+      data-daybreak-status={status}
       css={css`
         display: flex;
         flex-direction: column;
@@ -151,168 +112,45 @@ export const DaybreakPage: React.FC = () => {
           flex: 1;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
+          /*
+           * Top-align so the Critical view (taller — header +
+           * impact overview + risk + queue) doesn't push the
+           * header off-screen on shorter viewports. The Healthy
+           * view still looks naturally placed because its content
+           * is short.
+           */
+          justify-content: flex-start;
           width: 100%;
           padding-bottom: 16px;
+          /*
+           * Fade applied to the status page on hand-off. Avoids
+           * 'transform: translateY(0)' in the rest state so the
+           * EuiFlyout (type push) and other fixed-positioned
+           * descendants aren't trapped by a new containing block.
+           */
+          opacity: ${isExiting ? 0 : 1};
+          transform: ${isExiting ? 'translateY(-6px)' : 'none'};
+          transition: opacity ${exitDurationMs}ms ease-out, transform ${exitDurationMs}ms ease-out;
+          pointer-events: ${isExiting ? 'none' : 'auto'};
+          @media (prefers-reduced-motion: reduce) {
+            transition: opacity ${exitDurationMs}ms linear;
+            transform: none;
+          }
         `}
       >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          gutterSize="l"
-          responsive={false}
-          css={css`
-            width: 100%;
-            max-width: 753px;
-            margin: 0 auto;
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {/*
-                 * Health avatar — danger-tinted because the Daybreak
-                 * "Healthy" status today is actually flagging an active
-                 * attack. We keep the sun icon (Daybreak brand) but
-                 * paint the wrapper red so the page reads as "something
-                 * needs your attention" at a glance.
-                 */}
-                <div
-                  aria-hidden
-                  css={css`
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 20px;
-                    background: ${euiTheme.colors.backgroundBaseDanger};
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  `}
-                >
-                  <EuiIcon type="sun" size="l" color={euiTheme.colors.textDanger} />
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h2>
-                    {i18n.translate('xpack.securitySolution.daybreak.title', {
-                      defaultMessage:
-                        'You have 1 attack and 2 critical alerts that require your action',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  color="subdued"
-                  textAlign="center"
-                  css={css`
-                    max-width: 596px;
-                  `}
-                >
-                  <p>
-                    {i18n.translate('xpack.securitySolution.daybreak.description', {
-                      defaultMessage:
-                        'Top priority: An active attack is targeting your critical infrastructure.',
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              width: 100%;
-            `}
-          >
-            <EuiPanel
-              paddingSize="none"
-              hasShadow={false}
-              hasBorder
-              color="plain"
-              css={css`
-                overflow: hidden;
-                border-radius: 12px;
-                border-color: ${euiTheme.colors.borderBaseSubdued};
-              `}
-            >
-              <div
-                css={css`
-                  background: ${euiTheme.colors.backgroundBaseSubdued};
-                  padding: ${euiTheme.size.l};
-                `}
-              >
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="spaceBetween"
-                  responsive={false}
-                  gutterSize="s"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h6>
-                        {i18n.translate('xpack.securitySolution.daybreak.overviewLabel', {
-                          defaultMessage: 'Overview',
-                        })}
-                      </h6>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="sun" color="subdued" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiFlexGrid columns={3} gutterSize="s">
-                  {OVERVIEW_STATS.map((stat) => {
-                    const showGlyph = stat.variant !== 'none' && Boolean(stat.iconType);
-                    const { background, iconColor } = getStatGlyphColors(stat.variant, euiTheme);
-                    return (
-                      <EuiFlexItem key={stat.id}>
-                        <EuiPanel paddingSize="s" hasShadow={false} hasBorder color="plain">
-                          <EuiText size="xs">
-                            <strong>{stat.label}</strong>
-                          </EuiText>
-                          <EuiSpacer size="xs" />
-                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                            {showGlyph && (
-                              <EuiFlexItem grow={false}>
-                                <span
-                                  css={css`
-                                    display: inline-flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    width: ${STAT_GLYPH_BG_SIZE}px;
-                                    height: ${STAT_GLYPH_BG_SIZE}px;
-                                    border-radius: ${euiTheme.border.radius.small};
-                                    background: ${background};
-                                  `}
-                                >
-                                  <EuiIcon
-                                    type={stat.iconType ?? 'empty'}
-                                    size="s"
-                                    color={iconColor}
-                                  />
-                                </span>
-                              </EuiFlexItem>
-                            )}
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="m">
-                                <strong>{stat.value}</strong>
-                              </EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                      </EuiFlexItem>
-                    );
-                  })}
-                </EuiFlexGrid>
-              </div>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {/*
+         * `key={status}` forces React to fully unmount the previous
+         * status page and mount the new one whenever the chrome
+         * dropdown flips. Same pattern obs Nightshift uses — keeps
+         * each status's internal state isolated and any entry
+         * animations play cleanly on switch.
+         */}
+        <div key={status} css={css`width: 100%`}>
+          <StatusPage onStartConversation={start} isExiting={isExiting} />
+        </div>
+      </div>
+      <div css={bottomBarStyles}>
+        <DaybreakInput onSubmit={(prompt) => start(prompt)} isDisabled={isExiting} />
       </div>
     </div>
   );

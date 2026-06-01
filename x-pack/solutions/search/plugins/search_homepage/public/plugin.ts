@@ -18,6 +18,7 @@ import { PLUGIN_ID } from '../common';
 
 import { docLinks } from '../common/doc_links';
 import { SearchHomepage } from './embeddable';
+import { NIGHTSHIFT_API_KEY_TYPE } from './components/search_homepage/agent_brief/nightshift_api_key_constants';
 import { initQueryClient } from './services/query_client';
 import type {
   SearchHomepageAppInfo,
@@ -34,7 +35,13 @@ const appInfo: SearchHomepageAppInfo = {
 };
 
 export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
+  implements
+    Plugin<
+      SearchHomepagePluginSetup,
+      SearchHomepagePluginStart,
+      {},
+      SearchHomepageAppPluginStartDependencies
+    >
 {
   private readonly kibanaVersion: string;
 
@@ -76,7 +83,35 @@ export class SearchHomepagePlugin
     return result;
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, pluginsStart: SearchHomepageAppPluginStartDependencies) {
+    /*
+     * Register the VectorDB "Expiring API key" attachment UI
+     * definition against the Agent Builder attachments service. When
+     * the user pins one or more keys via the per-row paperclip on the
+     * homepage, the input forwards the payloads to Agent Builder
+     * through `initialAttachments`, and this registration is what
+     * tells Agent Builder how to render the resulting pill + canvas.
+     *
+     * Lazy-loaded so the EUI-heavy attachment renderer doesn't land
+     * in the homepage's main page-load bundle.
+     */
+    if (pluginsStart.agentBuilder) {
+      const { attachments } = pluginsStart.agentBuilder;
+      void import('./components/search_homepage/agent_brief/nightshift_api_key_definition').then(
+        ({ createNightshiftApiKeyDefinition }) => {
+          // `addAttachmentType` throws on duplicate registration; use
+          // the existence probe `getAttachmentUiDefinition` since the
+          // public contract doesn't expose a dedicated `has` check.
+          if (!attachments.getAttachmentUiDefinition(NIGHTSHIFT_API_KEY_TYPE)) {
+            attachments.addAttachmentType(
+              NIGHTSHIFT_API_KEY_TYPE,
+              createNightshiftApiKeyDefinition()
+            );
+          }
+        }
+      );
+    }
+
     return {
       app: appInfo,
       SearchHomepage,

@@ -68,7 +68,17 @@ export const NightshiftFixedEventsSummary: React.FC<NightshiftFixedEventsSummary
         <div
           data-test-subj="nightshiftFixedEventsList"
           css={css`
-            margin: 0 -${euiTheme.size.l};
+            /*
+             * The list sits inside the wrapping container's content
+             * box so it never overflows past the parent panel's
+             * \`overflow: hidden\` clipping boundary, regardless of
+             * how wide the per-row badge or action cluster gets.
+             * (Previously we escaped via \`margin: 0 -size.l\`, which
+             * looks fine at the design width but clips badges/icons
+             * on narrower layouts.)
+             */
+            width: 100%;
+            box-sizing: border-box;
             border-top: ${euiTheme.border.thin};
           `}
         >

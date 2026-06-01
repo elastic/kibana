@@ -62,10 +62,6 @@ const DAYBREAK_ICON_RAYS_PATH = [
 
 export const DAYBREAK_ICON_SUN_PATH = `${DAYBREAK_ICON_SUN_BODY_PATH} ${DAYBREAK_ICON_RAYS_PATH}`;
 
-/** Plus-shaped sparkle (upper right of the sun). */
-export const DAYBREAK_ICON_STAR_PATH =
-  'M14.9996 4C14.9996 4.13261 14.947 4.25979 14.8532 4.35355C14.7594 4.44732 14.6322 4.5 14.4996 4.5H13.9996V5C13.9996 5.13261 13.947 5.25979 13.8532 5.35355C13.7594 5.44732 13.6322 5.5 13.4996 5.5C13.367 5.5 13.2399 5.44732 13.1461 5.35355C13.0523 5.25979 12.9996 5.13261 12.9996 5V4.5H12.4996C12.367 4.5 12.2399 4.44732 12.1461 4.35355C12.0523 4.25979 11.9996 4.13261 11.9996 4C11.9996 3.86739 12.0523 3.74021 12.1461 3.64645C12.2399 3.55268 12.367 3.5 12.4996 3.5H12.9996V3C12.9996 2.86739 13.0523 2.74021 13.1461 2.64645C13.2399 2.55268 13.367 2.5 13.4996 2.5C13.6322 2.5 13.7594 2.55268 13.8532 2.64645C13.947 2.74021 13.9996 2.86739 13.9996 3V3.5H14.4996C14.6322 3.5 14.7594 3.55268 14.8532 3.64645C14.947 3.74021 14.9996 3.86739 14.9996 4Z';
-
 export interface DaybreakNavIconSvgOptions {
   size?: number;
   startColor?: string;
@@ -98,8 +94,13 @@ export function getDaybreakNavIconSvg(options: DaybreakNavIconSvgOptions = {}): 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${DAYBREAK_ICON_VIEWBOX}" class="daybreak-nav-icon" aria-hidden="true">`,
     gradientDef,
-    `<path d="${DAYBREAK_ICON_SUN_PATH}" ${fillAttr}/>`,
-    `<path d="${DAYBREAK_ICON_STAR_PATH}" ${fillAttr}/>`,
+    /*
+     * Sun body + rays — wrapped in a single <g> so the hover
+     * animation (rotate + subtle breath scale) can target one
+     * element instead of trying to keep two paths in sync. The
+     * class is referenced by DAYBREAK_SIDENAV_ICON_ANIMATION_CSS.
+     */
+    `<g class="daybreak-nav-icon__sun"><path d="${DAYBREAK_ICON_SUN_PATH}" ${fillAttr}/></g>`,
     `</svg>`,
   ].join('');
 }
