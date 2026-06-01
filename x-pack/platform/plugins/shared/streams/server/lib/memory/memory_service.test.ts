@@ -30,7 +30,11 @@ const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
 };
 
 const matchesFilter = (doc: MemoryDocument, filter: Record<string, unknown>): boolean =>
-  Object.entries(filter).every(([field, value]) => doc[field as keyof MemoryDocument] === value);
+  Object.entries(filter).every(([field, value]) => {
+    const docValue = doc[field as keyof MemoryDocument];
+    // Array fields (categories/tags/references) match if the term is one of their values.
+    return Array.isArray(docValue) ? docValue.some((item) => item === value) : docValue === value;
+  });
 
 const filterByQuery = (
   docs: MemoryDocument[],
@@ -85,11 +89,19 @@ const createInMemoryEsClient = () => {
   const memoryDocs: MemoryDocument[] = [];
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-  esClient.index.mockImplementation(async ({ index, document }) => {
-    if (index === MEMORIES_DATA_STREAM) {
-      memoryDocs.push(document as MemoryDocument);
+  // Memory page writes go through DataStreamClient.create, which issues a bulk request.
+  esClient.bulk.mockImplementation(async (params) => {
+    const request = params as { index?: string; operations?: unknown[] };
+    const operations = request.operations ?? [];
+    const items: unknown[] = [];
+    // Operations alternate [actionMetadata, document]; documents sit at odd indices.
+    for (let i = 1; i < operations.length; i += 2) {
+      if (request.index === MEMORIES_DATA_STREAM) {
+        memoryDocs.push(operations[i] as MemoryDocument);
+      }
+      items.push({ create: { status: 201, _id: 'doc', _index: String(request.index) } });
     }
-    return { result: 'created', _id: 'doc', _index: String(index), _shards: {} } as never;
+    return { errors: false, took: 0, items } as never;
   });
 
   esClient.search.mockImplementation(async (params) => {
@@ -347,5 +359,91 @@ describe('MemoryServiceImpl', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({ id: live.id, name: 'live-page' });
+  });
+
+  it('search over-fetches so a soft-deleted top hit does not crowd out a live result', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('live-uuid')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('deleted-uuid')
+      .mockReturnValueOnce('history-uuid-2')
+      .mockReturnValueOnce('history-uuid-3');
+    const { service } = createService();
+
+    // 'a-deleted' sorts ahead of 'b-live'; with size: 1 and no over-fetch the single collapsed
+    // slot would be the tombstone and the live page would be dropped from the results.
+    await service.create({ name: 'b-live', title: 'Live', content: 'searchable', user });
+    const doomed = await service.create({
+      name: 'a-deleted',
+      title: 'Deleted',
+      content: 'searchable',
+      user,
+    });
+    await service.delete({ id: doomed.id, user });
+
+    await expect(service.search({ query: 'searchable', size: 1 })).resolves.toEqual([
+      expect.objectContaining({ name: 'b-live' }),
+    ]);
+  });
+
+  it('listByCategory does not return a page whose latest version dropped the category', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('entry-uuid-1')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('history-uuid-2');
+    const { service } = createService();
+
+    const created = await service.create({
+      name: 'categorized',
+      title: 'Categorized',
+      content: 'content',
+      categories: ['services'],
+      user,
+    });
+
+    // Page is initially listed under the category.
+    await expect(service.listByCategory({ category: 'services' })).resolves.toEqual([
+      expect.objectContaining({ id: created.id, version: 1 }),
+    ]);
+
+    // Latest version drops the category — an older (v1) document still carries it in the stream.
+    await service.update({ id: created.id, categories: [], user });
+
+    // Two-phase read must resolve the latest version and exclude the stale match.
+    await expect(service.listByCategory({ category: 'services' })).resolves.toEqual([]);
+  });
+
+  it('getBacklinks does not return a page whose latest version dropped the reference', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('target-uuid')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('source-uuid')
+      .mockReturnValueOnce('history-uuid-2')
+      .mockReturnValueOnce('history-uuid-3');
+    const { service } = createService();
+
+    const target = await service.create({
+      name: 'target',
+      title: 'Target',
+      content: 'target content',
+      user,
+    });
+
+    const source = await service.create({
+      name: 'source',
+      title: 'Source',
+      content: 'links to target',
+      references: [target.id],
+      user,
+    });
+
+    await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([
+      expect.objectContaining({ id: source.id, version: 1 }),
+    ]);
+
+    // Latest version of source removes the reference; v1 still references target in the stream.
+    await service.update({ id: source.id, references: [], user });
+
+    await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([]);
   });
 });
