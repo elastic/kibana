@@ -110,6 +110,8 @@ const createInMemoryEsClient = () => {
       query?: Record<string, unknown>;
       collapse?: { field?: string };
       size?: number;
+      _source?: boolean;
+      fields?: string[];
     };
 
     if (request.index !== MEMORIES_DATA_STREAM || !request.query) {
@@ -126,7 +128,20 @@ const createInMemoryEsClient = () => {
 
     return {
       hits: {
-        hits: winners.map((source) => ({ _source: source })),
+        hits: winners.map((source) => {
+          const hit: { _source?: MemoryDocument; fields?: Record<string, unknown[]> } = {};
+          if (request._source !== false) {
+            hit._source = source;
+          }
+          if (request.fields?.length) {
+            hit.fields = {};
+            for (const field of request.fields) {
+              const value = source[field as keyof MemoryDocument];
+              hit.fields[field] = Array.isArray(value) ? value : [value];
+            }
+          }
+          return hit;
+        }),
         total: { value: winners.length },
       },
     } as never;

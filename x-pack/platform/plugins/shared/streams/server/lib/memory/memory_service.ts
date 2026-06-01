@@ -195,6 +195,31 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   /**
+   * Phase one of a mutable-field read: collect the distinct page ids of documents matching `query`,
+   * without fetching `_source` (only the `id` field). The matched versions may be stale, so callers
+   * must re-resolve the current latest via {@link _resolveLatestByIds}.
+   */
+  private async _collectCandidateIds(query: QueryDslQueryContainer): Promise<string[]> {
+    try {
+      const response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        size: MAX_PAGES,
+        query,
+        collapse: { field: 'id' },
+        _source: false,
+        fields: ['id'],
+      });
+      return response.hits.hits
+        .map((hit) => hit.fields?.id?.[0])
+        .filter((id): id is string => typeof id === 'string');
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
+  }
+
+  /**
    * Resolve the current latest version of each given page id (filtering on `id` is safe — it is
    * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
    * fields, so callers see each page's true latest state rather than the version that matched.
@@ -437,12 +462,10 @@ export class MemoryServiceImpl implements MemoryService {
     // `references` is mutable, so a one-shot collapsed search can surface a stale version that
     // referenced `id`. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
     // versions and keep only those that STILL reference `id`.
-    const candidates = await this._searchLatest({
-      query: { bool: { filter: [{ term: { references: id } }] } },
-      collapseField: 'id',
-      size: MAX_PAGES,
+    const candidateIds = await this._collectCandidateIds({
+      bool: { filter: [{ term: { references: id } }] },
     });
-    const latest = await this._resolveLatestByIds(candidates.map((hit) => hit._source.id));
+    const latest = await this._resolveLatestByIds(candidateIds);
     return latest.filter((entry) => entry.references.includes(id));
   }
 
@@ -545,16 +568,22 @@ export class MemoryServiceImpl implements MemoryService {
       });
 
       const hits = response.hits.hits;
-      if (hits.length >= MAX_PAGES) {
-        this.logger.warn(
-          `Memory listAll: reached the ${MAX_PAGES}-page limit, some entries may be missing`
-        );
-      }
-      return hits
+      const entries = hits
         .map((hit) => hit._source)
         .filter(
           (source): source is MemoryEntry => source !== undefined && source.is_deleted !== true
         );
+
+      // We only hit a wall if the search filled the entire window — then distinct pages beyond
+      // `MAX_PAGES` were silently dropped. Tombstoned pages count toward the window too, so report
+      // both the fetched and live counts to make the truncation actionable.
+      if (hits.length === MAX_PAGES) {
+        this.logger.warn(
+          `Memory listAll: hit the ${MAX_PAGES}-page fetch limit (${entries.length} live); pages beyond the limit are not returned`
+        );
+      }
+
+      return entries;
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
@@ -565,12 +594,10 @@ export class MemoryServiceImpl implements MemoryService {
     // `categories` is mutable, so a one-shot collapsed search can surface a stale version that had
     // the category. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
     // versions and keep only those that STILL belong to `category`.
-    const candidates = await this._searchLatest({
-      query: { bool: { filter: [{ term: { categories: category } }] } },
-      collapseField: 'id',
-      size: MAX_PAGES,
+    const candidateIds = await this._collectCandidateIds({
+      bool: { filter: [{ term: { categories: category } }] },
     });
-    const latest = await this._resolveLatestByIds(candidates.map((hit) => hit._source.id));
+    const latest = await this._resolveLatestByIds(candidateIds);
     return latest.filter((entry) => entry.categories.includes(category));
   }
 
