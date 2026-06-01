@@ -239,7 +239,7 @@ paths:
                   - results
                 properties:
                   ingest_pipeline:
-                    description: The ingest pipeline as a string up to 10MiB.
+                    description: The ingest pipeline as a JSON string up to 10MiB.
                     $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyIngestPipeline"
                   results:
                     description: Results array as JSON objects.
