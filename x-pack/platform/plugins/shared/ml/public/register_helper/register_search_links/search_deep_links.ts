@@ -28,6 +28,7 @@ function createDeepLinks(
           defaultMessage: 'Overview',
         }),
         path: `/${ML_PAGES.OVERVIEW}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -46,6 +47,7 @@ function createDeepLinks(
               defaultMessage: 'Anomaly explorer',
             }),
             path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'singleMetricViewer',
@@ -53,6 +55,7 @@ function createDeepLinks(
               defaultMessage: 'Single metric viewer',
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'suppliedConfigurations',
@@ -82,6 +85,7 @@ function createDeepLinks(
               defaultMessage: 'Results explorer',
             }),
             path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'analyticsMap',
@@ -89,6 +93,7 @@ function createDeepLinks(
               defaultMessage: 'Analytics map',
             }),
             path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
         ],
       };
@@ -139,6 +144,7 @@ function createDeepLinks(
               defaultMessage: 'Log rate analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'logRateAnalysisPage',
@@ -154,6 +160,7 @@ function createDeepLinks(
               defaultMessage: 'Log pattern analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'logPatternAnalysisPage',
@@ -169,6 +176,7 @@ function createDeepLinks(
               defaultMessage: 'Change point detection',
             }),
             path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'changePointDetectionsPage',
@@ -202,6 +210,7 @@ function createDeepLinks(
           defaultMessage: 'Data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -213,6 +222,7 @@ function createDeepLinks(
         }),
         keywords: ['CSV', 'JSON'],
         path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -223,6 +233,7 @@ function createDeepLinks(
           defaultMessage: 'Index data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -244,6 +255,7 @@ function createDeepLinks(
           defaultMessage: 'Data drift',
         }),
         path: `/${ML_PAGES.DATA_DRIFT}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
     getDataDriftPageDeepLink: (): AppDeepLink<LinkId> => {
