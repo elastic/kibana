@@ -453,27 +453,7 @@ paths:
       summary: Generate a memory dump from the host machine
       tags:
         - Security Endpoint Management API
-  /api/endpoint/action/running_procs:
-    post:
-      description: Get a list of all processes running on an endpoint.
-      operationId: EndpointGetProcessesAction
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetProcessesRouteResponse'
-          description: OK
-      summary: Get running processes
-      tags:
-        - Security Endpoint Management API
-  /api/endpoint/action/runscript:
+  /api/endpoint/action/run_script:
     post:
       description: Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
@@ -522,6 +502,26 @@ paths:
                 $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Action request was successfully created
       summary: Run a script
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/running_procs:
+    post:
+      description: Get a list of all processes running on an endpoint.
+      operationId: EndpointGetProcessesAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProcessesRouteResponse'
+          description: OK
+      summary: Get running processes
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/scan:
