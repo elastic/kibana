@@ -9,8 +9,8 @@ import type { Subscription } from 'rxjs';
 import { pairwise } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { ChatEventType, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
 import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 import { RuleCreationEventTypes } from '../../common/lib/telemetry/types';
 import type {
@@ -29,19 +29,6 @@ import { transformInput, transformOutput } from './transforms';
 import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
-
-const AGENT_ACTIVITY_EVENT_TYPES = new Set<string>([
-  ChatEventType.reasoning,
-  ChatEventType.messageChunk,
-  ChatEventType.messageComplete,
-  ChatEventType.toolCall,
-  ChatEventType.browserToolCall,
-  ChatEventType.toolProgress,
-  ChatEventType.toolResult,
-  ChatEventType.toolUi,
-  ChatEventType.thinkingComplete,
-  ChatEventType.promptRequest,
-]);
 
 const READ_ONLY_FIELDS: Array<keyof RuleResponse> = [
   'revision',
@@ -67,16 +54,44 @@ const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
   return rest as RuleUpdateProps;
 };
 
+/**
+ * Persists `ruleId` and `intent:'update'` into the attachment via shallow-merge PUT so they
+ * survive subsequent agent edits and the button label never flips. Non-fatal — `origin` is a
+ * legacy fallback set in parallel.
+ */
+const linkRuleIdToAttachment = (
+  http: HttpSetup,
+  conversationId: string,
+  attachmentId: string,
+  ruleId: string
+): void => {
+  http
+    .put(
+      `/api/agent_builder/conversations/${encodeURIComponent(
+        conversationId
+      )}/attachments/${encodeURIComponent(attachmentId)}`,
+      {
+        version: '2023-10-31',
+        body: JSON.stringify({ data: { ruleId, intent: 'update' } }),
+      }
+    )
+    .catch(() => {
+      // Non-fatal: origin fallback is set in parallel by updateAttachmentOrigin.
+    });
+};
+
 export const createAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
   telemetry,
+  http,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
   telemetry: TelemetryServiceStart;
+  http: HttpSetup;
 }): Subscription => {
   let activeConversationId: string | undefined;
   const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
@@ -101,8 +116,6 @@ export const createAiRuleCreationHandler = ({
 
     try {
       let saved: RuleResponse;
-      // The button handler always injects the resolved id before calling requestSaveRule,
-      // so rule.id is the only source needed here.
       const savedRuleId = rule.id;
       const isUpdate = !!savedRuleId;
       if (savedRuleId) {
@@ -137,17 +150,18 @@ export const createAiRuleCreationHandler = ({
       }
 
       aiRuleCreation.setLastSavedRuleId(saved.id);
-      aiRuleCreation.clearDirty();
       aiRuleCreation.clearSaving();
 
       const convId = activeConversationId;
       if (convId) {
-        agentBuilder
-          ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)
-          .catch(() => {
-            // Non-fatal: attachment.origin will be missing until the next reload,
-            // but lastSavedRuleId provides the id in-session.
-          });
+        linkRuleIdToAttachment(http, convId, SECURITY_RULE_ATTACHMENT_ID, saved.id);
+        if (!isUpdate) {
+          agentBuilder
+            ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)
+            .catch(() => {
+              // Non-fatal.
+            });
+        }
       }
 
       securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
@@ -170,9 +184,11 @@ export const createAiRuleCreationHandler = ({
       agentBuilder?.addAttachment({
         id: SECURITY_RULE_ATTACHMENT_ID,
         type: SecurityAgentBuilderAttachments.rule,
-        // description populates the chat's "Attachment added: …" label.
         description: saved.name,
-        data: { text: JSON.stringify(saved), attachmentLabel: saved.name },
+        data: {
+          text: JSON.stringify(saved),
+          attachmentLabel: saved.name,
+        },
       });
     } catch (err) {
       aiRuleCreation.clearSaving();
@@ -191,19 +207,6 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
-  // Mark dirty when agent modifies the rule attachment after a save (roundComplete only carries changed attachments).
-  const dirtySub = agentBuilder?.events.chat$.subscribe((event) => {
-    if (!isRoundCompleteEvent(event)) return;
-    const ruleAttachment = event.data.attachments?.find(
-      (a) => a.type === SecurityAgentBuilderAttachments.rule
-    );
-    // lastSavedRuleId is seeded from existingRuleId on edit pages, so this covers both flows.
-    const hasKnownRule = aiRuleCreation.getLastSavedRuleId() !== null;
-    if (hasKnownRule && ruleAttachment) {
-      aiRuleCreation.markDirty();
-    }
-  });
-
   // Reset lastSavedRuleId on conversation switch so each new conversation starts fresh.
   // pairwise() prevents the initial BehaviorSubject emission from triggering a spurious reset.
   const conversationSub = agentBuilder?.events.ui.activeConversation$
@@ -212,22 +215,10 @@ export const createAiRuleCreationHandler = ({
       // != guards against both null and undefined on BehaviorSubject's initial emission.
       if (prev != null && curr != null && prev?.id !== curr?.id) {
         aiRuleCreation.setLastSavedRuleId(null);
-        aiRuleCreation.clearDirty();
       }
     });
 
-  // Track agent mid-round globally so all surfaces (form pages and standalone chat) gate buttons consistently.
-  const agentBusySub = agentBuilder?.events.chat$.subscribe((event) => {
-    if (isRoundCompleteEvent(event)) {
-      aiRuleCreation.setAgentBusy(false);
-    } else if (AGENT_ACTIVITY_EVENT_TYPES.has(event.type)) {
-      aiRuleCreation.setAgentBusy(true);
-    }
-  });
-
   saveSub.add(conversationIdSub);
-  saveSub.add(dirtySub);
   saveSub.add(conversationSub);
-  saveSub.add(agentBusySub);
   return saveSub;
 };

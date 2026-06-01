@@ -22,21 +22,16 @@ export class AiRuleCreationService {
   // from the component after save. On reload, attachment.origin is persisted and available
   // on mount, making this unnecessary.
   private readonly lastSavedRuleIdSubject = new BehaviorSubject<string | null>(null);
-  private readonly dirtySubject = new BehaviorSubject<boolean>(false);
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
-  // True while agent is mid-round — cards hide action buttons to avoid flicker.
-  private readonly agentBusySubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
-  public readonly dirty$ = this.dirtySubject.pipe(distinctUntilChanged());
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
-  public readonly agentBusy$ = this.agentBusySubject.pipe(distinctUntilChanged());
 
   public startSession = (): AiRuleCreationSession => {
     this.session = {
@@ -66,20 +61,16 @@ export class AiRuleCreationService {
     this.savingSubject.next(false);
   };
 
+  public getIsSaving = (): boolean => {
+    return this.savingSubject.getValue();
+  };
+
   public setLastSavedRuleId = (id: string | null): void => {
     this.lastSavedRuleIdSubject.next(id);
   };
 
   public getLastSavedRuleId = (): string | null => {
     return this.lastSavedRuleIdSubject.getValue();
-  };
-
-  public markDirty = (): void => {
-    this.dirtySubject.next(true);
-  };
-
-  public clearDirty = (): void => {
-    this.dirtySubject.next(false);
   };
 
   public setAiCreatedRule = (rule: RuleResponse): void => {
@@ -94,21 +85,15 @@ export class AiRuleCreationService {
     this.formSyncSubject.next(true);
   };
 
-  public setAgentBusy = (busy: boolean): void => {
-    this.agentBusySubject.next(busy);
-  };
-
   public clearSession = (): void => {
     this.session = null;
   };
 
   public reset = (): void => {
     this.lastSavedRuleIdSubject.next(null);
-    this.dirtySubject.next(false);
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
-    this.agentBusySubject.next(false);
     this.session = null;
   };
 }

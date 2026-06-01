@@ -32,7 +32,7 @@ interface AddRuleAttachmentFromFormProps {
   scheduleStepData: ScheduleStepRule;
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
-  /** Existing rule id — injects `id` into the attachment so chat shows "Save changes" instead of "Save rule". */
+  /** Existing rule id — marks the attachment as an 'update' linked to this rule so chat shows "Update rule". */
   existingRuleId?: string;
   rule?: never;
 }
@@ -122,12 +122,19 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         : undefined);
     const attachmentData = JSON.stringify(formattedRule);
 
+    // A RuleResponse (or a form edit with existingRuleId) is tied to an existing saved rule, so
+    // the attachment is born 'update' and links that rule id; otherwise it's a fresh 'create'.
+    const linkedRuleId = rule?.id ?? existingRuleId;
+    const intent: 'create' | 'update' = linkedRuleId ? 'update' : 'create';
+
     return {
       attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: attachmentData,
         attachmentLabel,
+        intent,
+        ...(linkedRuleId ? { ruleId: linkedRuleId } : {}),
       },
       // description populates the chat's "Attachment added: …" label.
       attachmentDescription: attachmentLabel,

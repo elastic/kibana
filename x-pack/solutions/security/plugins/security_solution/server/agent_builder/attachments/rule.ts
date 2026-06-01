@@ -16,15 +16,17 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
+  attachmentLabel: z.string().optional(),
+  // Saved-rule id — written by the browser save handler, survives agent shallow merges.
+  ruleId: z.string().optional(),
+  // Per-version intent, frozen at write time — 'create' or 'update'.
+  intent: z.enum(['create', 'update']).optional(),
 });
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
-/**
- * Type guard to narrow attachment data to RuleAttachmentData
- */
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
 };
@@ -40,10 +42,8 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       }
     },
     format: (attachment: Attachment<string, unknown>) => {
-      // Extract data to allow proper type narrowing
       const data = attachment.data;
-      // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in agentBuilder attachment_types.ts
+      // AttachmentType enum is not yet registered for security attachments, so we validate manually.
       if (!isRuleAttachmentData(data)) {
         throw new Error(`Invalid rule attachment data for attachment ${attachment.id}`);
       }

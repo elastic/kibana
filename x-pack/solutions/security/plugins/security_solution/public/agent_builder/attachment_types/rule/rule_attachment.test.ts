@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type {
-  AttachmentServiceStartContract,
-  InlineRenderCallbacks,
-} from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
@@ -21,7 +17,7 @@ import {
   isOnRuleFormPage,
   registerRuleAttachment,
 } from './rule_attachment';
-import { useRuleActionButtons } from './use_rule_action_buttons';
+import { buildRuleActionButtons } from './rule_action_buttons';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 const validRule = {
@@ -90,14 +86,75 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('definition shape', () => {
-    it('does not expose a static getActionButtons — buttons are registered dynamically from RuleInlineContent', () => {
+    it('exposes a static getActionButtons so buttons render on every attachment version', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
       });
-      expect(definition.getActionButtons).toBeUndefined();
+      expect(definition.getActionButtons).toEqual(expect.any(Function));
+    });
+  });
+
+  describe('getActionButtons (intent wiring)', () => {
+    const buildButtons = (
+      attachmentData: Record<string, unknown>,
+      { canEdit = true, origin }: { canEdit?: boolean; origin?: string } = {}
+    ) => {
+      const definition = createRuleAttachmentDefinition({
+        application: makeApplication(canEdit),
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
+      return definition.getActionButtons!({
+        attachment: {
+          id: 'a',
+          type: SecurityAgentBuilderAttachments.rule,
+          data: attachmentData,
+          ...(origin ? { origin } : {}),
+        },
+        isSidebar: false,
+        isCanvas: false,
+        updateOrigin: jest.fn(),
+      } as never);
+    };
+    const primaryLabel = (buttons: ReturnType<typeof buildButtons>) =>
+      buttons.find((b) => b.type === 'primary')?.label;
+
+    beforeEach(() => {
+      window.history.pushState({}, '', '/');
+    });
+
+    it('labels an unsaved attachment "Create rule" (no ruleId, no origin)', () => {
+      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Create rule');
+    });
+
+    it('labels a saved attachment "Update rule" when data.ruleId is set', () => {
+      expect(
+        primaryLabel(buildButtons({ text: JSON.stringify(validRule), ruleId: 'rule-1' }))
+      ).toBe('Update rule');
+    });
+
+    it('falls back to origin for legacy attachments that predate data.ruleId', () => {
+      expect(
+        primaryLabel(buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }))
+      ).toBe('Update rule');
+    });
+
+    it('uses the in-session last-saved rule id for "View rule" before the server write completes', () => {
+      aiRuleCreation.setLastSavedRuleId('rule-session');
+      const buttonLabels = buildButtons({ text: JSON.stringify(validRule) }).map((b) => b.label);
+      expect(buttonLabels).toContain('View rule');
+    });
+
+    it('labels "Update rule" using in-session last-saved id before server write completes', () => {
+      aiRuleCreation.setLastSavedRuleId('rule-session');
+      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Update rule');
+    });
+
+    it('returns no buttons when the user cannot edit rules', () => {
+      expect(buildButtons({ text: JSON.stringify(validRule) }, { canEdit: false })).toEqual([]);
     });
   });
 
@@ -198,89 +255,98 @@ describe('createRuleAttachmentDefinition', () => {
   });
 });
 
-describe('useRuleActionButtons', () => {
-  const registerActionButtons = jest.fn();
-  const callbacks = { registerActionButtons } as unknown as InlineRenderCallbacks;
-  const saveButton = () =>
-    registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0].find(
-      (b: { icon: string }) => b.icon === 'save'
-    );
-
+describe('buildRuleActionButtons', () => {
   let aiRuleCreation: AiRuleCreationService;
-  let baseProps: Parameters<typeof useRuleActionButtons>[0];
+  let baseProps: Parameters<typeof buildRuleActionButtons>[0];
+
+  const primaryButton = (buttons: ReturnType<typeof buildRuleActionButtons>) =>
+    buttons.find((b) => b.type === 'primary');
+  const labels = (buttons: ReturnType<typeof buildRuleActionButtons>) =>
+    buttons.map((b) => b.label);
 
   beforeEach(() => {
     aiRuleCreation = new AiRuleCreationService();
+    jest.spyOn(aiRuleCreation, 'requestSaveRule');
     window.history.pushState({}, '', '/');
     baseProps = {
       rule: { name: 'Test Rule', type: 'query' } as unknown as RuleResponse,
       aiRuleCreation,
       application: makeApplication(true),
       uiSettings: makeUiSettings(),
-      callbacks,
-      isDirty: false,
       isSaving: false,
-      lastSavedRuleId: null,
-      attachmentOrigin: null,
-      showButtons: true,
+      intent: 'create',
+      ruleId: undefined,
     };
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  it('registers no buttons when the user lacks RULES_UI_EDIT_PRIVILEGE', () => {
-    renderHook(() => useRuleActionButtons({ ...baseProps, application: makeApplication(false) }));
-    expect(registerActionButtons).toHaveBeenCalledWith([]);
+  it('returns no buttons when the user lacks RULES_UI_EDIT_PRIVILEGE', () => {
+    expect(buildRuleActionButtons({ ...baseProps, application: makeApplication(false) })).toEqual(
+      []
+    );
   });
 
-  it('registers no buttons for an ES|QL rule when ENABLE_ESQL is disabled', () => {
-    renderHook(() =>
-      useRuleActionButtons({
+  it('returns no buttons for an ES|QL rule when ENABLE_ESQL is disabled', () => {
+    expect(
+      buildRuleActionButtons({
         ...baseProps,
         rule: { ...baseProps.rule!, type: 'esql' } as unknown as RuleResponse,
         uiSettings: makeUiSettings(false),
       })
+    ).toEqual([]);
+  });
+
+  it('returns a "Create rule" primary action for a create-intent attachment', () => {
+    const buttons = buildRuleActionButtons(baseProps);
+    expect(primaryButton(buttons)?.label).toBe('Create rule');
+    expect(primaryButton(buttons)?.icon).toBe('plusInCircle');
+  });
+
+  it('returns an "Update rule" primary action for an update-intent attachment', () => {
+    const buttons = buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' });
+    expect(primaryButton(buttons)?.label).toBe('Update rule');
+    expect(primaryButton(buttons)?.icon).toBe('save');
+  });
+
+  it('requests a save with the ruleId injected for an update-intent attachment', () => {
+    const buttons = buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' });
+    primaryButton(buttons)!.handler();
+    expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'rule-123' })
     );
-    expect(registerActionButtons).toHaveBeenCalledWith([]);
   });
 
-  it('always shows "Save changes" regardless of whether a savedRuleId is present', () => {
-    const { rerender } = renderHook((p: typeof baseProps) => useRuleActionButtons(p), {
-      initialProps: { ...baseProps, isDirty: true },
-    });
-    expect(saveButton()?.label).toBe('Save changes');
-
-    rerender({ ...baseProps, isDirty: true, lastSavedRuleId: 'saved-id' });
-    expect(saveButton()?.label).toBe('Save changes');
-
-    rerender({ ...baseProps, isDirty: true, attachmentOrigin: 'saved-id' });
-    expect(saveButton()?.label).toBe('Save changes');
+  it('disables the primary action only while saving', () => {
+    expect(primaryButton(buildRuleActionButtons(baseProps))?.disabled).toBe(false);
+    expect(primaryButton(buildRuleActionButtons({ ...baseProps, isSaving: true }))?.disabled).toBe(
+      true
+    );
   });
 
-  it('includes View rule when a savedRuleId exists and the user is not on a rule form page', () => {
-    const savedRule = { ...baseProps.rule!, id: 'rule-123' } as unknown as RuleResponse;
-    renderHook(() => useRuleActionButtons({ ...baseProps, rule: savedRule }));
-    const labels = registerActionButtons.mock.calls[0][0].map((b: { label: string }) => b.label);
-    expect(labels).toContain('View rule');
+  it('guards against a double-submit while a save is already in flight', () => {
+    aiRuleCreation.requestSaveRule({ name: 'in flight' } as unknown as RuleResponse);
+    (aiRuleCreation.requestSaveRule as jest.Mock).mockClear();
+    expect(aiRuleCreation.getIsSaving()).toBe(true);
+
+    primaryButton(buildRuleActionButtons(baseProps))!.handler();
+    expect(aiRuleCreation.requestSaveRule).not.toHaveBeenCalled();
   });
 
-  it('includes View rule when lastSavedRuleId arrives (e.g. seeded from edit page)', () => {
-    const { rerender } = renderHook((p: typeof baseProps) => useRuleActionButtons(p), {
-      initialProps: baseProps,
-    });
-    let labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
-    expect(labels).not.toContain('View rule');
+  it('includes View rule when a ruleId exists and the user is not on a rule form page', () => {
+    expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).toContain(
+      'View rule'
+    );
+  });
 
-    rerender({ ...baseProps, lastSavedRuleId: 'rule-from-page' });
-    labels = registerActionButtons.mock.calls.at(-1)![0].map((b: { label: string }) => b.label);
-    expect(labels).toContain('View rule');
+  it('omits View rule when there is no ruleId', () => {
+    expect(labels(buildRuleActionButtons(baseProps))).not.toContain('View rule');
   });
 
   it('omits View rule when the user is on a rule form page', () => {
     window.history.pushState({}, '', '/app/security/rules/create');
-    const savedRule = { ...baseProps.rule!, id: 'rule-123' } as unknown as RuleResponse;
-    renderHook(() => useRuleActionButtons({ ...baseProps, rule: savedRule }));
-    const labels = registerActionButtons.mock.calls[0][0].map((b: { label: string }) => b.label);
-    expect(labels).not.toContain('View rule');
+    expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).not.toContain(
+      'View rule'
+    );
   });
 });

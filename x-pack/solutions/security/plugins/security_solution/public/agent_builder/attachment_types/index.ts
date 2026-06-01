@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
@@ -148,7 +149,7 @@ export const registerRuleAttachment = ({
 };
 
 /**
- * Wires save/dirty/agentBusy subscriptions for AI rule creation. Dynamically imports
+ * Wires save subscriptions for AI rule creation. Dynamically imports
  * {@link createAiRuleCreationHandler} so Detection Engine API clients, transforms, and Zod
  * schemas stay off the main `securitySolution` page-load bundle.
  *
@@ -160,12 +161,14 @@ export const registerAiRuleCreationHandler = ({
   notifications,
   agentBuilder,
   telemetry,
+  http,
   register,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
   telemetry: TelemetryServiceStart;
+  http: HttpSetup;
   register: (subscription: Subscription) => void;
 }): void => {
   void import(
@@ -173,7 +176,7 @@ export const registerAiRuleCreationHandler = ({
     '../../detection_engine/common/ai_rule_creation_handler'
   ).then(({ createAiRuleCreationHandler }) => {
     register(
-      createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder, telemetry })
+      createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder, telemetry, http })
     );
   });
 };

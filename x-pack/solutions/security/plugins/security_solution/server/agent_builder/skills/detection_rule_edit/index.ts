@@ -129,7 +129,7 @@ For changes to tags, severity, risk_score, schedule, name, description, MITRE ma
 1. **Parse** the \`text\` field from the attachment (stringified JSON of the rule).
 2. **Modify** only the fields the user asked to change. Do not add or remove other fields.
 3. **Re-stringify the ENTIRE rule object** — never send partial updates.
-4. **Call \`attachment_update\`** to persist the change. Always carry through \`attachmentLabel\` (the rule \`name\`) and \`description\` (same as \`attachmentLabel\`, or \`Rule: <name>\`) so the chat label stays visible:
+4. **Call \`attachment_update\`** to persist the change. Always include \`attachmentLabel\` (the rule \`name\`) and \`description\` so the chat label stays visible. Other sibling fields like \`ruleId\` and \`intent\` persist automatically via data merge — you do not need to carry them through.
 \`\`\`
 attachment_update({
   attachment_id: "ATTACHMENT_ID",

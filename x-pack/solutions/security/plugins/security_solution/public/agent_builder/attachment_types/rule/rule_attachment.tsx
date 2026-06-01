@@ -16,7 +16,14 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { RuleInlineContent } from './rule_inline_content';
-import { type RuleAttachment, getRuleName } from './helpers';
+import { buildRuleActionButtons } from './rule_action_buttons';
+import {
+  type RuleAttachment,
+  getRuleName,
+  getRuleIdFromAttachment,
+  getRuleAttachmentIntent,
+  parseRuleFromAttachment,
+} from './helpers';
 
 export { isOnRuleFormPage } from './helpers';
 
@@ -52,15 +59,19 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props, callbacks) => (
-    <RuleInlineContent
-      {...props}
-      aiRuleCreation={aiRuleCreation}
-      application={application}
-      uiSettings={uiSettings}
-      callbacks={callbacks}
-      renderButtons={callbacks !== undefined}
-    />
-  ),
-  // Buttons are registered dynamically from RuleInlineContent to respect agentBusy state.
+  renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
+  getActionButtons: ({ attachment }) => {
+    const intent = getRuleAttachmentIntent(attachment);
+    const ruleId =
+      getRuleIdFromAttachment(attachment) ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
+    return buildRuleActionButtons({
+      rule: parseRuleFromAttachment(attachment),
+      aiRuleCreation,
+      application,
+      uiSettings,
+      isSaving: aiRuleCreation.getIsSaving(),
+      intent,
+      ruleId,
+    });
+  },
 });

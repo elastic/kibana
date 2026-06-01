@@ -244,6 +244,95 @@ describe('createDetectionRuleTool', () => {
       expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
     });
 
+    it('updates the existing attachment in place when attachment_id is provided', async () => {
+      const mockRule = {
+        name: 'Test Rule',
+        query: 'FROM test | limit 100',
+        language: 'esql',
+        type: 'esql',
+      };
+      mockIterativeAgent.invoke.mockResolvedValue({ rule: mockRule, errors: [] });
+
+      const existingAttachmentId = 'ai-rule-creation';
+      const existingRule = { id: 'existing-rule-id', name: 'Test Rule', type: 'esql' };
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue({
+        id: existingAttachmentId,
+        origin: 'origin-rule-id',
+        versions: [{ data: { text: '{}' } }],
+      });
+      (context.attachments.update as jest.Mock).mockResolvedValue({
+        id: existingAttachmentId,
+        current_version: 2,
+      });
+
+      await tool.handler(
+        {
+          user_query: userQuery,
+          existing_rule: existingRule,
+          attachment_id: existingAttachmentId,
+        } as unknown as Parameters<typeof tool.handler>[0],
+        context
+      );
+
+      expect(context.attachments.update).toHaveBeenCalledWith(
+        existingAttachmentId,
+        expect.objectContaining({
+          data: {
+            text: JSON.stringify(mockRule),
+            attachmentLabel: 'Test Rule',
+          },
+        })
+      );
+    });
+
+    it('creates a new attachment when no attachment_id is provided', async () => {
+      const mockRule = {
+        name: 'Test Rule',
+        query: 'FROM test | limit 100',
+        language: 'esql',
+        type: 'esql',
+      };
+      mockIterativeAgent.invoke.mockResolvedValue({ rule: mockRule, errors: [] });
+
+      const existingAttachmentId = 'ai-rule-creation';
+      const existingRule = { name: 'Test Rule', type: 'esql' };
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue({
+        id: existingAttachmentId,
+        versions: [{ data: { text: '{}' } }],
+      });
+      (context.attachments.update as jest.Mock).mockResolvedValue({
+        id: existingAttachmentId,
+        current_version: 2,
+      });
+
+      await tool.handler(
+        {
+          user_query: userQuery,
+          existing_rule: existingRule,
+          attachment_id: existingAttachmentId,
+        } as unknown as Parameters<typeof tool.handler>[0],
+        context
+      );
+
+      expect(context.attachments.update).toHaveBeenCalledWith(
+        existingAttachmentId,
+        expect.objectContaining({
+          data: {
+            text: JSON.stringify(mockRule),
+            attachmentLabel: 'Test Rule',
+          },
+        })
+      );
+    });
+
     it('returns error when connector ID is not available', async () => {
       const mockModelProviderWithoutConnector = agentBuilderMocks.createModelProvider();
       mockModelProviderWithoutConnector.getDefaultModel.mockResolvedValue({

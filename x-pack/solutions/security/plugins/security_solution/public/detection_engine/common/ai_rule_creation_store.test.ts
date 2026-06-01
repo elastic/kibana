@@ -46,26 +46,6 @@ describe('AiRuleCreationService', () => {
     });
   });
 
-  describe('dirty$', () => {
-    it('initially emits false', async () => {
-      const value = await firstValueFrom(service.dirty$);
-      expect(value).toBe(false);
-    });
-
-    it('emits true after markDirty', async () => {
-      service.markDirty();
-      const value = await firstValueFrom(service.dirty$);
-      expect(value).toBe(true);
-    });
-
-    it('emits false after clearDirty', async () => {
-      service.markDirty();
-      service.clearDirty();
-      const value = await firstValueFrom(service.dirty$);
-      expect(value).toBe(false);
-    });
-  });
-
   describe('session management', () => {
     it('startSession creates a new session', () => {
       const session = service.startSession();
@@ -95,13 +75,6 @@ describe('AiRuleCreationService', () => {
       expect(value).toBeNull();
     });
 
-    it('resets dirty$ to false', async () => {
-      service.markDirty();
-      service.reset();
-      const value = await firstValueFrom(service.dirty$);
-      expect(value).toBe(false);
-    });
-
     it('resets session to null', () => {
       service.startSession();
       service.reset();
@@ -113,9 +86,7 @@ describe('AiRuleCreationService', () => {
     const other = new AiRuleCreationService();
 
     service.setLastSavedRuleId('rule-1');
-    service.markDirty();
 
     expect(await firstValueFrom(other.lastSavedRuleId$)).toBeNull();
-    expect(await firstValueFrom(other.dirty$)).toBe(false);
   });
 });

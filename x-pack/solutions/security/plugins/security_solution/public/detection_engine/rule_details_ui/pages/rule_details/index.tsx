@@ -238,7 +238,6 @@ export const RuleDetailsPage = connector(
   }: DetectionEngineComponentProps) {
     const {
       application,
-      cps,
       timelines: timelinesUi,
       spaces: spacesApi,
       aiRuleCreation,
@@ -374,20 +373,15 @@ export const RuleDetailsPage = connector(
 
     useEffect(() => {
       let wasSaving = false;
-      let isDirty = false;
 
-      const dirtySub = aiRuleCreation.dirty$.subscribe((d: boolean) => {
-        isDirty = d;
-      });
       const savingSub = aiRuleCreation.saving$.subscribe((isSaving: boolean) => {
-        if (wasSaving && !isSaving && !isDirty) {
+        if (wasSaving && !isSaving) {
           refreshRule();
         }
         wasSaving = isSaving;
       });
 
       return () => {
-        dirtySub.unsubscribe();
         savingSub.unsubscribe();
       };
     }, [aiRuleCreation, refreshRule]);

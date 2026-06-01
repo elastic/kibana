@@ -22,17 +22,43 @@ import {
   SAVED_QUERY_LABEL,
 } from './translations';
 
-export type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
+export type RuleAttachmentIntent = 'create' | 'update';
+
+export type RuleAttachment = Attachment<
+  string,
+  {
+    text: string;
+    attachmentLabel?: string;
+    /** Saved-rule id — persisted by the browser save handler and survives agent shallow merges. */
+    ruleId?: string;
+    /**
+     * Per-version intent, frozen at write time. 'create' stays 'create' forever (even after the
+     * rule is saved) so the button label never flips; a duplicate-save warning is shown instead.
+     * Absent on legacy attachments — falls back to ruleId/origin presence.
+     */
+    intent?: RuleAttachmentIntent;
+  }
+>;
 
 export const isOnRuleFormPage = (pathname: string): boolean =>
   pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
 
-/** Resolve the Kibana rule id for save/navigation from all available sources. */
-export const getSavedRuleId = (
-  rule: RuleResponse | null | undefined,
-  lastSavedRuleId?: string | null,
-  attachmentOrigin?: string | null
-): string | undefined => rule?.id ?? attachmentOrigin ?? lastSavedRuleId ?? undefined;
+/** Saved-rule id from the attachment. `data.ruleId` is primary; `origin` is a legacy fallback. */
+export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>
+  attachment.data?.ruleId ?? (attachment as { origin?: string }).origin ?? undefined;
+
+/**
+ * Effective intent: 'create' for a new rule, 'update' for a saved one.
+ * `data.intent` is authoritative (frozen at write time); legacy attachments fall back to
+ * ruleId/origin presence.
+ */
+export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent => {
+  const dataIntent = attachment.data?.intent;
+  if (dataIntent === 'create' || dataIntent === 'update') {
+    return dataIntent;
+  }
+  return getRuleIdFromAttachment(attachment) ? 'update' : 'create';
+};
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   try {

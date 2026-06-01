@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,21 +19,21 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
-  type AttachmentRenderProps,
-  type InlineRenderCallbacks,
-} from '@kbn/agent-builder-browser/attachments';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { ScheduleDisplay } from './schedule_display';
-import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
+import {
+  parseRuleFromAttachment,
+  getRuleTypeLabel,
+  getQueryLabel,
+  getRuleIdFromAttachment,
+  getRuleAttachmentIntent,
+} from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
-import { useRuleActionButtons } from './use_rule_action_buttons';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -104,65 +104,24 @@ const getRuleDisplayFields = (rule: RuleResponse) => ({
 
 interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
-  application: ApplicationStart;
-  uiSettings: IUiSettingsClient;
-  callbacks?: InlineRenderCallbacks;
-  renderButtons: boolean;
 }
 
 export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   attachment,
   aiRuleCreation,
-  application,
-  uiSettings,
-  callbacks,
-  renderButtons,
 }) => {
-  const isDirty = useObservable(aiRuleCreation.dirty$, false);
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  const lastSavedRuleId = useObservable(
-    aiRuleCreation.lastSavedRuleId$,
-    aiRuleCreation.getLastSavedRuleId()
-  );
-  const agentBusy = useObservable(aiRuleCreation.agentBusy$, false);
+  const lastSavedRuleId = useObservable(aiRuleCreation.lastSavedRuleId$, null);
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  const showButtons = renderButtons && !agentBusy;
-
-  // attachment.origin is the durable server-persisted rule id (set by updateAttachmentOrigin
-  // after a save). Prefer it over rule.id in the JSON since it doesn't require a new version.
-  const savedIdFromAttachment = (attachment as { origin?: string }).origin ?? rule?.id;
-
-  // Keep lastSavedRuleId aligned with the attachment's rule id so markDirty fires after
-  // agent edits (conversation switch on "Add to chat" clears the in-session id).
-  useEffect(() => {
-    if (!renderButtons || !savedIdFromAttachment) {
-      return;
-    }
-    if (aiRuleCreation.getLastSavedRuleId() === null) {
-      aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
-    }
-    const sub = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
-      if (id === null) {
-        aiRuleCreation.setLastSavedRuleId(savedIdFromAttachment);
-      }
-    });
-    return () => sub.unsubscribe();
-  }, [renderButtons, savedIdFromAttachment, aiRuleCreation]);
-
-  useRuleActionButtons({
-    rule,
-    aiRuleCreation,
-    application,
-    uiSettings,
-    callbacks,
-    isDirty,
-    isSaving,
-    lastSavedRuleId,
-    attachmentOrigin: savedIdFromAttachment ?? null,
-    showButtons,
-  });
+  // intent is per-version (frozen at write time) and drives the button label.
+  // ruleId comes from data.ruleId (server-persisted) → origin (legacy) → in-session fallback.
+  // The duplicate warning shows for create-intent versions that are already linked to a saved rule:
+  // clicking "Create rule" again would spawn a second copy.
+  const intent = getRuleAttachmentIntent(attachment);
+  const ruleId = getRuleIdFromAttachment(attachment) ?? lastSavedRuleId ?? undefined;
+  const willDuplicateOnSave = intent === 'create' && ruleId !== undefined;
 
   if (!rule) {
     return null;
@@ -287,6 +246,32 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           })}
         </EuiText>
       </EuiCallOut>
+
+      {willDuplicateOnSave && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="copyClipboard"
+            title={i18n.translate(
+              'xpack.securitySolution.agentBuilder.ruleAttachment.alreadySavedTitle',
+              { defaultMessage: 'This rule has already been saved' }
+            )}
+          >
+            <EuiText size="xs">
+              {i18n.translate(
+                'xpack.securitySolution.agentBuilder.ruleAttachment.alreadySavedBody',
+                {
+                  defaultMessage:
+                    'Clicking "Create rule" again will save a separate, duplicate rule.',
+                }
+              )}
+            </EuiText>
+          </EuiCallOut>
+        </>
+      )}
     </EuiPanel>
   );
 };
