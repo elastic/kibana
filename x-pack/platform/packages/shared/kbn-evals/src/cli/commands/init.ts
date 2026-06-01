@@ -115,6 +115,13 @@ export const ensureLocalConfig = async (repoRoot: string, log: ToolingLog): Prom
 
   Fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
   log.info(`Written local config to ${configPath}`);
+  log.info('');
+  log.info(
+    'Note: the local profile expects Elasticsearch on localhost:9200 and Kibana on localhost:5601.'
+  );
+  log.info(
+    'Make sure both are running before starting evals (e.g. yarn es snapshot && yarn start).'
+  );
 };
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
