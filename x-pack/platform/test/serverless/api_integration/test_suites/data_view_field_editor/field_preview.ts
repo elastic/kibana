@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
     });
+    await es.indices.refresh({ index: INDEX_NAME });
   };
 
   const deleteIndex = async () => {

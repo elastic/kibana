@@ -7,9 +7,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
-import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -291,7 +290,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
     (await kbnClient.request({
       path: '/api/status',
       method: 'GET',
-    })) as AxiosResponse
+    })) as KbnClientResponse<{ version: { number: string } }>
   ).data.version.number;
 
   if (!version) {

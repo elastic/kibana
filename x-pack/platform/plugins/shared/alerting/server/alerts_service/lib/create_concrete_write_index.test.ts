@@ -704,26 +704,24 @@ describe('createConcreteWriteIndex', () => {
           });
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
-            body: {
-              composed_of: ['test-mappings'],
-              index_patterns: ['test*'],
-              template: {
-                mappings: {
-                  dynamic: false,
+            name: 'test-template',
+            composed_of: ['test-mappings'],
+            index_patterns: ['test*'],
+            template: {
+              mappings: {
+                dynamic: false,
+              },
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: '.alerts-empty-default',
                 },
-                settings: {
-                  auto_expand_replicas: '0-1',
-                  hidden: true,
-                  'index.lifecycle': {
-                    name: '.alerts-ilm-policy',
-                    rollover_alias: '.alerts-empty-default',
-                  },
-                  'index.mapping.total_fields.limit': 2501,
-                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                },
+                'index.mapping.total_fields.limit': 2501,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
-            name: 'test-template',
           });
 
           expect(logger.info).toHaveBeenNthCalledWith(
@@ -771,26 +769,24 @@ describe('createConcreteWriteIndex', () => {
           expect(logger.info).toBeCalledTimes(4);
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
-            body: {
-              composed_of: ['test-mappings'],
-              index_patterns: ['test*'],
-              template: {
-                mappings: {
-                  dynamic: false,
+            name: 'test-template',
+            composed_of: ['test-mappings'],
+            index_patterns: ['test*'],
+            template: {
+              mappings: {
+                dynamic: false,
+              },
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: '.alerts-empty-default',
                 },
-                settings: {
-                  auto_expand_replicas: '0-1',
-                  hidden: true,
-                  'index.lifecycle': {
-                    name: '.alerts-ilm-policy',
-                    rollover_alias: '.alerts-empty-default',
-                  },
-                  'index.mapping.total_fields.limit': 2501,
-                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                },
+                'index.mapping.total_fields.limit': 2501,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
-            name: 'test-template',
           });
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {

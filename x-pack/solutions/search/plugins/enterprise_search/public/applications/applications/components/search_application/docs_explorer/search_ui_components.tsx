@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useValues } from 'kea';
 
@@ -18,6 +18,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiIcon,
   EuiPanel,
   EuiSelect,
@@ -214,6 +215,10 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
       <EuiSelect
         data-test-subj="enterpriseSearchResultsPerPageViewSelect"
         id="results-per-page"
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.ariaLabel',
+          { defaultMessage: 'Results per page' }
+        )}
         options={
           options?.map((option) => ({
             text: i18n.translate(
@@ -238,36 +243,59 @@ export const Sorting: React.ComponentType<SortingProps> = withSearch<
   SortingSearchContext
 >(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
   const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
+  const [searchValue, setSearchValue] = useState('');
   const relevance = i18n.translate(
     'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.relevanceLabel',
     { defaultMessage: 'Relevance' }
   );
 
+  const options = useMemo(
+    () => [
+      { label: relevance, value: '' },
+      ...sortableFields.map((f: string) => ({ label: f, value: f })),
+    ],
+    [relevance, sortableFields]
+  );
+
+  const isInvalid = useMemo(() => {
+    if (!searchValue) return false;
+    return !options.some((opt) => opt.label.includes(searchValue));
+  }, [searchValue, options]);
+
+  const invalidFieldError = i18n.translate(
+    'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.invalidFieldError',
+    { defaultMessage: 'No matching field found' }
+  );
+
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiTitle size="xxxs">
-          <label htmlFor="sorting-field">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.fieldLabel"
-              defaultMessage="Sort By"
-            />
-          </label>
-        </EuiTitle>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.fieldLabel"
+            defaultMessage="Sort By"
+          />
+        }
+        isInvalid={isInvalid}
+        error={invalidFieldError}
+      >
         <EuiComboBox
-          id="sorting-field"
+          aria-label={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.fieldAriaLabel',
+            { defaultMessage: 'Sort by field' }
+          )}
           isClearable={false}
           singleSelection={{ asPlainText: true }}
-          options={[
-            { label: relevance, value: '' },
-            ...sortableFields.map((f: string) => ({ label: f, value: f })),
-          ]}
+          options={options}
           selectedOptions={[{ label: !!field ? field : relevance, value: field }]}
-          onChange={([{ value }]) =>
-            setSort(value === '' ? [] : [{ direction: 'asc', field: value }], 'asc')
-          }
+          onChange={([{ value }]) => {
+            setSearchValue('');
+            setSort(value === '' ? [] : [{ direction: 'asc', field: value }], 'asc');
+          }}
+          onSearchChange={setSearchValue}
+          isInvalid={isInvalid}
         />
-      </EuiFlexGroup>
+      </EuiFormRow>
       {field !== '' && (
         <>
           <EuiSpacer size="m" />
@@ -283,6 +311,10 @@ export const Sorting: React.ComponentType<SortingProps> = withSearch<
             <EuiSelect
               data-test-subj="enterpriseSearchSortingSelect"
               id="sorting-direction"
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.directionAriaLabel',
+                { defaultMessage: 'Sort direction' }
+              )}
               onChange={(evt) => {
                 switch (evt.target.value) {
                   case 'asc':

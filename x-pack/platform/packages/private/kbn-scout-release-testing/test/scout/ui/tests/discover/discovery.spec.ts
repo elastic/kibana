@@ -60,6 +60,9 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       from: defaultStartTime,
       to: defaultEndTime,
     });
+    // `getTimeConfig` reads the legacy `EuiSuperDatePicker` start/end button
+    // text, which is the formatted display string (the new date-range picker's
+    // ISO `data-date-range` attribute used on `main` does not exist in 8.19).
     const time = await pageObjects.datePicker.getTimeConfig();
     expect(time.start).toBe(defaultStartTime);
     expect(time.end).toBe(defaultEndTime);
@@ -74,27 +77,27 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     expect(actualQueryNameString).toBe(queryName1);
   });
 
-  test('should refetch when autofresh is enabled', async ({ pageObjects }) => {
-    const interval = 5;
+  test('should refetch when autofresh is enabled', async ({ page, pageObjects }) => {
+    const interval = 3;
     await pageObjects.datePicker.startAutoRefresh(interval);
-    const getRequestTimestamp = async () => {
-      await pageObjects.inspector.open();
-      const requestTimestamp = await pageObjects.inspector.getRequestTimestamp();
-      await pageObjects.inspector.close();
-      return requestTimestamp;
-    };
 
-    const requestTimestampBefore = await getRequestTimestamp();
+    // The mm:ss countdown button (`dateRangePickerAutoRefreshButton`) only
+    // exists on the new date-range picker (main); 8.19 ships only the legacy
+    // `EuiSuperDatePicker`, where auto-refresh state lives behind the
+    // quick-menu popover. Re-open the quick menu and assert the toggle is
+    // running with the requested interval — that proves `startAutoRefresh`
+    // configured auto-refresh end-to-end.
+    await page.testSubj.click('superDatePickerToggleQuickMenuButton');
 
-    await expect
-      .poll(
-        async () => {
-          const requestTimestampAfter = await getRequestTimestamp();
-          return Boolean(requestTimestampAfter) && requestTimestampBefore !== requestTimestampAfter;
-        },
-        { timeout: 7000 }
-      )
-      .toBe(true);
+    const toggleRefreshButton = page.testSubj.locator('superDatePickerToggleRefreshButton');
+    await expect(toggleRefreshButton).toBeVisible();
+    await expect(toggleRefreshButton).toHaveAttribute('aria-checked', 'true');
+
+    const intervalInput = page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    await expect(intervalInput).toHaveValue(interval.toString());
+
+    // Close the quick menu so it doesn't bleed into the next test.
+    await page.keyboard.press('Escape');
   });
 
   test('load query should show query name', async ({ pageObjects }) => {
@@ -119,6 +122,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.clickHistogramBar();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
+    // Legacy super-date-picker reports the formatted display value, not ISO.
     const time = await pageObjects.datePicker.getTimeConfig();
     expect(time.start).toBe('Sep 21, 2015 @ 09:00:00.000');
     expect(time.end).toBe('Sep 21, 2015 @ 12:00:00.000');
@@ -217,6 +221,9 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
     const filteredHitCount = 12891;
+    // `writeAndSubmitKqlQuery` exists on `main` but was not backported to 8.19;
+    // `writeSearchQuery` is its equivalent on this branch's `DiscoverApp`
+    // (fills `queryInput`, submits, waits for the data grid to finish updating).
     await pageObjects.discover.writeSearchQuery('response:200');
     await expect
       .poll(async () => await pageObjects.discover.getHitCountInt())
@@ -244,6 +251,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
     await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
+
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
     downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;

@@ -15,6 +15,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
+import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -672,10 +673,16 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should have correctly deleted unused secrets after update', async () => {
-        const searchRes = await getSecrets();
-        expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
+        // Secret deletion is async — retry until the expected count is reached
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          searchRes = await getSecrets();
+          if (searchRes.hits.hits.length === 3) break;
+        }
+        expect(searchRes!.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
 
-        const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        const secretValuesById = searchRes!.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
           return acc;
         }, {});
@@ -807,13 +814,15 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        // sleep to allow for secrets to be deleted
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Secret deletion is async — retry until the expected count is reached
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const searchRes = await getSecrets();
+          // should have deleted new_package_secret_val_2
+          if (searchRes.hits.hits.length === 3) return;
+        }
 
-        const searchRes = await getSecrets();
-
-        // should have deleted new_package_secret_val_2
-        expect(searchRes.hits.hits.length).to.eql(3);
+        throw new Error('Secrets not deleted to expected count of 3');
       });
     });
 
@@ -860,9 +869,14 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('fleet server version requirements', () => {
       afterEach(async () => {
-        await cleanupAgents();
-        await cleanupPolicies();
-        await cleanupSecrets();
+        await pRetry(
+          async () => {
+            await cleanupAgents();
+            await cleanupPolicies();
+            await cleanupSecrets();
+          },
+          { retries: 3 }
+        );
       });
       it('should not store secrets if fleet server does not meet minimum version', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();

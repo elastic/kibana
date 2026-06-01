@@ -25,7 +25,7 @@ export function registerClusterSettingsRoute({
       },
       validate: {
         body: schema.object({
-          settings: schema.arrayOf(schema.string()),
+          settings: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
       },
     },

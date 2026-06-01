@@ -1,5 +1,5 @@
 {
-  "sha1": "e8146a9b3e284afb91b1433d5fa1c5e67025e5a3",
+  "sha1": "559a525bb933b4a6df3b62bd8bf6361df1eba3da",
   "tests": [
     {
       "id": "f44f18cc703276d-178a4921f7b18d0",
@@ -779,12 +779,14 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -805,12 +807,14 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",
-        "line": 19,
-        "column": 10
+        "line": 22,
+        "column": 12
       }
     }
   ]

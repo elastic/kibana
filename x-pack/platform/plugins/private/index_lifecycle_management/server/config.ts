@@ -23,7 +23,7 @@ const schemaLatest = schema.object(
       enabled: schema.boolean({ defaultValue: true }),
     }),
     // Cloud requires the ability to hide internal node attributes from users.
-    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 1000 }),
     /**
      * Disables the plugin.
      * Added back in 8.8.
@@ -57,7 +57,7 @@ const schema7x = schema.object(
       enabled: schema.boolean({ defaultValue: true }),
     }),
     // Cloud requires the ability to hide internal node attributes from users.
-    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 1000 }),
   },
   { defaultValue: undefined }
 );

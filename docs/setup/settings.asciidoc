@@ -464,8 +464,9 @@ The number of milliseconds to wait for additional data before restarting
 the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
 [[server-maxPayload]] `server.maxPayload`::
-The maximum payload size in bytes
-for incoming server requests. *Default: `1048576`*
+The maximum payload size in bytes for incoming server requests.
+This option controls the maximum payload size Kibana can handle, rather than the incoming request size, which also limits the inflated size when compression is used.
+*Default: `1048576`*
 
 `server.name`::
 A human-readable display name that
