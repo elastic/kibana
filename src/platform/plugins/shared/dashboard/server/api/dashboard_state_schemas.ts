@@ -25,8 +25,10 @@ import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
+import { isDashboardSection } from '../../common';
+import type { DashboardPanel, DashboardSection } from './types';
 
-const MAX_PANELS = 250;
+const MAX_PANELS = 1000;
 
 export const panelGridSchema = schema.object(
   {
@@ -121,7 +123,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: boolean = false) {
+export function getSectionSchema(isDashboardAppRequest: boolean) {
   return schema.object(
     {
       title: schema.string({
@@ -138,7 +140,6 @@ export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: 
       panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
         meta: { description: 'The panels that belong to the section.' },
         defaultValue: [],
-        maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
       }),
       id: schema.maybe(
         schema.string({
@@ -252,11 +253,10 @@ export function getDashboardStateSchema(
       panels: schema.arrayOf(
         schema.oneOf([
           getPanelSchema(isDashboardAppRequest),
-          getSectionSchema(isDashboardAppRequest, isReadRequest),
+          getSectionSchema(isDashboardAppRequest),
         ]),
         {
           defaultValue: [],
-          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
           meta: {
             description:
               'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
@@ -290,6 +290,26 @@ export function getDashboardStateSchema(
       meta: {
         id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
       },
+      validate: (dashboardState) => {
+        if (isDashboardAppRequest) return;
+        const panelCount = countPanels(dashboardState.panels);
+        if (panelCount > MAX_PANELS) {
+          return `Dashboard state contains ${panelCount} panels, which exceeds the maximum of ${MAX_PANELS}.`;
+        }
+        return;
+      },
     }
   );
+}
+
+function countPanels(panels: Array<DashboardPanel | DashboardSection>): number {
+  let count = 0;
+  for (const panel of panels) {
+    if (isDashboardSection(panel)) {
+      count += countPanels(panel.panels);
+    } else {
+      count += 1;
+    }
+  }
+  return count;
 }
