@@ -2396,6 +2396,11 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
+"@elastic/micro-jq@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-1.8.0.tgz#7f8d5226568df7575c6a6a459f77d60c04ed1062"
+  integrity sha512-HMfLiglMgSEdedsaD4jqqxP4+uI26onwLlPbk9dzh6Mk6FYdwWkFHmHMb57VqlV+B/RpIDLJbZ1FjsEQDoANvw==
+
 "@elastic/monaco-esql@3.4.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.4.0.tgz#8dd058f333ab92847c91101f90b114e0c2e691c9"
