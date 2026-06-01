@@ -37,7 +37,7 @@ const fromExpectSuggestions = (
   );
 };
 
-const subquerySuggestions = ['(FROM $0)'];
+const subquerySuggestions = ['(FROM $0)', '(ROW $0)', '(TS $0)'];
 
 const visibleIndices =
   mockContext.sources?.filter((source) => !source.hidden).map((source) => source.name) || [];

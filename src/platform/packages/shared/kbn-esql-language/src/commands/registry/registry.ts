@@ -283,7 +283,9 @@ export class CommandRegistry implements ICommandRegistry {
     const queryContainsSubqueries = options?.queryContainsSubqueries ?? false;
 
     const filtered = isStartingSubquery
-      ? allCommands.filter(({ metadata }) => !!metadata.subquerySource && !metadata.subquerySourceHidden)
+      ? allCommands.filter(
+          ({ metadata }) => !!metadata.subquerySource && !metadata.subquerySourceHidden
+        )
       : allCommands;
 
     // Then apply subquery restrictions

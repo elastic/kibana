@@ -27,7 +27,7 @@ export const timeseriesCommand = {
   metadata: {
     type: 'source' as const,
     subquerySource: true,
-    subquerySourceHidden: true,
+    subquerySourceHidden: !(process.env.NODE_ENV === 'test'),
     hidden: false,
     preview: true,
     isTimeseries: true,
