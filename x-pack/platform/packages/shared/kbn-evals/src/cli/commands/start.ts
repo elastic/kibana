@@ -231,7 +231,15 @@ export const startCmd: Command<void> = {
           await ensureVaultAuth(log);
           profile = 'dev-vault';
         } else {
-          await runConfigInit(repoRoot, log);
+          const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
+            type: 'input',
+            name: 'customProfile',
+            message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
+            default: '',
+          });
+          const resolvedProfile = customProfile.trim() || undefined;
+          await runConfigInit(repoRoot, log, { profile: resolvedProfile });
+          profile = resolvedProfile;
         }
       } else if (isDevVaultProfile(profile)) {
         await ensureVaultAuth(log);
