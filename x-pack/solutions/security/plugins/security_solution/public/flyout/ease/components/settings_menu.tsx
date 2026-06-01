@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AnonymizationSwitch } from './anonymization_switch';
 
@@ -36,13 +36,15 @@ export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: AlertSummaryOp
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={OPTIONS_MENU}
-        data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
-        color="text"
-        iconType="boxesVertical"
-        onClick={togglePopover}
-      />
+      <EuiToolTip content={OPTIONS_MENU} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={OPTIONS_MENU}
+          data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
+          color="text"
+          iconType="boxesVertical"
+          onClick={togglePopover}
+        />
+      </EuiToolTip>
     ),
     [togglePopover]
   );
@@ -62,6 +64,7 @@ export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: AlertSummaryOp
   );
   return (
     <EuiPopover
+      aria-label={OPTIONS_MENU}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
