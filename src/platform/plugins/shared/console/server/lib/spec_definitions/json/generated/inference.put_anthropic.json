@@ -13,7 +13,8 @@
     },
     "url_components": {
       "task_type": [
-        "completion"
+        "completion",
+        "chat_completion"
       ]
     },
     "methods": [
