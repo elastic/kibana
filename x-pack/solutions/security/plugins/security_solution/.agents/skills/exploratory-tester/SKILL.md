@@ -213,12 +213,15 @@ If no `## Exploratory testing scope` comment is found — **stop** and show the 
 
 ### Step 0d — Fetch known bugs
 
+Extract 2–3 distinctive words from the area name, skipping articles and prepositions (a, an, the, for, in, and, with, of). Example: "Security Solution data view picker" → `"security solution data view"`.
+
 ```bash
+KEYWORDS="<2-3 distinctive words from area name>"
 gh issue list --repo elastic/kibana --state open \
-  --search "<area keywords from area name>" \
+  --search "$KEYWORDS" \
   --json number,title,labels --limit 10
 gh issue list --repo elastic/kibana --state closed \
-  --search "<area keywords from area name>" \
+  --search "$KEYWORDS" \
   --json number,title,closedAt --limit 5
 ```
 
@@ -234,7 +237,7 @@ date -u +"%Y-%m-%dT%H:%M:%SZ"
 If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
 
 - **Reuse (r):** Trust `config.json` as-is, including its existing `session_started_at`. Skip Phase 0 remaining steps and all of Phase 1. Jump directly to Phase 2. Existing `findings-flow-<N>.md` files are kept and will be included in Phase 3's merge.
-- **Start fresh (f):** Delete all `.exploratory-session/findings-flow-*.md` files. Overwrite `config.json` with the newly parsed input and continue. Set `session_started_at` to the current UTC time: `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
+- **Start fresh (f):** `rm -f .exploratory-session/findings-flow-*.md`. Overwrite `config.json` with the newly parsed input and continue. Set `session_started_at` to the current UTC time: `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
 
 Write `.exploratory-session/config.json`:
 ```json
@@ -380,42 +383,19 @@ If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana
 
 **Create a non-ECS noise index (all environment types):**
 
-Index a small set of documents with intentionally non-standard field types — the kind of data real customers have that often breaks features tested only against well-formed data:
+Index documents with intentionally wrong field types and missing fields — the class of data real customers have that breaks features tested only against clean ECS data.
 
 ```bash
-# Create index with non-ECS mappings (source.ip as text, event.kind as integer)
-curl -s -u "<username>:<password>" -X PUT "<es_url>/logs-exploratory.noise-000001" \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "mappings": {
-      "properties": {
-        "@timestamp": { "type": "date" },
-        "source.ip":  { "type": "text" },
-        "destination.ip": { "type": "text" },
-        "event.kind": { "type": "integer" },
-        "host.name":  { "type": "keyword" },
-        "message":    { "type": "text" }
-      }
-    },
-    "aliases": { "logs-exploratory.noise": {} }
-  }'
-
-# Index a few documents — some missing fields, some with extra unknown fields
-curl -s -u "<username>:<password>" -X POST "<es_url>/logs-exploratory.noise-000001/_bulk" \
-  -H 'Content-Type: application/json' \
-  -d '
-{"index":{}}
-{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","source.ip":"not-an-ip","event.kind":1,"host.name":"noise-host-1","message":"non-ECS source.ip field"}
-{"index":{}}
-{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","destination.ip":"256.256.256.256","event.kind":99,"host.name":"noise-host-2","message":"out-of-range event.kind","custom_unmapped_field":"unexpected"}
-{"index":{}}
-{"@timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","host.name":"noise-host-3","message":"missing source and destination fields entirely"}
-'
+# ES_URL: http://localhost:9220 (agent-managed) or environment.es_url from config.json
+bash x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-noise-index.sh \
+  --es-url "$ES_URL" \
+  --username "$USERNAME" \
+  --password "$PASSWORD"
 ```
 
-Substitute `<es_url>` with `http://localhost:9220` (agent-managed) or `environment.es_url` from `config.json` (user-provided/ECH). If index creation fails (e.g. cluster in read-only mode), add to `skipped_setup` and continue — but note it: noise-index testing will be skipped for this session.
+If the script exits non-zero (e.g. cluster read-only), add `{ "step": "noise-index", "reason": "<error>" }` to `skipped_setup` and continue — noise-index testing will be skipped for this session.
 
-Record the noise index alias in `config.json` under `"noise_index": "logs-exploratory.noise"` so the Explore Loop can reference it.
+On success, record `"noise_index": "logs-exploratory.noise"` in `config.json` so the Explore Loop can reference it.
 
 **Create test user (stateful only):**
 ```bash
@@ -692,7 +672,11 @@ Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
 
 ### Step 3a — Merge findings
 
-Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-session/report.md`:
+First enumerate which findings files exist:
+```bash
+ls .exploratory-session/findings-flow-*.md 2>/dev/null | sort -V
+```
+Read each file in that list, then write `.exploratory-session/report.md`:
 
 ```markdown
 # Exploratory Testing Report
@@ -788,12 +772,22 @@ With this initial structure:
 
 Append confirmed false positives (findings the user dismissed or reclassified) to `## Known non-bugs`. Append any navigation patterns discovered during this session that weren't already in the file to `## Navigation patterns`.
 
-If the file exceeds 100 lines, archive the current content to `knowledge/<area_slug>-archive-<date>.md`, start fresh with the initial structure above, and copy the most recently added entries from each section to the new file.
+Check line count before updating:
+```bash
+wc -l < x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
+```
+If the count exceeds 100, archive first:
+```bash
+TODAY=$(date -u +%Y-%m-%d)
+cp x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md \
+   x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>-archive-$TODAY.md
+```
+Then start fresh with the initial structure and copy the most recently added entries from each section.
 
 Commit the knowledge file:
 ```bash
 git add x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
-git commit -m "knowledge(exploratory-tester): update <area_slug> after session on <date>"
+git commit -m "knowledge(exploratory-tester): update <area_slug> after session on $(date -u +%Y-%m-%d)"
 ```
 
 ---
