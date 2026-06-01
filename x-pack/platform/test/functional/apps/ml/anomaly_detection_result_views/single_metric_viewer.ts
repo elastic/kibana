@@ -37,7 +37,6 @@ const DATAFEED_CONFIG: Datafeed = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('single metric viewer', function () {
@@ -45,7 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with single metric job', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -142,7 +140,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
         await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
         await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);

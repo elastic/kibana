@@ -109,6 +109,7 @@ export {
 
 export {
   fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

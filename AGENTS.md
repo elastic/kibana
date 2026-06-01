@@ -15,7 +15,7 @@
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
@@ -42,6 +42,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.

@@ -1,5 +1,5 @@
 {
-  "sha1": "80280c123ad403e3dcd3f449d4ab69cec031b016",
+  "sha1": "e79e215e144e7beba833fcbb65a4525c1cef5777",
   "tests": [
     {
       "id": "709f30ae5fb788f-05a1663c9e84f0e",
@@ -226,20 +226,6 @@
       }
     },
     {
-      "id": "2b7f497564b88f3-16f42721fa4c1db",
-      "title": "Discover app should refetch when autofresh is enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 77,
-        "column": 7
-      }
-    },
-    {
       "id": "2b7f497564b88f3-d0831360c44d882",
       "title": "Discover app load query should show query name",
       "expectedStatus": "passed",
@@ -249,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 100,
+        "line": 77,
         "column": 7
       }
     },
@@ -263,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 108,
+        "line": 85,
         "column": 7
       }
     },
@@ -277,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 112,
+        "line": 89,
         "column": 7
       }
     },
@@ -291,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 118,
+        "line": 95,
         "column": 7
       }
     },
@@ -305,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 137,
+        "line": 119,
         "column": 7
       }
     },
@@ -319,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 144,
+        "line": 126,
         "column": 7
       }
     },
@@ -333,7 +319,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 152,
+        "line": 134,
         "column": 7
       }
     },
@@ -347,7 +333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 161,
+        "line": 143,
         "column": 7
       }
     },
@@ -361,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 177,
+        "line": 159,
         "column": 7
       }
     },
@@ -375,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 192,
+        "line": 174,
         "column": 7
       }
     },
@@ -389,7 +375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 202,
+        "line": 184,
         "column": 7
       }
     },
@@ -403,7 +389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 218,
+        "line": 200,
         "column": 7
       }
     },
@@ -417,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 226,
+        "line": 208,
         "column": 7
       }
     },
@@ -431,7 +417,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 233,
+        "line": 215,
         "column": 7
       }
     },
@@ -445,7 +431,133 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 243,
+        "line": 225,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-79d3cf13237ee2d",
+      "title": "Discover ES|QL should switch the query bar to ES|QL and display the default sample query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-b96f9e502894bc8",
+      "title": "Discover ES|QL should create an ES|QL value variable control from the Discover editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-75f10f82cef9fbf",
+      "title": "Discover ES|QL should display a metric visualization for ES|QL STATS queries (count and sum)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-1081a7397d42c88",
+      "title": "Discover ES|QL should open the inline edit visualization flyout for an ES|QL chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 155,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-4b67968e425b300",
+      "title": "Discover ES|QL should save an ES|QL visualization to a new dashboard from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 176,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-dc0e7a2eb6e2df6",
+      "title": "Discover ES|QL should edit, explore in Discover, and copy an ES|QL panel from a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 195,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-f21c2c6ffe20444",
+      "title": "Discover ES|QL should restrict sidebar fields and grid columns to KEEP-listed fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 249,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-8bbbfff9121d488",
+      "title": "Discover ES|QL should embed a saved ES|QL Discover session on a dashboard and interact with its table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 269,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b807c730155cc2-ab47176f22b71bd",
+      "title": "Discover ES|QL should save an ES|QL bar histogram to a dashboard and edit it inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
+        "line": 309,
         "column": 7
       }
     },
