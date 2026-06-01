@@ -37,9 +37,6 @@ const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
     defaultMessage: 'Alerts and insights',
   }
 );
-const MACHINE_LEARNING_TITLE = i18n.translate('xpack.serverlessVectordb.nav.machineLearning', {
-  defaultMessage: 'Machine Learning',
-});
 const ACCESS_TITLE = i18n.translate('xpack.serverlessVectordb.nav.mngt.access', {
   defaultMessage: 'Access',
 });
@@ -116,65 +113,6 @@ export function createNavigationTree({
             title: i18n.translate('xpack.serverlessVectordb.nav.ingest.pipelines.title', {
               defaultMessage: 'Ingest',
             }),
-          },
-          {
-            id: 'ml_overview',
-            title: MACHINE_LEARNING_TITLE,
-            children: [
-              { link: 'ml:overview' },
-              { link: 'ml:dataVisualizer' },
-              { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
-              { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
-              { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
-              { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
-            ],
-          },
-          {
-            id: 'category-anomaly_detection',
-            title: i18n.translate('xpack.serverlessVectordb.nav.machineLearning.anomalyDetection', {
-              defaultMessage: 'Anomaly detection',
-            }),
-            breadcrumbStatus: 'hidden',
-            children: [
-              {
-                link: 'management:anomaly_detection',
-                title: i18n.translate(
-                  'xpack.serverlessVectordb.nav.machineLearning.anomalyDetection.manageJobs',
-                  {
-                    defaultMessage: 'Manage jobs',
-                  }
-                ),
-              },
-              { link: 'ml:anomalyExplorer' },
-              { link: 'ml:singleMetricViewer' },
-            ],
-          },
-          {
-            id: 'category-data_frame analytics',
-            title: i18n.translate(
-              'xpack.serverlessVectordb.nav.machineLearning.dataFrameAnalytics',
-              {
-                defaultMessage: 'Data frame analytics',
-              }
-            ),
-            breadcrumbStatus: 'hidden',
-            children: [{ link: 'ml:resultExplorer' }, { link: 'ml:analyticsMap' }],
-          },
-          {
-            id: 'category-aiops_labs',
-            title: i18n.translate('xpack.serverlessVectordb.nav.machineLearning.aiops_labs', {
-              defaultMessage: 'AIOps labs',
-            }),
-            breadcrumbStatus: 'hidden',
-            children: [
-              { link: 'ml:logRateAnalysis' },
-              { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
-              { link: 'ml:logPatternAnalysis' },
-              { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
-              { link: 'ml:changePointDetections' },
-              { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
-            ],
           },
         ],
         icon: 'database',
@@ -289,16 +227,6 @@ export function createNavigationTree({
                 breadcrumbStatus: 'hidden',
                 badgeType: 'new',
               },
-            ],
-          },
-          {
-            id: 'settings_ml',
-            title: MACHINE_LEARNING_TITLE,
-            children: [
-              { link: 'management:overview', breadcrumbStatus: 'hidden' },
-              { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
-              { link: 'management:anomaly_detection' },
-              { link: 'management:analytics' },
             ],
           },
           {
