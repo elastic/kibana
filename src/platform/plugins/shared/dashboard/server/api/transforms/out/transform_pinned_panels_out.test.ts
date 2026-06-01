@@ -9,6 +9,7 @@
 
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
   DEFAULT_RANGE_SLIDER_STATE,
   DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
@@ -96,6 +97,7 @@ describe('pinned panels', () => {
     {
       id: 'control1',
       type: OPTIONS_LIST_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
       grow: true,
       config: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -106,6 +108,7 @@ describe('pinned panels', () => {
     {
       id: 'control2',
       type: RANGE_SLIDER_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
       width: 'small',
       config: {
         ...DEFAULT_RANGE_SLIDER_STATE,
@@ -117,6 +120,7 @@ describe('pinned panels', () => {
     {
       id: 'control3',
       type: TIME_SLIDER_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
       grow: true,
       width: 'large',
       config: DEFAULT_TIME_SLIDER_STATE,

@@ -20,6 +20,7 @@ import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
 import type { Warnings } from '../../types';
+import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_schema';
 
 export type StoredPinnedPanels =
   Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
@@ -127,7 +128,7 @@ function transformPanels(
 
   panels.forEach((panel) => {
     const { transformOut, schema } = embeddableService.getTransforms(panel.type) ?? {};
-    let { config, ...rest } = panel;
+    let { config, type, ...rest } = panel;
     try {
       if (transformOut) {
         config = transformOut(config, [], containerReferences, panel.id) as DashboardPinnedPanel['config'];
@@ -141,7 +142,7 @@ function transformPanels(
             stripUnknownKeys: true,
           }) as DashboardPinnedPanel['config'];
       }
-      transformedPanels.push({ ...rest, config } as DashboardPinnedPanel);
+      transformedPanels.push({ ...pinnedControlSchema.validate(rest), config, type } as DashboardPinnedPanel);
     } catch (e) {
       warnings.push({
         type: 'dropped_panel',
