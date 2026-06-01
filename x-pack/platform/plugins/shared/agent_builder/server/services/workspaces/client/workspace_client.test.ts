@@ -30,9 +30,7 @@ const SAMPLE_FILES: Record<string, WorkspaceFile> = {
   },
 };
 
-const sampleDoc = (
-  overrides: Partial<WorkspaceDocument> = {}
-): WorkspaceDocument => ({
+const sampleDoc = (overrides: Partial<WorkspaceDocument> = {}): WorkspaceDocument => ({
   workspace_id: 'ws-1',
   space: 'default',
   schema_version: WORKSPACE_SCHEMA_VERSION,
