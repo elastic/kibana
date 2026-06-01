@@ -49,6 +49,31 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await expect(dataViewer).toContainText('Test run: true');
   });
 
+  test('should show the test execute modal Event tab and trigger events table', async ({
+    pageObjects,
+    page,
+  }) => {
+    const workflowName = 'Test Workflow Event Tab From Editor';
+
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.saveWorkflow();
+
+    await pageObjects.workflowEditor.clickRunButton();
+    await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
+
+    await expect(page.getByRole('heading', { name: 'Test Workflow', exact: true })).toBeVisible();
+
+    const eventTriggerTab = page.testSubj.locator('workflowExecuteModalTrigger-event');
+    await expect(eventTriggerTab).toBeEnabled();
+    await eventTriggerTab.click();
+
+    await page.testSubj.waitForSelector('workflowTriggerEventsTable', { state: 'visible' });
+    await page.testSubj.waitForSelector('workflow-trigger-events-query-input', {
+      state: 'visible',
+    });
+  });
+
   test('should run saved workflow from editor as test run with isTestRun: true', async ({
     pageObjects,
     page,

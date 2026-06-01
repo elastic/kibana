@@ -44,7 +44,7 @@ const evaluate = base.extend<
       await use(async ({ dataset }) => {
         await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async ({ input }) => {
               const startMs = Date.now();
               const response = await chatClient.converse({
