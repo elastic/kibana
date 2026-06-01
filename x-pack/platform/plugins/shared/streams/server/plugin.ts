@@ -641,13 +641,15 @@ export class StreamsPlugin
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {
-    const client = await workflowsExtensions.initManagedWorkflowsClient(
-      STREAMS_MANAGED_WORKFLOW_OWNER
-    );
-
     try {
+      const client = await workflowsExtensions.initManagedWorkflowsClient(
+        STREAMS_MANAGED_WORKFLOW_OWNER
+      );
+
       await installWorkflows({ client });
       this.logger.info('Streams managed workflows installed');
+
+      await client.ready();
     } catch (error) {
       this.logger.warn(
         `Failed to install streams managed workflows: ${
@@ -655,8 +657,6 @@ export class StreamsPlugin
         }`
       );
     }
-
-    await client.ready();
   }
 
   public async stop() {
