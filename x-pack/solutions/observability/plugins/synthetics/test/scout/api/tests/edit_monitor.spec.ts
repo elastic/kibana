@@ -42,7 +42,13 @@ apiTest.describe(
   },
   () => {
     let editorHeaders: Record<string, string>;
-    const httpMonitorJson = httpMonitorFixture;
+    // The FTR `http_monitor.json` fixture carried the Elastic-managed `dev`
+    // public location; the migrated fixture omits it, so add it back here.
+    // A monitor with zero locations is rejected with a 400 (LOCATION_REQUIRED_ERROR).
+    const httpMonitorJson: Record<string, unknown> = {
+      ...httpMonitorFixture,
+      locations: [LOCAL_PUBLIC_LOCATION],
+    };
     const spacesToCleanUp: string[] = [];
 
     const saveMonitor = async (
