@@ -11,7 +11,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -55,7 +55,11 @@ describe('AppHeaderView', () => {
   it('renders when the only content is a favorite action', () => {
     renderAppHeader(
       <AppHeaderView
-        favorite={<EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />}
+        favorite={
+          <EuiToolTip content="Favorite" disableScreenReaderOutput>
+            <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+          </EuiToolTip>
+        }
       />
     );
 
