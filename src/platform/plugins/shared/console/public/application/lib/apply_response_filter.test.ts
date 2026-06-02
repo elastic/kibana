@@ -20,7 +20,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text,
           contentType: TEXT_CONTENT_TYPE,
-          state: { expression: '', mode: 'regex', invertMatch: false },
+          state: { expression: '', mode: 'regex', invertMatch: false, isExpanded: false },
         })
       ).toBe(text);
     });
@@ -31,7 +31,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text,
           contentType: JSON_CONTENT_TYPE,
-          state: { expression: '', mode: 'jq', invertMatch: false },
+          state: { expression: '', mode: 'jq', invertMatch: false, isExpanded: false },
         })
       ).toBe(text);
     });
@@ -45,7 +45,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text,
           contentType: TEXT_CONTENT_TYPE,
-          state: { expression: 'p+l', mode: 'regex', invertMatch: false },
+          state: { expression: 'p+l', mode: 'regex', invertMatch: false, isExpanded: false },
         })
       ).toBe('apple\npineapple');
     });
@@ -55,7 +55,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text,
           contentType: TEXT_CONTENT_TYPE,
-          state: { expression: 'p+l', mode: 'regex', invertMatch: true },
+          state: { expression: 'p+l', mode: 'regex', invertMatch: true, isExpanded: false },
         })
       ).toBe('banana');
     });
@@ -65,7 +65,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text,
           contentType: TEXT_CONTENT_TYPE,
-          state: { expression: '*invalid', mode: 'regex', invertMatch: false },
+          state: { expression: '*invalid', mode: 'regex', invertMatch: false, isExpanded: false },
         })
       ).toBe(text);
     });
@@ -76,7 +76,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text: jsonText,
           contentType: JSON_CONTENT_TYPE,
-          state: { expression: 'status', mode: 'regex', invertMatch: false },
+          state: { expression: 'status', mode: 'regex', invertMatch: false, isExpanded: false },
         })
       ).toBe('  "status": "green",');
     });
@@ -89,7 +89,7 @@ describe('applyResponseFilter', () => {
       const result = applyResponseFilter({
         text,
         contentType: JSON_CONTENT_TYPE,
-        state: { expression: '.foo', mode: 'jq', invertMatch: false },
+        state: { expression: '.foo', mode: 'jq', invertMatch: false, isExpanded: false },
       });
       expect(result).toBe('"bar"');
     });
@@ -98,7 +98,7 @@ describe('applyResponseFilter', () => {
       const result = applyResponseFilter({
         text,
         contentType: JSON_CONTENT_TYPE,
-        state: { expression: 'blah invalid |||', mode: 'jq', invertMatch: false },
+        state: { expression: 'blah invalid |||', mode: 'jq', invertMatch: false, isExpanded: false },
       });
       expect(result).toBe(text);
     });
@@ -109,7 +109,7 @@ describe('applyResponseFilter', () => {
         applyResponseFilter({
           text: plainText,
           contentType: TEXT_CONTENT_TYPE,
-          state: { expression: '.foo', mode: 'jq', invertMatch: false },
+          state: { expression: '.foo', mode: 'jq', invertMatch: false, isExpanded: false },
         })
       ).toBe(plainText);
     });
