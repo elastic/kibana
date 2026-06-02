@@ -37,7 +37,7 @@ Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
 ```
-`Specs:` and `Session-timeout:` are optional. If omitted, the agent falls back to the official docs at `https://www.elastic.co/docs/solutions/security`. For user-provided environments append an `Environment:` block — see `phases/0-setup.md`.
+`Specs:`, `Session-timeout:`, and `isolate:` are optional. User-provided environments: append an `Environment:` block (see `phases/0-setup.md`).
 
 ## Red Flags
 
@@ -49,24 +49,15 @@ Session-timeout: 90    # optional, total session cap in minutes (default 90)
 | "I don't know how this feature works" | Check specs (`config.json → specs`) → official docs → UI → test files for user flows. |
 | "This error is expected" | Document it. The user decides — then add to `knowledge/<area-slug>.md`. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
-| "The flow name is ambiguous" | Take a snapshot, navigate from what you see. Never skip. |
-
 ## Phases
 
 Execute in order — read each file before starting it:
 
 | File | Contains |
 |---|---|
-| `phases/0-setup.md` | Prerequisites, environment boot, input parsing, role resolution, config.json |
-| `phases/1-wait-and-login.md` | Kibana readiness, login, space/data/user setup, area readiness |
-| `phases/2-explore.md` | Explore loop, checklist, mini-probe, navigation, findings discipline |
-| `phases/3-report.md` | Merge findings, filter noise, present report, update knowledge |
-| `templates/finding-format.md` | Finding entry format and level rules |
-| `templates/report-format.md` | report.md structure |
-| `scripts/create-noise-index.sh` | Creates non-ECS test data — executed by Phase 1 |
-| `scripts/create-flow-spaces.py` | Creates one Kibana space per parallel flow — executed by Phase 1 |
-| `scripts/delete-flow-spaces.py` | Deletes per-flow spaces created by this session — executed by Phase 3 |
-| `scripts/check-dom-anomalies.js` | DOM anomaly detector — pasted into `browser_evaluate` after each action |
-| `scripts/classify-console.js` | Console classifier — pasted into `browser_evaluate` with messages array injected |
-| `scripts/dedup-network.js` | Network duplicate detector — pasted into `browser_evaluate` with requests array injected |
-| `knowledge/<area_slug>.md` | Known non-bugs and navigation patterns — loaded at Phase 0 end |
+| `phases/0-setup.md` | Prerequisites, environment boot, input parsing, config.json |
+| `phases/1-wait-and-login.md` | Login, space/data/user setup, area readiness |
+| `phases/2-explore.md` | Explore loop, checklist, mini-probe, findings |
+| `phases/3-report.md` | Merge, filter noise, report, update knowledge |
+
+Supporting files in `templates/`, `scripts/`, and `knowledge/` are referenced inline from the phase files — read them when instructed.
