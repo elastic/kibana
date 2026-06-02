@@ -194,7 +194,11 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
 
   return (
     <EuiFlexGroup direction="column" css={{ position: 'relative', width: 580 }}>
-      <EuiToolTip content={closeCellActionPopoverText} disableScreenReaderOutput>
+      <EuiToolTip
+        content={closeCellActionPopoverText}
+        disableScreenReaderOutput
+        anchorProps={{ css: { position: 'absolute', right: 0 } }}
+      >
         <EuiButtonIcon
           aria-label={closeCellActionPopoverText}
           data-test-subj="docTableClosePopover"
@@ -202,7 +206,6 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           iconType="cross"
           size="xs"
           onClick={closePopover}
-          css={{ position: 'absolute', right: 0 }}
         />
       </EuiToolTip>
       {shouldRenderResource && (
