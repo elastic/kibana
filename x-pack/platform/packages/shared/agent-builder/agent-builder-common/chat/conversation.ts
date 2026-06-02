@@ -16,6 +16,7 @@ import type {
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
+import type { ConversationMetadataFields } from './conversation_metadata';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -265,7 +266,7 @@ export interface RoundModelUsageStats {
 /**
  * Main structure representing a conversation with an agent.
  */
-export interface Conversation {
+export interface Conversation extends ConversationMetadataFields {
   /** unique id for this conversation */
   id: string;
   /** id of the agent this conversation is bound to */

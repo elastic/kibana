@@ -11,12 +11,14 @@ import type {
   ListConversationsResponse,
   DeleteConversationResponse,
   RenameConversationResponse,
+  PatchConversationResponse,
 } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
+import type { ConversationMetadataUpdate } from '@kbn/agent-builder-common';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class ConversationsService {
@@ -53,6 +55,18 @@ export class ConversationsService {
       `${internalApiPath}/conversations/${conversationId}/_rename`,
       {
         body: JSON.stringify({ title }),
+      }
+    );
+  }
+
+  async patch({
+    conversationId,
+    ...update
+  }: { conversationId: string } & ConversationMetadataUpdate & { title?: string }) {
+    return await this.http.patch<PatchConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}`,
+      {
+        body: JSON.stringify(update),
       }
     );
   }

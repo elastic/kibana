@@ -29,6 +29,8 @@ const storageSettings = {
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
+      template_id: types.keyword({}),
+      custom_fields: types.object({ dynamic: true, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -44,6 +46,8 @@ export interface ConversationProperties {
   conversation_rounds: PersistentConversationRound[];
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
+  template_id?: string;
+  custom_fields?: Record<string, unknown>;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

@@ -34,6 +34,12 @@ export {
   isReasoningStep,
   isCompactionStep,
 } from './conversation';
+export type {
+  ConversationTemplateProfile,
+  TemplateSnapshot,
+  ConversationMetadataFields,
+  ConversationMetadataUpdate,
+} from './conversation_metadata';
 export {
   ChatEventType,
   type ChatEventBase,

@@ -42,6 +42,20 @@ export type Document = Pick<
   '_source' | '_id' | '_seq_no' | '_primary_term'
 >;
 
+const convertMetadataFromEs = (source: ConversationProperties) => {
+  return {
+    ...(source.template_id !== undefined && { template_id: source.template_id }),
+    ...(source.custom_fields !== undefined && { custom_fields: source.custom_fields }),
+  };
+};
+
+const convertMetadataToEs = (conversation: Conversation): Partial<ConversationProperties> => {
+  return {
+    ...(conversation.template_id !== undefined && { template_id: conversation.template_id }),
+    ...(conversation.custom_fields !== undefined && { custom_fields: conversation.custom_fields }),
+  };
+};
+
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
@@ -57,6 +71,7 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    ...convertMetadataFromEs(document._source),
   };
 };
 
@@ -219,6 +234,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...convertMetadataToEs(conversation),
   };
 };
 
@@ -265,5 +281,6 @@ export const createRequestToEs = ({
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...convertMetadataToEs(conversation),
   };
 };

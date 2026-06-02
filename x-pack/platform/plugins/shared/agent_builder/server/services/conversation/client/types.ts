@@ -25,7 +25,17 @@ export type ConversationCreateRequest = Omit<
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state'>>;
+  Partial<
+    Pick<
+      Conversation,
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'template_id'
+      | 'custom_fields'
+    >
+  >;
 
 export interface ConversationListOptions {
   agentId?: string;

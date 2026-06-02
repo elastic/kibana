@@ -19,3 +19,11 @@ export interface RenameConversationResponse {
   id: string;
   title: string;
 }
+
+/** Response for PATCH conversation (title + metadata allowlist). */
+export interface PatchConversationResponse {
+  id: string;
+  title?: string;
+  template_id?: string;
+  custom_fields?: Record<string, unknown>;
+}

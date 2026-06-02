@@ -552,6 +552,19 @@ describe('conversation model converters', () => {
 
       expect(serialized.state).toBeUndefined();
     });
+
+    it('serializes conversation metadata fields', () => {
+      const conversation: Conversation = {
+        ...conversationBase(),
+        template_id: 'incident-triage-v2',
+        custom_fields: { severity: 'high', status: 'open' },
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.template_id).toBe('incident-triage-v2');
+      expect(serialized.custom_fields).toEqual({ severity: 'high', status: 'open' });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -588,6 +601,26 @@ describe('conversation model converters', () => {
       });
 
       expect(serialized.state).toBeUndefined();
+    });
+
+    it('includes conversation metadata when creating new conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        template_id: 'incident-triage-v2',
+        custom_fields: { severity: 'medium' },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.template_id).toBe('incident-triage-v2');
+      expect(serialized.custom_fields).toEqual({ severity: 'medium' });
     });
   });
 });

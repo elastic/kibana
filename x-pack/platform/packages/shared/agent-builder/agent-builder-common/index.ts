@@ -212,6 +212,11 @@ export {
   conversationToTimelineConversation,
   timelineConversationToConversation,
   agentExecutionEventToRound,
+  type ConversationListOptions,
+  type ConversationTemplateProfile,
+  type TemplateSnapshot,
+  type ConversationMetadataFields,
+  type ConversationMetadataUpdate,
 } from './chat';
 export {
   type PublicSkillDefinition,
