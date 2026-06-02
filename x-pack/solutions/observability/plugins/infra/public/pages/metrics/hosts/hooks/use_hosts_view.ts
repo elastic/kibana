@@ -21,9 +21,10 @@ import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 // First-paint double-fire gate. The same gate is used by `useHostCount`
-// and `useHostsKpis` so all three fetchers fire once after the unified
-// search context settles instead of twice — and so `/host` and
-// `/host/kpis` start in the same animation frame (max, not sum).
+// and `useHostsKpisEsql` so all three fetchers fire once after the unified
+// search context settles instead of twice — and so the `/host` request and
+// the client-side ES|QL KPI query start in the same animation frame (max,
+// not sum).
 import { useHostsPageReady } from './use_hosts_page_ready';
 import { markOnce, measureSince } from '../utils/perf_marks';
 import type {

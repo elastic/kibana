@@ -14,14 +14,11 @@ import {
   GetInfraEntityCountRequestBodyPayloadRT,
   GetInfraEntityCountResponsePayloadRT,
   GetInfraEntityCountRequestParamsPayloadRT,
-  GetHostsKpisRequestBodyPayloadRT,
-  GetHostsKpisResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
-import { getHostsKpis } from './lib/host/get_hosts_kpis';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
@@ -127,43 +124,6 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         entityType,
         count,
       });
-    })
-  );
-
-  // KPI summary endpoint. Replaces four parallel Lens-driven DSL fan-outs
-  // (one per tile) with one request that returns the four headline scalars +
-  // the host count for the "Average (of N hosts)" subtitle. No time
-  // bucketing (there is no trend line) so the engine-side cell count is
-  // `O(hosts × per-state slices)`, well under any realistic Serverless
-  // circuit-breaker budget.
-  framework.registerRoute(
-    {
-      method: 'post',
-      path: '/api/metrics/infra/host/kpis',
-      validate: {
-        body: createRouteValidationFunction(GetHostsKpisRequestBodyPayloadRT),
-        query: createRouteValidationFunction(InspectQueryRT),
-      },
-    },
-    withInspect(async (context, request) => {
-      // KPIs are computed over the entire filter-matched fleet; the
-      // contract carries no `names` and no `limit`. The "(of N hosts)"
-      // subtitle is rendered client-side as `min(hostCount, limit)` so
-      // the displayed scope stays consistent with the table the user
-      // also sees.
-      const { from, to, query, schema = DEFAULT_SCHEMA } = request.body;
-
-      const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
-
-      const result = await getHostsKpis({
-        infraMetricsClient,
-        from,
-        to,
-        query,
-        schema,
-      });
-
-      return GetHostsKpisResponsePayloadRT.encode(result);
     })
   );
 };

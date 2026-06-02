@@ -8,12 +8,13 @@
 // Regression gate for the Hosts UI KPI render path.
 //
 // The four KPI tiles (CPU, Normalized Load, Memory, Disk) are served by a
-// single `POST /api/metrics/infra/host/kpis` request that fires in parallel
-// with the `/host` table fetch (both gated on `useHostsPageReady`). This
-// journey self-seeds a semconv (OTel host metrics) fleet, loads the Hosts
-// page cold, and reads the `infra.hosts.*` User Timing measures emitted by
-// the page hooks (see `pages/metrics/hosts/utils/perf_marks.ts`) to capture
-// table- vs KPI-readiness as distinct, parallel signals.
+// single client-side ES|QL `STATS` query (over the data plugin) that fires
+// in parallel with the `/host` table fetch (both gated on
+// `useHostsPageReady`). This journey self-seeds a semconv (OTel host
+// metrics) fleet, loads the Hosts page cold, and reads the `infra.hosts.*`
+// User Timing measures emitted by the page hooks (see
+// `pages/metrics/hosts/utils/perf_marks.ts`) to capture table- vs
+// KPI-readiness as distinct, parallel signals.
 //
 // Complements `infra_hosts_view_semconv.ts` (which gates the KPI *grid*
 // render via `waitForCharts`); this journey gates the finer-grained

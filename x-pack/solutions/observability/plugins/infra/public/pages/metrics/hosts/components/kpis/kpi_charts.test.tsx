@@ -9,14 +9,14 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KpiCharts } from './kpi_charts';
-import type { HostsKpis } from '../../../../../../common/http_api';
+import type { HostsKpis } from '../../hooks/use_hosts_kpis_esql';
 
 const mockUseHostsKpis = jest.fn();
 const mockUseHostCountContext = jest.fn();
 const mockUseUnifiedSearchContext = jest.fn();
 
-jest.mock('../../hooks/use_hosts_kpis', () => ({
-  useHostsKpis: () => mockUseHostsKpis(),
+jest.mock('../../hooks/use_hosts_kpis_esql', () => ({
+  useHostsKpisEsql: () => mockUseHostsKpis(),
 }));
 jest.mock('../../hooks/use_host_count', () => ({
   useHostCountContext: () => mockUseHostCountContext(),
@@ -100,7 +100,7 @@ describe('KpiCharts', () => {
     });
   });
 
-  it('renders the four KPI tiles from the summary endpoint', async () => {
+  it('renders the four KPI tiles from the ES|QL KPI query', async () => {
     renderKpiCharts();
 
     await waitFor(() => {

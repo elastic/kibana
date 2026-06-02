@@ -6,12 +6,12 @@
  */
 
 // Renders the four headline KPI tiles (CPU Usage, Normalized Load, Memory
-// Usage, Disk Usage) from a single server-side request (ES|QL `STATS` on
-// semconv, DSL siblings on ECS) instead of four parallel Lens charts. These
-// used to be `<Kpi>` components wrapping `<LensChart>`; this path uses the
-// lighter `<MetricChartWrapper>` (a plain Elastic Charts `Metric`) driven by
-// the `useHostsKpis` hook. The visual contract (header / value / subtitle /
-// tooltip) is preserved — only the data path changes.
+// Usage, Disk Usage) from a single client-side ES|QL `STATS` request issued
+// over the data plugin (`useHostsKpisEsql`) instead of four parallel Lens
+// charts. These used to be `<Kpi>` components wrapping `<LensChart>`; this
+// path uses the lighter `<MetricChartWrapper>` (a plain Elastic Charts
+// `Metric`). The visual contract (header / value / subtitle / tooltip) is
+// preserved — only the data path changes.
 //
 // Trade-off: dropping Lens for the KPI strip also drops the per-tile
 // sparkline trend line and the "Open in Lens" affordance. The headline
@@ -47,7 +47,7 @@ const DISK_USAGE_LABEL = i18n.translate('xpack.infra.assetDetails.metrics.label.
   defaultMessage: 'Disk Usage',
 });
 import { TooltipContent } from '../../../../../components/lens';
-import { useHostsKpis } from '../../hooks/use_hosts_kpis';
+import { useHostsKpisEsql } from '../../hooks/use_hosts_kpis_esql';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { MetricChartWrapper } from '../chart/metric_chart_wrapper';
@@ -108,7 +108,7 @@ export const HostKpiTiles = () => {
   const { euiTheme } = useEuiTheme();
   const { searchCriteria } = useUnifiedSearchContext();
   const { count: hostCount } = useHostCountContext();
-  const { kpis, loading } = useHostsKpis();
+  const { kpis, loading } = useHostsKpisEsql();
 
   const inventoryModel = findInventoryModel('host');
   const schema = searchCriteria?.preferredSchema;

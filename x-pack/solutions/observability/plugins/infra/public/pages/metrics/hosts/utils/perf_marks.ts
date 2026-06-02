@@ -18,7 +18,7 @@
 //   - `navigationStart`        — set on `HostsPage` mount.
 //   - `hostCountReadyDuration` — `/api/infra/host/count` resolved.
 //   - `tableReadyDuration`     — `/api/metrics/infra/host` resolved.
-//   - `kpiReadyDuration`       — `/api/metrics/infra/host/kpis` resolved.
+//   - `kpiReadyDuration`       — client-side ES|QL KPI query resolved.
 
 export function markOnce(name: string): void {
   if (typeof performance === 'undefined' || typeof performance.mark !== 'function') {

@@ -6,15 +6,15 @@
  */
 
 // First-paint double-fire gate for the Hosts page data fetchers
-// (`useHostsView`, `useHostCount`, `useHostsKpis`). Returns `true` when all
-// upstream prerequisites have settled so the downstream `useFetcher`
+// (`useHostsView`, `useHostCount`, `useHostsKpisEsql`). Returns `true` when
+// all upstream prerequisites have settled so the downstream `useFetcher`
 // callsites can fire once instead of twice.
 //
 // This gate is also load-bearing for the KPI strip's parallelism: because
-// `useHostsView` (the `/host` table fetch) and `useHostsKpis` (the
-// `/host/kpis` summary fetch) read from the *same* gate, both requests fire
+// `useHostsView` (the `/host` table fetch) and `useHostsKpisEsql` (the
+// client-side ES|QL KPI query) read from the *same* gate, both requests fire
 // in the same animation frame once the gate opens, so user-perceived KPI
-// latency is `max(/host, /kpis)` rather than `/host + /kpis`. Do not
+// latency is `max(/host, kpis)` rather than `/host + kpis`. Do not
 // reintroduce per-hook readiness checks that would re-serialise the fetches.
 //
 // Two upstream resolutions settle asynchronously on first load. Each one

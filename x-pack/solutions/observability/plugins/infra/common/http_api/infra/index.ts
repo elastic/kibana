@@ -7,4 +7,3 @@
 
 export * from './get_infra_metrics';
 export * from './get_infra_count';
-export * from './get_hosts_kpis';
