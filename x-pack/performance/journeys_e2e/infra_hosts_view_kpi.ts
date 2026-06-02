@@ -16,6 +16,15 @@
 // `pages/metrics/hosts/utils/perf_marks.ts`) to capture table- vs
 // KPI-readiness as distinct, parallel signals.
 //
+// Benchmark fidelity: mirrors the Hosts UI PoC harness
+// (`infra_hosts_view_tier1_poc.ts` / `hosts_semconv_tsds` scenario) so KPI
+// numbers are directly comparable — 1500 semconv hosts over a 24 h window on
+// a production-shaped TSDS OTel data stream, with both the `_g` time picker
+// and `_a.dateRange` set to `now-24h` → `now`. A 5 m sampling interval keeps
+// the seed at ~432k docs (vs ~4.3M at 30s) while preserving the same fleet
+// cardinality and time window — anything denser is re-aggregated by the
+// query layer at this range anyway.
+//
 // Complements `infra_hosts_view_semconv.ts` (which gates the KPI *grid*
 // render via `waitForCharts`); this journey gates the finer-grained
 // `tableReadyDuration` / `kpiReadyDuration` User Timing measures specific to
@@ -29,7 +38,16 @@ import { generateHostsSemconvData } from '../synthtrace_data/hosts_semconv_data'
 
 const TIMEOUT_MS = 120_000;
 
-const HOSTS_VIEW_PATH = `app/metrics/hosts?_g=(time:(from:'now-15m',to:'now'))&_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),preferredSchema:semconv,query:(language:kuery,query:''))`;
+// 24 h seed window matching the PoC benchmark. `LOOK_BACK_TIME` widens the
+// TSDS acceptance window (window + 1 h buffer) so the backdated `now-24h`
+// seed range ingests without rejection.
+const SEED_WINDOW_MS = 1000 * 60 * 60 * 24;
+const SEED_FROM = new Date(Date.now() - SEED_WINDOW_MS);
+const SEED_TO = new Date();
+const LOOK_BACK_TIME = '25h';
+const HOST_COUNT = 1500;
+
+const HOSTS_VIEW_PATH = `app/metrics/hosts?_g=(time:(from:'now-24h',to:'now'))&_a=(dateRange:(from:now-24h,to:now),filters:!(),limit:500,panelFilters:!(),preferredSchema:semconv,query:(language:kuery,query:''))`;
 
 interface WaitOpts {
   timeoutMs?: number;
@@ -97,11 +115,21 @@ const emitHostsPerfMeasures = async (page: Page, log: ToolingLog) => {
 export const journey = new Journey({
   synthtrace: {
     type: 'infra',
+    // Seed onto a production-shaped TSDS OTel data stream (the default
+    // journey path is plain data streams) so the KPI ES|QL `STATS` runs on
+    // the same `index.mode: time_series` code path the Hosts UI exercises in
+    // production — matching the PoC benchmark.
+    setupClient: (client) => {
+      if ('setOtelDataStreamTemplateOptions' in client) {
+        client.setOtelDataStreamTemplateOptions({ tsds: true, lookBackTime: LOOK_BACK_TIME });
+      }
+    },
     generator: generateHostsSemconvData,
     options: {
-      from: new Date(Date.now() - 1000 * 60 * 10),
-      to: new Date(),
-      count: 1000,
+      from: SEED_FROM,
+      to: SEED_TO,
+      count: HOST_COUNT,
+      interval: '5m',
     },
   },
 }).step('Load Hosts view and measure KPI readiness', async ({ page, kbnUrl, log }) => {

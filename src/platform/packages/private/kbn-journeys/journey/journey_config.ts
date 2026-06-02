@@ -14,12 +14,18 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SynthtraceGenerator } from '@kbn/synthtrace-client/src/types';
 import type { Readable } from 'stream';
 import type { BaseStepCtx } from './journey';
-import type { SynthtraceDataType } from '../services/synthtrace';
+import type { SynthtraceClient, SynthtraceDataType } from '../services/synthtrace';
 
 interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
   type: SynthtraceDataType;
   generator: (options: O) => Readable | SynthtraceGenerator<T>;
   options: O;
+  /**
+   * Optional hook to configure the resolved synthtrace client before any
+   * documents are indexed (e.g. enabling the TSDS OTel data-stream template
+   * for benchmark fidelity). Runs once, right before `client.index(...)`.
+   */
+  setupClient?: (client: SynthtraceClient) => void | Promise<void>;
 }
 
 export interface RampConcurrentUsersAction {
