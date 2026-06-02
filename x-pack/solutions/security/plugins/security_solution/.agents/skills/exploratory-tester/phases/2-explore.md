@@ -92,10 +92,13 @@ Before moving to the next checklist step:
 ### When uncertain about expected behavior
 
 Consult in order — stop when you have enough to proceed:
-1. UI labels, tooltips, help text, onboarding copy visible in the browser
-2. Official docs: `https://www.elastic.co/docs/solutions/security`
-3. Cypress (`.cy.ts`) or functional test files — for intended user flows **only**. Never copy selectors, CSS classes, or `data-test-subj` values.
-4. **Never source code** — React components, hooks, reducers, API handlers are off-limits. The implementation may itself be wrong.
+1. **Specs** (`config.json → specs`) — if the user provided a PRD, acceptance criteria, or design doc, read it first. It is the authoritative source of truth for intended behavior.
+2. **Official docs** (`config.json → specs_fallback`, default `https://www.elastic.co/docs/solutions/security`) — if no specs were provided, or the specs don't cover the specific behavior in question, consult the official documentation.
+3. **UI** — labels, tooltips, help text, and onboarding copy visible in the browser.
+4. **Test files** — Cypress (`.cy.ts`) or functional test files for intended user flows **only**. Never copy selectors, CSS classes, or `data-test-subj` values.
+5. **Never source code** — React components, hooks, reducers, API handlers are off-limits. The implementation may itself be wrong.
+
+**Specs vs fallback:** if both a spec and official docs exist, the spec wins for anything it covers explicitly. Use official docs for anything the spec is silent on.
 
 ### Navigation
 

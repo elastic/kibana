@@ -26,11 +26,16 @@ Write once at the top of each `findings-flow-<N>.md` file, before the first find
 <what actually happened — include error messages verbatim, HTTP status codes, console output>
 
 ### Expected behavior
-<what should have happened — derive from: (1) the `expected` field in config.json, (2) what the UI
-communicates via labels, tooltips, help text, or in-product copy, (3) standard UX heuristics (actions
-give feedback, destructive operations ask confirmation, successful saves navigate away), (4) official
-docs at https://www.elastic.co/docs/solutions/security, (5) test files for intended user flows.
-Never read source code or component internals — the implementation may be incorrect.>
+<what should have happened — derive from the first source that covers this behavior:
+(1) `config.json → specs` — if the user provided a PRD or acceptance criteria, cite it explicitly
+    (e.g. "Per spec at <url>: ..."). This is the authoritative source.
+(2) `config.json → specs_fallback` (official docs) — if no specs, or specs are silent on this point.
+    Cite the specific doc URL and section.
+(3) `config.json → flows[N].expected` — the expected outcome stated in the flow definition.
+(4) UI copy — labels, tooltips, help text visible in the product.
+(5) Test files — intended user flows only, never selectors.
+Never read source code or component internals — the implementation may be incorrect.
+Never write "expected behavior unknown" — if none of the above apply, use (4) or (5) and say so.>
 
 ### Why this might be an issue
 <mandatory for Level 1 and 2: commit to reasoning, explain user impact>

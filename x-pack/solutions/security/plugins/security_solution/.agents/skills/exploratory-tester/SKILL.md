@@ -33,8 +33,9 @@ Flows:
     expected: <correct outcome>
     timeout: <minutes>
 Setup: <connector name>, role: <role>
+Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 ```
-For user-provided environments append an `Environment:` block — see `phases/0-setup.md`.
+`Specs:` is optional. If omitted, the agent falls back to the official docs at `https://www.elastic.co/docs/solutions/security`. For user-provided environments append an `Environment:` block — see `phases/0-setup.md`.
 
 ## Red Flags
 
@@ -43,7 +44,7 @@ For user-provided environments append an `Environment:` block — see `phases/0-
 | "This area looks fine — I didn't find anything" | Did you attempt every checklist step? Did step 3 use the noise index? |
 | "All my test data is well-formed ECS" | Real customer data has non-ECS field types. Use the noise index for data-view flows. |
 | "Let me check the source code / test file selectors" | **Hard stop.** The implementation may be wrong. Navigate from what's visible in the browser. |
-| "I don't know how this feature works" | UI → official docs → test files for user flows. Then return to the browser. |
+| "I don't know how this feature works" | Check specs (`config.json → specs`) → official docs → UI → test files for user flows. |
 | "This error is expected" | Document it. The user decides — then add to `knowledge/<area-slug>.md`. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
 | "The flow name is ambiguous" | Take a snapshot, navigate from what you see. Never skip. |

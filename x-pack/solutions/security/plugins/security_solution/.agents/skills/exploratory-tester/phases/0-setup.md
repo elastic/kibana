@@ -63,7 +63,7 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 
 ## Step 0b — Parse input
 
-**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, and `mode` directly from the invocation text.
+**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, and `mode` directly from the invocation text.
 
 For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
 
@@ -79,7 +79,7 @@ gh issue view <NUMBER> --repo elastic/kibana --json number,title,body,comments
 gh pr view <NUMBER> --repo elastic/kibana --json number,title,body,comments
 ```
 
-Find the **latest** comment containing `## Exploratory testing scope`. Parse `### Area`, `### Flows`, `### Setup`, `### Environment`.
+Find the **latest** comment containing `## Exploratory testing scope`. Parse `### Area`, `### Flows`, `### Setup`, `### Environment`, `### Specs`.
 
 If no `## Exploratory testing scope` comment is found — **stop** and show the user this format:
 ```markdown
@@ -96,6 +96,9 @@ If no `## Exploratory testing scope` comment is found — **stop** and show the 
 
 ### Setup
 - <connector or role requirement, one per line>
+
+### Specs
+<URL or file path to PRD / acceptance criteria / design doc — optional>
 ```
 
 **Failures:**
@@ -181,6 +184,8 @@ Write `.exploratory-session/config.json`:
     "role": "<scope role>",
     "resolved_role": "<resolved role — never admin>"
   },
+  "specs": "<URL or file path provided in Specs: field, or null if not provided>",
+  "specs_fallback": "https://www.elastic.co/docs/solutions/security",
   "skipped_setup": [],
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],
