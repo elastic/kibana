@@ -342,6 +342,24 @@ describe('SearchSLODefinitions', () => {
       expect(result.results[0].remote).toBeUndefined();
     });
 
+    it('does not build a remote object for a local SLO when kibanaUrl is set', async () => {
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Local SLO',
+          groupBy: [],
+          remoteName: 'local',
+          kibanaUrl: 'https://local-kibana.example.com',
+        },
+      ]);
+
+      mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
+
+      const result = await searchSLODefinitions.execute({});
+
+      expect(result.results[0].remote).toBeUndefined();
+    });
+
     it('handles missing slo data gracefully', async () => {
       const mockResponse = {
         aggregations: {
