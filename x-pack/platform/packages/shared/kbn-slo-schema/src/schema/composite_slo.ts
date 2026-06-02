@@ -113,10 +113,24 @@ const compositeSloSummarySchema = z.object({
   oneDayBurnRate: z.number(),
 });
 
+const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
+
+const compositeSloSummaryResponseSchema = compositeSloBaseDefinitionSchema.extend({
+  summary: compositeSloSummarySchema,
+  members: z.array(compositeSloMemberSummarySchema),
+});
+
 type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOSummaryResponse = z.infer<typeof compositeSloSummaryResponseSchema>;
 
-export type { CompositeSLOMemberSummary, CompositeSLOSummary };
+export type {
+  CompositeSLOMemberSummary,
+  CompositeSLOSummary,
+  CompositeSLODefinitionResponse,
+  CompositeSLOSummaryResponse,
+};
 
 export {
   COMPOSITE_SLO_MIN_MEMBERS,
@@ -136,4 +150,6 @@ export {
   storedCompositeSloDefinitionSchema,
   compositeSloMemberSummarySchema,
   compositeSloSummarySchema,
+  compositeSloDefinitionResponseSchema,
+  compositeSloSummaryResponseSchema,
 };

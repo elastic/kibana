@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { FindCompositeSLOResponse } from '@kbn/slo-schema';
+import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
@@ -24,7 +24,7 @@ import { CompositeSloDeleteModal } from './composite_slo_delete_modal';
 import { CompositeSloTable } from './composite_slo_table';
 import { CompositeSloToolbar } from './composite_slo_toolbar';
 
-type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
+type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 export function CompositeSloList() {
   useRefreshCompositeSloSummaries();

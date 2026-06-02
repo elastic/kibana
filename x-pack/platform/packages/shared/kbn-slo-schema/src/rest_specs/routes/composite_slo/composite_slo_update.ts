@@ -13,7 +13,6 @@ import {
   compositeRollingTimeWindowSchema,
   compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
 } from '../../../schema/composite_slo';
 
 const updateCompositeSLOParamsSchema = z.object({
@@ -33,10 +32,7 @@ const updateCompositeSLOParamsSchema = z.object({
   }),
 });
 
-const updateCompositeSLOResponseSchema = compositeSloDefinitionSchema;
-
 type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOParamsSchema.shape.body>;
-type UpdateCompositeSLOResponse = z.infer<typeof updateCompositeSLOResponseSchema>;
 
-export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
-export type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse };
+export { updateCompositeSLOParamsSchema };
+export type { UpdateCompositeSLOInput };

@@ -7,7 +7,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { FindCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
+import type { CompositeSLODefinitionResponse, CompositeSLOSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { ActiveAlerts } from '../../../hooks/active_alerts';
@@ -28,7 +28,7 @@ const useKibanaMock = useKibana as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
-type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
+type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): CompositeSLOItem => ({
   id: 'composite-slo-1',
@@ -50,8 +50,8 @@ const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): Compo
 });
 
 const buildCompositeSloDetails = (
-  overrides: Partial<GetCompositeSLOResponse> = {}
-): GetCompositeSLOResponse => ({
+  overrides: Partial<CompositeSLOSummaryResponse> = {}
+): CompositeSLOSummaryResponse => ({
   id: 'composite-slo-1',
   name: 'My Composite SLO',
   description: 'A test composite SLO',
@@ -100,7 +100,7 @@ const defaultTableProps = {
   sortDirection: 'desc' as const,
   isDetailsLoading: false,
   isHistoricalLoading: false,
-  detailsById: new Map<string, GetCompositeSLOResponse>(),
+  detailsById: new Map<string, CompositeSLOSummaryResponse>(),
   historicalSummaryById: new Map(),
   onPageChange: jest.fn(),
   onPerPageChange: jest.fn(),

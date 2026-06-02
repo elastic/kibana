@@ -27,8 +27,8 @@ import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type {
-  FindCompositeSLOResponse,
-  GetCompositeSLOResponse,
+  CompositeSLODefinitionResponse,
+  CompositeSLOSummaryResponse,
   HistoricalSummaryResponse,
 } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -50,7 +50,7 @@ import {
 import { CompositeSloMembersTable } from './composite_slo_members_table';
 import { SloSparkline } from './slo_sparkline';
 
-type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
+type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 const SORTABLE_FIELDS: Record<string, CompositeSloSortBy> = {
   name: 'name',
@@ -67,7 +67,7 @@ interface CompositeSloTableProps {
   sortDirection: CompositeSloSortDirection;
   isDetailsLoading: boolean;
   isHistoricalLoading: boolean;
-  detailsById: Map<string, GetCompositeSLOResponse>;
+  detailsById: Map<string, CompositeSLOSummaryResponse>;
   historicalSummaryById: Map<string, HistoricalSummaryResponse[]>;
   onPageChange: (pageIndex: number) => void;
   onPerPageChange: (pageSize: number) => void;
