@@ -28,8 +28,7 @@ jest.mock('@kbn/esql-editor', () => ({
 }));
 
 jest.mock('./compose_discover_form', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useFormContext } = require('react-hook-form');
+  const { useFormContext } = jest.requireActual('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
     getSteps: (isAlert: boolean) => ({

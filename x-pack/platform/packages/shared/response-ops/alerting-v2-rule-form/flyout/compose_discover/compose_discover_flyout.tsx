@@ -305,7 +305,8 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   // it establishes new default values. Two extra refs compensate:
   // - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
   // - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
-  //   editing still shows the confirmation dialog.
+  //   editing still shows the confirmation dialog. Intentionally sticky for the
+  //   flyout's lifetime — resets only on unmount (close/discard).
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
