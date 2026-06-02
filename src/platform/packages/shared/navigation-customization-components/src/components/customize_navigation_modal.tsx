@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
@@ -26,12 +26,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
 import { HiddenItemsSection } from './hidden_items_section';
-import { SpaceCallout } from './space_callout';
 import { useItemList } from './use_item_list';
-import type { NavigationItemInfo } from '../types';
 
 const modalCss = css`
   width: 576px;
@@ -43,22 +44,18 @@ const headerCss = (euiTheme: EuiThemeComputed) => css`
 
 interface Props {
   items: NavigationItemInfo[];
-  isCalloutDismissed: boolean;
   onSave: (order: string[], hiddenIds: string[]) => void;
   onReset: () => NavigationItemInfo[];
   onChange: (order: string[], hiddenIds: string[]) => void;
   onClose: () => void;
-  onDismissCallout: () => void;
 }
 
 export const CustomizeNavigationModal = ({
   items: initialItems,
-  isCalloutDismissed,
   onSave,
   onReset,
   onChange,
   onClose,
-  onDismissCallout,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
@@ -73,12 +70,6 @@ export const CustomizeNavigationModal = ({
   } = useItemList(initialItems);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [calloutDismissed, setCalloutDismissed] = useState(isCalloutDismissed);
-
-  const handleDismissCallout = useCallback(() => {
-    setCalloutDismissed(true);
-    onDismissCallout();
-  }, [onDismissCallout]);
 
   useEffect(() => {
     const order = items.map((item) => item.id);
@@ -127,12 +118,15 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {!calloutDismissed && (
-          <>
-            <SpaceCallout onDismissCallout={handleDismissCallout} />
-            <EuiSpacer size="m" />
-          </>
-        )}
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          title={i18n.translate('navigationCustomizationComponents.spaceCallout', {
+            defaultMessage: 'Reorder or hide apps in this space without affecting other users.',
+          })}
+        />
+        <EuiSpacer size="m" />
         <EuiDragDropContext onDragEnd={createDragEndHandler('visible')}>
           <EuiDroppable droppableId="nav-items" spacing="none">
             {visibleItems.map((item, index) => (

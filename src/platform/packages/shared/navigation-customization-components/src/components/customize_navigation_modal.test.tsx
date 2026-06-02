@@ -66,18 +66,11 @@ describe('CustomizeNavigationModal', () => {
     expect(screen.getByText('Reset to default')).toBeInTheDocument();
   });
 
-  it('should show the space callout when not dismissed', () => {
-    renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={false} />);
+  it('should show the space callout', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     expect(
       screen.getByText('Reorder or hide apps in this space without affecting other users.')
     ).toBeInTheDocument();
-  });
-
-  it('should not show the space callout when dismissed', () => {
-    renderWithI18n(<CustomizeNavigationModal {...defaultProps} isCalloutDismissed={true} />);
-    expect(
-      screen.queryByText('Reorder or hide apps in this space without affecting other users.')
-    ).not.toBeInTheDocument();
   });
 
   it('should call onClose when the modal is closed', async () => {
