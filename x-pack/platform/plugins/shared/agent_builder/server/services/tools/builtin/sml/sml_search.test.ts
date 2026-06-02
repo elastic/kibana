@@ -106,7 +106,6 @@ describe('createSmlSearchTool', () => {
         references: [{ uri: 'dashboard://abc' }],
         spaces: ['default'],
         permissions: [],
-        ingestion_method: 'crawled',
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });

@@ -1283,6 +1283,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled',
       });
       expect(result.get('doc-2')).toEqual({
         id: 'doc-2',
@@ -1298,6 +1299,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled',
       });
     });
 
@@ -1357,6 +1359,7 @@ describe('SmlService', () => {
         updated_at: '2026-04-02T00:00:00.000Z',
         spaces: ['default'],
         permissions: ['saved_object:dashboard/get'],
+        ingestion_method: 'crawled',
       });
     });
 
@@ -1463,6 +1466,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled' as const,
       },
     };
 

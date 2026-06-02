@@ -1045,6 +1045,7 @@ const getDocumentsByIds = async ({
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
+        ingestion_method: source.ingestion_method ?? 'crawled',
       };
       if (source.description !== undefined) {
         doc.description = source.description;
@@ -1126,6 +1127,7 @@ const getDocumentById = async ({
       updated_at: source.updated_at ?? '',
       spaces: source.spaces ?? [],
       permissions: source.permissions ?? [],
+      ingestion_method: source.ingestion_method ?? 'crawled',
     };
   } catch (error) {
     if (isNotFoundError(error)) {
@@ -1210,6 +1212,7 @@ const listDocuments = async ({
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          ingestion_method: source.ingestion_method ?? 'crawled',
         };
       });
 
@@ -1299,6 +1302,7 @@ const upsertDocument = async ({
     updated_at: now,
     spaces: existing?.spaces ?? [spaceId],
     permissions: document.permissions ?? [],
+    ingestion_method: 'manual',
   };
 
   await smlClient.index({ id, document: fullDocument });

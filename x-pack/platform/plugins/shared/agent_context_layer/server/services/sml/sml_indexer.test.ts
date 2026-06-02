@@ -199,6 +199,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: ['perm1'],
+        ingestion_method: 'crawled',
         discovery_labels: [
           { value: 'My Viz', kind: 'title' },
           { value: 'lens', kind: 'type' },
@@ -278,6 +279,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default'],
         permissions: ['saved_object:dashboard/get'],
+        ingestion_method: 'crawled',
       });
     });
 
