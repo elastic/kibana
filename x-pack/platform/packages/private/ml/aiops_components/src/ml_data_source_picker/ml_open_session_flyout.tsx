@@ -22,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
@@ -31,12 +31,8 @@ import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/di
 export type { SavedObjectFinderProps };
 
 export interface MlOpenSessionFlyoutServices {
-  http: {
-    basePath: {
-      prepend(path: string): string;
-    };
-  };
-  application: Pick<ApplicationStart, 'capabilities'>;
+  http: HttpStart;
+  application: ApplicationStart;
   contentManagement: ContentManagementPublicStart;
   uiSettings: IUiSettingsClient;
 }

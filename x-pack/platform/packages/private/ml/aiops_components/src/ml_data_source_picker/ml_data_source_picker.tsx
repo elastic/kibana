@@ -12,7 +12,13 @@ import { parse, stringify } from 'query-string';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewListItem,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 
 import type {
@@ -24,17 +30,9 @@ import { MlOpenSessionFlyout } from './ml_open_session_flyout';
 export type { DataViewPickerProps };
 
 export interface MlDataSourcePickerServices extends MlOpenSessionFlyoutServices {
-  dataViews: {
-    getIdsWithTitle(): Promise<DataViewListItem[]>;
-  };
-  dataViewEditor?: {
-    userPermissions: {
-      editDataView(): boolean;
-    };
-  };
-  dataViewFieldEditor: {
-    openEditor(options: { ctx: { dataView: DataView }; onSave?: () => void }): Promise<() => void>;
-  };
+  dataViews: DataViewsPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
 }
 
 export interface MlDataSourcePickerProps {
