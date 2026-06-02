@@ -16,23 +16,9 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 
 const executeWorkflowSchema = z.object({
-  workflowId: workflowIdSchema
-    .optional()
-    .describe(
-      '(One of three, required) ID of a persisted workflow to execute. Mutually exclusive with `yaml` and `attachmentId`.'
-    ),
-  yaml: z
-    .string()
-    .optional()
-    .describe(
-      '(One of three, required) Inline workflow YAML definition to execute ephemerally (not persisted). Mutually exclusive with `workflowId` and `attachmentId`.'
-    ),
-  attachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(One of three, required) ID of a workflow YAML attachment in the current conversation to execute. Use the attachmentId returned by `generate_workflow`. Mutually exclusive with `workflowId` and `yaml`.'
-    ),
+  workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
+  yaml: z.string().optional().describe('Inline workflow YAML definition to execute.'),
+  attachmentId: z.string().optional().describe('ID of a workflow attachment to execute.'),
   inputs: z
     .record(z.string(), z.unknown())
     .optional()
@@ -43,7 +29,7 @@ const executeWorkflowSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      '(Optional, default true) When true, the tool waits for the workflow to complete (up to 120s) and returns the full execution. When false, it returns immediately with an executionId; use `get_workflow_execution_status` to follow up.'
+      '(Optional, default true) When true, wait for the execution to complete synchronously. When false, return immediately with an executionId (fire and forget)'
     ),
 });
 
@@ -58,7 +44,7 @@ export const executeWorkflowTool = ({
     id: platformCoreTools.executeWorkflow,
     type: ToolType.builtin,
     experimental: true,
-    description: cleanPrompt(`Execute an Elastic workflow end-to-end.
+    description: cleanPrompt(`Execute an Elastic workflow.
 
 Use this tool when:
 — The user asks to run, trigger or execute a workflow.
@@ -80,7 +66,7 @@ If the workflow has no inputs, omit \`inputs\` or pass \`{}\`.
 ## Wait behaviour
 
 \`waitForCompletion\` defaults to \`true\` (up to 120s).
-If the workflow does not complete within the timeout, the tool returns the in-flight execution and you can poll via \`${platformCoreTools.getWorkflowExecutionStatus}\`.
+If set to false, or if the workflow does not complete within the timeout, the tool returns the in-flight execution and you can poll via \`${platformCoreTools.getWorkflowExecutionStatus}\`.
 
 ## Follow-ups
 
