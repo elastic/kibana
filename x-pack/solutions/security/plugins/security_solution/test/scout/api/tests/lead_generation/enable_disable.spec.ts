@@ -11,8 +11,8 @@ import {
   LEAD_GENERATION_ROUTES,
   INTERNAL_HEADERS,
   LEAD_GENERATION_TAGS,
-} from '../../../fixtures/lead_generation_constants';
-import { cleanupLeadsIndex, DEFAULT_SPACE_ID } from '../../../fixtures/lead_generation_helpers';
+} from '../../fixtures/lead_generation_constants';
+import { cleanupLeadsIndex, DEFAULT_SPACE_ID } from '../../fixtures/lead_generation_helpers';
 
 /**
  * Tests for POST /enable and POST /disable.

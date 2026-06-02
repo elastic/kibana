@@ -216,9 +216,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'entityAnalyticsMlJobBehaviorMaintainer',
-      ])}`,
     ],
   },
 };

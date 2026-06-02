@@ -312,6 +312,7 @@ fileGroups:
     - test/scout/**/*
     - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
+    - test/scout_security_entity_ml_behavior_maintainer/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json
