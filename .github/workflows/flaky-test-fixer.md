@@ -70,8 +70,7 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    title-prefix: '[flaky-fix] '
-    labels: [auto:flaky-fix]
+    labels: [ai:flaky-fix-ready]
     base-branch: main
     allowed-base-branches: [main]
     if-no-changes: 'ignore'
@@ -106,13 +105,21 @@ Open one draft PR with the smallest test-side fix for this flaky-test issue. If 
 
 ## PR format
 
-- **Title**: `[<Plugin name>] <concise summary of the fix>`. The `[flaky-fix] ` prefix is added automatically — do not include it. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
+- **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
 
   ```
-  Fixes #<issue-number>.
+  Fixes #<issue-number>
 
   <a few sentences: what was failing, and what this patch changes>
 
-  This PR was opened automatically by the Flaky Test Fixer.
+  #### Verified locally
+
+  <bullet list of what you successfully ran on this branch — e.g. `yarn kbn bootstrap`, `node scripts/check --profile agent`, the targeted test passed N times in a row, etc. Include the exact commands.>
+
+  #### Not verified locally
+
+  <bullet list of what you could not verify and why — e.g. behavior under CI parallel load, on a different stack version, against a real Elasticsearch instance, etc. Omit this section if there is nothing to mention.
+
+  This PR was opened automatically by the Flaky Test Fixer. Provide feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3).
   ```
