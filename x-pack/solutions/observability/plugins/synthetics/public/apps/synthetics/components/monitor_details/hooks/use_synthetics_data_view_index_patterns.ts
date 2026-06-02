@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { ExploratoryEmbeddableProps } from '@kbn/exploratory-view-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useGetUrlParams } from '../../../hooks';
 
 type DataTypesIndexPatterns = NonNullable<ExploratoryEmbeddableProps['dataTypesIndexPatterns']>;
@@ -46,10 +46,8 @@ export const useSyntheticsDataViewIndexPatterns = (): DataTypesIndexPatterns => 
 
   return useMemo(
     () => ({
-      synthetics: remoteName
-        ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`
-        : SYNTHETICS_INDEX_PATTERN,
-      alerts: remoteName ? `${remoteName}:${ALERTS_INDEX_PATTERN}` : ALERTS_INDEX_PATTERN,
+      synthetics: getSyntheticsCcsIndex(remoteName),
+      alerts: getSyntheticsCcsIndex(remoteName, ALERTS_INDEX_PATTERN),
     }),
     [remoteName]
   );
