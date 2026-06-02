@@ -461,7 +461,19 @@ describe('getProxySettings', () => {
   });
 });
 
+jest.mock('fs', () => {
+  const actual = jest.requireActual<typeof import('fs')>('fs');
+  return { ...actual, readFileSync: jest.fn().mockImplementation(actual.readFileSync) };
+});
+
+import { readFileSync } from 'fs';
+const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+
 describe('getSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
   test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
@@ -480,6 +492,44 @@ describe('getSSLSettings', () => {
     };
     sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
     expect(sslSettings.verificationMode).toBe('none');
+  });
+
+  test('reads cert, key, and ca buffers from configured file paths', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'))
+      .mockReturnValueOnce(Buffer.from('ca-pem'));
+
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      ssl: {
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+        certificateAuthorities: '/path/to/ca.pem',
+      },
+    };
+    const sslSettings = getActionsConfigurationUtilities(config).getSSLSettings();
+
+    expect(sslSettings.cert).toEqual(Buffer.from('cert-pem'));
+    expect(sslSettings.key).toEqual(Buffer.from('key-pem'));
+    expect(sslSettings.ca).toEqual(Buffer.from('ca-pem'));
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(1, '/path/to/cert.pem');
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(2, '/path/to/key.pem');
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(3, '/path/to/ca.pem');
+  });
+
+  test('returns undefined cert, key, and ca when ssl paths are not configured', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      ssl: { verificationMode: 'full' },
+    };
+    const sslSettings = getActionsConfigurationUtilities(config).getSSLSettings();
+
+    expect(sslSettings.cert).toBeUndefined();
+    expect(sslSettings.key).toBeUndefined();
+    expect(sslSettings.ca).toBeUndefined();
+    expect(mockReadFileSync).not.toHaveBeenCalled();
   });
 });
 
