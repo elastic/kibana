@@ -135,11 +135,6 @@ async function runPermissionVerifierTask(
 ): Promise<{ shouldReschedule: boolean }> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
-  if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
-    logger.debug(`${VERIFY_PERMISSIONS_TASK} OTel verifier is disabled, skipping`);
-    return { shouldReschedule: false };
-  }
-
   logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run started`);
 
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();

@@ -20,15 +20,12 @@ export const VERIFICATION_TTL_MS = 5 * 60 * 1000;
  * exceeds {@link VERIFICATION_TTL_MS}. Shared by the verify-permissions task and
  * the dedicated cleanup task.
  *
- * No-ops when `enableOTelVerifier` is disabled (same as verify task).
+ * Always runs regardless of the `enableOTelVerifier` flag: cleanup must reclaim
+ * agentless slots even when the user-facing aggregator (gated by the flag) is off,
+ * otherwise expired verifier policies would leak indefinitely.
  */
 export async function runVerifierPolicyCleanup(abortController: AbortController): Promise<void> {
   const logger = appContextService.getLogger().get('otel-verifier');
-
-  if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
-    logger.debug(`${CLEANUP_TASK_LOG} OTel verifier is disabled, skipping verifier cleanup`);
-    return;
-  }
 
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
