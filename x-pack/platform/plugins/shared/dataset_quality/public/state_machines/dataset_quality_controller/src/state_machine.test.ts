@@ -140,6 +140,37 @@ const noPrivilegesResponse = {
   },
 };
 
+const partialPrivilegesResponse = {
+  datasetTypesPrivileges: {
+    // Wildcard check fails for logs (e.g. role with a negated/complement index
+    // pattern), even though individual logs data streams are accessible.
+    'logs-*-*': {
+      canMonitor: false,
+      canRead: false,
+      canReadFailureStore: false,
+      canManageFailureStore: false,
+    },
+    'metrics-*-*': {
+      canMonitor: true,
+      canRead: true,
+      canReadFailureStore: false,
+      canManageFailureStore: false,
+    },
+    'traces-*-*': {
+      canMonitor: true,
+      canRead: true,
+      canReadFailureStore: false,
+      canManageFailureStore: false,
+    },
+    'synthetics-*-*': {
+      canMonitor: true,
+      canRead: true,
+      canReadFailureStore: false,
+      canManageFailureStore: false,
+    },
+  },
+};
+
 const defaultDataStreamStatsResponse: DataStreamStatServiceResponse = {
   dataStreamsStats: [],
   datasetUserPrivileges: {
@@ -277,6 +308,28 @@ describe('DatasetQualityControllerStateMachine', () => {
       expect(authorizedDatasetTypes).toEqual(
         expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
       );
+
+      actor.stop();
+    });
+
+    it('should keep a type whose wildcard privilege check fails (negated role) so its accessible data streams are still queried', async () => {
+      const { machine } = buildStateMachine({
+        dataStreamStatsClient: createMockDataStreamStatsClient({
+          getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(partialPrivilegesResponse),
+        }),
+      });
+      const actor = createActor(machine);
+      actor.start();
+
+      await waitForPredicate(
+        actor,
+        (state) => typeof state.value === 'object' && 'main' in state.value
+      );
+
+      const { authorizedDatasetTypes } = actor.getSnapshot().context;
+      // `logs` must remain even though its wildcard `logs-*-*` privilege is false,
+      // because the server enforces per-data-stream authorization.
+      expect(authorizedDatasetTypes).toContain('logs');
 
       actor.stop();
     });

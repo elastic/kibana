@@ -11,16 +11,12 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom } from 'xstate';
 import { assign, fromCallback, fromPromise, setup } from 'xstate';
 import type {
-  DatasetTypesPrivileges,
   DataStreamDocsStat,
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
-import type {
-  DataStreamStatServiceResponse,
-  GetDataStreamsTypesPrivilegesResponse,
-} from '../../../../common/data_streams_stats';
+import type { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type { DataStreamType } from '../../../../common/types';
 import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
@@ -529,31 +525,23 @@ export const createDatasetQualityControllerStateMachine = ({
 
   return createPureDatasetQualityControllerStateMachine(initialContext).provide({
     actions: {
-      storeAuthorizedDatasetTypes: assign(({ context, event }) => {
-        if (!('output' in event)) return {};
-
-        const output = event.output as GetDataStreamsTypesPrivilegesResponse;
-
-        const authorizedDatasetTypes = extractAuthorizedDatasetTypes(output.datasetTypesPrivileges);
-
-        // Wildcard privilege checks (e.g. logs-*-*) return false for roles
-        // using ES negated regexes even when the user can read most indices.
-        // Fall back to all known types so the page still loads.
-        const effectiveTypes =
-          authorizedDatasetTypes.length > 0 ? authorizedDatasetTypes : KNOWN_TYPES;
-
+      storeAuthorizedDatasetTypes: assign(({ context }) => {
+        // The wildcard type privilege check (e.g. `logs-*-*`) returns `canRead: false`
+        // for roles built with ES negated/complement index patterns, even when the user
+        // can read individual data streams of that type. Relying on it would drop entire
+        // types (e.g. all logs) from the query. Authorization is enforced per data stream
+        // server-side, so we consider all known types and let the server return only the
+        // streams the user can actually access.
         const filterTypes = context.filters.types as DataStreamType[];
 
-        const validTypes = filterTypes.filter(
-          (type) => effectiveTypes.includes(type) && KNOWN_TYPES.includes(type)
-        );
+        const validTypes = filterTypes.filter((type) => KNOWN_TYPES.includes(type));
 
         return {
           filters: {
             ...context.filters,
             types: validTypes,
           },
-          authorizedDatasetTypes: effectiveTypes,
+          authorizedDatasetTypes: [...KNOWN_TYPES],
         };
       }),
 
@@ -683,11 +671,6 @@ export const createDatasetQualityControllerStateMachine = ({
 export type DatasetQualityControllerStateService = ActorRefFrom<
   ReturnType<typeof createDatasetQualityControllerStateMachine>
 >;
-
-const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
-  Object.entries(datasetTypesPrivileges)
-    .filter(([_type, priv]) => priv.canMonitor || priv.canRead)
-    .map(([type, _priv]) => type.replace(/-\*-\*$/, '')) as DataStreamType[];
 
 const getValidDatasetTypes = (
   context: DatasetQualityControllerContext,
