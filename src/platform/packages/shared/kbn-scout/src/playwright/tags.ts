@@ -101,5 +101,16 @@ export const tags = {
     ];
   },
   performance: ['@perf'],
-  qualityGate: ['@quality_gate'],
+  qualityGate: {
+    qa: ['@quality_gate_qa'],
+    staging: ['@quality_gate_staging'],
+    prod: ['@quality_gate_prod'],
+
+    /**
+     * All env-suffixed quality-gate tags
+     */
+    get all(): string[] {
+      return [...this.qa, ...this.staging, ...this.prod];
+    },
+  },
 };

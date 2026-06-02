@@ -14,7 +14,7 @@ import { tags } from '../../../../tags';
 const supportedTags = [
   ...testTargets.all.map((target) => target.playwrightTag),
   ...tags.performance,
-  ...tags.qualityGate,
+  ...tags.qualityGate.all,
 ];
 
 export const validateTagsFixture = base.extend<{ validateTags: void }>({
