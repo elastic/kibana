@@ -503,7 +503,7 @@ export class TaskRunner<
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
       prunedSnoozedInstances:
-        updatedActiveInstances.length < rule.snoozedInstances.length
+        updatedActiveInstances.length < (rule.snoozedInstances?.length ?? 0)
           ? updatedActiveInstances
           : undefined,
     };

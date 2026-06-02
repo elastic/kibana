@@ -63,6 +63,7 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface AlertRule {

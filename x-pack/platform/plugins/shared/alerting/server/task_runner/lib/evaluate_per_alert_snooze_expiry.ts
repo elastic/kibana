@@ -13,13 +13,13 @@ export interface EvaluatePerAlertSnoozeExpiryResult {
 }
 
 export const evaluatePerAlertSnoozeExpiry = (
-  snoozedInstances: RawRuleSnoozedInstance[],
+  snoozedInstances: RawRuleSnoozedInstance[] | undefined,
   now: Date
 ): EvaluatePerAlertSnoozeExpiryResult => {
   const activeInstances: RawRuleSnoozedInstance[] = [];
   const expiredInstances: RawRuleSnoozedInstance[] = [];
 
-  for (const instance of snoozedInstances) {
+  for (const instance of snoozedInstances ?? []) {
     const isExpired = instance.expiresAt != null && new Date(instance.expiresAt) <= now;
     if (isExpired) {
       expiredInstances.push(instance);
