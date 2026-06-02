@@ -19,3 +19,8 @@ export interface RenameConversationResponse {
   id: string;
   title: string;
 }
+
+export interface MarkReadConversationResponse {
+  id: string;
+  read: boolean;
+}
