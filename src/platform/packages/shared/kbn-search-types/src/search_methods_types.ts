@@ -13,7 +13,6 @@ import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
-import type { SanitizedConnectionRequestParams } from './types';
 
 /**
  * Base options shared across all typed search methods
@@ -161,10 +160,6 @@ export interface IDslSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 /**
@@ -175,10 +170,6 @@ export interface IDslPaginatedSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
   /**
    * Pagination helpers for navigating through result pages
    */
@@ -242,10 +233,6 @@ export interface IEsqlSearchResult {
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -320,10 +307,6 @@ export interface IEqlSearchResult {
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -378,11 +361,6 @@ export interface ISqlSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
-
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
