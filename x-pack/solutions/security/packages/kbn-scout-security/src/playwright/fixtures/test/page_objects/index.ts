@@ -9,6 +9,7 @@ import type { PageObjects, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { AddExceptionFlyoutPage } from './add_exception_flyout';
 import { AlertsTablePage } from './alerts_table';
+import { AgentBuilderPage } from './agent_builder';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
@@ -24,6 +25,7 @@ export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page'
 export interface SecurityPageObjects extends PageObjects {
   addExceptionFlyoutPage: AddExceptionFlyoutPage;
   alertsTablePage: AlertsTablePage;
+  agentBuilderPage: AgentBuilderPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsDashboardsPage: EntityAnalyticsDashboardsPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
@@ -45,6 +47,7 @@ export function extendPageObjects(
     ...pageObjects,
     addExceptionFlyoutPage: createLazyPageObject(AddExceptionFlyoutPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
+    agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsDashboardsPage: createLazyPageObject(EntityAnalyticsDashboardsPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
