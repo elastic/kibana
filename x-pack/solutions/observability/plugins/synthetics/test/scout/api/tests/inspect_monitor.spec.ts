@@ -10,7 +10,7 @@ import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_MONITOR_SO_TYPES } from 
 import { enableSynthetics, inspectMonitor } from '../fixtures/monitors';
 import { createParam } from '../fixtures/params';
 import { httpMonitorFixture } from '../fixtures/data/http_monitor';
-import { inspectBrowserMonitorFixture } from '../fixtures/data/inspect_browser_monitor';
+import { inspectBrowserMonitorFixture } from '../fixtures/data/browser_monitor_fixture';
 
 const LOCAL_PUBLIC_LOCATION = {
   id: 'dev',
