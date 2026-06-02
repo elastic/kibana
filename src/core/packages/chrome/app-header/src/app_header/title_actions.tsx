@@ -80,7 +80,7 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
             data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
-            onClick={shareAction.onClick}
+            onClick={(event) => shareAction.onClick(event.currentTarget)}
           />
         </EuiToolTip>
       ) : null}
