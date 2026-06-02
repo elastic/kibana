@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css as cssClassName } from '@emotion/css';
@@ -15,15 +15,7 @@ import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiScreenReaderOnly,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiToolTip,
-  useEuiTheme,
-  transparentize,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme, transparentize } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
 import {
@@ -37,22 +29,9 @@ import {
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
-import { useActionStyles, useHighlightedLinesClassName } from './styles';
+import { useHighlightedLinesClassName } from './styles';
+import { getJsonPathAtPosition } from '../../lib/get_json_path_at_position';
 import type { StatusCodeClassNames } from './types';
-
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const { actions } = useActionStyles();
-
-  return {
-    outputActions: css`
-      ${actions}
-
-      // For IE11
-      min-width: ${euiTheme.size.l};
-    `,
-  };
-};
 
 const useStatusCodeClassNames = (): StatusCodeClassNames => {
   const { euiTheme } = useEuiTheme();
@@ -101,10 +80,9 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
 };
 
 export const MonacoEditorOutput: FunctionComponent = () => {
-  const context = useServicesContext();
   const {
     services: { notifications },
-  } = context;
+  } = useServicesContext();
   const { settings: readOnlySettings } = useEditorReadContext();
   const {
     lastResult: { data },
@@ -113,27 +91,52 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const monacoEditorOutputStyles = useStyles();
   const statusCodeClassNames = useStatusCodeClassNames();
   const highlightedLinesClassName = useHighlightedLinesClassName();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
-  const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
-
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       const provider = new MonacoEditorOutputActionsProvider(
         editor,
-        setEditorActionsCss,
+        () => {},
         highlightedLinesClassName
       );
       actionsProvider.current = provider;
 
       setupResizeChecker(divRef.current!, editor);
       lineDecorations.current = editor.createDecorationsCollection();
+
+      editor.addAction({
+        id: 'console.copyJsonPath',
+        label: i18n.translate('console.output.copyPath', { defaultMessage: 'Copy path' }),
+        contextMenuGroupId: '9_cutcopypaste',
+        contextMenuOrder: 4,
+        run: async (ed) => {
+          const position = ed.getPosition();
+          const model = ed.getModel();
+          if (!position || !model) return;
+          const path = getJsonPathAtPosition(model.getValue(), model.getOffsetAt(position));
+          try {
+            await window.navigator.clipboard.writeText(path);
+            notifications.toasts.addSuccess({
+              title: i18n.translate('console.output.copyPathSuccess', {
+                defaultMessage: 'Path copied to clipboard',
+              }),
+              text: path,
+            });
+          } catch {
+            notifications.toasts.addDanger({
+              title: i18n.translate('console.output.copyPathFailed', {
+                defaultMessage: 'Could not copy path to clipboard',
+              }),
+            });
+          }
+        },
+      });
     },
-    [highlightedLinesClassName, setupResizeChecker]
+    [highlightedLinesClassName, notifications.toasts, setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -182,30 +185,6 @@ export const MonacoEditorOutput: FunctionComponent = () => {
     }
   }, [readOnlySettings, data, value, statusCodeClassNames]);
 
-  const copyOutputCallback = useCallback(async () => {
-    const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
-
-    try {
-      if (!window.navigator?.clipboard) {
-        throw new Error('Could not copy to clipboard!');
-      }
-
-      await window.navigator.clipboard.writeText(selectedText);
-
-      notifications.toasts.addSuccess({
-        title: i18n.translate('console.outputPanel.copyOutputToast', {
-          defaultMessage: 'Selected output copied to clipboard',
-        }),
-      });
-    } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('console.outputPanel.copyOutputToastFailedMessage', {
-          defaultMessage: 'Could not copy selected output to clipboard',
-        }),
-      });
-    }
-  }, [notifications.toasts]);
-
   return (
     <div
       css={css`
@@ -214,30 +193,6 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       `}
       ref={divRef}
     >
-      <EuiFlexGroup
-        css={monacoEditorOutputStyles.outputActions}
-        responsive={false}
-        style={editorActionsCss}
-        justifyContent="center"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('console.outputPanel.copyOutputButtonTooltipContent', {
-              defaultMessage: 'Click to copy to clipboard',
-            })}
-          >
-            <EuiButtonIcon
-              iconType="copy"
-              onClick={copyOutputCallback}
-              data-test-subj="copyOutputButton"
-              aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {
-                defaultMessage: 'Click to copy to clipboard',
-              })}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiScreenReaderOnly>
         <label htmlFor={'ConAppOutputTextarea'}>
           {i18n.translate('console.monaco.outputTextarea', {
