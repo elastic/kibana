@@ -93,13 +93,13 @@ const esEvents = toElasticsearchOutput([
 For live data ingestion:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --live
 ```
 
 For a fixed time window:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
 ```
 
 ### Local Development
@@ -107,7 +107,7 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 When running the CLI locally, you can simply use the following command to ingest data to a locally running Elasticsearch and Kibana instance:
 
 ```sh
-node scripts/synthtrace simple_trace.ts
+node scripts/synthtrace simple_trace
 ```
 
 _Assuming both Elasticsearch and Kibana are running on the default localhost ports with default credentials._
@@ -119,7 +119,7 @@ If the Kibana URL differs from the Elasticsearch URL in protocol or hostname, yo
 For example when running ES (with ssl) and Kibana (without ssl) locally in Serverless mode:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
+node scripts/synthtrace simple_trace --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
 ```
 
 ### Using CLI for Elastic Cloud URLs
@@ -127,7 +127,7 @@ node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:chan
 If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
+node scripts/synthtrace simple_trace --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
 ```
 
 ### Using CLI with an API key
@@ -135,7 +135,7 @@ node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@y
 You can use a Kibana API key for authentication by passing the `--apiKey` option:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
+node scripts/synthtrace simple_trace --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
 ```
 
 ## Scenario Examples
@@ -581,6 +581,21 @@ Generates infrastructure host metrics along with APM host data.
 node scripts/synthtrace infra_hosts_with_apm_hosts --live
 ```
 
+#### `infra_hosts_minimal_host`
+
+Generates a single ECS infrastructure host row without numeric system metric fields. Useful for verifying Hosts page `N/A` behavior when a host exists but utilization/throughput values are unavailable.
+
+**Options:**
+
+- `hostName` (string, default: `minimal-host`): Host name to generate.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_minimal_host --from=now-15m --to=now --clean
+node scripts/synthtrace infra_hosts_minimal_host --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
+```
+
 #### `infra_docker_containers`
 
 Generates Docker container metrics.
@@ -609,6 +624,23 @@ Generates AWS RDS infrastructure metrics.
 
 ```sh
 node scripts/synthtrace infra_aws_rds --live
+```
+
+#### `infra_hosts_missing_normalized_load`
+
+Generates three groups of hosts to reproduce missing metrics in the Hosts table and KPIs. Linux hosts emit all metrics; Windows "partial" hosts emit everything except `system.load` (the primary bug case — normalized load shows "0%" instead of "N/A"); Windows "minimal" hosts emit only CPU (maximizing N/A columns).
+
+**Options:**
+
+- `numLinuxHosts` (number, default: 2): Hosts with full metrics
+- `numWindowsPartialHosts` (number, default: 2): All metrics except load (primary bug case)
+- `numWindowsMinimalHosts` (number, default: 1): Only CPU metrics (maximum N/A)
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now --scenarioOpts='{"numLinuxHosts":2,"numWindowsPartialHosts":3,"numWindowsMinimalHosts":1}'
 ```
 
 ### Combined Scenarios

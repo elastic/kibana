@@ -12,6 +12,7 @@ jest.mock('../lib'); // Mock the ES client module
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
   search: jest.fn(),
+  heartbeatIndices: 'synthetics-*',
 };
 
 describe('queryPings', () => {
@@ -154,6 +155,63 @@ describe('queryPings', () => {
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  describe('CCS index targeting', () => {
+    const emptyResponse = {
+      body: {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      },
+    };
+
+    it('does not override the index when remoteName is absent', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBeUndefined();
+    });
+
+    it('prefixes the index with remoteName when present', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
+
+    it('also prefixes the index in the fields-only branch', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+        fields: [{ field: 'monitor.id' }],
+        fieldsExtractorFn: (doc: any) => ({ fieldData: doc._source }),
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
   });
 
   it('should throw an error if query fails to execute', async () => {
