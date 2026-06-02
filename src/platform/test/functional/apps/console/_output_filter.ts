@@ -63,7 +63,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('output to be filtered', async () => {
         const output = await PageObjects.console.getOutputText();
-        return output.includes('_shards') && !output.includes('hits');
+        // ._shards returns the value object, so the key "_shards" won't appear —
+        // check for "successful" which is unique to the _shards object
+        return output.includes('"successful"') && !output.includes('hits');
       });
     });
 
