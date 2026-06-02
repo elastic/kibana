@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await createDatasetQualityUserWithRole(security, 'fullAccess', [
           {
             names: ['/~(([.]|ilm-history-|logs-apache).*)/'],
-            privileges: ['read', 'view_index_metadata'],
+            privileges: ['read', 'monitor', 'view_index_metadata'],
           },
         ]);
 
