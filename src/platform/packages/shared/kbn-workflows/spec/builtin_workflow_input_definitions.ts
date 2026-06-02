@@ -118,8 +118,8 @@ export const builtinWorkflowInputDefinitionRefValuesForZod = builtinRefList as [
  */
 export const builtinWorkflowInputDefinitionRefSchema =
   builtinRefList.length > 0
-    ? z.union([z.enum(builtinWorkflowInputDefinitionRefValuesForZod), z.string()])
-    : z.string();
+    ? z.union([z.enum(builtinWorkflowInputDefinitionRefValuesForZod), z.string().max(512)])
+    : z.string().max(512);
 
 /**
  * Merges {@link builtinWorkflowInputDefinitions} under `kibana.definitions` on the workflow
