@@ -155,10 +155,8 @@ export function CompositeSloTable({
       render: (item: CompositeSLOItem) => {
         const isExpanded = expandedRowIds.has(item.id);
         return (
-          <EuiButtonIcon
-            data-test-subj={`compositeSloExpandRow-${item.id}`}
-            onClick={() => toggleExpandRow(item)}
-            aria-label={
+          <EuiToolTip
+            content={
               isExpanded
                 ? i18n.translate('xpack.slo.compositeSloList.collapseRowFor', {
                     defaultMessage: 'Collapse row: {name}',
@@ -169,8 +167,25 @@ export function CompositeSloTable({
                     values: { name: item.name },
                   })
             }
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`compositeSloExpandRow-${item.id}`}
+              onClick={() => toggleExpandRow(item)}
+              aria-label={
+                isExpanded
+                  ? i18n.translate('xpack.slo.compositeSloList.collapseRowFor', {
+                      defaultMessage: 'Collapse row: {name}',
+                      values: { name: item.name },
+                    })
+                  : i18n.translate('xpack.slo.compositeSloList.expandRowFor', {
+                      defaultMessage: 'Expand row: {name}',
+                      values: { name: item.name },
+                    })
+              }
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            />
+          </EuiToolTip>
         );
       },
     },
