@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import type { EuiBreakpointSize, EuiThemeComputed } from '@elastic/eui';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -62,8 +63,9 @@ export interface ContentListTableProps {
   responsiveBreakpoint?: EuiBreakpointSize | boolean;
   /**
    * Custom message to display when a search or filter returns zero results.
-   * When omitted, `EuiBasicTable` renders its built-in empty row. Has no
-   * effect when the whole list is empty; `<ContentList>` owns that state.
+   * When omitted, renders a default "No items found" with
+   * `data-test-subj="contentListNoResults"` (matches {@link ContentListWrapper}).
+   * Has no effect when the whole list is empty; `<ContentList>` owns that state.
    */
   noItemsMessage?: ReactNode;
   /**
@@ -327,13 +329,21 @@ const cssActionsCellNoWrap = css`
  * </ContentListProvider>
  * ```
  */
+const DEFAULT_NO_ITEMS_MESSAGE = (
+  <span data-test-subj="contentListNoResults">
+    {i18n.translate('contentManagement.contentList.table.noItemsMessage', {
+      defaultMessage: 'No items found',
+    })}
+  </span>
+);
+
 const ContentListTableComponent = ({
   title,
   tableLayout = 'auto',
   compressed = false,
   scrollableInline = true,
   responsiveBreakpoint = false,
-  noItemsMessage,
+  noItemsMessage = DEFAULT_NO_ITEMS_MESSAGE,
   children,
   filter,
   'data-test-subj': dataTestSubj = 'content-list-table',
