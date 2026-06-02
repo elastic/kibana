@@ -36,6 +36,12 @@ export const OAUTH_MAX_STRING_FIELD_LENGTH = 1024;
 export const OAUTH_MAX_URI_LENGTH = 2048;
 
 /**
+ * Upper bound on the number of `(client_id, connection_id)` targets that
+ * may be submitted in a single call to the bulk connection revocation API.
+ */
+export const OAUTH_MAX_BULK_REVOKE_CONNECTIONS = 100;
+
+/**
  * Image media types accepted by the OAuth client management API for the
  * `client_logo.media_type` field.
  */

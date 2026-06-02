@@ -147,9 +147,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
-
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
@@ -267,6 +264,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   ruleChangesHistoryEnabled: false,
 
+  /**
+   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
+   */
+  securityClassicNavExternalLinks: false,
   /**
    * Enables public Detection Engine attacks REST APIs
    * (`/api/detection_engine/attacks/*`).
