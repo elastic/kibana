@@ -250,9 +250,6 @@ export function ServiceMapEditorFlyout({
   const [applyCustomFilters, setApplyCustomFilters] = useState<boolean>(
     initialState?.apply_custom_filters ?? true
   );
-  const [applyCustomTimeRange, setApplyCustomTimeRange] = useState<boolean>(
-    initialState?.apply_custom_time_range ?? false
-  );
   const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
     initialState?.alert_status_filter ?? []
   );
@@ -400,7 +397,6 @@ export function ServiceMapEditorFlyout({
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
       apply_custom_filters: applyCustomFilters,
-      apply_custom_time_range: applyCustomTimeRange,
       // Empty arrays drop to undefined so they're omitted from the saved object payload.
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
@@ -414,7 +410,6 @@ export function ServiceMapEditorFlyout({
     kuery,
     serviceName,
     applyCustomFilters,
-    applyCustomTimeRange,
     alertStatusFilter,
     sloStatusFilter,
     connectionFilter,
@@ -683,22 +678,6 @@ export function ServiceMapEditorFlyout({
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            helpText={i18n.translate('xpack.apm.serviceMapEditor.applyCustomTimeRangeHelpText', {
-              defaultMessage:
-                "When on, the panel uses its own time range (set via the panel menu's \"Customize time range\" action). When off, it follows the dashboard's global time.",
-            })}
-            fullWidth
-          >
-            <EuiSwitch
-              label={i18n.translate('xpack.apm.serviceMapEditor.applyCustomTimeRangeLabel', {
-                defaultMessage: 'Apply custom time range',
-              })}
-              checked={applyCustomTimeRange}
-              onChange={(e) => setApplyCustomTimeRange(e.target.checked)}
-              data-test-subj="apmServiceMapEditorApplyCustomTimeRangeToggle"
-            />
-          </EuiFormRow>
         </EuiForm>
         {filterCountsEnabled && (
           <FlyoutFilterOptionCountsResolver
