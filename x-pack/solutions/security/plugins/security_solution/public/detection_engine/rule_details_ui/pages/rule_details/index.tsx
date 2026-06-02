@@ -99,13 +99,11 @@ import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
-
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -119,9 +117,7 @@ import {
 import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
-
 import * as ruleI18n from '../../../common/translations';
-
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
@@ -152,7 +148,6 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -282,13 +277,7 @@ export const RuleDetailsPage = connector(
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
-    const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(PageScope.alerts);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
-    const isLoadingIndexPattern = newDataViewPickerEnabled
-      ? status !== 'ready'
-      : oldIsLoadingIndexPattern;
+    const { dataView, status } = useDataView(PageScope.alerts);
 
     const loading = userInfoLoading || listsConfigLoading;
     const { detailName: ruleId } = useParams<{
@@ -369,8 +358,8 @@ export const RuleDetailsPage = connector(
     useLegacyUrlRedirect({ rule, spacesApi });
 
     const showUpdating = useMemo(
-      () => isLoadingIndexPattern || isAlertsLoading || loading,
-      [isLoadingIndexPattern, isAlertsLoading, loading]
+      () => status !== 'ready' || isAlertsLoading || loading,
+      [status, isAlertsLoading, loading]
     );
 
     const title = useMemo(
@@ -859,10 +848,9 @@ export const RuleDetailsPage = connector(
                       <>
                         <FiltersGlobal>
                           <SiemSearchBar
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             pollForSignalIndex={pollForSignalIndex}
                             id={InputsModelId.global}
-                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
                           />
                         </FiltersGlobal>
                         <EuiSpacer />
@@ -889,8 +877,7 @@ export const RuleDetailsPage = connector(
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             defaultFilters={alertMergedFilters}
                             defaultGroupingOptions={defaultGroupingOptions}
                             from={from}
