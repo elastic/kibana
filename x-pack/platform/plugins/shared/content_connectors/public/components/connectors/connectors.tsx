@@ -168,6 +168,10 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
+                      { defaultMessage: 'More connector options' }
+                    )}
                     isOpen={showMoreOptionsPopover}
                     closePopover={() => setShowMoreOptionsPopover(false)}
                     button={
@@ -187,10 +191,8 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     }
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorNative"
                           onClick={() => {
                             const url = application?.getUrlForApp('management', {
@@ -210,7 +212,6 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                           )}
                         </EuiContextMenuItem>,
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorClient"
                           icon="plusCircle"
                           onClick={() => {

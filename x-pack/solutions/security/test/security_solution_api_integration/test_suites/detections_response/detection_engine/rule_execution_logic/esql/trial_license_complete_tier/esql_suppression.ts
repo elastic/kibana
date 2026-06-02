@@ -2032,7 +2032,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
-      it('should be enriched with host risk score', async () => {
+      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };
@@ -2078,7 +2078,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should be enriched alert with criticality_level', async () => {
+      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };

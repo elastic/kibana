@@ -137,6 +137,8 @@
     "@kbn/doc-links",
     "@kbn/yaml-loader",
     "@kbn/charts-theme",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/human-readable-id",
+    "@kbn/elastic-agent-condition-language"
   ]
 }

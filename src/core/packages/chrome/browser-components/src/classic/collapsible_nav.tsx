@@ -141,7 +141,7 @@ export function CollapsibleNav({
       allLinks.filter(
         (link) =>
           // Filterting out hidden links,
-          link.visibleIn.includes('sideNav') &&
+          link.visibleIn.includes('classicSideNav') &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
       ),
@@ -211,8 +211,6 @@ export function CollapsibleNav({
                     }),
                   ]}
                   maxWidth="none"
-                  gutterSize="none"
-                  size="s"
                 />
               </EuiThemeProvider>
             </EuiCollapsibleNavGroup>
@@ -253,8 +251,6 @@ export function CollapsibleNav({
             ]}
             maxWidth="none"
             color="text"
-            gutterSize="none"
-            size="s"
           />
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
@@ -299,8 +295,6 @@ export function CollapsibleNav({
             })}
             maxWidth="none"
             color="subdued"
-            gutterSize="none"
-            size="s"
             css={styles.navRecentsListGroupCss}
           />
         </EuiCollapsibleNavGroup>
@@ -351,8 +345,6 @@ export function CollapsibleNav({
                 listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
                 maxWidth="none"
                 color="subdued"
-                gutterSize="none"
-                size="s"
               />
             </EuiCollapsibleNavGroup>
           );
@@ -361,8 +353,8 @@ export function CollapsibleNav({
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
           <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+            <EuiListGroup>
+              <EuiListGroupItem color="text" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}

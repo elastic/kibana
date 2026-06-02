@@ -6,90 +6,138 @@
  */
 
 import { useReducer } from 'react';
+import type { RuleKind } from './compose_form_types';
 import type {
+  StepId,
   ComposeDiscoverState,
   ComposeDiscoverAction,
   ComposeDiscoverMode,
-  SandboxTabConfig,
+  QueryTab,
+  RecoveryType,
 } from './types';
 
-const createInitialState = (
-  mode: ComposeDiscoverMode,
-  initialSandboxQuery = ''
-): ComposeDiscoverState => ({
+export const getStepIds = (isAlert: boolean): StepId[] =>
+  isAlert
+    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['alertCondition', 'details'];
+
+export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
+  isAlert
+    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['builderCondition', 'details'];
+
+export interface InitialStateConfig {
+  mode: ComposeDiscoverMode;
+  initialKind?: RuleKind;
+  initialRecoveryType?: RecoveryType;
+  isBuilderMode?: boolean;
+}
+
+export const createInitialState = ({
+  mode,
+  initialKind = 'signal',
+  initialRecoveryType = 'default',
+  isBuilderMode = false,
+}: InitialStateConfig): ComposeDiscoverState => ({
   mode,
   step: 0,
-  sandbox: { query: initialSandboxQuery },
+  recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
   activeTab: 'alert',
-  childOpen: mode === 'create',
+  childOpen: mode === 'create' && !isBuilderMode,
   queryCommitted: mode === 'edit',
-  sandboxDateStart: 'now-15m',
-  sandboxDateEnd: 'now',
   yamlMode: false,
 });
 
 /**
- * Returns the ordered list of step titles. Always 3 steps for PR B.
- * Tracking / Recovery Condition step added in the custom recovery follow-up.
+ * Returns the tabs to show in the Sandbox for the current step.
+ *
+ * isAlert + alertCondition     → ['base', 'alert']
+ * isAlert + recoveryCondition  + custom → ['recovery']
+ * everything else              → undefined (single editor)
  */
-export function getStepTitles(): string[] {
-  return ['Alert Condition', 'Details & Artifacts', 'Notifications'];
+export function getSandboxTabs(
+  isAlert: boolean,
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType'>
+): QueryTab[] | undefined {
+  if (!isAlert) return undefined;
+
+  const stepId = getStepIds(isAlert)[state.step];
+
+  if (stepId === 'alertCondition') return ['base', 'alert'];
+  if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
+  return undefined;
 }
 
-/**
- * Returns the SandboxTabConfig for the current state.
- * Always single for now — tabs (Base/Alert/Recovery) added in custom recovery follow-up.
- */
-export function getSandboxTabConfig(_state: ComposeDiscoverState): SandboxTabConfig {
-  return { type: 'single' };
+function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
+  if (tabs?.includes('recovery')) return 'recovery';
+  return 'alert';
 }
 
-function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
+export function reducer(
+  state: ComposeDiscoverState,
+  action: ComposeDiscoverAction
+): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_SANDBOX_QUERY':
-      return { ...state, sandbox: { ...state.sandbox, query: action.query } };
+    case 'SET_RECOVERY_TYPE':
+      return {
+        ...state,
+        recoveryType: action.recoveryType,
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
+          ? { childOpen: true, activeTab: 'recovery' as const }
+          : {}),
+      };
+    case 'KIND_CHANGE':
+      return action.kind === 'alert'
+        ? { ...state, step: 0, childOpen: true, activeTab: 'alert' }
+        : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const steps = getStepTitles();
-      const nextStep = Math.min(state.step + 1, steps.length - 1);
+      const stepCount = getStepIds(action.isAlert).length;
+      const nextStep = Math.min(state.step + 1, stepCount - 1);
       return { ...state, step: nextStep, childOpen: false };
     }
     case 'GO_BACK': {
       const prevStep = Math.max(state.step - 1, 0);
       return { ...state, step: prevStep, childOpen: false };
     }
-    case 'SET_SANDBOX_DATE_RANGE':
-      return { ...state, sandboxDateStart: action.start, sandboxDateEnd: action.end };
     case 'OPEN_CHILD':
-      return { ...state, childOpen: true };
-    case 'OPEN_CHILD_FOR_STEP':
-      return { ...state, step: action.step, childOpen: true };
-    case 'CLOSE_CHILD':
-      return { ...state, childOpen: false };
-    case 'COMMIT_SANDBOX_QUERY':
       return {
         ...state,
-        sandbox: { ...state.sandbox, query: action.query },
-        childOpen: state.yamlMode ? state.childOpen : false,
+        childOpen: true,
+        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, state)),
+      };
+    case 'OPEN_CHILD_FOR_STEP': {
+      const stateAtStep = { ...state, step: action.step };
+      return {
+        ...state,
+        step: action.step,
+        childOpen: true,
+        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, stateAtStep)),
+      };
+    }
+    case 'CLOSE_CHILD':
+      return { ...state, childOpen: false };
+    case 'COMMIT_QUERY':
+      return {
+        ...state,
         queryCommitted: true,
       };
+    case 'INVALIDATE_QUERY':
+      return { ...state, queryCommitted: false };
     case 'SET_YAML_MODE':
       return {
         ...state,
         yamlMode: action.enabled,
-        childOpen: true,
+        childOpen: action.enabled,
       };
     default:
       return state;
   }
 }
 
-export const useComposeDiscoverState = (
-  mode: ComposeDiscoverMode = 'create',
-  initialSandboxQuery = ''
-) => {
-  return useReducer(reducer, undefined, () => createInitialState(mode, initialSandboxQuery));
+export const useComposeDiscoverState = (config: InitialStateConfig) => {
+  return useReducer(reducer, undefined, () => createInitialState(config));
 };

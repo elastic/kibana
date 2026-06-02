@@ -17,6 +17,7 @@ export {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from './validation';
+export { getRandomColor } from './random_color';
 export {
   convertTagNameToId,
   getObjectTags,

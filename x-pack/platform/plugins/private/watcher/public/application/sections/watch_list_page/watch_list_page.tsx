@@ -210,6 +210,9 @@ export const WatchListPage = () => {
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downCenter"
+      aria-label={i18n.translate('xpack.watcher.sections.watchList.createWatchPopoverAriaLabel', {
+        defaultMessage: 'Create watch',
+      })}
     >
       <EuiContextMenuPanel
         items={[WATCH_TYPES.THRESHOLD, WATCH_TYPES.JSON].map((watchType: string) => {

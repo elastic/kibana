@@ -59,10 +59,8 @@ export const actionPolicyResponseSchema = z.object({
     })
     .describe('Authentication and ownership information.'),
   createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
-  createdByUsername: z.string().nullable().describe('The username of the creator.'),
   createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
   updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
-  updatedByUsername: z.string().nullable().describe('The username of the last updater.'),
   updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
 });
 

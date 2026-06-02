@@ -38,6 +38,11 @@ export type Evaluation = CustomMetricExpressionParams & {
   context?: AdditionalContext;
 };
 
+export interface CriterionEvaluationResult {
+  evaluations: Record<string, Evaluation>;
+  timeRange: { start: number; end: number };
+}
+
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
   esClient: ElasticsearchClient,
   params: Params,
@@ -52,7 +57,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
   missingGroups: MissingGroupsRecord[] = []
-): Promise<Array<Record<string, Evaluation>>> => {
+): Promise<CriterionEvaluationResult[]> => {
   const { criteria, groupBy, searchConfiguration } = params;
 
   return Promise.all(
@@ -135,7 +140,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           };
         }
       }
-      return evaluations;
+      return { evaluations, timeRange: calculatedTimerange };
     })
   );
 };

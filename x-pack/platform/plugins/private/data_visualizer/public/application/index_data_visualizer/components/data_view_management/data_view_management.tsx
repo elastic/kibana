@@ -6,7 +6,13 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Refresh } from '@kbn/ml-date-picker';
@@ -71,25 +77,34 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
         defaultMessage: 'Data view management',
       })}
       button={
-        <EuiButtonIcon
-          color="text"
-          iconType="boxesVertical"
-          data-test-subj="dataVisualizerDataViewManagementButton"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
             {
               defaultMessage: 'Data view settings',
             }
           )}
-          onClick={() => {
-            setIsAddDataViewFieldPopoverOpen(!isAddDataViewFieldPopoverOpen);
-          }}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            color="text"
+            iconType="boxesVertical"
+            data-test-subj="dataVisualizerDataViewManagementButton"
+            aria-label={i18n.translate(
+              'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
+              {
+                defaultMessage: 'Data view settings',
+              }
+            )}
+            onClick={() => {
+              setIsAddDataViewFieldPopoverOpen(!isAddDataViewFieldPopoverOpen);
+            }}
+          />
+        </EuiToolTip>
       }
     >
       <EuiContextMenuPanel
         data-test-subj="dataVisualizerDataViewManagementMenu"
-        size="s"
         items={[
           <EuiContextMenuItem
             key="add"

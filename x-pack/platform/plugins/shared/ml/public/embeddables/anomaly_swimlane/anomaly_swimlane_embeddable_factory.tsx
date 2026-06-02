@@ -9,7 +9,7 @@ import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,7 +30,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
@@ -88,7 +88,10 @@ export const getServices = async (
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    AnomalySwimLaneEmbeddableState,
+    AnomalySwimLaneEmbeddableApi
+  > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);
@@ -123,18 +126,15 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...swimlaneManager.getLatestState(),
-        } as AnomalySwimLaneEmbeddableState;
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
+      const stateApi = initializeStateApi<AnomalySwimLaneEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () =>
+          ({
+            ...titleManager.getLatestState(),
+            ...timeRangeManager.getLatestState(),
+            ...swimlaneManager.getLatestState(),
+          } as AnomalySwimLaneEmbeddableState),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -151,10 +151,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             filters: 'skip',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          swimlaneManager.reinitializeState(nextState);
         },
       });
 
@@ -190,7 +190,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...swimlaneManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         query$,
         filters$,
         interval,
@@ -204,7 +204,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           subscriptions
         ),
         dataLoading$,
-        serializeState,
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,

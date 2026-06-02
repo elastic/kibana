@@ -53,8 +53,7 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  // Failing: See https://github.com/elastic/kibana/issues/246569
-  describe.skip('Package Policy - update', function () {
+  describe('Package Policy - update', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let managedAgentPolicyId: string;
@@ -63,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId3: string;
     let packagePolicySecretsId: string;
     let packagePolicySecrets: any;
+    let endpointVersion: string;
     let endpointPackagePolicyId: string;
     let inputOnlyPackagePolicyId: string;
 
@@ -77,7 +77,20 @@ export default function (providerContext: FtrProviderContext) {
 
       await enableSecrets(providerContext);
 
-      await supertest.delete(`/api/fleet/epm/packages/endpoint/8.6.1`).set('kbn-xsrf', 'xxxx');
+      // Install latest endpoint to resolve the current version, then uninstall before the test re-installs it
+      await supertest
+        .post(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+      const { body: endpointInfo } = await supertest
+        .get(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      endpointVersion = endpointInfo.item.version;
+      await supertest
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
+        .set('kbn-xsrf', 'xxxx');
       const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
         await Promise.all([
           supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
@@ -214,7 +227,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
@@ -262,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
       // uninstall endpoint package
       await supertest
-        .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       await supertest
@@ -415,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         })
         .expect(200);

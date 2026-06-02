@@ -127,6 +127,8 @@ dependsOn:
   - '@kbn/yaml-loader'
   - '@kbn/charts-theme'
   - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
 tags:
   - plugin
   - prod

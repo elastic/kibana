@@ -16,19 +16,22 @@ import type {
 } from '../../../../common/ui/types';
 import {
   isLegacyEventAttachment,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedAlertAttachment,
   isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
 
-export const getManualAlertIds = (comments: AttachmentUIV2[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUIV2) => {
-    if (comment.type === AttachmentType.alert && `alertId` in comment) {
-      const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      ids.forEach((id) => alertIds.add(id));
-      return alertIds;
-    }
-    return alertIds;
-  }, new Set<string>());
-  return Array.from(dedupeAlerts);
+export const getAttachmentItemCount = (comment: AttachmentUIV2): number => {
+  if (isAlertAttachment(comment)) {
+    return Array.isArray(comment.alertId) ? comment.alertId.length : 1;
+  }
+  if (isLegacyEventAttachment(comment)) {
+    return Array.isArray(comment.eventId) ? comment.eventId.length : 1;
+  }
+  if (isUnifiedReferenceAttachmentRequest(comment)) {
+    return Array.isArray(comment.attachmentId) ? comment.attachmentId.length : 1;
+  }
+  return 1;
 };
 
 const isAlertAttachment = (comment: AttachmentUIV2): comment is AlertAttachmentUI => {
@@ -97,7 +100,7 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
         }
-        if (isUnifiedEventAttachment(comment)) {
+        if (isUnifiedEventAttachment(comment) || isUnifiedAlertAttachment(comment)) {
           return filterUnifiedCommentById(comment, searchTerm);
         }
         return comment;

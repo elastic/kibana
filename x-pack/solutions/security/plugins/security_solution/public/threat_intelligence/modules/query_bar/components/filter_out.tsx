@@ -133,7 +133,6 @@ export const FilterOutContextMenu: FC<FilterOutContextMenuProps> = ({
     <EuiContextMenuItem
       key="filterOut"
       icon="minusCircle"
-      size="s"
       onClick={() => {
         filterFn();
         onAnnounce(FILTER_OUT_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));

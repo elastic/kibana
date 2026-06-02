@@ -9,11 +9,10 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DynamicRuleFormFlyout } from '../dynamic_rule_form_flyout';
-import { StandaloneRuleFormFlyout } from '../standalone_rule_form_flyout';
 import { RuleFormFlyout } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
-import { StandaloneRuleForm } from '../../form/standalone_rule_form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import { NOOP_WORKFLOW_FORM } from '../../form/contexts/rule_form_context';
 
 const mockServices = {
   http: {
@@ -61,6 +60,12 @@ const mockServices = {
     EmbeddableComponent: () => null,
     stateHelperApi: () => ({}),
   } as any,
+  workflowForm: NOOP_WORKFLOW_FORM,
+  uiActions: {
+    getAction: async () => ({
+      execute: ({ onResults }: { onResults: (results: unknown[]) => void }) => onResults([]),
+    }),
+  } as any,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -70,6 +75,8 @@ const mockFormServices: RuleFormServices = {
   application: mockServices.application,
   notifications: mockServices.notifications,
   lens: mockServices.lens,
+  workflowForm: NOOP_WORKFLOW_FORM,
+  uiActions: mockServices.uiActions,
 };
 
 // =============================================================================
@@ -87,7 +94,6 @@ const dynamicMeta: Meta<typeof DynamicRuleFormFlyout> = {
 export default dynamicMeta;
 
 type DynamicStory = StoryObj<typeof DynamicRuleFormFlyout>;
-type StandaloneStory = StoryObj<typeof StandaloneRuleFormFlyout>;
 
 /**
  * DynamicRuleFormFlyout - For Discover integration
@@ -115,22 +121,6 @@ export const DynamicWithYamlToggle: DynamicStory = {
     onClose: action('onClose'),
     includeYaml: true,
   },
-};
-
-/**
- * StandaloneRuleFormFlyout - For plugin integration
- * Static initialization, ignores prop changes after mount.
- * Time field is auto-selected from available date fields.
- */
-export const Standalone: StandaloneStory = {
-  render: () => (
-    <StandaloneRuleFormFlyout
-      services={mockServices}
-      query="FROM metrics-* | STATS avg_cpu = AVG(system.cpu.usage)"
-      push={true}
-      onClose={action('onClose')}
-    />
-  ),
 };
 
 /**
@@ -170,27 +160,12 @@ export const ComposableDynamic: ComposableStory = {
 };
 
 /**
- * Composable: Standalone form with custom flyout wrapper
- */
-export const ComposableStandalone: ComposableStory = {
-  render: () => (
-    <RuleFormFlyout push={true} onClose={action('onClose')} isLoading={false}>
-      <StandaloneRuleForm
-        onSubmit={action('onSubmit')}
-        query="FROM metrics-*"
-        services={mockFormServices}
-      />
-    </RuleFormFlyout>
-  ),
-};
-
-/**
- * Overlay mode (non-push flyout)
+ * Composable: Dynamic form in overlay (non-push) flyout mode
  */
 export const OverlayMode: ComposableStory = {
   render: () => (
     <RuleFormFlyout push={false} onClose={action('onClose')} isLoading={false}>
-      <StandaloneRuleForm
+      <DynamicRuleForm
         onSubmit={action('onSubmit')}
         query="FROM logs-*"
         services={mockFormServices}

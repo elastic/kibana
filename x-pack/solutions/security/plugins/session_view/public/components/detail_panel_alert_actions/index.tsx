@@ -98,7 +98,7 @@ export const DetailPanelAlertActions = ({
       panelPaddingSize="none"
       anchorPosition="leftCenter"
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };

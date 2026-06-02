@@ -888,8 +888,6 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        const mockedConsoleDir = jest.spyOn(console, 'dir').mockImplementation(() => {}); // mocked console.dir to avoid messages in the console when running tests
-
         services.attributeService.saveToLibrary = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
@@ -912,9 +910,11 @@ describe('Lens App', () => {
 
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(services.attributeService.saveToLibrary).toHaveBeenCalled();
-        // eslint-disable-next-line no-console
-        expect(console.dir).toHaveBeenCalledTimes(1);
-        mockedConsoleDir.mockRestore();
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: expect.stringContaining('failed'),
+          })
+        );
       });
 
       it('does not show the copy button on first save', async () => {
@@ -1086,7 +1086,9 @@ describe('Lens App', () => {
         }),
       });
 
-      services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)]);
+      act(() =>
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
+      );
 
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({

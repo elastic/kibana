@@ -133,11 +133,14 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         });
       } catch (e) {
         // a 404 just means the doc is already missing
-        if (e.response.status !== 404) {
-          const { status, statusText, data, headers, config } = e.response;
+        if (e.status !== 404) {
           throw new Error(
             `error attempting to delete settings:\n${JSON.stringify(
-              { status, statusText, data, headers, config },
+              {
+                status: e.status,
+                headers: e.headers ? Object.fromEntries(e.headers.entries()) : undefined,
+                message: e.message,
+              },
               null,
               2
             )}`

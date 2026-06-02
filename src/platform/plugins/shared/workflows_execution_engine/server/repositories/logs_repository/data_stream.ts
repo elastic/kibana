@@ -94,6 +94,16 @@ export type LogsRepositoryDataStreamClient = IDataStreamClient<
   WorkflowLogEvent
 >;
 
+/**
+ * Bump when Elasticsearch index mappings for the workflows execution logs data stream change.
+ * Compared on startup against `mappings._meta.managed_index_mappings_version` on backing indices
+ * to decide whether to schedule a lazy rollover.
+ *
+ * This is independent of `registerDataStream({ version })` above (template lifecycle) and from
+ * `WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION` — logs and events streams can bump separately.
+ */
+export const WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION = 2;
+
 export const initializeDataStreamClient = (
   coreDataStreams: DataStreamsStart
 ): Promise<LogsRepositoryDataStreamClient> => {

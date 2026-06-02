@@ -8,7 +8,7 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiIcon, EuiLoadingSpinner, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -22,6 +22,7 @@ import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
+import { withTooltip } from '../with_tooltip';
 
 // Category icons for bare base types (e.g. `ai.prompt` + `ai.agent` → `ai`) applied
 // before extension-family inheritance, so the aggregated row icon stays stable
@@ -36,23 +37,6 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   executionStatus: ExecutionStatus | null | undefined;
   onClick?: React.MouseEventHandler;
 }
-
-// EuiToolTip clones its child to attach hover handlers, so anchor it to a plain
-// span — works uniformly for EuiIcon, EuiToken, Suspense, and the masked-span glyph.
-const tooltipAnchorStyle = css({
-  display: 'inline-flex',
-  alignItems: 'center',
-  lineHeight: 0,
-});
-
-const withTooltip = (content: React.ReactElement, title?: string): React.ReactElement =>
-  title ? (
-    <EuiToolTip content={title}>
-      <span css={tooltipAnchorStyle}>{content}</span>
-    </EuiToolTip>
-  ) : (
-    content
-  );
 
 export const StepIcon = React.memo(
   ({ stepType, executionStatus, onClick, title, ...rest }: StepIconProps) => {
@@ -69,7 +53,10 @@ export const StepIcon = React.memo(
     if (executionStatus === ExecutionStatus.RUNNING) {
       return <EuiLoadingSpinner size="m" />;
     }
-    if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
+    if (
+      executionStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+      executionStatus === ExecutionStatus.WAITING_FOR_CHILD
+    ) {
       return (
         <EuiIcon
           type="hourglass"

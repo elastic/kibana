@@ -29,13 +29,18 @@ export const DiscoverLink = ({
     await discoverLocator.navigate({ dataViewSpec: { title: indexName } });
   };
 
+  const tooltipContent = i18n.translate('xpack.idxMgmt.goToDiscover.showIndexToolTip', {
+    defaultMessage: 'Show {indexName} in Discover',
+    values: { indexName },
+  });
+
   let link = (
     <EuiButtonIcon
       onClick={onClick}
       display="empty"
       size="xs"
       iconType="discoverApp"
-      aria-label="Discover"
+      aria-label={tooltipContent}
       data-test-subj="discoverIconLink"
       css={{ margin: '0 0.3em' }}
     />
@@ -59,12 +64,7 @@ export const DiscoverLink = ({
   }
 
   return (
-    <EuiToolTip
-      content={i18n.translate('xpack.idxMgmt.goToDiscover.showIndexToolTip', {
-        defaultMessage: 'Show {indexName} in Discover',
-        values: { indexName },
-      })}
-    >
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       {link}
     </EuiToolTip>
   );

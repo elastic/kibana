@@ -273,6 +273,36 @@ describe('MCP tool_type', () => {
         });
       });
 
+      it('should prefer serviceMessage over message when connector execution returns error status', async () => {
+        const toolType = getMcpToolType({ actions: mockActions });
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
+          request: mockRequest,
+          spaceId: 'default',
+        });
+
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'error',
+          message: 'an error occurred while running the action',
+          serviceMessage: 'redacted upstream tool error',
+        });
+
+        const handler = await dynamicProps.getHandler();
+        const result = await handler({}, {
+          logger: mockLogger,
+        } as any);
+
+        expect(result).toEqual({
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: 'redacted upstream tool error',
+              },
+            },
+          ],
+        });
+      });
+
       it('should return error result with default message when connector error has no message', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {

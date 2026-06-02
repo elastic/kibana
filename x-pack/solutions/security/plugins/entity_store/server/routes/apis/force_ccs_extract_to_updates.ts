@@ -15,8 +15,12 @@ import { wrapMiddlewares } from '../middleware';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
   LOG_EXTRACTION_DELAY_DEFAULT,
+  LOG_EXTRACTION_FREQUENCY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
 } from '../../domain/saved_objects/global_state/constants';
 
@@ -26,14 +30,16 @@ const paramsSchema = z.object({
   entityType: EntityType,
 });
 
-const DEFAULT_MAX_LOGS_PER_PAGE = 40000;
-
 const bodySchema = z.object({
   indexPatterns: z.array(z.string()).min(1),
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
   docsLimit: z.number().int().min(1).optional(),
   maxLogsPerPage: z.number().int().min(1).optional(),
+  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+  maxLogsPerWindowCapBehavior: z
+    .enum(['defer', 'drop'])
+    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
@@ -63,7 +69,15 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         const entityStoreCtx = await ctx.entityStore;
         const { logger: baseLogger, ccsLogsExtractionClient, namespace } = entityStoreCtx;
         const { entityType } = req.params;
-        const { indexPatterns, fromDateISO, toDateISO, docsLimit, maxLogsPerPage } = req.body;
+        const {
+          indexPatterns,
+          fromDateISO,
+          toDateISO,
+          docsLimit,
+          maxLogsPerPage,
+          maxLogsPerWindow,
+          maxLogsPerWindowCapBehavior,
+        } = req.body;
 
         const logger = baseLogger.get('forceCcsExtractToUpdates').get(entityType);
         logger.debug(
@@ -77,13 +91,15 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
           type: entityType,
           remoteIndexPatterns: indexPatterns,
           docsLimit: docsLimit ?? DEFAULT_DOCS_LIMIT,
-          maxLogsPerPage: maxLogsPerPage ?? DEFAULT_MAX_LOGS_PER_PAGE,
+          maxLogsPerPage: maxLogsPerPage ?? LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           lookbackPeriod: LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
           delay: LOG_EXTRACTION_DELAY_DEFAULT,
+          frequency: LOG_EXTRACTION_FREQUENCY_DEFAULT,
           entityDefinition,
           windowOverride: { fromDateISO, toDateISO },
-          // windowOverride bypasses the cap, so this value is irrelevant on this code path.
           maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+          maxLogsPerWindow,
+          maxLogsPerWindowCapBehavior,
         });
 
         if (result.error) {

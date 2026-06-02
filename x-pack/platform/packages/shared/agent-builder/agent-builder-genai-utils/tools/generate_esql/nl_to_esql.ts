@@ -16,6 +16,7 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
+import { loadDocumentation } from './documentation';
 
 export interface GenerateEsqlResponse {
   /**
@@ -107,12 +108,14 @@ export const generateEsql = async ({
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
+  const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
     docBase,
+    documentation,
     esqlCallbacks,
   });
 

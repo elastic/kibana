@@ -5,17 +5,24 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@kbn/ambient-ui-types",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".storybook/**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/index-lifecycle-management-common-shared",
+    "@kbn/test-jest-helpers"
   ]
 }
