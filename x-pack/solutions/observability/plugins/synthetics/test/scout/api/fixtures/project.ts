@@ -41,10 +41,11 @@ export async function pushProjectMonitors(
   headers: Record<string, string>,
   project: string,
   monitors: unknown[],
-  opts: { spaceId?: string; statusCode?: number } = {}
+  opts: { spaceId?: string; savedObjectType?: string; statusCode?: number } = {}
 ) {
-  const { spaceId, statusCode = 200 } = opts;
-  const res = await apiClient.put(`${projectBase(project, spaceId)}/_bulk_update`, {
+  const { spaceId, savedObjectType, statusCode = 200 } = opts;
+  const query = savedObjectType ? `?savedObjectType=${savedObjectType}` : '';
+  const res = await apiClient.put(`${projectBase(project, spaceId)}/_bulk_update${query}`, {
     headers,
     body: { monitors },
     responseType: 'json',
