@@ -47,13 +47,11 @@ export interface OpenCustomizeNavigationModalDeps {
 export const openCustomizeNavigationModal = ({
   items,
   defaultItemIds,
-  isCalloutDismissed,
   computeMoves,
   onChange,
   onSave,
   onReset,
   onClose,
-  onDismissCallout,
   mountModal,
 }: OpenCustomizeNavigationModalDeps): void => {
   const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
@@ -64,12 +62,10 @@ export const openCustomizeNavigationModal = ({
   mountModal(
     React.createElement(CustomizeNavigationModal, {
       items,
-      isCalloutDismissed,
       onChange: (order, hiddenIds) => onChange(toCustomization(order, hiddenIds)),
       onSave: (order, hiddenIds) => onSave(toCustomization(order, hiddenIds)),
       onReset,
       onClose,
-      onDismissCallout,
     })
   );
 };
