@@ -526,6 +526,9 @@ export function ServiceMapEditorFlyout({
               compressed
               fullWidth
               isClearable
+              aria-label={i18n.translate('xpack.apm.serviceMapEditor.dependenciesFilterLabel', {
+                defaultMessage: 'Dependencies',
+              })}
               placeholder={i18n.translate(
                 'xpack.apm.serviceMapEditor.dependenciesFilterPlaceholder',
                 { defaultMessage: 'Filter by dependency status' }
@@ -553,6 +556,9 @@ export function ServiceMapEditorFlyout({
               compressed
               fullWidth
               isClearable
+              aria-label={i18n.translate('xpack.apm.serviceMapEditor.alertStatusFilterLabel', {
+                defaultMessage: 'Alert status',
+              })}
               placeholder={i18n.translate(
                 'xpack.apm.serviceMapEditor.alertStatusFilterPlaceholder',
                 { defaultMessage: 'Filter by alert status' }
@@ -580,6 +586,9 @@ export function ServiceMapEditorFlyout({
               compressed
               fullWidth
               isClearable
+              aria-label={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterLabel', {
+                defaultMessage: 'SLO status',
+              })}
               placeholder={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder', {
                 defaultMessage: 'Filter by SLO status',
               })}
@@ -604,6 +613,9 @@ export function ServiceMapEditorFlyout({
               compressed
               fullWidth
               isClearable
+              aria-label={i18n.translate('xpack.apm.serviceMapEditor.anomalySeverityFilterLabel', {
+                defaultMessage: 'Anomaly severity',
+              })}
               placeholder={i18n.translate(
                 'xpack.apm.serviceMapEditor.anomalySeverityFilterPlaceholder',
                 { defaultMessage: 'Filter by anomaly severity' }

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
@@ -204,7 +205,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         filters$,
         query$,
         canEditUnifiedSearch: () => true,
-        getTypeDisplayName: () => 'configuration',
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.apm.serviceMap.embeddable.typeDisplayName', {
+            defaultMessage: 'configuration',
+          }),
         isEditingEnabled: () => true,
         onEdit: async () => {
           openLazyFlyout({
