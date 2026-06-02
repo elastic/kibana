@@ -19,11 +19,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe(
   'Canvas spaces — Canvas disabled in custom space',
-  { tag: testData.CANVAS_UI_TAGS },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let spaceId: string;
 

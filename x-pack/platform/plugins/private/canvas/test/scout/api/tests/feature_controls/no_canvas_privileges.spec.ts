@@ -24,7 +24,7 @@ import { testData } from '../../fixtures';
 
 apiTest.describe(
   'Canvas feature controls — no canvas privileges',
-  { tag: testData.CANVAS_TAGS },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let noCanvasCredentials: RoleApiCredentials;
 

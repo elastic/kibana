@@ -35,7 +35,7 @@ import { testData } from '../../fixtures';
 
 apiTest.describe(
   'Canvas feature controls — canvas disabled in space',
-  { tag: testData.CANVAS_TAGS },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let spaceId: string;
     // canvas:all user — normally can do everything, but space-level disable zeros it out

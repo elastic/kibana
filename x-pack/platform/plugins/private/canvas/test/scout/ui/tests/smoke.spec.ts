@@ -23,7 +23,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Canvas smoke test', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas smoke test', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);

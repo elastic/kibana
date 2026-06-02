@@ -23,63 +23,67 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Canvas security — canvas:read privileges', { tag: testData.CANVAS_UI_TAGS }, () => {
-  test.beforeAll(async ({ kbnClient, esArchiver }) => {
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
-  });
+test.describe(
+  'Canvas security — canvas:read privileges',
+  { tag: ['@local-stateful-classic'] },
+  () => {
+    test.beforeAll(async ({ kbnClient, esArchiver }) => {
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
+    });
 
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(testData.CANVAS_VIEWER_ROLE);
-  });
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginWithCustomRole(testData.CANVAS_VIEWER_ROLE);
+    });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
+    });
 
-  test('shows Canvas in the navigation', async ({
-    page,
-    pageObjects: { home, collapsibleNav },
-  }) => {
-    // Expand the collapsible nav (it may be collapsed by default) before asserting the link.
-    await home.goto();
-    await collapsibleNav.expandNav();
-    const canvasNavLink = page.testSubj
-      .locator('collapsibleNavAppLink')
-      .filter({ hasText: 'Canvas' });
-    await expect(canvasNavLink).toBeVisible();
-  });
+    test('shows Canvas in the navigation', async ({
+      page,
+      pageObjects: { home, collapsibleNav },
+    }) => {
+      // Expand the collapsible nav (it may be collapsed by default) before asserting the link.
+      await home.goto();
+      await collapsibleNav.expandNav();
+      const canvasNavLink = page.testSubj
+        .locator('collapsibleNavAppLink')
+        .filter({ hasText: 'Canvas' });
+      await expect(canvasNavLink).toBeVisible();
+    });
 
-  test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
-    await test.step('shows disabled "Create workpad" button', async () => {
-      await canvas.gotoListing();
+    test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
+      await test.step('shows disabled "Create workpad" button', async () => {
+        await canvas.gotoListing();
+        await expect(canvas.createWorkpadButton).toBeVisible();
+        await expect(canvas.createWorkpadButton).toBeDisabled();
+      });
+
+      await test.step('shows "Read only" badge', async () => {
+        await expect(canvas.headerBadge).toBeVisible();
+        await expect(canvas.headerBadge).toHaveAttribute('data-test-badge-label', /read only/i);
+      });
+    });
+
+    test('navigating to workpad/create redirects back to listing with button disabled', async ({
+      pageObjects: { canvas },
+    }) => {
+      // canvas:read users cannot create workpads; the app redirects them back to
+      // the listing page where the create button remains disabled.
+      await canvas.gotoWorkpad('create');
       await expect(canvas.createWorkpadButton).toBeVisible();
       await expect(canvas.createWorkpadButton).toBeDisabled();
     });
 
-    await test.step('shows "Read only" badge', async () => {
-      await expect(canvas.headerBadge).toBeVisible();
-      await expect(canvas.headerBadge).toHaveAttribute('data-test-badge-label', /read only/i);
+    test('workpad does not show add-element button (view-only mode)', async ({
+      pageObjects: { canvas },
+    }) => {
+      await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
+      await expect(canvas.workpadPage).toBeVisible();
+      // Wait for workpad to finish loading (refresh control is visible when loaded)
+      await expect(canvas.refreshControl).toBeVisible();
+      await expect(canvas.addElementButton).toBeHidden();
     });
-  });
-
-  test('navigating to workpad/create redirects back to listing with button disabled', async ({
-    pageObjects: { canvas },
-  }) => {
-    // canvas:read users cannot create workpads; the app redirects them back to
-    // the listing page where the create button remains disabled.
-    await canvas.gotoWorkpad('create');
-    await expect(canvas.createWorkpadButton).toBeVisible();
-    await expect(canvas.createWorkpadButton).toBeDisabled();
-  });
-
-  test('workpad does not show add-element button (view-only mode)', async ({
-    pageObjects: { canvas },
-  }) => {
-    await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
-    await expect(canvas.workpadPage).toBeVisible();
-    // Wait for workpad to finish loading (refresh control is visible when loaded)
-    await expect(canvas.refreshControl).toBeVisible();
-    await expect(canvas.addElementButton).toBeHidden();
-  });
-});
+  }
+);

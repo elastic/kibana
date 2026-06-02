@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
-
-// Canvas only runs in stateful deployments (disabled in serverless via config/serverless.yml)
-export const CANVAS_UI_TAGS = [...tags.stateful.classic];
 
 const SCOUT_FIXTURES = 'x-pack/platform/plugins/private/canvas/test/scout/ui/fixtures';
 
@@ -44,6 +40,7 @@ export const FILTER_WORKPAD_ID = 'workpad-b5618217-56d2-47fa-b756-1be2306cda68';
 
 /** The "The Very Cool Workpad for PDF Tests" saved in the reports KBN archive. */
 export const REPORTS_WORKPAD_NAME = 'The Very Cool Workpad for PDF Tests';
+export const REPORTS_WORKPAD_ID = 'workpad-c13808dc-e690-4bab-be06-2073ba071754';
 
 /**
  * By-reference embeddables used by the Canvas embeddable specs.

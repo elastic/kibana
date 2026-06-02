@@ -22,7 +22,7 @@ import path from 'path';
 import FormData from 'form-data';
 import { expect } from '@kbn/scout/api';
 import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { testData } from '../fixtures';
 
 const EXPORTS_DIR = path.join(__dirname, '../fixtures/exports');
@@ -51,7 +51,7 @@ const importNdjson = async (
 
 apiTest.describe(
   'Canvas workpad migrations — SO _import smoke test',
-  { tag: tags.stateful.classic },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let adminCredentials: RoleApiCredentials;
 

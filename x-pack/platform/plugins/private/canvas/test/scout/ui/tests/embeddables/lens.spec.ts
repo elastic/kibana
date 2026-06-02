@@ -39,7 +39,7 @@ const { LENS } = testData.EMBEDDABLES;
 const { label: METRIC_LABEL, value: METRIC_VALUE } = testData.LENS_METRIC;
 const EXTENDED_TIMEOUT = 20_000;
 
-test.describe('Canvas lens embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas lens embeddable', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.CANVAS_LENS);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.LENS);

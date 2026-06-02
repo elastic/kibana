@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
-
-// Canvas only runs in stateful deployments (disabled in serverless via config/serverless.yml)
-export const CANVAS_TAGS = [...tags.stateful.classic];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -22,9 +18,14 @@ export const MULTIPART_HEADERS = {
 
 export const KBN_ARCHIVES = {
   DEFAULT: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default',
+  REPORTS: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/reports',
 };
 
 export const WORKPAD_ID = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
+
+/** The "The Very Cool Workpad for PDF Tests" saved in the reports KBN archive. */
+export const REPORTS_WORKPAD_ID = 'workpad-c13808dc-e690-4bab-be06-2073ba071754';
+export const REPORTS_WORKPAD_NAME = 'The Very Cool Workpad for PDF Tests';
 
 /**
  * A user with canvas:all + logstash-* read (the "canvas editor" role).
@@ -74,6 +75,24 @@ export const NO_CANVAS_ROLE: KibanaRole = {
     {
       base: [],
       feature: { discover: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * A user with canvas:read + canvas:generate_report — the minimum for PDF report generation.
+ * Mirrors the FTR `test_canvas_user` role (no ES index access needed).
+ */
+export const CANVAS_REPORT_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { canvas: ['read', 'generate_report'] },
       spaces: ['*'],
     },
   ],

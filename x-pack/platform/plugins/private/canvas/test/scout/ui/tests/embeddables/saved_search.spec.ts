@@ -23,7 +23,7 @@ import { test, testData } from '../../fixtures';
 const { SAVED_SEARCH } = testData.EMBEDDABLES;
 const EXTENDED_TIMEOUT = 20_000;
 
-test.describe('Canvas saved search embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas saved search embeddable', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     // Canvas is only accessible when at least one workpad exists.

@@ -36,7 +36,7 @@ const NEW_ELEMENT_DESC = 'An excellent new element';
 const EDITED_ELEMENT_NAME = 'My Edited New Element';
 const EDITED_ELEMENT_DESC = 'An excellent edited element';
 
-test.describe('Canvas custom elements', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas custom elements', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);

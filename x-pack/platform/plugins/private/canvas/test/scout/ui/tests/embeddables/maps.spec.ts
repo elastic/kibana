@@ -25,7 +25,7 @@ import { test, testData } from '../../fixtures';
 
 const EXTENDED_TIMEOUT = 20_000;
 
-test.describe('Canvas maps embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas maps embeddable', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     // Canvas is only accessible when at least one workpad exists.
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);

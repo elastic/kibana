@@ -29,7 +29,7 @@ import { test, testData } from '../../fixtures';
 
 test.describe(
   'Canvas spaces — Canvas enabled in custom space',
-  { tag: testData.CANVAS_UI_TAGS },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let spaceId: string;
 

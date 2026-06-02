@@ -23,7 +23,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Canvas filters', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas filters', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.FILTER);
   });

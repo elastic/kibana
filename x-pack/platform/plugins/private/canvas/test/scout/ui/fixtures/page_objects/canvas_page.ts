@@ -64,6 +64,17 @@ export class CanvasPage {
    */
   public readonly headerBadge: Locator;
 
+  // ── Share menu ─────────────────────────────────────────────────────────────
+
+  /** The workpad header "Share" button. */
+  public readonly shareButton: Locator;
+
+  /** The "PDF reports" item inside the share menu. */
+  public readonly pdfReportsShareItem: Locator;
+
+  /** The "Generate" button inside the PDF reports share panel. */
+  public readonly generateReportButton: Locator;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.workpadListItems = this.page.testSubj.locator(
       'canvasWorkpadTable > canvasWorkpadTableWorkpad'
@@ -82,6 +93,9 @@ export class CanvasPage {
     );
     this.embeddablePanels = this.page.testSubj.locator('embeddablePanel');
     this.headerBadge = this.page.testSubj.locator('headerBadge');
+    this.shareButton = this.page.testSubj.locator('shareTopNavButton');
+    this.pdfReportsShareItem = this.page.testSubj.locator('sharePanel-PDFReports');
+    this.generateReportButton = this.page.testSubj.locator('generateReportButton');
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
@@ -373,6 +387,18 @@ export class CanvasPage {
     await this.page.testSubj.locator('previousPageButton').click();
   }
 
+  // ── Share menu ─────────────────────────────────────────────────────────────
+
+  /** Open the workpad header "Share" menu. */
+  async openShareMenu() {
+    await this.shareButton.click();
+  }
+
+  /** Open the "PDF reports" panel within the share menu. */
+  async openPdfReportsPanel() {
+    await this.pdfReportsShareItem.click();
+  }
+
   // ── Debug / filter helpers ─────────────────────────────────────────────────
 
   /**
@@ -407,14 +433,14 @@ export class CanvasPage {
    * approach as the FTR `monacoEditor` service.
    */
   async getCodeEditorValue(nthIndex: number = 0): Promise<string> {
-    const values = await this.page.evaluate((index: number) => {
+    const values = await this.page.evaluate(() => {
       const env = (
         window as unknown as {
           MonacoEnvironment: { monaco: { editor: { getModels(): Array<{ getValue(): string }> } } };
         }
       ).MonacoEnvironment;
       return env.monaco.editor.getModels().map((m) => m.getValue());
-    }, nthIndex);
+    });
     return (values as string[])[nthIndex] ?? '';
   }
 

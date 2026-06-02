@@ -22,55 +22,59 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Canvas security — canvas:all privileges', { tag: testData.CANVAS_UI_TAGS }, () => {
-  test.beforeAll(async ({ kbnClient, esArchiver }) => {
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(testData.CANVAS_EDITOR_ROLE);
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
-  test('shows Canvas in the navigation', async ({
-    page,
-    pageObjects: { home, collapsibleNav },
-  }) => {
-    // Expand the collapsible nav (it may be collapsed by default) before asserting the link.
-    await home.goto();
-    await collapsibleNav.expandNav();
-    const canvasNavLink = page.testSubj
-      .locator('collapsibleNavAppLink')
-      .filter({ hasText: 'Canvas' });
-    await expect(canvasNavLink).toBeVisible();
-  });
-
-  test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
-    await test.step('shows enabled "Create workpad" button', async () => {
-      await canvas.gotoListing();
-      await expect(canvas.createWorkpadButton).toBeVisible();
-      await expect(canvas.createWorkpadButton).toBeEnabled();
+test.describe(
+  'Canvas security — canvas:all privileges',
+  { tag: ['@local-stateful-classic'] },
+  () => {
+    test.beforeAll(async ({ kbnClient, esArchiver }) => {
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
     });
 
-    await test.step('shows no read-only badge', async () => {
-      await expect(canvas.headerBadge).toBeHidden();
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginWithCustomRole(testData.CANVAS_EDITOR_ROLE);
     });
 
-    await test.step('allows a workpad to be created', async () => {
-      await canvas.createNewWorkpad();
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
+    });
+
+    test('shows Canvas in the navigation', async ({
+      page,
+      pageObjects: { home, collapsibleNav },
+    }) => {
+      // Expand the collapsible nav (it may be collapsed by default) before asserting the link.
+      await home.goto();
+      await collapsibleNav.expandNav();
+      const canvasNavLink = page.testSubj
+        .locator('collapsibleNavAppLink')
+        .filter({ hasText: 'Canvas' });
+      await expect(canvasNavLink).toBeVisible();
+    });
+
+    test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
+      await test.step('shows enabled "Create workpad" button', async () => {
+        await canvas.gotoListing();
+        await expect(canvas.createWorkpadButton).toBeVisible();
+        await expect(canvas.createWorkpadButton).toBeEnabled();
+      });
+
+      await test.step('shows no read-only badge', async () => {
+        await expect(canvas.headerBadge).toBeHidden();
+      });
+
+      await test.step('allows a workpad to be created', async () => {
+        await canvas.createNewWorkpad();
+        await expect(canvas.addElementButton).toBeVisible();
+      });
+    });
+
+    test('allows an existing workpad to be opened and edited', async ({
+      pageObjects: { canvas },
+    }) => {
+      await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
+      await expect(canvas.workpadPage).toBeVisible();
       await expect(canvas.addElementButton).toBeVisible();
     });
-  });
-
-  test('allows an existing workpad to be opened and edited', async ({
-    pageObjects: { canvas },
-  }) => {
-    await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
-    await expect(canvas.workpadPage).toBeVisible();
-    await expect(canvas.addElementButton).toBeVisible();
-  });
-});
+  }
+);

@@ -83,7 +83,8 @@
     "@kbn/saved-search-plugin",
     "@kbn/lens-common",
     "@kbn/core-http-browser",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }

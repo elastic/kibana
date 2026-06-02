@@ -22,7 +22,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Canvas datasource', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas datasource', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     // Load the logstash-* index pattern (legacy.json) so Canvas's data view picker can list it.

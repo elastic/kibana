@@ -28,7 +28,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Canvas saved object resolve', { tag: testData.CANVAS_UI_TAGS }, () => {
+test.describe('Canvas saved object resolve', { tag: ['@local-stateful-classic'] }, () => {
   let spaceId: string;
 
   test.beforeAll(async ({ kbnClient, apiServices }, workerInfo) => {
