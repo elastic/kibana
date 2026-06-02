@@ -68,6 +68,7 @@ export interface ConversationListItemRowProps {
   showActionsMenu?: boolean;
   onItemClick?: () => void;
   status?: ConversationDisplayStatus;
+  read?: boolean;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -79,6 +80,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   showActionsMenu = true,
   onItemClick,
   status,
+  read,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -160,10 +162,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     `;
   }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, status]);
 
-  const isUnread =
-    status === ConversationDisplayStatus.unread ||
-    status === ConversationDisplayStatus.awaitingPrompt ||
-    status === ConversationDisplayStatus.error;
+  const isUnread = read === false;
 
   const menuItems = useMemo(
     () => [
@@ -185,9 +184,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="read-status"
         icon={isUnread ? 'eyeClosed' : 'eye'}
-        data-test-subj={`agentBuilderSidebarConversation${
-          isUnread ? 'MarkRead' : 'MarkUnread'
-        }-${conversationId}`}
         onClick={() => {
           closePopover();
           if (isUnread) {

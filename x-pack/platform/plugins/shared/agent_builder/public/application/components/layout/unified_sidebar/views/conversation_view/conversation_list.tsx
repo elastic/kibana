@@ -124,6 +124,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               showActionsMenu={!isStreaming}
               onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
               status={status}
+              read={conversation.read}
             />
           </EuiFlexItem>
         );
