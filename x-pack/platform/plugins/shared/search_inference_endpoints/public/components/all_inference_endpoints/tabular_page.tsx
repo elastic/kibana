@@ -159,7 +159,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             }),
             icon: 'eye',
             type: 'icon',
-            available: () => canManage,
             onClick: (item) => displayInferenceFlyout(item),
             'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
           },
