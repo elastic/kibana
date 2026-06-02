@@ -38,7 +38,10 @@ import type {
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
 } from '.';
-import { getResponseInspectorStats } from './search_source/inspect/inspector_stats';
+import {
+  getResponseInspectorStats,
+  getEsqlInspectorStats,
+} from './search_source/inspect/inspector_stats';
 
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
@@ -62,6 +65,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params ?? {}) as Record<string, unknown>,
+        getStats: getEsqlInspectorStats,
       }
     );
     return {
