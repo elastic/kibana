@@ -46,10 +46,11 @@ function quoteKqlValue(value: string): string {
 
 /**
  * Build the hash path expected by the Dashboards app's incoming-embeddable handler.
- * For a NEW dashboard we also seed the global time range (`_g.time`) from the APM view
- * the user was looking at — matches the Lens "Save and add to dashboard" UX so the
- * dashboard's time picker reflects the snapshot. For an EXISTING dashboard we leave
- * the time range alone (overwriting it could clobber state the user intentionally set).
+ * Always seed the global time range (`_g.time`) from the APM view the user was looking
+ * at — matches the Lens "Save and add to dashboard" UX so the destination dashboard's
+ * time picker reflects the snapshot. Caveat: encoding `_g=(time:...)` replaces the
+ * whole `_g` payload, so pinned filters / a non-default refresh interval on an existing
+ * destination dashboard get dropped. Lens does the same; product direction is to match.
  */
 function dashboardPathForId(
   dashboardId: string | null,
@@ -57,7 +58,7 @@ function dashboardPathForId(
 ): string {
   const isNew = !dashboardId || dashboardId === 'new';
   const base = isNew ? '#/create' : `#/view/${dashboardId}`;
-  if (!isNew || !timeRange) {
+  if (!timeRange) {
     return base;
   }
   const g = encodeRison({ time: { from: timeRange.from, to: timeRange.to } });
@@ -196,15 +197,18 @@ export function AddToDashboardButton({
       const serializedState: ServiceMapEmbeddableState = {
         title: newTitle,
         description: newDescription,
-        time_range: { from: start, to: end },
+        // No `time_range` here: with `apply_custom_time_range` defaulting OFF, the panel
+        // inherits the dashboard's global time range (which we seed from APM below via
+        // `dashboardPathForId`). The user can switch on a custom time later via the
+        // dashboard panel-menu's "Customize time range" action + the flyout toggle.
         environment,
         kuery: capturedKuery,
         service_name: capturedServiceName,
         service_group_id: serviceGroupId || undefined,
         map_orientation: mapOrientation,
-        // Default ON for the APM-UI creation flow: the user explicitly chose to put this
-        // view on a dashboard, so they likely want it to behave like a dashboard panel.
-        sync_with_dashboard_filters: true,
+        // Default ON: panel uses only its own captured filters and ignores the dashboard's
+        // KQL/Controls (the user opted into copying THIS view, not following the dashboard).
+        apply_custom_filters: true,
         // Snapshot the options-panel selections so the dashboard panel renders with the
         // same filter chips selected. Empty arrays are dropped to keep saved state minimal.
         alert_status_filter: viewFilters.alertStatusFilter.length
@@ -238,7 +242,10 @@ export function AddToDashboardButton({
           (serializedState.slo_status_filter?.length ?? 0) +
           (serializedState.connection_filter?.length ?? 0) +
           (serializedState.anomaly_severity_filter?.length ?? 0),
-        sync_with_dashboard_filters: serializedState.sync_with_dashboard_filters ?? false,
+        // Preserve the old EBT field name + semantics (true when the panel "syncs" with
+        // dashboard filters) so existing telemetry dashboards keep working. With the new
+        // `apply_custom_filters` semantics, "sync" means the inverse.
+        sync_with_dashboard_filters: serializedState.apply_custom_filters === false,
       });
 
       stateTransfer.navigateToWithEmbeddablePackages<ServiceMapEmbeddableState>('dashboards', {

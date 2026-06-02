@@ -247,8 +247,11 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
-  const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
-    initialState?.sync_with_dashboard_filters ?? false
+  const [applyCustomFilters, setApplyCustomFilters] = useState<boolean>(
+    initialState?.apply_custom_filters ?? true
+  );
+  const [applyCustomTimeRange, setApplyCustomTimeRange] = useState<boolean>(
+    initialState?.apply_custom_time_range ?? false
   );
   const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
     initialState?.alert_status_filter ?? []
@@ -396,7 +399,8 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
-      sync_with_dashboard_filters: syncWithDashboardFilters,
+      apply_custom_filters: applyCustomFilters,
+      apply_custom_time_range: applyCustomTimeRange,
       // Empty arrays drop to undefined so they're omitted from the saved object payload.
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
@@ -409,7 +413,8 @@ export function ServiceMapEditorFlyout({
     environment,
     kuery,
     serviceName,
-    syncWithDashboardFilters,
+    applyCustomFilters,
+    applyCustomTimeRange,
     alertStatusFilter,
     sloStatusFilter,
     connectionFilter,
@@ -662,19 +667,36 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
 
           <EuiFormRow
-            helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {
+            helpText={i18n.translate('xpack.apm.serviceMapEditor.applyCustomFiltersHelpText', {
               defaultMessage:
-                "When on, the panel responds to the dashboard's global filters and search. Time range is not synced — it stays panel-owned.",
+                "When on, the panel uses only its own filters and ignores the dashboard's KQL / Controls.",
             })}
             fullWidth
           >
             <EuiSwitch
-              label={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersLabel', {
-                defaultMessage: 'Sync with dashboard filters',
+              label={i18n.translate('xpack.apm.serviceMapEditor.applyCustomFiltersLabel', {
+                defaultMessage: 'Apply custom panel filters',
               })}
-              checked={syncWithDashboardFilters}
-              onChange={(e) => setSyncWithDashboardFilters(e.target.checked)}
-              data-test-subj="apmServiceMapEditorSyncFiltersToggle"
+              checked={applyCustomFilters}
+              onChange={(e) => setApplyCustomFilters(e.target.checked)}
+              data-test-subj="apmServiceMapEditorApplyCustomFiltersToggle"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            helpText={i18n.translate('xpack.apm.serviceMapEditor.applyCustomTimeRangeHelpText', {
+              defaultMessage:
+                "When on, the panel uses its own time range (set via the panel menu's \"Customize time range\" action). When off, it follows the dashboard's global time.",
+            })}
+            fullWidth
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.apm.serviceMapEditor.applyCustomTimeRangeLabel', {
+                defaultMessage: 'Apply custom time range',
+              })}
+              checked={applyCustomTimeRange}
+              onChange={(e) => setApplyCustomTimeRange(e.target.checked)}
+              data-test-subj="apmServiceMapEditorApplyCustomTimeRangeToggle"
             />
           </EuiFormRow>
         </EuiForm>

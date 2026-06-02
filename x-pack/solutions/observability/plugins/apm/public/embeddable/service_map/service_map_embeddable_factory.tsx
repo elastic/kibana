@@ -53,7 +53,14 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   service_name: undefined,
   service_group_id: undefined,
   map_orientation: 'horizontal',
-  sync_with_dashboard_filters: false,
+  // Default ON: the panel uses only its own captured filters and ignores the
+  // dashboard's KQL/Controls. Dashboards usually have broader filter contexts
+  // that don't make sense for a service map.
+  apply_custom_filters: true,
+  // Default OFF: panel inherits the dashboard's global time range. When ON, the
+  // panel's stored `time_range` (set via the built-in "Customize time range"
+  // panel-menu action) is published instead.
+  apply_custom_time_range: false,
   alert_status_filter: undefined,
   slo_status_filter: undefined,
   connection_filter: undefined,
@@ -67,7 +74,8 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   service_name: 'referenceEquality',
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
-  sync_with_dashboard_filters: 'referenceEquality',
+  apply_custom_filters: 'referenceEquality',
+  apply_custom_time_range: 'referenceEquality',
   // Array fields use deepEquality: the editor flyout's handleSave + the in-graph options
   // panel both produce fresh arrays on every save, which would otherwise mark the panel
   // dirty regardless of whether the selected values actually changed.
@@ -132,6 +140,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const state = initialState;
 
       const titleManager = initializeTitleManager(state);
+      // Always keep the stored time range available so the built-in "Customize time range"
+      // panel-menu action works; whether it's actually *applied* to the data fetch is
+      // gated below by `apply_custom_time_range` via the derived `effectiveTimeRange$`.
       const timeRangeManager = initializeTimeRangeManager({
         time_range: state.time_range ?? DEFAULT_TIME_RANGE,
       });
@@ -143,7 +154,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           service_name: state.service_name,
           service_group_id: state.service_group_id,
           map_orientation: state.map_orientation,
-          sync_with_dashboard_filters: state.sync_with_dashboard_filters,
+          apply_custom_filters: state.apply_custom_filters,
+          apply_custom_time_range: state.apply_custom_time_range,
           alert_status_filter: state.alert_status_filter,
           slo_status_filter: state.slo_status_filter,
           connection_filter: state.connection_filter,
@@ -152,6 +164,21 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         },
         defaultCustomState
       );
+
+      // Published time range: emit the stored value only when the user opted into a
+      // custom time range. Otherwise emit `undefined` so `fetch$()` falls back to the
+      // dashboard's global time range (see presentation-publishing fetch.ts).
+      const effectiveTimeRange$ = new BehaviorSubject<TimeRange | undefined>(
+        state.apply_custom_time_range ? timeRangeManager.api.timeRange$.getValue() : undefined
+      );
+      // Subscription is bounded by the embeddable instance lifetime — matches the
+      // existing pattern for `query$` / `filters$` BehaviorSubjects in this file.
+      combineLatest([
+        customStateManager.api.applyCustomTimeRange$,
+        timeRangeManager.api.timeRange$,
+      ])
+        .pipe(map(([on, tr]) => (on ? tr : undefined)))
+        .subscribe((next) => effectiveTimeRange$.next(next));
 
       const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
         buildQueryFromKuery(state.kuery)
@@ -193,6 +220,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const api = finalizeApi({
         ...titleManager.api,
         ...timeRangeManager.api,
+        // Override the timeRange$ exposed by `timeRangeManager.api` with the gated
+        // `effectiveTimeRange$` so the dashboard sees `undefined` when the user hasn't
+        // opted into a panel-level custom time range. `setTimeRange` from
+        // `timeRangeManager.api` still writes to the manager unchanged, so the dashboard's
+        // built-in "Customize time range" panel-menu action keeps working.
+        timeRange$: effectiveTimeRange$,
         ...stateApi,
         blockingError$,
         filters$,
@@ -225,8 +258,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
                       customStateManager.api.setMapOrientation(newState.map_orientation);
-                      customStateManager.api.setSyncWithDashboardFilters(
-                        newState.sync_with_dashboard_filters
+                      customStateManager.api.setApplyCustomFilters(newState.apply_custom_filters);
+                      customStateManager.api.setApplyCustomTimeRange(
+                        newState.apply_custom_time_range
                       );
                       // View filters live in the edit flyout per product direction: the
                       // in-graph options panel only renders layout controls in dashboard panels.
@@ -271,7 +305,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             serviceName,
             serviceGroupId,
             mapOrientation,
-            syncWithDashboardFilters,
+            applyCustomFilters,
             alertStatusFilter,
             sloStatusFilter,
             connectionFilter,
@@ -283,7 +317,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.serviceName$,
             customStateManager.api.serviceGroupId$,
             customStateManager.api.mapOrientation$,
-            customStateManager.api.syncWithDashboardFilters$,
+            customStateManager.api.applyCustomFilters$,
             customStateManager.api.alertStatusFilter$,
             customStateManager.api.sloStatusFilter$,
             customStateManager.api.connectionFilter$,
@@ -330,10 +364,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
 
           // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
-          // Only forward them when the panel opts in via `sync_with_dashboard_filters`; otherwise
-          // the panel stays isolated (preserves back-compat for panels added from the dashboard menu).
-          const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
-          const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
+          // `apply_custom_filters` defaults true (panel uses only its own captured filters).
+          // Forward parent filters only when the user opted out of custom filters.
+          const parentFilters = !applyCustomFilters ? fetchContext.filters : undefined;
+          const parentQuery = !applyCustomFilters ? fetchContext.query : undefined;
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
