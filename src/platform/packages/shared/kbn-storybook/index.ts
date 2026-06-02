@@ -12,6 +12,7 @@ import { defaultConfig } from './src/lib/default_config';
 export { defaultConfig };
 export type { StorybookConfig };
 export { runStorybookCli } from './src/lib/run_storybook_cli';
+export { buildStorybookDocsArtifacts, runStorybookDocsTestServer } from './src/lib/docs_test';
 export { default as WebpackConfig } from './src/webpack.config';
 export { DEFAULT_THEME, THEMES } from './src/lib/themes';
 export {
@@ -52,6 +53,11 @@ export type {
   StorybookDocsMetadata,
   StorybookDocsRegistry,
 } from './src/lib/docs_assets';
+export type {
+  BuildStorybookDocsArtifactsOptions,
+  BuildStorybookDocsArtifactsResult,
+  RunStorybookDocsTestServerOptions,
+} from './src/lib/docs_test';
 export type {
   StorybookDocsReference,
   ValidateStorybookDocsReferencesResult,
