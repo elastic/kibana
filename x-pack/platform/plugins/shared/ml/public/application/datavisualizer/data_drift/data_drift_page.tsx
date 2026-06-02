@@ -57,7 +57,6 @@ export const DataDriftPage: FC = () => {
           key={savedSearch?.id ?? dataView.id ?? dataView.getIndexPattern()}
           dataView={dataView}
           savedSearch={savedSearch}
-          headerContent={dataSourcePicker}
         />
       ) : dataView ? null : (
         <>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { EMPTY, map, merge } from 'rxjs';
@@ -31,6 +31,7 @@ import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
 import {
@@ -55,14 +56,6 @@ export interface ChangePointDetectionAppStateProps {
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /**
-   * Optional data source picker rendered in the page header. When provided it
-   * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
-   * style component supplied by the host application.
-   */
-  headerContent?: ReactNode;
-  /** Optional content rendered to the right of the header content */
-  rightSideItems?: ReactNode;
 }
 
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
@@ -70,8 +63,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
-  headerContent,
-  rightSideItems,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
@@ -106,7 +97,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     return (
       <AiopsAppContext.Provider value={appContextValue}>
         <UrlStateProvider>
-          {headerContent}
+          <AiopsDataSourcePicker currentDataView={dataView} />
           <EuiSpacer size="m" />
           {warning}
         </UrlStateProvider>
@@ -126,7 +117,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
           <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <PageHeader headerContent={headerContent} rightSideItems={rightSideItems} />
+                <PageHeader />
                 <EuiSpacer />
                 <ReloadContextProvider reload$={reload$}>
                   <FilterQueryContextProvider>

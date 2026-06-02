@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
@@ -24,6 +24,7 @@ import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { LogCategorizationPage } from './log_categorization_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -39,12 +40,6 @@ export interface LogCategorizationAppStateProps {
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /**
-   * Optional data source picker rendered in the page header. When provided it
-   * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
-   * style component supplied by the host application.
-   */
-  headerContent?: ReactNode;
 }
 
 export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
@@ -52,7 +47,6 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
-  headerContent,
 }) => {
   if (!dataView) {
     return null;
@@ -64,7 +58,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     return (
       <AiopsAppContext.Provider value={appContextValue}>
         <UrlStateProvider>
-          {headerContent}
+          <AiopsDataSourcePicker currentDataView={dataView} />
           <EuiSpacer size="m" />
           {warning}
         </UrlStateProvider>
@@ -97,7 +91,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
           <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogCategorizationPage headerContent={headerContent} />
+                <LogCategorizationPage />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

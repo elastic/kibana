@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
@@ -27,6 +27,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -44,12 +45,6 @@ export interface LogRateAnalysisAppStateProps {
   showContextualInsights?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
-  /**
-   * Optional data source picker rendered in the page header. When provided it
-   * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
-   * style component supplied by the host application.
-   */
-  headerContent?: ReactNode;
 }
 
 export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
@@ -58,7 +53,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   appContextValue,
   showContextualInsights = false,
   showFrozenDataTierChoice = true,
-  headerContent,
 }) => {
   if (!dataView) {
     return null;
@@ -70,7 +64,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     return (
       <AiopsAppContext.Provider value={appContextValue}>
         <UrlStateProvider>
-          {headerContent}
+          <AiopsDataSourcePicker currentDataView={dataView} />
           <EuiSpacer size="m" />
           {warning}
         </UrlStateProvider>
@@ -103,10 +97,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
               <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                 <DatePickerContextProvider {...datePickerDeps}>
                   <FilterQueryContextProvider>
-                    <LogRateAnalysisPage
-                      showContextualInsights={showContextualInsights}
-                      headerContent={headerContent}
-                    />
+                    <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
                   </FilterQueryContextProvider>
                 </DatePickerContextProvider>
               </StorageContextProvider>

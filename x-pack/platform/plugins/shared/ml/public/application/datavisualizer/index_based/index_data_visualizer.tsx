@@ -256,7 +256,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               getAdditionalLinks={getAdditionalLinks}
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
-              headerContent={dataSourcePicker}
             />
           )}
         </>

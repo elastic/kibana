@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiBadge,
-  EuiTitle,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
@@ -50,6 +49,7 @@ import type { DataComparisonFullAppState } from './types';
 import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
+import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
 import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
@@ -65,9 +65,8 @@ const maxInlineSizeStyles = css`
 interface PageHeaderProps {
   onRefresh: () => void;
   needsUpdate: boolean;
-  headerContent?: ReactNode;
 }
-export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, headerContent }) => {
+export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -111,11 +110,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, header
       data-test-subj="dataComparisonTimeRangeSelectorSection"
     >
       <EuiFlexItem grow={false}>
-        {headerContent ?? (
-          <EuiTitle size="s">
-            <h2 data-test-subj="mlDataDriftPageDataViewTitle">{dataView.getName()}</h2>
-          </EuiTitle>
-        )}
+        <DataVisualizerDataSourcePicker currentDataView={dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
         <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
@@ -159,13 +154,12 @@ const getDataDriftDataLabel = (label: string, indexPattern?: string) => (
 );
 interface Props {
   initialSettings: InitialSettings;
-  headerContent?: ReactNode;
 }
 
 const isBarBetween = (start: number, end: number, min: number, max: number) => {
   return start >= min && end <= max;
 };
-export const DataDriftPage: FC<Props> = ({ initialSettings, headerContent }) => {
+export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService, uiSettings, cps },
   } = useDataVisualizerKibana();
@@ -417,11 +411,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings, headerContent }) => 
 
   return (
     <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
-      <PageHeader
-        onRefresh={handleRefresh}
-        needsUpdate={queryNeedsUpdate}
-        headerContent={headerContent}
-      />
+      <PageHeader onRefresh={handleRefresh} needsUpdate={queryNeedsUpdate} />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">

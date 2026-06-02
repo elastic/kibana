@@ -41,15 +41,6 @@ export const ChangePointDetectionPage: FC = () => {
     />
   );
 
-  const headerContent = (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      services={services}
-      DataViewPickerComponent={DataViewPicker}
-      SavedObjectFinderComponent={SavedObjectFinder}
-    />
-  );
-
   return (
     <>
       <MlPageHeader>
@@ -64,7 +55,12 @@ export const ChangePointDetectionPage: FC = () => {
       </MlPageHeader>
       {!dataView ? (
         <>
-          {headerContent}
+          <MlDataSourcePicker
+            currentDataView={dataView ?? null}
+            services={services}
+            DataViewPickerComponent={DataViewPicker}
+            SavedObjectFinderComponent={SavedObjectFinder}
+          />
           <NoDataViewPrompt />
         </>
       ) : (
@@ -72,7 +68,6 @@ export const ChangePointDetectionPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
             ...pick(services, [
@@ -80,7 +75,10 @@ export const ChangePointDetectionPage: FC = () => {
               'application',
               'cases',
               'charts',
+              'contentManagement',
               'data',
+              'dataViewEditor',
+              'dataViewFieldEditor',
               'embeddable',
               'executionContext',
               'fieldFormats',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual, orderBy } from 'lodash';
 
@@ -58,12 +58,10 @@ interface SignificantFieldValue {
 
 interface LogRateAnalysisPageProps {
   showContextualInsights?: boolean;
-  headerContent?: ReactNode;
 }
 
 export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   showContextualInsights = false,
-  headerContent,
 }) => {
   const aiopsAppContext = useAiopsAppContext();
   const { data: dataService, observabilityAIAssistant } = aiopsAppContext;
@@ -298,7 +296,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
 
   return (
     <EuiPageBody data-test-subj="aiopsLogRateAnalysisPage" paddingSize="none" panelled={false}>
-      <PageHeader headerContent={headerContent} />
+      <PageHeader />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">

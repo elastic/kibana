@@ -6,10 +6,10 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -28,23 +28,14 @@ import {
   type AiOpsKey,
   type AiOpsStorageMapped,
 } from '../../types/storage';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const maxInlineSizeStyles = css`
   max-inline-size: 100%;
   min-inline-size: 0;
 `;
 
-export interface PageHeaderProps {
-  /** Optional content rendered to the right of the header content */
-  rightSideItems?: ReactNode;
-  /**
-   * When provided, rendered on the left side of the header in place of the
-   * static data view title. Typically the data source picker component.
-   */
-  headerContent?: ReactNode;
-}
-
-export const PageHeader: FC<PageHeaderProps> = ({ rightSideItems, headerContent }) => {
+export const PageHeader: FC = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -82,16 +73,11 @@ export const PageHeader: FC<PageHeaderProps> = ({ rightSideItems, headerContent 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
-        {headerContent !== undefined ? (
-          <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>{headerContent}</EuiFlexItem>
-            {rightSideItems ? <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem> : null}
-          </EuiFlexGroup>
-        ) : (
-          <EuiTitle size="l">
-            <h2>{dataView.getName()}</h2>
-          </EuiTitle>
-        )}
+        <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <AiopsDataSourcePicker currentDataView={dataView} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
         <EuiFlexGroup

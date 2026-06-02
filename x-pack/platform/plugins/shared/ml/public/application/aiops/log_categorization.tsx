@@ -37,15 +37,6 @@ export const LogCategorizationPage: FC = () => {
     />
   );
 
-  const headerContent = (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      services={services}
-      DataViewPickerComponent={DataViewPicker}
-      SavedObjectFinderComponent={SavedObjectFinder}
-    />
-  );
-
   return (
     <>
       <MlPageHeader>
@@ -53,7 +44,12 @@ export const LogCategorizationPage: FC = () => {
       </MlPageHeader>
       {!dataView ? (
         <>
-          {headerContent}
+          <MlDataSourcePicker
+            currentDataView={dataView ?? null}
+            services={services}
+            DataViewPickerComponent={DataViewPicker}
+            SavedObjectFinderComponent={SavedObjectFinder}
+          />
           <NoDataViewPrompt />
         </>
       ) : (
@@ -61,14 +57,16 @@ export const LogCategorizationPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
             ...pick(services, [
               'analytics',
               'application',
               'charts',
+              'contentManagement',
               'data',
+              'dataViewEditor',
+              'dataViewFieldEditor',
               'executionContext',
               'fieldFormats',
               'http',

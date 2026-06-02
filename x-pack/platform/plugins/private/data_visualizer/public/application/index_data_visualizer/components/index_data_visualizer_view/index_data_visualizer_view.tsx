@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -58,6 +58,7 @@ import type {
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { DataVisualizerDataSourcePicker } from '../../../common/components/data_source_picker';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { OMIT_FIELDS } from '../../../../../common/constants';
@@ -107,11 +108,9 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
-  headerContent?: ReactNode;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
-  headerContent,
   ...dataVisualizerProps
 }) => {
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<
@@ -527,7 +526,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
           wrap={true}
           data-test-subj="dataVisualizerTimeRangeSelectorSection"
         >
-          <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DataVisualizerDataSourcePicker
+              currentDataView={currentDataView}
+              onFieldSaved={() => mlTimefilterRefresh$.next({ lastRefresh: Date.now() })}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
             <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
               {hasValidTimeField && (
