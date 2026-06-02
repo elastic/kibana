@@ -36,8 +36,12 @@ export const stopCmd: Command<void> = {
     } else {
       // Always run stopAll — Docker containers and orphaned child processes
       // can outlive the tracked PIDs recorded in services.json.
-      await stopAll(repoRoot, log);
-      log.info('All eval services have been shut down.');
+      const didStop = await stopAll(repoRoot, log);
+      if (didStop) {
+        log.info('All eval services have been shut down.');
+      } else {
+        log.info('No managed services were running.');
+      }
     }
   },
 };

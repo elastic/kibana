@@ -181,7 +181,9 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
   const composePath = Path.join(repoRoot, EDOT_DOCKER_COMPOSE_FILE);
 
   try {
-    if (Fs.existsSync(composePath)) {
+    if (!Fs.existsSync(composePath)) {
+      log.info('[edot] compose file not found, using docker stop');
+    } else {
       execFileSync('docker', ['compose', '-f', composePath, 'down'], {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -267,6 +269,10 @@ const terminateProcessGroup = async (
     while (isProcessGroupAlive(pid) && Date.now() < killDeadline) {
       await new Promise((r) => setTimeout(r, 100));
     }
+
+    if (isProcessGroupAlive(pid)) {
+      log.warning(`[${label}] process group ${pid} still alive after SIGKILL`);
+    }
   }
 };
 
@@ -312,16 +318,21 @@ export const stopService = async (
     stopEdotDockerContainer(repoRoot, log);
   }
 
-  log.info(`[${name}] stopped`);
+  if (isProcessGroupAlive(entry.pid)) {
+    log.warning(`[${name}] may not have fully stopped (PID ${entry.pid})`);
+  } else {
+    log.info(`[${name}] stopped`);
+  }
   delete state[name];
   writeState(repoRoot, state);
   return true;
 };
 
-export const stopAll = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+export const stopAll = async (repoRoot: string, log: ToolingLog): Promise<boolean> => {
   // Stop Scout first (it has child processes), then EDOT
-  await stopService(repoRoot, 'scout', log);
-  await stopService(repoRoot, 'edot', log);
+  const scoutStopped = await stopService(repoRoot, 'scout', log);
+  const edotStopped = await stopService(repoRoot, 'edot', log);
+  return scoutStopped || edotStopped;
 };
 
 /**
