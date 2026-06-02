@@ -229,7 +229,9 @@ export class GisPageObject extends FtrService {
 
   async onMapListingPage() {
     this.log.debug(`onMapListingPage`);
-    return await this.listingTable.onListingPage('map');
+    return await this.testSubjects.exists('mapLandingPage', {
+      timeout: 5000,
+    });
   }
 
   async onMapPage() {
@@ -265,7 +267,9 @@ export class GisPageObject extends FtrService {
       await this.retry.try(async () => {
         await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
         const onMapListingPage = await this.onMapListingPage();
-        if (!onMapListingPage) throw new Error('Not on map listing page.');
+        if (!onMapListingPage) {
+          throw new Error('Not on map listing page.');
+        }
       });
     }
   }
