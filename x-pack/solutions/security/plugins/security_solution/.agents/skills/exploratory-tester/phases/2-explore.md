@@ -73,13 +73,59 @@ Record end time when checklist completes or timebox fires. Write both into the f
 
 ### At every checklist step
 
-1. **`browser_console_messages`** — scan for new messages after the action:
-   - `"Maximum update depth exceeded"` → **Level 1** (infinite render loop)
-   - Any other `"Warning: ..."` React message → **Level 2**
-   - Ignore: CSP violations, 404s on `/internal/cloud/solution`, browser extension messages
-2. **`browser_network_requests`** — group by `method + path` (strip query strings). If any group has 2+ entries from a single user action → **Level 2** finding ("Duplicate API call"). Exclude polling paths (`/health`, `/status`, `/metrics`, `/fleet-setup`).
-3. **`browser_take_screenshot`** — save to `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
-4. **Append one entry to `findings-flow-<N>.md` immediately** — even if nothing went wrong. Use `templates/finding-format.md`.
+After each action, run the three detectors below **in sequence**. Each detector returns structured results — log them directly, no interpretation needed. Agent judgment applies only after the detectors have run, for UI states the detectors don't cover.
+
+---
+
+**Detector A — DOM state** (`browser_evaluate`)
+
+Paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
+- `level1[]` items → Level 1 finding
+- `level2[]` items → Level 2 finding
+- `level3[]` items → Level 3 observation
+
+---
+
+**Detector B — Console** (`browser_console_messages(level: "error")`)
+
+Apply this classification table exactly — pattern matching, no judgment:
+
+| Pattern in message | Level | Action |
+|---|---|---|
+| contains `Maximum update depth exceeded` | 1 | Log: "Infinite React re-render" |
+| contains `[5][0][2][3][4]` in HTTP status, or message contains ` 500`, ` 502`, ` 503`, ` 504` | 1 | Log: "Server error in console" |
+| starts with `Warning:` | 2 | Log: "React warning" |
+| contains `Executing inline script violates the following Content Security Policy` | suppress | ECH infrastructure noise |
+| contains `Failed to load resource` AND URL contains `/internal/cloud/solution` | suppress | ECH infrastructure noise |
+| contains `Failed to load resource` AND URL contains `/internal/osquery/` | suppress | Osquery not installed on ECH |
+| anything else at error level | 3 | Log as observation |
+
+---
+
+**Detector C — Network** (`browser_network_requests(static: false)`)
+
+Apply this algorithm exactly — no judgment:
+
+```
+POLLING = ["/health", "/status", "/metrics", "/fleet-setup", "/api/security/me"]
+
+counts = {}
+for each request r:
+  key = r.method + " " + r.url.split("?")[0]   // strip query string
+  counts[key] = (counts[key] || 0) + 1
+
+for each key where counts[key] >= 2:
+  if NONE of the POLLING paths appear in key:
+    → Level 2: "Duplicate API call: {key} called {counts[key]} times"
+```
+
+---
+
+**Screenshot:** `browser_take_screenshot` → `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
+
+**Append findings:** Write one entry to `findings-flow-<N>.md` per detector result (use `templates/finding-format.md`). If all three detectors return nothing, write one Level 3 observation: "Step <N> — no anomalies detected."
+
+**Agent judgment:** After the detectors, assess the overall UI state. If something the flow requires is visibly absent or wrong and the detectors didn't catch it — log a Level 2 finding with what is missing and why it matters. Do not re-derive anything the detectors already reported.
 
 ### Mini-probe (Level 1 or Level 2 finding)
 

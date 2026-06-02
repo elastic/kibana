@@ -62,4 +62,5 @@ Execute in order — read each file before starting it:
 | `templates/finding-format.md` | Finding entry format and level rules |
 | `templates/report-format.md` | report.md structure |
 | `scripts/create-noise-index.sh` | Creates non-ECS test data — executed by Phase 1 |
+| `scripts/check-dom-anomalies.js` | DOM anomaly detector — pasted into `browser_evaluate` after each action |
 | `knowledge/<area_slug>.md` | Known non-bugs and navigation patterns — loaded at Phase 0 end |
