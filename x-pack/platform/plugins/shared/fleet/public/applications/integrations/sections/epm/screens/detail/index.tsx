@@ -49,7 +49,6 @@ import {
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
   useLink,
@@ -400,11 +399,6 @@ export function Detail() {
         search,
         hash,
       });
-
-      const agentlessStatus = getAgentlessStatusForPackage(
-        packageInfo ?? undefined,
-        integration ?? undefined
-      );
 
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
