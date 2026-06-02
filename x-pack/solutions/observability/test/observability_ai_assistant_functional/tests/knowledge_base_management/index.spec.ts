@@ -44,7 +44,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         body: {
           title: 'Favourite color',
           text,
-          public: false,
+          public: true,
           labels: {},
         },
       },

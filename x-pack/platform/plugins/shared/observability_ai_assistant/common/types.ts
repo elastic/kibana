@@ -129,6 +129,7 @@ export interface KnowledgeBaseEntry {
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
   user?: {
+    id?: string;
     name: string;
   };
   confidence?: 'low' | 'medium' | 'high'; // deprecated
