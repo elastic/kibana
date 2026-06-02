@@ -135,9 +135,14 @@ export interface IDslPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: (
-    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext' | 'inspector'>
-  ) => Promise<IDslPaginatedSearchResult | null>;
+  nextPage: (options?: {
+    abortSignal?: AbortSignal;
+    executionContext?: KibanaExecutionContext;
+    /** Override the inspector title for this pagination request */
+    inspectorTitle?: string;
+    /** Override the inspector description for this pagination request */
+    inspectorDescription?: string;
+  }) => Promise<IDslPaginatedSearchResult | null>;
 }
 
 /**

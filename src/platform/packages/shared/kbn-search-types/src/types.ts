@@ -14,7 +14,6 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { Observable } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
@@ -130,16 +129,6 @@ export interface ISearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
-
-  /**
-   * Inspector integration options for tracking requests
-   */
-  inspector?: {
-    adapter?: RequestAdapter;
-    title: string;
-    description?: string;
-    id?: string;
-  };
 }
 
 /**

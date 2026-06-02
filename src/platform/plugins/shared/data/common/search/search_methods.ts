@@ -59,6 +59,7 @@ export class SearchMethodsService implements ISearchMethods {
     const response = await this.executeSearch(
       request,
       this.mapEsqlOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY),
+      options?.inspector,
       {
         getRequestBody: (req) => (req.params ?? {}) as Record<string, unknown>,
       }
@@ -74,10 +75,15 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
     const request = this.buildDslRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDslOptions(options, params), {
-      getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-      getStats: getResponseInspectorStats,
-    });
+    const response = await this.executeSearch(
+      request,
+      this.mapDslOptions(options, params),
+      options?.inspector,
+      {
+        getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+        getStats: getResponseInspectorStats,
+      }
+    );
     return {
       rawResponse: response.rawResponse,
       requestParams: response.requestParams,
@@ -97,10 +103,15 @@ export class SearchMethodsService implements ISearchMethods {
       trackTotalHits: true,
     };
     const request = this.buildDslRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDslOptions(options, params), {
-      getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-      getStats: getResponseInspectorStats,
-    });
+    const response = await this.executeSearch(
+      request,
+      this.mapDslOptions(options, params),
+      options?.inspector,
+      {
+        getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+        getStats: getResponseInspectorStats,
+      }
+    );
     return {
       rawResponse: response.rawResponse,
       requestParams: response.requestParams,
@@ -116,6 +127,7 @@ export class SearchMethodsService implements ISearchMethods {
     const response = await this.executeSearch(
       request,
       this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY),
+      options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
       }
@@ -134,6 +146,7 @@ export class SearchMethodsService implements ISearchMethods {
     const response = await this.executeSearch(
       request,
       this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY),
+      options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
       }
@@ -155,12 +168,12 @@ export class SearchMethodsService implements ISearchMethods {
   private async executeSearch<T extends IKibanaSearchRequest>(
     request: T,
     options: ISearchOptions,
+    inspector: IBaseSearchOptions['inspector'],
     inspectorCallbacks?: {
       getRequestBody: (request: T) => Record<string, unknown>;
       getStats?: (rawResponse: any) => RequestStatistics;
     }
   ): Promise<any> {
-    const inspector = options?.inspector;
     const requestResponder = inspector?.adapter?.start(inspector.title, {
       id: inspector.id,
       description: inspector.description,
@@ -265,34 +278,27 @@ export class SearchMethodsService implements ISearchMethods {
     return {
       hasNextPage,
       nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult | null> => {
-        const { abortSignal, executionContext, inspector } = pageOptions ?? {};
+        const { abortSignal, executionContext, inspectorTitle, inspectorDescription } =
+          pageOptions ?? {};
 
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
 
-        // Merge inspector options: pageOptions.inspector overrides original,
-        // but preserve adapter from original if not specified
-        let mergedInspector = options?.inspector;
-        if (inspector && options?.inspector) {
-          mergedInspector = {
-            adapter: inspector.adapter ?? options.inspector.adapter,
-            title: inspector.title ?? options.inspector.title,
-            description: inspector.description ?? options.inspector.description,
-            id: inspector.id ?? options.inspector.id,
-          };
-        } else if (inspector) {
-          mergedInspector = inspector;
-        }
+        // Build inspector with optional title/description overrides
+        const paginationInspector = options?.inspector
+          ? {
+              ...options.inspector,
+              title: inspectorTitle ?? options.inspector.title,
+              description: inspectorDescription ?? options.inspector.description,
+            }
+          : undefined;
 
-        // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
         const paginationOptions = {
           ...options,
           abortSignal,
           executionContext: executionContext ?? options?.executionContext,
-          // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
-          sessionId: undefined,
-          inspector: mergedInspector,
+          sessionId: undefined, // Strip session ID for pagination calls
         };
 
         // Build next search with search_after
@@ -308,6 +314,7 @@ export class SearchMethodsService implements ISearchMethods {
         const nextResponse = await self.executeSearch(
           request,
           self.mapDslOptions(paginationOptions),
+          paginationInspector,
           {
             getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
             getStats: getResponseInspectorStats,
@@ -432,7 +439,6 @@ export class SearchMethodsService implements ISearchMethods {
       sessionId: options.sessionId,
       executionContext: options.executionContext,
       projectRouting: options.projectRouting,
-      inspector: options.inspector,
     };
   }
 }
