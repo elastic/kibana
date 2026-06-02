@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
+import {
+  getRoot,
+  isDraftStream,
+  isEnabledFailureStore,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
@@ -22,6 +28,7 @@ import {
   streamlangDSLSchemaStrict,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
+import { isEqual } from 'lodash';
 import type {
   EnrichmentDataSource,
   EnrichmentUrlState,
@@ -220,20 +227,30 @@ export const streamEnrichmentMachine = setup({
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => {
       const { definition, urlState } = assignArgs.context;
-      const dataSources = [...urlState.dataSources];
 
-      // Add failure store data source by default if available and not already present
-      const isFailureStoreAvailable =
-        isEnabledFailureStore(definition.effective_failure_store) &&
-        definition.privileges?.read_failure_store;
-      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+      const isWiredDraft = isDraftStream(definition.stream);
 
-      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
-        // Add with enabled: false since there's already an active data source
-        dataSources.push({
-          ...createFailureStoreDataSource(definition.stream.name),
-          enabled: false,
-        });
+      const dataSources = isWiredDraft
+        ? urlState.dataSources.filter(
+            (ds) => ds.type !== 'kql-samples' && ds.type !== 'failure-store'
+          )
+        : [...urlState.dataSources];
+
+      // Add failure store data source by default if available and not already present.
+      // Draft streams have no backing data stream so failure store is not applicable.
+      if (!isWiredDraft) {
+        const isFailureStoreAvailable =
+          isEnabledFailureStore(definition.effective_failure_store) &&
+          definition.privileges?.read_failure_store;
+        const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+
+        if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+          // Add with enabled: false since there's already an active data source
+          dataSources.push({
+            ...createFailureStoreDataSource(definition.stream.name),
+            enabled: false,
+          });
+        }
       }
 
       return {
@@ -712,9 +729,9 @@ const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: Str
   if (!isValidSchema) {
     return true;
   } else {
-    return (
-      JSON.stringify(sanitiseForEditing(nextStreamlangDSL)) !==
-      JSON.stringify(sanitiseForEditing(previousStreamlangDSL))
+    return !isEqual(
+      sanitiseForEditing(nextStreamlangDSL),
+      sanitiseForEditing(previousStreamlangDSL)
     );
   }
 };

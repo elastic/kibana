@@ -11,6 +11,7 @@ import React from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { LandingHeader } from '../header';
+import { IntegrationsGrid } from '../integrations_grid/integrations_grid';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
 import { PageTemplate } from './template';
 
@@ -25,8 +26,7 @@ export const LandingPage = () => {
       <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
         <LandingHeader />
         <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
-          {/* Will be replaced by the new sections */}
-          <OnboardingFlowForm />
+          <IntegrationsGrid />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     );

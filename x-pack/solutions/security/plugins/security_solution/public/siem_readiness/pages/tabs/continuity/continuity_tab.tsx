@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
-import type { PipelineStats } from '@kbn/siem-readiness';
+import type { MainCategories, PipelineStats } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, filterPipelinesByCategories } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -62,36 +63,42 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
+  const { getReadinessPipelines, getReadinessCategories } = useSiemReadinessApi();
 
-  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
+  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
+
+  const pipelineItems = pipelinesData?.items;
 
   // If any pipeline has statsAvailable: false, stats are not available for this environment
-  const statsAvailable = pipelinesData ? pipelinesData.every((p) => p.statsAvailable) : true;
+  const statsAvailable = pipelineItems ? pipelineItems.every((p) => p.statsAvailable) : true;
 
-  // Build index → category mapping from getReadinessCategories
-  const indexToCategoryMap = useMemo(() => {
-    const map = new Map<string, string>();
-
-    if (!categoriesData?.mainCategoriesMap) return map;
-
-    categoriesData.mainCategoriesMap.forEach(({ category, indices }) => {
-      indices.forEach(({ indexName }) => {
-        map.set(indexName, category);
+  // Build index → all-categories map from the categories API response
+  const indexToCategoriesMap = useMemo(() => {
+    const map = new Map<string, MainCategories[]>();
+    categoriesData?.mainCategoriesMap?.forEach((group) => {
+      group.indices.forEach((idx) => {
+        const existing = map.get(idx.indexName) ?? [];
+        map.set(idx.indexName, [...existing, group.category as MainCategories]);
       });
     });
-
     return map;
-  }, [categoriesData?.mainCategoriesMap]);
+  }, [categoriesData]);
 
-  // Group pipelines by category based on their associated indices
+  // Shared filter: same predicate used by the agent tool.
+  // Produces the flat list of pipelines that serve at least one categorized SIEM index.
+  const filteredPipelineItems = useMemo(
+    () => filterPipelinesByCategories(pipelineItems ?? [], categoriesData),
+    [pipelineItems, categoriesData]
+  );
+
+  // Group filtered pipelines by category (UI-only: adds status fields and respects activeCategories).
   const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
-    if (!pipelinesData?.length) return [];
+    if (!filteredPipelineItems.length) return [];
 
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
-    pipelinesData.forEach((pipeline) => {
+    filteredPipelineItems.forEach((pipeline) => {
       const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
@@ -100,44 +107,30 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         status: getDocInjectionStatus(failureRate),
       };
 
-      // Get unique categories for this pipeline
-      const uniqueCategories = new Set<string>();
+      const pipelineCategories = new Set<MainCategories>();
       pipeline.indices.forEach((indexName) => {
-        const category = indexToCategoryMap.get(indexName);
-        if (category) uniqueCategories.add(category);
+        (indexToCategoriesMap.get(indexName) ?? []).forEach((cat) => pipelineCategories.add(cat));
       });
 
-      // Add pipeline to each category (once per category)
-      uniqueCategories.forEach((category) => {
-        const pipelinesInCategory = categoryPipelinesMap.get(category) || [];
-        pipelinesInCategory.push(pipelineWithStats);
-        categoryPipelinesMap.set(category, pipelinesInCategory);
+      pipelineCategories.forEach((category) => {
+        if (activeCategories.includes(category)) {
+          const existing = categoryPipelinesMap.get(category) ?? [];
+          existing.push(pipelineWithStats);
+          categoryPipelinesMap.set(category, existing);
+        }
       });
     });
 
-    // Build result in category order, filtered by active categories
     const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
     activeCategories.forEach((category) => {
       const items = categoryPipelinesMap.get(category);
-      if (!items) return;
-
-      result.push({
-        category,
-        items,
-      });
+      if (items) result.push({ category, items });
     });
 
     return result;
-  }, [pipelinesData, indexToCategoryMap, activeCategories]);
+  }, [filteredPipelineItems, indexToCategoriesMap, activeCategories]);
 
-  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
-  const hasUnfilteredData = useMemo(() => {
-    if (!pipelinesData?.length) return false;
-
-    return pipelinesData.some((pipeline) =>
-      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
-    );
-  }, [pipelinesData, indexToCategoryMap]);
+  const hasUnfilteredData = (pipelineItems?.length ?? 0) > 0;
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -358,7 +351,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   };
 
-  const isLoading = categoriesLoading || pipelinesLoading;
+  const isLoading = pipelinesLoading || categoriesLoading;
 
   if (isLoading) {
     return (

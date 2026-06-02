@@ -8,26 +8,26 @@ If you want the system architecture, read [`server/README.md`](server/README.md)
 
 If you want implementation detail for one subsystem, continue with:
 
-| Area | Document |
-| --- | --- |
-| High-level plugin architecture | [`server/README.md`](server/README.md) |
-| Rule execution pipeline | [`server/lib/rule_executor/README.md`](server/lib/rule_executor/README.md) |
-| Alert lifecycle / episodes | [`server/lib/director/README.md`](server/lib/director/README.md) |
-| Notification dispatch pipeline | [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md) |
-| Elasticsearch resources and schemas | [`server/resources/README.md`](server/resources/README.md) |
+| Area                                | Document                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| High-level plugin architecture      | [`server/README.md`](server/README.md)                                     |
+| Rule execution pipeline             | [`server/lib/rule_executor/README.md`](server/lib/rule_executor/README.md) |
+| Alert lifecycle / episodes          | [`server/lib/director/README.md`](server/lib/director/README.md)           |
+| Notification dispatch pipeline      | [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)       |
+| Elasticsearch resources and schemas | [`server/resources/README.md`](server/resources/README.md)                 |
 
 ## Repository guide
 
-| Path | Purpose |
-| --- | --- |
-| `public/` | Management UI for rules, alerts/episodes, and notification policies. |
-| `server/routes/` | HTTP APIs for rules, alert actions, notification policies, and suggestions. |
-| `server/saved_objects/` | Persisted models and mappings for rules and notification policies. |
-| `server/lib/rule_executor/` | Per-rule Task Manager execution pipeline. |
-| `server/lib/director/` | Episode state engine for alert rules. |
-| `server/lib/dispatcher/` | Asynchronous notification matching, throttling, and delivery. |
-| `server/resources/` | Data streams and ES|QL views (`.rule-events`, `.alert-actions`, alert episode views). |
-| `server/setup/` | Dependency injection, task registration, routes, and plugin startup wiring. |
+| Path                        | Purpose                                                                     |
+| --------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `public/`                   | Management UI for rules, alerts/episodes, and notification policies.        |
+| `server/routes/`            | HTTP APIs for rules, alert actions, notification policies, and suggestions. |
+| `server/saved_objects/`     | Persisted models and mappings for rules and notification policies.          |
+| `server/lib/rule_executor/` | Per-rule Task Manager execution pipeline.                                   |
+| `server/lib/director/`      | Episode state engine for alert rules.                                       |
+| `server/lib/dispatcher/`    | Asynchronous notification matching, throttling, and delivery.               |
+| `server/resources/`         | Data streams and ES                                                         | QL views (`.rule-events`, `.alert-actions`, alert episode views). |
+| `server/setup/`             | Dependency injection, task registration, routes, and plugin startup wiring. |
 
 ## Quick mental model
 
@@ -44,4 +44,6 @@ If you want implementation detail for one subsystem, continue with:
 - Notification matching, grouping, throttling, or delivery: start in [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)
 - Document shape or ES|QL views: start in [`server/resources/README.md`](server/resources/README.md)
 - API shape or saved object contracts: inspect `server/routes/` and `server/saved_objects/` together with the relevant subsystem docs
-- Workflow triggers (workflows_extensions registration, server + public wiring): start in [`common/workflows_extensions/README.md`](common/workflows_extensions/README.md)
+- Workflow triggers (workflows_extensions registration + runtime emission): see the public and server READMEs
+  - [`public/lib/workflow_extensions/README.md`](public/lib/workflow_extensions/README.md)
+  - [`server/lib/services/workflow_extensions_service/README.md`](server/lib/services/workflow_extensions_service/README.md)

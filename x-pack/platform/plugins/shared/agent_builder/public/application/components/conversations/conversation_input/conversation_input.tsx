@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiShadow,
-  useEuiShadowHover,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
+import { ConversationInputShell } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
@@ -30,77 +25,30 @@ import {
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
-import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
-
-const INPUT_MIN_HEIGHT = '150px';
-const useInputBorderStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    border: ${euiTheme.border.thin};
-    ${borderRadiusXlStyles}
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    &:focus-within[aria-disabled='false'] {
-      border-color: ${euiTheme.colors.primary};
-    }
-  `;
-};
-const useInputShadowStyles = () => {
-  return css`
-    ${useEuiShadow('s')}
-    &:hover {
-      ${useEuiShadowHover('s')}
-    }
-    &:focus-within[aria-disabled='false'] {
-      ${useEuiShadow('xl')}
-      :hover {
-        ${useEuiShadowHover('xl')}
-      }
-    }
-  `;
-};
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
 });
 
+const flexGrowZeroStyles = css`
+  flex-grow: 0;
+`;
+
 const InputContainer: React.FC<
   PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
-> = ({ children, isDisabled, isCollapsed }) => {
-  const { euiTheme } = useEuiTheme();
-  const inputContainerStyles = css`
-    width: 100%;
-    min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base};
-    flex-grow: 0;
-    transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-
-    ${useInputBorderStyles()}
-    ${useInputShadowStyles()}
-
-    &[aria-disabled='true'] {
-      background-color: ${euiTheme.colors.backgroundBaseDisabled};
-    }
-  `;
-
-  return (
-    <EuiFlexGroup
-      css={inputContainerStyles}
-      direction="column"
-      gutterSize="s"
-      responsive={false}
-      alignItems="stretch"
-      justifyContent="center"
-      data-test-subj="agentBuilderConversationInputForm"
-      aria-label={containerAriaLabel}
-      aria-disabled={isDisabled}
-    >
-      {children}
-    </EuiFlexGroup>
-  );
-};
+> = ({ children, isDisabled, isCollapsed }) => (
+  <ConversationInputShell
+    isDisabled={isDisabled}
+    isCollapsed={isCollapsed}
+    css={flexGrowZeroStyles}
+    data-test-subj="agentBuilderConversationInputForm"
+    aria-label={containerAriaLabel}
+  >
+    {children}
+  </ConversationInputShell>
+);
 
 interface ConversationInputProps {
   onSubmit?: () => void;
@@ -144,7 +92,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
 }) => {
-  const { pendingMessage, error, isResuming, isResponseLoading } = useSendMessage();
+  const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -181,12 +129,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const visibleAttachments = useMemo(() => {
     if (!attachments || shouldHideAttachments) return [];
-    return attachments
-      .filter((attachment) => !attachment.hidden)
-      .map((attachment, idx) => ({
-        ...attachment,
-        id: attachment.id ?? `attachment-${idx}`,
-      }));
+    return attachments.filter((attachment) => {
+      if ('items' in attachment) return true; // AttachmentGroup — always visible
+      return !attachment.hidden;
+    });
   }, [attachments, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;

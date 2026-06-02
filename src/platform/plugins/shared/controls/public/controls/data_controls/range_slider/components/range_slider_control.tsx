@@ -228,7 +228,6 @@ export const RangeSliderControl: FC<Props> = ({
                 <EuiToolTip
                   position="top"
                   content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
-                  delay="long"
                 >
                   <EuiToken
                     tabIndex={0}

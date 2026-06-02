@@ -13,16 +13,17 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type {
+  ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  ActionPolicy,
-  ActionPolicyId,
   Rule,
   RuleId,
 } from '../types';
+import { createMatcherContext } from './utils/matcher_context';
 
 @injectable()
 export class EvaluateMatchersStep implements DispatcherStep {
@@ -57,6 +58,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
         if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) continue;
 
         if (!policy.matcher) {
           matched.push({ episode, policy });
@@ -92,23 +94,4 @@ const MAX_LOGGED_TEXT_LENGTH = 500;
 
 function truncate(value: string, max: number): string {
   return value.length > max ? `${value.slice(0, max)}…` : value;
-}
-
-function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
-  return {
-    last_event_timestamp: episode.last_event_timestamp,
-    group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
-    ...(episode.data ? { data: episode.data } : {}),
-    rule: {
-      id: rule.id,
-      name: rule.name,
-      description: rule.description,
-      tags: rule.tags,
-      enabled: rule.enabled,
-      createdAt: rule.createdAt,
-      updatedAt: rule.updatedAt,
-    },
-  };
 }

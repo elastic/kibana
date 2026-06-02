@@ -11,12 +11,10 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { useScheduleView } from './use_schedule_view';
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -26,13 +24,9 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
@@ -70,11 +64,6 @@ describe('useScheduleView', () => {
     jest.clearAllMocks();
 
     setupUseKibana();
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 
     mockUseFindAttackDiscoverySchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,
@@ -172,7 +161,6 @@ describe('useScheduleView', () => {
 
       const createButton = screen.getByTestId('createSchedule');
       fireEvent.mouseOver(createButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

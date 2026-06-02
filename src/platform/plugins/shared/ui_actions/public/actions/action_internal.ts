@@ -28,8 +28,9 @@ export class ActionInternal<
   public readonly MenuItem?: React.FC<ActionMenuItemProps<any>>;
   public readonly grouping?: PresentableGrouping<Context>;
   public readonly showNotification?: boolean;
-  public readonly disabled?: boolean;
 
+  public readonly isDisabled: Action<Context>['isDisabled'];
+  public readonly getDisabledStateChangesSubject?: Action<Context>['getDisabledStateChangesSubject'];
   public readonly getCompatibilityChangesSubject?: Action<Context>['getCompatibilityChangesSubject'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
@@ -43,7 +44,7 @@ export class ActionInternal<
     this.MenuItem = this.definition.MenuItem;
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
-    this.disabled = this.definition.disabled;
+    this.isDisabled = this.definition.isDisabled;
     this.errorLogged = false;
     this.extension = this.definition.extension;
 
@@ -52,6 +53,9 @@ export class ActionInternal<
     }
     if (this.definition.couldBecomeCompatible) {
       this.couldBecomeCompatible = definition.couldBecomeCompatible;
+    }
+    if (this.definition.getDisabledStateChangesSubject) {
+      this.getDisabledStateChangesSubject = definition.getDisabledStateChangesSubject;
     }
   }
 

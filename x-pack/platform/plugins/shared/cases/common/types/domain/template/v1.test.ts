@@ -12,7 +12,7 @@ import {
   UpdateTemplateInputSchema,
   PatchTemplateInputSchema,
 } from './v1';
-import { FieldSchema } from './fields';
+import { FieldSchema, isRefField } from './fields';
 
 describe('TemplateSchema', () => {
   const validTemplate = {
@@ -145,7 +145,7 @@ describe('FieldSchema', () => {
     const result = FieldSchema.safeParse(fieldWithoutLabel);
 
     expect(result.success).toBe(true);
-    if (result.success) {
+    if (result.success && !isRefField(result.data)) {
       expect(result.data.label).toBeUndefined();
     }
   });

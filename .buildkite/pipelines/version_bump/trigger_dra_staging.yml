@@ -1,4 +1,8 @@
 steps:
+  - name: mock kibana staging build
+    if: build.env("DRY_RUN") == "true"
+    command: sleep 10
+
   - name: Trigger DRA Staging Build
     key: trigger-dra-staging
     trigger: kibana-artifacts-staging

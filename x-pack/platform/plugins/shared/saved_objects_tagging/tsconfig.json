@@ -20,7 +20,11 @@
     "@kbn/ebt-tools",
     "@kbn/core-notifications-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/core-http-server",
+    "@kbn/core-http-browser",
+    "@kbn/as-code-shared-telemetry"
   ],
   "exclude": [
     "target/**/*",

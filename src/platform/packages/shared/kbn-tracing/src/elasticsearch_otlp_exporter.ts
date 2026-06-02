@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Readable } from 'node:stream';
+import { buffer as collectBuffer } from 'node:stream/consumers';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { ProtobufTraceSerializer } from '@opentelemetry/otlp-transformer';
+import type { IExportTraceServiceResponse } from '@opentelemetry/otlp-transformer';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const ES_OTLP_TRACES_PATH = '/_otlp/v1/traces';
 const CONTENT_TYPE_PROTOBUF = 'application/x-protobuf';
+
+const extractPartialFailure = (buf: Buffer): { errorMessage: string } | undefined => {
+  if (buf.length === 0) {
+    return undefined;
+  }
+  const decoded: IExportTraceServiceResponse = ProtobufTraceSerializer.deserializeResponse(buf);
+  if (decoded.partialSuccess?.errorMessage) {
+    return { errorMessage: decoded.partialSuccess.errorMessage };
+  }
+  return undefined;
+};
 
 /**
  * A {@link tracing.SpanExporter} that ships OTLP-protobuf encoded spans
@@ -46,7 +60,7 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
     }
 
     const exportPromise = this.client.transport
-      .request(
+      .request<Readable>(
         {
           method: 'POST',
           path: ES_OTLP_TRACES_PATH,
@@ -55,9 +69,23 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
         {
           headers: { 'Content-Type': CONTENT_TYPE_PROTOBUF },
           maxRetries: 3,
+          asStream: true,
         }
       )
-      .then(() => resultCallback({ code: core.ExportResultCode.SUCCESS }))
+      .then(async (stream) => {
+        /** Streams are the only way the ES transport exposes raw bytes without UTF-8 decoding. */
+        const buf = await collectBuffer(stream);
+        const failure = extractPartialFailure(buf);
+
+        if (failure) {
+          resultCallback({
+            code: core.ExportResultCode.FAILED,
+            error: new Error(failure.errorMessage),
+          });
+        } else {
+          resultCallback({ code: core.ExportResultCode.SUCCESS });
+        }
+      })
       .catch((error) => resultCallback({ code: core.ExportResultCode.FAILED, error }))
       .finally(() => this.sendingPromises.delete(exportPromise));
 

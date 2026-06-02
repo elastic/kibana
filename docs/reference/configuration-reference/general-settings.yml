@@ -1,6 +1,6 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -132,6 +132,17 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: status.statusPageBypassMonitorPrivilege
+        description: |
+          Allow all authenticated users to access the full {{kib}} server status API. When `false`, users are required to have the Elasticsearch `monitor` cluster privilege.
+          NOTE: This setting is only relevant if `status.allowAnonymous` is `false` (default).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
   - group: Content Security Policy (CSP) settings
     id: csp-settings
     settings:
@@ -240,14 +251,25 @@ groups:
           self: ga
         note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityresponseheaders-disableembedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
 
+      - setting: csp.form_action
+        description: |
+          Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action).
+        datatype: string
+        default: "'self'"
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
+
       - setting: csp.report_only.form_action
         description: |
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
         datatype: string
         applies_to:
-          stack: ga
-          ech: unavailable
-          self: ga
+          - "stack: deprecated 9.5"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Use `csp.form_action` instead."
 
       - setting: csp.report_only.object_src
         description: |
@@ -258,6 +280,15 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "This setting is deprecated in favor of `csp.object_src`."
+
+      - setting: csp.report_only.connect_src
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
+        datatype: string
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: csp.report_uri
         description: |
@@ -863,9 +894,13 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
@@ -873,9 +908,13 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
@@ -883,7 +922,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -893,7 +932,7 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
@@ -947,6 +986,7 @@ groups:
         id: server-maxpayload
         description: |
           The maximum payload size in bytes for incoming server requests.
+          This option controls the maximum payload size Kibana can handle, rather than the incoming request size, which also limits the inflated size when compression is used.
         datatype: int
         default: 1048576
         applies_to:
@@ -1504,18 +1544,28 @@ groups:
           - "ech: ga"
           - "self: ga"
 
-      - setting: vis_type_table.legacyVisEnabled
+      - setting: vis_type_timelion.enabled
         description: |
-          Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+          Set to `false` to disable Timelion visualizations.
         datatype: bool
+        default: true
         applies_to:
           stack: ga
           ech: ga
           self: ga
 
-      - setting: vis_type_vega.enable
+      - setting: vis_type_table.legacyVisEnabled
         description: |
-          For 7.7 version and later, set to `false` to disable Vega vizualizations.
+          Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+        datatype: bool
+        applies_to:
+          stack: removed 8.0
+          ech: ga
+          self: ga
+
+      - setting: vis_type_vega.enabled
+        description: |
+          For versions 7.7 and later, set to `false` to disable Vega visualizations.
         datatype: bool
         default: true
         applies_to:

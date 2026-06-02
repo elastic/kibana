@@ -31,16 +31,12 @@ test.beforeEach(async ({ page, onboardingHomePage }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
-/**
- * Kubernetes onboarding with OTel can be slow — increase test timeout to 10 minutes.
- */
 test('Otel Kubernetes', async ({
   page,
   onboardingHomePage,
   otelKubernetesFlowPage,
   wiredStreamsSelector,
 }) => {
-  test.setTimeout(10 * 60 * 1000);
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
@@ -134,14 +130,97 @@ test('Otel Kubernetes', async ({
 
     await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 
-    const apmServiceInventoryPage = new ApmServiceInventoryPage(
-      await otelKubernetesFlowPage.openServiceInventoryInNewTab()
+    const apmServiceName = 'opentelemetry/java/elastic';
+    const apmProbePath = path.join(
+      __dirname,
+      '..',
+      process.env.ARTIFACTS_FOLDER,
+      'apm_service_probes.json'
     );
+    const apmServiceCalls: Array<{
+      tMs: number;
+      status: number;
+      requestUrl: string;
+      services: Array<{ service: string; agent: string; transactionType: string }>;
+      errorBody?: string;
+    }> = [];
 
-    const serviceTestId = 'serviceLink_opentelemetry/java/elastic';
+    try {
+      // Open the inventory in a new tab manually so the response listener is
+      // attached before navigation. page.on('response') only catches future
+      // events, and the inventory's mount-fetch fires immediately on goto.
+      const serviceInventoryHref = await page
+        .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
+        .getAttribute('href');
+      if (!serviceInventoryHref) {
+        throw new Error('Service inventory URL not found');
+      }
 
-    await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
-    await apmServiceInventoryPage.assertTransactionExists();
+      const apmStartedAt = Date.now();
+      const apmPage = await page.context().newPage();
+      apmPage.on('response', async (response) => {
+        // Match only the top-level list endpoint, not /internal/apm/services/foo/...
+        const url = new URL(response.url());
+        if (url.pathname !== '/internal/apm/services') return;
+        const status = response.status();
+        let services: Array<{ service: string; agent: string; transactionType: string }> = [];
+        let errorBody: string | undefined;
+        if (status >= 400) {
+          try {
+            errorBody = (await response.text()).slice(0, 1000);
+          } catch {
+            errorBody = '<read-failed>';
+          }
+        } else {
+          try {
+            const json = (await response.json()) as {
+              items?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
+              services?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
+            };
+            const items = json.items ?? json.services ?? [];
+            services = items.map((item) => ({
+              service: item?.serviceName ?? '<missing>',
+              agent: item?.agentName ?? '<missing>',
+              transactionType: item?.transactionType ?? '<missing>',
+            }));
+          } catch {
+            // leave services empty
+          }
+        }
+        apmServiceCalls.push({
+          tMs: Date.now() - apmStartedAt,
+          status,
+          requestUrl: response.url(),
+          services,
+          ...(errorBody !== undefined ? { errorBody } : {}),
+        });
+      });
+      await apmPage.goto(serviceInventoryHref);
+      const apmServiceInventoryPage = new ApmServiceInventoryPage(apmPage);
+
+      const serviceTestId = `serviceLink_${apmServiceName}`;
+
+      await apmServiceInventoryPage.waitForServiceRow(serviceTestId);
+      await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
+      await apmServiceInventoryPage.assertTransactionExists();
+    } finally {
+      try {
+        fs.writeFileSync(
+          apmProbePath,
+          JSON.stringify({ serviceName: apmServiceName, calls: apmServiceCalls }, null, 2)
+        );
+      } catch {
+        // best-effort - don't mask the original test failure
+      }
+    }
   } else {
     await otelKubernetesFlowPage.clickExploreLogsCTA();
     await assertDiscoverHasData(page);

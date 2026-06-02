@@ -8,50 +8,46 @@
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
+  errorResponseSchema,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
-
-const createActionPolicyParamsSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe('An optional custom identifier. If omitted, an ID is generated automatically.'),
-});
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id?}`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
     summary: 'Create an action policy',
-    description: 'Create a new action policy with an optional custom identifier.',
+    description:
+      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createActionPolicyDataSchema),
-      params: buildRouteValidationWithZod(createActionPolicyParamsSchema),
+      body: createActionPolicyDataSchema,
     },
     response: {
-      200: {
+      201: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created action policy.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
       },
     },
@@ -62,11 +58,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      z.infer<typeof createActionPolicyParamsSchema>,
-      unknown,
-      CreateActionPolicyData
-    >,
+    private readonly request: KibanaRequest<unknown, unknown, CreateActionPolicyData>,
     @inject(ActionPolicyClient)
     private readonly actionPolicyClient: ActionPolicyClient
   ) {
@@ -76,9 +68,8 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   protected async execute() {
     const created = await this.actionPolicyClient.createActionPolicy({
       data: this.request.body,
-      options: { id: this.request.params.id },
     });
 
-    return this.ctx.response.ok({ body: created });
+    return this.ctx.response.created({ body: created });
   }
 }

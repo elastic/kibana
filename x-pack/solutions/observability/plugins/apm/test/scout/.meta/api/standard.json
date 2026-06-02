@@ -1,0 +1,69 @@
+{
+  "sha1": "3662078bbe9313ad3a70ab45f8585f9898e9b9b4",
+  "tests": [
+    {
+      "id": "888be2654773a9b-f0ea416820b0dce",
+      "title": "Ingest APM metrics data for Scout API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/global.setup.ts",
+        "line": 14,
+        "column": 1
+      }
+    },
+    {
+      "id": "ba211266fd3591c-b332a6f97801043",
+      "title": "APM Service Metrics API JRuby JVM nodes table values match the seeded metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "ba211266fd3591c-8d199dfb45d64ee",
+      "title": "APM Service Metrics API JRuby charts endpoint exposes CPU + memory series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
+        "line": 76,
+        "column": 12
+      }
+    },
+    {
+      "id": "ba211266fd3591c-dd43ec607da904d",
+      "title": "APM Service Metrics API AWS Lambda serverless summary responds 200 and exposes the documented KPI keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
   formatDate,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -272,7 +273,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -294,7 +294,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToCasePanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
           defaultMessage: 'Add to case',
         }),
@@ -325,23 +324,33 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
-              <EuiButtonIcon
-                size="s"
-                aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="text"
-                display="base"
-                iconType="boxesVertical"
-                onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                data-test-subj="mlExplorerAnomalyPanelMenu"
-                disabled={chartsCount < 1}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  size="s"
+                  aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+                    defaultMessage: 'Actions',
+                  })}
+                  color="text"
+                  display="base"
+                  iconType="boxesVertical"
+                  onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                  data-test-subj="mlExplorerAnomalyPanelMenu"
+                  disabled={chartsCount < 1}
+                />
+              </EuiToolTip>
             }
             isOpen={isMenuOpen}
             closePopover={setIsMenuOpen.bind(null, false)}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverAriaLabel', {
+              defaultMessage: 'Anomaly actions menu',
+            })}
           >
             <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>

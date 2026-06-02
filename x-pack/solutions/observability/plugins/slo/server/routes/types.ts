@@ -16,6 +16,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common/data_views'
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SLODefinitionRepository, TransformManager } from '../services';
+import type { CompositeSLORepository } from '../services/composites/composite_slo_repository';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 import type { SLOSettingsRepository } from '../services/slo_settings_repository';
 import type { SLOTemplateRepository } from '../services/slo_template_repository';
@@ -37,6 +38,7 @@ export interface RouteHandlerScopedClients {
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
   repository: SLODefinitionRepository;
+  compositeSloRepository: CompositeSLORepository;
   settingsRepository: SLOSettingsRepository;
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;

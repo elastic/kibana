@@ -12,6 +12,7 @@
     "public/**/*.json",
     "../../../../../typings/index.d.ts",
     "test/scout/**/*",
+    "test/scout_http2/**/*",
     "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
@@ -70,7 +71,8 @@
     "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/core-elasticsearch-server",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

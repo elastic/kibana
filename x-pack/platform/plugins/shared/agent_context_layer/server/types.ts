@@ -19,8 +19,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   SmlTypeDefinition,
   SmlSearchResult,
+  SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
@@ -47,19 +50,22 @@ export interface AgentContextLayerPluginStart {
     esClient: IScopedClusterClient;
     request: KibanaRequest;
     skipContent?: boolean;
+    filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
-  checkItemsAccess: (params: {
-    ids: string[];
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    request: KibanaRequest;
-  }) => Promise<Map<string, boolean>>;
-
+  /**
+   * Fetch SML documents by their chunk IDs.
+   *
+   * The returned map only contains documents the user (identified by `request`) is
+   * authorized to access in the resolved space; unauthorized or missing IDs are
+   * simply absent from the result. Permission checks are performed internally —
+   * callers do not need to pre-authorize the IDs.
+   */
   getDocuments: (params: {
     ids: string[];
-    spaceId: string;
-    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    /** Optional. Resolved from `request` via the spaces service when omitted. */
+    spaceId?: string;
   }) => Promise<Map<string, SmlDocument>>;
 
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
@@ -76,7 +82,15 @@ export interface AgentContextLayerPluginStart {
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
 }
 
-export interface SmlIndexAttachmentParams {
+/**
+ * Common params shared by both modes of `AgentContextLayerPluginStart.indexAttachment`.
+ *
+ * The mode is selected by the discriminator fields from
+ * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
+ * shared with the internal `SmlIndexerParams` so the public and internal unions cannot
+ * drift on the discriminator.
+ */
+interface SmlIndexAttachmentBaseParams {
   request: KibanaRequest;
   originId: string;
   attachmentType: string;
@@ -84,3 +98,18 @@ export interface SmlIndexAttachmentParams {
   spaceId?: string;
   includedHiddenTypes?: string[];
 }
+
+export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentOriginMode;
+
+export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
+  SmlIndexAttachmentContentMode;
+
+/**
+ * Discriminated union — `content` selects the mode:
+ * - omitted → origin mode (calls `getSmlData`, marks `'crawled'`)
+ * - provided → content mode (skips `getSmlData`, marks `'manual'`)
+ */
+export type SmlIndexAttachmentParams =
+  | SmlIndexAttachmentOriginParams
+  | SmlIndexAttachmentContentParams;

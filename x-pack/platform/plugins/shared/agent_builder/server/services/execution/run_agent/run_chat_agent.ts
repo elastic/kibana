@@ -15,15 +15,11 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
-import {
-  ConversationRoundStatus,
-  agentBuilderDefaultAgentId,
-  AgentExecutionMode,
-} from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
@@ -36,6 +32,7 @@ import {
   getPendingRound,
   evictInternalEvents,
 } from './utils';
+import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
@@ -47,10 +44,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
-import { createSubagentTool } from './tools/run_subagent';
-import { createSleepTool } from './tools/sleep';
 import { BackgroundExecutionService } from './background_execution_service';
-import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -107,11 +101,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skillsStore,
     toolManager,
     experimentalFeatures,
+    todoStateManager,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
+  // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
+  const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
@@ -178,6 +175,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
+    todoStateManager,
   });
 
   // First add static tools
@@ -193,33 +191,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
-  // Register sub-agent and sleep tools if experimental features enabled and not in standalone mode
-  if (experimentalFeatures.subagents && context.executionMode !== AgentExecutionMode.standalone) {
-    const subagentTool = createSubagentTool({
-      agentId: agentId ?? agentBuilderDefaultAgentId,
-      executionId: executionId ?? '',
-      connectorId: context.defaultConnectorId,
-      capabilities,
-      subAgentExecutor: context.subAgentExecutor,
-      abortSignal,
-      backgroundExecutionService,
-    });
-    const sleepTool = createSleepTool();
-    await toolManager.addTools({
-      type: ToolManagerToolType.executable,
-      tools: [
-        {
-          ...builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
-          origin: ToolOrigin.internal,
-        },
-        {
-          ...builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
-          origin: ToolOrigin.internal,
-        },
-      ],
-      logger,
-    });
-  }
+  await registerInternalTools({
+    context,
+    agentId,
+    executionId,
+    capabilities,
+    abortSignal,
+    backgroundExecutionService,
+  });
 
   // Then add dynamic tools
   await toolManager.addTools(
@@ -324,6 +303,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger,
       startTime,
       pendingRound,
+      structuredOutput,
     }),
     finalize(() => manualEvents$.complete())
   );
@@ -345,6 +325,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           toolManager,
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
+          todoStateManager,
         }),
       pendingRound,
       startTime,
@@ -354,6 +335,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       configurationOverrides: effectiveOverrides,
       compactionResult,
       roundId,
+      initialTodos,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -377,18 +359,22 @@ const getConversationState = ({
   toolManager,
   backgroundExecutionService,
   compactionSummary,
+  todoStateManager,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
+  todoStateManager: TodoStateManager;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
+  const todos = todoStateManager.get();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
+    ...(todos !== undefined ? { todos } : {}),
   };
 };
 

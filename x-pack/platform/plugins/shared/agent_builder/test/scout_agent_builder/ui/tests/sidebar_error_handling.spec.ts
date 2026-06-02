@@ -195,11 +195,13 @@ test.describe(
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
         }).toPass({ timeout: 60_000 });
         await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
-        await expect(
-          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
-            hasText: FIRST_RESPONSE,
-          })
-        ).toContainText(FIRST_RESPONSE);
+        await expect(async () => {
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: FIRST_RESPONSE,
+            })
+          ).toContainText(FIRST_RESPONSE);
+        }).toPass({ timeout: 60_000 });
       });
     });
   }

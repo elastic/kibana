@@ -93,22 +93,38 @@ export class RiskScoreDataClient {
   /**
    * Daily average normalized risk scores per entity (oldest → newest calendar buckets)
    * from the risk score time-series index. Suitable for trend / escalation analysis.
+   *
+   * The risk-score time-series index nests the identity-side fields under
+   * `<entityType>.risk.*` (e.g. `host.risk.id_field`, `user.risk.id_value`),
+   * so this query parameterises every reference on `entityType`.
+   *
+   * Filters on `<entityType>.risk.id_field === 'entity.id'` so only V2-shaped
+   * documents (written by the entity-store risk-score maintainer) participate.
+   * Legacy documents written by the pre-V2 scoring task have `id_field` set to
+   * `host.name` or `user.name`, and are excluded by this filter. That is the
+   * intended behaviour, since their `id_value` carries a raw name rather than
+   * an EUID and would silently distort the trend.
+   *
+   * The returned map is keyed by EUID (e.g. `"host:InnoDB"`).
    */
   public async getDailyAverageRiskScoreNormSeries(params: {
     entityType: string;
-    entityNames: readonly string[];
+    entityIds: readonly string[];
     lookbackRange?: { readonly gte: string; readonly lte: string };
   }): Promise<Map<string, number[]>> {
-    const { entityType, entityNames } = params;
+    const { entityType, entityIds } = params;
     const range = params.lookbackRange ?? { gte: 'now-90d', lte: 'now' };
     const result = new Map<string, number[]>();
 
-    if (entityNames.length === 0) {
+    if (entityIds.length === 0) {
       return result;
     }
 
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
+
+    const idFieldPath = `${entityType}.risk.id_field`;
+    const idValuePath = `${entityType}.risk.id_value`;
 
     const response = await esClient.search({
       index,
@@ -118,14 +134,15 @@ export class RiskScoreDataClient {
       query: {
         bool: {
           filter: [
-            { terms: { [`${entityType}.name`]: [...entityNames] } },
+            { term: { [idFieldPath]: 'entity.id' } },
+            { terms: { [idValuePath]: [...entityIds] } },
             { range: { '@timestamp': range } },
           ],
         },
       },
       aggs: {
         by_entity: {
-          terms: { field: `${entityType}.name`, size: entityNames.length },
+          terms: { field: idValuePath, size: entityIds.length },
           aggs: {
             scores_over_time: {
               date_histogram: { field: '@timestamp', calendar_interval: 'day' },
@@ -148,7 +165,7 @@ export class RiskScoreDataClient {
       const scores = bucket.scores_over_time.buckets
         .map((b) => b.avg_score.value)
         .filter((v): v is number => v != null);
-      result.set(`${entityType}:${bucket.key}`, scores);
+      result.set(bucket.key, scores);
     }
 
     return result;

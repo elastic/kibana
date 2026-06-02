@@ -30,12 +30,14 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "alertingVTwo",
       "cloud",
       "esql",
       "serverless",
       "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
+      "workflowsExtensions",
       "workflowsManagement"
     ],
     "requiredBundles": [],

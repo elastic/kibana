@@ -20,12 +20,7 @@ interface ServiceMapBadgesReturn {
   status: FETCH_STATUS;
 }
 
-/**
- * One POST returns **per-service** alert counts and SLO stats for every service node on the map
- * (same `body.serviceNames` shape as `POST /internal/apm/services/detailed_statistics`).
- * We send all map service names in one request instead of N calls — the response still lists each
- * `serviceName` with its own `alertsCount` / SLO summary for badge merge on each node.
- */
+/** Fetches per-service alert counts and SLO stats for every service node in one POST. */
 export function useServiceMapBadges({
   environment,
   start,
@@ -61,8 +56,7 @@ export function useServiceMapBadges({
     nodesStatus === FETCH_STATUS.SUCCESS &&
     serviceNamesForBadges.length > 0;
 
-  // useFetcher compares `fnDeps` by reference; a new inline array every render re-runs the
-  // effect, aborts in-flight requests, and can prevent badges from ever reaching SUCCESS.
+  // Stable reference required: useFetcher keys off fnDeps by reference, not value.
   const fetcherDeps = useMemo(
     () => [enabled, serviceNamesForBadges, start, end, environment, kuery],
     [enabled, serviceNamesForBadges, start, end, environment, kuery]
@@ -82,16 +76,13 @@ export function useServiceMapBadges({
             ...(kuery ? { kuery } : {}),
           },
           body: {
-            // io-ts `jsonRt.pipe(t.array(t.string))` expects a JSON string (see service inventory
-            // `POST /internal/apm/services/detailed_statistics`).
+            // io-ts jsonRt expects a JSON string.
             serviceNames: JSON.stringify(serviceNamesForBadges),
           },
         },
       });
     },
-    // useFetcher keys off fnDeps by reference; a new [] each render would re-run the effect and
-    // abort in-flight requests (see use_fetcher.tsx). Deps are listed in fetcherDeps' useMemo above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see fetcherDeps memo above
     fetcherDeps,
     { showToastOnError: false }
   );

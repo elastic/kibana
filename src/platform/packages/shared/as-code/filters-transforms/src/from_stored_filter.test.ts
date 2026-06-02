@@ -598,7 +598,8 @@ describe('fromStoredFilter', () => {
         expect(result.dsl.query).toEqual(spatialFilter.query);
         expect(result.label).toBe('intersects shape');
         expect(result.disabled).toBe(false);
-        expect(result.negate).toBe(false);
+        // negate is omitted when negate is false
+        expect(result.negate).toBeUndefined();
       }
     });
 

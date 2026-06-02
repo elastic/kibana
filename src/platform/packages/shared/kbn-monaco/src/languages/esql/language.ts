@@ -9,63 +9,26 @@
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
-import type { ESQLMessage } from '@kbn/esql-language';
-import {
-  getSignatureHelp,
-  getHoverItem,
-  getDocumentHighlightItems,
-  inlineSuggest,
-  suggest,
-  validateQuery,
-  getIndexSourcesFromQuery,
-  getQuickFixForMessage,
-} from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
-import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
 import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
-import { offsetToRowColumn, wrapAsMonacoMessages } from './lib/converters/positions';
-import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import {
-  getDecorationHoveredMessages,
-  filterSuggestionsWithCustomCommands,
-  monacoPositionToOffset,
-  findMessageByMarker,
-} from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
-import { wrapAsMonacoCodeAction } from './lib/converters/code_actions';
+import {
+  ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
+  esqlValidate,
+  getCodeActionProvider,
+  getDocumentHighlightProvider,
+  getHoverProvider,
+  getInlineCompletionsProvider,
+  getSignatureProvider,
+  getSuggestionProvider,
+} from './lib/providers';
+import type { ESQLDependencies, MonacoMessage } from './lib/providers';
 
-const removeKeywordSuffix = (name: string) => {
-  return name.endsWith('.keyword') ? name.slice(0, -8) : name;
-};
-
-export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
-
-export type MonacoMessage = monaco.editor.IMarkerData & {
-  code: string;
-
-  // By default warnings are not underlined, use this flag to indicate it should be
-  underlinedWarning?: ESQLMessage['underlinedWarning'];
-};
-
-export type ESQLDependencies = ESQLCallbacks &
-  Partial<{
-    telemetry: ESQLTelemetryCallbacks;
-    /**
-     * Latest validation messages (errors + warnings) for the current model.
-     */
-    getEditorMessages?: () => { errors: MonacoMessage[]; warnings: MonacoMessage[] };
-    /**
-     * Optional resolver to provide model-specific dependencies.
-     *
-     * Monaco language providers are global per language, but Kibana can render multiple ES|QL
-     * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
-     * pick the correct callbacks for the specific editor model requesting suggestions.
-     */
-    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLDependencies | undefined;
-  }>;
+export { ESQL_AUTOCOMPLETE_TRIGGER_CHARS };
+export type { ESQLDependencies, MonacoMessage };
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
@@ -101,298 +64,11 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       { open: '"', close: '"' },
     ],
   },
-  validate: async (
-    model: monaco.editor.ITextModel,
-    code: string,
-    callbacks?: ESQLCallbacks,
-    options?: { invalidateColumnsCache?: boolean }
-  ) => {
-    const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, callbacks, options);
-    const monacoErrors = wrapAsMonacoMessages(text, errors);
-    const monacoWarnings = wrapAsMonacoMessages(text, warnings);
-    return { errors: monacoErrors, warnings: monacoWarnings };
-  },
-  getCodeActionProvider: (deps?: ESQLDependencies): monaco.languages.CodeActionProvider => ({
-    async provideCodeActions(model, _range, context, _token) {
-      const actions: monaco.languages.CodeAction[] = [];
-      const modelDeps = deps?.getModelDependencies?.(model);
-      const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
-
-      const editorMessages = resolvedDeps?.getEditorMessages?.();
-      const allMessages = editorMessages
-        ? [...editorMessages.errors, ...editorMessages.warnings]
-        : [];
-
-      const queryString = model.getValue();
-
-      await Promise.all(
-        context.markers.map(async (marker) => {
-          const message = findMessageByMarker(allMessages, marker);
-          if (!message) return [];
-          const quickFix = await getQuickFixForMessage({
-            queryString,
-            message,
-            callbacks: resolvedDeps,
-          });
-
-          if (quickFix) {
-            actions.push(wrapAsMonacoCodeAction(model, marker, quickFix));
-          }
-        })
-      );
-      return { actions, dispose: () => {} };
-    },
-  }),
-  getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
-    let lastHoveredWord: string;
-
-    return {
-      async provideHover(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        token: monaco.CancellationToken
-      ) {
-        const fullText = model.getValue();
-        const offset = monacoPositionToOffset(fullText, position);
-        const hoveredWord = model.getWordAtPosition(position);
-
-        // Monaco triggers the hover event on each char of the word,
-        // we only want to track the Hover if the word changed.
-        if (
-          hoveredWord &&
-          hoveredWord.word !== lastHoveredWord &&
-          deps?.telemetry?.onDecorationHoverShown
-        ) {
-          lastHoveredWord = hoveredWord.word;
-
-          const hoverMessages = getDecorationHoveredMessages(hoveredWord, position, model);
-          if (hoverMessages.length) {
-            deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
-          }
-        }
-
-        return getHoverItem(fullText, offset, deps);
-      },
-    };
-  },
-  getInlineCompletionsProvider: (
-    callbacks?: ESQLCallbacks
-  ): monaco.languages.InlineCompletionsProvider => {
-    const provider = {
-      async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
-        const fullText = model.getValue();
-        // Get the text before the cursor
-        const textBeforeCursor = model.getValueInRange({
-          startLineNumber: 1,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const range = new monaco.Range(
-          position.lineNumber,
-          position.column,
-          position.lineNumber,
-          position.column
-        );
-
-        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
-      },
-      freeInlineCompletions: () => {},
-    };
-
-    return provider;
-  },
-  getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
-    const itemContext = new WeakMap<
-      monaco.languages.CompletionItem,
-      {
-        streamNames: string[];
-        getFieldsMetadata: ESQLDependencies['getFieldsMetadata'];
-      }
-    >();
-
-    return {
-      triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
-      async provideCompletionItems(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position
-      ): Promise<monaco.languages.CompletionList> {
-        // Avoid returning suggestions for unfocused editors sharing the same model.
-        const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
-        const modelHasTextFocus =
-          editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
-
-        if (!modelHasTextFocus) {
-          return { suggestions: [] };
-        }
-
-        const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
-        const resolvedDeps = resolvedCallbacks
-          ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
-          : deps;
-        const fullText = model.getValue();
-        const offset = monacoPositionToOffset(fullText, position);
-
-        const computeStart = performance.now();
-        const suggestions = await suggest(fullText, offset, resolvedDeps);
-
-        const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
-        if (suggestionsWithCustomCommands.length) {
-          resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
-            suggestionsWithCustomCommands
-          );
-        }
-
-        const result = wrapAsMonacoSuggestions(suggestions, fullText);
-        const computeEnd = performance.now();
-
-        resolvedDeps?.telemetry?.onSuggestionsReady?.(
-          computeStart,
-          computeEnd,
-          model.getValueLength(),
-          model.getLineCount()
-        );
-
-        const streamNames = getIndexSourcesFromQuery(fullText).filter(
-          (name) => !name.includes('*')
-        );
-        for (const suggestion of result.suggestions) {
-          itemContext.set(suggestion, {
-            streamNames,
-            getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
-          });
-        }
-
-        return result;
-      },
-      async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        const context = itemContext.get(item);
-        if (!context?.getFieldsMetadata) return item;
-
-        const fieldsMetadataClient = await context.getFieldsMetadata;
-        if (!fieldsMetadataClient) return item;
-
-        // Fetch the full ECS field list upfront as a single lightweight check.
-        // The client caches this result, so subsequent calls are free.
-        const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
-
-        if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
-        if (typeof item.label !== 'string') return item;
-
-        const strippedFieldName = removeKeywordSuffix(item.label);
-        const { streamNames } = context;
-        const documentationParts: string[] = [];
-
-        // 1. ECS description
-        if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
-          const ecsMetadata = await fieldsMetadataClient.find({
-            fieldNames: [strippedFieldName],
-            attributes: ['description'],
-          });
-          const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
-          if (ecsDescription) {
-            documentationParts.push(ecsDescription);
-          }
-        }
-
-        // 2. Stream descriptions
-        if (streamNames?.length) {
-          const streamMetadata = await fieldsMetadataClient.find({
-            fieldNames: [strippedFieldName],
-            attributes: ['description'],
-            streamNames,
-            source: ['streams'],
-          });
-          const streamParts = streamNames.flatMap((streamName) => {
-            const streamDescription =
-              streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
-            return streamDescription ? [`Per **${streamName}** stream: ${streamDescription}`] : [];
-          });
-          if (streamParts.length > 0) {
-            if (documentationParts.length > 0) {
-              documentationParts.push('---');
-            }
-            documentationParts.push(streamParts.join('\n\n'));
-          }
-        }
-
-        if (documentationParts.length === 0) {
-          return item;
-        }
-
-        return {
-          ...item,
-          documentation: {
-            value: documentationParts.join('\n\n'),
-          },
-        };
-      },
-    };
-  },
-  getSignatureProvider: (deps?: ESQLDependencies): monaco.languages.SignatureHelpProvider => {
-    return {
-      signatureHelpTriggerCharacters: ['(', ','],
-      signatureHelpRetriggerCharacters: ['(', ','],
-      async provideSignatureHelp(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        token: monaco.CancellationToken,
-        context: monaco.languages.SignatureHelpContext
-      ): Promise<monaco.languages.SignatureHelpResult | null> {
-        const fullText = model.getValue();
-        const offset = monacoPositionToOffset(fullText, position);
-        const signatureHelp = await getSignatureHelp(fullText, offset, deps);
-
-        if (!signatureHelp) {
-          return null;
-        }
-
-        const { signatures, activeSignature, activeParameter } = signatureHelp;
-
-        return {
-          value: {
-            signatures: signatures.map(({ label, documentation, parameters }) => ({
-              label,
-              documentation: documentation ? { value: documentation } : undefined,
-              parameters: parameters.map(({ label: paramLabel, documentation: paramDoc }) => ({
-                label: paramLabel,
-                documentation: paramDoc ? { value: paramDoc } : undefined,
-              })),
-            })),
-            activeSignature,
-            activeParameter,
-          },
-          dispose: () => {},
-        };
-      },
-    };
-  },
-  getDocumentHighlightProvider: (): monaco.languages.DocumentHighlightProvider => {
-    return {
-      provideDocumentHighlights(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position
-      ): monaco.languages.DocumentHighlight[] {
-        const fullText = model.getValue();
-        const offset = monacoPositionToOffset(fullText, position);
-        const items = getDocumentHighlightItems(fullText, offset);
-
-        return items.map((item) => {
-          const startPosition = offsetToRowColumn(fullText, item.start);
-          const endPosition = offsetToRowColumn(fullText, item.end);
-          return {
-            range: new monaco.Range(
-              startPosition.lineNumber,
-              startPosition.column,
-              endPosition.lineNumber,
-              endPosition.column + 1
-            ),
-            kind: monaco.languages.DocumentHighlightKind.Read,
-          };
-        });
-      },
-    };
-  },
+  validate: esqlValidate,
+  getCodeActionProvider,
+  getHoverProvider,
+  getInlineCompletionsProvider,
+  getSuggestionProvider,
+  getSignatureProvider,
+  getDocumentHighlightProvider,
 };

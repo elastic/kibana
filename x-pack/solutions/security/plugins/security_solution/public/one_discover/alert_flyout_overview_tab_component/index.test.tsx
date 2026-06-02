@@ -23,7 +23,7 @@ jest.mock('../../common/components/user_privileges/user_privileges_context', () 
 
 const mockOverviewTab = jest.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
 
-jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
+jest.mock('../../flyout_v2/document/main/tabs/overview_tab', () => ({
   OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
 
@@ -78,6 +78,7 @@ describe('AlertFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
+    mockUseInitDataViewManager.mockReturnValue(jest.fn());
     mockUseIsExperimentalFeatureEnabled.mockReset();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
@@ -205,7 +206,7 @@ describe('AlertFlyoutOverviewTab', () => {
     expect(initSpy).toHaveBeenCalledWith([]);
   });
 
-  it('does not initialize when feature flag disabled', async () => {
+  it('initializes when status is pristine', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
@@ -233,7 +234,8 @@ describe('AlertFlyoutOverviewTab', () => {
       await Promise.resolve();
     });
 
-    expect(initSpy).not.toHaveBeenCalled();
+    expect(initSpy).toHaveBeenCalledTimes(1);
+    expect(initSpy).toHaveBeenCalledWith([]);
   });
 
   it('does not initialize when status is loading or ready', async () => {

@@ -57,9 +57,17 @@ export class ObservabilityNavigation {
     });
   }
 
-  /** App root or `kbnNoDataPage` (Discover/Dashboards with no data views). */
+  /**
+   * App root or one of the shared no-data shells. Discover/Dashboards delegate to
+   * `KibanaNoDataPage`, which renders either `kbnNoDataPage` (cluster has no data) or
+   * `noDataViewsPrompt` (cluster has data but no user data view), depending on cluster
+   * state. The shells are mutually exclusive, so an `.or()` chain is enough — see gh-267186.
+   */
   pageOrNoData(testSubj: string): Locator {
-    return this.page.testSubj.locator(testSubj).or(this.page.testSubj.locator('kbnNoDataPage'));
+    return this.page.testSubj
+      .locator(testSubj)
+      .or(this.page.testSubj.locator('kbnNoDataPage'))
+      .or(this.page.testSubj.locator('noDataViewsPrompt'));
   }
 
   navItemInPrimaryByDeepLinkId(deepLinkId: string): Locator {

@@ -95,7 +95,6 @@ export const links: LinkItem = {
   ],
   links: subLinks,
   skipUrlState: true,
-  globalNavPosition: 13,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.automaticMigrations', {
