@@ -154,6 +154,6 @@ export async function stepCreateAlertingRules(
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
+    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId, false, true);
   });
 }
