@@ -17,6 +17,11 @@ type RemoteMonitorLike = Pick<OverviewStatusMetaData, 'remote' | 'configId'>;
 interface CreateBaseUrlArgs {
   monitor: RemoteMonitorLike;
   spaceId?: string;
+  // Explicit remote Kibana URL that takes precedence over
+  // `monitor.remote.kibanaUrl`. The overview-status metadata doesn't always
+  // carry `kibanaUrl` (the `top_metrics` aggregation drops `text`-mapped
+  // fields), so callers can supply the value read from a ping's `_source`.
+  kibanaUrl?: string;
 }
 
 // We assume same-named spaces federate across clusters — i.e. the active
@@ -27,16 +32,15 @@ interface CreateBaseUrlArgs {
 function createBaseRemoteMonitorDetailUrl({
   monitor,
   spaceId,
+  kibanaUrl,
 }: CreateBaseUrlArgs): URL | undefined {
-  if (!monitor.remote?.kibanaUrl) {
+  const resolvedKibanaUrl = kibanaUrl ?? monitor.remote?.kibanaUrl;
+  if (!resolvedKibanaUrl) {
     return undefined;
   }
 
   const spacePath = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-  return new URL(
-    path.join(spacePath, paths.monitorDetail(monitor.configId)),
-    monitor.remote.kibanaUrl
-  );
+  return new URL(path.join(spacePath, paths.monitorDetail(monitor.configId)), resolvedKibanaUrl);
 }
 
 interface CreateRemoteMonitorDetailUrlArgs extends CreateBaseUrlArgs {
@@ -47,8 +51,9 @@ export function createRemoteMonitorDetailUrl({
   monitor,
   locationId,
   spaceId,
+  kibanaUrl,
 }: CreateRemoteMonitorDetailUrlArgs): string | undefined {
-  const url = createBaseRemoteMonitorDetailUrl({ monitor, spaceId });
+  const url = createBaseRemoteMonitorDetailUrl({ monitor, spaceId, kibanaUrl });
   if (!url) {
     return undefined;
   }
