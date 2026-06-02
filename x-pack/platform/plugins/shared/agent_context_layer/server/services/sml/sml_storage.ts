@@ -14,7 +14,7 @@ import type { SmlDocument } from './types';
 export const smlIndexName = chatSystemIndex('sml-data');
 
 const SEMANTIC_MULTI_FIELD = {
-  semantic: types.semantic_text({ index_options: { dense_vector: { type: 'bbq_disk' } } }),
+  semantic: types.semantic_text({}),
 };
 
 /**
