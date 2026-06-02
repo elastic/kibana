@@ -43,6 +43,44 @@ export type RuleAttachment = Attachment<
 export const isOnRuleFormPage = (pathname: string): boolean =>
   pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
 
+/** Rule id encoded in a rule edit URL (`…/rules/id/<ruleId>/edit`). */
+export const getRuleIdFromEditFormPath = (pathname: string): string | undefined => {
+  if (!pathname.includes(RULES_PATH) || !pathname.includes('/edit')) {
+    return undefined;
+  }
+  const match = pathname.match(/\/id\/([^/]+)\/edit/);
+  return match ? decodeURIComponent(match[1]) : undefined;
+};
+
+/**
+ * True when the open create/edit form is already showing this saved rule (same id in the URL).
+ * Used to hide redundant "View rule" — not when the form is for a different rule.
+ */
+export const isAttachmentRuleOpenOnFormPage = (
+  attachmentRuleId: string | undefined,
+  pathname: string
+): boolean => {
+  if (!attachmentRuleId || !isOnRuleFormPage(pathname)) {
+    return false;
+  }
+  if (pathname.includes('/create')) {
+    return false;
+  }
+  const formRuleId = getRuleIdFromEditFormPath(pathname);
+  return formRuleId !== undefined && formRuleId === attachmentRuleId;
+};
+
+/** Whether "View rule" should appear for an update-intent attachment with this rule id. */
+export const shouldShowViewRuleButton = (
+  attachmentRuleId: string | undefined,
+  pathname: string
+): boolean => {
+  if (!attachmentRuleId) {
+    return false;
+  }
+  return !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
+};
+
 /** Saved-rule id from the attachment. `data.ruleId` is primary; `origin` is a legacy fallback. */
 export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>
   attachment.data?.ruleId ?? (attachment as { origin?: string }).origin ?? undefined;

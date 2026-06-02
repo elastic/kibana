@@ -18,7 +18,7 @@ import {
   getEditRuleUrl,
   getRuleDetailsUrl,
 } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { isOnRuleFormPage, type RuleAttachmentIntent } from './helpers';
+import { shouldShowViewRuleButton, type RuleAttachmentIntent } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 
 interface BuildRuleActionButtonsParams {
@@ -59,7 +59,7 @@ export const buildRuleActionButtons = ({
       handler: () => {
         aiRuleCreation.setAiCreatedRule(rule);
         application.navigateToApp('securitySolutionUI', {
-          path: ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
+          path: isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
         });
       },
     },
@@ -93,7 +93,7 @@ export const buildRuleActionButtons = ({
           },
         },
   ];
-  if (ruleId && !isOnRuleFormPage(window.location.pathname)) {
+  if (isUpdate && ruleId && shouldShowViewRuleButton(ruleId, window.location.pathname)) {
     buttons.push({
       label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
         defaultMessage: 'View rule',

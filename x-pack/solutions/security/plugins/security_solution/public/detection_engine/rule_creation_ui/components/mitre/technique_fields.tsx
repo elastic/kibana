@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -176,7 +177,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     [field.label, techniquesOptions, updateTechnique]
   );
 
-  const techniques = values[threatIndex].technique ?? [];
+  const threatEntry = values[threatIndex];
+  const techniques = threatEntry?.technique ?? [];
 
   return (
     <TechniqueContainer>
@@ -189,16 +191,23 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
           >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow>
-                {getSelectTechnique(values[threatIndex].tactic.name, index, isDisabled, technique)}
+                {getSelectTechnique(
+                  threatEntry?.tactic?.name ?? 'none',
+                  index,
+                  isDisabled,
+                  technique
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="trash"
-                  isDisabled={isDisabled}
-                  onClick={() => removeTechnique(index)}
-                  aria-label={Rulei18n.DELETE}
-                />
+                <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={isDisabled}
+                    onClick={() => removeTechnique(index)}
+                    aria-label={Rulei18n.DELETE}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

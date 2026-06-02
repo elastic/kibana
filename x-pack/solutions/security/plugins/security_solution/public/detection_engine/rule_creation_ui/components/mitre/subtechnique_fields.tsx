@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -151,7 +152,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
       const options = subtechniquesOptions.filter(
-        (t) => t.techniqueId === technique[techniqueIndex].id
+        (t) => t.techniqueId === technique[techniqueIndex]?.id
       );
 
       return (
@@ -208,13 +209,15 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                   {getSelectSubtechnique(index, isDisabled, subtechnique)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="danger"
-                    iconType="trash"
-                    isDisabled={isDisabled}
-                    onClick={() => removeSubtechnique(index)}
-                    aria-label={Rulei18n.DELETE}
-                  />
+                  <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      color="danger"
+                      iconType="trash"
+                      isDisabled={isDisabled}
+                      onClick={() => removeSubtechnique(index)}
+                      aria-label={Rulei18n.DELETE}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>

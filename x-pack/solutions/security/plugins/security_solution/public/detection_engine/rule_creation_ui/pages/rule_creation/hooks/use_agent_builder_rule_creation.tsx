@@ -95,6 +95,10 @@ export const useAgentBuilderRuleCreation = ({
   const intentRef = useRef<'create' | 'update'>(existingRuleId ? 'update' : 'create');
 
   const getRuleIdForSync = useCallback((): string | undefined => {
+    // Create-intent chat on a rule edit page must not inherit the page's rule id.
+    if (intentRef.current === 'create') {
+      return syncRuleIdRef.current;
+    }
     return syncRuleIdRef.current ?? existingRuleIdRef.current ?? undefined;
   }, []);
 
@@ -103,28 +107,27 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // On conversation switch, restore the rule id if the attachment already has one,
-  // or clear the sync ref so stale ids don't bleed into a fresh create conversation.
+  // On conversation switch, align intent/ruleId with the attachment (including on rule edit pages).
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
       return;
     }
     const subscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
-      if (existingRuleIdRef.current) {
-        return;
-      }
       const ruleAttachment = change?.conversation?.attachments?.find(
         (a) => a.type === SecurityAgentBuilderAttachments.rule
       );
       if (!ruleAttachment) {
         syncRuleIdRef.current = undefined;
+        intentRef.current = existingRuleIdRef.current ? 'update' : 'create';
         return;
       }
-      const ruleId = getRuleIdFromAttachment(ruleAttachment as never);
       intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
-      if (ruleId) {
+      const ruleId = getRuleIdFromAttachment(ruleAttachment as never);
+      if (intentRef.current === 'create') {
         syncRuleIdRef.current = ruleId;
+        return;
       }
+      syncRuleIdRef.current = ruleId ?? existingRuleIdRef.current;
     });
     return () => subscription.unsubscribe();
   }, [agentBuilder]);
@@ -134,10 +137,9 @@ export const useAgentBuilderRuleCreation = ({
       if (!agentBuilder?.addAttachment) {
         return;
       }
+      const intent = intentRef.current;
       // ruleId is a sibling of `text` (not embedded in the rule JSON) — survives shallow merges.
-      const ruleId = savedRuleId ?? getRuleIdForSync();
-      // Preserve the frozen intent rather than recomputing it (no flipping).
-      const intent: 'create' | 'update' = existingRuleIdRef.current ? 'update' : intentRef.current;
+      const ruleId = intent === 'update' ? savedRuleId ?? getRuleIdForSync() : undefined;
       const attachment: AttachmentInput = {
         id: SECURITY_RULE_ATTACHMENT_ID,
         type: SecurityAgentBuilderAttachments.rule,
@@ -168,7 +170,8 @@ export const useAgentBuilderRuleCreation = ({
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
 
-      const ruleIdForSync = rule.id ?? getRuleIdForSync();
+      const ruleIdForSync =
+        intentRef.current === 'update' ? rule.id ?? getRuleIdForSync() : undefined;
       if (ruleIdForSync) {
         syncRuleIdRef.current = ruleIdForSync;
       }
@@ -248,9 +251,10 @@ export const useAgentBuilderRuleCreation = ({
         // Malformed attachment text — ignore silently
         return;
       }
-      const savedRuleId = getRuleIdFromAttachment(ruleAttachment as never) ?? undefined;
       intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
-      const ruleToApply = savedRuleId ? { ...parsed, id: savedRuleId } : parsed;
+      const savedRuleId = getRuleIdFromAttachment(ruleAttachment as never) ?? undefined;
+      const ruleToApply =
+        intentRef.current === 'update' && savedRuleId ? { ...parsed, id: savedRuleId } : parsed;
       updateFormFromChatRef.current(ruleToApply, { silent: true });
     });
     return () => subscription.unsubscribe();
@@ -282,12 +286,13 @@ export const useAgentBuilderRuleCreation = ({
           actionsStepData,
           actionTypeRegistry
         );
-        const ruleIdForSync = getRuleIdForSync();
+        const isUpdateIntent = intentRef.current === 'update';
+        const ruleIdForSync = isUpdateIntent ? getRuleIdForSync() : undefined;
         const ruleToSync = ruleIdForSync ? { ...formattedRule, id: ruleIdForSync } : formattedRule;
         addRuleAttachment(
           ruleToSync,
           ruleToSync.name ||
-            (ruleIdForSync
+            (isUpdateIntent && ruleIdForSync
               ? i18n.translate(
                   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
                   { defaultMessage: 'Rule' }

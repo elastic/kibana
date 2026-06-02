@@ -14,8 +14,11 @@ import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import {
   createRuleAttachmentDefinition,
+  getRuleIdFromEditFormPath,
+  isAttachmentRuleOpenOnFormPage,
   isOnRuleFormPage,
   registerRuleAttachment,
+  shouldShowViewRuleButton,
 } from './rule_attachment';
 import { buildRuleActionButtons } from './rule_action_buttons';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
@@ -73,6 +76,49 @@ describe('isOnRuleFormPage', () => {
 
   it('returns false for paths containing create but not rules', () => {
     expect(isOnRuleFormPage('/app/security/other/create')).toBe(false);
+  });
+});
+
+describe('getRuleIdFromEditFormPath', () => {
+  it('extracts the rule id from an edit URL', () => {
+    expect(getRuleIdFromEditFormPath('/app/security/rules/id/my-rule-id/edit')).toBe('my-rule-id');
+  });
+
+  it('returns undefined when not on an edit URL', () => {
+    expect(getRuleIdFromEditFormPath('/app/security/rules/create')).toBeUndefined();
+  });
+});
+
+describe('shouldShowViewRuleButton', () => {
+  it('is false without an attachment rule id', () => {
+    expect(shouldShowViewRuleButton(undefined, '/app/security/rules')).toBe(false);
+  });
+
+  it('is true on the rules list', () => {
+    expect(shouldShowViewRuleButton('rule-b', '/app/security/rules')).toBe(true);
+  });
+
+  it('is false when the edit form is open for the same rule', () => {
+    expect(shouldShowViewRuleButton('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(false);
+  });
+
+  it('is true when the edit form is open for a different rule', () => {
+    expect(shouldShowViewRuleButton('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(true);
+  });
+
+  it('is true on the create form (attachment targets another saved rule)', () => {
+    expect(shouldShowViewRuleButton('rule-b', '/app/security/rules/create')).toBe(true);
+  });
+});
+
+describe('isAttachmentRuleOpenOnFormPage', () => {
+  it('is true only when pathname and attachment rule id match on edit', () => {
+    expect(isAttachmentRuleOpenOnFormPage('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(
+      true
+    );
+    expect(isAttachmentRuleOpenOnFormPage('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(
+      false
+    );
   });
 });
 
@@ -314,20 +360,53 @@ describe('buildRuleActionButtons', () => {
     expect(aiRuleCreation.requestSaveRule).not.toHaveBeenCalled();
   });
 
-  it('includes View rule when a ruleId exists and the user is not on a rule form page', () => {
-    expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).toContain(
+  it('omits View rule for create intent even when a ruleId is present', () => {
+    expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).not.toContain(
       'View rule'
     );
+  });
+
+  it('navigates to create path for create intent even when a ruleId is present', () => {
+    const application = makeApplication(true);
+    const buttons = buildRuleActionButtons({
+      ...baseProps,
+      application,
+      ruleId: 'rule-123',
+    });
+    buttons.find((b) => b.label === 'Open in form')!.handler();
+    expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+      path: expect.stringContaining('/create'),
+    });
+  });
+
+  it('includes View rule for update intent when a ruleId exists and the user is not on a rule form page', () => {
+    expect(
+      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
+    ).toContain('View rule');
   });
 
   it('omits View rule when there is no ruleId', () => {
     expect(labels(buildRuleActionButtons(baseProps))).not.toContain('View rule');
   });
 
-  it('omits View rule when the user is on a rule form page', () => {
+  it('omits View rule when the edit form is open for the same rule', () => {
+    window.history.pushState({}, '', '/app/security/rules/id/rule-123/edit');
+    expect(
+      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
+    ).not.toContain('View rule');
+  });
+
+  it('includes View rule when the edit form is open for a different rule', () => {
+    window.history.pushState({}, '', '/app/security/rules/id/rule-a/edit');
+    expect(
+      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-b' }))
+    ).toContain('View rule');
+  });
+
+  it('includes View rule on the create form when the attachment targets another saved rule', () => {
     window.history.pushState({}, '', '/app/security/rules/create');
-    expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).not.toContain(
-      'View rule'
-    );
+    expect(
+      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
+    ).toContain('View rule');
   });
 });

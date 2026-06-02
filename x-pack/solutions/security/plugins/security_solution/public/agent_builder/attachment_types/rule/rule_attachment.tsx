@@ -25,7 +25,12 @@ import {
   parseRuleFromAttachment,
 } from './helpers';
 
-export { isOnRuleFormPage } from './helpers';
+export {
+  getRuleIdFromEditFormPath,
+  isAttachmentRuleOpenOnFormPage,
+  isOnRuleFormPage,
+  shouldShowViewRuleButton,
+} from './helpers';
 
 export const registerRuleAttachment = ({
   attachments,
