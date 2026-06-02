@@ -21,6 +21,9 @@ export const CreateButtonPopOver = ({ anchorPosition = 'upCenter' }: Props) => {
   return (
     <EuiPopover
       id="createComponentTemplatePanel"
+      aria-label={i18n.translate('xpack.idxMgmt.componentTemplatesFlyout.createPopoverAriaLabel', {
+        defaultMessage: 'Create component template',
+      })}
       button={
         <EuiButton
           fill

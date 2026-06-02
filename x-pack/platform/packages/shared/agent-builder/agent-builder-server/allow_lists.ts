@@ -50,6 +50,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
+  `${internalNamespaces.security}.siem_readiness.get_coverage`,
+  `${internalNamespaces.security}.siem_readiness.get_quality`,
+  `${internalNamespaces.security}.siem_readiness.get_continuity`,
+  `${internalNamespaces.security}.siem_readiness.get_retention`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -69,12 +73,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
-  `${internalNamespaces.workflows}.workflow_insert_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step_property`,
-  `${internalNamespaces.workflows}.workflow_modify_property`,
-  `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_set_yaml`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
@@ -135,6 +133,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'threat-hunting',
   'pci-compliance',
+  'siem-readiness',
 
   // O11Y
   'observability.rca',
@@ -148,6 +147,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  'skill-authoring',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

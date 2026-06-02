@@ -228,9 +228,9 @@ export function HeaderControl({ slo }: Props) {
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          size="m"
           items={[
             <EuiContextMenuItem
               key="edit"

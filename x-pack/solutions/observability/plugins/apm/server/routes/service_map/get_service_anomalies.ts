@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { sortBy, uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { sortBy, uniqBy } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
-import { withApmSpan } from '../../utils/with_apm_span';
-import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import type { MlClient } from '../../lib/helpers/get_ml_client';
-import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
-import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   anomalySearch,
   ML_SERVICE_NAME_FIELD,
   ML_TRANSACTION_TYPE_FIELD,
 } from '../../lib/anomaly_detection/anomaly_search';
+import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
+import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
+import type { MlClient } from '../../lib/helpers/get_ml_client';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = Awaited<ReturnType<typeof getServiceAnomalies>>;
 export async function getServiceAnomalies({
   mlClient,
   environment,
@@ -47,7 +47,7 @@ export async function getServiceAnomalies({
   searchQuery?: string;
   /** When set, matches that service only via a `term` filter (avoids wildcard fan-out for short names). Ignores `searchQuery` for the service-name clause. */
   exactServiceName?: string;
-}) {
+}): Promise<ServiceAnomaliesResponse> {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);

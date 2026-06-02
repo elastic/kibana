@@ -12,7 +12,6 @@ import {
   getBuiltInStepStability,
   isBuiltInStepProperty,
   isBuiltInStepType,
-  isCancelableStatus,
   isDangerousStatus,
   isDynamicConnector,
   isElasticsearchStep,
@@ -97,6 +96,7 @@ describe('types/utils', () => {
         ExecutionStatus.PENDING,
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
       ]);
 
       it.each(allStatuses)('returns %s for status "%s"', (status) => {
@@ -126,26 +126,11 @@ describe('types/utils', () => {
       });
     });
 
-    describe('isCancelableStatus', () => {
-      const cancelable = new Set([
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.PENDING,
-      ]);
-
-      it.each(allStatuses)('returns %s for status "%s"', (status) => {
-        expect(isCancelableStatus(status)).toBe(cancelable.has(status));
-      });
-    });
-
-    it('TIMED_OUT is terminal but NOT cancelable', () => {
+    it('TIMED_OUT is terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.TIMED_OUT)).toBe(true);
-      expect(isCancelableStatus(ExecutionStatus.TIMED_OUT)).toBe(false);
     });
 
-    it('WAITING_FOR_INPUT is cancelable but NOT terminal', () => {
-      expect(isCancelableStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(true);
+    it('WAITING_FOR_INPUT is not terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(false);
     });
   });

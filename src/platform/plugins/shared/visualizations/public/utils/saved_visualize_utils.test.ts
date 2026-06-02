@@ -77,6 +77,9 @@ jest.mock('../services', () => ({
       mSearch: mockFindContent,
     },
   })),
+  getEmbeddable: jest.fn(() => ({
+    getSavedObjects: mockFindContent,
+  })),
 }));
 
 const mockParseSearchSourceJSON = jest.fn();
@@ -293,10 +296,8 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            options: {
-              types: ['visualization'],
-              searchFields: ['title^3', 'description'],
-            },
+            type: ['visualization'],
+            limit: 10,
           },
         ],
       ]);
@@ -320,15 +321,7 @@ describe('saved_visualize_utils', () => {
         props.size
       );
       expect(mockFindContent.mock.calls).toMatchObject([
-        [
-          {
-            contentTypes: [
-              { contentTypeId: 'bazdoc' },
-              { contentTypeId: 'etc' },
-              { contentTypeId: 'visualization' },
-            ],
-          },
-        ],
+        [{ limit: 10, type: ['bazdoc', 'etc', 'visualization'] }],
       ]);
     });
 
@@ -358,16 +351,7 @@ describe('saved_visualize_utils', () => {
         props.size
       );
       expect(mockFindContent.mock.calls).toMatchObject([
-        [
-          {
-            contentTypes: [
-              { contentTypeId: 'bazdoc' },
-              { contentTypeId: 'bar' },
-              { contentTypeId: 'visualization' },
-              { contentTypeId: 'foo' },
-            ],
-          },
-        ],
+        [{ limit: 10, type: ['bazdoc', 'bar', 'visualization', 'foo'] }],
       ]);
     });
 
@@ -384,7 +368,9 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            query: { text: 'ahoythere*' },
+            limit: 10,
+            search: 'ahoythere*',
+            type: ['bazdoc', 'bar', 'visualization', 'foo'],
           },
         ],
       ]);
@@ -407,10 +393,11 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            query: {
-              tags: {
-                included: ['hello', 'dolly'],
-              },
+            limit: 10,
+            type: ['bazdoc', 'bar', 'visualization', 'foo'],
+            tags: {
+              excluded: undefined,
+              included: ['hello', 'dolly'],
             },
           },
         ],
@@ -436,7 +423,7 @@ describe('saved_visualize_utils', () => {
         } as VisTypeAlias,
       ];
       (mockFindContent as jest.Mock).mockImplementationOnce(async () => ({
-        pagination: { total: 2 },
+        total: 2,
         hits: [
           {
             id: 'lotr',
@@ -467,6 +454,7 @@ describe('saved_visualize_utils', () => {
           {
             id: 'wat',
             image: undefined,
+            managed: undefined,
             editor: {
               editUrl: '/edit/wat',
             },

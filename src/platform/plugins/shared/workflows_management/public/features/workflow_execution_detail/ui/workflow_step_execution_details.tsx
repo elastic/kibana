@@ -220,7 +220,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
                         {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
                       </EuiLink>
@@ -239,7 +238,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiLink
                         href={parentWorkflowNav.href}
                         onClick={handleParentWorkflowLinkClick}
@@ -284,6 +282,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         <>
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
+                            workflowId={stepExecution?.workflowId}
+                            stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}

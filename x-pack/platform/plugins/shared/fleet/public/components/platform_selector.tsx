@@ -184,7 +184,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               }
               isOpen={showExtendedPlatforms}
               closePopover={() => setShowExtendedPlatforms(false)}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               repositionOnScroll={true}
             >
               <EuiSelectable
@@ -206,7 +206,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   setShowExtendedPlatforms(false);
                 }}
                 css={{ width: 150 }}
-                listProps={{ paddingSize: 'none', onFocusBadge: false }}
+                listProps={{ onFocusBadge: false }}
               >
                 {(list) => list}
               </EuiSelectable>

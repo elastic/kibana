@@ -27,7 +27,7 @@ import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stre
 
 const classicStreamManagementSubTabs = [
   'overview',
-  'retention',
+  'lifecycle',
   'partitioning',
   'processing',
   'advanced',
@@ -42,17 +42,11 @@ type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[num
 
 const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   enrich: { newTab: 'processing' },
 };
 
-function isValidManagementSubTab(
-  value: string,
-  overviewPageEnabled: boolean
-): value is ClassicStreamManagementSubTab {
-  if (value === 'overview' && !overviewPageEnabled) {
-    return false;
-  }
+function isValidManagementSubTab(value: string): value is ClassicStreamManagementSubTab {
   return classicStreamManagementSubTabs.includes(value as ClassicStreamManagementSubTab);
 }
 
@@ -68,7 +62,7 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { overviewPage, queryStreams },
+    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -105,16 +99,14 @@ export function ClassicStreamDetailManagement({
 
   const tabs: ManagementTabs = {};
 
-  if (overviewPage.enabled) {
-    tabs.overview = {
-      content: <StreamOverview />,
-      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-        defaultMessage: 'Overview',
-      }),
-    };
-  }
+  tabs.overview = {
+    content: <StreamOverview />,
+    label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+      defaultMessage: 'Overview',
+    }),
+  };
 
-  tabs.retention = {
+  tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
@@ -127,7 +119,7 @@ export function ClassicStreamDetailManagement({
       >
         <span data-test-subj="retentionTab" tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-            defaultMessage: 'Retention',
+            defaultMessage: 'Data lifecycle',
           })}
         </span>
       </EuiToolTip>
@@ -210,19 +202,13 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (tab === 'overview' && !overviewPage.enabled) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
-    );
-  }
-
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
     );
   }
 
-  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
+  if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -239,6 +225,5 @@ export function ClassicStreamDetailManagement({
     return null;
   }
 
-  const defaultTab = overviewPage.enabled ? 'overview' : 'retention';
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

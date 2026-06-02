@@ -9,6 +9,19 @@ import { gapStatus, gapReasonType } from '@kbn/alerting-plugin/common';
 import type { GapReasonType, GapStatus } from '../../types';
 import * as i18n from './translations';
 
+/**
+ * Returns the reason types that should be excluded from the gaps query.
+ * When selectedReasonTypes is empty (all options deselected), returns [] so that
+ * no filter is applied and all gaps are shown — consistent with the Status filter.
+ */
+export const getExcludedReasons = (
+  selectedReasonTypes: GapReasonType[],
+  allReasonTypes: GapReasonType[]
+): GapReasonType[] => {
+  if (selectedReasonTypes.length === 0) return [];
+  return allReasonTypes.filter((reason) => !selectedReasonTypes.includes(reason));
+};
+
 export const getStatusLabel = (status: GapStatus) => {
   switch (status) {
     case gapStatus.PARTIALLY_FILLED:

@@ -99,6 +99,10 @@ export class InjectedMetadataService {
       getFeatureFlags: () => {
         return this.state.featureFlags;
       },
+
+      getUserStorage: () => {
+        return this.state.userStorage;
+      },
     };
   }
 }

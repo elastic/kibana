@@ -7,8 +7,8 @@
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
-import { runGenericMaintainer } from '../engine/run_relationship_maintainer';
-import { ACCESSES_ENGINE_CONFIGS } from './configs';
+import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 
 export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   id: 'accesses_frequently_and_infrequently',
@@ -19,12 +19,12 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting accesses maintainer run');
-    const result = await runGenericMaintainer({
+    const result = await runRelationshipMaintainer({
       esClient,
       logger,
       namespace,
       crudClient,
-      integrations: ACCESSES_ENGINE_CONFIGS,
+      integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
     });
     logger.info(

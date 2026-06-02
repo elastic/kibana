@@ -155,7 +155,7 @@ export function ConversationList({
               {DATE_CATEGORY_LABELS[category]}
             </EuiText>
           </EuiPanel>
-          <EuiListGroup flush={false} gutterSize="none">
+          <EuiListGroup>
             {list.map((conversation) => (
               <EuiListGroupItem
                 data-test-subj="observabilityAiAssistantConversationsLink"
@@ -166,7 +166,6 @@ export function ConversationList({
                     isPublic={conversation.public}
                   />
                 }
-                size="s"
                 isActive={conversation.id === selectedConversationId}
                 isDisabled={isLoading}
                 showToolTip
@@ -244,7 +243,7 @@ export function ConversationList({
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="warning" color="danger" />
+                    <EuiIcon type="warning" color="danger" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="danger">

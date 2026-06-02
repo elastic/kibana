@@ -16,12 +16,12 @@ import { i18n } from '@kbn/i18n';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
-import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
 import type { EmbeddableLogRateAnalysisType } from '../embeddables/log_rate_analysis/embeddable_log_rate_analysis_factory';
-import type { LogRateAnalysisEmbeddableState } from '../../common/embeddables/log_rate_analysis/types';
 import type { PatternAnalysisEmbeddableState } from '../../common/embeddables/pattern_analysis/types';
 
 type SupportedEmbeddableTypes =
@@ -31,7 +31,7 @@ type SupportedEmbeddableTypes =
 
 type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
-    ? ChangePointEmbeddableState
+    ? ChangePointChartEmbeddableState
     : T extends EmbeddablePatternAnalysisType
     ? PatternAnalysisEmbeddableState
     : T extends EmbeddableLogRateAnalysisType

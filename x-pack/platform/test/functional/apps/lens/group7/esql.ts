@@ -122,8 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.removePanel(panel);
       await header.waitUntilLoadingHasFinished();
 
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await header.waitUntilLoadingHasFinished();
 
       await dashboard.waitForRenderComplete();

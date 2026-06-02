@@ -30,15 +30,15 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.classify',
-    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+    handlerHash: '0dcc5fb63038d1cb5fe73dd7ae7744d3eb3dda9d95d7e1dd860e587926177553',
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
+    handlerHash: '3b7be086fd3479a81113a1d1f0bcc37e3e7f008e8fa5eaa2c905bf4b4a3b5ca6',
   },
   {
     id: 'ai.summarize',
-    handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
+    handlerHash: 'f4337c9b87598cd32c2b4a78494f4f015c655873b65f6e4ca981104ea432a2b0',
   },
   {
     id: 'data.aggregate',
@@ -62,7 +62,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+    handlerHash: '2eda52d265fc8683f625974f6909a5e0fb5ad6ee1eadd4ee89737ac5c8b4c8e1',
   },
   {
     id: 'data.parseJson',

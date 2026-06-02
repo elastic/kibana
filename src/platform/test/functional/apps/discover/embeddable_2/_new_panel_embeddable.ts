@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -28,12 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('add new discover panel embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'

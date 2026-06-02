@@ -15,11 +15,9 @@ import type {
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
-export enum AttachmentActionType {
-  BUTTON = 'button',
-  CUSTOM = 'custom',
-}
+export { AttachmentActionType };
 
 interface BaseAttachmentAction {
   type: AttachmentActionType;
@@ -66,6 +64,7 @@ export interface CommonAttachmentViewProps {
 /** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
 export interface CommonAttachmentTabViewProps {
   caseData: CaseUI;
+  searchTerm?: string;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
@@ -95,6 +94,7 @@ export interface UnifiedReferenceAttachmentViewProps<
 > extends CommonAttachmentViewProps {
   attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
   metadata?: Metadata;
+  data?: UnifiedReferenceAttachmentPayload['data'];
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;

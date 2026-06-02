@@ -13,7 +13,7 @@ import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
+import { SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';

@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: legacyPrivateLocationsSavedObjectId,
         });
       } catch (e) {
-        expect(e.response.status).to.be(404);
+        expect(e.status).to.be(404);
       }
     });
 

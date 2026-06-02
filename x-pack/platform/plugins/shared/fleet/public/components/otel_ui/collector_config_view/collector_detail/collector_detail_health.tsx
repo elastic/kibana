@@ -144,6 +144,7 @@ const PipelineAccordion: React.FC<{
     (sum, g) => sum + g.components.filter((c) => c.status === 'healthy').length,
     0
   );
+
   const unhealthyCount = totalComponents - healthyCount;
 
   return (
@@ -304,6 +305,17 @@ const ComponentHealthSectionHeader: React.FC<{
   );
 };
 
+const resolveComponentType = (
+  componentId: string,
+  componentType: string,
+  config: OTelCollectorConfig
+): OTelComponentType => {
+  if (config.connectors && componentId in config.connectors) {
+    return 'connector';
+  }
+  return componentType as OTelComponentType;
+};
+
 export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
   health,
   config,
@@ -333,8 +345,8 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
             type,
             components: componentIds.map((id) => {
               const componentHealth =
-                findComponentHealth(pipelineHealth, type, id) ??
-                findComponentHealth(health, type, id);
+                findComponentHealth(pipelineHealth, resolveComponentType(id, type, config), id) ??
+                findComponentHealth(health, resolveComponentType(id, type, config), id);
               return {
                 id,
                 health: componentHealth,

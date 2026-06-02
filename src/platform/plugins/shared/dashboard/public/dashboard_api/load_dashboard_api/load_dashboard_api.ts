@@ -9,16 +9,17 @@
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
+import { asyncForEach } from '@kbn/std';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { dashboardClient } from '../../dashboard_client';
-import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
-import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
+import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getLastSavedState } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
@@ -26,15 +27,18 @@ import {
   getDashboardBackupService,
   initializeDashboardApiServices,
 } from '../../services/dashboard_api_services';
+import { getDashboardUserActivityService } from '../../services/user_activity_service';
 
 export async function loadDashboardApi({
   getCreationOptions,
   onApiCleanup,
   savedObjectId,
+  panelFlyoutType,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onApiCleanup?: () => void;
   savedObjectId?: string;
+  panelFlyoutType?: EuiFlyoutProps['type'];
 }) {
   const creationOptions = await getCreationOptions?.();
 
@@ -42,16 +46,11 @@ export async function loadDashboardApi({
   // Determine sizes of incoming embeddables. Done here due to async fetching.
   // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  for (const embeddable of incomingEmbeddables ?? []) {
-    if (embeddable.size) continue; // don't overwrite size if it was provided
-    // otherwise, use the panel settings to determine the size
-    const panelSettings = await getPanelSettings(embeddable.type, embeddable.serializedState);
-    const panelPlacementSettings = {
-      ...DEFAULT_PANEL_PLACEMENT_SETTINGS,
-      ...panelSettings?.placementSettings,
-    };
-    embeddable.size = panelPlacementSettings;
-  }
+  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
+    if (!embeddable.size) {
+      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
+    }
+  });
 
   const [readResult, user, isAccessControlEnabled] = savedObjectId
     ? await Promise.all([
@@ -102,6 +101,7 @@ export async function loadDashboardApi({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    panelFlyoutType,
     incomingEmbeddables,
     initialState: {
       ...getLastSavedState(readResult),
@@ -113,8 +113,9 @@ export async function loadDashboardApi({
     user,
     isAccessControlEnabled,
   });
+  const userActivityService = getDashboardUserActivityService(api);
 
-  const performanceSubscription = startQueryPerformanceTracking(api, {
+  const telemetrySubscription = startTrackingDashboardLoadTelemetry(api, {
     firstLoad: true,
     creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
       ?.startTime,
@@ -125,6 +126,7 @@ export async function loadDashboardApi({
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
+    api.userActivity$.next({ type: 'view', start: Date.now() });
     const contentInsightsClient = new ContentInsightsClient(
       { http: coreServices.http, logger },
       { domainId: 'dashboard' }
@@ -136,10 +138,14 @@ export async function loadDashboardApi({
     api,
     cleanup: () => {
       cleanup();
+      if (savedObjectId) {
+        api.userActivity$.next({ type: 'view', end: Date.now() });
+      }
+      userActivityService.cleanup();
       if (onApiCleanup) {
         onApiCleanup();
       }
-      performanceSubscription.unsubscribe();
+      telemetrySubscription.unsubscribe();
     },
     internalApi,
     useControlsIntegration: creationOptions?.useControlsIntegration,

@@ -64,17 +64,17 @@ export const TemplateContentIndicator = ({
 
   return (
     <>
-      <EuiToolTip content={mappingsText}>
+      <EuiToolTip content={mappingsText} disableScreenReaderOutput>
         <EuiBadge tabIndex={tabIndex} color={getColor(mappings)} aria-label={mappingsText}>
           M
         </EuiBadge>
       </EuiToolTip>{' '}
-      <EuiToolTip content={settingsText}>
+      <EuiToolTip content={settingsText} disableScreenReaderOutput>
         <EuiBadge tabIndex={tabIndex} color={getColor(settings)} aria-label={settingsText}>
           S
         </EuiBadge>
       </EuiToolTip>{' '}
-      <EuiToolTip content={aliasesText}>
+      <EuiToolTip content={aliasesText} disableScreenReaderOutput>
         <EuiBadge tabIndex={tabIndex} color={getColor(aliases)} aria-label={aliasesText}>
           A
         </EuiBadge>

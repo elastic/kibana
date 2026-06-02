@@ -18,8 +18,10 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  GlobalSearchConfig,
   ChromeNavLink,
   ChromeUserBanner,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -62,8 +64,12 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
+  globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
+  inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 
   /** Help system */
   help: {
@@ -107,7 +113,11 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
+  const inlineAppHeader = createState<boolean>(false);
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -130,12 +140,16 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     headerBanner,
     globalFooter,
+    globalSearch,
     customNavLink,
     appMenu,
+    inlineAppHeader,
+    appHeader,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    contextSwitcher,
   };
 }

@@ -116,6 +116,56 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  uri_parts: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.uriParts.name', {
+      defaultMessage: 'URI Parts',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.description', {
+      defaultMessage:
+        'Parse a URI string into its components (scheme, domain, path, query, fragment, port, user info, and file extension).',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
+      defaultMessage:
+        'Provide `from` for the field containing the URI string. Optionally set `to` to choose the target prefix (defaults to `url`). Extracted components become `<prefix>.scheme`, `<prefix>.domain`, `<prefix>.path`, `<prefix>.port`, etc.',
+      ignoreTag: true,
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.examples.basic', {
+          defaultMessage: 'Parse a URL field using the default `url` prefix',
+        }),
+        yaml: `- action: uri_parts
+  from: attributes.request_url`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.examples.custom', {
+          defaultMessage:
+            'Store the parts under a custom prefix and drop the source field after a successful parse',
+        }),
+        yaml: `- action: uri_parts
+  from: attributes.request_url
+  to: attributes.request
+  keep_original: false
+  remove_if_successful: true`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.subfields', {
+        defaultMessage:
+          'Produces `scheme`, `domain`, `path`, `query`, `fragment`, `port` (integer), `user_info`, `username`, `password`, and `extension` as sub-fields of the target prefix.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.relative', {
+        defaultMessage:
+          'Relative URIs (e.g. `/app/login?x=1`) parse successfully with null scheme and domain. Only inputs that cannot be parsed at all produce null for every sub-field.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.keepOriginal', {
+        defaultMessage:
+          'By default `keep_original: true` preserves the source URI at `<prefix>.original`. Combine with `remove_if_successful: true` to drop the source field only when parsing succeeds.',
+        ignoreTag: true,
+      }),
+    ],
+  },
+
   set: {
     name: i18n.translate('xpack.streamlang.actionMetadata.set.name', {
       defaultMessage: 'Set',
@@ -892,6 +942,38 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.enrich.tips.ignoreMissing', {
         defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  registered_domain: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.name', {
+      defaultMessage: 'Registered Domain',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.description', {
+      defaultMessage: 'Extract the domain parts from an FQDN string',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.usage', {
+      defaultMessage:
+        'Provide the `expression` field containing the FQDN and `prefix` for the output columns prefix where you want to store the extracted parts (for example, `prefix.subdomain`)',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.registeredDomain.examples.simple',
+          {
+            defaultMessage: 'Extract the domain parts from an FQDN string',
+          }
+        ),
+        yaml: `- action: registered_domain
+  expression: fqdn
+  prefix: rd`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.tips.parts', {
+        defaultMessage:
+          'Extracts the following parts: domain, registered_domain, top_level_domain, subdomain',
       }),
     ],
   },

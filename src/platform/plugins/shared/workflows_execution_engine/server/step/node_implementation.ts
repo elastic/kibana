@@ -154,8 +154,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
@@ -187,7 +185,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
           if (outputSize > maxBytes) {
-            throw new ResponseSizeLimitError(maxBytes, this.step.name);
+            throw new ResponseSizeLimitError(maxBytes, this.step.name, {
+              actualBytes: outputSize,
+            });
           }
           // Forward the already-computed size to finishStep so the IO service
           // can decide eviction without re-serialising. Zero-byte outputs are
@@ -227,9 +227,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         stepSpan.end();
       }
     }
-
-    // flush event logs after finishing the step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     this.workflowExecutionRuntime.navigateToNextNode();
   }

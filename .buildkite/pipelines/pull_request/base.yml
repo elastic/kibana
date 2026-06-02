@@ -31,21 +31,6 @@ steps:
       diskSizeGb: 200
     key: verify_rspack_build
     timeout_in_minutes: 60
-    plugins:
-      - custom-checkout#v1.8.0:
-          skip_checkout: true
-          repos:
-            - url: git@github.com:elastic/kibana.git
-              mirror_url: /opt/git-mirrors/git-github-com-elastic-kibana-git
-              ref: "${BUILDKITE_COMMIT}"
-              fetch: true
-              clone_flags:
-                - '--depth=1'
-                - '--no-tags'
-                - '--single-branch'
-              fetch_flags:
-                - '--depth=1'
-                - '--no-tags'
     retry:
       automatic:
         - exit_status: '-1'
@@ -163,6 +148,8 @@ steps:
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      RESTORE_ARCHIVE: 'true'
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'

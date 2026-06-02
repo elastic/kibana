@@ -8,13 +8,11 @@
  */
 
 import { PromQLParser } from '@elastic/esql';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getQueryPosition } from './query_position';
 import { getPreGroupedAggregationName } from '../../promql';
-import {
-  buildNextActionsSuggestion,
-  buildVectorSuggestions,
-} from './query_positions/suggestion_helpers';
+import { buildVectorSuggestions } from './query_positions/suggestion_helpers';
 import { positionHandlers } from './query_positions/dispatcher';
 
 interface SuggestForPromqlQueryInput {
@@ -22,10 +20,12 @@ interface SuggestForPromqlQueryInput {
   shouldWrap: boolean;
   queryText?: string;
   cursorRelative?: number;
+  variables?: ESQLControlVariable[];
+  supportsControls?: boolean;
 }
 
 export function suggestForPromqlQuery(input: SuggestForPromqlQueryInput): ISuggestionItem[] {
-  const { columns, shouldWrap, queryText, cursorRelative } = input;
+  const { columns, shouldWrap, queryText, cursorRelative, variables, supportsControls } = input;
 
   if (!queryText || cursorRelative === undefined) {
     return buildVectorSuggestions(columns, [], shouldWrap);
@@ -35,22 +35,14 @@ export function suggestForPromqlQuery(input: SuggestForPromqlQueryInput): ISugge
   const position = getQueryPosition(root, cursorRelative, queryText);
   const preGroupedAgg = getPreGroupedAggregationName(queryText.slice(0, cursorRelative));
 
-  if (cursorRelative > root.location.max && position.type === 'inside_query') {
-    return buildNextActionsSuggestion({
-      columns,
-      shouldWrap,
-      preGroupedAgg,
-      isAfterAggregationName: !!position.isAfterAggregationName,
-      canAddGrouping: !!position.canAddGrouping,
-    });
-  }
-
   return (
     positionHandlers[position.type]?.({
       position,
       columns,
       shouldWrap,
       preGroupedAgg,
+      variables,
+      supportsControls,
     }) ?? []
   );
 }

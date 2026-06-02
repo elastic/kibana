@@ -186,6 +186,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
           truncationProps: {
             truncation: 'middle',
           },
+          paddingSize: 's',
         }}
         singleSelection={!isMultiSelect}
       >

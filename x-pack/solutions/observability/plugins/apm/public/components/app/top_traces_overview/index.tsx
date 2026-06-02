@@ -50,7 +50,7 @@ export function TopTracesOverview() {
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem grow>
+      <EuiFlexItem grow style={{ minWidth: 0 }}>
         <TraceList response={response} />
       </EuiFlexItem>
     </EuiFlexGroup>

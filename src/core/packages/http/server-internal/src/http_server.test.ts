@@ -28,6 +28,7 @@ import { createServer } from '@kbn/server-http-tools';
 import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { gzipSync } from 'zlib';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
@@ -1416,6 +1417,44 @@ describe('body options', () => {
       error: 'Request Entity Too Large',
       message: 'Payload content length greater than maximum allowed: 1',
     });
+  });
+
+  test('should reject a gzip-bomb that inflates beyond `maxBytes`', async () => {
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.string() }) },
+        options: { body: { maxBytes: 64 } },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .set('Content-Encoding', 'gzip')
+      .set('Content-Type', 'application/json')
+      .send(
+        gzipSync(
+          JSON.stringify({
+            test: '0'.repeat(1024),
+          })
+        )
+      )
+      .expect(413, {
+        statusCode: 413,
+        error: 'Request Entity Too Large',
+        message: 'Payload content length greater than maximum allowed: 64',
+      });
   });
 
   test('should not parse the content in the request', async () => {

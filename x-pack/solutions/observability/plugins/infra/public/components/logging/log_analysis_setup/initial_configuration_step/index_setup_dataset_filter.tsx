@@ -86,7 +86,12 @@ export const IndexSetupDatasetFilter: React.FC<{
         isOpen={isVisible}
         panelPaddingSize="none"
       >
-        <EuiSelectable onChange={changeDatasetFilter} options={selectableOptions} searchable>
+        <EuiSelectable
+          onChange={changeDatasetFilter}
+          options={selectableOptions}
+          searchable
+          listProps={{ paddingSize: 's' }}
+        >
           {(list, search) => (
             <div>
               <EuiPopoverTitle>{search}</EuiPopoverTitle>
