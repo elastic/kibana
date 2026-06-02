@@ -22,6 +22,7 @@
     "server/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
+    "test/scout/**/*",
     "types/**/*"
   ],
   "kbn_references": [
@@ -81,7 +82,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/saved-search-plugin",
     "@kbn/lens-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

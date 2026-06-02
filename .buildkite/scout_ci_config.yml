@@ -8,6 +8,7 @@ plugins:
     - apm
     - automatic_import
     - banners
+    - canvas
     - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
@@ -18,8 +19,8 @@ plugins:
     - dashboard_markdown
     - data
     - data_view_editor
-    - data_views
     - data_view_management
+    - data_views
     - dev_tools
     - discover
     - discover_enhanced
