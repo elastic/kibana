@@ -207,8 +207,6 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
