@@ -7,6 +7,11 @@ xpack.cloud.serverless.product_tier: logs_essentials
 xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.agentBuilder.enabled: false
+xpack.genAiSettings.showAiBreadcrumb: false
+xpack.genAiSettings.showSpacesIntegration: false
+xpack.genAiSettings.showAiAssistantsVisibilitySetting: false
+xpack.genAiSettings.showChatExperienceSetting: false
 xpack.aiops.ui.enabled: false
 xpack.apm.enabled: false
 xpack.cases.enabled: false
@@ -25,6 +30,8 @@ xpack.features.overrides:
   searchInferenceEndpoints.hidden: true
   ### Workflows Management feature should be hidden in this tier
   workflowsManagement.hidden: true
+  ### Agent Context Layer is hidden when Agent Builder is disabled for this tier
+  agentContextLayer.hidden: true
 
 
 xpack.fleet.internal.registry.excludePackages: [

@@ -7,7 +7,7 @@
 
 import type { EsClient } from '@kbn/scout-security';
 import type { apiTest } from '@kbn/scout-security';
-import type { GetStatusResult } from '../../../../server/domain/types';
+import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
@@ -296,9 +296,7 @@ export const getStatus = (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   { includeComponents = false } = {}
-): Promise<
-  Omit<ApiClientResponse, 'body'> & { body: Pick<GetStatusResult, 'engines' | 'status'> }
-> =>
+): Promise<Omit<ApiClientResponse, 'body'> & { body: EntityStoreStatusResponseBody }> =>
   apiClient.get(
     includeComponents
       ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`

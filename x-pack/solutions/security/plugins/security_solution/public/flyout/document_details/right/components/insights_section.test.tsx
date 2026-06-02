@@ -9,13 +9,10 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
-import {
-  INSIGHTS_CONTENT_TEST_ID,
-  INSIGHTS_ENTITIES_TEST_ID,
-  INSIGHTS_HEADER_TEST_ID,
-} from './test_ids';
+import { INSIGHTS_CONTENT_TEST_ID, INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import {
   CORRELATIONS_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from '../../../../flyout_v2/document/main/components/test_ids';
@@ -32,7 +29,6 @@ import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../flyout_v2/document/main/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_same_source_event';
@@ -41,6 +37,9 @@ import { useShowRelatedCases } from '../../../../flyout_v2/document/tools/correl
 import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_suppressed_alerts';
 
 jest.mock('../../../../flyout_v2/document/main/hooks/use_alert_prevalence');
+jest.mock('../../shared/hooks/use_event_details', () => ({
+  useEventDetails: jest.fn(() => ({ dataAsNestedObject: null, loading: false })),
+}));
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -71,7 +70,6 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
-const selectedPatterns = 'alerts';
 const mockSearchHit = {
   _id: 'some-id',
   _index: 'alerts-index',
@@ -88,13 +86,6 @@ const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
-  };
-});
-
-const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
-  return {
-    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 
@@ -141,7 +132,6 @@ describe('<InsightsSection />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });

@@ -2,20 +2,25 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
-    - agent_builder
     - automatic_import
     - banners
+    - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
+    - data_view_editor
     - data_views
+    - data_view_management
+    - dev_tools
     - discover
     - discover_enhanced
     - entity_store
@@ -25,16 +30,22 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
+    - grokdebugger
+    - home
+    - index_lifecycle_management
     - index_management
     - infra
+    - ingest_hub
     - ingest_pipelines
     - intercepts
-    - home
     - kibana_overview
     - lens
     - logstash
+    - management
     - maps
     - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
@@ -46,18 +57,22 @@ plugins:
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
+    - searchprofiler
     - security
     - security_solution
     - serverless_observability
     - share
     - slo
     - spaces
+    - stack_connectors
     - streams
     - streams_app
     - synthetics
     - task_manager
     - transform
     - triggers_actions_ui
+    - unified_search
+    - upgrade_assistant
     - uptime
     - ux
     - workflows_extensions

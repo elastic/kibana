@@ -14,12 +14,17 @@ import type {
 } from './execution_context_enums';
 
 /**
- * Naming convention for metrics profile execution context labels in APM.
- * Returns options suitable for spreading into search calls. Pass enum values from constants.ts, e.g. getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, MetricsExecutionContextName.METRICS_INFO).
+ * Returns execution context options for spreading into search calls.
+ * When `meta` is provided it is forwarded to `executionContext.meta`,
+ * which the server-side pipeline flattens onto the APM transaction as `kibana_meta_*` labels.
  */
 export const getMetricsExecutionContext = (
   action: MetricsExecutionContextAction,
-  name: MetricsExecutionContextName
+  name: MetricsExecutionContextName,
+  meta?: KibanaExecutionContext['meta']
 ) => ({
-  executionContext: { page: `metrics_${action}_${name}` } as KibanaExecutionContext,
+  executionContext: {
+    page: `metrics_${action}_${name}`,
+    ...(meta ? { meta } : {}),
+  } as KibanaExecutionContext,
 });

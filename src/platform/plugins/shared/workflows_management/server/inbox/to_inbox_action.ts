@@ -140,11 +140,12 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
  * log) feed.
  *
  * Two source-of-truth windows feed this mapper:
- *   1. **Responded, not yet resumed** — `respondedAt` is set but the
+ *   1. **Responded, not yet resumed** — `hitl.respondedAt` is set but the
  *      engine hasn't written `finishedAt`. The step row is still
- *      `WAITING_FOR_INPUT`. The audit fields (`respondedBy`,
- *      `respondedAt`, `channel`) come straight from `markStepAsResponded`,
- *      which fires synchronously from the responder's request.
+ *      `WAITING_FOR_INPUT`. The audit fields (`hitl.respondedBy`,
+ *      `hitl.respondedAt`, `hitl.channel`) come straight from
+ *      `markStepAsResponded`, which fires synchronously from the
+ *      responder's request.
  *      `response_input` is the input the responder submitted, taken from
  *      the step's `input` snapshot? No — at this point the engine has
  *      not yet promoted the input to `output`, so we leave it `null`
@@ -188,11 +189,12 @@ export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction
     step.status === ExecutionStatus.FAILED ||
     step.status === ExecutionStatus.CANCELLED;
 
-  // `respondedAt` is the truth-bearer for "a human said something". Fall
-  // back to `finishedAt` for legacy rows from before the audit fields
-  // shipped (and for abnormal terminations where no human responded —
-  // the responder column will simply render empty in those cases).
-  const respondedAt = step.respondedAt ?? step.finishedAt ?? null;
+  // `hitl.respondedAt` is the truth-bearer for "a human said something".
+  // Fall back to `finishedAt` for legacy rows from before the audit
+  // fields shipped (and for abnormal terminations where no human
+  // responded — the responder column will simply render empty in those
+  // cases).
+  const respondedAt = step.hitl?.respondedAt ?? step.finishedAt ?? null;
 
   return {
     id: buildWorkflowSourceId(step),
@@ -205,8 +207,8 @@ export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction
     input_schema: promptSchema,
     created_at: step.startedAt,
     responded_at: respondedAt,
-    responded_by: step.respondedBy ?? null,
-    channel: step.channel ?? null,
+    responded_by: step.hitl?.respondedBy ?? null,
+    channel: step.hitl?.channel ?? null,
     response_mode: settledAbnormally ? 'timed_out' : 'responded',
     response_input: responseInput,
   };

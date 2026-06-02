@@ -9,7 +9,35 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord } from '../../types';
-import { getInvalidNameTitleFields, isSearchableViaManagement } from './common_utils';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
+import {
+  getFieldsMissingIgnoreAbove,
+  getInvalidNameTitleFields,
+  isSearchableViaManagement,
+} from './common_utils';
+
+/**
+ * Validates that all `keyword` and `flattened` mapping fields on a **new** SO type define
+ * `ignore_above`. Without this constraint, Elasticsearch silently drops strings that exceed
+ * the default length limit during indexing, which can cause hard-to-diagnose data loss.
+ *
+ * Throws if any field is missing `ignore_above`.
+ */
+export function validateIgnoreAboveNewType(name: string, to: MigrationInfoRecord): void {
+  const fieldsMissing = getFieldsMissingIgnoreAbove(to.mappings);
+  if (fieldsMissing.length > 0) {
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.NEW_TYPE_KEYWORD_MISSING_IGNORE_ABOVE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has 'keyword' or 'flattened' mapping fields without 'ignore_above': ${fieldsMissing.join(
+        ', '
+      )}.`,
+      fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
+      docsAnchor: '#defining-model-versions',
+    });
+  }
+}
 
 /**
  * Validates that `name` and `title` mapping fields use `type: text` on a **new** SO type being
@@ -28,10 +56,15 @@ export function validateNameTitleFieldTypesNewType(
 
   const invalidFields = getInvalidNameTitleFields(to);
   if (invalidFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${invalidFields
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.NEW_TYPE_INVALID_NAME_TITLE_FIELD_TYPE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${invalidFields
         .map(({ description }) => description)
-        .join(', ')}. ` + `These fields must be of type 'text' for Search API compatibility.`
-    );
+        .join(', ')}.`,
+      fixHint: `These fields must be of type 'text' for Search API compatibility.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }

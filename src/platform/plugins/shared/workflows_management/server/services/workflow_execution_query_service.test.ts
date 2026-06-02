@@ -115,6 +115,34 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must).toContainEqual({ terms: { executedBy: ['user1', 'user2'] } });
     });
 
+    it('adds concurrencyGroupKey filter', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        term: { concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+      });
+    });
+
+    it('adds collapse while preserving other filters', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', statuses: ['running'] as any, collapse: 'concurrencyGroupKey' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.collapse).toEqual({ field: 'concurrencyGroupKey' });
+      expect(call.query.bool.must).toContainEqual({ terms: { status: ['running'] } });
+    });
+
     it('adds omitStepRuns filter', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
@@ -126,6 +154,94 @@ describe('WorkflowExecutionQueryService', () => {
         (clause: any) => clause.bool?.must_not?.exists?.field === 'stepId'
       );
       expect(stepIdFilter).toBeDefined();
+    });
+
+    it('adds startedAt range filter when startedAfter and startedBefore are provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', startedAfter: 'now-1w', startedBefore: 'now' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      const rangeClause = must.find((clause: any) => clause.range?.startedAt);
+      expect(rangeClause).toBeDefined();
+      expect(rangeClause.range.startedAt.gte).toMatch(/^\d{4}-/);
+      expect(rangeClause.range.startedAt.lte).toMatch(/^\d{4}-/);
+    });
+
+    it('adds finishedAt range filter (datemath) when finishedAfter and finishedBefore are provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', finishedAfter: 'now-1w', finishedBefore: 'now' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      const rangeClause = must.find((clause: any) => clause.range?.finishedAt);
+      expect(rangeClause).toBeDefined();
+      expect(rangeClause.range.finishedAt.gte).toMatch(/^\d{4}-/);
+      expect(rangeClause.range.finishedAt.lte).toMatch(/^\d{4}-/);
+    });
+
+    it('adds finishedAt range filter when finish bounds are absolute ISO timestamps', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        {
+          workflowId: 'wf-1',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        range: {
+          finishedAt: {
+            gte: '2026-05-01T00:00:00.000Z',
+            lte: '2026-05-14T00:00:00.000Z',
+          },
+        },
+      });
+    });
+
+    it('does not add startedAt or finishedAt range when time bounds are omitted', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must.some((clause: any) => clause.range?.startedAt)).toBe(false);
+      expect(must.some((clause: any) => clause.range?.finishedAt)).toBe(false);
+    });
+
+    it('uses createdAt desc as the default sort', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ createdAt: 'desc' }]);
+    });
+
+    it('uses explicit execution sort when provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', sortField: 'finishedAt', sortOrder: 'desc' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }]);
     });
 
     it('uses default page size and page 1 when not specified', async () => {
@@ -265,6 +381,24 @@ describe('WorkflowExecutionQueryService', () => {
       const call = mockEsClient.search.mock.calls[0][0] as any;
       // No source excludes should be passed
       expect(call._source?.excludes).toBeUndefined();
+    });
+
+    it('adds startedAt range when startedAfter and startedBefore are provided', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        {
+          workflowId: 'wf-1',
+          includeInput: true,
+          includeOutput: true,
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must.some((clause: any) => clause.range?.startedAt)).toBe(true);
     });
   });
 
@@ -426,7 +560,7 @@ describe('WorkflowExecutionQueryService', () => {
       expect(result.results[0].stepType).toBe('waitForInput');
     });
 
-    it('excludes step executions that already have finishedAt or respondedAt set', async () => {
+    it('excludes step executions that already have finishedAt or hitl.respondedAt set', async () => {
       // Regression #1: a race between the workflow-level timeout monitor
       // and the waitForInput step could leave a doc with
       // `status: waiting_for_input` AND `finishedAt` set (the step is
@@ -435,8 +569,8 @@ describe('WorkflowExecutionQueryService', () => {
       // execution is already finished.
       //
       // Regression #2: when a responder submits via Kibana / Slack /
-      // agent builder, the inbox provider stamps `respondedAt` on the
-      // step doc *before* Task Manager runs the resume. Pending must
+      // agent builder, the inbox provider stamps `hitl.respondedAt` on
+      // the step doc *before* Task Manager runs the resume. Pending must
       // exclude these so the row drops the moment any client submits —
       // history picks them up immediately as "Processing…".
       mockEsClient.search.mockResolvedValueOnce({
@@ -450,7 +584,7 @@ describe('WorkflowExecutionQueryService', () => {
       };
       expect(searchArgs.query.bool.must_not).toEqual([
         { exists: { field: 'finishedAt' } },
-        { exists: { field: 'respondedAt' } },
+        { exists: { field: 'hitl.respondedAt' } },
       ]);
     });
 
@@ -663,11 +797,11 @@ describe('WorkflowExecutionQueryService', () => {
       // Two source-of-truth windows feed the audit feed:
       //   1. Fully terminated rows: `finishedAt` set, status ∈
       //      `completed | failed | cancelled`.
-      //   2. Audit-stamped rows from `markStepAsResponded`: `respondedAt`
-      //      set, status still `waiting_for_input` (Task Manager hasn't
-      //      run the resume yet).  This window is what makes the inbox
-      //      multi-client safe — every client sees the response land
-      //      regardless of which Task Manager polls first.
+      //   2. Audit-stamped rows from `markStepAsResponded`:
+      //      `hitl.respondedAt` set, status still `waiting_for_input`
+      //      (Task Manager hasn't run the resume yet).  This window is
+      //      what makes the inbox multi-client safe — every client sees
+      //      the response land regardless of which Task Manager polls first.
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [buildProcessedHit()], total: { value: 1 } },
       } as any);
@@ -703,11 +837,11 @@ describe('WorkflowExecutionQueryService', () => {
             ],
           },
         },
-        { exists: { field: 'respondedAt' } },
+        { exists: { field: 'hitl.respondedAt' } },
       ]);
       expect(searchArgs.query.bool.minimum_should_match).toBe(1);
       expect(searchArgs.sort).toEqual([
-        { respondedAt: { order: 'desc', missing: '_last' } },
+        { 'hitl.respondedAt': { order: 'desc', missing: '_last' } },
         { finishedAt: { order: 'desc', missing: '_last' } },
       ]);
       expect(result.total).toBe(1);
@@ -804,9 +938,9 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.refresh).toBe('wait_for');
       expect(args.script.lang).toBe('painless');
       expect(args.script.source).toContain('ctx._source.spaceId == params.spaceId');
-      expect(args.script.source).toContain('ctx._source.respondedBy = params.respondedBy');
-      expect(args.script.source).toContain('ctx._source.respondedAt = params.respondedAt');
-      expect(args.script.source).toContain('ctx._source.channel = params.channel');
+      expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
+      expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
+      expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
       expect(args.script.params).toEqual({ spaceId: 'default', ...audit });
     });
 

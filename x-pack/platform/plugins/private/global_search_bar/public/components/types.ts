@@ -12,12 +12,26 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { Observable } from 'rxjs';
 import type { EventReporter } from '../telemetry';
 
+export const SEARCH_MODAL_SELECTOR_PREFIX = 'chromeProjectNextSearchModal';
+export const SEARCH_MODAL_HEIGHT_VH = 50;
+export const SEARCH_MODAL_WIDTH_PX = 800;
+export const SEARCH_MODAL_ROW_HEIGHT_PX = 68;
+
 /* @internal */
-export interface SearchBarProps {
+export interface SearchProps {
   globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
+}
+
+/* @internal */
+export interface SearchBarProps extends SearchProps {
   chromeStyle$: Observable<ChromeStyle>;
+}
+
+/* @internal */
+export interface SearchModalProps extends SearchProps {
+  onClose: () => void;
 }

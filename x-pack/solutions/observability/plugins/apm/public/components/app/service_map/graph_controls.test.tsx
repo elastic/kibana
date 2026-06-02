@@ -27,6 +27,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -77,6 +81,21 @@ jest.mock('../../shared/service_map/layout', () => ({
 
 jest.mock('./service_map_minimap', () => ({
   ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
+}));
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const createMockNode = (id: string, label: string): ServiceMapNode => ({

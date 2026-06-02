@@ -136,7 +136,6 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
         </div>
         <div css={styles.separator} />
         <div css={styles.spacer} />
-        <div css={styles.separator} />
         <div css={styles.rightGroup}>
           {search && (
             <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">

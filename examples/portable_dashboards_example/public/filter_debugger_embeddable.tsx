@@ -9,18 +9,26 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
+import { of } from 'rxjs';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export type Api = DefaultEmbeddableApi<{}>;
 
-export const factory: EmbeddableFactory<{}, Api> = {
+export const factory: EmbeddablePublicDefinition<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
+  getPlacementHints: () => {
+    return { width: 48, height: 12 };
+  },
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
+      anyStateChange$: of(),
       serializeState: () => ({}),
       applySerializedState: () => undefined,
     });

@@ -26,6 +26,12 @@ describe('Execution Routes', () => {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
+        execute: jest.fn(),
+      },
     }),
     licensing: Promise.resolve({
       license: {
@@ -323,21 +329,37 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         },
       };
 
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,
           omitStepRuns: true,
-        },
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
+        }),
         'default'
       );
     });
@@ -367,14 +389,39 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           stepId: 's1',
           includeInput: true,
           includeOutput: false,
           page: 1,
           size: 10,
+        }),
+        'default'
+      );
+    });
+
+    it('should forward startedAfter and startedBefore query params to api.searchStepExecutions', async () => {
+      mockApi.searchStepExecutions.mockResolvedValue({ stepExecutions: [] });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: {
+          stepId: 's1',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          stepId: 's1',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+        }),
         'default'
       );
     });
@@ -434,7 +481,11 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 

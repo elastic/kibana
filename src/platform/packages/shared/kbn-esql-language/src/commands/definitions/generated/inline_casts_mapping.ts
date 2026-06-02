@@ -17,6 +17,7 @@ export const inlineCastsMapping = {
   date: 'to_datetime',
   date_nanos: 'to_date_nanos',
   date_period: 'to_dateperiod',
+  date_range: 'to_date_range',
   datetime: 'to_datetime',
   dense_vector: 'to_dense_vector',
   double: 'to_double',
@@ -36,4 +37,6 @@ export const inlineCastsMapping = {
   time_duration: 'to_timeduration',
   unsigned_long: 'to_unsigned_long',
   version: 'to_version',
+  counter: 'to_counter',
+  gauge: 'to_gauge',
 } as const;

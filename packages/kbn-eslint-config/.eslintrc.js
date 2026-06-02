@@ -56,6 +56,7 @@ const USES_ELASTIC_APM_AGENT = [
   /plugins[\/\\]apm[\/\\]/,
   /synthetics[\/\\]server[\/\\]/,
   /feature-flags[\/\\]server-internal[\/\\]/,
+  /plugins[\/\\]slo[\/\\]server[\/\\]/,
 ];
 
 module.exports = {
@@ -401,6 +402,7 @@ module.exports = {
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/consistent-is-invalid-props': 'error',
   },
 
   overrides: [

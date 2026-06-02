@@ -124,7 +124,6 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             css={popoverHeightStyle}
             className="eui-scrollBar"
             data-test-subj={`${dataTestSubj || ''}MenuPanel`}
-            size="s"
             items={itemActions as ReactElement[]}
           />
         )}

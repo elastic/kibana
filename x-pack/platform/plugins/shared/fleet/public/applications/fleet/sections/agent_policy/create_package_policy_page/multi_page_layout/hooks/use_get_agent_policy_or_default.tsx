@@ -16,6 +16,7 @@ import {
   sendGetEnrollmentAPIKeys,
   useFleetStatus,
 } from '../../../../../../../hooks';
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../../../../../../../types';
 
@@ -43,6 +44,7 @@ const sendGetAgentPolicy = async (agentPolicyId: string) => {
 
 export function useGetAgentPolicyOrDefault(agentPolicyIdIn?: string) {
   const { spaceId, isSpaceAwarenessEnabled } = useFleetStatus();
+  const { defaultNamespace } = useSpaceSettingsContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
   const [agentPolicyResponse, setAgentPolicyResponse] = useState<AgentPolicy>();
@@ -68,9 +70,10 @@ export function useGetAgentPolicyOrDefault(agentPolicyIdIn?: string) {
           name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
             defaultMessage: 'My first agent policy',
           }),
+          namespace: defaultNamespace,
         })
       ),
-    [defaultFirstPolicyId]
+    [defaultFirstPolicyId, defaultNamespace]
   );
 
   useEffect(() => {

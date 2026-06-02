@@ -7,7 +7,7 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema, ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -27,14 +27,14 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get rule tags',
   } as const;
-  static validate = {
-    request: {},
+  static schemas = {
     response: {
       200: {
         body: () => ruleTagsResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the requested rule tags.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },

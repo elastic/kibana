@@ -62,6 +62,7 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
       },
     },
     grouping: { fields: [] },
+    recovery_policy: { type: 'no_breach' },
     enabled: true,
     createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',

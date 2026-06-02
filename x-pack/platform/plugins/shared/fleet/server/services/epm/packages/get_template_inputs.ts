@@ -96,7 +96,10 @@ export const templatePackagePolicyToFullInputStreams = (
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true, streamsIdsMap),
+      ...getFullInputStreams(input, {
+        allStreamEnabled: true,
+        streamsOriginalIdsMap: streamsIdsMap,
+      }),
     };
 
     inputAndStreamsIdsMap?.set(fullInputStream.id, {

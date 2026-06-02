@@ -230,9 +230,11 @@ describe('toInboxHistoryAction', () => {
     // before the engine resumes — see HITL multi-client design.
     const action = toInboxHistoryAction(
       buildCompletedStep({
-        respondedAt: '2026-04-24T12:25:00.000Z',
-        respondedBy: 'alice',
-        channel: 'inbox',
+        hitl: {
+          respondedAt: '2026-04-24T12:25:00.000Z',
+          respondedBy: 'alice',
+          channel: 'inbox',
+        },
       })
     );
     expect(action.responded_at).toBe('2026-04-24T12:25:00.000Z');
@@ -260,9 +262,11 @@ describe('toInboxHistoryAction', () => {
     const action = toInboxHistoryAction(
       buildStep({
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        respondedAt: '2026-04-24T12:25:00.000Z',
-        respondedBy: 'alice',
-        channel: 'inbox',
+        hitl: {
+          respondedAt: '2026-04-24T12:25:00.000Z',
+          respondedBy: 'alice',
+          channel: 'inbox',
+        },
       })
     );
     expect(action.responded_at).toBe('2026-04-24T12:25:00.000Z');

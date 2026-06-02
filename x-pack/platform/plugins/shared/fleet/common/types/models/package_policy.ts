@@ -9,6 +9,9 @@ import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } 
 import type { SecretReference } from './secret';
 import type { GlobalDataTag } from './agent_policy';
 
+/** Boolean expression syntax evaluated by Elastic Agent. */
+export type AgentConditionExpression = string;
+
 export interface PackagePolicyPackage {
   name: string;
   title: string;
@@ -52,6 +55,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  condition?: AgentConditionExpression;
   migrate_from?: string;
 }
 
@@ -73,6 +77,7 @@ export interface NewPackagePolicyInput {
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  condition?: AgentConditionExpression;
   deprecated?: DeprecationInfo;
   migrate_from?: string;
 }
@@ -111,6 +116,7 @@ export interface NewPackagePolicy {
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
   global_data_tags?: GlobalDataTag[];
+  condition?: AgentConditionExpression;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

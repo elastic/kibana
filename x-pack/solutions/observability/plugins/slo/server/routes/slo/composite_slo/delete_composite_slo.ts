@@ -10,8 +10,7 @@ import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import { buildCompositeSloSummaryDocId } from '../../../services/composites/composite_slo_summary_index';
 import { retryTransientEsErrors } from '../../../utils/retry';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 // TODO: move into CompositeSummaryRepository alongside the upsert added for inline summary persist on create/update
 export const deleteCompositeSummaryDoc = async (
@@ -39,7 +38,7 @@ export const deleteCompositeSummaryDoc = async (
   }
 };
 
-export const deleteCompositeSLORoute = createSloServerRoute({
+export const deleteCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'DELETE /api/observability/slo_composites/{id} 2023-10-31',
   options: { access: 'public' },
   security: {
@@ -48,9 +47,7 @@ export const deleteCompositeSLORoute = createSloServerRoute({
     },
   },
   params: deleteCompositeSLOParamsSchema,
-  handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
-    await assertPlatinumLicense(plugins);
-
+  handler: async ({ context, response, params, logger, request, plugins, getScopedClients }) => {
     const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
       request,
       logger,

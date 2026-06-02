@@ -22,6 +22,7 @@ const createGenerationUuid = (): string => {
 export interface AttackDiscoveryApiService {
   seedAttackData: () => Promise<void>;
   seedAttackSchedule: () => Promise<void>;
+  seedAttackInferenceSchedule: (interval?: string) => Promise<{ id: string }>;
 }
 
 export const getAttackDiscoveryApiService = ({
@@ -150,6 +151,83 @@ export const getAttackDiscoveryApiService = ({
               actions: [],
             },
           });
+        }
+      );
+    },
+
+    seedAttackInferenceSchedule: async (interval: string = '1m') => {
+      const scheduleName = 'Scout seeded inference attack schedule';
+      return measurePerformanceAsync(
+        log,
+        'security.attackDiscovery.seedAttackInferenceSchedule',
+        async () => {
+          const findSchedulesResponse = await kbnClient.request({
+            method: 'GET',
+            path: `${basePath}/api/attack_discovery/schedules/_find`,
+            query: {
+              page: 1,
+              per_page: 100,
+              search: `"${scheduleName}"`,
+            },
+          });
+
+          const responseBody = findSchedulesResponse.data as { data?: unknown[] };
+          const schedules = Array.isArray(responseBody.data) ? responseBody.data : [];
+          const existingSchedule = schedules.find(
+            (schedule) =>
+              typeof schedule === 'object' &&
+              schedule !== null &&
+              'name' in schedule &&
+              (schedule as { name?: unknown }).name === scheduleName
+          );
+
+          if (
+            existingSchedule &&
+            typeof existingSchedule === 'object' &&
+            'id' in existingSchedule
+          ) {
+            return { id: (existingSchedule as { id: string }).id };
+          }
+
+          const createResponse = await kbnClient.request({
+            method: 'POST',
+            path: `${basePath}/api/attack_discovery/schedules`,
+            headers: {
+              'kbn-xsrf': 'true',
+              'elastic-api-version': '2023-10-31',
+            },
+            ignoreErrors: [400, 500],
+            body: {
+              name: scheduleName,
+              enabled: false,
+              params: {
+                alerts_index_pattern: `.alerts-security.alerts-${spaceId}`,
+                anonymization_fields: [],
+                api_config: {
+                  connectorId: '.eis-claude-3.7-sonnet',
+                  actionTypeId: '.inference',
+                  model: 'none',
+                  name: 'Scout seeded inference connector',
+                  provider: 'Other',
+                },
+                end: 'now',
+                replacements: {},
+                size: 50,
+                start: 'now-24h',
+                subAction: 'invokeAI',
+              },
+              schedule: {
+                interval,
+              },
+              actions: [],
+            },
+          });
+
+          if (createResponse.status !== 200) {
+            throw new Error(`Failed to create schedule: ${JSON.stringify(createResponse.data)}`);
+          }
+
+          return { id: (createResponse.data as { id: string }).id };
         }
       );
     },

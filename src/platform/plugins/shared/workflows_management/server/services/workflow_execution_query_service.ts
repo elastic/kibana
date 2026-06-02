@@ -28,6 +28,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
@@ -90,7 +91,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      { term: { workflowId: params.workflowId } },
+      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       {
         bool: {
           should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
@@ -123,13 +124,38 @@ export class WorkflowExecutionQueryService {
       must.push({ terms: { executedBy: params.executedBy } });
     }
 
+    if (params.concurrencyGroupKey !== undefined) {
+      must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
+    }
+
     if (params.omitStepRuns) {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
+    }
+
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
+    if (startedAtRange) {
+      must.push(startedAtRange);
+    }
+
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
+    if (finishedAtRange) {
+      must.push(finishedAtRange);
     }
 
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
+    const sort = params.sortField
+      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      : undefined;
 
     return searchWorkflowExecutions({
       esClient: this.deps.esClient,
@@ -139,6 +165,8 @@ export class WorkflowExecutionQueryService {
       size,
       from,
       page,
+      sort,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
 
@@ -207,6 +235,8 @@ export class WorkflowExecutionQueryService {
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
       page: params.page,
       size: params.size,
+      startedAfter: params.startedAfter,
+      startedBefore: params.startedBefore,
     });
   }
 
@@ -268,15 +298,18 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
-            // A step doc with `respondedAt` set has already received a
-            // response — Task Manager simply hasn't run the resume yet.
+            // A step doc with `hitl.respondedAt` set has already received
+            // a response — Task Manager simply hasn't run the resume yet.
             // Filter those out of pending so the row drops from the
             // user's "needs my action" list the moment they submit. The
             // processed listing picks them up immediately so the audit
             // feed populates with no perceptible gap, and the row will
             // settle out of the responded-but-not-resumed window once
             // the engine writes `finishedAt`.
-            must_not: [{ exists: { field: 'finishedAt' } }, { exists: { field: 'respondedAt' } }],
+            must_not: [
+              { exists: { field: 'finishedAt' } },
+              { exists: { field: 'hitl.respondedAt' } },
+            ],
           },
         },
         sort: [{ startedAt: { order: 'desc' } }],
@@ -363,11 +396,11 @@ export class WorkflowExecutionQueryService {
             //   (a) actually terminated (`finishedAt` + a terminal
             //       status — the engine resumed and ran the step body), or
             //   (b) been audit-stamped via `markStepAsResponded` but not
-            //       yet resumed by Task Manager (`respondedAt` set, status
-            //       still `waiting_for_input`). Surfacing (b) immediately
-            //       is what makes the inbox feel multi-client safe — every
-            //       responder sees the response land regardless of which
-            //       Task Manager polled the resume task.
+            //       yet resumed by Task Manager (`hitl.respondedAt` set,
+            //       status still `waiting_for_input`). Surfacing (b)
+            //       immediately is what makes the inbox feel multi-client
+            //       safe — every responder sees the response land
+            //       regardless of which Task Manager polled the resume task.
             should: [
               {
                 bool: {
@@ -377,18 +410,18 @@ export class WorkflowExecutionQueryService {
                   ],
                 },
               },
-              { exists: { field: 'respondedAt' } },
+              { exists: { field: 'hitl.respondedAt' } },
             ],
             minimum_should_match: 1,
           },
         },
-        // `respondedAt` is set the moment a response arrives; for the
+        // `hitl.respondedAt` is set the moment a response arrives; for the
         // brief responded-but-not-resumed window it precedes
         // `finishedAt`. Sorting on it (with `finishedAt` as a tiebreak)
         // keeps the audit feed stable: the row's relative position
         // doesn't shift when the engine eventually writes `finishedAt`.
         sort: [
-          { respondedAt: { order: 'desc', missing: '_last' } },
+          { 'hitl.respondedAt': { order: 'desc', missing: '_last' } },
           { finishedAt: { order: 'desc', missing: '_last' } },
         ],
         from,
@@ -534,9 +567,10 @@ export class WorkflowExecutionQueryService {
         script: {
           source:
             'if (ctx._source.spaceId == params.spaceId) {' +
-            '  ctx._source.respondedBy = params.respondedBy;' +
-            '  ctx._source.respondedAt = params.respondedAt;' +
-            '  ctx._source.channel = params.channel;' +
+            '  if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
+            '  ctx._source.hitl.respondedBy = params.respondedBy;' +
+            '  ctx._source.hitl.respondedAt = params.respondedAt;' +
+            '  ctx._source.hitl.channel = params.channel;' +
             '} else { ctx.op = "noop"; }',
           lang: 'painless',
           params: {

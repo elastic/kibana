@@ -391,7 +391,9 @@ apiTest.describe(
         expect(entityC).toBeDefined();
         expect(get(entityC, ['entity', 'name'])).toBe('romulo.farias');
         expect(get(entityC, ['entity', 'namespace'])).toBe('okta');
-        expect(get(entityC, ['event', 'module'])).toMatchObject(['entityanalytics_okta', 'okta']);
+        expect((get(entityC, ['event', 'module']) as string[]).sort()).toStrictEqual(
+          ['entityanalytics_okta', 'okta'].sort()
+        );
         expect(get(entityC, ['event', 'kind'])).toBe('asset');
 
         const entityD = byId['user:cecilia@okta'];
@@ -399,10 +401,9 @@ apiTest.describe(
         expect(get(entityD, ['entity', 'name'])).toBe('cecilia');
         expect(get(entityD, ['entity', 'namespace'])).toBe('okta');
         expect(get(entityD, ['event', 'kind'])).toBe('asset');
-        expect(get(entityD, ['data_stream', 'dataset'])).toMatchObject([
-          'entityanalytics_okta.users',
-          'okta.logs',
-        ]);
+        expect((get(entityD, ['data_stream', 'dataset']) as string[]).sort()).toStrictEqual(
+          ['entityanalytics_okta.users', 'okta.logs'].sort()
+        );
 
         const entityE = byId['user:flora@unknown'];
         expect(entityE).toBeDefined();
@@ -567,9 +568,12 @@ apiTest.describe(
         await createCcsTestLogsIndex(esClient);
 
         // 6 distinct hosts: one doc each. With maxLogsPerPage=3 and docsLimit=2:
-        // - Outer loop: 2 slices (3 raw docs each)
-        // - Inner loop: 2 entity pages per slice (2 + 1 entities each)
-        // Total: count=6, pages=4
+        // - Outer loop: 3 slices (T0-T2 / T2-T4 / T4-T5); inclusive lower bound means the
+        //   slice-end doc is re-processed in the next slice (idempotent aggregations, safe).
+        // - Inner loop: 2+2+1=5 pages (docsLimit=2)
+        // - count=8 because boundary docs host-3 (T2) and host-5 (T4) each appear in two slices
+        // - 6 unique entities end up in the store (upserts are idempotent)
+        // Total: count=8, pages=5
         await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:00:00Z',
           host: { name: 'pagination-host-1' },
@@ -610,7 +614,7 @@ apiTest.describe(
           }
         );
         expect(extractResponse.statusCode).toBe(200);
-        expect(extractResponse.body).toMatchObject({ count: 6, pages: 4 });
+        expect(extractResponse.body).toMatchObject({ count: 8, pages: 5 });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
