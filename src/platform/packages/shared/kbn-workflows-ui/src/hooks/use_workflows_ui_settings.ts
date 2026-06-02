@@ -15,31 +15,40 @@ import {
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows';
 
+interface WorkflowsUiSettingsServices {
+  settings?: {
+    client?: IUiSettingsClient;
+  };
+  uiSettings?: IUiSettingsClient;
+}
+
 export const useWorkflowsUIEnabledSetting = (): boolean => {
   const {
-    services: { uiSettings },
-  } = useKibana<{ uiSettings: IUiSettingsClient }>();
+    services: { settings, uiSettings },
+  } = useKibana<WorkflowsUiSettingsServices>();
+  const uiSettingsClient = settings?.client ?? uiSettings;
 
-  return uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
+  return uiSettingsClient?.get<boolean>(WORKFLOWS_UI_SETTING_ID, true) ?? true;
 };
 
 export const useShowManagedWorkflowsSetting = (): boolean => {
   const {
-    services: { uiSettings },
-  } = useKibana<{ uiSettings: IUiSettingsClient }>();
-  const [showManagedWorkflows, setShowManagedWorkflows] = useState(
-    () => uiSettings?.get<boolean>(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, false) ?? false
-  );
+    services: { settings, uiSettings },
+  } = useKibana<WorkflowsUiSettingsServices>();
+  const uiSettingsClient = settings?.client ?? uiSettings;
+  const getShowManagedWorkflows = () =>
+    uiSettingsClient?.get<boolean>(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, false) ?? false;
+  const [showManagedWorkflows, setShowManagedWorkflows] = useState(getShowManagedWorkflows);
 
   useEffect(() => {
-    const subscription = uiSettings?.getUpdate$().subscribe(({ key, newValue }) => {
-      if (key === WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID) {
-        setShowManagedWorkflows(newValue === true);
-      }
-    });
+    const subscription = uiSettingsClient
+      ?.get$<boolean>(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, false)
+      .subscribe((showManagedWorkflowSetting) => {
+        setShowManagedWorkflows(showManagedWorkflowSetting === true);
+      });
 
     return () => subscription?.unsubscribe();
-  }, [uiSettings]);
+  }, [uiSettingsClient]);
 
   return showManagedWorkflows;
 };
