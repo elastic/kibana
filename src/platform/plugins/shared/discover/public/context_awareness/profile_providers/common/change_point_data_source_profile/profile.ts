@@ -97,7 +97,7 @@ export const createChangePointDataSourceProfileProvider =
           };
         },
       getDocViewer:
-        (prev, { context }) =>
+        (prev, { context, toolkit }) =>
         (params) => {
           const prevDocViewer = prev(params);
           return {
@@ -115,7 +115,7 @@ export const createChangePointDataSourceProfileProvider =
                   React.createElement(ChangePointDocViewerPanel, {
                     record: params.record,
                     context,
-                    actions: params.actions,
+                    actions: toolkit.actions,
                   }),
               });
               return prevDocViewer.docViewsRegistry(registry);

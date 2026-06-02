@@ -215,9 +215,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
     const buildDocViewer = () => {
       const getDocViewer = provider.profile.getDocViewer!(
         () => ({ title: undefined, docViewsRegistry: (r: DocViewsRegistry) => r }),
-        { context: buildContext() }
+        { context: buildContext(), toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       );
-      return getDocViewer({ record: MOCK_RECORD, actions: {} });
+      return getDocViewer({ record: MOCK_RECORD });
     };
 
     describe('registered tab', () => {
@@ -243,9 +243,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const prevDocViewsRegistry = jest.fn(() => prevRegistry);
       const getDocViewer = provider.profile.getDocViewer!(
         () => ({ title: undefined, docViewsRegistry: prevDocViewsRegistry }),
-        { context: buildContext() }
+        { context: buildContext(), toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       );
-      const docViewer = getDocViewer({ record: MOCK_RECORD, actions: {} });
+      const docViewer = getDocViewer({ record: MOCK_RECORD });
       const { registryArg } = buildRegistry();
       const result = docViewer.docViewsRegistry(registryArg);
       expect(prevDocViewsRegistry).toHaveBeenCalled();
