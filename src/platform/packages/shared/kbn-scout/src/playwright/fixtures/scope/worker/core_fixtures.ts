@@ -9,13 +9,11 @@
 
 import { test as base } from '@playwright/test';
 import type { KbnClient } from '@kbn/kbn-client';
-import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { Client } from '@elastic/elasticsearch';
 import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
-  createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
   createElasticsearchCustomRole,
@@ -45,52 +43,12 @@ export interface RoleSessionCredentials {
   cookieHeader: CookieHeader;
 }
 
-export interface SamlAuth {
-  session: SamlSessionManager;
-  customRoleName: string;
-  setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
-
-  /**
-   * Generates a SAML session cookie for an interactive user with the specified role.
-   *
-   * This method is ideal for testing internal APIs that are typically accessed via the UI.
-   * It authenticates as an interactive user and returns session credentials including cookie
-   * headers that can be used in API requests.
-   *
-   * @param role - Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or
-   *               a custom role descriptor with specific permissions (Kibana or Elasticsearch)
-   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
-   *
-   * @example
-   * // Using a built-in role
-   * const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-   * const response = await apiClient.get('internal/endpoint', {
-   *   headers: { ...cookieHeader }
-   * });
-   *
-   * @example
-   * // Using a custom role descriptor
-   * const customRole = {
-   *   kibana: [{ base: ['read'], spaces: ['*'] }],
-   *   elasticsearch: { indices: [{ names: ['logs-*'], privileges: ['read'] }] }
-   * };
-   * const { cookieHeader } = await samlAuth.asInteractiveUser(customRole);
-   * const response = await apiClient.get('internal/endpoint', {
-   *   headers: { ...cookieHeader }
-   * });
-   */
-  asInteractiveUser(
-    role: string | KibanaRole | ElasticsearchRoleDescriptor
-  ): Promise<RoleSessionCredentials>;
-}
-
-export interface CoreWorkerFixtures {
+export interface BaseWorkerFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;
-  samlAuth: SamlAuth;
   /**
    * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
    * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
@@ -112,8 +70,11 @@ export interface CoreWorkerFixtures {
  * scoped resources for each Playwright worker, ensuring that tests have consistent
  * and isolated access to critical services such as logging, configuration, and
  * clients for interacting with Kibana and Elasticsearch.
+ *
+ * Note: `samlAuth` is added by the `samlAuthFixture` in `./saml_auth/index.ts`, which
+ * extends this base. The combined fixture (with samlAuth) is what `worker/index.ts` exports.
  */
-export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
+export const coreWorkerFixtures = base.extend<{}, BaseWorkerFixtures>({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
   // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
@@ -206,107 +167,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
   kbnClient: [
     ({ log, config }, use) => {
       use(getKbnClient(config, log));
-    },
-    { scope: 'worker' },
-  ],
-
-  /**
-   * Creates a SAML session manager, that handles authentication tasks for tests involving
-   * SAML-based authentication. Exposes a method to set a custom role for the session.
-   *
-   * Note: In order to speedup execution of tests, we cache the session cookies for each role
-   * after first call. Custom roles are persisted for the worker lifetime and cleaned up when
-   * the worker completes.
-   */
-  samlAuth: [
-    async ({ log, config, esClient, kbnClient }, use, workerInfo) => {
-      /**
-       * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
-       * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
-       * If running tests in parallel, make sure the file contains enough entries to accommodate all workers.
-       * The file should be structured as follows:
-       * {
-       *   "custom_role_worker_1": { "username": ..., "password": ... },
-       *   "custom_role_worker_2": { "username": ..., "password": ... },
-       */
-      const customRoleName = `custom_role_worker_${workerInfo.parallelIndex + 1}`;
-      const session = createSamlSessionManager(config, log, customRoleName);
-      let customRoleHash = '';
-      let isCustomRoleCreated = false;
-
-      const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
-
-      const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
-        const newRoleHash = JSON.stringify(role);
-
-        if (isCustomRoleSet(newRoleHash)) {
-          log.debug(
-            `Custom role '${customRoleName}' with provided privileges already exists, reusing it`
-          );
-          return;
-        }
-
-        log.debug(
-          isCustomRoleCreated
-            ? `Overriding existing custom role '${customRoleName}'`
-            : `Creating custom role '${customRoleName}'`
-        );
-
-        isCustomRoleCreated = true;
-
-        if (isElasticsearchRole(role)) {
-          await createElasticsearchCustomRole(esClient, customRoleName, role);
-          log.debug(`Created Elasticsearch custom role: ${customRoleName}`);
-        } else {
-          await createCustomRole(kbnClient, customRoleName, role);
-          log.debug(`Created Kibana custom role: ${customRoleName}`);
-        }
-
-        customRoleHash = newRoleHash;
-      };
-
-      const asInteractiveUser = async (
-        role: string | KibanaRole | ElasticsearchRoleDescriptor
-      ): Promise<RoleSessionCredentials> => {
-        let roleName: string;
-
-        if (typeof role === 'string') {
-          // Built-in role name
-          roleName = role;
-        } else {
-          // Custom role descriptor - create/update the role first
-          await setCustomRole(role);
-          roleName = customRoleName;
-        }
-
-        const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(roleName);
-        const cookieHeader = { Cookie: `sid=${cookieValue}` };
-        return { cookieValue, cookieHeader };
-      };
-
-      // Hide the announcements (including the sidenav tour) in the default space
-      await kbnClient.uiSettings.update({ hideAnnouncements: true });
-
-      await use({
-        session,
-        customRoleName,
-        setCustomRole,
-        asInteractiveUser,
-      });
-
-      // Delete custom role when worker completes (if it was created)
-      if (isCustomRoleCreated) {
-        log.debug(`Deleting custom role ${customRoleName}`);
-        try {
-          await esClient.security.deleteRole({ name: customRoleName });
-          log.debug(`Custom role '${customRoleName}' deleted`);
-          customRoleHash = '';
-        } catch (error: any) {
-          log.error(
-            `Failed to delete custom role '${customRoleName}' during worker cleanup: ${error.message}`
-          );
-        }
-      }
     },
     { scope: 'worker' },
   ],
