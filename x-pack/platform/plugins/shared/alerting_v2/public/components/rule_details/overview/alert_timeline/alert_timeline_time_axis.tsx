@@ -10,7 +10,8 @@ import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-const MINUTE_MS = 60 * 1000;
+const SECOND_MS = 1000;
+const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
@@ -23,12 +24,16 @@ interface Tick {
 
 interface StepDef {
   ms: number;
-  /** 'day' = snap to local midnight; 'hour' = snap to local hour; 'minute' = snap to local minute. */
-  unit: 'minute' | 'hour' | 'day';
+  /** 'second' = snap to second; 'minute' = snap to local minute; 'hour' = snap to local hour; 'day' = snap to local midnight. */
+  unit: 'second' | 'minute' | 'hour' | 'day';
 }
 
 // Ordered smallest → largest. Picked so adjacent steps are nice multiples.
 const STEPS: StepDef[] = [
+  { ms: 10 * SECOND_MS, unit: 'second' },
+  { ms: 30 * SECOND_MS, unit: 'second' },
+  { ms: MINUTE_MS, unit: 'minute' },
+  { ms: 2 * MINUTE_MS, unit: 'minute' },
   { ms: 5 * MINUTE_MS, unit: 'minute' },
   { ms: 15 * MINUTE_MS, unit: 'minute' },
   { ms: 30 * MINUTE_MS, unit: 'minute' },
@@ -56,8 +61,11 @@ const snapForward = (ms: number, step: StepDef): number => {
     d.setHours(0, 0, 0, 0);
   } else if (step.unit === 'hour') {
     d.setMinutes(0, 0, 0);
-  } else {
+  } else if (step.unit === 'minute') {
     d.setSeconds(0, 0);
+  } else {
+    // second — snap to millisecond boundary
+    d.setMilliseconds(0);
   }
   let cursor = d.getTime();
   if (step.unit === 'day') {
@@ -81,6 +89,7 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string, timeZone?: str
 
   const showDate = step.unit === 'day' || span > DAY_MS;
   const showTime = step.unit !== 'day';
+  const showSeconds = step.unit === 'second';
   const resolvedTz = timeZone && timeZone !== 'Browser' ? timeZone : undefined;
   const formatter = new Intl.DateTimeFormat(locale, {
     timeZone: resolvedTz,
@@ -88,6 +97,7 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string, timeZone?: str
     day: showDate ? 'numeric' : undefined,
     hour: showTime ? '2-digit' : undefined,
     minute: showTime ? '2-digit' : undefined,
+    second: showSeconds ? '2-digit' : undefined,
     hour12: false,
   });
 
@@ -138,7 +148,8 @@ export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({
       css={css`
         position: relative;
         height: ${euiTheme.size.l};
-        border-bottom: 1px solid ${euiTheme.colors.lightShade};
+        padding-top: ${euiTheme.size.s};
+        border-top: 1px solid ${euiTheme.colors.lightShade};
       `}
       data-test-subj="alertTimelineTimeAxis"
     >

@@ -7,18 +7,19 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiButton,
+  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
+  EuiSplitButton,
   EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
@@ -37,7 +38,6 @@ import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
 import { AlertTimelineChart } from './alert_timeline_chart';
-import { AlertTimelineFooter } from './alert_timeline_footer';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
 
@@ -69,6 +69,7 @@ export const AlertTimelineSection: React.FC = () => {
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ALERT_TIMELINE_TIME_RANGE);
   const [refreshTick, setRefreshTick] = useState(0);
+  const [isViewAllMenuOpen, setIsViewAllMenuOpen] = useState(false);
 
   const handleTimeChange = useCallback(
     (next: OnTimeChangeProps) => {
@@ -159,14 +160,10 @@ export const AlertTimelineSection: React.FC = () => {
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleAlertTimelineSection">
+    <div data-test-subj="ruleAlertTimelineSection">
+      {/* Section header — no panel */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            flex-shrink: 0;
-          `}
-        >
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.alertingV2.alertTimeline.title', {
@@ -176,106 +173,173 @@ export const AlertTimelineSection: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiSuperDatePicker
-                compressed
-                width="auto"
-                start={timeRange.from}
-                end={timeRange.to}
-                onTimeChange={handleTimeChange}
-                onRefresh={handleRefresh}
-                isLoading={isLoading}
-                showUpdateButton="iconOnly"
-                data-test-subj="alertTimelineDatePicker"
-              />
-            </EuiFlexItem>
-            {discoverHref && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="discoverApp"
-                  href={discoverHref}
-                  target="_blank"
-                  data-test-subj="alertTimelineExploreInDiscover"
-                >
-                  {i18n.translate('xpack.alertingV2.alertTimeline.exploreInDiscover', {
-                    defaultMessage: 'Explore in Discover',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiSuperDatePicker
+            compressed
+            width="auto"
+            start={timeRange.from}
+            end={timeRange.to}
+            onTimeChange={handleTimeChange}
+            onRefresh={handleRefresh}
+            isLoading={isLoading}
+            showUpdateButton="iconOnly"
+            updateButtonProps={{ fill: false }}
+            data-test-subj="alertTimelineDatePicker"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <AlertTimelineStatsRow summary={timelineData.summary} />
-      <EuiSpacer size="m" />
-      <AlertTimelineLegend />
+
+      {/* KPI panel */}
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertTimelineKpiPanel">
+        <AlertTimelineStatsRow summary={timelineData.summary} />
+      </EuiPanel>
+
       <EuiSpacer size="m" />
 
-      {isLoading && (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          responsive={false}
-          data-test-subj="alertTimelineSectionLoading"
-        >
+      {/* Chart panel */}
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertTimelineChartPanel">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiSpacer size="l" />
-            <EuiLoadingChart size="l" />
-            <EuiSpacer size="l" />
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.alertingV2.alertTimeline.seriesTitle', {
+                  defaultMessage: 'Alert series',
+                })}
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {discoverHref ? (
+              <EuiSplitButton
+                color="text"
+                fill={false}
+                size="s"
+                data-test-subj="alertTimelineViewAllSplitButton"
+              >
+                <EuiSplitButton.ActionPrimary
+                  href={viewAllHref}
+                  data-test-subj="alertTimelineViewAllEpisodes"
+                >
+                  {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
+                    defaultMessage: 'View all episodes',
+                  })}
+                </EuiSplitButton.ActionPrimary>
+                <EuiSplitButton.ActionSecondary
+                  iconType="arrowDown"
+                  aria-label={i18n.translate('xpack.alertingV2.alertTimeline.viewAllMoreOptions', {
+                    defaultMessage: 'More view options',
+                  })}
+                  onClick={() => setIsViewAllMenuOpen((o) => !o)}
+                  data-test-subj="alertTimelineViewAllMenuButton"
+                  popoverProps={{
+                    isOpen: isViewAllMenuOpen,
+                    closePopover: () => setIsViewAllMenuOpen(false),
+                    anchorPosition: 'downRight',
+                    panelPaddingSize: 'none',
+                    children: (
+                      <EuiContextMenu
+                        initialPanelId={0}
+                        panels={[
+                          {
+                            id: 0,
+                            items: [
+                              {
+                                name: i18n.translate(
+                                  'xpack.alertingV2.alertTimeline.viewInDiscover',
+                                  { defaultMessage: 'View in Discover' }
+                                ),
+                                icon: 'discoverApp',
+                                href: discoverHref,
+                                'data-test-subj': 'alertTimelineViewInDiscover',
+                              },
+                            ],
+                          },
+                        ]}
+                      />
+                    ),
+                  }}
+                />
+              </EuiSplitButton>
+            ) : (
+              <EuiButton
+                size="s"
+                color="text"
+                href={viewAllHref}
+                data-test-subj="alertTimelineViewAllEpisodes"
+              >
+                {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
+                  defaultMessage: 'View all episodes',
+                })}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
 
-      {!isLoading && isError && (
-        <EuiEmptyPrompt
-          color="danger"
-          iconType="warning"
-          data-test-subj="alertTimelineSectionError"
-          title={
-            <h4>
-              {i18n.translate('xpack.alertingV2.alertTimeline.errorTitle', {
-                defaultMessage: 'Could not load episodes',
-              })}
-            </h4>
-          }
-          body={
-            <EuiText size="s">
-              {i18n.translate('xpack.alertingV2.alertTimeline.errorBody', {
-                defaultMessage:
-                  'Try a smaller time range or refresh the page. Check the rule events index is reachable.',
-              })}
-            </EuiText>
-          }
-        />
-      )}
+        <EuiSpacer size="s" />
+        <AlertTimelineLegend />
+        <EuiSpacer size="m" />
 
-      {!isLoading && !isError && timelineData.rows.length === 0 && (
-        <EuiEmptyPrompt
-          iconType="bell"
-          data-test-subj="alertTimelineSectionEmpty"
-          title={
-            <h4>
-              {i18n.translate('xpack.alertingV2.alertTimeline.emptyTitle', {
-                defaultMessage: 'No episodes in this window',
-              })}
-            </h4>
-          }
-          body={
-            <EuiText size="s">
-              {i18n.translate('xpack.alertingV2.alertTimeline.emptyBody', {
-                defaultMessage: 'Episodes appear here once the rule fires.',
-              })}
-            </EuiText>
-          }
-        />
-      )}
+        {isLoading && (
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="alertTimelineSectionLoading"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="l" />
+              <EuiLoadingChart size="l" />
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
-      {!isLoading && !isError && timelineData.rows.length > 0 && (
-        <>
+        {!isLoading && isError && (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            data-test-subj="alertTimelineSectionError"
+            title={
+              <h4>
+                {i18n.translate('xpack.alertingV2.alertTimeline.errorTitle', {
+                  defaultMessage: 'Could not load episodes',
+                })}
+              </h4>
+            }
+            body={
+              <EuiText size="s">
+                {i18n.translate('xpack.alertingV2.alertTimeline.errorBody', {
+                  defaultMessage:
+                    'Try a smaller time range or refresh the page. Check the rule events index is reachable.',
+                })}
+              </EuiText>
+            }
+          />
+        )}
+
+        {!isLoading && !isError && timelineData.rows.length === 0 && (
+          <EuiEmptyPrompt
+            iconType="bell"
+            data-test-subj="alertTimelineSectionEmpty"
+            title={
+              <h4>
+                {i18n.translate('xpack.alertingV2.alertTimeline.emptyTitle', {
+                  defaultMessage: 'No episodes in this window',
+                })}
+              </h4>
+            }
+            body={
+              <EuiText size="s">
+                {i18n.translate('xpack.alertingV2.alertTimeline.emptyBody', {
+                  defaultMessage: 'Episodes appear here once the rule fires.',
+                })}
+              </EuiText>
+            }
+          />
+        )}
+
+        {!isLoading && !isError && timelineData.rows.length > 0 && (
           <AlertTimelineChart
             rows={timelineData.rows}
             gteMs={gteMs}
@@ -285,10 +349,8 @@ export const AlertTimelineSection: React.FC = () => {
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />
-          <EuiSpacer size="m" />
-          <AlertTimelineFooter viewAllHref={viewAllHref} />
-        </>
-      )}
-    </EuiPanel>
+        )}
+      </EuiPanel>
+    </div>
   );
 };

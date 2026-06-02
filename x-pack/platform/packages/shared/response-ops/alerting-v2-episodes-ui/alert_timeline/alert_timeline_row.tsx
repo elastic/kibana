@@ -22,7 +22,7 @@ import type {
   Theme,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiDescriptionList, EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -78,19 +78,13 @@ interface TooltipPanelProps {
   euiTheme: EuiThemeComputed;
   status: AlertEpisodeStatus;
   episodeId: string;
-  primaryLine: string;
-  secondaryLine?: string;
-  durationLabel?: string;
+  listItems: Array<{
+    title: NonNullable<React.ReactNode>;
+    description: NonNullable<React.ReactNode>;
+  }>;
 }
 
-const TooltipPanel: React.FC<TooltipPanelProps> = ({
-  euiTheme,
-  status,
-  episodeId,
-  primaryLine,
-  secondaryLine,
-  durationLabel,
-}) => {
+const TooltipPanel: React.FC<TooltipPanelProps> = ({ euiTheme, status, episodeId, listItems }) => {
   return (
     <EuiPanel
       paddingSize="none"
@@ -102,6 +96,8 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
       <EuiText size="xs">
         <div
           css={css`
+            display: flex;
+            align-items: center;
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
             border-bottom: 1px solid ${euiTheme.colors.lightShade};
           `}
@@ -115,19 +111,20 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
           `}
         >
-          <div>{primaryLine}</div>
-          {secondaryLine && <div>{secondaryLine}</div>}
-          {durationLabel && <div>{durationLabel}</div>}
-          <div
-            css={css`
-              margin-top: ${euiTheme.size.xs};
-            `}
-          >
-            {i18n.translate('xpack.alertingV2.alertTimeline.tooltip.episodeId', {
-              defaultMessage: 'Episode id: {id}',
-              values: { id: episodeId },
-            })}
-          </div>
+          <EuiDescriptionList
+            type="column"
+            compressed
+            rowGutterSize="s"
+            listItems={[
+              ...listItems,
+              {
+                title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.episodeIdLabel', {
+                  defaultMessage: 'Episode ID',
+                }),
+                description: episodeId,
+              },
+            ]}
+          />
         </div>
       </EuiText>
     </EuiPanel>
@@ -237,13 +234,15 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                 euiTheme={euiTheme}
                 status={datum.status}
                 episodeId={datum.episodeId}
-                primaryLine={i18n.translate(
-                  'xpack.alertingV2.alertTimeline.tooltip.transitionTime',
+                listItems={[
                   {
-                    defaultMessage: 'Transitioned at {when}',
-                    values: { when: formatTimestamp(datum.x, timeZone) },
-                  }
-                )}
+                    title: i18n.translate(
+                      'xpack.alertingV2.alertTimeline.tooltip.transitionedAtLabel',
+                      { defaultMessage: 'Transitioned at' }
+                    ),
+                    description: formatTimestamp(datum.x, timeZone),
+                  },
+                ]}
               />
             );
           }}
@@ -276,21 +275,27 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                     euiTheme={euiTheme}
                     status={d.status}
                     episodeId={d.episodeId}
-                    primaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.from', {
-                      defaultMessage: 'From: {when}',
-                      values: { when: formatTimestamp(d.x0Ms, timeZone) },
-                    })}
-                    secondaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.to', {
-                      defaultMessage: 'To: {when}',
-                      values: { when: formatTimestamp(d.x1Ms, timeZone) },
-                    })}
-                    durationLabel={i18n.translate(
-                      'xpack.alertingV2.alertTimeline.tooltip.duration',
+                    listItems={[
                       {
-                        defaultMessage: 'Duration: {duration}',
-                        values: { duration: formatDuration(d.x1Ms - d.x0Ms) },
-                      }
-                    )}
+                        title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.fromLabel', {
+                          defaultMessage: 'From',
+                        }),
+                        description: formatTimestamp(d.x0Ms, timeZone),
+                      },
+                      {
+                        title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.toLabel', {
+                          defaultMessage: 'To',
+                        }),
+                        description: formatTimestamp(d.x1Ms, timeZone),
+                      },
+                      {
+                        title: i18n.translate(
+                          'xpack.alertingV2.alertTimeline.tooltip.durationLabel',
+                          { defaultMessage: 'Duration' }
+                        ),
+                        description: formatDuration(d.x1Ms - d.x0Ms),
+                      },
+                    ]}
                   />
                 );
               }}

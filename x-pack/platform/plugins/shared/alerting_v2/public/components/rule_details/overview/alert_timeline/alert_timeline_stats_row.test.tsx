@@ -28,9 +28,9 @@ const baseSummary: AlertTimelineSummary = {
 describe('AlertTimelineStatsRow', () => {
   it('renders all four stat values', () => {
     wrap(baseSummary);
+    expect(screen.getByTestId('alertTimelineStatEpisodesOpen')).toHaveTextContent('4');
     expect(screen.getByTestId('alertTimelineStatEpisodesStarted')).toHaveTextContent('12');
     expect(screen.getByTestId('alertTimelineStatRecovered')).toHaveTextContent('8');
-    expect(screen.getByTestId('alertTimelineStatStillOpen')).toHaveTextContent('4');
     expect(screen.getByTestId('alertTimelineStatMedianDuration')).toHaveTextContent('1h');
   });
 
@@ -53,6 +53,6 @@ describe('AlertTimelineStatsRow', () => {
     wrap({ episodesStarted: 0, recovered: 0, stillOpen: 0, medianDurationMs: 0 });
     expect(screen.getByTestId('alertTimelineStatEpisodesStarted')).toHaveTextContent('0');
     expect(screen.getByTestId('alertTimelineStatRecovered')).toHaveTextContent('0');
-    expect(screen.getByTestId('alertTimelineStatStillOpen')).toHaveTextContent('0');
+    expect(screen.getByTestId('alertTimelineStatEpisodesOpen')).toHaveTextContent('0');
   });
 });

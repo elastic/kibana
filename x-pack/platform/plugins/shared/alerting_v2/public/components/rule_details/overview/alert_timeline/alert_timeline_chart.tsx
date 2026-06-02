@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -19,6 +19,7 @@ import { AlertTimelineTimeAxis } from './alert_timeline_time_axis';
 
 const META_COLUMN_WIDTH_PX = 180;
 const ROW_HEIGHT_PX = 44;
+const ALERT_TIMELINE_VISIBLE_ROW_COUNT = 6;
 
 export interface AlertTimelineChartProps {
   rows: AlertTimelineSeries[];
@@ -44,84 +45,104 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   const charts = useService(PluginStart('charts')) as ChartsPluginStart;
   const baseTheme = charts.theme.useChartsBaseTheme();
 
+  const maxScrollHeight = ROW_HEIGHT_PX * ALERT_TIMELINE_VISIBLE_ROW_COUNT;
+
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="s"
-      responsive={false}
-      alignItems="stretch"
+    <div
       aria-label={i18n.translate('xpack.alertingV2.alertTimeline.chart.ariaLabel', {
         defaultMessage: 'Alert activity timeline chart',
       })}
       data-test-subj="alertTimelineChart"
     >
-      {showLabelColumn && (
-        <EuiFlexItem
-          grow={false}
+      <div
+        css={css`
+          max-height: ${maxScrollHeight}px;
+          overflow-y: auto;
+        `}
+      >
+        <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="stretch">
+          {showLabelColumn && (
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                width: ${META_COLUMN_WIDTH_PX}px;
+                min-width: 0;
+                overflow: hidden;
+              `}
+            >
+              <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+                {rows.map((row) => (
+                  <EuiFlexItem grow={false} key={row.groupHash}>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="none"
+                      responsive={false}
+                      css={css`
+                        height: ${ROW_HEIGHT_PX}px;
+                      `}
+                    >
+                      <EuiFlexItem
+                        grow={false}
+                        css={css`
+                          min-width: 0;
+                        `}
+                      >
+                        <AlertTimelineSeriesLabel
+                          groupHash={row.groupHash}
+                          groupingValues={row.groupingValues}
+                          episodeCount={row.episodeCount}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem>
+            {rows.map((row) => (
+              <AlertTimelineRow
+                key={row.groupHash}
+                row={row}
+                gteMs={gteMs}
+                lteMs={lteMs}
+                height={ROW_HEIGHT_PX}
+                baseTheme={baseTheme}
+                timeZone={timeZone}
+                onEpisodeClick={onEpisodeClick}
+                getEpisodeHref={getEpisodeHref}
+              />
+            ))}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+
+      {showLabelColumn ? (
+        <div
           css={css`
-            width: ${META_COLUMN_WIDTH_PX}px;
-            min-width: 0;
-            overflow: hidden;
+            display: flex;
+            gap: ${euiTheme.size.s};
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText
-                size="xs"
-                color="subdued"
-                css={css`
-                  height: ${euiTheme.size.l};
-                  display: flex;
-                  align-items: flex-end;
-                `}
-              >
-                <strong>
-                  {i18n.translate('xpack.alertingV2.alertTimeline.chart.seriesColumnHeader', {
-                    defaultMessage: 'Alert series',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            {rows.map((row) => (
-              <EuiFlexItem grow={false} key={row.groupHash}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="none"
-                  responsive={false}
-                  css={css`
-                    height: ${ROW_HEIGHT_PX}px;
-                  `}
-                >
-                  <EuiFlexItem>
-                    <AlertTimelineSeriesLabel
-                      groupHash={row.groupHash}
-                      groupingValues={row.groupingValues}
-                      episodeCount={row.episodeCount}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
-
-      <EuiFlexItem>
-        <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} timeZone={timeZone} />
-        {rows.map((row) => (
-          <AlertTimelineRow
-            key={row.groupHash}
-            row={row}
-            gteMs={gteMs}
-            lteMs={lteMs}
-            height={ROW_HEIGHT_PX}
-            baseTheme={baseTheme}
-            timeZone={timeZone}
-            onEpisodeClick={onEpisodeClick}
-            getEpisodeHref={getEpisodeHref}
+          <div
+            css={css`
+              width: ${META_COLUMN_WIDTH_PX}px;
+              flex-shrink: 0;
+            `}
           />
-        ))}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <div
+            css={css`
+              flex: 1;
+              min-width: 0;
+            `}
+          >
+            <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} timeZone={timeZone} />
+          </div>
+        </div>
+      ) : (
+        <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} timeZone={timeZone} />
+      )}
+    </div>
   );
 };

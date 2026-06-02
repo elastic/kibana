@@ -14,20 +14,19 @@ import {
   alertTimelineStatusLabel,
 } from './alert_timeline_status_palette';
 
-const SWATCH_WIDTH_PX = 20;
-const SWATCH_HEIGHT_PX = 8;
+const DOT_SIZE_PX = 10;
 
 interface SwatchProps {
   background: string;
 }
 
-const PillSwatch: React.FC<SwatchProps> = ({ background }) => (
+const DotSwatch: React.FC<SwatchProps> = ({ background }) => (
   <span
     css={css`
       display: inline-block;
-      width: ${SWATCH_WIDTH_PX}px;
-      height: ${SWATCH_HEIGHT_PX}px;
-      border-radius: 9999px;
+      width: ${DOT_SIZE_PX}px;
+      height: ${DOT_SIZE_PX}px;
+      border-radius: 50%;
       background: ${background};
     `}
   />
@@ -38,7 +37,7 @@ export const AlertTimelineLegend: React.FC = () => {
 
   const items = ALERT_TIMELINE_STATUS_LEGEND_ORDER.map((status) => ({
     key: status,
-    sample: <PillSwatch background={alertTimelineStatusColor(euiTheme, status)} />,
+    sample: <DotSwatch background={alertTimelineStatusColor(euiTheme, status)} />,
     label: alertTimelineStatusLabel(status),
   }));
 

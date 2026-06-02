@@ -33,7 +33,7 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={tooltipLabel} display="block">
           <EuiText size="xs" className="eui-textTruncate" data-test-subj="alertTimelineSeriesLabel">
