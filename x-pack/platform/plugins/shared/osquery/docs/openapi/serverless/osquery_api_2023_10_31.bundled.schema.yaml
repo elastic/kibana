@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   description: Run live queries, manage packs and saved queries.
   title: Security Osquery API (Elastic Cloud Serverless)
