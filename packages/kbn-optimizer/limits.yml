@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 51297
+  alertingVTwo: 56591
   apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   inference: 10368
   inferenceWorkflows: 25000
   infra: 56302
-  ingestHub: 13422
+  ingestHub: 14788
   ingestPipelines: 17866
   inputControlVis: 7638
   inspectComponent: 4590

@@ -113,7 +113,6 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
-  - '@kbn/app-header'
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
@@ -128,6 +127,9 @@ dependsOn:
   - '@kbn/dashboard-navigation-options-components'
   - '@kbn/dashboard-navigation-options-schema'
   - '@kbn/as-code-shared-telemetry'
+  - '@kbn/core-user-activity-server'
+  - '@kbn/core-test-helpers-test-utils'
+  - '@kbn/app-header'
   - '@kbn/core-chrome-browser'
 tags:
   - plugin
