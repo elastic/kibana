@@ -19,6 +19,8 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -45,9 +47,12 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
-  onRefreshData?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -57,9 +62,12 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
-  onRefreshData,
   enableDocumentViewer,
   inlineEditing,
+  docViewerRef,
+  expandedDoc,
+  initialDocViewerTabId,
+  setExpandedDoc,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
@@ -239,7 +247,6 @@ export function SearchEmbeddableGridComponent({
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
-      onRefreshData={onRefreshData}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}
@@ -272,6 +279,10 @@ export function SearchEmbeddableGridComponent({
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
+      expandedDoc={expandedDoc}
+      initialDocViewerTabId={initialDocViewerTabId}
+      docViewerRef={docViewerRef}
+      setExpandedDoc={setExpandedDoc}
     />
   );
 }

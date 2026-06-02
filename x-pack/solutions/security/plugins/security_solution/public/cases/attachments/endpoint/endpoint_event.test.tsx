@@ -29,7 +29,6 @@ describe('AttachmentContentEvent', () => {
   const defaultProps = {
     metadata: {
       command: 'isolate',
-      comment: 'test comment',
       targets: [
         {
           endpointId: 'endpoint-1',
@@ -96,7 +95,6 @@ describe('AttachmentContentEvent', () => {
       <AttachmentContentEvent
         metadata={{
           command: 'isolate',
-          comment: '',
           targets: [
             {
               endpointId: 'cs-1',
@@ -122,7 +120,7 @@ describe('AttachmentContentEvent', () => {
     });
 
     const { container } = render(
-      <AttachmentContentEvent metadata={{ command: 'isolate', comment: '', targets: [] }} />
+      <AttachmentContentEvent metadata={{ command: 'isolate', targets: [] }} />
     );
 
     expect(container).toBeEmptyDOMElement();
