@@ -19,7 +19,6 @@ import {
   type CompositeSloSortBy,
   type CompositeSloSortDirection,
 } from '../../../../hooks/use_fetch_composite_slo_list';
-import { useFetchCompositeSloSuggestions } from '../../../../hooks/use_fetch_composite_slo_suggestions';
 import { useRefreshCompositeSloSummaries } from '../../../../hooks/use_refresh_composite_slo_summaries';
 import { CompositeSloDeleteModal } from './composite_slo_delete_modal';
 import { CompositeSloTable } from './composite_slo_table';
@@ -83,9 +82,6 @@ export function CompositeSloList() {
   const results = data?.results ?? [];
   const total = data?.total ?? 0;
 
-  const { suggestions } = useFetchCompositeSloSuggestions();
-  const availableTags = suggestions?.tags?.map((t) => t.label).sort() ?? [];
-
   const hasActiveFilters =
     debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
 
@@ -118,7 +114,6 @@ export function CompositeSloList() {
         search={search}
         isLoading={isLoading}
         selectedTags={selectedTags}
-        availableTags={availableTags}
         selectedStatuses={selectedStatuses}
         hasActiveFilters={hasActiveFilters}
         onSearchChange={handleSearchChange}

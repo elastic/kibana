@@ -19,12 +19,12 @@ import {
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useFetchCompositeSloSuggestions } from '../../../../hooks/use_fetch_composite_slo_suggestions';
 
-interface CompositeSloToolbarProps {
+interface Props {
   search: string;
   isLoading: boolean;
   selectedTags: string[];
-  availableTags: string[];
   selectedStatuses?: string[];
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
@@ -33,45 +33,19 @@ interface CompositeSloToolbarProps {
   onClearFilters: () => void;
 }
 
-const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
-  {
-    value: 'HEALTHY',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.healthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: 'DEGRADING',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.degrading', {
-      defaultMessage: 'Degrading',
-    }),
-  },
-  {
-    value: 'VIOLATED',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.violated', {
-      defaultMessage: 'Violated',
-    }),
-  },
-  {
-    value: 'NO_DATA',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.noData', {
-      defaultMessage: 'No data',
-    }),
-  },
-];
-
 export function CompositeSloToolbar({
   search,
   isLoading,
   selectedTags,
-  availableTags,
   selectedStatuses = [],
   hasActiveFilters,
   onSearchChange,
   onTagSelectionChange,
   onStatusChange,
   onClearFilters,
-}: CompositeSloToolbarProps) {
+}: Props) {
+  const { suggestions } = useFetchCompositeSloSuggestions();
+  const availableTags = suggestions?.tags?.map((t) => t.label).sort() ?? [];
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
 
@@ -212,3 +186,30 @@ export function CompositeSloToolbar({
     </EuiFlexGroup>
   );
 }
+
+const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
+  {
+    value: 'HEALTHY',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+  },
+  {
+    value: 'DEGRADING',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.degrading', {
+      defaultMessage: 'Degrading',
+    }),
+  },
+  {
+    value: 'VIOLATED',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.violated', {
+      defaultMessage: 'Violated',
+    }),
+  },
+  {
+    value: 'NO_DATA',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.noData', {
+      defaultMessage: 'No data',
+    }),
+  },
+];
