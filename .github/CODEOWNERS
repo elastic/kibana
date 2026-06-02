@@ -3264,7 +3264,6 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_anal
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
