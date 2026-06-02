@@ -135,8 +135,7 @@ const workflowAiProposalResolvedSchema: RootSchema<ReportWorkflowAiProposalResol
   toolId: {
     type: 'keyword',
     _meta: {
-      description:
-        'The edit tool that produced this proposal (e.g. workflow_insert_step, workflow_modify_step)',
+      description: 'The edit tool that produced this proposal (e.g. generate_workflow)',
       optional: false,
     },
   },

@@ -166,7 +166,6 @@ describe('convertToBuildEsQuery', () => {
       config,
       dataView: createStubDataView({ spec: {} }),
       queries: queryWithNestedFields,
-      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -183,7 +182,6 @@ describe('convertToBuildEsQuery', () => {
       config: configWithOverride,
       dataView: createStubDataView({ spec: {} }),
       queries: queryWithNestedFields,
-      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -288,29 +286,6 @@ describe('convertToBuildEsQuery', () => {
   describe('When ignoreFilterIfFieldNotInIndex is true', () => {
     const updatedConfig = { ...config, ignoreFilterIfFieldNotInIndex: true };
 
-    it('should use dataViewSpec when an empty dataView is provided', () => {
-      mockDataViewSpec.fields = {
-        _id: {
-          name: '_id',
-          type: 'string',
-          esTypes: ['keyword'],
-          aggregatable: true,
-          searchable: true,
-          scripted: false,
-        },
-      };
-      const emptyStubDataView = createStubDataView({ spec: { id: '', title: '' } });
-      const [converted] = convertToBuildEsQuery({
-        config: updatedConfig,
-        dataView: emptyStubDataView, // <-- empty dataView
-        queries: queryWithNestedFields,
-        dataViewSpec: mockDataViewSpec, // <-- should be used instead of the empty dataView
-        filters,
-      });
-
-      expect(JSON.parse(converted ?? '')).to.eql(expectedConverted); // just verify that something was built
-    });
-
     it('should not use the field if the filter is not mapped in the', () => {
       const updatedConvertedWithoutIdQuery = structuredClone(expectedConverted);
       updatedConvertedWithoutIdQuery.bool.filter = [updatedConvertedWithoutIdQuery.bool.filter[0]]; // remove the search bar filter
@@ -324,7 +299,6 @@ describe('convertToBuildEsQuery', () => {
         config: updatedConfig,
         dataView: dataViewWithoutIdMapped,
         queries: queryWithNestedFields,
-        dataViewSpec: mockDataViewSpec,
         filters,
       });
 
@@ -352,7 +326,6 @@ describe('convertToBuildEsQuery', () => {
         config: updatedConfig,
         dataView: dataViewWithIdMapped,
         queries: queryWithNestedFields,
-        dataViewSpec: mockDataViewSpec,
         filters,
       });
 
