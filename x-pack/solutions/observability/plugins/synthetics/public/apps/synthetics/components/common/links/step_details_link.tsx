@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
