@@ -51,8 +51,6 @@ const EPISODE_DIR = path.resolve(
   '..',
   '..',
   '..',
-  '..',
-  '..',
   'plugins',
   'security_solution',
   'scripts',
@@ -193,7 +191,20 @@ function variate(
 
   // Normalise ECS nested fields
   if (!clone.host) clone.host = {};
-  (clone.host as Record<string, unknown>).name = host;
+  const hostObj = clone.host as Record<string, unknown>;
+  hostObj.name = host;
+  if (!hostObj.os) hostObj.os = {};
+  const hostOs = hostObj.os as Record<string, unknown>;
+  if (!hostOs.type) {
+    const procPath = ((clone.process as Record<string, unknown>)?.executable as string) ?? '';
+    const isWindows = !!(
+      clone.winlog ||
+      procPath.includes('.exe') ||
+      procPath.includes('C:\\\\') ||
+      (hostOs.Ext as Record<string, unknown>)?.variant?.toString().toLowerCase().includes('windows')
+    );
+    hostOs.type = isWindows ? 'windows' : 'linux';
+  }
   if (!clone.user) clone.user = {};
   (clone.user as Record<string, unknown>).name = user;
   if (!clone.agent) clone.agent = {};
@@ -399,12 +410,20 @@ async function bulkIndex(
   esClient: any,
   index: string,
   docs: Record<string, unknown>[],
-  batchSize = 500
+  batchSize = 500,
+  log?: { warning: (msg: string) => void }
 ) {
   for (let i = 0; i < docs.length; i += batchSize) {
     const slice = docs.slice(i, i + batchSize);
-    const body = slice.flatMap((doc) => [{ index: { _index: index } }, doc]);
-    await esClient.bulk({ refresh: false, body });
+    // Data streams only accept `create` ops (not `index`).
+    const body = slice.flatMap((doc) => [{ create: { _index: index } }, doc]);
+    const resp = await esClient.bulk({ refresh: false, body });
+    if (resp.errors) {
+      const firstErr = resp.items?.find((it: any) => it.create?.error)?.create?.error;
+      if (log && firstErr) {
+        log.warning(`[security-ai-rules eval setup] bulk errors into ${index}: ${firstErr.type}: ${firstErr.reason}`);
+      }
+    }
   }
 }
 
@@ -432,7 +451,7 @@ globalSetupHook(
           clones.push(variate(sample, i, baseTimeMs, timeSpreadMs));
         }
 
-        await bulkIndex(esClient, source.index, clones);
+        await bulkIndex(esClient, source.index, clones, 500, log);
         log.info(`[security-ai-rules eval setup] indexed ${clones.length} docs into ${source.index}`);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -466,7 +485,7 @@ globalSetupHook(
           clones.push(variate(base, i, baseTimeMs, timeSpreadMs));
         }
 
-        await bulkIndex(esClient, index, clones);
+        await bulkIndex(esClient, index, clones, 500, log);
         log.info(`[security-ai-rules eval setup] indexed ${clones.length} endpoint docs into ${index}`);
       }
     } catch (err) {
