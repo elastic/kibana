@@ -18,10 +18,10 @@ export const singleMetricViewerEmbeddableStateSchema = schema.object(
     ...serializedTimeRangeSchema.getPropSchemas(),
     job_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
       minSize: 1,
-      maxSize: 10000,
+      maxSize: 1,
       meta: {
         description:
-          'Anomaly detection job IDs whose results are shown in the single metric viewer.',
+          'Anomaly detection job ID whose results are shown in the single metric viewer.',
       },
     }),
     selected_detector_index: schema.number({

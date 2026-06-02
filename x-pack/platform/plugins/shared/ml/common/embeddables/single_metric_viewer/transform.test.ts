@@ -25,7 +25,7 @@ describe('single metric viewer embeddable transforms', () => {
 
     it('accepts a fully populated state', () => {
       const state = singleMetricViewerEmbeddableStateSchema.validate({
-        job_ids: ['job-1', 'job-2'],
+        job_ids: ['job-1'],
         selected_detector_index: 2,
         selected_entities: { airline: 'AAL' },
         function_description: 'mean',
@@ -35,7 +35,7 @@ describe('single metric viewer embeddable transforms', () => {
       });
 
       expect(state).toEqual({
-        job_ids: ['job-1', 'job-2'],
+        job_ids: ['job-1'],
         selected_detector_index: 2,
         selected_entities: { airline: 'AAL' },
         function_description: 'mean',
@@ -49,6 +49,14 @@ describe('single metric viewer embeddable transforms', () => {
       expect(() =>
         singleMetricViewerEmbeddableStateSchema.validate({
           job_ids: [],
+        })
+      ).toThrow();
+    });
+
+    it('rejects multiple job_ids', () => {
+      expect(() =>
+        singleMetricViewerEmbeddableStateSchema.validate({
+          job_ids: ['job-1', 'job-2'],
         })
       ).toThrow();
     });
