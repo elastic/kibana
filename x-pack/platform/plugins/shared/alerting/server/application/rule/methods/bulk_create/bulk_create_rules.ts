@@ -122,9 +122,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     errors.push(...result.errors);
 
     if (exitEarlyOnError && result.errors.length > 0) {
-      logger.warn(
-        `bulkCreateRules: exiting early at batch ${i + 1}/${totalBatches}.`
-      );
+      logger.warn(`bulkCreateRules: exiting early at batch ${i + 1}/${totalBatches}.`);
       break;
     }
   }
