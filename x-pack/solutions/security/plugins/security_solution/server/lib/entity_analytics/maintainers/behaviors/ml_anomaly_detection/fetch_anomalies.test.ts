@@ -65,7 +65,6 @@ describe('streamAnomaliesForEntityBatch', () => {
   it('returns empty array without querying ML when entityIds is empty', async () => {
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: [],
         logger,
@@ -83,7 +82,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob'],
         logger,
@@ -102,7 +100,7 @@ describe('streamAnomaliesForEntityBatch', () => {
               { term: { result_type: 'record' } },
               { terms: { entity_id: ['user:alice', 'user:bob'] } },
               { term: { is_interim: false } },
-              { range: { record_score: { gte: 50 } } },
+              { range: { record_score: { gte: 1 } } },
               { range: { timestamp: { gte: 'now-1h' } } },
             ],
           },
@@ -124,6 +122,7 @@ describe('streamAnomaliesForEntityBatch', () => {
           entityId: 'user:alice',
           jobId: 'security-job-1',
           detectorIndex: 2,
+          detectorFunction: 'rare',
           timestamp: 1778241600000,
           recordScore: 88,
           actual: [10],
@@ -134,7 +133,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
         logger,
@@ -149,6 +147,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 2,
+        detectorFunction: 'rare',
         timestamp: 1778241600000,
         recordScore: 88,
         actual: 10,
@@ -178,7 +177,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
       const result = await collectPages(
         streamAnomaliesForEntityBatch({
-          anomalyThreshold: 50,
           entityType: 'host',
           entityIds: ['host:web-01'],
           logger,
@@ -196,7 +194,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
         logger,
@@ -213,7 +210,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
         logger,
@@ -232,7 +228,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
         logger,
@@ -249,7 +244,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
         logger,
@@ -276,7 +270,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob', 'user:carol'],
         logger,
@@ -307,7 +300,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob'],
         logger,
@@ -327,7 +319,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     const result = await collectPages(
       streamAnomaliesForEntityBatch({
-        anomalyThreshold: 50,
         entityType: 'host',
         entityIds: ['host:web-01'],
         logger,
@@ -346,7 +337,6 @@ describe('streamAnomaliesForEntityBatch', () => {
 describe('fetchAnomaliesForEntityBatch', () => {
   it('returns an empty map when entityIds is empty', async () => {
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: [],
       logger,
@@ -362,7 +352,6 @@ describe('fetchAnomaliesForEntityBatch', () => {
     mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([]));
 
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
       logger,
@@ -382,7 +371,6 @@ describe('fetchAnomaliesForEntityBatch', () => {
     );
 
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
       logger,
@@ -393,12 +381,13 @@ describe('fetchAnomaliesForEntityBatch', () => {
     expect(result.size).toBe(1);
     const aliceAnomalies = result.get('user:alice');
     expect(Object.keys(aliceAnomalies ?? {})).toEqual(['security-job-1', 'security-job-2']);
-    expect(aliceAnomalies?.['security-job-1'].anomalies).toHaveLength(1);
-    expect(aliceAnomalies?.['security-job-1'].anomalies[0]).toEqual({
+    expect(aliceAnomalies?.['security-job-1']).toHaveLength(1);
+    expect(aliceAnomalies?.['security-job-1'][0]).toEqual({
       _id: '1',
       entityId: 'user:alice',
       jobId: 'security-job-1',
       detectorIndex: 0,
+      detectorFunction: 'rare',
       timestamp: 1778241600000,
       recordScore: 80,
       actual: 5,
@@ -411,12 +400,13 @@ describe('fetchAnomaliesForEntityBatch', () => {
       partitionFieldName: 'host.name',
       partitionFieldValue: 'web-01',
     });
-    expect(aliceAnomalies?.['security-job-2'].anomalies).toHaveLength(1);
-    expect(aliceAnomalies?.['security-job-2'].anomalies[0]).toEqual({
+    expect(aliceAnomalies?.['security-job-2']).toHaveLength(1);
+    expect(aliceAnomalies?.['security-job-2'][0]).toEqual({
       _id: '2',
       entityId: 'user:alice',
       jobId: 'security-job-2',
       detectorIndex: 0,
+      detectorFunction: 'rare',
       timestamp: 1778241600000,
       recordScore: 70,
       actual: 5,
@@ -452,7 +442,6 @@ describe('fetchAnomaliesForEntityBatch', () => {
     );
 
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
       logger,
@@ -460,13 +449,14 @@ describe('fetchAnomaliesForEntityBatch', () => {
       soClient,
     });
 
-    expect(result.get('user:alice')?.['security-job-1'].anomalies).toHaveLength(2);
-    expect(result.get('user:alice')?.['security-job-1'].anomalies).toEqual([
+    expect(result.get('user:alice')?.['security-job-1']).toHaveLength(2);
+    expect(result.get('user:alice')?.['security-job-1']).toEqual([
       {
         _id: '1',
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 0,
+        detectorFunction: 'rare',
         timestamp: 1000,
         recordScore: 60,
         actual: 5,
@@ -484,6 +474,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 0,
+        detectorFunction: 'rare',
         timestamp: 2000,
         recordScore: 90,
         actual: 5,
@@ -515,7 +506,6 @@ describe('fetchAnomaliesForEntityBatch', () => {
       .mockResolvedValueOnce(makeResponse(page2));
 
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice', 'user:bob'],
       logger,
@@ -527,7 +517,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
     expect(Object.keys(result.get('user:alice') ?? {})).toEqual(
       expect.arrayContaining(['security-job-1', 'security-job-2'])
     );
-    expect(result.get('user:bob')?.['security-job-1'].anomalies).toHaveLength(1);
+    expect(result.get('user:bob')?.['security-job-1']).toHaveLength(1);
   });
 
   it('merges anomalies for the same entity and job across pages', async () => {
@@ -561,7 +551,6 @@ describe('fetchAnomaliesForEntityBatch', () => {
       .mockResolvedValueOnce(makeResponse(page2));
 
     const result = await fetchAnomaliesForEntityBatch({
-      anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
       logger,
@@ -569,7 +558,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
       soClient,
     });
 
-    const anomalies = result.get('user:alice')?.['security-job-1'].anomalies;
+    const anomalies = result.get('user:alice')?.['security-job-1'];
     expect(anomalies).toHaveLength(3);
     expect(anomalies?.map((a) => a.recordScore)).toEqual([60, 70, 80]);
   });

@@ -112,19 +112,12 @@ export const entityTestData = [
   },
   {
     cloud: {
-      instance: {
-        id: '1496917318294392993',
-      },
+      instance: { id: '1496917318294392993' },
       provider: 'gcp',
-      machine: {
-        type: 'n2-standard-4',
-      },
+      machine: { type: 'n2-standard-4' },
       region: 'us-central1',
     },
-    agent: {
-      id: '65337c44-bae0-4ac9-bcd0-4cc3e8e8453f',
-      type: 'packetbeat',
-    },
+    agent: { id: '65337c44-bae0-4ac9-bcd0-4cc3e8e8453f', type: 'packetbeat' },
     '@timestamp': '2026-05-19T14:16:05.489Z',
     data_stream: {
       dataset: [
@@ -380,11 +373,7 @@ export const sourceTestData = () => [
     },
     process: { name: 'lsass.exe' },
     source: {
-      geo: {
-        city_name: 'New York',
-        country_name: 'United States',
-        region_name: 'New York',
-      },
+      geo: { city_name: 'New York', country_name: 'United States', region_name: 'New York' },
       ip: '92.164.206.22',
     },
     user: { domain: 'CORP', id: '787537df8b20123d6a5c88cf2ecb97c3', name: 'carol.davis' },
@@ -422,11 +411,7 @@ export const sourceTestData = () => [
     },
     process: { name: 'lsass.exe' },
     source: {
-      geo: {
-        city_name: 'New York',
-        country_name: 'United States',
-        region_name: 'New York',
-      },
+      geo: { city_name: 'New York', country_name: 'United States', region_name: 'New York' },
       ip: '166.58.235.79',
     },
     user: { domain: 'CORP', id: '787537df8b20123d6a5c88cf2ecb97c3', name: 'carol.davis' },
@@ -659,6 +644,44 @@ export const sourceTestData = () => [
         WorkstationName: 'WIN-APP01',
       },
       event_id: '4624',
+      provider_name: 'Microsoft-Windows-Security-Auditing',
+    },
+  },
+  {
+    '@timestamp': hoursAgo(2),
+    data_stream: { dataset: 'windows.forwarded', namespace: 'default', type: 'logs' },
+    event: {
+      action: 'logged-in-explicit',
+      category: ['authentication'],
+      code: '4648',
+      dataset: 'windows.forwarded',
+      id: 'c9a2e4f17b83d05e6c91a748f2b36d55',
+      kind: 'event',
+      module: 'security',
+      outcome: 'success',
+      provider: 'Microsoft-Windows-Security-Auditing',
+      type: ['start'],
+    },
+    host: {
+      id: 'a1b2c3d4e5f6789012345678901234ab',
+      name: 'WIN-DC01',
+      os: { family: 'windows', platform: 'windows', type: 'windows' },
+    },
+    process: { name: 'lsass.exe' },
+    source: {
+      geo: { city_name: 'Sevastopol', country_name: 'Russia', region_name: 'Crimea' },
+      ip: '91.200.12.47',
+    },
+    user: { domain: 'CORP', id: '787537df8b20123d6a5c88cf2ecb97c3', name: 'carol.davis' },
+    winlog: {
+      channel: 'Security',
+      event_data: {
+        PrivilegeList: 'SeImpersonatePrivilege',
+        SubjectDomainName: 'CORP',
+        SubjectUserName: 'carol.davis',
+        TargetUserName: 'carol.davis',
+      },
+      event_id: '4648',
       provider_name: 'Microsoft-Windows-Security-Auditing',
     },
   },
@@ -950,3 +973,26 @@ export const anomalyTestData = () => [
     'host.id': ['d4e5f6789012345678901234abcdef01'],
   },
 ];
+
+export const ANOMALY_RECORD_IDS = [
+  'pad_windows_rare_region_name_by_user_ea_record_1779192000000_3600_0_-103491946261268334286430206369177126287_17',
+  'auth_high_count_logon_events_ea_record_1777427100000_900_0_0_0',
+  'suspicious_login_activity_ea_record_1777083300000_900_0_104569967308362299912281918639174079753_9',
+  'suspicious_login_activity_ea_record_1777356900000_900_0_104569967308362299912281918639174079753_9',
+] as const;
+
+export const SOURCE_EVENT_IDS = [
+  'c9a2e4f17b83d05e6c91a748f2b36d55',
+  'd2685f7931f5f3342d880ec6ec4baead',
+  '3031bc1254221f26becaa73bd21ac896',
+  '2d5fbc9035d1dcf0d5de7953816a6917',
+  'e63b940bdfa5e3c3fa50d64c0fa20f74',
+  'a67c1cdba9fc464eeda82b3be8c76bd0',
+  '6f3e5ebd761122f0b84e9715d3245249',
+  'af81324cd04fc9da86d73eb2894686ba',
+  'b4426372197998c4c478d9eba61b39fb',
+  '57bba5329f1a94973097820353a88510',
+  '9c5ded8fb51546bf177774bd13ffd4ab',
+  'ddde87de74716c395daecd1eb17da9da',
+  '1e37d58e392741e66f25a039923e77e5',
+] as const;

@@ -25,6 +25,7 @@ export const ML_AD_DETAILS_MAPPING: MappingTypeMapping = {
         _id: { type: 'keyword' },
         job_id: { type: 'keyword' },
         detector_index: { type: 'integer' },
+        detector_function: { type: 'keyword' },
         timestamp: { type: 'date' },
         record_score: { type: 'float' },
         field_name: { type: 'keyword' },
@@ -36,11 +37,10 @@ export const ML_AD_DETAILS_MAPPING: MappingTypeMapping = {
         over_field_value: { type: 'keyword' },
         partition_field_name: { type: 'keyword' },
         partition_field_value: { type: 'keyword' },
+        baseline_values: { type: 'keyword' },
+        anomalous_value: { type: 'keyword' },
+        anomalous_value_count: { type: 'long' },
       },
-    },
-    baseline: {
-      type: 'object',
-      enabled: false,
     },
   },
 };
@@ -62,13 +62,8 @@ export const ensureMlAdDetailsDataStream = async ({
     await esClient.indices.putIndexTemplate({
       name: ML_AD_DETAILS_INDEX_TEMPLATE_NAME,
       index_patterns: [`${ML_AD_DETAILS_INDEX_BASE}-*`],
-      data_stream: {},
-      template: {
-        mappings: ML_AD_DETAILS_MAPPING,
-        lifecycle: {
-          data_retention: '90d',
-        },
-      },
+      data_stream: { hidden: true },
+      template: { mappings: ML_AD_DETAILS_MAPPING, lifecycle: { data_retention: '360d' } },
     });
 
     try {

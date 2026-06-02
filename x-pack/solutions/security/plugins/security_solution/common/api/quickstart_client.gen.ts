@@ -243,6 +243,11 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  GetBehavioralSummaryRequestParamsInput,
+  GetBehavioralSummaryRequestBodyInput,
+  GetBehavioralSummaryResponse,
+} from './entity_analytics/behavioral_summary/behavioral_summary.gen';
+import type {
   EntityDetailsHighlightsRequestBodyInput,
   EntityDetailsHighlightsResponse,
 } from './entity_analytics/entity_details/highlights.gen';
@@ -1839,6 +1844,25 @@ finishes and then call this operation once.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns pre-computed ML anomaly records with baseline data for a given entity.
+   */
+  async getBehavioralSummary(props: GetBehavioralSummaryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetBehavioralSummary`);
+    return this.kbnClient
+      .request<GetBehavioralSummaryResponse>({
+        path: replaceParams(
+          '/internal/entity_analytics/entities/{entity_id}/behavioral_summary',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -4007,6 +4031,10 @@ export interface GetAllTranslationStatsDashboardMigrationProps {
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetBehavioralSummaryProps {
+  params: GetBehavioralSummaryRequestParamsInput;
+  body: GetBehavioralSummaryRequestBodyInput;
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;

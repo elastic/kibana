@@ -1,166 +1,174 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`fetchBaselineBehavior non-rare detector returns top hits from sample_hits aggregation 1`] = `
+exports[`fetchBaselineBehavior rare detector msearch request matches snapshot 1`] = `
 Object {
-  "aggs": Object {
-    "sample_hits": Object {
-      "top_hits": Object {
-        "size": 3,
-      },
-    },
-  },
+  "ignore_unavailable": true,
   "index": Array [
     "logs-*",
   ],
-  "query": Object {
-    "bool": Object {
-      "filter": Array [
-        Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "term": Object {
-                  "event.action": "authentication",
-                },
-              },
-            ],
-          },
-        },
-        Object {
-          "term": Object {
-            "entity_id": "user:alice",
-          },
-        },
-        Object {
-          "exists": Object {
-            "field": "process.name",
-          },
-        },
-        Object {
-          "exists": Object {
-            "field": "dept",
-          },
-        },
-        Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-90d",
-              "lt": 1778241600000,
+  "searches": Array [
+    Object {},
+    Object {
+      "aggs": Object {
+        "anomaly": Object {
+          "filter": Object {
+            "term": Object {
+              "source.ip": "evil-ip",
             },
           },
         },
-        Object {
-          "bool": Object {
-            "must_not": Array [
-              Object {
-                "terms": Object {
-                  "_tier": Array [
-                    "data_cold",
-                    "data_frozen",
-                  ],
-                },
-              },
+        "baseline": Object {
+          "terms": Object {
+            "exclude": Array [
+              "evil-ip",
             ],
-          },
-        },
-      ],
-    },
-  },
-  "runtime_mappings": Object {
-    "entity_id": Object {
-      "script": Object {
-        "source": "",
-      },
-      "type": "keyword",
-    },
-  },
-  "size": 0,
-}
-`;
-
-exports[`fetchBaselineBehavior rare detector returns baseline buckets mapped from the aggregation response 1`] = `
-Object {
-  "aggs": Object {
-    "baseline": Object {
-      "aggs": Object {
-        "sample_hits": Object {
-          "top_hits": Object {
+            "field": "source.ip",
+            "order": Object {
+              "_count": "desc",
+            },
             "size": 3,
           },
         },
       },
-      "terms": Object {
-        "field": "source.ip",
-        "order": Object {
-          "_count": "desc",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.action": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "entity_id": "user:alice",
+              },
+            },
+            Object {
+              "exists": Object {
+                "field": "source.ip",
+              },
+            },
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "gte": "now-90d",
+                  "lte": 1778245200000,
+                },
+              },
+            },
+          ],
+          "must_not": Array [
+            Object {
+              "terms": Object {
+                "_tier": Array [
+                  "data_cold",
+                  "data_frozen",
+                ],
+              },
+            },
+          ],
         },
-        "size": 3,
       },
+      "runtime_mappings": Object {
+        "entity_id": Object {
+          "script": Object {
+            "source": "",
+          },
+          "type": "keyword",
+        },
+      },
+      "size": 0,
     },
-  },
+  ],
+}
+`;
+
+exports[`fetchBaselineBehavior time_of_day detector msearch request matches snapshot 1`] = `
+Object {
+  "ignore_unavailable": true,
   "index": Array [
     "logs-*",
   ],
-  "query": Object {
-    "bool": Object {
-      "filter": Array [
-        Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "term": Object {
-                  "event.action": "authentication",
-                },
-              },
-            ],
-          },
-        },
-        Object {
-          "term": Object {
-            "entity_id": "user:alice",
-          },
-        },
-        Object {
-          "exists": Object {
-            "field": "source.ip",
-          },
-        },
-        Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-90d",
-              "lt": 1778241600000,
+  "searches": Array [
+    Object {},
+    Object {
+      "aggs": Object {
+        "time_bucket": Object {
+          "filter": Object {
+            "term": Object {
+              "hour_of_day": 12,
             },
           },
         },
-      ],
-      "must_not": Array [
-        Object {
-          "terms": Object {
-            "_tier": Array [
-              "data_cold",
-              "data_frozen",
-            ],
-          },
-        },
-        Object {
-          "terms": Object {
-            "source.ip": Array [
-              "evil-ip",
-            ],
-          },
-        },
-      ],
-    },
-  },
-  "runtime_mappings": Object {
-    "entity_id": Object {
-      "script": Object {
-        "source": "",
       },
-      "type": "keyword",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.action": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "entity_id": "user:alice",
+              },
+            },
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "gte": "now-90d",
+                  "lte": 1778245200000,
+                },
+              },
+            },
+          ],
+          "must_not": Array [
+            Object {
+              "terms": Object {
+                "_tier": Array [
+                  "data_cold",
+                  "data_frozen",
+                ],
+              },
+            },
+          ],
+        },
+      },
+      "runtime_mappings": Object {
+        "day_of_week": Object {
+          "script": Object {
+            "source": "emit(doc['@timestamp'].value.getDayOfWeekEnum().getValue() % 7)",
+          },
+          "type": "long",
+        },
+        "entity_id": Object {
+          "script": Object {
+            "source": "",
+          },
+          "type": "keyword",
+        },
+        "hour_of_day": Object {
+          "script": Object {
+            "source": "emit(doc['@timestamp'].value.getHour())",
+          },
+          "type": "long",
+        },
+      },
+      "size": 0,
     },
-  },
-  "size": 0,
+  ],
 }
 `;

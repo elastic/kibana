@@ -238,6 +238,9 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        'entityAnalyticsMlJobBehaviorMaintainer',
+      ])}`,
     ],
   },
 };

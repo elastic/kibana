@@ -11,12 +11,12 @@ import {
   LEAD_GENERATION_ROUTES,
   INTERNAL_HEADERS,
   LEAD_GENERATION_TAGS,
-} from '../../fixtures/lead_generation_constants';
+} from '../../../fixtures/lead_generation_constants';
 import {
   seedLead,
   cleanupLeadsIndex,
   DEFAULT_SPACE_ID,
-} from '../../fixtures/lead_generation_helpers';
+} from '../../../fixtures/lead_generation_helpers';
 
 apiTest.describe(
   'Lead Generation - GET /internal/entity_analytics/leads',

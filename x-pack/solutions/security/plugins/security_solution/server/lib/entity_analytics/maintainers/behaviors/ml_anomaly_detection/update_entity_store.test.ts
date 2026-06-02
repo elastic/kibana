@@ -11,7 +11,7 @@ import type { EntityAnomalies } from './fetch_anomalies';
 import { updateEntityStore } from './update_entity_store';
 
 const makeAnomalies = (jobIds: string[]): EntityAnomalies =>
-  Object.fromEntries(jobIds.map((id) => [id, { anomalies: [], baselineBehaviors: [] }]));
+  Object.fromEntries(jobIds.map((id) => [id, []]));
 
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let updateClient: jest.Mocked<EntityUpdateClient>;

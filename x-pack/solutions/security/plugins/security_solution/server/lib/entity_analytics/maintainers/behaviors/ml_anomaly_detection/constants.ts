@@ -23,12 +23,6 @@ export const ENTITY_PAGE_SIZE = 200;
 // Page size for paginating anomaly search results.
 export const ANOMALY_SEARCH_PAGE_SIZE = 1000;
 
-// Number of source documents to capture
-export const TOP_SOURCE_HITS = 3;
-
-// Number of baseline buckets to retain per anomaly
-export const BASELINE_BUCKET_SIZE = 3;
-
 export const ML_AD_DETAILS_INDEX_BASE = '.entity_analytics.ml-ad-jobs-latest';
 
 export const getMlAdDetailsIndexName = (namespace: string): string =>

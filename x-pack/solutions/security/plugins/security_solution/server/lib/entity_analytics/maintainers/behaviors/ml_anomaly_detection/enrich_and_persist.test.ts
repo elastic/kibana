@@ -14,7 +14,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { EntityAnomalies } from './fetch_anomalies';
 import type { AnomalyHit } from './types';
 import { enrichAndPersistAnomalies } from './enrich_and_persist';
-import { makeAnomaly, makeBaselineBucket } from './test_helpers';
+import { makeAnomaly } from './test_helpers';
 
 jest.mock('./fetch_baseline_behavior', () => ({
   fetchBaselineBehavior: jest.fn(),
@@ -35,8 +35,9 @@ const mockGetMlAdDetailsIndexName = getMlAdDetailsIndexName as jest.MockedFuncti
   typeof getMlAdDetailsIndexName
 >;
 
+// EntityAnomalies maps jobId → AnomalyHit[]
 const makeEntityAnomalies = (jobId: string, anomalies: AnomalyHit[]): EntityAnomalies => ({
-  [jobId]: { anomalies, baselineBehaviors: [] },
+  [jobId]: anomalies,
 });
 
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -73,7 +74,7 @@ describe('enrichAndPersistAnomalies', () => {
 
   it('returns early without calling bulk when all jobs have empty anomaly arrays', async () => {
     const anomaliesByEntity: Map<string, EntityAnomalies> = new Map([
-      ['user:alice', { 'security-job-1': { anomalies: [], baselineBehaviors: [] } }],
+      ['user:alice', { 'security-job-1': [] }],
     ]);
 
     await enrichAndPersistAnomalies({
@@ -172,6 +173,9 @@ describe('enrichAndPersistAnomalies', () => {
       byFieldValue: 'Iran',
     });
 
+    // fetchBaselineBehavior returns the anomaly without enrichment
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
+
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([
         ['user:alice', makeEntityAnomalies('security-job-1', [anomaly])],
@@ -192,6 +196,7 @@ describe('enrichAndPersistAnomalies', () => {
       _id: 'anomaly-hit-1',
       job_id: 'security-job-1',
       detector_index: 2,
+      detector_function: 'rare',
       timestamp: 1778241600000,
       record_score: 88,
       field_name: 'process.name',
@@ -206,10 +211,15 @@ describe('enrichAndPersistAnomalies', () => {
     });
   });
 
-  it('attaches baseline behaviors from fetchBaselineBehavior to each anomaly', async () => {
+  it('attaches baseline_values and anomalous_value from the enriched anomaly to the indexed document', async () => {
     const anomaly = makeAnomaly();
-    const baselines = [makeBaselineBucket({ value: 'US' }), makeBaselineBucket({ value: 'UK' })];
-    mockFetchBaselineBehavior.mockResolvedValueOnce(baselines);
+    const enrichedAnomaly = {
+      ...anomaly,
+      baselineValues: ['US', 'UK'],
+      anomalousValue: 'Iran',
+      anomalousValueCount: 5,
+    };
+    mockFetchBaselineBehavior.mockResolvedValueOnce([enrichedAnomaly]);
 
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([
@@ -226,15 +236,15 @@ describe('enrichAndPersistAnomalies', () => {
 
     const bulkCall = esClient.bulk.mock.calls[0][0];
     const indexedDoc = (bulkCall.operations as unknown[])[1] as Record<string, unknown>;
-    expect(indexedDoc.baseline).toEqual([
-      { value: 'US', doc_count: 100, top_hits: [] },
-      { value: 'UK', doc_count: 100, top_hits: [] },
-    ]);
+    const anomalyDoc = indexedDoc.anomaly as Record<string, unknown>;
+    expect(anomalyDoc.baseline_values).toEqual(['US', 'UK']);
+    expect(anomalyDoc.anomalous_value).toBe('Iran');
+    expect(anomalyDoc.anomalous_value_count).toBe(5);
   });
 
-  it('uses an empty array for baseline when fetchBaselineBehavior returns null', async () => {
+  it('omits baseline fields from the indexed document when the enriched anomaly has none', async () => {
     const anomaly = makeAnomaly();
-    mockFetchBaselineBehavior.mockResolvedValueOnce(null);
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
 
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([
@@ -251,11 +261,15 @@ describe('enrichAndPersistAnomalies', () => {
 
     const bulkCall = esClient.bulk.mock.calls[0][0];
     const indexedDoc = (bulkCall.operations as unknown[])[1] as Record<string, unknown>;
-    expect(indexedDoc.baseline).toEqual([]);
+    const anomalyDoc = indexedDoc.anomaly as Record<string, unknown>;
+    expect(anomalyDoc.baseline_values).toBeUndefined();
+    expect(anomalyDoc.anomalous_value).toBeUndefined();
+    expect(anomalyDoc.anomalous_value_count).toBeUndefined();
   });
 
   it('bulk indexes to the correct index for the given namespace', async () => {
     const anomaly = makeAnomaly();
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
     mockGetMlAdDetailsIndexName.mockReturnValue('.ml-ad-details-my-namespace');
 
     await enrichAndPersistAnomalies({
@@ -279,6 +293,7 @@ describe('enrichAndPersistAnomalies', () => {
 
   it('bulk indexes each anomaly with a @timestamp field', async () => {
     const anomaly = makeAnomaly();
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
     const before = Date.now();
 
     await enrichAndPersistAnomalies({
@@ -307,12 +322,17 @@ describe('enrichAndPersistAnomalies', () => {
     const anomaly2 = makeAnomaly({ entityId: 'user:alice', jobId: 'security-job-2' });
     const anomaly3 = makeAnomaly({ entityId: 'user:bob', jobId: 'security-job-1' });
 
+    mockFetchBaselineBehavior
+      .mockResolvedValueOnce([anomaly1])
+      .mockResolvedValueOnce([anomaly2])
+      .mockResolvedValueOnce([anomaly3]);
+
     const anomaliesByEntity: Map<string, EntityAnomalies> = new Map([
       [
         'user:alice',
         {
-          'security-job-1': { anomalies: [anomaly1], baselineBehaviors: [] },
-          'security-job-2': { anomalies: [anomaly2], baselineBehaviors: [] },
+          'security-job-1': [anomaly1],
+          'security-job-2': [anomaly2],
         },
       ],
       ['user:bob', makeEntityAnomalies('security-job-1', [anomaly3])],
@@ -336,6 +356,7 @@ describe('enrichAndPersistAnomalies', () => {
 
   it('calls bulk with refresh: false', async () => {
     const anomaly = makeAnomaly();
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
 
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([
@@ -355,6 +376,7 @@ describe('enrichAndPersistAnomalies', () => {
 
   it('logs a warning when the bulk response contains errors', async () => {
     const anomaly = makeAnomaly();
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
     const errorItem = { index: { error: { reason: 'mapper_exception' } } };
     esClient.bulk.mockResolvedValueOnce({
       errors: true,
@@ -380,13 +402,20 @@ describe('enrichAndPersistAnomalies', () => {
     );
   });
 
-  it('still indexes all anomalies with empty baseline when one fetchBaselineBehavior call fails', async () => {
+  it('falls back to the original anomaly (without enrichment) when fetchBaselineBehavior throws', async () => {
     const anomaly1 = makeAnomaly({ entityId: 'user:alice', jobId: 'security-job-1' });
     const anomaly2 = makeAnomaly({ entityId: 'user:bob', jobId: 'security-job-2' });
-    const baselines = [makeBaselineBucket({ value: 'US' })];
+    const enrichedAnomaly1 = {
+      ...anomaly1,
+      baselineValues: ['US'],
+      anomalousValue: 'Iran',
+      anomalousValueCount: 3,
+    };
     const fetchError = new Error('fetch failed');
 
-    mockFetchBaselineBehavior.mockResolvedValueOnce(baselines).mockRejectedValueOnce(fetchError);
+    mockFetchBaselineBehavior
+      .mockResolvedValueOnce([enrichedAnomaly1])
+      .mockRejectedValueOnce(fetchError);
 
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([
@@ -409,13 +438,18 @@ describe('enrichAndPersistAnomalies', () => {
     expect((bulkCall.operations as unknown[]).length).toBe(4);
 
     const aliceDoc = (bulkCall.operations as unknown[])[1] as Record<string, unknown>;
+    const aliceAnomaly = aliceDoc.anomaly as Record<string, unknown>;
+    expect(aliceAnomaly.baseline_values).toEqual(['US']);
+
     const bobDoc = (bulkCall.operations as unknown[])[3] as Record<string, unknown>;
-    expect(aliceDoc.baseline).toEqual([{ value: 'US', doc_count: 100, top_hits: [] }]);
-    expect(bobDoc.baseline).toEqual([]);
+    const bobAnomaly = bobDoc.anomaly as Record<string, unknown>;
+    // bob fell back to the original anomaly – no enrichment fields
+    expect(bobAnomaly.baseline_values).toBeUndefined();
   });
 
   it('does not log a warning when the bulk response has no errors', async () => {
     const anomaly = makeAnomaly();
+    mockFetchBaselineBehavior.mockResolvedValueOnce([anomaly]);
 
     await enrichAndPersistAnomalies({
       anomaliesByEntity: new Map([

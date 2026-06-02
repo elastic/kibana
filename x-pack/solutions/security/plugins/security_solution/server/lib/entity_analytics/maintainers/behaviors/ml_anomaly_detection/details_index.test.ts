@@ -29,10 +29,10 @@ describe('ensureMlAdDetailsDataStream', () => {
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         index_patterns: [expect.stringContaining('ml-ad-jobs-latest')],
-        data_stream: {},
+        data_stream: { hidden: true },
         template: expect.objectContaining({
           mappings: ML_AD_DETAILS_MAPPING,
-          lifecycle: { data_retention: '90d' },
+          lifecycle: { data_retention: '360d' },
         }),
       })
     );
