@@ -78,6 +78,29 @@ describe('getDataStreams', () => {
     expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
+  it('Returns data streams even when wildcard canMonitor is false', async () => {
+    mockGetDatasetPrivileges.mockResolvedValueOnce({
+      datasetsPrivilages: {
+        'logs-*-*': {
+          canRead: true,
+          canMonitor: false,
+          canReadFailureStore: false,
+        },
+      },
+    });
+
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await getDataStreams({
+      esClient: esClientMock,
+      types: ['logs'],
+      uncategorisedOnly: false,
+      isSecurityEnabled: true,
+    });
+
+    expect(result.dataStreams.length).toBe(5);
+    expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalled();
+  });
+
   describe('uncategorized only option', () => {
     it('Returns the correct number of results when true', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
