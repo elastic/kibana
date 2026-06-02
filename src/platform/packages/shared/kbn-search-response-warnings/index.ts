@@ -10,7 +10,6 @@
 export type { SearchResponseWarning, WarningHandlerCallback } from './src/types';
 
 export {
-  getParsedReasonFromShardFailure,
   getWarningsDescription,
   getWarningsTitle,
   SearchResponseWarningsBadge,

@@ -18,8 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsError, renderSearchError } from '@kbn/search-errors';
-import { getParsedReasonFromShardFailure } from '@kbn/search-response-warnings';
+import { EsError, getParsedReasonFromShardFailure, renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
