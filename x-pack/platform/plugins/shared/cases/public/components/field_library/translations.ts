@@ -147,6 +147,11 @@ export const FIELD_DEFINITION_NAME_LABEL = i18n.translate(
   { defaultMessage: 'Field name' }
 );
 
+export const FIELD_DEFINITION_SETTINGS_LABEL = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionSettingsLabel',
+  { defaultMessage: 'Settings' }
+);
+
 export const FIELD_DEFINITION_DESCRIPTION_LABEL = i18n.translate(
   'xpack.cases.fieldLibrary.fieldDefinitionDescriptionLabel',
   { defaultMessage: 'Description' }

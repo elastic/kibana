@@ -149,24 +149,9 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" data-test-subj="fieldDefinitionForm">
-          <EuiFormRow
-            label={i18n.FIELD_DEFINITION_YAML_LABEL}
-            isInvalid={!!definitionError}
-            error={definitionError}
-            fullWidth
-          >
-            <FieldDefinitionYamlEditor
-              value={definition}
-              onChange={setDefinition}
-              data-test-subj="fieldDefinitionYamlInput"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
           <EuiTitle size="xs">
-            <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
+            <h3>{i18n.FIELD_DEFINITION_SETTINGS_LABEL}</h3>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
           <EuiSpacer size="m" />
           <EuiFormRow label={i18n.FIELD_DEFINITION_DESCRIPTION_LABEL} fullWidth>
             <EuiTextArea
@@ -187,6 +172,25 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               data-test-subj="fieldDefinitionApplyToAllCasesCheckbox"
             />
           </EuiToolTip>
+          <EuiSpacer size="l" />
+          <EuiFormRow
+            label={i18n.FIELD_DEFINITION_YAML_LABEL}
+            isInvalid={!!definitionError}
+            error={definitionError}
+            fullWidth
+          >
+            <FieldDefinitionYamlEditor
+              value={definition}
+              onChange={setDefinition}
+              data-test-subj="fieldDefinitionYamlInput"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

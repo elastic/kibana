@@ -126,11 +126,6 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       ),
     },
     {
-      field: 'owner',
-      name: i18n.OWNER_COLUMN,
-      truncateText: true,
-    },
-    {
       field: 'isGlobal',
       name: i18n.APPLY_TO_ALL_CASES_COLUMN,
       render: (value: boolean | undefined) =>
