@@ -41,7 +41,7 @@ export function prepareCallbacks(
     onData: ((...args: Parameters<OnDataCallback>) => {
       addLog(`onData$`);
       onDataUpdate(...args);
-    }) as OnDataCallback,
+    }) satisfies OnDataCallback,
     handleEvent: prepareEventHandler(api, getState, callbacks, services, disableTriggers),
   };
 }

@@ -85,7 +85,7 @@ export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
  */
 export function getSingleValue<T>(set: Set<T> | undefined): T | undefined {
   if (!set || set.size !== 1) return undefined;
-  return set.values().next().value as T;
+  return set.values().next().value;
 }
 
 /**
@@ -94,5 +94,5 @@ export function getSingleValue<T>(set: Set<T> | undefined): T | undefined {
  */
 export function getFirstValue<T>(set: Set<T> | undefined): T | undefined {
   if (!set || set.size === 0) return undefined;
-  return set.values().next().value as T;
+  return set.values().next().value;
 }
