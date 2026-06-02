@@ -1164,6 +1164,8 @@
       "@kbn/evals-phoenix-executor/*": ["x-pack/platform/packages/shared/kbn-evals-phoenix-executor/*"],
       "@kbn/evals-plugin": ["x-pack/platform/plugins/shared/evals"],
       "@kbn/evals-plugin/*": ["x-pack/platform/plugins/shared/evals/*"],
+      "@kbn/evals-runner": ["x-pack/platform/packages/shared/kbn-evals-runner"],
+      "@kbn/evals-runner/*": ["x-pack/platform/packages/shared/kbn-evals-runner/*"],
       "@kbn/evals-suite-agent-builder": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder"],
       "@kbn/evals-suite-agent-builder/*": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/*"],
       "@kbn/evals-suite-attack-discovery": ["x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery"],

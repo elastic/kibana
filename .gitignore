@@ -202,3 +202,11 @@ src/platform/plugins/shared/console/packaging/react/translations
 # Stray declaration files generated next to .ts sources in kbn-fs
 # (target/ is already ignored globally; these are the in-tree variants)
 x-pack/platform/packages/shared/kbn-fs/**/*.d.ts
+
+# Local Elasticsearch dev stack: docker volume backups (tarballs) and any
+# other artifacts produced by .claude/local-dev/elasticsearch/dev-es.sh.
+# These can be hundreds of megabytes and are operator-specific snapshots;
+# they must never accidentally land in a commit. The `dev-es.sh nuke`
+# postmortem (2026-05-04) is why this entry exists.
+.claude/local-dev/elasticsearch/backups/
+.claude/local-dev/elasticsearch/backups/**

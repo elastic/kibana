@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { trace } from '@opentelemetry/api';
 import { computeCompositeScore, evaluateCiGates } from './convergence_loop';
 import type { EvaluatorRegistry } from '../evaluation_engine';
 import { createEvaluationRunner } from '../evaluation_engine';
@@ -21,6 +22,7 @@ import {
   resolveEvaluatorNames,
 } from './convergence_loop';
 import { buildImprovementPrompt } from './improvement_prompt';
+import { withAesopSpan } from './monitoring/tracing';
 
 const GRADE_THRESHOLDS: Array<[string, number]> = [
   ['A', 0.9],
@@ -51,52 +53,104 @@ export class SkillValidationService {
       };
     }
   ): Promise<SkillValidation> {
-    if (!options?.autoConverge) {
-      return this.runSingleValidation(skill, config);
-    }
+    const mode = options?.autoConverge ? 'convergence' : 'single';
 
-    const inferenceClient = options.inferenceClient;
-    if (!inferenceClient) {
-      throw new Error('autoConverge requires an inferenceClient');
-    }
-
-    const improveSkill = async (
-      currentSkill: ProposedSkillDocument,
-      feedback: SkillEvaluatorResult[]
-    ): Promise<ProposedSkillDocument> => {
-      return this.improveSkillViaLlm(currentSkill, feedback, inferenceClient);
-    };
-
-    const result = await runConvergenceLoop(skill, config, {
-      evaluatorRegistry: this.evaluatorRegistry,
-      logger: this.logger,
-      improveSkill,
-    });
-
-    const lastIterationResults = result.iterations[result.iterations.length - 1]?.evaluator_results;
-
-    return {
-      status: result.converged ? 'passed' : 'failed',
-      final_score: result.finalScore,
-      composite_score: result.finalScore,
-      composite_grade: getGrade(result.finalScore),
-      started_at: new Date(Date.now() - result.totalDurationMs).toISOString(),
-      completed_at: new Date().toISOString(),
-      connector_id: config.connectorId,
-      duration_ms: result.totalDurationMs,
-      evaluator_results: lastIterationResults,
-      gate_result: {
-        passed: result.gateResult.passed,
-        failed_gates: result.gateResult.failedGates,
+    return withAesopSpan(
+      `aesop.skill.validation.${mode}`,
+      {
+        attributes: {
+          'aesop.kind': 'skill_validation',
+          'aesop.validation_mode': mode,
+          'aesop.skill_id': skill.id ?? '',
+          'aesop.skill_name': skill.name,
+          'aesop.connector_id': config.connectorId,
+        },
       },
-      iterations: result.iterations,
-      convergence: {
-        converged: result.converged,
-        reason: result.reason,
-        total_iterations: result.iterations.length,
-        total_duration_ms: result.totalDurationMs,
-      },
-    };
+      async () => {
+        if (!options?.autoConverge) {
+          const result = await this.runSingleValidation(skill, config);
+          this.recordValidationOutcomeOnActiveSpan(result);
+          return result;
+        }
+
+        const inferenceClient = options.inferenceClient;
+        if (!inferenceClient) {
+          throw new Error('autoConverge requires an inferenceClient');
+        }
+
+        const improveSkill = async (
+          currentSkill: ProposedSkillDocument,
+          feedback: SkillEvaluatorResult[]
+        ): Promise<ProposedSkillDocument> => {
+          return this.improveSkillViaLlm(currentSkill, feedback, inferenceClient);
+        };
+
+        const result = await runConvergenceLoop(skill, config, {
+          evaluatorRegistry: this.evaluatorRegistry,
+          logger: this.logger,
+          improveSkill,
+        });
+
+        const lastIterationResults =
+          result.iterations[result.iterations.length - 1]?.evaluator_results;
+
+        const validation: SkillValidation = {
+          status: result.converged ? 'passed' : 'failed',
+          final_score: result.finalScore,
+          composite_score: result.finalScore,
+          composite_grade: getGrade(result.finalScore),
+          started_at: new Date(Date.now() - result.totalDurationMs).toISOString(),
+          completed_at: new Date().toISOString(),
+          connector_id: config.connectorId,
+          duration_ms: result.totalDurationMs,
+          evaluator_results: lastIterationResults,
+          gate_result: {
+            passed: result.gateResult.passed,
+            failed_gates: result.gateResult.failedGates,
+          },
+          iterations: result.iterations,
+          convergence: {
+            converged: result.converged,
+            reason: result.reason,
+            total_iterations: result.iterations.length,
+            total_duration_ms: result.totalDurationMs,
+          },
+        };
+        this.recordValidationOutcomeOnActiveSpan(validation);
+        return validation;
+      }
+    );
+  }
+
+  /**
+   * Stamp the final score, grade, and gate outcome onto whatever span is
+   * currently active so APM can filter validations by pass/fail without
+   * having to read the document body.
+   */
+  private recordValidationOutcomeOnActiveSpan(validation: SkillValidation): void {
+    const span = trace.getActiveSpan();
+    if (!span?.isRecording()) return;
+    // SkillValidation has several optional fields (composite_score/_grade,
+    // gate_result, duration_ms, convergence). Stamp them defensively so a
+    // partially-populated result doesn't throw when handed to setAttribute,
+    // which only accepts defined AttributeValue types.
+    span.setAttribute('aesop.validation.status', validation.status);
+    if (typeof validation.composite_score === 'number') {
+      span.setAttribute('aesop.validation.composite_score', validation.composite_score);
+    }
+    if (typeof validation.composite_grade === 'string') {
+      span.setAttribute('aesop.validation.composite_grade', validation.composite_grade);
+    }
+    if (validation.gate_result) {
+      span.setAttribute('aesop.validation.gate_passed', validation.gate_result.passed);
+    }
+    if (typeof validation.duration_ms === 'number') {
+      span.setAttribute('aesop.validation.duration_ms', validation.duration_ms);
+    }
+    if (validation.convergence) {
+      span.setAttribute('aesop.validation.iterations', validation.convergence.total_iterations);
+      span.setAttribute('aesop.validation.converged', validation.convergence.converged);
+    }
   }
 
   private async runSingleValidation(

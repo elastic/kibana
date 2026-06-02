@@ -200,6 +200,14 @@ export const buildRunsListingFilterQuery = (
 };
 
 /**
+ * Defensive ceiling on the over-fetched terms-aggregation `size`. The route
+ * schema already caps `page <= 100` and `perPage <= 100`, but if a future
+ * caller bypasses validation this guard prevents us from ever asking ES for
+ * a buckets array that exceeds the default `search.max_buckets` (65,536).
+ */
+const RUNS_LISTING_MAX_BUCKETS = 10_000;
+
+/**
  * Returns the aggregation definition for listing runs with summary metadata.
  * Groups score documents by run_id and extracts the latest timestamp,
  * model info, git metadata, and CI info for each run.
@@ -215,7 +223,7 @@ export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPagina
   runs: {
     terms: {
       field: 'run_id',
-      size: page * perPage,
+      size: Math.min(page * perPage, RUNS_LISTING_MAX_BUCKETS),
       order: { latest_timestamp: 'desc' as const },
     },
     aggs: {

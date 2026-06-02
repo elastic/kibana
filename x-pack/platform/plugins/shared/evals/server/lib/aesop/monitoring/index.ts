@@ -8,7 +8,7 @@
 export { DashboardGeneratorService } from './dashboard_generator';
 export { MetricsCollectorService } from './metrics_collector';
 export { FeedbackLoaderService } from './feedback_loader';
-export { APMInstrumentationService } from './apm_instrumentation';
+export { withAesopSpan } from './tracing';
 export { ALERTING_RULES } from './alerting_rules';
 
 export type {

@@ -137,7 +137,9 @@ export const buildValidationSummary = (
   const gateSummary = gate.passed
     ? 'All required gates passed.'
     : `Failed required gates: ${gate.failedRequired.join(', ') || 'composite threshold'}.`;
-  const feedback = `Composite ${(score * 100).toFixed(0)}%. ${passedCount} strong, ${failedCount} weak. ${gateSummary}`.trim();
+  const feedback = `Composite ${(score * 100).toFixed(
+    0
+  )}%. ${passedCount} strong, ${failedCount} weak. ${gateSummary}`.trim();
 
   return {
     score,

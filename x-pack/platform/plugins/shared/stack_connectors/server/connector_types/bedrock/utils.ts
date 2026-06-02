@@ -9,14 +9,34 @@ import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
 import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
+// Anthropic deprecated `temperature` starting with Claude 4.5 (Opus / Sonnet / Haiku 4.5+) and
+// keeps it deprecated on every subsequent 4.x / 5+ release that ships extended thinking. Sending
+// the parameter produces HTTP 400 `"temperature" is deprecated for this model` from both the
+// Messages API (`run` / `invokeAI`) and the Converse API (`converse` / `converseStream`).
+//
+// The inference plugin's adapters already strip `temperature` via `getTemperatureIfValid`, but
+// this connector is also reachable from callers that bypass that layer (LangChain/langgraph
+// executors, legacy Agent Builder conversation flows, ad-hoc `_execute` probes). Guard inside
+// the connector itself so the fix is bulletproof regardless of the caller.
+//
+// Matches `claude-{opus,sonnet,haiku}-4-[5-9]` and `claude-{opus,sonnet,haiku}-[5-9]*`, across
+// bare (`anthropic.claude-opus-4-7`) and region-prefixed (`us.anthropic.claude-opus-4-7`) ids.
+const CLAUDE_WITHOUT_TEMPERATURE_REGEX = /claude-(?:opus|sonnet|haiku)-(?:4-[5-9]|[5-9])/;
+
+export const modelRejectsTemperature = (modelId?: string): boolean => {
+  if (!modelId) return false;
+  return CLAUDE_WITHOUT_TEMPERATURE_REGEX.test(modelId.toLowerCase());
+};
+
 export const formatBedrockBody = ({
   messages,
   stopSequences,
-  temperature = 0,
+  temperature,
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
   toolChoice,
+  model,
 }: {
   messages: BedrockMessage[];
   stopSequences?: string[];
@@ -26,15 +46,19 @@ export const formatBedrockBody = ({
   system?: string;
   tools?: Array<{ name: string; description: string }>;
   toolChoice?: BedrockToolChoice;
-}) => ({
-  anthropic_version: 'bedrock-2023-05-31',
-  ...ensureMessageFormat(messages, system),
-  max_tokens: maxTokens,
-  stop_sequences: stopSequences,
-  temperature,
-  tools,
-  tool_choice: toolChoice,
-});
+  model?: string;
+}) => {
+  const includeTemperature = temperature !== undefined && !modelRejectsTemperature(model);
+  return {
+    anthropic_version: 'bedrock-2023-05-31',
+    ...ensureMessageFormat(messages, system),
+    max_tokens: maxTokens,
+    stop_sequences: stopSequences,
+    ...(includeTemperature ? { temperature } : {}),
+    tools,
+    tool_choice: toolChoice,
+  };
+};
 
 interface FormattedBedrockMessage {
   role: string;

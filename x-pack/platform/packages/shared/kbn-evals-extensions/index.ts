@@ -13,6 +13,13 @@
  * - ❌ kbn-evals → MUST NOT import from → kbn-evals-extensions
  *
  * Evaluation suites opt in by importing directly from this package.
+ *
+ * Boundary tightening: types from `@kbn/evals` (Evaluator, Example,
+ * EvaluationDataset, TaskOutput, EvaluationScoreDocument, …) are NOT
+ * re-exported from here. Consumers must import them directly from
+ * `@kbn/evals` so we keep a single source of truth for those public
+ * shapes and avoid duplicate-symbol drift if `@kbn/evals` ever evolves
+ * those types in a non-trivially-compatible way.
  */
 
 /**
@@ -20,10 +27,6 @@
  * quick runtime health check for consumers.
  */
 export const EVALS_EXTENSIONS_VERSION = '1.0.0';
-
-// Core re-exports for convenience
-export type { Evaluator, Example, EvaluationDataset, TaskOutput } from '@kbn/evals';
-export type { EvaluationScoreDocument } from '@kbn/evals';
 
 // Shared extension types
 export type * from './src/types';

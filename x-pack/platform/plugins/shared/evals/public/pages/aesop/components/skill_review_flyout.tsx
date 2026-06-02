@@ -31,10 +31,14 @@ import {
   EuiProgress,
   EuiFieldText,
   EuiToolTip,
+  EuiIconTip,
   EuiCheckbox,
   EuiSteps,
 } from '@elastic/eui';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
 import { useLLMConnectors } from '../../../hooks/use_llm_connectors';
 
@@ -87,15 +91,41 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
   const { data: connectors, isLoading: connectorsLoading } = useLLMConnectors();
 
-  // Auto-select first .gen-ai connector, or first available — only once
+  // Operator-configurable default via uiSettings.overrides in kibana.yml.
+  // Same setting Agent Builder and the proposed-skills page honor, so a
+  // single config controls all three flows.
+  const { services } = useKibana<{ settings: { client: IUiSettingsClient } }>();
+  const defaultConnectorId = services.settings?.client.get<string | undefined>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    undefined
+  );
+
+  // Auto-select strategy mirrors `proposed_skills_list.tsx`:
+  //   1) honor `genAiSettings:defaultAIConnector` if available
+  //   2) fall back to the first preconfigured connector (any provider)
+  // The previous heuristic (first `.gen-ai`) silently picked DeepSeek-R1
+  // over Bedrock/Anthropic defaults — fixed here for parity.
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
   React.useEffect(() => {
-    if (connectors?.length && !hasAutoSelected) {
-      const genAi = connectors.find((c) => c.actionTypeId === '.gen-ai');
-      setSelectedConnectorId(genAi?.id || connectors[0].id);
+    if (!connectors?.length || hasAutoSelected) return;
+
+    if (defaultConnectorId && connectors.some((c) => c.id === defaultConnectorId)) {
+      setSelectedConnectorId(defaultConnectorId);
       setHasAutoSelected(true);
+      return;
     }
-  }, [connectors, hasAutoSelected]);
+
+    const preconfigured = connectors.find((c) => c.isPreconfigured);
+    setSelectedConnectorId(preconfigured?.id || connectors[0].id);
+    setHasAutoSelected(true);
+  }, [connectors, hasAutoSelected, defaultConnectorId]);
+
+  // Surface a warning when the operator configured a default that does not
+  // resolve to an available connector — otherwise the fallback above
+  // silently overrides their choice.
+  const defaultConnectorMissing = Boolean(
+    defaultConnectorId && connectors?.length && !connectors.some((c) => c.id === defaultConnectorId)
+  );
 
   // Approve skill mutation
   const approveMutation = useMutation({
@@ -487,16 +517,30 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
             </EuiFlexItem>
             {isReviewable && (
               <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
-                <EuiSuperSelect
-                  options={connectorOptions}
-                  valueOfSelected={selectedConnectorId}
-                  onChange={setSelectedConnectorId}
-                  isLoading={connectorsLoading}
-                  compressed
-                  prepend="LLM"
-                  disabled={connectorsLoading || connectorOptions.length === 0}
-                  aria-label="Select LLM connector for validation"
-                />
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiSuperSelect
+                      options={connectorOptions}
+                      valueOfSelected={selectedConnectorId}
+                      onChange={setSelectedConnectorId}
+                      isLoading={connectorsLoading}
+                      compressed
+                      prepend="LLM"
+                      disabled={connectorsLoading || connectorOptions.length === 0}
+                      aria-label="Select LLM connector for validation"
+                    />
+                  </EuiFlexItem>
+                  {defaultConnectorMissing && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        aria-label="Configured default GenAI connector is unavailable"
+                        content={`Your kibana.yml sets genAiSettings:defaultAIConnector="${defaultConnectorId}", but that connector is not available (deleted, disabled, or typo). Falling back to "${selectedConnectorId}". Update kibana.yml or pick another connector here.`}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

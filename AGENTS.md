@@ -3,6 +3,32 @@
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
+## Local Elasticsearch — DOCKER ONLY in this worktree
+
+**NEVER run `yarn es snapshot` (or any `node scripts/es snapshot` variant) in this worktree.**
+That command deletes and re-extracts `.es/9.5.0/`, including the `data/` subdirectory.
+We've already lost ~848MB of AESOP / eval data this way once (2026-05-04 — see
+`.claude/local-dev/elasticsearch/POSTMORTEM.md`).
+
+For all Elasticsearch lifecycle operations, use the dockerized stack with a named volume:
+
+```bash
+.claude/local-dev/elasticsearch/dev-es.sh up        # start
+.claude/local-dev/elasticsearch/dev-es.sh status    # health + indices
+.claude/local-dev/elasticsearch/dev-es.sh down      # stop (data preserved)
+.claude/local-dev/elasticsearch/dev-es.sh backup    # snapshot to backups/<ts>.tar.gz
+.claude/local-dev/elasticsearch/dev-es.sh restore <archive>
+.claude/local-dev/elasticsearch/dev-es.sh nuke      # destroy data (interactive confirm)
+```
+
+Data lives in the named docker volume `skill_eval_platform_es_data` and survives
+`git clean`, worktree resets, and any host-side `rm -rf .es/`. Take a backup before
+risky migrations or before stopping the demo for the day.
+
+**Never re-point Kibana at another worktree's ES** (e.g. `cluster-scout` on :9220).
+Each worktree must have its own isolated stack — branch-specific saved objects,
+encrypted keys, and ESO migrations are not portable across branches.
+
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.

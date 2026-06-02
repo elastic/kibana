@@ -112,10 +112,7 @@ const resolvePattern = async (
     const res = (await (
       client as unknown as {
         indices: {
-          resolveIndex: (p: {
-            name: string | string[];
-            expand_wildcards?: string;
-          }) => Promise<{
+          resolveIndex: (p: { name: string | string[]; expand_wildcards?: string }) => Promise<{
             indices?: unknown[];
             aliases?: unknown[];
             data_streams?: unknown[];

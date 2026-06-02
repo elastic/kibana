@@ -90,9 +90,7 @@ export function registerRunSkillValidationRoute({
     // The route is registered with a logger-only fallback in older code
     // paths; refuse to start rather than silently regressing to the
     // monolithic LLM prompt.
-    throw new Error(
-      'registerRunSkillValidationRoute: evaluatorRegistry dependency is required'
-    );
+    throw new Error('registerRunSkillValidationRoute: evaluatorRegistry dependency is required');
   }
   router.versioned
     .post({
@@ -619,9 +617,7 @@ async function runConvergenceValidation({
       onIteration: async (iteration) => {
         // Build a live summary from this iteration's evaluator results so
         // the UI shows progress without waiting for the full loop to finish.
-        const serverResults = iteration.evaluator_results.map((r) =>
-          skillResultToServerResult(r)
-        );
+        const serverResults = iteration.evaluator_results.map((r) => skillResultToServerResult(r));
         const summary = buildValidationSummary(serverResults, {
           requiredPass: REQUIRED_PASS_EVALUATORS,
           compositeThreshold: PASS_THRESHOLD,
@@ -683,8 +679,7 @@ async function runConvergenceValidation({
         // to avoid `converged: true` + `gate.passed: false` confusion (can't
         // happen today since the loop short-circuits on gate pass, but the
         // explicit check makes the invariant visible).
-        status:
-          convergenceResult.converged && finalSummary?.passed !== false ? 'passed' : 'failed',
+        status: convergenceResult.converged && finalSummary?.passed !== false ? 'passed' : 'failed',
         final_score: convergenceResult.finalScore,
         completed_at: new Date().toISOString(),
         connector_id: connectorId,
@@ -765,9 +760,7 @@ async function runLLMImprovement({
   const skipped = feedback.filter((r) => r.score == null);
 
   if (weaknesses.length === 0 && skipped.length === 0) {
-    logger.info(
-      `[AESOP] No weaknesses to improve, skipping improvement skill_id=${skillId}`
-    );
+    logger.info(`[AESOP] No weaknesses to improve, skipping improvement skill_id=${skillId}`);
     return;
   }
 

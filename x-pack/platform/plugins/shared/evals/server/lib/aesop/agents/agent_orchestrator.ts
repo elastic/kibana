@@ -7,8 +7,30 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { lastValueFrom, timeout, catchError, filter, map, of } from 'rxjs';
+import { lastValueFrom, timeout, catchError, filter, map, of, defaultIfEmpty } from 'rxjs';
+import { ChatEventType, isMessageCompleteEvent, type ChatEvent } from '@kbn/agent-builder-common';
+import { trace } from '@opentelemetry/api';
 
+import { withAesopSpan } from '../monitoring/tracing';
+import { parseSkillsFromResponse } from './skill_response_parser';
+
+/**
+ * Why `agentBuilderStart` is typed as `any` here:
+ *
+ * The `evals` plugin and `agent_builder` plugin form a project-reference cycle
+ * (agent_builder optionally depends on evals for the skill-eval surface), so
+ * we cannot `import type { AgentBuilderPluginStart }` directly. The plugin
+ * boundary uses {@link AgentBuilderContractLike} (`Record<string, any>`) and
+ * we honor the same erasure here. The runtime contract this orchestrator
+ * actually relies on is a thin slice — `agentBuilderStart.execution.executeAgent({...}) → { executionId, events$: Observable<ChatEvent> }`.
+ *
+ * Tracked as tech debt: extract the contract into a shared
+ * `@kbn/evals-agent-builder-contract` package so both sides can import a
+ * real type. Until then, the events-pipeline types below give us the
+ * material safety: filter/map/timeout are typed against `ChatEvent`, so
+ * any future event-shape change in agent_builder will fail compilation
+ * here even with the `any` boundary.
+ */
 export interface AgentOrchestrationConfig {
   agentBuilderStart: any;
   request: KibanaRequest;
@@ -23,7 +45,11 @@ export class AgentOrchestrator {
   private readonly timeoutMs: number;
 
   constructor(private readonly config: AgentOrchestrationConfig) {
-    this.timeoutMs = config.timeoutMs || 120_000;
+    // Default to 10 minutes per agent — Opus-class reasoning models with deep
+    // tool use (schema-explorer, skill-generator) can easily run 3–5+ minutes
+    // per call. 120s was too aggressive and caused silent skill-synthesis
+    // failures during demos.
+    this.timeoutMs = config.timeoutMs || 600_000;
   }
 
   async executeAgent(agentId: string, message: string): Promise<string> {
@@ -36,67 +62,115 @@ export class AgentOrchestrator {
       ? `aesop-${agentId}-${this.config.executionId}`
       : undefined;
 
-    const { executionId, events$ } = await agentBuilderStart.execution.executeAgent({
-      request,
-      params: {
-        agentId,
-        connectorId,
-        storeConversation: !!conversationTag,
-        conversationId: conversationTag,
-        autoCreateConversationWithId: !!conversationTag,
-        nextInput: { message },
+    // Wrap the entire agent invocation — Agent Builder dispatch + the
+    // stream consumption — in a single OTLP span so tool-call latency,
+    // LLM time-to-first-token, and message-complete arrival are all
+    // attributable to one parent in APM. Token usage isn't surfaced by
+    // the Agent Builder event stream today, so we stamp request/response
+    // sizing instead; richer attributes can land here once the agent
+    // dispatch contract exposes usage.
+    return withAesopSpan(
+      `aesop.agent.invoke.${agentId}`,
+      {
+        attributes: {
+          'aesop.kind': 'agent_invocation',
+          'aesop.agent_id': agentId,
+          'aesop.connector_id': connectorId,
+          'aesop.execution_id': this.config.executionId ?? '',
+          'aesop.message_length': message.length,
+        },
       },
-      metadata: {
-        source: 'aesop',
-        aesop_execution_id: this.config.executionId || '',
-        agent_role: agentId,
-      },
-    });
+      async () => {
+        const { executionId, events$ } = await agentBuilderStart.execution.executeAgent({
+          request,
+          params: {
+            agentId,
+            connectorId,
+            storeConversation: !!conversationTag,
+            conversationId: conversationTag,
+            autoCreateConversationWithId: !!conversationTag,
+            nextInput: { message },
+          },
+          metadata: {
+            source: 'aesop',
+            aesop_execution_id: this.config.executionId || '',
+            agent_role: agentId,
+          },
+        });
 
-    logger.debug(`[AESOP] Agent ${agentId} execution started: ${executionId}`);
+        const activeSpan = trace.getActiveSpan();
+        if (activeSpan?.isRecording()) {
+          activeSpan.setAttribute('aesop.agent.builder_execution_id', String(executionId ?? ''));
+        }
 
-    try {
-      const response = (await lastValueFrom(
-        events$.pipe(
-          filter(
-            (event: any) => event.type === 'messageComplete' || event.type === 'conversationUpdate'
-          ),
-          map((event: any) => {
-            if (event.type === 'messageComplete' && event.message?.content) {
-              return event.message.content;
-            }
-            if (event.type === 'conversationUpdate') {
-              const messages = event.conversation?.messages || [];
-              const lastAssistant = messages.filter((m: any) => m.role === 'assistant').pop();
-              return lastAssistant?.content || '';
-            }
-            return '';
-          }),
-          filter((text: string) => text.length > 0),
-          timeout(this.timeoutMs),
-          catchError((err) => {
-            logger.error(
-              `[AESOP] Agent ${agentId} stream error: ${
-                err instanceof Error ? err.message : String(err)
-              }`
+        logger.debug(`[AESOP] Agent ${agentId} execution started: ${executionId}`);
+
+        try {
+          // Agent Builder emits ChatEventType.messageComplete (`'message_complete'`)
+          // with `data.message_content`. Earlier code used wrong string literals
+          // (`'messageComplete'`, `'conversationUpdate'`) and a non-existent
+          // `event.message.content` shape, which caused every AESOP agent
+          // execution to terminate with `EmptyError: no elements in sequence`.
+          // `events$` is typed as `any` at the plugin boundary
+          // (see AgentOrchestrationConfig docstring). The pipe operators below
+          // are still strictly typed against `ChatEvent`, giving us material
+          // safety; we just have to pin `lastValueFrom` to `Promise<string>`
+          // because the loose source widens the chained inference.
+          const response: string = await lastValueFrom<string>(
+            events$.pipe(
+              filter((event: ChatEvent) => event.type === ChatEventType.messageComplete),
+              // `isMessageCompleteEvent` narrows to MessageCompleteEvent, after
+              // which `event.data.message_content` is typed as string.
+              map((event: ChatEvent) =>
+                isMessageCompleteEvent(event) ? event.data.message_content || '' : ''
+              ),
+              filter((text: string) => text.length > 0),
+              timeout(this.timeoutMs),
+              catchError((err: unknown) => {
+                logger.error(
+                  `[AESOP] Agent ${agentId} stream error: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
+                );
+                return of('');
+              }),
+              // Stream may complete with no message_complete events at all (e.g.
+              // tool-only round, error before LLM responded). Default to ''
+              // instead of throwing EmptyError so the orchestrator can degrade
+              // gracefully and the next agent in the pipeline can still run.
+              defaultIfEmpty('')
+            )
+          );
+
+          if (activeSpan?.isRecording()) {
+            activeSpan.setAttribute('aesop.agent.response_length', response.length);
+          }
+
+          if (response.length === 0) {
+            logger.warn(
+              `[AESOP] Agent ${agentId} completed with no message content (execution_id=${executionId}); returning empty response`
             );
-            return of('');
-          })
-        )
-      )) as string;
-
-      logger.info(`[AESOP] Agent ${agentId} completed (${response.length} chars)`);
-      return response;
-    } catch (error) {
-      // lastValueFrom throws EmptyError when observable completes without emitting
-      logger.error(
-        `[AESOP] Agent ${agentId} execution failed: ${
-          error instanceof Error ? error.message : String(error)
-        } (execution_id=${executionId})`
-      );
-      return '';
-    }
+          } else {
+            logger.info(`[AESOP] Agent ${agentId} completed (${response.length} chars)`);
+          }
+          return response;
+        } catch (error) {
+          logger.error(
+            `[AESOP] Agent ${agentId} execution failed: ${
+              error instanceof Error ? error.message : String(error)
+            } (execution_id=${executionId})`
+          );
+          return '';
+        }
+      }
+    );
   }
+
+  // Skills are returned as opaque structured records. Callers
+  // (`exploration_workflow_executor`, `improve_skill`, `run_skill_validation`)
+  // own their own zod / runtime validation; pinning a strict type here
+  // would force every caller to also adopt that type, which is tracked as a
+  // separate slice of work (see PR B6 in the split plan).
 
   async runDiscoveryPipeline(context: {
     indexNames: string[];
@@ -159,8 +233,11 @@ export class AgentOrchestrator {
       return [];
     }
 
-    return this.parseSkillsFromResponse(skillResponse);
+    return parseSkillsFromResponse(skillResponse, this.config.logger);
   }
+
+  // Validation result shape is owned by `skill_validation_service.ts`, which
+  // re-parses this opaque record. See `runDiscoveryPipeline` rationale.
 
   async validateSkill(skillMarkdown: string): Promise<any> {
     const response = await this.executeAgent(
@@ -182,23 +259,7 @@ export class AgentOrchestrator {
     return this.parseJsonFromResponse(response);
   }
 
-  private parseSkillsFromResponse(response: string): any[] {
-    try {
-      let cleaned = response;
-      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned
-        .replace(/```json?\s*/g, '')
-        .replace(/```\s*/g, '')
-        .trim();
-      const match = cleaned.match(/\[[\s\S]*\]/);
-      return match ? JSON.parse(match[0]) : [];
-    } catch {
-      this.config.logger.error('[AESOP] Failed to parse skills from agent response');
-      return [];
-    }
-  }
-
-  private parseJsonFromResponse(response: string): any | null {
+  private parseJsonFromResponse(response: string): any {
     try {
       let cleaned = response;
       cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');

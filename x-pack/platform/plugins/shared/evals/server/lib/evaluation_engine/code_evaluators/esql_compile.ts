@@ -64,11 +64,13 @@ const verifyQuery = async (
     if (esql?.query) {
       await esql.query({ query });
     } else {
-      await (client as unknown as {
-        transport: {
-          request: (p: { method: string; path: string; body: unknown }) => Promise<unknown>;
-        };
-      }).transport.request({
+      await (
+        client as unknown as {
+          transport: {
+            request: (p: { method: string; path: string; body: unknown }) => Promise<unknown>;
+          };
+        }
+      ).transport.request({
         method: 'POST',
         path: '/_query',
         body: { query },

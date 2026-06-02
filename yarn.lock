@@ -6867,6 +6867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-runner@link:x-pack/platform/packages/shared/kbn-evals-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
   version "0.0.0"
   uid ""

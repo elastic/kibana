@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   type CoreSetup,
@@ -42,7 +41,10 @@ import {
 } from './storage/skill_storage';
 import { SkillValidationService } from './lib/aesop';
 import { SkillOnlineEvalService } from './lib/aesop/skill_online_eval_service';
-import { SuiteRunner } from './lib/suite_runner';
+import { ExperimentSuiteRegistry } from './experiments/registry';
+import { getEvalsRunSuiteStepDefinition } from './workflows_steps/run_suite';
+import { clusterHealthExperimentSuite } from './experiments/built_in/cluster_health_suite';
+import { experimentSuiteDefinitions } from './experiments/suite_definitions';
 
 export class EvalsPlugin
   implements
@@ -56,7 +58,11 @@ export class EvalsPlugin
   private monitoringService?: SkillMonitoringService;
   private skillValidationService?: SkillValidationService;
   private skillOnlineEvalService?: SkillOnlineEvalService;
-  private suiteRunner?: SuiteRunner;
+  private experimentSuiteRegistry?: ExperimentSuiteRegistry;
+  // Single shutdown latch shared by all in-flight async work the plugin
+  // owns (today: AESOP exploration runs). `stop()` aborts it so callers
+  // can mark themselves failed and stop scheduling new work.
+  private readonly stopController = new AbortController();
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -65,12 +71,18 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features, encryptedSavedObjects }: EvalsSetupDependencies
+    {
+      features,
+      encryptedSavedObjects,
+      workflowsManagement,
+      workflowsExtensions,
+    }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
       return {
         registerEvaluator: () => {},
+        registerExperimentSuite: () => undefined,
       };
     }
 
@@ -86,9 +98,42 @@ export class EvalsPlugin
 
     this.monitoringService = new SkillMonitoringService(this.logger);
 
+    this.experimentSuiteRegistry = new ExperimentSuiteRegistry();
+    for (const suite of experimentSuiteDefinitions) {
+      this.experimentSuiteRegistry.register(suite);
+    }
+    this.experimentSuiteRegistry.register(clusterHealthExperimentSuite);
+
+    if (workflowsExtensions) {
+      workflowsExtensions.registerStepDefinition(
+        getEvalsRunSuiteStepDefinition({
+          coreSetup,
+          experimentSuiteRegistry: this.experimentSuiteRegistry,
+          datasetService: this.datasetService,
+        })
+      );
+    } else {
+      this.logger.warn(
+        'workflowsExtensions plugin is not available — the Experiments tab will list ' +
+          'suites but "Run now" requests will fail with 503 until the plugin is enabled.'
+      );
+    }
+    if (!workflowsManagement) {
+      this.logger.warn(
+        'workflowsManagement plugin is not available — Experiments cannot be dispatched, ' +
+          'inspected, or cancelled. Enable the workflowsManagement plugin to use Experiments.'
+      );
+    }
+
     coreSetup.savedObjects.registerType(evaluatorSavedObjectType);
     if (this.config.aesop.enabled) {
       coreSetup.savedObjects.registerType(proposedSkillSavedObjectType);
+    } else {
+      this.logger.info(
+        'AESOP feature is disabled. Set `xpack.evals.aesop.enabled: true` in kibana.yml ' +
+          'to enable the autonomous exploration UI, AESOP routes, and the proposed-skill ' +
+          'saved object type.'
+      );
     }
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -105,20 +150,6 @@ export class EvalsPlugin
         this.logger
       );
     }
-
-    // Resolve repo root from plugin location for suite runner
-    // Plugin is at: x-pack/platform/plugins/shared/evals/server/plugin.ts
-    // __dirname = .../evals/server → 6 hops: server → evals → shared → plugins → platform → x-pack → root
-    const repoRoot = resolve(__dirname, '..', '..', '..', '..', '..', '..');
-    const { hostname, port, protocol } = coreSetup.http.getServerInfo();
-    const kibanaUrl = `${protocol}://${hostname}:${port}`;
-
-    // Extract ES URL from CLI args (--elasticsearch.hosts=http://...) since
-    // coreSetup doesn't expose the raw elasticsearch config URL.
-    const esArg = process.argv.find((arg) => arg.startsWith('--elasticsearch.hosts='));
-    const elasticsearchUrl = esArg?.split('=')[1] ?? 'http://localhost:9200';
-
-    this.suiteRunner = new SuiteRunner(repoRoot, this.logger, { kibanaUrl, elasticsearchUrl });
 
     // Resolve agentBuilder via runtimePluginDependencies to avoid circular dep
     // (agentBuilder optionally depends on evals). Contract shape is erased via
@@ -191,13 +222,17 @@ export class EvalsPlugin
       monitoringService: this.monitoringService,
       skillValidationService: this.skillValidationService,
       skillOnlineEvalService: this.skillOnlineEvalService,
-      suiteRunner: this.suiteRunner,
-      repoRoot,
+      experimentSuiteRegistry: this.experimentSuiteRegistry,
+      workflowsManagement,
+      workflowsExtensions,
       canEncrypt: encryptedSavedObjects.canEncrypt,
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
       aesopEnabled: this.config.aesop.enabled,
+      aesopRateLimits: this.config.aesop.rateLimits,
+      aesopExplorationTimeoutMs: this.config.aesop.explorationTimeoutMs,
+      pluginStopSignal: this.stopController.signal,
     });
 
     return {
@@ -207,6 +242,7 @@ export class EvalsPlugin
         }
         this.evaluatorRegistry.register(evaluator);
       },
+      registerExperimentSuite: (definition) => this.experimentSuiteRegistry?.register(definition),
     };
   }
 
@@ -267,5 +303,26 @@ export class EvalsPlugin
     };
   }
 
-  stop() {}
+  /**
+   * Plugin shutdown hook.
+   *
+   * Aborts {@link stopController} so any AESOP exploration runs in flight
+   * race the abort signal in their main `Promise.race` loop and mark
+   * themselves failed in the state tracker. This avoids the previously
+   * observed footgun where, after a Kibana restart, the UI would still
+   * show "running" explorations forever because the executor process had
+   * died mid-phase. The actual ES/LLM calls in flight are NOT cancelled —
+   * AbortController plumbing into every downstream service is tracked
+   * separately. Background work drains and its later errors are ignored.
+   *
+   * Safe to call multiple times: `AbortController.abort()` is idempotent.
+   */
+  stop() {
+    if (!this.stopController.signal.aborted) {
+      this.logger.info(
+        '[Evals] Plugin stopping; aborting in-flight AESOP exploration runs (state tracker will mark them failed).'
+      );
+      this.stopController.abort();
+    }
+  }
 }

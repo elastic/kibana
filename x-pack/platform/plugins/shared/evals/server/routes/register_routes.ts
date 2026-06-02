@@ -8,10 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { EvalsRouter } from '../types';
 import type { EvaluatorRegistry } from '../lib/evaluation_engine';
 import type { SkillMonitoringService } from '../lib/monitoring/skill_monitoring_service';
 import type { SkillValidationService } from '../lib/aesop';
+import type { ExperimentSuiteRegistry } from '../experiments/registry';
 import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
@@ -38,10 +41,15 @@ import { registerEvaluatorRoutes } from './evaluators';
 import { registerMonitoringRoutes } from './monitoring';
 import { registerAesopRoutes } from './aesop';
 import { registerSkillRoutes } from './skills';
-import { registerSuiteRoutes } from './suites';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
+import { registerGetExperimentSuitesRoute } from './experiments/get_suites';
+import { registerRunExperimentSuiteRoute } from './experiments/post_run';
+import { registerRunExperimentSuiteNowRoute } from './experiments/post_run_now';
+import { registerCancelExperimentRunRoute } from './experiments/post_cancel_run';
+import { registerGetExperimentRunRoute } from './experiments/get_workflow_execution';
+import { registerGetExperimentRunLogsRoute } from './experiments/get_workflow_execution_logs';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -49,6 +57,16 @@ export interface RouteDependencies {
   canEncrypt: boolean;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
+  experimentSuiteRegistry?: ExperimentSuiteRegistry;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Signal that fires when the Evals plugin's `stop()` lifecycle hook runs.
+   * Forwarded to long-running async work (e.g. AESOP exploration) so it can
+   * mark itself failed during Kibana shutdown instead of staying pinned at
+   * "running" across restarts.
+   */
+  pluginStopSignal?: AbortSignal;
 }
 
 interface AllRouteDependencies extends RouteDependencies {
@@ -57,9 +75,14 @@ interface AllRouteDependencies extends RouteDependencies {
   // AESOP-scoped services; present only when `aesopEnabled` is true.
   skillValidationService?: SkillValidationService;
   skillOnlineEvalService?: import('../lib/aesop/skill_online_eval_service').SkillOnlineEvalService;
-  suiteRunner?: import('../lib/suite_runner').SuiteRunner;
-  repoRoot?: string;
   aesopEnabled: boolean;
+  aesopRateLimits?: import('../lib/aesop/security/rate_limiter').RateLimitConfig;
+  /**
+   * Hard ceiling for an entire AESOP exploration run. Sourced from
+   * `xpack.evals.aesop.explorationTimeoutMs` in kibana.yml. Forwarded to
+   * the executor; see {@link ExplorationWorkflowExecutor.execute}.
+   */
+  aesopExplorationTimeoutMs?: number;
 }
 
 export const registerRoutes = (dependencies: AllRouteDependencies) => {
@@ -91,17 +114,21 @@ export const registerRoutes = (dependencies: AllRouteDependencies) => {
   registerEvaluatorRoutes(dependencies);
   registerMonitoringRoutes(dependencies);
   if (dependencies.aesopEnabled) {
-    registerAesopRoutes(dependencies);
+    registerAesopRoutes({
+      ...dependencies,
+      rateLimits: dependencies.aesopRateLimits,
+      explorationTimeoutMs: dependencies.aesopExplorationTimeoutMs,
+      pluginStopSignal: dependencies.pluginStopSignal,
+    });
   }
   registerSkillRoutes(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 
-  if (dependencies.repoRoot) {
-    registerSuiteRoutes({
-      router: dependencies.router,
-      logger: dependencies.logger,
-      suiteRunner: dependencies.suiteRunner,
-      repoRoot: dependencies.repoRoot,
-    });
-  }
+  // Experiments routes (Workflows-based eval runs)
+  registerGetExperimentSuitesRoute(dependencies);
+  registerRunExperimentSuiteRoute(dependencies);
+  registerRunExperimentSuiteNowRoute(dependencies);
+  registerCancelExperimentRunRoute(dependencies);
+  registerGetExperimentRunRoute(dependencies);
+  registerGetExperimentRunLogsRoute(dependencies);
 };

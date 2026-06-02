@@ -16,6 +16,7 @@
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/evals-common",
+    "@kbn/evals-runner",
     "@kbn/i18n",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
@@ -30,6 +31,15 @@
     "@kbn/zod",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/management-settings-ids",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
+    "@kbn/tracing-utils"
   ]
 }

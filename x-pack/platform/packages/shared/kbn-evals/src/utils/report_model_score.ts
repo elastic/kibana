@@ -7,16 +7,15 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import { hostname } from 'os';
 import type { Model } from '@kbn/inference-common';
+import {
+  mapToEvaluationScoreDocuments as mapToRunnerScoreDocuments,
+  type EvaluationScoreDocument,
+} from '@kbn/evals-runner';
+import type { RanExperiment } from '@kbn/evals-runner';
 import type { EvaluationScoreRepository } from './score_repository';
-import { type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata, type GitMetadata } from './git_metadata';
-import type { RanExperiment, EvaluationRun, EvaluationCompleteEvent, TaskRun } from '../types';
-
-function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
-  return runs[evalRun.experimentRunId];
-}
+import type { EvaluationCompleteEvent } from '../types';
 
 export interface BuildSingleScoreDocumentParams {
   event: EvaluationCompleteEvent;
@@ -98,46 +97,19 @@ export async function mapToEvaluationScoreDocuments({
   runId: string;
   totalRepetitions: number;
 }): Promise<EvaluationScoreDocument[]> {
-  const documents: EvaluationScoreDocument[] = [];
-  const timestamp = new Date().toISOString();
-  const git = getGitMetadata();
-  const hostName = hostname();
+  const gitMetadata = getGitMetadata();
 
-  for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs = {} } = experiment;
-    if (!evaluationRuns) {
-      continue;
-    }
-
-    const datasetName = experiment.datasetName ?? datasetId;
-
-    for (const evalRun of evaluationRuns) {
-      const taskRun = getTaskRun(evalRun, runs);
-      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
-
-      documents.push(
-        buildSingleScoreDocument({
-          event: {
-            experimentId: experiment.id ?? '',
-            datasetId,
-            datasetName,
-            taskRun,
-            evaluationRun: evalRun,
-            exampleId,
-          },
-          taskModel,
-          evaluatorModel,
-          runId,
-          totalRepetitions,
-          timestamp,
-          gitMetadata: git,
-          hostName,
-        })
-      );
-    }
-  }
-
-  return documents;
+  return await mapToRunnerScoreDocuments({
+    experiments,
+    taskModel,
+    evaluatorModel,
+    runId,
+    totalRepetitions,
+    runMetadata: {
+      gitBranch: gitMetadata.branch,
+      gitCommitSha: gitMetadata.commitSha,
+    },
+  });
 }
 
 export async function exportEvaluations(

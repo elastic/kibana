@@ -16,9 +16,7 @@ const findEvaluator = (name: string): ServerEvaluator => {
   return evaluator;
 };
 
-const buildParams = (
-  responses: Array<string | { content?: string }>
-): ServerEvaluatorParams => {
+const buildParams = (responses: Array<string | { content?: string }>): ServerEvaluatorParams => {
   const queue = [...responses];
   return {
     input: { name: 'skill', description: 'd', markdown: '# s' },

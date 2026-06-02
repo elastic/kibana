@@ -84,7 +84,9 @@ Respond with ONLY a JSON array, no other text.`;
 
     if (!responseText || !responseText.trim()) {
       throw new Error(
-        `LLM returned empty content (connector=${connectorId}, typeId=${connectorTypeId ?? 'unknown'})`
+        `LLM returned empty content (connector=${connectorId}, typeId=${
+          connectorTypeId ?? 'unknown'
+        })`
       );
     }
 

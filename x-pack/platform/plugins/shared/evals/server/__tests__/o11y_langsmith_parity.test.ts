@@ -9,8 +9,9 @@
 /**
  * O11y Traces vs LangSmith Parity Validation Suite
  *
- * Validates that Elastic Observability (O11y) APM traces provide equivalent
- * or superior metrics compared to LangSmith for LLM observability.
+ * Aspirationally validates that Elastic Observability (O11y) APM traces
+ * provide equivalent or superior metrics compared to LangSmith for LLM
+ * observability.
  *
  * Key Metrics:
  * 1. Token Count Parity (≥95%)
@@ -19,12 +20,19 @@
  * 4. Error Rate Tracking
  * 5. Cost Attribution
  *
- * This suite supports the "eat our own dog food" principle: Elastic should
- * use its own observability stack for AESOP monitoring instead of external
- * tools like LangSmith.
+ * Status: SKIPPED — every block in this file builds the comparison data
+ * inline (`o11yTrace`, `langsmithTrace`, etc.) and asserts arithmetic on
+ * those hard-coded mocks. Nothing here actually queries `traces-apm-*` or
+ * the LangSmith API; the suite would pass against any real or broken
+ * implementation. We use `xdescribe` so the gap is loud in test output
+ * rather than masked as green coverage. Mirrors the convention used by
+ * `aesop_competitive_benchmarks.test.ts`.
+ *
+ * To re-enable, replace each inline mock with a real query against the
+ * matching index / API endpoint, then flip back to `describe`.
  */
 
-describe('O11y Traces vs LangSmith Parity', () => {
+xdescribe('O11y Traces vs LangSmith Parity (placeholder thresholds — see file header)', () => {
   // Test data structures
   interface O11yTrace {
     traceId: string;

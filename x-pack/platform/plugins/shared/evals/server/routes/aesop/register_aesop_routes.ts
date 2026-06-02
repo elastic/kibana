@@ -29,6 +29,7 @@ import { registerProposeEvaluatorsRoute } from './propose_evaluators';
 import type { SkillOnlineEvalService } from '../../lib/aesop/skill_online_eval_service';
 import type { SkillValidationService } from '../../lib/aesop/skill_validation_service';
 import type { EvaluatorRegistry } from '../../lib/evaluation_engine';
+import type { RateLimitConfig } from '../../lib/aesop/security/rate_limiter';
 
 export interface AESOPRouteDependencies {
   router: IRouter<EvalsRequestHandlerContext>;
@@ -36,6 +37,25 @@ export interface AESOPRouteDependencies {
   skillOnlineEvalService?: SkillOnlineEvalService;
   skillValidationService?: SkillValidationService;
   evaluatorRegistry?: EvaluatorRegistry;
+  /**
+   * Operator-tunable AESOP rate limits, sourced from
+   * `xpack.evals.aesop.rateLimits` in kibana.yml. When omitted, the
+   * persistent rate limiter falls back to its built-in defaults.
+   */
+  rateLimits?: RateLimitConfig;
+  /**
+   * Hard ceiling for an entire AESOP exploration run, in milliseconds.
+   * Sourced from `xpack.evals.aesop.explorationTimeoutMs` in kibana.yml
+   * and forwarded to the exploration executor.
+   */
+  explorationTimeoutMs?: number;
+  /**
+   * Signal that fires when the Evals plugin's `stop()` lifecycle hook runs.
+   * Forwarded to the exploration executor so in-flight runs are marked
+   * `failed` during Kibana shutdown / plugin reload, instead of staying
+   * pinned at "running" across restarts.
+   */
+  pluginStopSignal?: AbortSignal;
 }
 
 /**

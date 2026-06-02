@@ -8,6 +8,7 @@
 import {
   formatBedrockBody,
   ensureMessageFormat,
+  modelRejectsTemperature,
   parseContent,
   usesDeprecatedArguments,
   extractRegionId,
@@ -23,6 +24,53 @@ describe('formatBedrockBody', () => {
       messages: [{ role: 'user', content: 'Hello' }],
       max_tokens: expect.any(Number),
     });
+  });
+
+  it('includes temperature when provided for supported models', () => {
+    const result = formatBedrockBody({
+      messages: [{ role: 'user', content: 'Hello' }],
+      temperature: 0.2,
+      model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+    });
+    expect(result).toHaveProperty('temperature', 0.2);
+  });
+
+  it('omits temperature when the model rejects it', () => {
+    const result = formatBedrockBody({
+      messages: [{ role: 'user', content: 'Hello' }],
+      temperature: 0.2,
+      model: 'us.anthropic.claude-opus-4-7',
+    });
+    expect(result).not.toHaveProperty('temperature');
+  });
+
+  it('omits temperature when not provided', () => {
+    const result = formatBedrockBody({ messages: [{ role: 'user', content: 'Hello' }] });
+    expect(result).not.toHaveProperty('temperature');
+  });
+});
+
+describe('modelRejectsTemperature', () => {
+  it.each([
+    'us.anthropic.claude-opus-4-7',
+    'anthropic.claude-opus-4-5',
+    'us.anthropic.claude-sonnet-4-5',
+    'anthropic.claude-haiku-4-5',
+    'anthropic.claude-opus-5',
+    'anthropic.claude-sonnet-7',
+  ])('returns true for %s', (model) => {
+    expect(modelRejectsTemperature(model)).toBe(true);
+  });
+
+  it.each([
+    'anthropic.claude-3-5-sonnet-20240620-v1:0',
+    'anthropic.claude-3-opus-20240229-v1:0',
+    'anthropic.claude-opus-4-0',
+    'anthropic.claude-opus-4-1',
+    'anthropic.claude-sonnet-4',
+    undefined,
+  ])('returns false for %s', (model) => {
+    expect(modelRejectsTemperature(model)).toBe(false);
   });
 });
 

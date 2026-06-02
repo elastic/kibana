@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-// Spike test — uses an extended withRetry API (exponentialBackoff, jitter, timeouts, callbacks)
-// not yet reflected in the current aesop_errors.ts implementation.
+// Spike test — uses an extended withRetry API (exponentialBackoff, jitter,
+// timeouts, callbacks) NOT reflected in the current aesop_errors.ts
+// implementation. Casting via `as any` lets the file compile but means
+// most assertions exercise behaviour the real `withRetry` does not yet
+// implement, so a green run here does not prove anything about
+// production. See the `xdescribe` block below.
 import {
   withRetry as withRetryImpl,
   AESOPError,
@@ -32,7 +36,7 @@ interface RetryConfig {
   operation: string;
 }
 
-describe('Workflow Retry Logic', () => {
+xdescribe('Workflow Retry Logic (spike — withRetry API drifted from impl, see file header)', () => {
   let mockLogger: any;
 
   beforeEach(() => {

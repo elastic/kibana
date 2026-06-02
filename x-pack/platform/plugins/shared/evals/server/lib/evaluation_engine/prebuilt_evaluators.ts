@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing */
+
 import {
   SKILL_RELEVANCE_PROMPT,
   SKILL_COMPLETENESS_PROMPT,
@@ -138,10 +138,7 @@ const evaluateWithLlmJudge = async (
  * don't need the extra params, so the adapter simply forwards the four base
  * fields.
  */
-const adaptCodeEvaluator = (
-  evaluator: Evaluator,
-  description: string
-): ServerEvaluator => ({
+const adaptCodeEvaluator = (evaluator: Evaluator, description: string): ServerEvaluator => ({
   name: evaluator.name,
   kind: evaluator.kind,
   description,
@@ -206,8 +203,7 @@ const aggregateScores = (
   } else {
     const sorted = [...scores].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
-    aggregated =
-      sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    aggregated = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
   }
 
   return { aggregated, stddev };

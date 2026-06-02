@@ -17,7 +17,6 @@
  * From paper Section 8: Threat Model - production security controls
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   sanitizeIndexPattern,
   sanitizeAgentRole,
@@ -26,7 +25,11 @@ import {
   redactPII,
 } from '../input_sanitization';
 import { ReadOnlyEnforcer, SecurityError } from '../read_only_enforcer';
-import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../rate_limiter';
+
+// Rate limiting (Layer 4) is exercised against the production
+// `PersistentRateLimiter` in `persistent_rate_limiter.test.ts`. The previous
+// in-memory `RateLimiterService` was deleted; do not re-add it here — that
+// path is dead code.
 
 describe('AESOP Security Test Suite', () => {
   describe('Layer 1: Input Sanitization', () => {
@@ -228,99 +231,27 @@ describe('AESOP Security Test Suite', () => {
     });
   });
 
-  describe('Layer 4: Rate Limiting', () => {
-    let rateLimiter: RateLimiterService;
-    let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-
-    beforeEach(() => {
-      logger = loggingSystemMock.createLogger();
-      rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
-    });
-
-    describe('Exploration Rate Limiting (1/hour)', () => {
-      it('should allow 1 exploration per hour', async () => {
-        const result1 = await rateLimiter.checkRateLimit('user1', 'exploration');
-        expect(result1.allowed).toBe(true);
-
-        const result2 = await rateLimiter.checkRateLimit('user1', 'exploration');
-        expect(result2.allowed).toBe(false);
-        expect(result2.retryAfterSeconds).toBeLessThanOrEqual(3600);
-      });
-    });
-
-    describe('Validation Rate Limiting (10/hour)', () => {
-      it('should allow 10 validations per hour', async () => {
-        for (let i = 0; i < 10; i++) {
-          const result = await rateLimiter.checkRateLimit('user1', 'validation');
-          expect(result.allowed).toBe(true);
-        }
-
-        const blocked = await rateLimiter.checkRateLimit('user1', 'validation');
-        expect(blocked.allowed).toBe(false);
-      });
-    });
-
-    describe('Approval Rate Limiting (20/hour)', () => {
-      it('should allow 20 approvals per hour', async () => {
-        for (let i = 0; i < 20; i++) {
-          const result = await rateLimiter.checkRateLimit('user1', 'approval');
-          expect(result.allowed).toBe(true);
-        }
-
-        const blocked = await rateLimiter.checkRateLimit('user1', 'approval');
-        expect(blocked.allowed).toBe(false);
-      });
-    });
-
-    describe('User Isolation', () => {
-      it('should isolate rate limits per user', async () => {
-        // User1 hits exploration limit
-        await rateLimiter.checkRateLimit('user1', 'exploration');
-        const blocked = await rateLimiter.checkRateLimit('user1', 'exploration');
-        expect(blocked.allowed).toBe(false);
-
-        // User2 should still be allowed
-        const allowed = await rateLimiter.checkRateLimit('user2', 'exploration');
-        expect(allowed.allowed).toBe(true);
-      });
-    });
-
-    describe('Operation Isolation', () => {
-      it('should isolate rate limits per operation', async () => {
-        // Hit validation limit
-        for (let i = 0; i < 10; i++) {
-          await rateLimiter.checkRateLimit('user1', 'validation');
-        }
-
-        // Exploration should still work
-        const result = await rateLimiter.checkRateLimit('user1', 'exploration');
-        expect(result.allowed).toBe(true);
-      });
-    });
-  });
+  // Layer 4 (Rate Limiting) is covered exhaustively against the real
+  // production class in `persistent_rate_limiter.test.ts`. We intentionally
+  // do NOT duplicate that here — the previous tests exercised an in-memory
+  // service that no longer ships.
 
   describe('Integration: Multi-Layer Defense', () => {
     let enforcer: ReadOnlyEnforcer;
-    let rateLimiter: RateLimiterService;
-    let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
     beforeEach(() => {
       enforcer = new ReadOnlyEnforcer();
-      logger = loggingSystemMock.createLogger();
-      rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
     });
 
-    it('should apply all security layers in sequence', async () => {
+    it('should apply all security layers in sequence', () => {
       // Layer 1: Input sanitization
       const indices = ['logs-*', 'metrics-*'];
       const sanitizedIndices = validateScopedIndices(indices);
       expect(sanitizedIndices).toEqual(indices);
 
-      // Layer 2: Rate limiting
-      const rateLimit = await rateLimiter.checkRateLimit('user1', 'exploration');
-      expect(rateLimit.allowed).toBe(true);
-
-      // Layer 3: Read-only enforcement
+      // Layer 3: Read-only enforcement (rate limiting layer is covered in
+      // persistent_rate_limiter.test.ts to avoid duplicating ES mocking
+      // here).
       expect(() => enforcer.validateReadOnlyRequest('POST', '/logs-*/_search')).not.toThrow();
       expect(() => enforcer.validateReadOnlyRequest('POST', '/logs-*/_delete/1')).toThrow(
         SecurityError
@@ -338,14 +269,8 @@ describe('AESOP Security Test Suite', () => {
       expect(() => enforcer.validateReadOnlyRequest('DELETE', '/my-index')).toThrow(SecurityError);
     });
 
-    it('should prevent resource exhaustion via rate limiting', async () => {
-      // Try to run multiple explorations (resource exhaustion attack)
-      await rateLimiter.checkRateLimit('user1', 'exploration');
-
-      const blocked = await rateLimiter.checkRateLimit('user1', 'exploration');
-      expect(blocked.allowed).toBe(false);
-      expect(blocked.retryAfterSeconds).toBeGreaterThan(0);
-    });
+    // Resource-exhaustion protection (rate limiting) is covered against the
+    // persistent ES-backed limiter in persistent_rate_limiter.test.ts.
   });
 
   describe('Edge Cases and Corner Cases', () => {

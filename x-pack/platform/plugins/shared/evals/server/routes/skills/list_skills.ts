@@ -7,6 +7,21 @@
 
 import type { SkillRouteDependencies } from '.';
 
+/**
+ * `GET /internal/evals/skills`
+ *
+ * Returns a lightweight summary of every skill registered with Agent
+ * Builder. Used by `scripts/test_skill_eval_e2e.sh` and surfaces the
+ * `id` + `name` of skills that consumers can drill into via the per-skill
+ * detail endpoints.
+ *
+ * Performance note: prior versions of this route awaited
+ * `skill.getRegistryTools()` for every skill in the listing (N+1 against
+ * a registry whose persistence layer does not always batch). We deliberately
+ * skip that here — `tool_ids` belongs on the per-skill detail endpoint
+ * (`GET /internal/evals/skills/{skillId}/...`) where the caller has already
+ * narrowed to a single skill and the cost of one extra await is irrelevant.
+ */
 export function registerListSkillsRoute({ router, logger }: SkillRouteDependencies) {
   router.versioned
     .get({
@@ -25,19 +40,13 @@ export function registerListSkillsRoute({ router, logger }: SkillRouteDependenci
         const skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
         const allSkills = await skillRegistry.list();
 
-        const skills = await Promise.all(
-          allSkills.map(async (skill: any) => {
-            const toolIds = await skill.getRegistryTools();
-            return {
-              id: skill.id,
-              name: skill.name,
-              description: skill.description,
-              readonly: skill.readonly,
-              experimental: skill.experimental,
-              tool_ids: toolIds,
-            };
-          })
-        );
+        const skills = allSkills.map((skill: any) => ({
+          id: skill.id,
+          name: skill.name,
+          description: skill.description,
+          readonly: skill.readonly,
+          experimental: skill.experimental,
+        }));
 
         return response.ok({ body: { skills } });
       } catch (error) {

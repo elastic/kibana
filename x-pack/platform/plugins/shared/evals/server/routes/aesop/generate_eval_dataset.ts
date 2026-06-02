@@ -112,9 +112,10 @@ export function registerGenerateEvalDatasetRoute({ router, logger }: AESOPRouteD
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[AESOP] Failed to generate eval dataset: ${msg}`);
-          const isConnectorIssue = /Connector execution failed|security token|Forbidden|Unauthorized|rate limit|max_tokens|anthropic_version/i.test(
-            msg
-          );
+          const isConnectorIssue =
+            /Connector execution failed|security token|Forbidden|Unauthorized|rate limit|max_tokens|anthropic_version/i.test(
+              msg
+            );
           return response.customError({
             statusCode: isConnectorIssue ? 400 : 500,
             body: {

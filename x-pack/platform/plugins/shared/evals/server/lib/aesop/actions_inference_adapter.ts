@@ -7,11 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import {
-  buildLlmRequestBody,
-  extractLlmResponseText,
-  getConnectorTypeId,
-} from './llm_defaults';
+import { buildLlmRequestBody, extractLlmResponseText, getConnectorTypeId } from './llm_defaults';
 
 type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
@@ -69,7 +65,8 @@ export const createActionsInferenceClient = ({
       .map((m) => m.content)
       .join('\n\n');
 
-    const combinedSystem = [baseSystemPrompt, inlineSystem].filter(Boolean).join('\n\n') || undefined;
+    const combinedSystem =
+      [baseSystemPrompt, inlineSystem].filter(Boolean).join('\n\n') || undefined;
 
     const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
 

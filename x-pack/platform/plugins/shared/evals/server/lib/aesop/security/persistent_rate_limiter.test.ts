@@ -112,7 +112,7 @@ describe('PersistentRateLimiter', () => {
       );
     });
 
-    it('should fail open on ES error and return allowed: true', async () => {
+    it('should fail open by default on ES error and return allowed: true', async () => {
       mockEsClient.indices.exists.mockRejectedValueOnce(new Error('ES connection refused'));
 
       // Need a fresh instance since ensureIndex is cached
@@ -125,6 +125,26 @@ describe('PersistentRateLimiter', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('[RateLimiter] ES error, failing open')
+      );
+    });
+
+    it('should fail closed on ES error when failClosed=true', async () => {
+      mockEsClient.indices.exists.mockRejectedValueOnce(new Error('ES connection refused'));
+
+      // Production-style config: deny on backend failure rather than letting
+      // an ES outage silently bypass the connector-cost ceiling.
+      const failClosedLimits = { ...TEST_LIMITS, failClosed: true };
+      const freshLimiter = new PersistentRateLimiter(mockEsClient as any, logger, failClosedLimits);
+      const result = await freshLimiter.checkRateLimit('user1', 'exploration');
+
+      expect(result.allowed).toBe(false);
+      expect(result.limit).toBe(1);
+      expect(result.remaining).toBe(0);
+      // Caller-friendly retry hint so they don't hammer ES while it's down.
+      expect(result.retryAfterSeconds).toBeGreaterThan(0);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('[RateLimiter] ES error, failing closed')
       );
     });
 
@@ -154,11 +174,15 @@ describe('PersistentRateLimiter', () => {
       );
     });
 
-    it('should enforce exploration limit of 1 per hour', async () => {
+    it('should enforce the configured exploration limit per hour', async () => {
+      // Mock state at the limit (DEFAULT_RATE_LIMITS.exploration.maxRequests = 5).
+      // The next request must therefore be blocked. If defaults change in
+      // rate_limiter.ts, update this seed too — the assertion is otherwise
+      // tied to the production default and will catch drift.
       const now = Date.now();
       mockEsClient.get.mockResolvedValueOnce({
         _source: {
-          count: 1,
+          count: 5,
           window_start: now - 1000,
           last_attempt: now - 500,
         },

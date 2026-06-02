@@ -24,7 +24,6 @@ import { RunsListPage } from './pages/runs_list';
 import { DatasetsListPage } from './pages/datasets_list';
 import { EvaluatorCatalogPage } from './pages/evaluators';
 import { SkillPerformanceDashboard } from './pages/monitoring';
-import { SuitesListPage } from './pages/suites_list';
 // AesopErrorBoundary is a lightweight class used as the wrapper around
 // lazy AESOP routes; imported eagerly so it can catch errors thrown by
 // the lazy children during render. It is tree-shakable when no AESOP
@@ -79,6 +78,11 @@ const CompareRunsPage = React.lazy(async () => {
   return { default: mod.CompareRunsPage };
 });
 
+const ExperimentsPage = React.lazy(async () => {
+  const mod = await import('./pages/experiments');
+  return { default: mod.ExperimentsPage };
+});
+
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
 });
@@ -103,10 +107,6 @@ const monitoringTabLabel = i18n.translate('xpack.evals.navigation.monitoring', {
   defaultMessage: 'Monitoring',
 });
 
-const suitesTabLabel = i18n.translate('xpack.evals.navigation.suites', {
-  defaultMessage: 'Suites',
-});
-
 const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
   defaultMessage: 'Remotes',
 });
@@ -115,10 +115,15 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
 
+const experimentsTabLabel = i18n.translate('xpack.evals.navigation.experiments', {
+  defaultMessage: 'Experiments',
+});
+
 const ROOT_PATH = '/' as const;
 const COMPARE_PATH = '/compare' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
+const EXPERIMENTS_PATH = '/experiments' as const;
 const REMOTES_PATH = '/remotes' as const;
 
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
@@ -154,10 +159,6 @@ const evaluatorsBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.evalua
 
 const monitoringBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.monitoring', {
   defaultMessage: 'Monitoring',
-});
-
-const suitesBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.suites', {
-  defaultMessage: 'Suites',
 });
 
 const technicalPreviewLabel = i18n.translate('xpack.evals.technicalPreview.badgeLabel', {
@@ -276,8 +277,8 @@ const getBreadcrumbs = ({
     return [{ text: monitoringBreadcrumbLabel }];
   }
 
-  if (pathname === '/suites') {
-    return [{ text: suitesBreadcrumbLabel }];
+  if (pathname === EXPERIMENTS_PATH) {
+    return [{ text: experimentsTabLabel }];
   }
 
   return [{ text: runsTabLabel }];
@@ -292,7 +293,7 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
   const isAESOPSelected = aesopEnabled && pathname.startsWith('/aesop');
   const isEvaluatorsSelected = pathname === '/evaluators';
   const isMonitoringSelected = pathname.startsWith('/monitoring');
-  const isSuitesSelected = pathname === '/suites';
+  const isExperimentsSelected = pathname.startsWith(EXPERIMENTS_PATH);
   const isRunsSelected =
     !isTracingSelected &&
     !isDatasetsSelected &&
@@ -300,7 +301,7 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
     !isAESOPSelected &&
     !isEvaluatorsSelected &&
     !isMonitoringSelected &&
-    !isSuitesSelected;
+    !isExperimentsSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -334,8 +335,8 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
           {monitoringTabLabel}
           <TechPreviewBadge />
         </EuiTab>
-        <EuiTab isSelected={isSuitesSelected} onClick={() => history.push('/suites')}>
-          {suitesTabLabel}
+        <EuiTab isSelected={isExperimentsSelected} onClick={() => history.push(EXPERIMENTS_PATH)}>
+          {experimentsTabLabel}
           <TechPreviewBadge />
         </EuiTab>
       </EuiTabs>
@@ -407,6 +408,15 @@ export const EvalsApp: React.FC<{
                   </AesopErrorBoundary>
                 </Route>
               )}
+              {/* Bookmarks to bare `/aesop` should land on the proposed-skills
+                  hub, not a blank page. */}
+              {aesopEnabled && (
+                <Route
+                  exact
+                  path="/aesop"
+                  render={() => <Redirect to="/aesop/skills/proposed" />}
+                />
+              )}
               {/* When AESOP is disabled, bookmarked deep-links to /aesop/*
                   would otherwise render a blank page. Redirect them to the
                   root instead so the user lands on a working page. */}
@@ -414,7 +424,7 @@ export const EvalsApp: React.FC<{
               <Route exact path="/evaluators" component={EvaluatorCatalogPage} />
               <Route exact path="/monitoring" component={SkillPerformanceDashboard} />
               <Route path="/monitoring/:skillId" component={SkillPerformanceDashboard} />
-              <Route exact path="/suites" component={SuitesListPage} />
+              <Route exact path={EXPERIMENTS_PATH} component={ExperimentsPage} />
             </Routes>
           </Suspense>
         </div>

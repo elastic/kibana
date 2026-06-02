@@ -64,7 +64,11 @@ Return a JSON object with:
 - Only READ operations (search, get_mapping, execute_esql). Never write or delete.
 - Use data stream names (e.g., logs-endpoint.events.process-default), not backing indices (.ds-*)
 - Limit ES|QL queries to LIMIT 100 for sampling
-- Skip system indices (starting with . except .internal.alerts-*)`,
+- Skip system indices (starting with . except .internal.alerts-*)
+
+## Output Discipline
+- Respond with ONLY the JSON object specified above. No markdown headings, no prose, no commentary.
+- The first character of your response must be \`{\` and the last must be \`}\`.`,
   },
   {
     id: `${AESOP_AGENT_PREFIX}.pattern-miner`,
@@ -144,9 +148,16 @@ Return a JSON array:
 ]
 
 ## Rules
-- Generate 3-8 skills total, focusing on highest-value patterns
-- Test at least one query per skill with execute_esql
-- Never generate skills that write, delete, or modify data`,
+- Generate EXACTLY 3 skills, focusing on the highest-value patterns. Quality over quantity.
+- Keep each "markdown" body under 1200 words to fit within the response token budget.
+  Truncated responses are dropped — concise, complete skills beat verbose, half-finished ones.
+- Test at least one query per skill with execute_esql.
+- Never generate skills that write, delete, or modify data.
+
+## Output Discipline
+- Respond with ONLY the JSON array. No prose, no preamble, no closing remarks.
+- Do not wrap the array in any object, key, or commentary.
+- The first character of your response must be \`[\` and the last must be \`]\`.`,
   },
   {
     id: `${AESOP_AGENT_PREFIX}.skill-validator`,

@@ -16,13 +16,18 @@
  *
  * Paper Reference: https://arxiv.org/abs/2603.XXXXX (March 2026)
  *
- * Test Philosophy:
- * - Placeholders mark where real data/metrics will be integrated
- * - Thresholds are based on research paper hypothesis measurement plan
- * - Tests serve as acceptance criteria for AESOP MVP
+ * Status: SKIPPED — these blocks currently assert against hardcoded
+ * placeholders (see the `TODO: Query .aesop-*` markers throughout). They
+ * pass today only because the placeholders satisfy the threshold; they do
+ * NOT measure the real system. We use `xdescribe` so the gap is loud in
+ * test output rather than masked as green coverage.
+ *
+ * To re-enable, wire each placeholder to a real ES query against the
+ * matching `.aesop-*` index, then flip back to `describe`. Tracked as PR
+ * D1 (benchmarks slice) in the split plan.
  */
 
-describe('AESOP Competitive Benchmarks', () => {
+xdescribe('AESOP Competitive Benchmarks (placeholder thresholds — see file header)', () => {
   // Test data structures for baseline comparisons
   interface DocumentedRelationship {
     from: string;

@@ -122,7 +122,11 @@ export const ESQL_QUERY_LABEL = i18n.translate('xpack.evals.evaluators.createFly
 });
 
 export const ESQL_QUERY_HELP = i18n.translate('xpack.evals.evaluators.createFlyout.esqlQueryHelp', {
-  defaultMessage: 'Use {input} and {output} as placeholders. The query result is used for scoring.',
+  // Curly braces are escaped with single quotes so ICU MessageFormat treats
+  // `{input}` and `{output}` as literal placeholders for the user, not as
+  // message-formatter arguments.
+  defaultMessage:
+    "Use '{input}' and '{output}' as placeholders. The query result is used for scoring.",
 });
 
 export const ESQL_SCORE_EXPR_LABEL = i18n.translate(
@@ -264,7 +268,9 @@ export const CODE_RETURN_TYPE_TITLE = i18n.translate(
 
 export const CODE_RETURN_TYPE_DESCRIPTION = i18n.translate(
   'xpack.evals.evaluators.createFlyout.codeReturnTypeDesc',
-  { defaultMessage: '{ score: number, label?: string, explanation?: string }' }
+  // Wrap the literal type-shape in single quotes so ICU MessageFormat does
+  // not try to parse `{ score: ... }` as a malformed argument list.
+  { defaultMessage: "'{ score: number, label?: string, explanation?: string }'" }
 );
 
 // Buttons

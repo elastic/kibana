@@ -51,7 +51,7 @@ export const GetEvaluationRunsRequestQuery = z.object({
    * Filter by dataset ID
    */
   dataset_id: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional().default(1),
+  page: z.coerce.number().int().min(1).max(100).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
 });
 export type GetEvaluationRunsRequestQueryInput = z.input<typeof GetEvaluationRunsRequestQuery>;

@@ -13,8 +13,12 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { ServerEvaluator } from './lib/evaluation_engine';
+import type { ExperimentSuiteDefinition } from './experiments/types';
 
 /**
  * Structural placeholder for the `@kbn/agent-builder-plugin` Setup/Start
@@ -37,6 +41,7 @@ export type AgentBuilderContractLike = Record<string, any>;
 
 export interface EvalsPluginSetup {
   registerEvaluator: (evaluator: ServerEvaluator) => void;
+  registerExperimentSuite: (definition: ExperimentSuiteDefinition<any>) => void;
 }
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
@@ -47,12 +52,15 @@ export interface EvalsSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   actions?: ActionsPluginSetup;
   agentBuilder?: AgentBuilderContractLike;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderContractLike;
+  inference?: InferenceServerStart;
 }
 
 export interface EvalsRouteHandlerContext {

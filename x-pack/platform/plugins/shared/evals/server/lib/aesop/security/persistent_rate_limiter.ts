@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { trace } from '@opentelemetry/api';
 import type { RateLimitConfig, RateLimitResult } from './rate_limiter';
 import { DEFAULT_RATE_LIMITS } from './rate_limiter';
 
@@ -25,7 +26,14 @@ interface RateLimitDocument {
  * in the `.aesop-rate-limits` ES index so limits survive Kibana restarts
  * and work correctly across multiple Kibana instances.
  *
- * Fails open on ES errors to avoid blocking legitimate requests.
+ * Failure mode is operator-configurable via the `failClosed` flag on
+ * {@link RateLimitConfig}:
+ *  - `false` (default): fail OPEN — allow the request through, log a
+ *    warning, and record an `aesop.rate_limiter.failure` event on the
+ *    active OTLP span so the bypass is alertable in APM.
+ *  - `true`: fail CLOSED — deny the request. Recommended for production
+ *    deployments where bypassed limits translate directly into connector
+ *    spend or abuse risk.
  */
 export class PersistentRateLimiter {
   private ensureIndexPromise: Promise<void> | null = null;
@@ -117,16 +125,58 @@ export class PersistentRateLimiter {
           continue;
         }
 
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const failClosed = this.limits.failClosed === true;
+        const mode = failClosed ? 'fail_closed' : 'fail_open';
+
+        // Surface the bypass on the active OTLP span so it shows up in
+        // APM exactly where the request was being processed; operators
+        // can alert on `aesop.rate_limiter.failure` events even when
+        // running in fail-open mode.
+        const activeSpan = trace.getActiveSpan();
+        if (activeSpan?.isRecording()) {
+          activeSpan.addEvent('aesop.rate_limiter.failure', {
+            'aesop.rate_limiter.mode': mode,
+            'aesop.rate_limiter.user_id': userId,
+            'aesop.rate_limiter.operation': operation,
+            'aesop.rate_limiter.error': errorMessage,
+          });
+        }
+
+        if (failClosed) {
+          this.logger.error(
+            `[RateLimiter] ES error, failing closed (${operation} for ${userId}): ${errorMessage}`
+          );
+          return {
+            allowed: false,
+            limit: limit.maxRequests,
+            remaining: 0,
+            // Surface a short retry hint so callers don't hammer ES while
+            // it's still down. 30s is intentionally short — when ES comes
+            // back the next attempt should succeed.
+            retryAfterSeconds: 30,
+            resetAt: now + 30_000,
+          };
+        }
+
         this.logger.warn(
-          `[RateLimiter] ES error, failing open: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+          `[RateLimiter] ES error, failing open (${operation} for ${userId}): ${errorMessage}`
         );
         return { allowed: true, limit: limit.maxRequests, remaining: 1 };
       }
     }
 
-    // Should not be reached, but fail open as safety net
+    // Should not be reached, but fail open as safety net (or closed if
+    // configured) — same policy as the catch block above.
+    if (this.limits.failClosed === true) {
+      return {
+        allowed: false,
+        limit: limit.maxRequests,
+        remaining: 0,
+        retryAfterSeconds: 30,
+        resetAt: now + 30_000,
+      };
+    }
     return { allowed: true, limit: limit.maxRequests, remaining: 1 };
   }
 

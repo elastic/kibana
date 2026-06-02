@@ -10,7 +10,13 @@
     "browser": true,
     "configPath": ["xpack", "evals"],
     "requiredPlugins": ["features", "encryptedSavedObjects"],
-    "optionalPlugins": ["management", "actions"],
+    "optionalPlugins": [
+      "management",
+      "actions",
+      "workflowsManagement",
+      "workflowsExtensions",
+      "inference"
+    ],
     "runtimePluginDependencies": ["agentBuilder"],
     "requiredBundles": ["kibanaReact"]
   }

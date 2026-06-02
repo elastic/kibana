@@ -59,6 +59,7 @@ import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   extractRegionId,
   formatBedrockBody,
+  modelRejectsTemperature,
   parseContent,
   tee,
   usesDeprecatedArguments,
@@ -389,7 +390,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const res = (await this.streamApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            tools,
+            toolChoice,
+            model: model ?? this.model,
+          })
         ),
         model,
         signal,
@@ -434,6 +443,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
             maxTokens,
             tools,
             toolChoice,
+            model: model ?? this.model,
           })
         ),
         model,
@@ -461,13 +471,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
+    const effectiveModel = model ?? this.model;
+    const includeTemperature =
+      temperature !== undefined && !modelRejectsTemperature(effectiveModel);
     const res = await this.runApi(
       {
         body: JSON.stringify({
           messages,
           stop_sequences: stopSequences,
           system,
-          temperature,
+          ...(includeTemperature ? { temperature } : {}),
           max_tokens: maxTokens,
           tools,
           tool_choice: toolChoice,
@@ -550,10 +563,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    const includeTemperature = temperature !== undefined && !modelRejectsTemperature(modelId);
     const request: ConverseRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(includeTemperature ? { temperature } : {}),
         stopSequences,
         maxTokens,
       },
@@ -605,10 +619,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    const includeTemperature = temperature !== undefined && !modelRejectsTemperature(modelId);
     const request: ConverseStreamRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(includeTemperature ? { temperature } : {}),
         stopSequences,
         maxTokens,
       },

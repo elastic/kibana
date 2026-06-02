@@ -6,7 +6,20 @@
  */
 
 import { of, EMPTY, throwError } from 'rxjs';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { AgentOrchestrator } from './agent_orchestrator';
+
+// Helper: build the exact `message_complete` event shape Agent Builder emits
+// at runtime. The orchestrator filters on this type and reads
+// `event.data.message_content`; we keep all fixtures going through this
+// helper so a future event-shape change only needs one edit.
+const messageComplete = (content: string) => ({
+  type: ChatEventType.messageComplete,
+  data: {
+    message_id: 'msg-1',
+    message_content: content,
+  },
+});
 
 describe('AgentOrchestrator', () => {
   const mockLogger = {
@@ -30,8 +43,8 @@ describe('AgentOrchestrator', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('executeAgent', () => {
-    it('extracts response from messageComplete event', async () => {
-      const events$ = of({ type: 'messageComplete', message: { content: 'Hello world' } });
+    it('extracts response from message_complete event', async () => {
+      const events$ = of(messageComplete('Hello world'));
       const agentBuilder = createMockAgentBuilderStart(events$);
 
       const orchestrator = new AgentOrchestrator({
@@ -56,15 +69,13 @@ describe('AgentOrchestrator', () => {
       );
     });
 
-    it('extracts response from conversationUpdate event', async () => {
+    it('ignores non-message_complete events and returns empty string', async () => {
+      // The orchestrator only consumes `message_complete`. Conversation
+      // updates, reasoning chunks, tool results etc. must be silently
+      // ignored — failing to filter them caused EmptyError in production.
       const events$ = of({
-        type: 'conversationUpdate',
-        conversation: {
-          messages: [
-            { role: 'user', content: 'hi' },
-            { role: 'assistant', content: 'Schema analysis complete' },
-          ],
-        },
+        type: ChatEventType.reasoning,
+        data: { reasoning: 'thinking...' },
       });
       const agentBuilder = createMockAgentBuilderStart(events$);
 
@@ -76,7 +87,7 @@ describe('AgentOrchestrator', () => {
       });
 
       const result = await orchestrator.executeAgent('agent1', 'go');
-      expect(result).toBe('Schema analysis complete');
+      expect(result).toBe('');
     });
 
     it('returns empty string on stream error', async () => {
@@ -122,21 +133,15 @@ describe('AgentOrchestrator', () => {
             .fn()
             .mockResolvedValueOnce({
               executionId: 'e1',
-              events$: of({
-                type: 'messageComplete',
-                message: { content: '{"schemas": []}' },
-              }),
+              events$: of(messageComplete('{"schemas": []}')),
             })
             .mockResolvedValueOnce({
               executionId: 'e2',
-              events$: of({
-                type: 'messageComplete',
-                message: { content: '[{"name": "pattern1"}]' },
-              }),
+              events$: of(messageComplete('[{"name": "pattern1"}]')),
             })
             .mockResolvedValueOnce({
               executionId: 'e3',
-              events$: of({ type: 'messageComplete', message: { content: skillsJson } }),
+              events$: of(messageComplete(skillsJson)),
             }),
         },
       };
@@ -194,10 +199,7 @@ describe('AgentOrchestrator', () => {
             .fn()
             .mockResolvedValueOnce({
               executionId: 'e1',
-              events$: of({
-                type: 'messageComplete',
-                message: { content: 'schemas found' },
-              }),
+              events$: of(messageComplete('schemas found')),
             })
             .mockResolvedValueOnce({
               // pattern miner fails (EMPTY observable → '' response)
@@ -247,9 +249,7 @@ describe('AgentOrchestrator', () => {
         suggestions: [],
       });
 
-      const agentBuilder = createMockAgentBuilderStart(
-        of({ type: 'messageComplete', message: { content: validationJson } })
-      );
+      const agentBuilder = createMockAgentBuilderStart(of(messageComplete(validationJson)));
 
       const orchestrator = new AgentOrchestrator({
         agentBuilderStart: agentBuilder,
@@ -286,9 +286,7 @@ describe('AgentOrchestrator', () => {
         markdown: '# Improved\nBetter content',
       });
 
-      const agentBuilder = createMockAgentBuilderStart(
-        of({ type: 'messageComplete', message: { content: improvedJson } })
-      );
+      const agentBuilder = createMockAgentBuilderStart(of(messageComplete(improvedJson)));
 
       const orchestrator = new AgentOrchestrator({
         agentBuilderStart: agentBuilder,
@@ -303,12 +301,11 @@ describe('AgentOrchestrator', () => {
 
     it('handles markdown-wrapped JSON response', async () => {
       const agentBuilder = createMockAgentBuilderStart(
-        of({
-          type: 'messageComplete',
-          message: {
-            content: '```json\n{"name": "Fixed", "description": "d", "markdown": "# Fixed"}\n```',
-          },
-        })
+        of(
+          messageComplete(
+            '```json\n{"name": "Fixed", "description": "d", "markdown": "# Fixed"}\n```'
+          )
+        )
       );
 
       const orchestrator = new AgentOrchestrator({

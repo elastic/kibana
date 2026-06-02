@@ -16,14 +16,21 @@ import { inferAnalystRole, describeRole } from '../../services/analyst_role_infe
 import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
 import { PersistentRateLimiter } from '../../lib/aesop/security/persistent_rate_limiter';
-import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instrumentation';
+import { withAesopSpan } from '../../lib/aesop/monitoring/tracing';
 
 jest.mock('../../services/index_discovery');
 jest.mock('../../services/analyst_role_inference');
 jest.mock('../../services/sampling_strategy');
 jest.mock('../../lib/aesop/workflows/workflow_state_tracker');
 jest.mock('../../lib/aesop/security/persistent_rate_limiter');
-jest.mock('../../lib/aesop/monitoring/apm_instrumentation');
+// The tracing helper wraps `@kbn/tracing-utils`. We don't want to spin up
+// a real OTel SDK in unit tests, so we replace it with a pass-through
+// implementation that just runs the callback. Span attributes are not
+// asserted here; trace coverage is exercised by integration tests.
+jest.mock('../../lib/aesop/monitoring/tracing', () => ({
+  __esModule: true,
+  withAesopSpan: jest.fn(async (_name: string, _opts: unknown, cb: () => unknown) => cb()),
+}));
 
 const mockDiscoverIndices = discoverIndices as jest.MockedFunction<typeof discoverIndices>;
 const mockInferAnalystRole = inferAnalystRole as jest.MockedFunction<typeof inferAnalystRole>;
@@ -31,15 +38,13 @@ const mockDescribeRole = describeRole as jest.MockedFunction<typeof describeRole
 const mockCalibrateSamplingStrategy = calibrateSamplingStrategy as jest.MockedFunction<
   typeof calibrateSamplingStrategy
 >;
+const mockWithAesopSpan = withAesopSpan as jest.MockedFunction<typeof withAesopSpan>;
 
 const MockWorkflowStateTracker = WorkflowStateTracker as jest.MockedClass<
   typeof WorkflowStateTracker
 >;
 const MockPersistentRateLimiter = PersistentRateLimiter as jest.MockedClass<
   typeof PersistentRateLimiter
->;
-const MockAPMInstrumentationService = APMInstrumentationService as jest.MockedClass<
-  typeof APMInstrumentationService
 >;
 
 describe('POST /internal/aesop/exploration/run', () => {
@@ -160,12 +165,6 @@ describe('POST /internal/aesop/exploration/run', () => {
     });
 
     MockWorkflowStateTracker.prototype.initializeExecution = jest.fn().mockResolvedValue(undefined);
-    MockAPMInstrumentationService.prototype.ensureMetricsIndex = jest
-      .fn()
-      .mockResolvedValue(undefined);
-    MockAPMInstrumentationService.prototype.instrumentWorkflowStep = jest
-      .fn()
-      .mockImplementation(async (_name, _meta, op) => op());
 
     registerRunExplorationRoute({ router: mockRouter, logger: mockLogger });
   });
@@ -223,21 +222,28 @@ describe('POST /internal/aesop/exploration/run', () => {
       expect(MockWorkflowStateTracker).toHaveBeenCalledWith(scopedClient.asCurrentUser, mockLogger);
     });
 
-    it('should pass esClient.asCurrentUser to APMInstrumentationService', async () => {
-      const scopedClient = mockScopedClient();
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: { client: scopedClient },
-          security: { authc: { getCurrentUser: () => ({ username: 'test-user' }) } },
-        }),
-      } as any;
+    it('should emit an OTLP span for the exploration kickoff with the right name and attributes', async () => {
+      const mockContext = createMockContext();
       const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(MockAPMInstrumentationService).toHaveBeenCalledWith(
-        scopedClient.asCurrentUser,
-        mockLogger
+      expect(mockWithAesopSpan).toHaveBeenCalledWith(
+        'aesop.exploration.started',
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            'aesop.kind': 'workflow_step',
+            'aesop.step_name': 'exploration_started',
+            'aesop.workflow_name': 'aesop.autonomous_exploration',
+            'aesop.execution_id': expect.stringMatching(/^aesop-/),
+            'aesop.user_id': 'test-user',
+            'aesop.analyst_role': 'soc_analyst',
+            'aesop.analyst_role_source': 'inferred',
+            'aesop.discovered_indices_count': 2,
+            'aesop.sampling_strategy': 'Time-Based Sampling (10%)',
+          }),
+        }),
+        expect.any(Function)
       );
     });
 
@@ -274,15 +280,6 @@ describe('POST /internal/aesop/exploration/run', () => {
         expect.stringMatching(/^aesop-/),
         'aesop.self_exploration'
       );
-    });
-
-    it('should ensure the APM metrics index exists', async () => {
-      const mockContext = createMockContext();
-      const mockRequest = createMockRequest();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(MockAPMInstrumentationService.prototype.ensureMetricsIndex).toHaveBeenCalled();
     });
   });
 

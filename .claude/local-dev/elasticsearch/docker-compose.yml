@@ -1,0 +1,84 @@
+# Persistent dev Elasticsearch for the skill-eval-platform worktree.
+#
+# Why this exists:
+# `yarn es snapshot` deletes and re-extracts `.es/9.5.0/`, including the
+# data directory, every time it runs. We lost ~848MB of AESOP / eval data
+# this way (see .claude/local-dev/elasticsearch/POSTMORTEM.md). To prevent
+# recurrence, we run ES under Docker with a NAMED VOLUME bound to this
+# worktree, and never use `yarn es snapshot` again in this worktree.
+#
+# Lifecycle:
+#   ./scripts/dev-es.sh up        # start ES, wait for green
+#   ./scripts/dev-es.sh down      # stop ES (data preserved)
+#   ./scripts/dev-es.sh logs      # tail ES logs
+#   ./scripts/dev-es.sh status    # health + index count
+#   ./scripts/dev-es.sh nuke      # DESTROY data volume (interactive confirm)
+#
+# Auth: elastic:changeme  (matches Kibana dev defaults).
+# License: trial.
+# Port: 9200 (host) -> 9200 (container).
+# Cluster: single-node, named `skill-eval-platform`.
+#
+# IMPORTANT: Never run `yarn es snapshot` in this worktree. Use `dev-es.sh`.
+
+name: skill-eval-platform-es
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.0-SNAPSHOT
+    container_name: skill-eval-platform-es
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9300:9300"
+    environment:
+      # Cluster
+      - cluster.name=skill-eval-platform
+      - node.name=skill-eval-platform-es
+      - discovery.type=single-node
+
+      # Security: elastic:changeme (Kibana dev default)
+      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - xpack.security.authc.token.enabled=true
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.autoconfiguration.enabled=false
+
+      # Trial license (matches `yarn es snapshot --license trial`)
+      - xpack.license.self_generated.type=trial
+
+      # Match `yarn es snapshot` operational flags
+      - action.destructive_requires_name=true
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - ingest.geoip.downloader.enabled=false
+      - search.check_ccs_compatibility=true
+
+      # JVM
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - bootstrap.memory_lock=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      # NAMED volume — persists across `docker compose down` and survives
+      # any `yarn` / `node` / `git clean` operations on the host filesystem.
+      # Use `./scripts/dev-es.sh nuke` to delete it deliberately.
+      - skill_eval_es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "curl -fs -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health | grep -E '\"status\":\"(green|yellow)\"' >/dev/null"
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  skill_eval_es_data:
+    name: skill_eval_platform_es_data

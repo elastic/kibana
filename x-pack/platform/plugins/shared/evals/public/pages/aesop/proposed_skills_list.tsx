@@ -25,9 +25,13 @@ import {
   EuiPanel,
   EuiStat,
   EuiSuperSelect,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { useLLMConnectors } from '../../hooks/use_llm_connectors';
 import { SkillReviewFlyout } from './components/skill_review_flyout';
@@ -77,16 +81,44 @@ export const ProposedSkillsList = () => {
   const [derivedFromFilter, setDerivedFromFilter] = useState<string>('all');
   const [discoveryConnectorId, setDiscoveryConnectorId] = useState<string>('');
   const { data: connectors } = useLLMConnectors();
+  const { services } = useKibana<{ settings?: { client: IUiSettingsClient } }>();
+  // Operator-configurable default via uiSettings.overrides in kibana.yml.
+  // Same setting Agent Builder uses, so a single config controls both flows.
+  const defaultConnectorId = services.settings?.client.get<string | undefined>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    undefined
+  );
 
-  // Auto-select first .gen-ai connector once
+  // Resolve the discovery connector once connectors load. We deliberately do
+  // NOT filter by actionTypeId — Bedrock and Gemini connectors are valid
+  // discovery targets and the previous `.gen-ai`-only filter silently hid
+  // every Anthropic/Google option from the picker.
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
   React.useEffect(() => {
-    if (connectors?.length && !hasAutoSelected) {
-      const genAi = connectors.find((c) => c.actionTypeId === '.gen-ai');
-      setDiscoveryConnectorId(genAi?.id || connectors[0].id);
+    if (!connectors?.length || hasAutoSelected) return;
+
+    // 1. Honor the operator-configured GenAI default when it resolves to an
+    //    available connector.
+    if (defaultConnectorId && connectors.some((c) => c.id === defaultConnectorId)) {
+      setDiscoveryConnectorId(defaultConnectorId);
       setHasAutoSelected(true);
+      return;
     }
-  }, [connectors, hasAutoSelected]);
+
+    // 2. Fall back to the first preconfigured connector regardless of provider
+    //    (was previously hard-filtered to `.gen-ai`).
+    const preconfigured = connectors.find((c) => c.isPreconfigured);
+    setDiscoveryConnectorId(preconfigured?.id || connectors[0].id);
+    setHasAutoSelected(true);
+  }, [connectors, hasAutoSelected, defaultConnectorId]);
+
+  // True when the operator configured `genAiSettings:defaultAIConnector` but
+  // it did not resolve to any available connector (deleted, disabled, or
+  // typo). Surfaced as an inline warning next to the picker so the operator
+  // is not silently overridden by the fallback path above.
+  const defaultConnectorMissing = Boolean(
+    defaultConnectorId && connectors?.length && !connectors.some((c) => c.id === defaultConnectorId)
+  );
 
   // Fetch proposed skills
   const { data, isLoading, error, refetch } = useQuery({
@@ -388,6 +420,16 @@ export const ProposedSkillsList = () => {
                       aria-label="Select LLM connector for skill discovery"
                     />
                   </EuiFlexItem>
+                  {defaultConnectorMissing && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        aria-label="Configured default GenAI connector is unavailable"
+                        content={`Your kibana.yml sets genAiSettings:defaultAIConnector="${defaultConnectorId}", but that connector is not available (deleted, disabled, or typo). AESOP fell back to "${discoveryConnectorId}". Update kibana.yml or pick another connector here.`}
+                      />
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       iconType="playFilled"

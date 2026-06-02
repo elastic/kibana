@@ -18,9 +18,6 @@ export {
 
 export { ReadOnlyEnforcer, SecurityError } from './read_only_enforcer';
 
-export {
-  RateLimiterService,
-  DEFAULT_RATE_LIMITS,
-  type RateLimitConfig,
-  type RateLimitResult,
-} from './rate_limiter';
+export { DEFAULT_RATE_LIMITS, type RateLimitConfig, type RateLimitResult } from './rate_limiter';
+
+export { PersistentRateLimiter } from './persistent_rate_limiter';

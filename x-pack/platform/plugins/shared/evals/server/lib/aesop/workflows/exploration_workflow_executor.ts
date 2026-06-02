@@ -32,6 +32,7 @@ import {
 import { SkillDeduplicator } from '../dedup/skill_deduplicator';
 import { ConversationAnalyzer, type ConversationInsights } from '../analysis/conversation_analyzer';
 import { buildLlmRequestBody, extractLlmResponseText, getConnectorTypeId } from '../llm_defaults';
+import { withAesopSpan } from '../monitoring/tracing';
 
 const PROPOSED_SKILLS_INDEX = '.aesop-proposed-skills';
 const DISCOVERED_PATTERNS_INDEX = '.aesop-discovered-patterns';
@@ -109,6 +110,23 @@ interface ExplorationConfig {
   // Online eval pipeline (optional — enables auto-eval after skill generation)
   datasetService?: any;
   evaluatorRegistry?: any;
+
+  // Hard ceiling for the entire 5-phase run; sourced from
+  // `xpack.evals.aesop.explorationTimeoutMs` in kibana.yml. When the timer
+  // fires before execute() resolves, the executor marks the run failed via
+  // the state tracker and returns. Optional so existing callers keep working
+  // until plumbed through everywhere.
+  overallTimeoutMs?: number;
+
+  // Signal that fires when the Evals plugin's `stop()` lifecycle hook runs
+  // (Kibana shutdown, plugin disable, dev-server reload). The executor
+  // races this signal alongside the timeout: if it fires the run is marked
+  // `failed` in the state tracker so the UI doesn't show a permanently
+  // "running" exploration after Kibana restarts. In-flight ES/LLM calls
+  // are NOT cancelled — that requires AbortController plumbing into every
+  // downstream service and is tracked separately. The background work is
+  // allowed to drain; its later errors are ignored.
+  abortSignal?: AbortSignal;
 }
 
 interface SchemaInfo {
@@ -190,11 +208,33 @@ export class ExplorationWorkflowExecutor {
   /**
    * Execute the full 5-phase exploration workflow.
    * This method is fire-and-forget - it catches all errors internally.
+   *
+   * If `config.overallTimeoutMs` is set, the entire pipeline is bounded by
+   * that timer. The timer DOES NOT cancel in-flight work — bash-style hard
+   * cancellation of LLM/ES calls would require AbortController plumbing
+   * through every downstream service, which is tracked separately. Instead
+   * the timer marks the execution failed in the state tracker so the UI
+   * reports "timed out" instead of staying pinned at "running" forever; the
+   * background work eventually drains and its further errors are ignored.
+   *
+   * If `config.abortSignal` fires (because the Evals plugin's `stop()` hook
+   * ran — typically Kibana shutdown or a dev-server reload), the run is
+   * marked `failed` with a "shutdown" reason. Same caveat as the timeout:
+   * downstream work drains rather than being hard-cancelled.
    */
   async execute(): Promise<void> {
-    const { executionId } = this.config;
+    const { executionId, overallTimeoutMs, abortSignal } = this.config;
 
-    try {
+    // Bail out before doing any work if shutdown was already in progress
+    // when the executor was constructed (race with stop()).
+    if (abortSignal?.aborted) {
+      const message = 'Exploration aborted: Evals plugin is stopping.';
+      this.logger.warn(`[AESOP] ${message} execution_id=${executionId}`);
+      await this.stateTracker.failExecution(executionId, message).catch(() => {});
+      return;
+    }
+
+    const phasePipeline = async () => {
       // Store config in execution document for the detail page
       await this.storeExecutionConfig();
 
@@ -220,6 +260,54 @@ export class ExplorationWorkflowExecutor {
 
       // Phase 5: Skill Synthesis
       await this.executePhase(5, 'Skill Synthesis', () => this.phaseSkillSynthesis());
+    };
+
+    // unref() so a stuck timer does not keep the Node process alive past
+    // shutdown. Sentinel symbols survive `await` and are cheap to compare.
+    const TIMEOUT_SENTINEL = Symbol('aesop-exploration-timeout');
+    const ABORT_SENTINEL = Symbol('aesop-exploration-aborted');
+
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const timeoutPromise =
+      typeof overallTimeoutMs === 'number' && overallTimeoutMs > 0
+        ? new Promise<typeof TIMEOUT_SENTINEL>((resolve) => {
+            timeoutHandle = setTimeout(() => resolve(TIMEOUT_SENTINEL), overallTimeoutMs);
+            timeoutHandle.unref?.();
+          })
+        : null;
+
+    let abortListener: (() => void) | undefined;
+    const abortPromise = abortSignal
+      ? new Promise<typeof ABORT_SENTINEL>((resolve) => {
+          abortListener = () => resolve(ABORT_SENTINEL);
+          abortSignal.addEventListener('abort', abortListener, { once: true });
+        })
+      : null;
+
+    try {
+      const racers: Array<Promise<'done' | typeof TIMEOUT_SENTINEL | typeof ABORT_SENTINEL>> = [
+        phasePipeline().then(() => 'done' as const),
+      ];
+      if (timeoutPromise) racers.push(timeoutPromise);
+      if (abortPromise) racers.push(abortPromise);
+
+      const result = racers.length > 1 ? await Promise.race(racers) : await racers[0];
+
+      if (result === ABORT_SENTINEL) {
+        const message =
+          'Exploration aborted: Evals plugin is stopping (Kibana shutdown or plugin reload). In-flight work will drain in the background.';
+        this.logger.warn(`[AESOP] ${message} execution_id=${executionId}`);
+        await this.stateTracker.failExecution(executionId, message).catch(() => {});
+        return;
+      }
+
+      if (result === TIMEOUT_SENTINEL) {
+        const minutes = Math.round((overallTimeoutMs ?? 0) / 60_000);
+        const message = `Exploration exceeded overall timeout of ~${minutes} minutes; marking as failed (in-flight work will drain in the background).`;
+        this.logger.error(`[AESOP] ${message} execution_id=${executionId}`);
+        await this.stateTracker.failExecution(executionId, message);
+        return;
+      }
 
       // Mark execution complete
       await this.stateTracker.completeExecution(executionId);
@@ -231,11 +319,19 @@ export class ExplorationWorkflowExecutor {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[AESOP] Exploration failed execution_id=${executionId} error=${message}`);
       await this.stateTracker.failExecution(executionId, message);
+    } finally {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+      if (abortSignal && abortListener) {
+        abortSignal.removeEventListener('abort', abortListener);
+      }
     }
   }
 
   /**
-   * Execute a single phase with timing, progress tracking, and error handling.
+   * Execute a single phase with timing, progress tracking, error handling,
+   * and OTLP tracing. The whole phase body becomes an
+   * `aesop.exploration.phase.<n>.<name>` span so APM groups the per-phase
+   * ES / LLM / agent work nested inside.
    */
   private async executePhase(
     phaseNumber: 1 | 2 | 3 | 4 | 5,
@@ -247,8 +343,23 @@ export class ExplorationWorkflowExecutor {
       `[AESOP] Starting Phase ${phaseNumber}: ${phaseName} execution_id=${this.config.executionId}`
     );
 
+    // Phase name is used as a span attribute (kebab-case) so it survives
+    // the OTel span-name length cap and stays queryable in APM filters.
+    const phaseSlug = phaseName.toLowerCase().replace(/\s+/g, '_');
+
     try {
-      await fn();
+      await withAesopSpan(
+        `aesop.exploration.phase.${phaseNumber}.${phaseSlug}`,
+        {
+          attributes: {
+            'aesop.kind': 'exploration_phase',
+            'aesop.phase_number': phaseNumber,
+            'aesop.phase_name': phaseName,
+            'aesop.execution_id': this.config.executionId,
+          },
+        },
+        async () => fn()
+      );
       const durationMs = Date.now() - start;
       await this.stateTracker.completePhase(this.config.executionId, phaseNumber, durationMs);
       this.logger.info(`[AESOP] Completed Phase ${phaseNumber}: ${phaseName} in ${durationMs}ms`);
@@ -717,7 +828,9 @@ export class ExplorationWorkflowExecutor {
     const agentBuilderStart = this.config.getAgentBuilderStart();
     if (!agentBuilderStart || !connectorId) {
       this.logger.warn(
-        '[AESOP] Agent Builder or connector not available, skipping skill synthesis'
+        `[AESOP] Skipping agent-based skill synthesis: agentBuilderStart=${
+          agentBuilderStart ? 'available' : 'missing'
+        } connectorId=${connectorId ? 'set' : 'missing'}`
       );
       return;
     }

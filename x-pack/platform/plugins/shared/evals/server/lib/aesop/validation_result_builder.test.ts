@@ -97,7 +97,10 @@ describe('buildValidationSummary', () => {
 
   it('feedback is a short one-liner referencing gate status', () => {
     const summary = buildValidationSummary(
-      [mkResult('skill-safety', 1.0, 'pass'), mkResult('skill-secret-scanner', 1.0, 'pass', undefined, 'CODE')],
+      [
+        mkResult('skill-safety', 1.0, 'pass'),
+        mkResult('skill-secret-scanner', 1.0, 'pass', undefined, 'CODE'),
+      ],
       { requiredPass: REQUIRED, compositeThreshold: THRESHOLD }
     );
 
