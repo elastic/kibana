@@ -30,8 +30,6 @@ interface Props {
   readonly onSelectEntity: (entityName: string) => void;
 }
 
-const MAX_TILES_PER_ROW = 96;
-
 const useHealthColors = (): Record<EntityHealth, string> => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
@@ -97,14 +95,14 @@ const HealthTile = ({
 const HealthTileRow = ({
   entities,
   onSelectEntity,
-  maxTiles = MAX_TILES_PER_ROW,
 }: {
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
-  maxTiles?: number;
 }) => {
-  const visible = entities.slice(0, maxTiles);
-  const overflow = entities.length - visible.length;
+  // No truncation — every entity in the bucket renders as its own tile so
+  // the map view stays consistent with the count shown in the header (and
+  // with the list-view count). The wrap+flex layout handles large pods/
+  // containers buckets gracefully.
   const containerClass = css`
     display: flex;
     flex-wrap: wrap;
@@ -113,17 +111,9 @@ const HealthTileRow = ({
   `;
   return (
     <div className={containerClass} role="list">
-      {visible.map((entity) => (
+      {entities.map((entity) => (
         <HealthTile key={entity.id} entity={entity} onSelectEntity={onSelectEntity} />
       ))}
-      {overflow > 0 ? (
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.entityCentricLab.entities.tileOverflow', {
-            defaultMessage: '+{count} more',
-            values: { count: overflow.toLocaleString() },
-          })}
-        </EuiText>
-      ) : null}
     </div>
   );
 };

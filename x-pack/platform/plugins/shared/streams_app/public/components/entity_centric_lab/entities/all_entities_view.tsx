@@ -19,7 +19,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
+// The Streams page body is a column flex container with `height: 100%`.
+// `EuiFlexGroup` bakes `flex-grow: 1` into its CSS with no prop to disable
+// it, so any EuiFlexGroup used as a "toolbar" row would absorb the empty
+// vertical space freed up when filtering shrinks the grid below — the
+// "each new filter adds more space" symptom. Pin `flex-grow` to `0` so
+// toolbars stay at content height.
+const NO_GROW = css`
+  flex-grow: 0;
+`;
 import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -157,7 +168,7 @@ export const AllEntitiesView = () => {
           onChange={setActiveTagFilters}
         />
         <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap css={NO_GROW}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h3>

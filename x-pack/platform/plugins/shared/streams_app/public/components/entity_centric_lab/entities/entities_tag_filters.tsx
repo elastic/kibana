@@ -10,7 +10,8 @@ import {
   EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiSelectable,
   useGeneratedHtmlId,
@@ -20,6 +21,17 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActiveTagFilters, TagKey } from './fake_entities';
 import { TAG_KEYS, TAG_KEY_LABEL } from './fake_entities';
+
+// The Streams page body is a column flex container with `height: 100%`.
+// `EuiFlexGroup` bakes `flex-grow: 1` directly into its CSS with no prop to
+// disable it, so without this override the filter toolbar absorbs whatever
+// vertical space the entities grid below gives up — exactly matching the
+// "each new filter adds more space" symptom users hit when filtering shrinks
+// the grid. Pinning `flex-grow` to `0` keeps the toolbar flush against the
+// next row regardless of how many entities remain.
+const NO_GROW = css`
+  flex-grow: 0;
+`;
 
 interface Props {
   readonly facets: Record<TagKey, string[]>;
@@ -65,6 +77,7 @@ const TagFilterPopover = ({
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
+      panelStyle={{ minWidth: 260 }}
       button={
         <EuiFilterButton
           iconType="arrowDown"
@@ -101,17 +114,10 @@ const TagFilterPopover = ({
         )}
       >
         {(list, search) => (
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            paddingSize="none"
-            css={css`
-              min-width: 260px;
-            `}
-          >
+          <>
             {search}
             {list}
-          </EuiPanel>
+          </>
         )}
       </EuiSelectable>
     </EuiPopover>
@@ -133,58 +139,62 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
   };
 
   return (
-    <div
-      css={css`
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-      `}
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      wrap
+      css={NO_GROW}
       data-test-subj="entityCentricLabTagFilters"
     >
-      <EuiFilterGroup
-        aria-label={i18n.translate(
-          'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
-          { defaultMessage: 'Entity tag filters' }
-        )}
-      >
-        <TagFilterPopover
-          tagKey="application"
-          options={facets.application}
-          selected={activeFilters.application}
-          onChange={handleKeyChange('application')}
-        />
-        <TagFilterPopover
-          tagKey="environment"
-          options={facets.environment}
-          selected={activeFilters.environment}
-          onChange={handleKeyChange('environment')}
-        />
-        <TagFilterPopover
-          tagKey="team"
-          options={facets.team}
-          selected={activeFilters.team}
-          onChange={handleKeyChange('team')}
-        />
-        <TagFilterPopover
-          tagKey="region"
-          options={facets.region}
-          selected={activeFilters.region}
-          onChange={handleKeyChange('region')}
-        />
-      </EuiFilterGroup>
-      {totalActive > 0 ? (
-        <EuiButtonEmpty
-          size="s"
-          iconType="cross"
-          onClick={clearAll}
-          data-test-subj="entityCentricLabTagFiltersClear"
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup
+          aria-label={i18n.translate(
+            'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
+            { defaultMessage: 'Entity tag filters' }
+          )}
         >
-          {i18n.translate('xpack.streams.entityCentricLab.entities.tagFilter.clearAll', {
-            defaultMessage: 'Clear filters',
-          })}
-        </EuiButtonEmpty>
+          <TagFilterPopover
+            tagKey="application"
+            options={facets.application}
+            selected={activeFilters.application}
+            onChange={handleKeyChange('application')}
+          />
+          <TagFilterPopover
+            tagKey="environment"
+            options={facets.environment}
+            selected={activeFilters.environment}
+            onChange={handleKeyChange('environment')}
+          />
+          <TagFilterPopover
+            tagKey="team"
+            options={facets.team}
+            selected={activeFilters.team}
+            onChange={handleKeyChange('team')}
+          />
+          <TagFilterPopover
+            tagKey="region"
+            options={facets.region}
+            selected={activeFilters.region}
+            onChange={handleKeyChange('region')}
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      {totalActive > 0 ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="cross"
+            onClick={clearAll}
+            data-test-subj="entityCentricLabTagFiltersClear"
+          >
+            {i18n.translate('xpack.streams.entityCentricLab.entities.tagFilter.clearAll', {
+              defaultMessage: 'Clear filters',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       ) : null}
-    </div>
+    </EuiFlexGroup>
   );
 };
