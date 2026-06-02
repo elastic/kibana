@@ -56,6 +56,24 @@ export function createSyntheticsPrivateLocationApi(
     return data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   };
 
+  // The synthetics Fleet package install is a *global* operation: every Scout
+  // worker shares the same Kibana/Fleet install. The previous implementation
+  // ran `DELETE synthetics` + reinstall on the first call per worker, but with
+  // many spec files the workers run those `beforeAll` hooks concurrently, so
+  // one worker's DELETE wiped the package out from under another worker's
+  // in-flight monitor save — yielding intermittent 400s on the first save of a
+  // spec (see the FTR `PrivateLocationTestService` notes on this exact flake).
+  // We now install idempotently: never DELETE, short-circuit when the package
+  // is already present at the target version, and tolerate concurrent installs
+  // from sibling workers.
+  interface FleetPackageItem {
+    status?: string;
+    version?: string;
+    installationInfo?: { version?: string };
+  }
+  const isInstalledAt = (item: FleetPackageItem | undefined, wanted: string): boolean =>
+    item?.status === 'installed' && (item?.installationInfo?.version ?? item?.version) === wanted;
+
   const installSyntheticsPackage = async ({ version }: { version?: string } = {}) => {
     const resolvedVersion = version ?? (await fetchSyntheticsPackageVersion());
 
@@ -63,22 +81,32 @@ export function createSyntheticsPrivateLocationApi(
       return;
     }
 
-    await fleetApi.internal.setup();
-
-    try {
-      await fleetApi.integration.delete('synthetics');
-    } catch {
-      // Ignore — package may not be installed yet
+    const { data: current } = await fleetApi.integration.getPackage('synthetics');
+    if (isInstalledAt(current?.item, resolvedVersion)) {
+      cachedInstalledVersion = resolvedVersion;
+      return;
     }
 
-    await fleetApi.integration.installPackage('synthetics', resolvedVersion);
+    await fleetApi.internal.setup();
 
-    const { data } = await fleetApi.integration.getPackage('synthetics');
-    const installedVersion = data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
-    if (installedVersion !== resolvedVersion) {
-      throw new Error(
-        `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
-      );
+    const maxAttempts = 60;
+    let installed = false;
+    for (let attempt = 0; attempt < maxAttempts && !installed; attempt++) {
+      try {
+        await fleetApi.integration.installPackage('synthetics', resolvedVersion);
+      } catch {
+        // A sibling worker may be installing the same package concurrently;
+        // re-check the install state below before retrying.
+      }
+      const { data } = await fleetApi.integration.getPackage('synthetics');
+      installed = isInstalledAt(data?.item, resolvedVersion);
+      if (!installed) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+
+    if (!installed) {
+      throw new Error(`Synthetics package failed to install at version ${resolvedVersion}`);
     }
 
     cachedInstalledVersion = resolvedVersion;
