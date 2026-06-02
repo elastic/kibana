@@ -17,17 +17,11 @@ import {
   ErrorCallOut,
 } from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
-import type { RuleParams } from '@kbn/alerting-v2-schemas';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { SecurityRuleType } from '../constants';
 import * as i18n from '../translations';
 import { RuleTypeSwitcher } from './rule_type_switcher';
 import { ThresholdFields } from './threshold_fields';
-import { SecurityDetectionFields } from './security_detection_fields';
-import { SuppressionDurationField } from './suppression_duration_field';
-
-type ThreatEntry = NonNullable<RuleParams['threat']>[number];
-type RelatedIntegration = NonNullable<RuleParams['related_integrations']>[number];
 
 interface SecurityGuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -49,18 +43,6 @@ interface SecurityGuiRuleFormProps {
   onCardinalityValueChange: (value: number) => void;
   generatedQuery: string;
   search: ISearchGeneric;
-  threat: ThreatEntry[];
-  onThreatChange: (threat: ThreatEntry[]) => void;
-  note: string;
-  onNoteChange: (note: string) => void;
-  setup: string;
-  onSetupChange: (setup: string) => void;
-  relatedIntegrations: RelatedIntegration[];
-  onRelatedIntegrationsChange: (integrations: RelatedIntegration[]) => void;
-  investigationFieldNames: string[];
-  onInvestigationFieldNamesChange: (fieldNames: string[]) => void;
-  references: string[];
-  onReferencesChange: (references: string[]) => void;
 }
 
 export const SecurityGuiRuleForm = ({
@@ -83,18 +65,6 @@ export const SecurityGuiRuleForm = ({
   onCardinalityValueChange,
   generatedQuery,
   search,
-  threat,
-  onThreatChange,
-  note,
-  onNoteChange,
-  setup,
-  onSetupChange,
-  relatedIntegrations,
-  onRelatedIntegrationsChange,
-  investigationFieldNames,
-  onInvestigationFieldNamesChange,
-  references,
-  onReferencesChange,
 }: SecurityGuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
@@ -135,24 +105,7 @@ export const SecurityGuiRuleForm = ({
           groupFieldLabel={i18n.SUPPRESSION_FIELDS_LABEL}
         />
         <EuiSpacer size="m" />
-        <SuppressionDurationField />
-        <EuiSpacer size="m" />
         <RuleExecutionFieldGroup />
-        <EuiSpacer size="m" />
-        <SecurityDetectionFields
-          threat={threat}
-          onThreatChange={onThreatChange}
-          note={note}
-          onNoteChange={onNoteChange}
-          setup={setup}
-          onSetupChange={onSetupChange}
-          relatedIntegrations={relatedIntegrations}
-          onRelatedIntegrationsChange={onRelatedIntegrationsChange}
-          investigationFieldNames={investigationFieldNames}
-          onInvestigationFieldNamesChange={onInvestigationFieldNamesChange}
-          references={references}
-          onReferencesChange={onReferencesChange}
-        />
       </EuiForm>
       <SubmissionButtons
         isSubmitting={isSubmitting}

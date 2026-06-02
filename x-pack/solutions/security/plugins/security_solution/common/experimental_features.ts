@@ -276,6 +276,13 @@ export const allowedExperimentalValues = Object.freeze({
    * (`/api/detection_engine/attacks/*`).
    */
   publicAttacksApiEnabled: false,
+
+  /**
+   * Enables v2 (alerting v2) rule type cards in the v1 rule creation flow.
+   * When enabled, users see additional ES|QL v2 and Threshold v2 cards in
+   * the rule type selector that redirect to the v2 rule creation page.
+   */
+  alertingV2RuleCreationEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

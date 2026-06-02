@@ -49,6 +49,7 @@ interface SecurityRuleFormProps {
   initialQuery?: string;
   initialParams?: RuleParams;
   initialExceptions?: ExceptionListReference[];
+  initialRuleType?: SecurityRuleType;
   onSuccess?: (savedRuleId: string) => void;
   onCancel?: () => void;
 }
@@ -65,12 +66,15 @@ export const SecurityRuleForm = ({
   initialQuery,
   initialParams,
   initialExceptions = [],
+  initialRuleType,
   onSuccess,
   onCancel,
 }: SecurityRuleFormProps) => {
   const inferredType: SecurityRuleType =
     initialValues?.metadata?.tags?.includes('threshold') ? 'threshold' : 'esql';
-  const [ruleType, setRuleType] = useState<SecurityRuleType>(ruleId ? inferredType : 'esql');
+  const [ruleType, setRuleType] = useState<SecurityRuleType>(
+    initialRuleType ?? (ruleId ? inferredType : 'esql')
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;

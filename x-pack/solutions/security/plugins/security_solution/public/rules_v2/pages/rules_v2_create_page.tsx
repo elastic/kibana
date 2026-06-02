@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useQuery } from '@kbn/react-query';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -42,9 +42,21 @@ export const RulesV2CreatePage = () => {
   return <CreateRulePage />;
 };
 
+const VALID_V2_TYPES = ['esql', 'threshold'] as const;
+type V2RuleType = (typeof VALID_V2_TYPES)[number];
+
+const isValidV2Type = (value: string | null): value is V2RuleType =>
+  value != null && (VALID_V2_TYPES as readonly string[]).includes(value);
+
 const CreateRulePage = () => {
   const history = useHistory();
+  const { search } = useLocation();
   const services = useRuleFormServices();
+
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
+  const typeParam = searchParams.get('type');
+  const returnTo = searchParams.get('returnTo');
+  const initialRuleType = isValidV2Type(typeParam) ? typeParam : undefined;
 
   const handleSuccess = useCallback(
     (savedRuleId: string) => {
@@ -54,21 +66,46 @@ const CreateRulePage = () => {
   );
 
   const handleCancel = useCallback(() => {
-    history.push(RULES_V2_PATH);
+    if (returnTo === 'rules') {
+      history.push('/rules');
+    } else {
+      history.push(RULES_V2_PATH);
+    }
+  }, [history, returnTo]);
+
+  const handleBackToV1 = useCallback(() => {
+    history.push('/rules/create');
   }, [history]);
 
   return (
     <SecuritySolutionPageWrapper>
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem css={MAX_WIDTH_CSS}>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            onClick={handleCancel}
-            flush="left"
-            size="s"
-          >
-            {i18n.BACK_TO_RULES}
-          </EuiButtonEmpty>
+          {returnTo === 'rules' ? (
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={handleBackToV1}
+              flush="left"
+              size="s"
+              css={css`
+                align-self: flex-start;
+              `}
+            >
+              {i18n.BACK_TO_V1_CREATION}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={handleCancel}
+              flush="left"
+              size="s"
+              css={css`
+                align-self: flex-start;
+              `}
+            >
+              {i18n.BACK_TO_RULES}
+            </EuiButtonEmpty>
+          )}
           <EuiSpacer size="m" />
           <EuiPageHeader pageTitle={i18n.CREATE_RULE} />
           <EuiSpacer size="m" />
@@ -76,6 +113,7 @@ const CreateRulePage = () => {
             services={services}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
+            initialRuleType={initialRuleType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

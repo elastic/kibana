@@ -12,7 +12,7 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.rulesV2.pageTit
 });
 
 export const CREATE_RULE = i18n.translate('xpack.securitySolution.rulesV2.createRule', {
-  defaultMessage: 'Create rule',
+  defaultMessage: 'Create v2 rule',
 });
 
 export const EDIT_RULE = i18n.translate('xpack.securitySolution.rulesV2.editRule', {
@@ -321,4 +321,9 @@ export const SUPPRESSION_DURATION_HELP = i18n.translate(
 export const VIEW_SUPPRESSION_DURATION_LABEL = i18n.translate(
   'xpack.securitySolution.rulesV2.viewSuppressionDurationLabel',
   { defaultMessage: 'Suppression window' }
+);
+
+export const BACK_TO_V1_CREATION = i18n.translate(
+  'xpack.securitySolution.rulesV2.backToV1Creation',
+  { defaultMessage: 'Back to classic rule creation' }
 );
