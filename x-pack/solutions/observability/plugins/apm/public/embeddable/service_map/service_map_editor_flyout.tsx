@@ -27,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import datemath from '@kbn/datemath';
 import {
   ENVIRONMENT_ALL,
@@ -38,6 +40,14 @@ import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
+import type { ConnectionFilter } from '../../components/app/service_map/apply_service_map_visibility';
+import type { SloStatus } from '../../../common/service_inventory';
+import {
+  ALERT_STATUS_OPTIONS,
+  ANOMALY_SEVERITY_OPTIONS,
+  CONNECTION_FILTER_OPTIONS,
+  SLO_STATUS_OPTIONS,
+} from '../../components/app/service_map/service_map_options_panel';
 
 interface KueryInputProps {
   kuery: string;
@@ -181,6 +191,20 @@ export function ServiceMapEditorFlyout({
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
   );
+  const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
+    initialState?.alert_status_filter ?? []
+  );
+  const [sloStatusFilter, setSloStatusFilter] = useState<SloStatus[]>(
+    initialState?.slo_status_filter ?? []
+  );
+  const [connectionFilter, setConnectionFilter] = useState<ConnectionFilter[]>(
+    initialState?.connection_filter ?? []
+  );
+  // Schema types the array as a string-literal union; cast at the boundary into the enum type the
+  // graph + filter helpers consume. The literal values are identical to the enum values.
+  const [anomalySeverityFilter, setAnomalySeverityFilter] = useState<ML_ANOMALY_SEVERITY[]>(
+    (initialState?.anomaly_severity_filter as ML_ANOMALY_SEVERITY[] | undefined) ?? []
+  );
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -265,9 +289,24 @@ export function ServiceMapEditorFlyout({
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
       sync_with_dashboard_filters: syncWithDashboardFilters,
+      // Empty arrays drop to undefined so they're omitted from the saved object payload.
+      alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
+      slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
+      connection_filter: connectionFilter.length ? connectionFilter : undefined,
+      anomaly_severity_filter: anomalySeverityFilter.length ? anomalySeverityFilter : undefined,
     };
     onSave(state);
-  }, [environment, kuery, serviceName, syncWithDashboardFilters, onSave]);
+  }, [
+    environment,
+    kuery,
+    serviceName,
+    syncWithDashboardFilters,
+    alertStatusFilter,
+    sloStatusFilter,
+    connectionFilter,
+    anomalySeverityFilter,
+    onSave,
+  ]);
 
   return (
     <div style={serviceMapFlyoutShellStyle}>
@@ -366,6 +405,126 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
 
           <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.dependenciesFilterLabel', {
+              defaultMessage: 'Dependencies',
+            })}
+            fullWidth
+          >
+            <EuiComboBox
+              compressed
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.apm.serviceMapEditor.dependenciesFilterPlaceholder',
+                { defaultMessage: 'Filter by dependency status' }
+              )}
+              options={CONNECTION_FILTER_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+              }))}
+              selectedOptions={connectionFilter.map((value) => {
+                const opt = CONNECTION_FILTER_OPTIONS.find((o) => o.value === value);
+                return { label: opt?.label ?? value, value };
+              })}
+              onChange={(selected) =>
+                setConnectionFilter(
+                  selected.map((s) => (s.value ?? s.label) as ConnectionFilter)
+                )
+              }
+              data-test-subj="apmServiceMapEditorConnectionFilter"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.alertStatusFilterLabel', {
+              defaultMessage: 'Alert status',
+            })}
+            fullWidth
+          >
+            <EuiComboBox
+              compressed
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.apm.serviceMapEditor.alertStatusFilterPlaceholder',
+                { defaultMessage: 'Filter by alert status' }
+              )}
+              options={ALERT_STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+              }))}
+              selectedOptions={alertStatusFilter.map((value) => {
+                const opt = ALERT_STATUS_OPTIONS.find((o) => o.value === value);
+                return { label: opt?.label ?? value, value };
+              })}
+              onChange={(selected) =>
+                setAlertStatusFilter(selected.map((s) => (s.value ?? s.label) as AlertStatus))
+              }
+              data-test-subj="apmServiceMapEditorAlertStatusFilter"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterLabel', {
+              defaultMessage: 'SLO status',
+            })}
+            fullWidth
+          >
+            <EuiComboBox
+              compressed
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder',
+                { defaultMessage: 'Filter by SLO status' }
+              )}
+              options={SLO_STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+              }))}
+              selectedOptions={sloStatusFilter.map((value) => {
+                const opt = SLO_STATUS_OPTIONS.find((o) => o.value === value);
+                return { label: opt?.label ?? value, value };
+              })}
+              onChange={(selected) =>
+                setSloStatusFilter(selected.map((s) => (s.value ?? s.label) as SloStatus))
+              }
+              data-test-subj="apmServiceMapEditorSloStatusFilter"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.anomalySeverityFilterLabel', {
+              defaultMessage: 'Anomaly severity',
+            })}
+            fullWidth
+          >
+            <EuiComboBox
+              compressed
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.apm.serviceMapEditor.anomalySeverityFilterPlaceholder',
+                { defaultMessage: 'Filter by anomaly severity' }
+              )}
+              options={ANOMALY_SEVERITY_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+              }))}
+              selectedOptions={anomalySeverityFilter.map((value) => {
+                const opt = ANOMALY_SEVERITY_OPTIONS.find((o) => o.value === value);
+                return { label: opt?.label ?? value, value };
+              })}
+              onChange={(selected) =>
+                setAnomalySeverityFilter(
+                  selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
+                )
+              }
+              data-test-subj="apmServiceMapEditorAnomalySeverityFilter"
+            />
+          </EuiFormRow>
 
           <EuiFormRow
             helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {

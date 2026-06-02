@@ -749,6 +749,7 @@ function GraphInner({
                   onMapOrientationChange={setMapOrientation}
                   searchQuery={searchQuery}
                   onSearchQueryChange={setSearchQuery}
+                  layoutControlsOnly={isEmbedded}
                 />
               )}
             </Panel>

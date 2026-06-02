@@ -226,6 +226,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       customStateManager.api.setSyncWithDashboardFilters(
                         newState.sync_with_dashboard_filters
                       );
+                      // View filters live in the edit flyout per product direction: the
+                      // in-graph options panel only renders layout controls in dashboard panels.
+                      customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
+                      customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
+                      customStateManager.api.setConnectionFilter(newState.connection_filter);
+                      customStateManager.api.setAnomalySeverityFilter(
+                        newState.anomaly_severity_filter
+                      );
                       closeFlyout();
                     }}
                   />

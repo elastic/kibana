@@ -38,22 +38,22 @@ import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
-const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
+export const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
   {
     value: 'orphaned',
     label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
-      defaultMessage: 'No connections',
+      defaultMessage: 'No dependencies',
     }),
   },
   {
     value: 'connected',
     label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
-      defaultMessage: 'With connections',
+      defaultMessage: 'With dependencies',
     }),
   },
 ];
 
-const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
+export const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   {
     value: ALERT_STATUS_ACTIVE,
     label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
@@ -80,7 +80,7 @@ const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   },
 ];
 
-const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
+export const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
   {
     value: 'healthy',
     label: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
@@ -107,7 +107,7 @@ const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
   },
 ];
 
-const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
+export const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
   {
     value: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
@@ -170,6 +170,12 @@ export interface ServiceMapOptionsPanelProps {
   searchQuery?: string;
   /** Pass-through to ServiceMapFindInPage; called whenever the user edits the search field. */
   onSearchQueryChange?: (next: string) => void;
+  /**
+   * Embeddable rendering: only show layout-affecting controls (orientation + find-in-page) and
+   * hide the alerts/SLO/connection/anomaly filter pickers. Dashboard panels delegate filter
+   * editing to the edit flyout per product direction; the in-panel UI stays a "preview" surface.
+   */
+  layoutControlsOnly?: boolean;
 }
 
 /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
@@ -295,6 +301,7 @@ export function ServiceMapOptionsPanel({
   onMapOrientationChange,
   searchQuery,
   onSearchQueryChange,
+  layoutControlsOnly = false,
 }: ServiceMapOptionsPanelProps) {
   const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
@@ -434,110 +441,120 @@ export function ServiceMapOptionsPanel({
         onSearchQueryChange={onSearchQueryChange}
       />
 
-      <EuiHorizontalRule margin="m" />
+      {!layoutControlsOnly && (
+        <>
+          <EuiHorizontalRule margin="m" />
 
-      <EuiText size="xs">
-        <h3>
-          {i18n.translate('xpack.apm.serviceMap.options.filtersHeading', {
-            defaultMessage: 'Filters',
-          })}
-        </h3>
-      </EuiText>
-      <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.apm.serviceMap.options.filtersHeading', {
+                defaultMessage: 'Filters',
+              })}
+            </h3>
+          </EuiText>
+          <EuiSpacer size="s" />
 
-      <EuiComboBox
-        placeholder={i18n.translate('xpack.apm.serviceMap.controls.connectionFilter', {
-          defaultMessage: 'Connections',
-        })}
-        options={connectionFilterComboBoxOptions}
-        selectedOptions={connectionFilter.map((value) => {
-          const opt = connectionFilterComboBoxOptions.find((o) => o.value === value);
-          return { label: opt?.label ?? value, value };
-        })}
-        onChange={(selected) => {
-          onConnectionFilterChange(selected.map((s) => (s.value ?? s.label) as ConnectionFilter));
-        }}
-        fullWidth
-        compressed
-        isClearable
-        data-test-subj="serviceMapConnectionFilter"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
-          defaultMessage: 'Filter by connection status',
-        })}
-      />
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.apm.serviceMap.controls.connectionFilter', {
+              defaultMessage: 'Dependencies',
+            })}
+            options={connectionFilterComboBoxOptions}
+            selectedOptions={connectionFilter.map((value) => {
+              const opt = connectionFilterComboBoxOptions.find((o) => o.value === value);
+              return { label: opt?.label ?? value, value };
+            })}
+            onChange={(selected) => {
+              onConnectionFilterChange(
+                selected.map((s) => (s.value ?? s.label) as ConnectionFilter)
+              );
+            }}
+            fullWidth
+            compressed
+            isClearable
+            data-test-subj="serviceMapConnectionFilter"
+            aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
+              defaultMessage: 'Filter by dependency status',
+            })}
+          />
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-      <EuiComboBox
-        placeholder={i18n.translate('xpack.apm.serviceMap.controls.alertStatusFilter', {
-          defaultMessage: 'Alert status',
-        })}
-        options={alertStatusComboBoxOptions}
-        selectedOptions={alertStatusFilter.map((value) => {
-          const opt = alertStatusComboBoxOptions.find((o) => o.value === value);
-          return { label: opt?.label ?? value, value };
-        })}
-        onChange={(selected) => {
-          onAlertStatusFilterChange(selected.map((s) => (s.value ?? s.label) as AlertStatus));
-        }}
-        fullWidth
-        compressed
-        isClearable={true}
-        data-test-subj="serviceMapAlertStatusFilter"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.alertStatusAriaLabel', {
-          defaultMessage: 'Filter by alert status',
-        })}
-      />
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.apm.serviceMap.controls.alertStatusFilter', {
+              defaultMessage: 'Alert status',
+            })}
+            options={alertStatusComboBoxOptions}
+            selectedOptions={alertStatusFilter.map((value) => {
+              const opt = alertStatusComboBoxOptions.find((o) => o.value === value);
+              return { label: opt?.label ?? value, value };
+            })}
+            onChange={(selected) => {
+              onAlertStatusFilterChange(
+                selected.map((s) => (s.value ?? s.label) as AlertStatus)
+              );
+            }}
+            fullWidth
+            compressed
+            isClearable={true}
+            data-test-subj="serviceMapAlertStatusFilter"
+            aria-label={i18n.translate('xpack.apm.serviceMap.controls.alertStatusAriaLabel', {
+              defaultMessage: 'Filter by alert status',
+            })}
+          />
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-      <EuiComboBox
-        placeholder={i18n.translate('xpack.apm.serviceMap.controls.sloStatusFilter', {
-          defaultMessage: 'SLO Status',
-        })}
-        options={sloStatusComboBoxOptions}
-        selectedOptions={sloStatusFilter.map((value) => {
-          const opt = sloStatusComboBoxOptions.find((o) => o.value === value);
-          return { label: opt?.label ?? value, value };
-        })}
-        onChange={(selected) => {
-          onSloStatusFilterChange(selected.map((s) => (s.value ?? s.label) as SloStatus));
-        }}
-        fullWidth
-        compressed
-        isClearable={true}
-        data-test-subj="serviceMapSloStatusFilter"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.sloStatusAriaLabel', {
-          defaultMessage: 'Filter by SLO status',
-        })}
-      />
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.apm.serviceMap.controls.sloStatusFilter', {
+              defaultMessage: 'SLO Status',
+            })}
+            options={sloStatusComboBoxOptions}
+            selectedOptions={sloStatusFilter.map((value) => {
+              const opt = sloStatusComboBoxOptions.find((o) => o.value === value);
+              return { label: opt?.label ?? value, value };
+            })}
+            onChange={(selected) => {
+              onSloStatusFilterChange(
+                selected.map((s) => (s.value ?? s.label) as SloStatus)
+              );
+            }}
+            fullWidth
+            compressed
+            isClearable={true}
+            data-test-subj="serviceMapSloStatusFilter"
+            aria-label={i18n.translate('xpack.apm.serviceMap.controls.sloStatusAriaLabel', {
+              defaultMessage: 'Filter by SLO status',
+            })}
+          />
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-      <EuiComboBox
-        placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityFilter', {
-          defaultMessage: 'Anomaly severity',
-        })}
-        options={anomalyFilterComboBoxOptions}
-        selectedOptions={anomalySeverityFilter.map((value) => {
-          const opt = anomalyFilterComboBoxOptions.find((o) => o.value === value);
-          return { label: opt?.label ?? value, value };
-        })}
-        onChange={(selected) => {
-          onAnomalySeverityFilterChange(
-            selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
-          );
-        }}
-        fullWidth
-        compressed
-        isClearable={true}
-        data-test-subj="serviceMapAnomalySeverityFilter"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityAriaLabel', {
-          defaultMessage: 'Filter by anomaly severity',
-        })}
-      />
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityFilter', {
+              defaultMessage: 'Anomaly severity',
+            })}
+            options={anomalyFilterComboBoxOptions}
+            selectedOptions={anomalySeverityFilter.map((value) => {
+              const opt = anomalyFilterComboBoxOptions.find((o) => o.value === value);
+              return { label: opt?.label ?? value, value };
+            })}
+            onChange={(selected) => {
+              onAnomalySeverityFilterChange(
+                selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
+              );
+            }}
+            fullWidth
+            compressed
+            isClearable={true}
+            data-test-subj="serviceMapAnomalySeverityFilter"
+            aria-label={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityAriaLabel', {
+              defaultMessage: 'Filter by anomaly severity',
+            })}
+          />
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiText size="xs" data-test-subj="serviceMapPresentationSettings">
         <h3>{presentationLegend}</h3>
