@@ -93,11 +93,19 @@ For user-provided: replace URL and credentials. Fake `accessKey: test` is suffic
 **Non-ECS noise index** (all environment types):
 ```bash
 # ES_URL: http://localhost:9220 (agent-managed) or environment.es_url from config.json
+# Use --api-key for serverless / ECH (basic auth is unavailable or rejected):
 bash x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-noise-index.sh \
   --es-url "$ES_URL" \
-  --username "$USERNAME" \
-  --password "$PASSWORD"
+  --api-key "$APIKEY"
+
+# Use --username / --password for agent-managed stateful environments:
+bash x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-noise-index.sh \
+  --es-url "$ES_URL" \
+  --username elastic \
+  --password changeme
 ```
+
+The script automatically falls back from `logs-exploratory.noise` to `exploratory-noise` if the `logs-*` name is reserved by a data stream template (common on serverless). The alias used is printed as `NOISE_INDEX_ALIAS=<alias>`.
 On success: set `"noise_index": "logs-exploratory.noise"` in `config.json`. On failure: add to `skipped_setup` — noise-index testing skipped for this session.
 
 > **Why:** Real customer data often has non-ECS field types and missing fields. Features that work with clean data can silently break on this class of data.
