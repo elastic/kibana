@@ -49,7 +49,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
