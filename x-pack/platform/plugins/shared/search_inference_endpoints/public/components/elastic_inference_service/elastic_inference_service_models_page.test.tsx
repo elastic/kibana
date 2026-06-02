@@ -23,7 +23,7 @@ const mockUseKibana = jest.fn(() => ({
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: (...args: unknown[]) => mockUseKibana(...args),
+  useKibana: mockUseKibana,
 }));
 jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
