@@ -96,9 +96,12 @@ export const AgentInstallSection = () => {
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
                   defaultMessage: 'Build in your IDE',
                 })}
-                description={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.description', {
-                  defaultMessage: 'Code with context using Elastic-certified skills.',
-                })}
+                description={i18n.translate(
+                  'xpack.searchGettingStarted.agentInstall.ide.description',
+                  {
+                    defaultMessage: 'Code with context using Elastic-certified skills.',
+                  }
+                )}
               >
                 <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -171,9 +174,12 @@ export const AgentInstallSection = () => {
               <EuiPanel color="transparent" paddingSize="l">
                 <AgentInstallPanel
                   icon="productAgent"
-                  title={i18n.translate('xpack.searchGettingStarted.agentInstall.agentBuilder.title', {
-                    defaultMessage: 'Build with the Elastic AI Agent',
-                  })}
+                  title={i18n.translate(
+                    'xpack.searchGettingStarted.agentInstall.agentBuilder.title',
+                    {
+                      defaultMessage: 'Build with the Elastic AI Agent',
+                    }
+                  )}
                   description={i18n.translate(
                     'xpack.searchGettingStarted.agentInstall.agentBuilder.description',
                     {
