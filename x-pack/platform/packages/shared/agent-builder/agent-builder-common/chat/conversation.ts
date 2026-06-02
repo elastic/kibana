@@ -262,6 +262,24 @@ export enum ConversationRoundStatus {
 }
 
 /**
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */

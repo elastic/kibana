@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -277,7 +278,8 @@ asset*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -591,7 +593,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with pagination 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -908,7 +911,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with recoveryId 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1225,7 +1229,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1472,7 +1477,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1748,7 +1754,8 @@ host*,
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for generic entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1757,7 +1764,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for host entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1766,7 +1774,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for service entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1775,7 +1784,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for user entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
