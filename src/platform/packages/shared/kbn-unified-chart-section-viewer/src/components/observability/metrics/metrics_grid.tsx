@@ -108,6 +108,23 @@ export const MetricsGrid = ({
       gridRef,
     });
 
+  const dimensionNameSet = useMemo(
+    () => new Set(dimensions.map((dimension) => dimension.name)),
+    [dimensions]
+  );
+
+  const applicableDimensionsPerItem = useMemo(
+    () =>
+      metricItems.map((item) => {
+        const metricFieldNames = new Set(item.dimensionFields.map((field) => field.name));
+        return dimensions.filter(
+          (dimension) =>
+            dimensionNameSet.has(dimension.name) && metricFieldNames.has(dimension.name)
+        );
+      }),
+    [metricItems, dimensions, dimensionNameSet]
+  );
+
   const flyoutData = useMemo(() => {
     if (!flyoutState) {
       return undefined;
@@ -206,7 +223,7 @@ export const MetricsGrid = ({
                   index={index}
                   metricItem={metricItem}
                   size="s"
-                  dimensions={dimensions}
+                  applicableDimensions={applicableDimensionsPerItem[index]}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
@@ -249,7 +266,7 @@ interface ChartItemProps
   metricItem: ParsedMetricItem;
   index: number;
   size: ChartSize;
-  dimensions: Dimension[];
+  applicableDimensions: Dimension[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
@@ -269,7 +286,7 @@ const ChartItem = React.memo(
     metricItem,
     index,
     size,
-    dimensions,
+    applicableDimensions,
     services,
     onBrushEnd,
     onFilter,
@@ -292,12 +309,6 @@ const ChartItem = React.memo(
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
-    );
-
-    const applicableDimensions = useMemo(
-      () =>
-        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
-      [dimensions, metricItem.dimensionFields]
     );
 
     const esqlQuery = useMemo(() => {
