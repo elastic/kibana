@@ -12,8 +12,6 @@ import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDeleteCompositeSlo } from '../../../../hooks/use_delete_composite_slo';
-import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
-import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import {
   useFetchCompositeSloList,
   type CompositeSloSortBy,
@@ -85,11 +83,6 @@ export function CompositeSloList() {
   const hasActiveFilters =
     debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
 
-  const compositeIds = data?.results?.map((item: CompositeSLOItem) => item.id) ?? [];
-  const { detailsById, isLoading: isDetailsLoading } = useFetchCompositeSloDetails(compositeIds);
-  const { historicalSummaryById, isLoading: isHistoricalLoading } =
-    useFetchCompositeHistoricalSummary(compositeIds);
-
   const handleSortChange = (
     newSortBy: CompositeSloSortBy,
     newDirection: CompositeSloSortDirection
@@ -131,17 +124,12 @@ export function CompositeSloList() {
       ) : (
         <CompositeSloTable
           results={results}
-          total={total}
-          page={page}
-          perPage={perPage}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          isDetailsLoading={isDetailsLoading}
-          isHistoricalLoading={isHistoricalLoading}
-          detailsById={detailsById}
-          historicalSummaryById={historicalSummaryById}
-          onPageChange={setPage}
-          onPerPageChange={setPerPage}
+          pagination={{ pageIndex: page, pageSize: perPage, totalItemCount: total }}
+          sort={{ field: sortBy, direction: sortDirection }}
+          onPageChange={(pageIndex, pageSize) => {
+            setPage(pageIndex);
+            setPerPage(pageSize);
+          }}
           onSortChange={handleSortChange}
           onDelete={setDeleteConfirm}
         />

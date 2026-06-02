@@ -25,17 +25,15 @@ import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-obse
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
-import type {
-  CompositeSLODefinitionResponse,
-  CompositeSLOSummaryResponse,
-  HistoricalSummaryResponse,
-} from '@kbn/slo-schema';
+import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { displayStatus } from '../../../../components/slo/slo_badges/slo_status_badge';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
+import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
+import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import type {
   CompositeSloSortBy,
   CompositeSloSortDirection,
@@ -60,34 +58,25 @@ const SORTABLE_FIELDS: Record<string, CompositeSloSortBy> = {
 
 interface Props {
   results: CompositeSLOItem[];
-  total: number;
-  page: number;
-  perPage: number;
-  sortBy: CompositeSloSortBy;
-  sortDirection: CompositeSloSortDirection;
-  isDetailsLoading: boolean;
-  isHistoricalLoading: boolean;
-  detailsById: Map<string, CompositeSLOSummaryResponse>;
-  historicalSummaryById: Map<string, HistoricalSummaryResponse[]>;
-  onPageChange: (pageIndex: number) => void;
-  onPerPageChange: (pageSize: number) => void;
-  onSortChange: (sortBy: CompositeSloSortBy, direction: CompositeSloSortDirection) => void;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+    totalItemCount: number;
+  };
+  sort: {
+    field: CompositeSloSortBy;
+    direction: CompositeSloSortDirection;
+  };
+  onPageChange: (pageIndex: number, pageSize: number) => void;
+  onSortChange: (field: CompositeSloSortBy, direction: CompositeSloSortDirection) => void;
   onDelete: (item: CompositeSLOItem) => void;
 }
 
 export function CompositeSloTable({
   results,
-  total,
-  page,
-  perPage,
-  sortBy,
-  sortDirection,
-  isDetailsLoading,
-  isHistoricalLoading,
-  detailsById,
-  historicalSummaryById,
+  pagination,
+  sort,
   onPageChange,
-  onPerPageChange,
   onSortChange,
   onDelete,
 }: Props) {
@@ -106,6 +95,11 @@ export function CompositeSloTable({
   const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [openMemberHealthPopoverId, setOpenMemberHealthPopoverId] = useState<string | null>(null);
+
+  const compositeIds = results.map((item) => item.id);
+  const { detailsById, isLoading: isDetailsLoading } = useFetchCompositeSloDetails(compositeIds);
+  const { historicalSummaryById, isLoading: isHistoricalLoading } =
+    useFetchCompositeHistoricalSummary(compositeIds);
 
   const seenMemberKeys = new Set<string>();
   const memberSloIdsAndInstanceIds: Array<[string, string]> = [];
@@ -525,25 +519,22 @@ export function CompositeSloTable({
       loading={isDetailsLoading}
       sorting={{
         sort: {
-          field: sortBy as keyof CompositeSLOItem,
-          direction: sortDirection,
+          field: sort.field as keyof CompositeSLOItem,
+          direction: sort.direction,
         },
       }}
       pagination={{
-        pageIndex: page,
-        pageSize: perPage,
-        totalItemCount: total,
+        ...pagination,
         pageSizeOptions: [10, 25, 50],
       }}
-      onChange={({ page: pagination, sort }: CriteriaWithPagination<CompositeSLOItem>) => {
-        if (pagination) {
-          onPageChange(pagination.index);
-          onPerPageChange(pagination.size);
+      onChange={({ page: nextPage, sort: nextSort }: CriteriaWithPagination<CompositeSLOItem>) => {
+        if (nextPage) {
+          onPageChange(nextPage.index, nextPage.size);
         }
-        if (sort) {
-          const mappedField = SORTABLE_FIELDS[sort.field as string];
+        if (nextSort) {
+          const mappedField = SORTABLE_FIELDS[nextSort.field as string];
           if (mappedField) {
-            onSortChange(mappedField, sort.direction);
+            onSortChange(mappedField, nextSort.direction);
           }
         }
       }}
