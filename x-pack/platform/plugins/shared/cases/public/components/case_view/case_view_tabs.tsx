@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
@@ -12,18 +13,15 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
-import type { CaseViewTab } from './use_case_attachment_tabs';
 import {
+  ATTACHMENT_TAB_ALIASES,
   AttachmentsBadge,
   SimilarCasesBadge,
-  useCaseAttachmentTabs,
+  useCaseAttachmentsTotal,
 } from './use_case_attachment_tabs';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import {
-  useAttachmentsSubTabClickedEBT,
-  useAttachmentsTabClickedEBT,
-} from '../../analytics/use_attachments_tab_ebt';
+import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab_ebt';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -31,13 +29,15 @@ export interface CaseViewTabsProps {
   searchTerm?: string;
 }
 
+interface Tab {
+  id: CASE_VIEW_PAGE_TABS;
+  name: string;
+  badge?: ReactNode;
+}
+
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab, searchTerm }) => {
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { tabs: attachmentTabs, totalAttachments } = useCaseAttachmentTabs({
-    caseData,
-    activeTab,
-    searchTerm,
-  });
+  const totalAttachments = useCaseAttachmentsTotal({ caseData, searchTerm });
 
   const { euiTheme } = useEuiTheme();
 
@@ -51,14 +51,9 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
-  const isAttachmentsTabActive = useMemo(
-    () => !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab),
-    [activeTab, attachmentTabs]
-  );
+  const isAttachmentsTabActive = ATTACHMENT_TAB_ALIASES.has(activeTab);
 
-  const defaultAttachmentsTabId = attachmentTabs[0].id;
-
-  const tabs: CaseViewTab[] = useMemo(
+  const tabs: Tab[] = useMemo(
     () => [
       {
         id: CASE_VIEW_PAGE_TABS.ACTIVITY,
@@ -91,7 +86,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   );
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();
-  const trackAttachmentsSubTabClick = useAttachmentsSubTabClickedEBT();
 
   const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => (
@@ -101,13 +95,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         onClick={() => {
           if (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS) {
             trackAttachmentsTabClick();
-            // NOTE: counting default sub-tab click here as it is already picked when navigating to attachments tab
-            trackAttachmentsSubTabClick(defaultAttachmentsTabId);
           }
 
           navigateToCaseView({
             detailName: caseData.id,
-            tabId: tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS ? CASE_VIEW_PAGE_TABS.ALERTS : tab.id,
+            tabId: tab.id,
           });
         }}
         isSelected={
@@ -126,8 +118,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     navigateToCaseView,
     caseData.id,
     trackAttachmentsTabClick,
-    trackAttachmentsSubTabClick,
-    defaultAttachmentsTabId,
   ]);
 
   return <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>;

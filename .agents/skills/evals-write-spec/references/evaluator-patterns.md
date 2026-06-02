@@ -20,7 +20,7 @@ type MyTaskOutput = TaskOutput & {
 };
 
 await executorClient.runExperiment(
-  { dataset, task },
+  { datasets: [dataset], task },
   selectEvaluators<MyExample, MyTaskOutput>([
     {
       name: 'NonEmptyDocuments',
@@ -246,7 +246,7 @@ A common pattern passes both CODE and LLM evaluators to `runExperiment`:
 
 ```ts
 await executorClient.runExperiment(
-  { dataset, task },
+  { datasets: [dataset], task },
   [
     createCriteriaEvaluator({ evaluators }),
     createToolCallsEvaluator({ evaluators }),

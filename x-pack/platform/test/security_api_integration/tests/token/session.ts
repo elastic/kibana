@@ -9,6 +9,7 @@ import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -153,9 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
 
             const newSessionCookies = response.headers['set-cookie'];
-            expect(newSessionCookies).to.have.length(1);
-
-            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            const newSessionCookie = findSessionCookie(newSessionCookies);
             expectNewSessionCookie(sessionCookie, newSessionCookie);
 
             // The second new cookie with fresh pair of access and refresh tokens should work.
@@ -212,9 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const cookie = parseCookie(cookies[0])!;
+        const cookie = findSessionCookie(cookies);
         expect(cookie.key).to.be('sid');
         expect(cookie.value).to.be.empty();
         expect(cookie.path).to.be('/');

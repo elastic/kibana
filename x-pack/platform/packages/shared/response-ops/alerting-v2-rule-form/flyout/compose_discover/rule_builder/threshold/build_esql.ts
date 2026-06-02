@@ -190,3 +190,20 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
   const root = Builder.expression.query(commands);
   return BasicPrettyPrinter.multiline(root, { pipeTab: '  ' });
 };
+
+export const buildRecoveryBlock = (values: ThresholdFormValues): string | undefined => {
+  const { recovery } = values;
+  if (!recovery) return undefined;
+
+  const validConditions = recovery.conditions.filter((c) => c.metric && c.threshold.length > 0);
+  if (validConditions.length === 0) return undefined;
+
+  const conditionExprs = validConditions.map(buildConditionExpr);
+  const joiner = recovery.conditionOperator === 'OR' ? 'or' : 'and';
+  const combined = conditionExprs.reduce((left, right) =>
+    Builder.expression.func.binary(joiner, [left, right])
+  );
+
+  const whereCmd = Builder.command({ name: 'where', args: [combined] });
+  return `| ${BasicPrettyPrinter.command(whereCmd)}`;
+};

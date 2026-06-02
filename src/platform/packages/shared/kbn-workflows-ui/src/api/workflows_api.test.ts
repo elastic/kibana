@@ -237,6 +237,24 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('searchTriggerEvents', () => {
+    it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
+      const params = {
+        kql: 'eventId: "e1"',
+        from: '2025-01-01',
+        to: '2025-12-31',
+        page: 2,
+        size: 25,
+      };
+      await api.searchTriggerEvents(params);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/trigger_events/_search', {
+        body: JSON.stringify(params),
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // Execution operations
   // ---------------------------------------------------------------------------

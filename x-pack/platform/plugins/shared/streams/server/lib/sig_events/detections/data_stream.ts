@@ -16,14 +16,15 @@ export const detectionsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    silent: mappings.boolean(),
-    processed: mappings.boolean(),
+    detected_at: mappings.date({ format: 'strict_date_optional_time' }),
+    kind: mappings.keyword(),
     detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
-    peak_30m_alert_count: mappings.long(),
+    peak_alert_count: mappings.long(),
     detection_evidence: mappings.object({
       properties: {
+        change_point_type: mappings.keyword(),
         p_value: { type: 'double' as const },
       },
     }),
@@ -38,7 +39,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 3,
+  version: 4,
   hidden: true,
   template: {
     priority: 500,

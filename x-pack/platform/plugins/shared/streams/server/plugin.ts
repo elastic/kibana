@@ -15,10 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -33,6 +30,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -338,9 +336,7 @@ export class StreamsPlugin
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
-            const soClient = coreStart.savedObjects.createInternalRepository();
-            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+            return await isSignificantEventsMemoryEnabled(coreStart.featureFlags);
           } catch {
             return false;
           }
