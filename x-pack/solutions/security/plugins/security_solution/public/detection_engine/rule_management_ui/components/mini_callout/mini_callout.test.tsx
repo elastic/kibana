@@ -35,11 +35,11 @@ describe('MiniCallout', () => {
     );
   });
 
-  it('renders the MiniCallout component with no icon if not provided', () => {
+  it('renders the MiniCallout component with default icon if no custom icon is provided', () => {
     const { container } = render(<MiniCallout {...{ ...defaultProps, iconType: undefined }} />);
 
-    const icon = container.querySelector('[data-euiicon-type]');
-    expect(icon).toBeNull();
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
+    expect(icon).not.toBeNull();
   });
 
   it('renders the dismiss link when dismissible is true', () => {
