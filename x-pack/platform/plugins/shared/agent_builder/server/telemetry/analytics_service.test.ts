@@ -241,8 +241,69 @@ describe('AnalyticsService', () => {
   });
 
   describe.each([
-    { method: 'reportSkillCreated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated },
-    { method: 'reportSkillUpdated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated },
+    {
+      method: 'reportSkillCreated' as const,
+      eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
+      report: (args: { skillId: string; origin?: 'custom'; toolIds: string[] }) =>
+        service.reportSkillCreated(args),
+    },
+    {
+      method: 'reportSkillUpdated' as const,
+      eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated,
+      report: (args: { skillId: string; origin?: 'custom'; toolIds: string[] }) =>
+        service.reportSkillUpdated(args),
+    },
+  ])('$method', ({ method, eventType, report }) => {
+    it('reports the event with normalized skill_id and deduplicated tool_ids', () => {
+      report({
+        skillId: 'custom-skill-1',
+        origin: 'custom',
+        toolIds: ['my_custom_tool', 'my_custom_tool'],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+        tool_ids: ['custom-3c9388baa67aef90'],
+      });
+    });
+
+    it('reports empty tool_ids when no tools are attached', () => {
+      report({ skillId: 'custom-skill-1', origin: 'custom', toolIds: [] });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+        tool_ids: [],
+      });
+    });
+
+    it('uses a composite `plugin-<hash>-<hash>` id when a pluginId is provided', () => {
+      service[method]({
+        skillId: 'plugin-skill',
+        origin: 'plugin',
+        pluginId: 'plugin-uuid-1',
+        toolIds: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'plugin-f3a4ba6782682a47-eabadf06389e747c',
+        origin: 'plugin',
+        tool_ids: [],
+      });
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() => report({ skillId: 'custom-skill-1', toolIds: [] })).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe.each([
     { method: 'reportSkillDeleted' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted },
   ])('$method', ({ method, eventType }) => {
     it('normalizes the skill_id and passes origin for custom skills', () => {
