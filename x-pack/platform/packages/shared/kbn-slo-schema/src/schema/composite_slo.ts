@@ -113,12 +113,10 @@ const compositeSloSummarySchema = z.object({
   oneDayBurnRate: z.number(),
 });
 
-type CompositeSLOMember = z.infer<typeof compositeSloMemberSchema>;
-type CompositeMethod = z.infer<typeof compositeMethodSchema>;
 type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
 
-export type { CompositeSLOMember, CompositeMethod, CompositeSLOMemberSummary, CompositeSLOSummary };
+export type { CompositeSLOMemberSummary, CompositeSLOSummary };
 
 export {
   COMPOSITE_SLO_MIN_MEMBERS,
