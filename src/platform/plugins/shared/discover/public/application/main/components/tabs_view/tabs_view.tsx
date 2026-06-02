@@ -29,7 +29,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 interface TabsViewProps extends SingleTabViewProps {
-  headerTitle?: string;
+  headerTitle: string;
 }
 
 export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) => {
@@ -90,7 +90,7 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
 
     return (tabsBar) => (
       <AppHeader
-        title={headerTitle ?? ''}
+        title={headerTitle}
         menu={topNavMenuItems}
         sticky={false}
         padding="m"
