@@ -30,7 +30,7 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     // create_monitor_public_api migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts
     // create_monitor test suite migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor.spec.ts
     // (create_monitor.ts is retained as a helpers-only module: addMonitorAPIHelper/omitMonitorKeys are still used by unmigrated FTR suites)
-    loadTestFile(require.resolve('./create_update_delete_params'));
+    // create_update_delete_params migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts
     loadTestFile(require.resolve('./delete_monitor_project'));
     // delete_monitor migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts
     // edit_monitor_private_location migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts
@@ -42,9 +42,9 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     loadTestFile(require.resolve('./get_monitor_project'));
     // get_monitor migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts
     loadTestFile(require.resolve('./inspect_monitor'));
-    loadTestFile(require.resolve('./suggestions.ts'));
+    // suggestions migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/suggestions.spec.ts
     loadTestFile(require.resolve('./sync_global_params'));
-    loadTestFile(require.resolve('./sync_global_params_for_filtered_monitors'));
+    // sync_global_params_for_filtered_monitors migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params_for_filtered_monitors.spec.ts
     // synthetics_enablement migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts
     // test_now_monitor migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/test_now_monitor.spec.ts
     // edit_private_location migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts
