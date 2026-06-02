@@ -80,6 +80,31 @@ describe('TriggerRegistry', () => {
       expect(registry.list()).toHaveLength(3);
     });
 
+    it('accepts kebab-case namespace ids from naming conventions', () => {
+      const idsFromDocs = [
+        'my-namespace.customTrigger',
+        'cases.updated',
+        'custom-feature.alertFired',
+        'my-plugin.myTrigger',
+        'alertingV2.episodeAssigned',
+      ];
+
+      for (const id of idsFromDocs) {
+        registry.register(createValidDefinition({ id }));
+      }
+
+      expect(registry.list()).toHaveLength(idsFromDocs.length);
+      for (const id of idsFromDocs) {
+        expect(registry.has(id)).toBe(true);
+      }
+    });
+
+    it('rejects event segment with dashes (event must be camelCase)', () => {
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my-namespace.custom-trigger' }));
+      }).toThrow('must follow namespaced format');
+    });
+
     it('throws if eventSchema is null', () => {
       expect(() => {
         registry.register(
