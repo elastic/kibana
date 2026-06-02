@@ -58,6 +58,34 @@ export function registerBundleRoutes({
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
+  // Runtime DLL integrity check for SWC minifier bug diagnostic
+  try {
+    const dllPath = Path.resolve(UiSharedDepsNpm.distDir, 'kbn-ui-shared-deps-npm.dll.js');
+    if (Fs.existsSync(dllPath)) {
+      const dllContent = Fs.readFileSync(dllPath, 'utf8');
+      const hasParts = dllContent.includes('parts[');
+      const dllSize = dllContent.length;
+      // eslint-disable-next-line no-console
+      console.log(`[SWC-DIAG] Runtime DLL check: ${dllPath}`);
+      // eslint-disable-next-line no-console
+      console.log(`[SWC-DIAG]   DLL size: ${dllSize}`);
+      // eslint-disable-next-line no-console
+      console.log(
+        `[SWC-DIAG]   vfile-message "parts[" corruption: ${hasParts ? 'CORRUPTED' : 'CLEAN'}`
+      );
+      if (hasParts) {
+        const idx = dllContent.indexOf('parts[');
+        const start = Math.max(0, idx - 200);
+        const end = Math.min(dllContent.length, idx + 200);
+        // eslint-disable-next-line no-console
+        console.log(`[SWC-DIAG]   CORRUPTION snippet: …${dllContent.slice(start, end)}…`);
+      }
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(`[SWC-DIAG] Runtime DLL check failed: ${e}`);
+  }
+
   // Shared deps bundles are always served - they're built by webpack
   // and used by both webpack and RSPack built plugins
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';

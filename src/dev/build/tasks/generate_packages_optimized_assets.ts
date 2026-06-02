@@ -14,7 +14,7 @@ import zlib from 'zlib';
 import { cpus } from 'os';
 import { promisify } from 'util';
 
-import { minify } from '@swc/core';
+import { minify, version as swcVersion } from '@swc/core';
 import { transform as lightningTransform, browserslistToTargets } from 'lightningcss';
 import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
@@ -36,8 +36,17 @@ const PARALLEL_CONCURRENCY = cpus().length;
 const brotliCompressAsync = promisify(zlib.brotliCompress);
 const cssTargets = browserslistToTargets(browserslist());
 
+function extractSnippet(code: string, marker: string, contextChars = 120): string | null {
+  const idx = code.indexOf(marker);
+  if (idx === -1) return null;
+  const start = Math.max(0, idx - contextChars);
+  const end = Math.min(code.length, idx + marker.length + contextChars);
+  return `…${code.slice(start, end)}…`;
+}
+
 async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: number) {
   log.info('Creating optimized assets for', assetDir);
+  log.info(`[SWC-DIAG] @swc/core version: ${swcVersion}`);
   log.indent(4);
   try {
     log.debug('Remove Pre Minify Sourcemaps');
@@ -61,12 +70,52 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
     const jsFiles = await globby(['**/*.js'], { cwd: assetDir, absolute: true });
     await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, async (file) => {
       const source = await Fsp.readFile(file, 'utf8');
+
+      const isVfileMessage = file.includes('vfile-message');
+      const isDllBundle = file.includes('kbn-ui-shared-deps-npm.dll');
+
+      if (isVfileMessage) {
+        log.info(`[SWC-DIAG] Pre-minify vfile-message: ${file}`);
+        log.info(`[SWC-DIAG]   source length: ${source.length}`);
+        log.info(`[SWC-DIAG]   has parseOrigin: ${source.includes('parseOrigin')}`);
+        log.info(`[SWC-DIAG]   has "parts[": ${source.includes('parts[')}`);
+        const preSnippet = extractSnippet(source, 'parts[');
+        if (preSnippet) log.info(`[SWC-DIAG]   pre-minify parts[ context: ${preSnippet}`);
+      }
+
       const result = await minify(source, {
         compress: { passes: 2 },
         mangle: true,
         sourceMap: false,
       });
-      await Fsp.writeFile(file, result.code);
+
+      const output = result.code;
+
+      if (isVfileMessage) {
+        const hasParts = output.includes('parts[');
+        log.info(`[SWC-DIAG] Post-minify vfile-message: ${hasParts ? 'CORRUPTED' : 'CLEAN'}`);
+        log.info(`[SWC-DIAG]   output length: ${output.length}`);
+        if (hasParts) {
+          const snippet = extractSnippet(output, 'parts[');
+          log.info(`[SWC-DIAG]   CORRUPTION snippet: ${snippet}`);
+        }
+        log.info(`[SWC-DIAG]   full minified output:\n${output}`);
+      }
+
+      if (isDllBundle) {
+        const hasParts = output.includes('parts[');
+        const hasVMessage = output.includes('VMessage');
+        log.info(`[SWC-DIAG] Post-minify DLL bundle: ${file}`);
+        log.info(`[SWC-DIAG]   output length: ${output.length}`);
+        log.info(`[SWC-DIAG]   contains "parts[": ${hasParts}`);
+        log.info(`[SWC-DIAG]   contains "VMessage": ${hasVMessage}`);
+        if (hasParts) {
+          const snippet = extractSnippet(output, 'parts[');
+          log.info(`[SWC-DIAG]   DLL CORRUPTION snippet: ${snippet}`);
+        }
+      }
+
+      await Fsp.writeFile(file, output);
     });
 
     log.debug('Brotli compress');
