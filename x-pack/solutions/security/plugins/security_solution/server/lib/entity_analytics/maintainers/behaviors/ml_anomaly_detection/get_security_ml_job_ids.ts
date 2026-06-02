@@ -19,29 +19,19 @@ const isSecurityJob = (job: ModuleJob): boolean =>
     ML_GROUP_IDS.includes(group as typeof ML_GROUP_ID | typeof LEGACY_ML_GROUP_ID)
   ) || false;
 
-export interface SecurityMlJob {
-  id: string;
-  name: string;
-}
-
 interface GetSecurityMlJobIdsOpts {
   ml: MlPluginSetup;
   soClient: SavedObjectsClientContract;
 }
 
-export const getSecurityMlJobs = async ({
+export const getSecurityMlJobIds = async ({
   ml,
   soClient,
-}: GetSecurityMlJobIdsOpts): Promise<SecurityMlJob[]> => {
+}: GetSecurityMlJobIdsOpts): Promise<string[]> => {
   const mlModulesProvider = ml.modulesProvider({} as KibanaRequest, soClient);
   const modules = await mlModulesProvider?.listModules?.();
 
   return (modules ?? []).flatMap((module) =>
-    module.jobs.filter(isSecurityJob).map((job) => ({
-      id: job.id,
-      name:
-        (job.config?.custom_settings as { security_app_display_name?: string } | undefined)
-          ?.security_app_display_name ?? job.id,
-    }))
+    module.jobs.filter(isSecurityJob).map((job) => job.id)
   );
 };

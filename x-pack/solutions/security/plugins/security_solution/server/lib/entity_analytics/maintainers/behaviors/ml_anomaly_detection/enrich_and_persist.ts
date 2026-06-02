@@ -18,7 +18,6 @@ interface EnrichAndPersistAnomaliesOpts {
   anomaliesByEntity: Map<string, EntityAnomalies>;
   entityType: EntityType;
   esClient: ElasticsearchClient;
-  jobNameById: Map<string, string>;
   logger: Logger;
   ml: MlPluginSetup;
   namespace: string;
@@ -29,7 +28,6 @@ export const enrichAndPersistAnomalies = async ({
   anomaliesByEntity,
   entityType,
   esClient,
-  jobNameById,
   logger,
   ml,
   namespace,
@@ -72,7 +70,6 @@ export const enrichAndPersistAnomalies = async ({
         anomaly: {
           _id: anomaly._id,
           job_id: jobId,
-          job_name: jobNameById.get(jobId) ?? jobId,
           detector_index: anomaly.detectorIndex,
           detector_function: anomaly.detectorFunction,
           timestamp: anomaly.timestamp,

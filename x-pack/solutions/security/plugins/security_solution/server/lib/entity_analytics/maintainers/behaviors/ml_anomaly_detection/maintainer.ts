@@ -180,8 +180,7 @@ const processBatchOfEntities = async ({
   if (entityIds.length === 0) return;
 
   // Query for anomaly records for the batch of entities
-  const { anomaliesByEntity, jobNameById } = await fetchAnomaliesForEntityBatch({
-    anomalyThreshold,
+  const anomaliesByEntity = await fetchAnomaliesForEntityBatch({
     entityType,
     entityIds,
     logger,
@@ -198,7 +197,6 @@ const processBatchOfEntities = async ({
     anomaliesByEntity,
     entityType,
     esClient,
-    jobNameById,
     logger,
     ml,
     namespace,

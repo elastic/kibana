@@ -45,7 +45,6 @@ export interface EnrichedAnomalyRecord {
   anomaly: {
     _id: string;
     job_id: string;
-    job_name: string;
     detector_index: number;
     detector_function: string;
     timestamp: number;

@@ -24,7 +24,6 @@ export const ML_AD_DETAILS_MAPPING: MappingTypeMapping = {
       properties: {
         _id: { type: 'keyword' },
         job_id: { type: 'keyword' },
-        job_name: { type: 'keyword' },
         detector_index: { type: 'integer' },
         detector_function: { type: 'keyword' },
         timestamp: { type: 'date' },
