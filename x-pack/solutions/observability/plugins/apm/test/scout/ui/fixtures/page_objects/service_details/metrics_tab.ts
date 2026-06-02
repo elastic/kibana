@@ -21,6 +21,11 @@ export class MetricsTab extends ServiceDetailsTab {
   public readonly cpuUsageChart: Locator;
   public readonly serverlessSummary: Locator;
   public readonly serverlessSummaryFeedbackLink: Locator;
+  public readonly noDataForRangeCallout: Locator;
+  public readonly mixedAgentTypesCallout: Locator;
+  public readonly mixedAgentTypesOverlapCallout: Locator;
+  public readonly currentTimeRangeLink: Locator;
+  public readonly previousTimeRangeLink: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
@@ -33,6 +38,11 @@ export class MetricsTab extends ServiceDetailsTab {
     this.serverlessSummaryFeedbackLink = this.page.getByTestId(
       'apmServerlessSummaryGiveFeedbackLink'
     );
+    this.noDataForRangeCallout = this.page.getByTestId('apmMetricsNoDataForRange');
+    this.mixedAgentTypesCallout = this.page.getByTestId('apmMetricsMixedAgentTypes');
+    this.mixedAgentTypesOverlapCallout = this.page.getByTestId('apmMetricsMixedAgentTypesOverlap');
+    this.currentTimeRangeLink = this.page.getByTestId('apmMetricsCurrentTimeRangeLink');
+    this.previousTimeRangeLink = this.page.getByTestId('apmMetricsPreviousTimeRangeLink');
   }
 
   protected async waitForTabLoad(): Promise<void> {
@@ -71,6 +81,14 @@ export class MetricsTab extends ServiceDetailsTab {
 
   async getLegendLabels(panelTitle: string): Promise<string[]> {
     return this.panels.getLegendLabels(panelTitle);
+  }
+
+  async getUrlTimeRange(): Promise<{ rangeFrom: string | null; rangeTo: string | null }> {
+    const url = new URL(this.page.url());
+    return {
+      rangeFrom: url.searchParams.get('rangeFrom'),
+      rangeTo: url.searchParams.get('rangeTo'),
+    };
   }
 
   async waitForAllPanelsToRender(): Promise<void> {
