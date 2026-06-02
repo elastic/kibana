@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('Start Migration', () => {
+  describe('@skipInServerlessMKI Start Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
       const createMigrationRespose = await migrationRulesRoutes.create({});
