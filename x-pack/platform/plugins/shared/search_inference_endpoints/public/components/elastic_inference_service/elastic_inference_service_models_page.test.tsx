@@ -13,18 +13,18 @@ import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 jest.mock('../../hooks/use_eis_models');
-const mockUseKibana = jest.fn(() => ({
-  services: {
-    notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-    application: {
-      capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(() => ({
+    services: {
+      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+      application: {
+        capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
+      },
     },
-  },
+  })),
 }));
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: mockUseKibana,
-}));
+const mockUseKibana = jest.requireMock('../../hooks/use_kibana').useKibana as jest.Mock;
 jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
