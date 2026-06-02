@@ -51,6 +51,7 @@ export async function cruiseExternalDeps(paths: PathsToAnalyze) {
       ],
     },
     doNotFollow: { path: 'node_modules' },
+    // @ts-ignore wrongly typed in dependency-cruiser, see https://github.com/sverweij/dependency-cruiser/blob/main/doc/options-reference.md#extensions
     extensions: ['.ts', '.tsx'],
     focus: '^node_modules',
     exclude: { path: excludePaths },
