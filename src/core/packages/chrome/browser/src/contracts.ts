@@ -329,6 +329,32 @@ export interface ChromeStart {
   getActiveSolutionNavId(): SolutionId | null;
 
   /**
+   * Register a handler that opens the feedback UI.
+   * Called by the feedback plugin during `start`.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+
+  /**
+   * Get an observable of the currently registered feedback handler, or `undefined` if none.
+   */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+
+  /**
+   * Register a handler that opens the newsfeed UI.
+   * Called by the newsfeed plugin during `start`.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
+
+  /**
+   * Get an observable of the currently registered newsfeed handler, or `undefined` if none.
+   */
+  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
+
+  /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
    */
   withProvider(component: ReactNode): ReactNode;
