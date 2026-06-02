@@ -7,30 +7,12 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
-// List of packages that shouldn't use the multi-step onboarding UI because they use custom policy interfaces
-// or are otherwise not accounted for by verbiage and elements throughout the multi-step UI
-const EXCLUDED_PACKAGES = [
-  'apm',
-  'cloud_security_posture',
-  'cloud_asset_inventory',
-  'cloud_defend',
-  'dga',
-  'fleet_server',
-  'osquery_manager',
-  'problemchild',
-  'security_detection_engine',
-  'synthetics',
-  'agentless_hello_world',
-];
-
 interface GetInstallPkgRouteOptionsParams {
   currentPath: string;
   integration: string | null;
   agentPolicyId?: string;
   pkgkey: string;
   isCloud: boolean;
-  isExperimentalAddIntegrationPageEnabled: boolean;
-  isFirstTimeAgentUser: boolean;
   isGuidedOnboardingActive: boolean;
   isAgentlessIntegration?: boolean;
   isAgentlessDefault?: boolean;
@@ -41,8 +23,6 @@ export type InstallPkgRouteOptions = [
   { path: string; state: CreatePackagePolicyRouteState }
 ];
 
-const isPackageExemptFromStepsLayout = (pkgkey: string) =>
-  EXCLUDED_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname));
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
  * by generating the options to be passed to `services.application.navigateToApp`.
@@ -52,24 +32,14 @@ export const getInstallPkgRouteOptions = ({
   integration,
   agentPolicyId,
   pkgkey,
-  isFirstTimeAgentUser,
   isCloud,
-  isExperimentalAddIntegrationPageEnabled,
   isGuidedOnboardingActive,
   isAgentlessIntegration,
   isAgentlessDefault,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
-  const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
-  const useMultiPageLayout =
-    isExperimentalAddIntegrationPageEnabled &&
-    isCloud &&
-    (isFirstTimeAgentUser || isGuidedOnboardingActive) &&
-    !packageExemptFromStepsLayout &&
-    !isAgentlessDefault;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
-    useMultiPageLayout,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];
