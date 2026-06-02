@@ -73,7 +73,9 @@ store_old_version
 
 update_package_json_version
 
-update_initial_app_data
+if [[ "$branch_to_merge_into" != "8.19" ]]; then
+  update_initial_app_data
+fi
 
 update_kibana_migrator_utils
 
