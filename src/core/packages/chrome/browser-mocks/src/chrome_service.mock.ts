@@ -146,16 +146,16 @@ const createStartContractMock = () => {
           };
         }),
       }),
+      getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
+      getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
     getAppMenu$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setAppMenu: jest.fn(),
     setBreadcrumbsBadges: jest.fn(),
-    getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-    registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
-    getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-    registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
   });
 
   return startContract;

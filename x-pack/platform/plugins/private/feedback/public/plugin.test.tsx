@@ -43,13 +43,13 @@ describe('Feedback Plugin', () => {
       expect(React.isValidElement(content)).toBe(true);
     });
 
-    it('should register feedback handler when Chrome Next is enabled', () => {
+    it('should register feedback handler in the Chrome Next namespace when Chrome Next is enabled', () => {
       enableFeedback();
       coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
 
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
-      expect(coreStartMock.chrome.registerFeedbackHandler).toHaveBeenCalledWith(
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
         expect.any(Function)
       );
     });
@@ -60,7 +60,7 @@ describe('Feedback Plugin', () => {
 
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
-      expect(coreStartMock.chrome.registerFeedbackHandler).not.toHaveBeenCalled();
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
     });
 
     it('should not register feedback button when feedback is disabled', () => {

@@ -119,7 +119,7 @@ export class FeedbackPlugin implements Plugin {
         overflow-y: auto;
       `;
 
-      core.chrome.registerFeedbackHandler(() => {
+      core.chrome.next.registerFeedbackHandler(() => {
         const modal = core.overlays.openModal(
           toMountPoint(
             core.rendering.addContext(

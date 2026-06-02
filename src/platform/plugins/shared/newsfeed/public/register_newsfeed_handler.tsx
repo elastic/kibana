@@ -32,7 +32,7 @@ export const registerNewsfeedHandler = ({
   );
   const handlerApi: NewsfeedApi = { ...api, fetchResults$: handlerResults$ };
 
-  return core.chrome.registerNewsfeedHandler({
+  return core.chrome.next.registerNewsfeedHandler({
     open: () => {
       if (lastFetchResult) {
         handlerApi.markAsRead(lastFetchResult.feedItems.map((item) => item.hash));

@@ -35,7 +35,7 @@ describe('ChromeNextGlobalHeader', () => {
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
     Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
-    chrome.getNewsfeedHandler$.mockReturnValue(
+    chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
         hasNew$: new BehaviorSubject(false),
@@ -58,7 +58,7 @@ describe('ChromeNextGlobalHeader', () => {
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
     Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
-    chrome.getNewsfeedHandler$.mockReturnValue(
+    chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
         hasNew$: new Subject<boolean>(),

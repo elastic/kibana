@@ -43,8 +43,8 @@ export function useHelpLinks$(): Observable<HelpLinks> {
         chrome.getHelpExtension$(),
         chrome.getHelpSupportUrl$(),
         chrome.getGlobalHelpExtensionMenuLinks$(),
-        chrome.getFeedbackHandler$(),
-        chrome.getNewsfeedHandler$().pipe(
+        chrome.next.getFeedbackHandler$(),
+        chrome.next.getNewsfeedHandler$().pipe(
           switchMap((handler) =>
             handler
               ? handler.hasNew$.pipe(

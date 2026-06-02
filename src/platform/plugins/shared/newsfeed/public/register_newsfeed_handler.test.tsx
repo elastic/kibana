@@ -42,7 +42,9 @@ describe('registerNewsfeedHandler', () => {
     const api: NewsfeedApi = { fetchResults$, markAsRead };
     const core = {
       chrome: {
-        registerNewsfeedHandler: registerNewsfeedHandlerMock,
+        next: {
+          registerNewsfeedHandler: registerNewsfeedHandlerMock,
+        },
       },
       overlays: {
         openSystemFlyout,
