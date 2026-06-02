@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AnyExpressionFunctionDefinition } from '../expression_functions/types';
 import type { ExpressionAstExpression } from './types';
 import type { ExpressionAstFunctionBuilder, InferFunctionDefinition } from './build_function';
@@ -21,40 +30,42 @@ export declare function isExpressionAstBuilder(val: unknown): val is ExpressionA
 /** @internal */
 export declare function isExpressionAst(val: unknown): val is ExpressionAstExpression;
 export interface ExpressionAstExpressionBuilder {
-    /**
-     * Used to identify expression builder objects.
-     */
-    type: 'expression_builder';
-    /**
-     * Array of each of the `buildExpressionFunction()` instances
-     * in this expression. Use this to remove or reorder functions
-     * in the expression.
-     */
-    functions: ExpressionAstFunctionBuilder[];
-    /**
-     * Recursively searches expression for all ocurrences of the
-     * function, including in subexpressions.
-     *
-     * Useful when performing migrations on a specific function,
-     * as you can iterate over the array of references and update
-     * all functions at once.
-     *
-     * @param fnName Name of the function to search for.
-     * @return `ExpressionAstFunctionBuilder[]`
-     */
-    findFunction: <FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name']) => Array<ExpressionAstFunctionBuilder<FnDef>> | [];
-    /**
-     * Converts expression to an AST.
-     *
-     * @return `ExpressionAstExpression`
-     */
-    toAst: () => ExpressionAstExpression;
-    /**
-     * Converts expression to an expression string.
-     *
-     * @return `string`
-     */
-    toString: () => string;
+  /**
+   * Used to identify expression builder objects.
+   */
+  type: 'expression_builder';
+  /**
+   * Array of each of the `buildExpressionFunction()` instances
+   * in this expression. Use this to remove or reorder functions
+   * in the expression.
+   */
+  functions: ExpressionAstFunctionBuilder[];
+  /**
+   * Recursively searches expression for all ocurrences of the
+   * function, including in subexpressions.
+   *
+   * Useful when performing migrations on a specific function,
+   * as you can iterate over the array of references and update
+   * all functions at once.
+   *
+   * @param fnName Name of the function to search for.
+   * @return `ExpressionAstFunctionBuilder[]`
+   */
+  findFunction: <FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(
+    fnName: InferFunctionDefinition<FnDef>['name']
+  ) => Array<ExpressionAstFunctionBuilder<FnDef>> | [];
+  /**
+   * Converts expression to an AST.
+   *
+   * @return `ExpressionAstExpression`
+   */
+  toAst: () => ExpressionAstExpression;
+  /**
+   * Converts expression to an expression string.
+   *
+   * @return `string`
+   */
+  toString: () => string;
 }
 /**
  * Makes it easy to progressively build, update, and traverse an
@@ -65,4 +76,6 @@ export interface ExpressionAstExpressionBuilder {
  * @param initialState Optional. An expression string, AST, or array of `ExpressionAstFunctionBuilder[]`.
  * @return `this`
  */
-export declare function buildExpression(initialState?: ExpressionAstFunctionBuilder[] | ExpressionAstExpression | string): ExpressionAstExpressionBuilder;
+export declare function buildExpression(
+  initialState?: ExpressionAstFunctionBuilder[] | ExpressionAstExpression | string
+): ExpressionAstExpressionBuilder;

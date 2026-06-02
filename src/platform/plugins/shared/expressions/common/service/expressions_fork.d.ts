@@ -1,11 +1,25 @@
-import type { ExpressionExecutionParams, ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '.';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ExpressionExecutionParams,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+} from '.';
 import type { ExpressionAstExpression } from '../ast';
 import type { AnyExpressionFunctionDefinition } from '../expression_functions';
 import type { AnyExpressionTypeDefinition } from '../expression_types';
 import type { AnyExpressionRenderDefinition } from '../expression_renderers';
 export interface ExpressionServiceFork {
-    setup(): ExpressionsServiceSetup;
-    start(): ExpressionsServiceStart;
+  setup(): ExpressionsServiceSetup;
+  start(): ExpressionsServiceStart;
 }
 /**
  * `ExpressionsService` class is used for multiple purposes:
@@ -27,27 +41,45 @@ export interface ExpressionServiceFork {
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
 export declare class ExpressionsServiceFork implements ExpressionServiceFork {
-    private namespace;
-    private expressionsService;
-    /**
-     * @note Workaround since the expressions service is frozen.
-     */
-    constructor(namespace: string, expressionsService: ExpressionsService);
-    protected registerFunction(definition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
-    protected registerRenderer(definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)): void;
-    protected registerType(definition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    protected run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): import("rxjs").Observable<import("..").ExecutionResult<import("../expression_types").ExpressionValueError | Output>>;
-    protected execute<Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): import("..").ExecutionContract<Input, Output, object>;
-    protected getFunction(name: string): import("../expression_functions").ExpressionFunction | undefined;
-    protected getFunctions(): Record<string, import("../expression_functions").ExpressionFunction>;
-    /**
-     * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
-     * same contract on server-side and browser-side.
-     */
-    setup(): ExpressionsServiceSetup;
-    /**
-     * Returns Kibana Platform *start* life-cycle contract. Useful to return the
-     * same contract on server-side and browser-side.
-     */
-    start(): ExpressionsServiceStart;
+  private namespace;
+  private expressionsService;
+  /**
+   * @note Workaround since the expressions service is frozen.
+   */
+  constructor(namespace: string, expressionsService: ExpressionsService);
+  protected registerFunction(
+    definition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+  ): void;
+  protected registerRenderer(
+    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
+  ): void;
+  protected registerType(
+    definition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+  ): void;
+  protected run<Input, Output>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    params?: ExpressionExecutionParams
+  ): import('rxjs').Observable<
+    import('..').ExecutionResult<import('../expression_types').ExpressionValueError | Output>
+  >;
+  protected execute<Input = unknown, Output = unknown>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    params?: ExpressionExecutionParams
+  ): import('..').ExecutionContract<Input, Output, object>;
+  protected getFunction(
+    name: string
+  ): import('../expression_functions').ExpressionFunction | undefined;
+  protected getFunctions(): Record<string, import('../expression_functions').ExpressionFunction>;
+  /**
+   * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
+   * same contract on server-side and browser-side.
+   */
+  setup(): ExpressionsServiceSetup;
+  /**
+   * Returns Kibana Platform *start* life-cycle contract. Useful to return the
+   * same contract on server-side and browser-side.
+   */
+  start(): ExpressionsServiceStart;
 }

@@ -1,12 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * All runtime field types.
  * @public
  */
-export declare const RUNTIME_FIELD_COMPOSITE_TYPE: "composite";
+export declare const RUNTIME_FIELD_COMPOSITE_TYPE: 'composite';
 export type RuntimeFieldCompositeType = typeof RUNTIME_FIELD_COMPOSITE_TYPE;
-export declare const PRIMITIVE_RUNTIME_FIELD_TYPES: readonly ["keyword", "long", "double", "date", "ip", "boolean", "geo_point"];
+export declare const PRIMITIVE_RUNTIME_FIELD_TYPES: readonly [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point'
+];
 export type PrimitiveRuntimeFieldTypes = typeof PRIMITIVE_RUNTIME_FIELD_TYPES;
-export declare const RUNTIME_FIELD_TYPES: readonly ["keyword", "long", "double", "date", "ip", "boolean", "geo_point", "composite"];
+export declare const RUNTIME_FIELD_TYPES: readonly [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+  'composite'
+];
 /**
  * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
  * that are created by default by elastic in ese.
@@ -14,23 +40,23 @@ export declare const RUNTIME_FIELD_TYPES: readonly ["keyword", "long", "double",
  * instead of relying on these hardcoded assets
  */
 export declare const DEFAULT_ASSETS_TO_IGNORE: {
-    DATA_STREAMS_TO_IGNORE: string[];
+  DATA_STREAMS_TO_IGNORE: string[];
 };
 /**
  * UiSettings key for metaFields list.
  * @public
  */
-export declare const META_FIELDS = "metaFields";
+export declare const META_FIELDS = 'metaFields';
 /**
  * Data view saved object type.
  * @public
  */
-export declare const DATA_VIEW_SAVED_OBJECT_TYPE = "index-pattern";
+export declare const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 /**
  * Data views plugin name.
  * @public
  */
-export declare const PLUGIN_NAME = "DataViews";
+export declare const PLUGIN_NAME = 'DataViews';
 /**
  * Max length for the custom field description
  */
@@ -39,24 +65,24 @@ export declare const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
  * Fields for wildcard path.
  * @public
  */
-export declare const FIELDS_FOR_WILDCARD_PATH = "/internal/data_views/_fields_for_wildcard";
+export declare const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
 /**
  * Fields path. Like fields for wildcard but GET only
  * @public
  */
-export declare const FIELDS_PATH = "/internal/data_views/fields";
+export declare const FIELDS_PATH = '/internal/data_views/fields';
 /**
  * Existing indices path
  * @public
  */
-export declare const EXISTING_INDICES_PATH = "/internal/data_views/_existing_indices";
-export declare const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = "data_views:fields_excluded_data_tiers";
-export declare const DEFAULT_DATA_VIEW_ID = "defaultIndex";
+export declare const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
+export declare const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
+export declare const DEFAULT_DATA_VIEW_ID = 'defaultIndex';
 /**
  * Valid `failureReason` attribute values for `has_es_data` API error responses
  */
 export declare enum HasEsDataFailureReason {
-    localDataTimeout = "local_data_timeout",
-    remoteDataTimeout = "remote_data_timeout",
-    unknown = "unknown"
+  localDataTimeout = 'local_data_timeout',
+  remoteDataTimeout = 'remote_data_timeout',
+  unknown = 'unknown',
 }

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 /**
  * This can convert a type into a known Expression string representation of
@@ -12,15 +21,27 @@ export type TypeToString<T> = KnownTypeToString<T> | UnmappedTypeStrings;
  * If the provided generic is its own type interface, we use the value of
  * the `type` key as a string literal type for it.
  */
-export type KnownTypeToString<T> = T extends string ? 'string' : T extends boolean ? 'boolean' : T extends number ? 'number' : T extends null ? 'null' : T extends {
-    type: string;
-} ? T['type'] : never;
+export type KnownTypeToString<T> = T extends string
+  ? 'string'
+  : T extends boolean
+  ? 'boolean'
+  : T extends number
+  ? 'number'
+  : T extends null
+  ? 'null'
+  : T extends {
+      type: string;
+    }
+  ? T['type']
+  : never;
 /**
  * If the type extends a Promise, we still need to return the string representation:
  *
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
-export type TypeString<T> = KnownTypeToString<T extends ObservableLike<unknown> ? UnwrapObservable<T> : Awaited<T>>;
+export type TypeString<T> = KnownTypeToString<
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : Awaited<T>
+>;
 /**
  * Types used in Expressions that don't map to a primitive cleanly:
  *

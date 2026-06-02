@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Add a new set of registries to an existing set of registries.
  *
@@ -20,6 +29,6 @@ export function register(registries: any, specs: any): any;
  * @param {*} registries - The registries to wrap.
  */
 export function registryFactory(registries: any): {
-    registries(): any;
-    register(specs: any): any;
+  registries(): any;
+  register(specs: any): any;
 };
