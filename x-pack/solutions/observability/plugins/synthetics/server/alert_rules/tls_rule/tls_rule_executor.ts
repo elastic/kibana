@@ -195,9 +195,8 @@ export class TLSRuleExecutor {
       // Browser-certificate evaluation. When `includeBrowserCerts` is off these
       // are all undefined/empty, so the query collapses on the sha256
       // fingerprint exactly as before (lightweight-only behavior preserved).
-      // The public `certOrigin` rule param maps onto the query's `party` filter.
       includeBrowserCerts: this.params.includeBrowserCerts,
-      party: this.params.certOrigin,
+      certOrigin: this.params.certOrigin,
       browserResourceTypes: this.params.browserResourceTypes,
       issuers: this.params.issuers,
     });
