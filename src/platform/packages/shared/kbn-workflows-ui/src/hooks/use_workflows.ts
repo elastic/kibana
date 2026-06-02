@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { useShowManagedWorkflowsSetting } from './use_workflows_ui_settings';
 import { useWorkflowsApi } from '../api/use_workflows_api';
 
 /**
@@ -21,11 +23,19 @@ import { useWorkflowsApi } from '../api/use_workflows_api';
  */
 export function useWorkflows(params: WorkflowsSearchParams) {
   const api = useWorkflowsApi();
+  const showManagedWorkflows = useShowManagedWorkflowsSetting();
+  const queryParams = useMemo<WorkflowsSearchParams>(() => {
+    if (params.managed !== undefined || !showManagedWorkflows) {
+      return params;
+    }
+
+    return { ...params, managed: 'all' };
+  }, [params, showManagedWorkflows]);
 
   return useQuery<WorkflowListDto>({
     networkMode: 'always',
-    queryKey: ['workflows', params],
-    queryFn: async () => api.getWorkflows(params),
+    queryKey: ['workflows', queryParams],
+    queryFn: async () => api.getWorkflows(queryParams),
     keepPreviousData: true,
   });
 }
