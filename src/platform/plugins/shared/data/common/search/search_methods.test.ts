@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 describe('SearchMethodsService', () => {
   let mockSearch: jest.MockedFunction<ISearchGeneric>;
@@ -21,12 +22,35 @@ describe('SearchMethodsService', () => {
     service = new SearchMethodsService(mockSearch);
   });
 
-  const createMockResponse = (rawResponse: object, isRunning = false) => {
+  const createMockResponse = (
+    rawResponse: object,
+    isRunning = false,
+    took?: number,
+    requestParams?: { path: string; method: string }
+  ) => {
     return of({
       isRunning,
       rawResponse,
+      took,
+      requestParams,
     });
   };
+
+  const createMockRequestResponder = () => ({
+    json: jest.fn().mockReturnThis(),
+    stats: jest.fn().mockReturnThis(),
+    ok: jest.fn(),
+    error: jest.fn(),
+  });
+
+  const createMockInspector = (
+    requestResponder: ReturnType<typeof createMockRequestResponder>
+  ) => ({
+    adapter: { start: jest.fn().mockReturnValue(requestResponder) } as unknown as RequestAdapter,
+    title: 'Test Request',
+    description: 'Test description',
+    id: 'test-id',
+  });
 
   describe('esql', () => {
     it('executes with correct strategy', async () => {
@@ -105,6 +129,150 @@ describe('SearchMethodsService', () => {
       const result = await service.esql({ query: 'FROM logs' });
 
       expect(result).toEqual({ rawResponse: mockResponse });
+    });
+
+    describe('inspector', () => {
+      it('calls inspector.adapter.start with correct parameters', async () => {
+        const mockResponse = { columns: [], values: [] };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector, sessionId: 'test-session-123' });
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: 'test-session-123',
+        });
+      });
+
+      it('calls requestResponder.json with ES|QL request params', async () => {
+        const mockResponse = { columns: [], values: [] };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql(
+          {
+            query: 'FROM logs | WHERE status > ?foo',
+            params: [{ name: 'foo', value: 200 }],
+            filter: { term: { field: 'value' } },
+            timeZone: 'UTC',
+            locale: 'en-US',
+          },
+          { inspector }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith({
+          query: 'FROM logs | WHERE status > ?foo',
+          params: [{ name: 'foo', value: 200 }],
+          filter: { term: { field: 'value' } },
+          time_zone: 'UTC',
+          locale: 'en-US',
+          dropNullColumns: undefined,
+          include_execution_metadata: undefined,
+        });
+      });
+
+      it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {
+        const mockResponse = {
+          columns: [{ name: 'status', type: 'integer' }],
+          values: [[200], [201], [202]],
+          took: 42,
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.stats).toHaveBeenCalledWith({
+          hits: {
+            label: 'Hits',
+            value: '3',
+            description: expect.any(String),
+          },
+          queryTime: {
+            label: 'Query time',
+            value: '42ms',
+            description: expect.any(String),
+          },
+        });
+      });
+
+      it('calls requestResponder.ok with response data on success', async () => {
+        const mockResponse = { columns: [], values: [] };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: undefined,
+        });
+      });
+
+      it('passes requestParams to inspector ok callback', async () => {
+        const mockResponse = { columns: [], values: [] };
+        const requestParams = { path: '/_query', method: 'POST' };
+        mockSearch.mockReturnValue(
+          createMockResponse(mockResponse, false, undefined, requestParams)
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: { path: '/_query', method: 'POST' },
+        });
+      });
+
+      it('works when inspector is not provided', async () => {
+        const mockResponse = { columns: [], values: [] };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+        const result = await service.esql({ query: 'FROM logs' });
+
+        expect(result).toEqual({ rawResponse: mockResponse });
+      });
+
+      it('calls requestResponder.error when search throws with error.attributes', async () => {
+        const mockError = Object.assign(new Error('Search failed'), {
+          attributes: { type: 'validation_exception', reason: 'Invalid query' },
+        });
+        mockSearch.mockReturnValue(throwError(() => mockError));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.esql({ query: 'FROM logs' }, { inspector })).rejects.toThrow(
+          'Search failed'
+        );
+
+        expect(requestResponder.json).toHaveBeenCalled();
+        expect(requestResponder.error).toHaveBeenCalledWith({
+          json: mockError.attributes,
+        });
+      });
+
+      it('calls requestResponder.error with message when error has no attributes', async () => {
+        const mockError = new Error('Network error');
+        mockSearch.mockReturnValue(throwError(() => mockError));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.esql({ query: 'FROM logs' }, { inspector })).rejects.toThrow(
+          'Network error'
+        );
+
+        expect(requestResponder.error).toHaveBeenCalledWith({
+          json: { message: 'Network error' },
+        });
+      });
     });
   });
 
@@ -188,6 +356,139 @@ describe('SearchMethodsService', () => {
           indexPattern: mockDataView,
         })
       );
+    });
+
+    describe('inspector', () => {
+      it('calls inspector.adapter.start with correct parameters', async () => {
+        const mockResponse = { hits: { hits: [], total: 0 } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dsl(
+          { index: 'logs-*', query: { match_all: {} } },
+          { inspector, sessionId: 'test-session' }
+        );
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: 'test-session',
+        });
+      });
+
+      it('calls requestResponder.json with DSL request body', async () => {
+        const mockResponse = { hits: { hits: [], total: 0 } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dsl(
+          {
+            index: 'logs-*',
+            query: { match: { message: 'error' } },
+            aggs: { status_count: { terms: { field: 'status' } } },
+            size: 50,
+          },
+          { inspector, trackTotalHits: true }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith({
+          query: { match: { message: 'error' } },
+          aggs: { status_count: { terms: { field: 'status' } } },
+          size: 50,
+          sort: undefined,
+          fields: undefined,
+          _source: undefined,
+          runtime_mappings: undefined,
+          highlight: undefined,
+          track_total_hits: true,
+        });
+      });
+
+      it('calls requestResponder.stats with getResponseInspectorStats result on success', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [{ _id: '1' }, { _id: '2' }],
+            total: { value: 100, relation: 'eq' },
+          },
+          took: 25,
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
+
+        expect(requestResponder.stats).toHaveBeenCalledWith({
+          queryTime: {
+            label: 'Query time',
+            value: '25ms',
+            description: expect.any(String),
+          },
+          hitsTotal: {
+            label: 'Hits (total)',
+            value: '100',
+            description: expect.any(String),
+          },
+          hits: {
+            label: 'Hits',
+            value: '2',
+            description: expect.any(String),
+          },
+        });
+      });
+
+      it('calls requestResponder.stats with getRequestMetadata before search when provided', async () => {
+        const mockResponse = { hits: { hits: [], total: 0 } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestMetadata = jest.fn().mockReturnValue({
+          customStat: { label: 'Custom', value: 'test' },
+        });
+
+        await service.dsl(
+          { index: 'logs-*', query: { match_all: {} } },
+          { inspector, getRequestMetadata }
+        );
+
+        expect(getRequestMetadata).toHaveBeenCalled();
+        expect(requestResponder.stats).toHaveBeenCalledWith({
+          customStat: { label: 'Custom', value: 'test' },
+        });
+      });
+
+      it('calls requestResponder.ok with response data on success', async () => {
+        const mockResponse = { hits: { hits: [], total: 0 } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: undefined,
+        });
+      });
+
+      it('passes requestParams to inspector ok callback', async () => {
+        const mockResponse = { hits: { hits: [], total: 0 } };
+        const requestParams = { path: '/_search', method: 'POST' };
+        mockSearch.mockReturnValue(
+          createMockResponse(mockResponse, false, undefined, requestParams)
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: { path: '/_search', method: 'POST' },
+        });
+      });
     });
   });
 
@@ -555,6 +856,215 @@ describe('SearchMethodsService', () => {
         );
       });
     });
+
+    describe('inspector', () => {
+      it('calls inspector for initial search', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dslPaginated(
+          {
+            index: 'logs-*',
+            query: { match_all: {} },
+            sort: [{ timestamp: 'desc' }],
+          },
+          { inspector }
+        );
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(1);
+        expect(requestResponder.json).toHaveBeenCalled();
+        expect(requestResponder.ok).toHaveBeenCalled();
+      });
+
+      it('calls inspector for pagination with same adapter', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [
+              { _id: '3', _source: { message: 'test3' }, sort: [3000] },
+              { _id: '4', _source: { message: 'test4' }, sort: [4000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(
+          {
+            index: 'logs-*',
+            query: { match_all: {} },
+            sort: [{ timestamp: 'desc' }],
+          },
+          { inspector }
+        );
+
+        await result.pagination.nextPage();
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(2);
+      });
+
+      it('allows overriding inspectorTitle in nextPage()', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { inspector }
+        );
+
+        await result.pagination?.nextPage({ inspectorTitle: 'Page 2 Request' });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Page 2 Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('allows overriding inspectorDescription in nextPage()', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { inspector }
+        );
+
+        await result.pagination?.nextPage({ inspectorDescription: 'Fetching second page' });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Test Request', {
+          id: 'test-id',
+          description: 'Fetching second page',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('uses original title/description when overrides not provided', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { inspector }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Test Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('does not use inspector when original options had no inspector', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        const nextPageResult = await result.pagination?.nextPage();
+
+        expect(nextPageResult).not.toBeNull();
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+      });
+    });
   });
   describe('eql', () => {
     it('executes with correct strategy', async () => {
@@ -644,6 +1154,143 @@ describe('SearchMethodsService', () => {
 
       expect(result).toEqual({ rawResponse: mockResponse });
     });
+
+    describe('inspector', () => {
+      it('calls inspector.adapter.start with correct parameters', async () => {
+        const mockResponse = { hits: { events: [] } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+          },
+          { inspector, sessionId: 'test-session' }
+        );
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: 'test-session',
+        });
+      });
+
+      it('calls requestResponder.json with EQL request body', async () => {
+        const mockResponse = { hits: { events: [] } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+            filter: { term: { 'agent.id': 'test' } },
+            size: 100,
+            fields: ['process.name', 'process.pid'],
+          },
+          { inspector }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith({
+          query: 'process where process.name == "regsvr32.exe"',
+          filter: { term: { 'agent.id': 'test' } },
+          size: 100,
+          fields: ['process.name', 'process.pid'],
+          runtime_mappings: undefined,
+          event_category_field: undefined,
+          timestamp_field: undefined,
+          tiebreaker_field: undefined,
+        });
+      });
+
+      it('does NOT call requestResponder.stats with response stats (no getStats callback)', async () => {
+        const mockResponse = { hits: { events: [] } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+          },
+          { inspector }
+        );
+
+        // requestResponder.stats should NOT be called with response stats for EQL
+        // (only if getRequestMetadata is provided)
+        expect(requestResponder.stats).not.toHaveBeenCalled();
+      });
+
+      it('calls requestResponder.stats with getRequestMetadata if provided', async () => {
+        const mockResponse = { hits: { events: [] } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestMetadata = jest.fn().mockReturnValue({
+          customStat: { label: 'Custom', value: 'test' },
+        });
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+          },
+          { inspector, getRequestMetadata }
+        );
+
+        expect(getRequestMetadata).toHaveBeenCalled();
+        expect(requestResponder.stats).toHaveBeenCalledWith({
+          customStat: { label: 'Custom', value: 'test' },
+        });
+      });
+
+      it('calls requestResponder.ok on success', async () => {
+        const mockResponse = { hits: { events: [] } };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+          },
+          { inspector }
+        );
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: undefined,
+        });
+      });
+
+      it('passes requestParams to inspector ok callback', async () => {
+        const mockResponse = { hits: { events: [] } };
+        const requestParams = { path: '/_eql/search', method: 'POST' };
+        mockSearch.mockReturnValue(
+          createMockResponse(mockResponse, false, undefined, requestParams)
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.eql(
+          {
+            index: 'logs-*',
+            query: 'process where process.name == "regsvr32.exe"',
+          },
+          { inspector }
+        );
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: { path: '/_eql/search', method: 'POST' },
+        });
+      });
+    });
   });
 
   describe('sql', () => {
@@ -719,6 +1366,110 @@ describe('SearchMethodsService', () => {
       const result = await service.sql({ query: 'SELECT * FROM logs' });
 
       expect(result).toEqual({ rawResponse: mockResponse });
+    });
+
+    describe('inspector', () => {
+      it('calls inspector.adapter.start with correct parameters', async () => {
+        const mockResponse = { columns: [], rows: [], took: 10 };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.sql(
+          { query: 'SELECT * FROM logs' },
+          { inspector, sessionId: 'test-session' }
+        );
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'test-id',
+          description: 'Test description',
+          searchSessionId: 'test-session',
+        });
+      });
+
+      it('calls requestResponder.json with SQL request body', async () => {
+        const mockResponse = { columns: [], rows: [], took: 10 };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.sql(
+          {
+            query: 'SELECT * FROM logs WHERE status = ?',
+            params: [200],
+            fetchSize: 50,
+            filter: { term: { field: 'value' } },
+          },
+          { inspector, timeZone: 'UTC' }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith({
+          query: 'SELECT * FROM logs WHERE status = ?',
+          params: [200],
+          fetch_size: 50,
+          filter: { term: { field: 'value' } },
+          time_zone: 'UTC',
+        });
+      });
+
+      it('calls requestResponder.stats with inline SQL stats (hits count, queryTime)', async () => {
+        const mockResponse = {
+          columns: [],
+          rows: [
+            [1, 'test'],
+            [2, 'test2'],
+          ],
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse, false, 15));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.sql({ query: 'SELECT * FROM logs' }, { inspector });
+
+        expect(requestResponder.stats).toHaveBeenCalledWith(
+          expect.objectContaining({
+            hits: expect.objectContaining({
+              label: 'Hits',
+              value: '2',
+            }),
+            queryTime: expect.objectContaining({
+              label: 'Query time',
+              value: '15ms',
+            }),
+          })
+        );
+      });
+
+      it('calls requestResponder.ok on success', async () => {
+        const mockResponse = { columns: [], rows: [], took: 10 };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.sql({ query: 'SELECT * FROM logs' }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: undefined,
+        });
+      });
+
+      it('passes requestParams to inspector ok callback', async () => {
+        const mockResponse = { columns: [], rows: [], took: 10 };
+        const requestParams = { path: '/_sql', method: 'POST' };
+        mockSearch.mockReturnValue(
+          createMockResponse(mockResponse, false, undefined, requestParams)
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.sql({ query: 'SELECT * FROM logs' }, { inspector });
+
+        expect(requestResponder.ok).toHaveBeenCalledWith({
+          json: { rawResponse: mockResponse },
+          requestParams: { path: '/_sql', method: 'POST' },
+        });
+      });
     });
   });
 });
