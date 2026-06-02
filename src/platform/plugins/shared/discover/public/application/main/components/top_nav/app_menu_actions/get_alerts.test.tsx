@@ -47,9 +47,6 @@ const getAlertsMenuItem = async ({
     adHocDataViews: [],
     isEsqlMode,
     authorizedRuleTypeIds,
-    actions: {
-      updateAdHocDataViews: jest.fn(),
-    },
   };
 
   return getAlertsAppMenuItem({
@@ -57,6 +54,7 @@ const getAlertsMenuItem = async ({
     services,
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
+    dispatch: toolkit.internalState.dispatch,
     subscribe: (listener: () => void) => toolkit.internalState.subscribe(listener),
     showCreateRuleV2,
   });

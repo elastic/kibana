@@ -28,6 +28,7 @@ import {
   streamlangDSLSchemaStrict,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
+import { isEqual } from 'lodash';
 import type {
   EnrichmentDataSource,
   EnrichmentUrlState,
@@ -728,9 +729,9 @@ const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: Str
   if (!isValidSchema) {
     return true;
   } else {
-    return (
-      JSON.stringify(sanitiseForEditing(nextStreamlangDSL)) !==
-      JSON.stringify(sanitiseForEditing(previousStreamlangDSL))
+    return !isEqual(
+      sanitiseForEditing(nextStreamlangDSL),
+      sanitiseForEditing(previousStreamlangDSL)
     );
   }
 };

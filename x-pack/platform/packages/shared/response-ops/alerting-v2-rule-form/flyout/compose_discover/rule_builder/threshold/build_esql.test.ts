@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildThresholdEsql } from './build_esql';
+import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { Aggregation, Comparator } from './form_types';
 import type { ThresholdFormValues } from './form_types';
 
@@ -306,5 +306,81 @@ describe('buildThresholdEsql', () => {
       expect(lines[0]).toMatch(/^FROM/);
       expect(lines.some((l) => l.trim().startsWith('|'))).toBe(true);
     });
+  });
+});
+
+describe('buildRecoveryBlock', () => {
+  it('returns undefined when no recovery config', () => {
+    expect(buildRecoveryBlock(makeValues())).toBeUndefined();
+  });
+
+  it('returns undefined when no valid conditions', () => {
+    expect(
+      buildRecoveryBlock(
+        makeValues({
+          recovery: {
+            conditions: [{ id: '1', metric: '', comparator: Comparator.LTE, threshold: [50] }],
+            conditionOperator: 'AND',
+          },
+        })
+      )
+    ).toBeUndefined();
+  });
+
+  it('generates simple recovery WHERE block', () => {
+    const result = buildRecoveryBlock(
+      makeValues({
+        recovery: {
+          conditions: [{ id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] }],
+          conditionOperator: 'AND',
+        },
+      })
+    );
+    expect(result).toContain('WHERE count <= 100');
+  });
+
+  it('generates recovery block with multiple conditions joined by AND', () => {
+    const result = buildRecoveryBlock(
+      makeValues({
+        recovery: {
+          conditions: [
+            { id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] },
+            { id: '2', metric: 'errors', comparator: Comparator.LT, threshold: [5] },
+          ],
+          conditionOperator: 'AND',
+        },
+      })
+    );
+    expect(result).toMatch(/count <= 100\.0 AND errors < 5\.0/);
+  });
+
+  it('generates recovery block with OR operator', () => {
+    const result = buildRecoveryBlock(
+      makeValues({
+        recovery: {
+          conditions: [
+            { id: '1', metric: 'a', comparator: Comparator.LT, threshold: [10] },
+            { id: '2', metric: 'b', comparator: Comparator.GT, threshold: [20] },
+          ],
+          conditionOperator: 'OR',
+        },
+      })
+    );
+    expect(result).toMatch(/a < 10\.0 OR b > 20\.0/);
+  });
+
+  it('generates recovery block with BETWEEN condition', () => {
+    const result = buildRecoveryBlock(
+      makeValues({
+        recovery: {
+          conditions: [
+            { id: '1', metric: 'val', comparator: Comparator.BETWEEN, threshold: [0, 50] },
+          ],
+          conditionOperator: 'AND',
+        },
+      })
+    );
+    expect(result).toContain('val >= 0');
+    expect(result).toContain('val <= 50');
   });
 });
