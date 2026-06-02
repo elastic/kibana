@@ -169,11 +169,12 @@ export const createContinuousKiExtractionWorkflowService = ({
         return;
       }
 
-      // Disabling: stop scheduling new managed runs, drain in-flight work, and
-      // retire the legacy workflow if the user was still running on it.
-      await setManagedEnabled({ enabled: false, request });
-
+      // Disabling: retire the legacy workflow first so a delete failure does not
+      // leave managed disabled while legacy is still present. Then stop
+      // scheduling new managed runs and drain in-flight work.
       await deleteLegacyWorkflow({ request });
+
+      await setManagedEnabled({ enabled: false, request });
 
       await cancelAndAwaitTermination({
         workflowId: STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
