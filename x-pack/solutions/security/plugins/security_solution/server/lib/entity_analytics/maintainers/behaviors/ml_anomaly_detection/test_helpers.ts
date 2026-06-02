@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnomalyHit, BaselineBucket } from './types';
+import type { AnomalyHit } from './types';
 
 // ---------------------------------------------------------------------------
 // AnomalyHit
@@ -16,21 +16,11 @@ export const makeAnomaly = (overrides: Partial<AnomalyHit> = {}): AnomalyHit => 
   entityId: 'user:alice',
   jobId: 'security-job-1',
   detectorIndex: 0,
+  detectorFunction: 'rare',
   timestamp: 1778241600000,
   recordScore: 75,
   actual: 5,
   typical: 1,
-  ...overrides,
-});
-
-// ---------------------------------------------------------------------------
-// BaselineBucket
-// ---------------------------------------------------------------------------
-
-export const makeBaselineBucket = (overrides: Partial<BaselineBucket> = {}): BaselineBucket => ({
-  value: 'US',
-  doc_count: 100,
-  topHits: [],
   ...overrides,
 });
 
@@ -53,6 +43,7 @@ export const makeHit = (
     sort?: unknown[];
     noSource?: boolean;
     noEntityId?: boolean;
+    detectorFunction?: string;
   } = {}
 ) => {
   const {
@@ -69,6 +60,7 @@ export const makeHit = (
     sort = [timestamp, jobId, detectorIndex],
     noSource = false,
     noEntityId = false,
+    detectorFunction = 'rare',
   } = overrides;
 
   return {
@@ -84,13 +76,13 @@ export const makeHit = (
           timestamp,
           record_score: recordScore,
           initial_record_score: recordScore,
+          function: detectorFunction,
           bucket_span: 900,
           is_interim: false,
           by_field_name: byFieldName,
           by_field_value: byFieldValue,
           partition_field_name: 'host.name',
           partition_field_value: 'web-01',
-          function: 'rare',
           function_description: 'rare',
           actual,
           typical,
@@ -105,19 +97,7 @@ export const makeResponse = (hits: ReturnType<typeof makeHit>[]) => ({
 });
 
 // ---------------------------------------------------------------------------
-// ES aggregation responses (used by fetch_baseline_behavior tests)
+// msearch responses (used by fetch_baseline_behavior tests)
 // ---------------------------------------------------------------------------
 
-export const makeEsSearchResponse = (buckets: unknown[]) => ({
-  aggregations: { baseline: { buckets } },
-});
-
-export const makeMetricSearchResponse = (hits: unknown[]) => ({
-  aggregations: { sample_hits: { hits: { hits } } },
-});
-
-export const makeRareBucket = (key: string, docCount: number, hits: unknown[] = []) => ({
-  key,
-  doc_count: docCount,
-  sample_hits: { hits: { hits } },
-});
+export const makeMsearchResponse = (responses: unknown[]) => ({ responses });

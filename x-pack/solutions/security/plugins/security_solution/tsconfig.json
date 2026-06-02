@@ -11,6 +11,7 @@
     "test/scout/**/*",
     "test/scout_cps_local/**/*",
     "test/scout_security_attacks_alignment/**/*",
+    "test/scout_security_entity_ml_behavior_maintainer/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -240,6 +241,7 @@
     "@kbn/inference-common",
     "@kbn/inference-langchain",
     "@kbn/scout-security",
+    "@kbn/ftr-llm-proxy",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",

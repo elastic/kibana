@@ -12,6 +12,7 @@ export interface AnomalyHit {
   entityId: string;
   jobId: string;
   detectorIndex: number;
+  detectorFunction: string;
   timestamp: number;
   recordScore: number;
   actual: number;
@@ -25,11 +26,16 @@ export interface AnomalyHit {
   partitionFieldValue?: string;
 }
 
-export interface BaselineBucket {
-  value: string;
-  doc_count: number;
-  topHits: unknown[];
-}
+export type EnrichedAnomalyHit = AnomalyHit & {
+  // anomalous value - this is copied from the anomaly record
+  anomalousValue?: number | string;
+  // this is computed with a query against the source index
+  anomalousValueCount?: number;
+
+  // baseline values - this can either be computed with a query against the source index
+  // or copied from the anomaly record typical field
+  baselineValues?: Array<number | string>;
+};
 
 export interface EnrichedAnomalyRecord {
   entity: {
@@ -41,6 +47,7 @@ export interface EnrichedAnomalyRecord {
     job_id: string;
     job_name: string;
     detector_index: number;
+    detector_function: string;
     timestamp: number;
     record_score: number;
     field_name?: string;
@@ -52,6 +59,8 @@ export interface EnrichedAnomalyRecord {
     over_field_value?: string;
     partition_field_name?: string;
     partition_field_value?: string;
+    anomalous_value?: number | string;
+    anomalous_value_count?: number;
+    baseline_values?: Array<number | string>;
   };
-  baseline: Array<{ value: string; doc_count: number; top_hits: unknown[] }>;
 }

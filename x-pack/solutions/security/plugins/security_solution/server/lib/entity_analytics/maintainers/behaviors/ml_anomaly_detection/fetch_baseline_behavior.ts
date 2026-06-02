@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, zipWith } from 'lodash';
 import type {
   ElasticsearchClient,
   Logger,
@@ -15,20 +15,27 @@ import type {
 import type {
   MappingRuntimeFields,
   MlDetector,
+  MsearchRequestItem,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { BASELINE_BUCKET_SIZE, ML_AD_LOOKBACK, TOP_SOURCE_HITS } from './constants';
-import type { AnomalyHit, BaselineBucket } from './types';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { ML_AD_LOOKBACK } from './constants';
+import type { AnomalyHit, EnrichedAnomalyHit } from './types';
 
 export interface JobConfig {
   sourceIndex: string[];
   datafeedQuery: QueryDslQueryContainer;
   detectors: MlDetector[];
-  influencers: string[];
+  bucketSpanMs: number;
 }
+
+// Exclude cold and frozen tiers for query performance
+const MUST_NOT_CLAUSE: QueryDslQueryContainer[] = [
+  { terms: { _tier: ['data_cold', 'data_frozen'] } },
+];
 
 /**
  * ML AD job function types
@@ -36,6 +43,7 @@ export interface JobConfig {
  * --- Metric functions ---
  * The actual and typical values in the anomaly record represent
  * the anomalous metric value and the baseline metric value.
+ * No need to reach back into the source documents
  * ------------------------
  * high_mean
  * high_median
@@ -50,8 +58,8 @@ export interface JobConfig {
  *
  * -- Occurence functions --
  * Observed occurrence rate of the by_field_value
- * Only this function requires reaching back into the source documents
- * to get the baseline values.
+ * This function requires reaching back into the source documents
+ * to get the baseline values and counts.
  * ------------------------
  * rare
  * ------------------------
@@ -59,47 +67,13 @@ export interface JobConfig {
  * -- Temporal functions --
  * The actual and typical values in the anomaly record represent the
  * anomalous and baseline temporal patterns
+ * These functions require reaching back into the source documents to
+ * get a count of documents in the anomalous time bucket (+/- 1 hr)
  * ------------------------
  * time_of_day - seconds since midnight
  * time_of_week - seconds since Sunday midnight
  * ------------------------
  */
-
-export interface BaselineConfig {
-  detectorIndex: number;
-  func: string;
-  anomalies: AnomalyHit[];
-  /** rare detectors only: field to aggregate and values to exclude */
-  targetField: string | null;
-  exclusionValues: string[];
-  /** non-rare detectors: fields that must exist */
-  groupFields: string[];
-  /** non-rare detectors: anomalous field values seen per groupField (by/over/partition only) */
-  groupFieldValues: Record<string, string[]>;
-}
-
-const uniqueNonNullValues = (
-  anomalies: AnomalyHit[],
-  selector: (a: AnomalyHit) => string | undefined
-): string[] => [...new Set(anomalies.map(selector).filter((v): v is string => v != null))];
-
-const buildRareConfig = (
-  func: string,
-  detector: MlDetector,
-  detectorAnomalies: AnomalyHit[],
-  detectorIndex: number
-): BaselineConfig | null => {
-  if (!detector.by_field_name) return null;
-  return {
-    detectorIndex,
-    func,
-    targetField: detector.by_field_name,
-    exclusionValues: uniqueNonNullValues(detectorAnomalies, (a) => a.byFieldValue),
-    groupFields: [],
-    groupFieldValues: {},
-    anomalies: detectorAnomalies,
-  };
-};
 
 // Collect detector field names that are not entity-type identifiers (e.g. user.name, host.name)
 const getNonEntityGroupFields = (detector: MlDetector, entityType: string): string[] =>
@@ -110,76 +84,25 @@ const getNonEntityGroupFields = (detector: MlDetector, entityType: string): stri
     detector.partition_field_name,
   ].filter((f): f is string => f != null && !f.startsWith(`${entityType}.`));
 
-// For each by/over/partition field that made it into groupFields, collect the unique anomalous values
+// For each by/over/partition field that made it into groupFields, collect the anomalous value
 const buildGroupFieldValues = (
   detector: MlDetector,
   groupFields: string[],
-  detectorAnomalies: AnomalyHit[]
+  anomaly: AnomalyHit
 ): Record<string, string[]> => {
-  const dimensionalFields: Array<[string | undefined, (a: AnomalyHit) => string | undefined]> = [
-    [detector.by_field_name, (a) => a.byFieldValue],
-    [detector.over_field_name, (a) => a.overFieldValue],
-    [detector.partition_field_name, (a) => a.partitionFieldValue],
+  const dimensionalFields: Array<[string | undefined, string | undefined]> = [
+    [detector.by_field_name, anomaly.byFieldValue],
+    [detector.over_field_name, anomaly.overFieldValue],
+    [detector.partition_field_name, anomaly.partitionFieldValue],
   ];
   return Object.fromEntries(
     dimensionalFields
       .filter(
-        (entry): entry is [string, (a: AnomalyHit) => string | undefined] =>
-          entry[0] != null && groupFields.includes(entry[0])
+        (entry): entry is [string, string] =>
+          entry[0] != null && groupFields.includes(entry[0]) && entry[1] != null
       )
-      .map(([fieldName, selector]) => [fieldName, uniqueNonNullValues(detectorAnomalies, selector)])
+      .map(([fieldName, value]) => [fieldName, [value]])
   );
-};
-
-const buildMetricConfig = (
-  func: string,
-  detector: MlDetector,
-  detectorAnomalies: AnomalyHit[],
-  detectorIndex: number,
-  entityType: string
-): BaselineConfig => {
-  const groupFields = getNonEntityGroupFields(detector, entityType);
-  return {
-    detectorIndex,
-    func,
-    targetField: null,
-    exclusionValues: [],
-    groupFields,
-    groupFieldValues: buildGroupFieldValues(detector, groupFields, detectorAnomalies),
-    anomalies: detectorAnomalies,
-  };
-};
-
-/**
- * Gets the config to query for baseline behavior
- *
- * Groups anomalies by detectorIndex, looks up each detector's function and
- * field config from the job definition, and returns one BaselineConfig per
- * detector that has a meaningful categorical field to aggregate:
- *
- * - rare                       → byFieldName from detector (required)
- * - count and metric functions → groupFields (if any) from by/over/partition field names (excluding user.* and host.*)
- */
-export const getBaselineConfigs = (
-  job: JobConfig,
-  anomalies: AnomalyHit[],
-  entityType: string
-): BaselineConfig[] => {
-  const byDetector = groupBy(anomalies, (a) => a.detectorIndex);
-
-  return Object.entries(byDetector).flatMap(([detectorIndexStr, detectorAnomalies]) => {
-    const detectorIndex = Number(detectorIndexStr);
-    const detector = job.detectors?.[detectorIndex];
-    const { function: func } = detector ?? {};
-    if (!func) return [];
-
-    const config =
-      func === 'rare'
-        ? buildRareConfig(func, detector, detectorAnomalies, detectorIndex)
-        : buildMetricConfig(func, detector, detectorAnomalies, detectorIndex, entityType);
-
-    return config != null ? [config] : [];
-  });
 };
 
 interface GetJobConfigOpts {
@@ -209,11 +132,21 @@ export const getJobConfig = async ({
       jobConfigCache.set(jobId, null);
       return null;
     }
+    const bucketSpanStr = job.analysis_config?.bucket_span;
+    let bucketSpanMs = 60 * 60 * 1000; // default to 1h
+    if (typeof bucketSpanStr === 'string') {
+      try {
+        bucketSpanMs = parseDuration(bucketSpanStr);
+      } catch {
+        logger.warn(`Invalid bucket_span "${bucketSpanStr}" for job ${jobId}`);
+      }
+    }
+
     const config: JobConfig = {
       sourceIndex: (job.datafeed_config?.indices ?? []) as string[],
       datafeedQuery: (job.datafeed_config?.query as QueryDslQueryContainer) ?? { match_all: {} },
       detectors: job.analysis_config?.detectors ?? [],
-      influencers: (job.analysis_config?.influencers ?? []) as string[],
+      bucketSpanMs,
     };
     jobConfigCache.set(jobId, config);
     return config;
@@ -223,18 +156,6 @@ export const getJobConfig = async ({
     return null;
   }
 };
-
-interface FetchBaselineBehaviorOpts {
-  abortSignal: AbortSignal;
-  anomalies: AnomalyHit[];
-  entityId: string;
-  entityType: EntityType;
-  esClient: ElasticsearchClient;
-  jobId: string;
-  logger: Logger;
-  ml: MlPluginSetup;
-  soClient: SavedObjectsClientContract;
-}
 
 /**
  * For a batch of anomaly records sharing the same entityId and jobId, queries
@@ -251,193 +172,291 @@ interface FetchBaselineBehaviorOpts {
  *   - count / time_of_* → no baseline (no categorical field to aggregate)
  */
 
-interface SampleHits {
-  hits: { hits: unknown[] };
-}
-
 interface RareBucket {
   key: string;
   doc_count: number;
-  sample_hits: SampleHits;
+}
+
+interface BaselineAggType {
+  baseline: { buckets: RareBucket[] };
+  anomaly: { doc_count: number };
+  time_bucket: { doc_count: number };
 }
 
 interface QuerySharedOpts {
   abortSignal: AbortSignal;
-  config: BaselineConfig;
+  anomalies: AnomalyHit[];
+  detector: MlDetector;
   entityId: string;
+  entityType: EntityType;
   esClient: ElasticsearchClient;
   jobConfig: JobConfig;
   jobId: string;
   logger: Logger;
   runtimeMappings: MappingRuntimeFields;
-  sourceIncludes: string[] | undefined;
 }
 
-const fetchRareBaseline = async ({
+const fetchRareBaselineForAnomalies = async ({
   abortSignal,
-  config,
+  anomalies,
   entityId,
   esClient,
   jobConfig,
   jobId,
   logger,
   runtimeMappings,
-  sourceIncludes,
-}: QuerySharedOpts): Promise<BaselineBucket[]> => {
+}: QuerySharedOpts): Promise<EnrichedAnomalyHit[]> => {
   try {
-    const anomalyLatest = config.anomalies[config.anomalies.length - 1];
-    const { targetField } = config;
-    if (!targetField) return [];
+    // For each anomaly, reach back into the source indices to determine the baseline
+    // behavior for this job at this point in time. This is required because for "rare"
+    // detectors, the actual and typical values in the anomaly record represent probabilities
+    // and not the actual and typical anomalous values.
+    const searches: MsearchRequestItem[] = anomalies.flatMap((anomaly) => {
+      const additionalFilters = anomaly.byFieldName
+        ? [{ exists: { field: anomaly.byFieldName } }]
+        : [];
 
-    // Exclude cold and frozen tiers for query performance
-    const mustNot: QueryDslQueryContainer[] = [{ terms: { _tier: ['data_cold', 'data_frozen'] } }];
+      return [
+        {},
+        {
+          size: 0,
+          runtime_mappings: runtimeMappings,
+          query: {
+            bool: {
+              filter: [
+                // Mirror the datafeed's own filter so the baseline is over the
+                // same population the model trained on.
+                jobConfig.datafeedQuery,
 
-    // Exclude the anomalous values from the baseline aggregation
-    if (config.exclusionValues.length > 0) {
-      mustNot.push({ terms: { [targetField]: config.exclusionValues } });
-    }
+                // Filter to this entity
+                { term: { entity_id: entityId } },
 
-    const resp = await esClient.search<unknown, { baseline: { buckets: RareBucket[] } }>(
-      {
-        index: jobConfig.sourceIndex,
-        size: 0,
-        runtime_mappings: runtimeMappings,
-        query: {
-          bool: {
-            filter: [
-              // Mirror the datafeed's own filter so the baseline is over the
-              // same population the model trained on.
-              jobConfig.datafeedQuery,
+                // Add additional filters
+                ...additionalFilters,
 
-              // Filter to this entity
-              { term: { entity_id: entityId } },
-
-              // Field that triggered anomalous value must exist
-              { exists: { field: targetField } },
-
-              // Limit time range to anomaly lookback window
-              {
-                range: {
-                  '@timestamp': {
-                    lt: anomalyLatest.timestamp,
-                    gte: `now-${ML_AD_LOOKBACK}`,
+                // Limit time range to anomaly lookback window
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: anomaly.timestamp + jobConfig.bucketSpanMs,
+                      gte: `now-${ML_AD_LOOKBACK}`,
+                    },
                   },
                 },
-              },
-            ],
-            must_not: mustNot,
-          },
-        },
-        aggs: {
-          baseline: {
-            terms: {
-              field: targetField,
-              size: BASELINE_BUCKET_SIZE,
-              order: { _count: 'desc' },
-            },
-            aggs: {
-              sample_hits: {
-                top_hits: {
-                  size: TOP_SOURCE_HITS,
-                  ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
-                },
-              },
+              ],
+              must_not: MUST_NOT_CLAUSE,
             },
           },
+          aggs: {
+            baseline: {
+              terms: {
+                field: anomaly.byFieldName,
+                size: 3,
+                order: { _count: 'desc' },
+                exclude: anomaly.byFieldValue != null ? [anomaly.byFieldValue] : [],
+              },
+            },
+            anomaly: {
+              filter:
+                anomaly.byFieldName && anomaly.byFieldValue != null
+                  ? { term: { [anomaly.byFieldName]: anomaly.byFieldValue } }
+                  : { match_none: {} },
+            },
+          },
         },
-      },
-      { signal: abortSignal }
-    );
-
-    return (resp.aggregations?.baseline?.buckets ?? []).map((bucket) => ({
-      value: bucket.key,
-      doc_count: bucket.doc_count,
-      topHits: bucket.sample_hits?.hits?.hits ?? [],
-    }));
-  } catch (err) {
-    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityId}: ${err}`);
-    return [];
-  }
-};
-
-const fetchMetricBaseline = async ({
-  abortSignal,
-  config,
-  entityId,
-  esClient,
-  jobConfig,
-  jobId,
-  logger,
-  runtimeMappings,
-  sourceIncludes,
-}: QuerySharedOpts): Promise<BaselineBucket[]> => {
-  try {
-    const anomalyLatest = config.anomalies[config.anomalies.length - 1];
-    const termsFields = config.groupFields;
-
-    const additionalFilters = termsFields.map((field) => {
-      const values = config.groupFieldValues[field] ?? [];
-      return values && values.length > 0 ? { terms: { [field]: values } } : { exists: { field } };
+      ];
     });
 
-    const resp = await esClient.search<unknown, { sample_hits: SampleHits }>(
+    const resp = await esClient.msearch<unknown, BaselineAggType>(
       {
         index: jobConfig.sourceIndex,
-        size: 0,
-        runtime_mappings: runtimeMappings,
-        query: {
-          bool: {
-            filter: [
-              // Mirror the datafeed's own filter so the baseline is over the
-              // same population the model trained on.
-              jobConfig.datafeedQuery,
+        ignore_unavailable: true,
+        searches,
+      },
+      {
+        signal: abortSignal,
+      }
+    );
 
-              // Filter to this entity
-              { term: { entity_id: entityId } },
+    if (resp.responses == null || resp.responses.length !== anomalies.length) {
+      logger.warn(
+        `Unexpected msearch response for job ${jobId}, entity ${entityId}: ${JSON.stringify(resp)}`
+      );
+      return anomalies;
+    }
 
-              // Add additional filters to filter the data down to the specific
-              // value that triggered the anomaly record
-              ...additionalFilters,
+    return zipWith(anomalies, resp.responses, (anomaly, searchResp) => {
+      if ('error' in searchResp) {
+        return {
+          ...anomaly,
+          anomalousValue: anomaly.byFieldValue,
+        };
+      }
+      const aggs = searchResp.aggregations as unknown as BaselineAggType | undefined;
+      const baselineValues = (aggs?.baseline?.buckets ?? []).map((b) => b.key);
+      const anomalousValueCount = aggs?.anomaly?.doc_count ?? 0;
+      return {
+        ...anomaly,
+        baselineValues,
+        anomalousValue: anomaly.byFieldValue,
+        anomalousValueCount,
+      };
+    });
+  } catch (err) {
+    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityId}: ${err}`);
+    return anomalies;
+  }
+};
 
-              // Limit time range to anomaly lookback window
-              {
-                range: {
-                  '@timestamp': {
-                    lt: anomalyLatest.timestamp,
-                    gte: `now-${ML_AD_LOOKBACK}`,
-                  },
-                },
+const defaultBaselineForAnomalies = async ({
+  anomalies,
+}: QuerySharedOpts): Promise<EnrichedAnomalyHit[]> => {
+  return anomalies.map((anomaly) => ({
+    ...anomaly,
+    anomalousValue: anomaly.actual,
+    baselineValues: [anomaly.typical],
+  }));
+};
+
+const fetchTimeBaselineForAnomalies = async ({
+  abortSignal,
+  anomalies,
+  detector,
+  entityId,
+  entityType,
+  esClient,
+  jobConfig,
+  jobId,
+  logger,
+  runtimeMappings,
+}: QuerySharedOpts): Promise<EnrichedAnomalyHit[]> => {
+  try {
+    const termsFields = getNonEntityGroupFields(detector, entityType);
+
+    const isTimeOfWeek = detector.function === 'time_of_week';
+
+    // For each anomaly, query the full lookback window and use a filter agg to count
+    // how many source docs fall in the same hour-of-day (or day+hour for time_of_week)
+    // as the anomalous actual value.
+    const searches: MsearchRequestItem[] = anomalies.flatMap((anomaly) => {
+      const groupFieldValues = buildGroupFieldValues(detector, termsFields, anomaly);
+      const additionalFilters = termsFields.map((field) => {
+        const values = groupFieldValues[field] ?? [];
+        return values && values.length > 0 ? { terms: { [field]: values } } : { exists: { field } };
+      });
+
+      // Derive the anomalous hour and day from actual (seconds since midnight / week-start)
+      const anomalousHour = Math.floor(
+        (isTimeOfWeek ? anomaly.actual % 86400 : anomaly.actual) / 3600
+      );
+      const anomalousDay = isTimeOfWeek ? Math.floor(anomaly.actual / 86400) : null;
+
+      const timeBucketFilter: QueryDslQueryContainer =
+        isTimeOfWeek && anomalousDay != null
+          ? {
+              bool: {
+                filter: [
+                  { term: { day_of_week: anomalousDay } },
+                  { term: { hour_of_day: anomalousHour } },
+                ],
               },
+            }
+          : { term: { hour_of_day: anomalousHour } };
 
-              // Exclude cold and frozen tiers for query performance
-              { bool: { must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }] } },
-            ],
-          },
-        },
-        aggs: {
-          sample_hits: {
-            top_hits: {
-              size: TOP_SOURCE_HITS,
-              ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
+      return [
+        {},
+        {
+          size: 0,
+          runtime_mappings: {
+            ...runtimeMappings,
+            hour_of_day: {
+              type: 'long' as const,
+              script: { source: "emit(doc['@timestamp'].value.getHour())" },
+            },
+            // Java DayOfWeek: Mon=1…Sun=7; mod 7 gives Sun=0…Sat=6
+            day_of_week: {
+              type: 'long' as const,
+              script: { source: "emit(doc['@timestamp'].value.getDayOfWeekEnum().getValue() % 7)" },
             },
           },
+          query: {
+            bool: {
+              filter: [
+                // Mirror the datafeed's own filter so the baseline is over the
+                // same population the model trained on.
+                jobConfig.datafeedQuery,
+
+                // Filter to this entity
+                { term: { entity_id: entityId } },
+
+                // Add additional filters
+                ...additionalFilters,
+
+                // Limit time range to anomaly lookback window
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: anomaly.timestamp + jobConfig.bucketSpanMs,
+                      gte: `now-${ML_AD_LOOKBACK}`,
+                    },
+                  },
+                },
+              ],
+              must_not: MUST_NOT_CLAUSE,
+            },
+          },
+          aggs: {
+            time_bucket: { filter: timeBucketFilter },
+          },
         },
+      ];
+    });
+
+    const resp = await esClient.msearch<unknown, BaselineAggType>(
+      {
+        index: jobConfig.sourceIndex,
+        ignore_unavailable: true,
+        searches,
       },
       { signal: abortSignal }
     );
 
-    return [
-      {
-        value: '',
-        doc_count: 0,
-        topHits: resp.aggregations?.sample_hits?.hits?.hits ?? [],
-      },
-    ];
+    if (resp.responses == null || resp.responses.length !== anomalies.length) {
+      logger.warn(
+        `Unexpected msearch response for job ${jobId}, entity ${entityId}: ${JSON.stringify(resp)}`
+      );
+      return anomalies;
+    }
+
+    return zipWith(anomalies, resp.responses, (anomaly, searchResp) => {
+      if ('error' in searchResp) {
+        return { ...anomaly };
+      }
+      const aggs = searchResp.aggregations as unknown as BaselineAggType | undefined;
+      return {
+        ...anomaly,
+        baselineValues: [anomaly.typical],
+        anomalousValue: anomaly.actual,
+        anomalousValueCount: aggs?.time_bucket?.doc_count ?? 0,
+      };
+    });
   } catch (err) {
     logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityId}: ${err}`);
-    return [];
+    return anomalies;
   }
 };
+
+interface FetchBaselineBehaviorOpts {
+  abortSignal: AbortSignal;
+  anomalies: AnomalyHit[];
+  entityId: string;
+  entityType: EntityType;
+  esClient: ElasticsearchClient;
+  jobId: string;
+  logger: Logger;
+  ml: MlPluginSetup;
+  soClient: SavedObjectsClientContract;
+}
 
 export const fetchBaselineBehavior = async ({
   abortSignal,
@@ -449,40 +468,47 @@ export const fetchBaselineBehavior = async ({
   logger,
   ml,
   soClient,
-}: FetchBaselineBehaviorOpts): Promise<BaselineBucket[] | null> => {
-  if (anomalies.length === 0) return null;
+}: FetchBaselineBehaviorOpts): Promise<EnrichedAnomalyHit[]> => {
+  if (anomalies.length === 0) return [];
 
   const jobConfig = await getJobConfig({ ml, jobId, soClient, logger });
   if (!jobConfig || jobConfig.sourceIndex.length === 0 || jobConfig.detectors.length === 0) {
-    return null;
+    return anomalies;
   }
 
-  const baselineConfigs = getBaselineConfigs(jobConfig, anomalies, entityType);
-  if (baselineConfigs.length === 0) return null;
+  // group by detector index
+  const byDetector = groupBy(anomalies, (a) => a.detectorIndex);
 
-  const runtimeMappings = {
+  const runtimeMappings: MappingRuntimeFields = {
     entity_id: euid.painless.getEuidRuntimeMapping(entityType),
   };
-
-  const sourceIncludes = jobConfig.influencers.length > 0 ? jobConfig.influencers : undefined;
   const sharedOpts = {
     abortSignal,
     entityId,
+    entityType,
     esClient,
     jobConfig,
     jobId,
     logger,
     runtimeMappings,
-    sourceIncludes,
   };
 
-  const bucketsByConfig = await Promise.all(
-    baselineConfigs.map((config) =>
-      config.func === 'rare'
-        ? fetchRareBaseline({ ...sharedOpts, config })
-        : fetchMetricBaseline({ ...sharedOpts, config })
-    )
+  const result = await Promise.all(
+    Object.entries(byDetector).flatMap(([detectorIndexStr, detectorAnomalies]) => {
+      const detectorIndex = Number(detectorIndexStr);
+      const detector = jobConfig.detectors?.[detectorIndex];
+
+      const opts = { ...sharedOpts, detector, anomalies: detectorAnomalies };
+
+      if (detector?.function === 'rare') {
+        return fetchRareBaselineForAnomalies(opts);
+      } else if (detector?.function?.startsWith('time_')) {
+        return fetchTimeBaselineForAnomalies(opts);
+      } else {
+        return defaultBaselineForAnomalies(opts);
+      }
+    })
   );
 
-  return bucketsByConfig.flat();
+  return result.flat();
 };

@@ -86,9 +86,19 @@ export function registerChatRoutes({
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
-      })
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: 512 }),
+        schema.oneOf([
+          schema.object({ allow: schema.boolean() }),
+          schema.object({ authorized: schema.boolean() }),
+        ]),
+        {
+          meta: {
+            description:
+              'Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.',
+          },
+        }
+      )
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -121,6 +131,21 @@ export function registerChatRoutes({
             hidden: schema.maybe(
               schema.boolean({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+              })
+            ),
+            description: schema.maybe(
+              schema.string({
+                maxLength: 1024,
+                meta: { description: 'Human-readable label for the attachment.' },
+              })
+            ),
+            group_id: schema.maybe(
+              schema.string({
+                maxLength: 256,
+                meta: {
+                  description:
+                    'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+                },
               })
             ),
           },

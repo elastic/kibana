@@ -8,20 +8,12 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { MlDetector } from '@elastic/elasticsearch/lib/api/types';
 import {
   clearJobConfigCacheForTest,
   fetchBaselineBehavior,
-  getBaselineConfigs,
   getJobConfig,
-  type JobConfig,
 } from './fetch_baseline_behavior';
-import {
-  makeAnomaly,
-  makeEsSearchResponse,
-  makeMetricSearchResponse,
-  makeRareBucket,
-} from './test_helpers';
+import { makeAnomaly, makeMsearchResponse } from './test_helpers';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
@@ -74,8 +66,42 @@ describe('getJobConfig', () => {
       sourceIndex: ['logs-*'],
       datafeedQuery: { bool: { filter: [{ term: { 'event.action': 'authentication' } }] } },
       detectors: [{ function: 'rare', by_field_name: 'source.ip', detector_index: 0 }],
-      influencers: ['user.name', 'source.ip'],
+      bucketSpanMs: 3600000, // default 1h – makeJob has no bucket_span
     });
+  });
+
+  it('parses bucket_span into milliseconds', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          analysis_config: {
+            detectors: [{ function: 'rare', by_field_name: 'source.ip' }],
+            bucket_span: '15m',
+          },
+        }),
+      ],
+    });
+
+    const result = await getJobConfig({ ml: mockMl, jobId: 'test-job', soClient, logger });
+
+    expect(result?.bucketSpanMs).toBe(900000); // 15 * 60 * 1000
+  });
+
+  it('falls back to 1h when bucket_span is absent', async () => {
+    const result = await getJobConfig({ ml: mockMl, jobId: 'test-job', soClient, logger });
+
+    expect(result?.bucketSpanMs).toBe(3600000);
+  });
+
+  it('falls back to 1h and logs a warning when bucket_span cannot be parsed', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ analysis_config: { detectors: [], bucket_span: 'not-a-duration' } })],
+    });
+
+    const result = await getJobConfig({ ml: mockMl, jobId: 'test-job', soClient, logger });
+
+    expect(result?.bucketSpanMs).toBe(3600000);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid bucket_span'));
   });
 
   it('falls back to match_all when datafeed query is absent', async () => {
@@ -134,369 +160,8 @@ describe('getJobConfig', () => {
   });
 });
 
-const makeJobConfig = (detectors: MlDetector[]): JobConfig => ({
-  sourceIndex: ['logs-*'],
-  datafeedQuery: { match_all: {} },
-  detectors,
-  influencers: [],
-});
-
-describe('getBaselineConfigs', () => {
-  describe('rare detector', () => {
-    it('returns a config using by_field_name as targetField and exclusionValues from anomalies', () => {
-      const job = makeJobConfig([{ function: 'rare', by_field_name: 'source.ip' }]);
-      const anomalies = [makeAnomaly({ byFieldName: 'source.ip', byFieldValue: 'evil-ip' })];
-
-      const [config] = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(config).toMatchObject({
-        detectorIndex: 0,
-        func: 'rare',
-        targetField: 'source.ip',
-        exclusionValues: ['evil-ip'],
-        groupFields: [],
-      });
-    });
-
-    it('collects and deduplicates exclusionValues across multiple anomaly records', () => {
-      const job = makeJobConfig([{ function: 'rare', by_field_name: 'source.ip' }]);
-      const anomalies = [
-        makeAnomaly({ byFieldValue: 'ip-1' }),
-        makeAnomaly({ byFieldValue: 'ip-1' }),
-        makeAnomaly({ byFieldValue: 'ip-2' }),
-      ];
-
-      const [config] = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(config.exclusionValues).toEqual(['ip-1', 'ip-2']);
-    });
-
-    it('returns empty exclusionValues when no anomaly has a byFieldValue', () => {
-      const job = makeJobConfig([{ function: 'rare', by_field_name: 'source.ip' }]);
-      const anomalies = [makeAnomaly({ byFieldValue: undefined })];
-
-      const [config] = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(config.exclusionValues).toEqual([]);
-    });
-
-    it('skips the detector when by_field_name is absent', () => {
-      const job = makeJobConfig([{ function: 'rare' }]);
-
-      expect(getBaselineConfigs(job, [makeAnomaly()], 'user')).toHaveLength(0);
-    });
-  });
-
-  describe('non-rare detector functions', () => {
-    it('collects field_name, by_field_name, over_field_name, partition_field_name as groupFields', () => {
-      const job = makeJobConfig([
-        {
-          function: 'high_distinct_count',
-          field_name: 'process.name',
-          by_field_name: 'department',
-          over_field_name: 'source.ip',
-          partition_field_name: 'team',
-        },
-      ]);
-
-      const [config] = getBaselineConfigs(job, [makeAnomaly()], 'user');
-
-      expect(config).toMatchObject({
-        func: 'high_distinct_count',
-        targetField: null,
-        exclusionValues: [],
-        groupFields: ['process.name', 'department', 'source.ip', 'team'],
-      });
-    });
-
-    it('omits undefined dimensional fields from groupFields', () => {
-      const job = makeJobConfig([{ function: 'high_mean', by_field_name: 'department' }]);
-
-      const [config] = getBaselineConfigs(job, [makeAnomaly()], 'user');
-
-      expect(config.groupFields).toEqual(['department']);
-    });
-
-    it('excludes only fields prefixed with the entityType from groupFields', () => {
-      const job = makeJobConfig([
-        {
-          function: 'high_distinct_count',
-          by_field_name: 'user.name',
-          over_field_name: 'host.name',
-          partition_field_name: 'source.ip',
-        },
-      ]);
-
-      const [config] = getBaselineConfigs(job, [makeAnomaly()], 'user');
-
-      expect(config.groupFields).toEqual(['host.name', 'source.ip']);
-    });
-
-    it('includes the detector with empty groupFields when all dimensional fields are filtered out', () => {
-      const job = makeJobConfig([{ function: 'high_mean', by_field_name: 'user.name' }]);
-      const [config] = getBaselineConfigs(job, [makeAnomaly()], 'user');
-
-      expect(config).toMatchObject({ groupFields: [], groupFieldValues: {} });
-    });
-
-    it('captures by/over/partition field values from anomalies into groupFieldValues', () => {
-      const job = makeJobConfig([
-        {
-          function: 'high_count',
-          by_field_name: 'department',
-          over_field_name: 'source.ip',
-          partition_field_name: 'team',
-        },
-      ]);
-      const anomaly = makeAnomaly({
-        byFieldValue: 'engineering',
-        overFieldValue: '1.2.3.4',
-        partitionFieldValue: 'backend',
-      });
-
-      const [config] = getBaselineConfigs(job, [anomaly], 'user');
-
-      expect(config.groupFieldValues).toEqual({
-        department: ['engineering'],
-        'source.ip': ['1.2.3.4'],
-        team: ['backend'],
-      });
-    });
-
-    it('deduplicates groupFieldValues across multiple anomaly records', () => {
-      const job = makeJobConfig([
-        { function: 'high_count', by_field_name: 'department', over_field_name: 'source.ip' },
-      ]);
-      const anomalies = [
-        makeAnomaly({ byFieldValue: 'engineering', overFieldValue: '1.2.3.4' }),
-        makeAnomaly({ byFieldValue: 'engineering', overFieldValue: '5.6.7.8' }),
-        makeAnomaly({ byFieldValue: 'finance', overFieldValue: '1.2.3.4' }),
-      ];
-
-      const [config] = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(config.groupFieldValues).toEqual({
-        department: ['engineering', 'finance'],
-        'source.ip': ['1.2.3.4', '5.6.7.8'],
-      });
-    });
-
-    it('omits field_name from groupFieldValues (only by/over/partition carry values)', () => {
-      const job = makeJobConfig([
-        { function: 'high_sum', field_name: 'bytes', by_field_name: 'department' },
-      ]);
-      const anomaly = makeAnomaly({ byFieldValue: 'engineering' });
-
-      const [config] = getBaselineConfigs(job, [anomaly], 'user');
-
-      expect(config.groupFields).toContain('bytes');
-      expect(config.groupFieldValues).toEqual({ department: ['engineering'] });
-      expect(config.groupFieldValues).not.toHaveProperty('bytes');
-    });
-
-    it('excludes values for fields filtered out by the entityType prefix rule', () => {
-      const job = makeJobConfig([
-        {
-          function: 'high_count',
-          by_field_name: 'user.name',
-          over_field_name: 'source.ip',
-        },
-      ]);
-      const anomaly = makeAnomaly({ byFieldValue: 'alice', overFieldValue: '1.2.3.4' });
-
-      const [config] = getBaselineConfigs(job, [anomaly], 'user');
-
-      expect(config.groupFields).toEqual(['source.ip']);
-      expect(config.groupFieldValues).toEqual({ 'source.ip': ['1.2.3.4'] });
-      expect(config.groupFieldValues).not.toHaveProperty('user.name');
-    });
-
-    it('returns empty groupFieldValues when no anomaly carries by/over/partition values', () => {
-      const job = makeJobConfig([{ function: 'high_sum', field_name: 'bytes' }]);
-
-      const [config] = getBaselineConfigs(job, [makeAnomaly()], 'user');
-
-      expect(config.groupFieldValues).toEqual({});
-    });
-  });
-
-  describe('multi-detector jobs', () => {
-    it('returns one config per detector', () => {
-      const job = makeJobConfig([
-        { function: 'rare', by_field_name: 'source.ip' },
-        {
-          function: 'high_distinct_count',
-          field_name: 'destination.port',
-          by_field_name: 'host.name',
-        },
-        { function: 'high_count', field_name: 'destination.ip' },
-      ]);
-      const anomalies = [
-        makeAnomaly({ detectorIndex: 0, _id: '1' }),
-        makeAnomaly({
-          detectorIndex: 0,
-          recordScore: 85,
-          timestamp: 2000,
-          actual: 0.02,
-          typical: 0.5,
-          _id: '2',
-        }),
-        makeAnomaly({ detectorIndex: 1, _id: '3' }),
-        makeAnomaly({ detectorIndex: 2, _id: '4' }),
-      ];
-
-      const configs = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(configs).toHaveLength(3);
-      expect(configs).toEqual([
-        {
-          anomalies: [
-            {
-              _id: '1',
-              actual: 5,
-              detectorIndex: 0,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 75,
-              timestamp: 1778241600000,
-              typical: 1,
-            },
-            {
-              _id: '2',
-              actual: 0.02,
-              detectorIndex: 0,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 85,
-              timestamp: 2000,
-              typical: 0.5,
-            },
-          ],
-          detectorIndex: 0,
-          exclusionValues: [],
-          func: 'rare',
-          groupFields: [],
-          groupFieldValues: {},
-          targetField: 'source.ip',
-        },
-        {
-          anomalies: [
-            {
-              _id: '3',
-              actual: 5,
-              detectorIndex: 1,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 75,
-              timestamp: 1778241600000,
-              typical: 1,
-            },
-          ],
-          detectorIndex: 1,
-          exclusionValues: [],
-          func: 'high_distinct_count',
-          groupFields: ['destination.port', 'host.name'],
-          groupFieldValues: { 'host.name': [] },
-          targetField: null,
-        },
-        {
-          anomalies: [
-            {
-              _id: '4',
-              actual: 5,
-              detectorIndex: 2,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 75,
-              timestamp: 1778241600000,
-              typical: 1,
-            },
-          ],
-          detectorIndex: 2,
-          exclusionValues: [],
-          func: 'high_count',
-          groupFields: ['destination.ip'],
-          groupFieldValues: {},
-          targetField: null,
-        },
-      ]);
-    });
-
-    it('groups each detector anomalies independently', () => {
-      const job = makeJobConfig([
-        { function: 'rare', by_field_name: 'source.ip' },
-        { function: 'rare', by_field_name: 'process.name' },
-      ]);
-      const anomalies = [
-        makeAnomaly({ detectorIndex: 0, byFieldValue: 'evil-ip', _id: '1' }),
-        makeAnomaly({ detectorIndex: 1, byFieldValue: 'malware.exe', _id: '2' }),
-      ];
-
-      const configs = getBaselineConfigs(job, anomalies, 'user');
-
-      expect(configs).toEqual([
-        {
-          anomalies: [
-            {
-              _id: '1',
-              actual: 5,
-              byFieldValue: 'evil-ip',
-              detectorIndex: 0,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 75,
-              timestamp: 1778241600000,
-              typical: 1,
-            },
-          ],
-          detectorIndex: 0,
-          exclusionValues: ['evil-ip'],
-          func: 'rare',
-          groupFields: [],
-          groupFieldValues: {},
-          targetField: 'source.ip',
-        },
-        {
-          anomalies: [
-            {
-              _id: '2',
-              actual: 5,
-              byFieldValue: 'malware.exe',
-              detectorIndex: 1,
-              entityId: 'user:alice',
-              jobId: 'security-job-1',
-              recordScore: 75,
-              timestamp: 1778241600000,
-              typical: 1,
-            },
-          ],
-          detectorIndex: 1,
-          exclusionValues: ['malware.exe'],
-          func: 'rare',
-          groupFields: [],
-          groupFieldValues: {},
-          targetField: 'process.name',
-        },
-      ]);
-    });
-  });
-
-  it('skips a detector whose index has no entry in job.detectors', () => {
-    const job = makeJobConfig([{ function: 'rare', by_field_name: 'source.ip' }]);
-    const anomalies = [makeAnomaly({ detectorIndex: 99 })];
-
-    expect(getBaselineConfigs(job, anomalies, 'user')).toHaveLength(0);
-  });
-
-  it('returns empty array for an empty anomalies list', () => {
-    const job = makeJobConfig([{ function: 'rare', by_field_name: 'source.ip' }]);
-
-    expect(getBaselineConfigs(job, [], 'user')).toHaveLength(0);
-  });
-});
-
 describe('fetchBaselineBehavior', () => {
-  let mockEsSearch: jest.Mock;
+  let mockEsMsearch: jest.Mock;
   let esClient: ElasticsearchClient;
 
   const defaultOpts = {
@@ -507,11 +172,11 @@ describe('fetchBaselineBehavior', () => {
   };
 
   beforeEach(() => {
-    mockEsSearch = jest.fn().mockResolvedValue(makeEsSearchResponse([]));
-    esClient = { search: mockEsSearch } as unknown as ElasticsearchClient;
+    mockEsMsearch = jest.fn().mockResolvedValue(makeMsearchResponse([]));
+    esClient = { msearch: mockEsMsearch } as unknown as ElasticsearchClient;
   });
 
-  it('returns null for empty anomalies', async () => {
+  it('returns empty array for empty anomalies', async () => {
     const result = await fetchBaselineBehavior({
       ...defaultOpts,
       anomalies: [],
@@ -521,83 +186,63 @@ describe('fetchBaselineBehavior', () => {
       soClient,
     });
 
-    expect(result).toBeNull();
-    expect(mockEsSearch).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
+    expect(mockEsMsearch).not.toHaveBeenCalled();
   });
 
-  it('returns null when job config is not found', async () => {
+  it('returns anomalies as is when job config is not found', async () => {
     mockJobsFn.mockResolvedValueOnce({ jobs: [] });
+    const anomalies = [makeAnomaly()];
 
     const result = await fetchBaselineBehavior({
       ...defaultOpts,
-      anomalies: [makeAnomaly()],
+      anomalies,
       esClient,
       logger,
       ml: mockMl,
       soClient,
     });
 
-    expect(result).toBeNull();
-    expect(mockEsSearch).not.toHaveBeenCalled();
+    expect(result).toEqual(anomalies);
+    expect(mockEsMsearch).not.toHaveBeenCalled();
   });
 
-  it('returns null when sourceIndex is empty', async () => {
+  it('returns anomalies as is when sourceIndex is empty', async () => {
     mockJobsFn.mockResolvedValueOnce({
       jobs: [makeJob({ datafeed_config: { indices: [], query: {} } })],
     });
+    const anomalies = [makeAnomaly()];
 
     const result = await fetchBaselineBehavior({
       ...defaultOpts,
-      anomalies: [makeAnomaly()],
+      anomalies,
       esClient,
       logger,
       ml: mockMl,
       soClient,
     });
 
-    expect(result).toBeNull();
+    expect(result).toEqual(anomalies);
+    expect(mockEsMsearch).not.toHaveBeenCalled();
   });
 
-  it('returns null when detectors list is empty', async () => {
+  it('returns anomalies as is when detectors list is empty', async () => {
     mockJobsFn.mockResolvedValueOnce({
-      jobs: [makeJob({ analysis_config: { detectors: [], influencers: [] } })],
+      jobs: [makeJob({ analysis_config: { detectors: [] } })],
     });
+    const anomalies = [makeAnomaly()];
 
     const result = await fetchBaselineBehavior({
       ...defaultOpts,
-      anomalies: [makeAnomaly()],
+      anomalies,
       esClient,
       logger,
       ml: mockMl,
       soClient,
     });
 
-    expect(result).toBeNull();
-  });
-
-  it('still queries ES when all detector fields are filtered out by the entityType prefix', async () => {
-    mockJobsFn.mockResolvedValueOnce({
-      jobs: [
-        makeJob({
-          analysis_config: {
-            detectors: [{ function: 'high_mean', by_field_name: 'user.name' }],
-            influencers: [],
-          },
-        }),
-      ],
-    });
-
-    const result = await fetchBaselineBehavior({
-      ...defaultOpts,
-      anomalies: [makeAnomaly()],
-      esClient,
-      logger,
-      ml: mockMl,
-      soClient,
-    });
-
-    expect(mockEsSearch).toHaveBeenCalled();
-    expect(result).toEqual([{ value: '', doc_count: 0, topHits: [] }]);
+    expect(result).toEqual(anomalies);
+    expect(mockEsMsearch).not.toHaveBeenCalled();
   });
 
   describe('rare detector', () => {
@@ -607,186 +252,240 @@ describe('fetchBaselineBehavior', () => {
           makeJob({
             analysis_config: {
               detectors: [{ function: 'rare', by_field_name: 'source.ip' }],
-              influencers: [],
             },
           }),
         ],
       });
     });
 
-    it('returns baseline buckets mapped from the aggregation response', async () => {
-      const hit = { _source: { 'source.ip': '10.0.0.1' } };
-      mockEsSearch.mockResolvedValueOnce(
-        makeEsSearchResponse([makeRareBucket('10.0.0.1', 5, [hit])])
+    it('returns an enriched anomaly with baseline values and anomalous value count', async () => {
+      const anomaly = makeAnomaly({ byFieldName: 'source.ip', byFieldValue: 'evil-ip' });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          {
+            aggregations: {
+              baseline: { buckets: [{ key: '10.0.0.1', doc_count: 5 }] },
+              anomaly: { doc_count: 3 },
+            },
+          },
+        ])
       );
 
       const result = await fetchBaselineBehavior({
         ...defaultOpts,
-        anomalies: [makeAnomaly({ byFieldValue: 'evil-ip' })],
+        anomalies: [anomaly],
         esClient,
         logger,
         ml: mockMl,
         soClient,
       });
 
-      expect(result).toEqual([{ value: '10.0.0.1', doc_count: 5, topHits: [hit] }]);
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody).toMatchSnapshot();
+      expect(result).toEqual([
+        {
+          ...anomaly,
+          baselineValues: ['10.0.0.1'],
+          anomalousValue: 'evil-ip',
+          anomalousValueCount: 3,
+        },
+      ]);
     });
 
-    it('issues a terms agg query with must_not exclusion for anomalous values', async () => {
-      await fetchBaselineBehavior({
-        ...defaultOpts,
-        anomalies: [makeAnomaly({ byFieldValue: 'evil-ip', timestamp: 1_000_000 })],
-        esClient,
-        logger,
-        ml: mockMl,
-        soClient,
-      });
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.aggs.baseline.terms.field).toBe('source.ip');
-      expect(searchBody.query.bool.must_not).toEqual([
-        { terms: { _tier: ['data_cold', 'data_frozen'] } },
-        { terms: { 'source.ip': ['evil-ip'] } },
-      ]);
-      expect(searchBody.query.bool.filter).toContainEqual(
-        expect.objectContaining({
-          range: expect.objectContaining({
-            '@timestamp': expect.objectContaining({ lt: 1_000_000 }),
-          }),
-        })
+    it('sends one search pair (header + body) per anomaly in the msearch request', async () => {
+      const anomalies = [
+        makeAnomaly({ _id: 'a1', byFieldValue: 'ip-1' }),
+        makeAnomaly({ _id: 'a2', byFieldValue: 'ip-2' }),
+      ];
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        ])
       );
-    });
 
-    it('still includes tier exclusion in must_not when there are no anomalous values', async () => {
       await fetchBaselineBehavior({
         ...defaultOpts,
-        anomalies: [makeAnomaly({ byFieldValue: undefined })],
+        anomalies,
         esClient,
         logger,
         ml: mockMl,
         soClient,
       });
 
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.query.bool.must_not).toEqual([
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      // Two anomalies → two header+body pairs = 4 items
+      expect(searches).toHaveLength(4);
+      expect(searches[0]).toEqual({});
+      expect(searches[2]).toEqual({});
+    });
+
+    it('excludes the anomalous by_field_value from the baseline terms agg', async () => {
+      const anomaly = makeAnomaly({ byFieldName: 'source.ip', byFieldValue: 'evil-ip' });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        ])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      const body = searches[1];
+      expect(body.aggs.baseline.terms.exclude).toEqual(['evil-ip']);
+      expect(body.aggs.anomaly.filter).toEqual({ term: { 'source.ip': 'evil-ip' } });
+    });
+
+    it('includes tier exclusion in must_not', async () => {
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        ])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [makeAnomaly({ byFieldName: 'source.ip' })],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      expect(searches[1].query.bool.must_not).toEqual([
         { terms: { _tier: ['data_cold', 'data_frozen'] } },
       ]);
     });
 
-    it('returns empty baseline (not null) when ES search throws', async () => {
-      mockEsSearch.mockRejectedValueOnce(new Error('cluster unavailable'));
+    it('applies the timestamp range filter using bucketSpanMs as the upper bound', async () => {
+      const anomaly = makeAnomaly({ timestamp: 1_000_000 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        ])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      const timestampRange = searches[1].query.bool.filter.find(
+        (f: unknown) => typeof f === 'object' && f !== null && 'range' in f
+      ) as { range: { '@timestamp': { lte: number; gte: string } } };
+      // lte = anomaly.timestamp + defaultBucketSpanMs (3600000)
+      expect(timestampRange.range['@timestamp'].lte).toBe(1_000_000 + 3_600_000);
+      expect(timestampRange.range['@timestamp'].gte).toBe('now-30d');
+    });
+
+    it('returns the original anomaly without enrichment when msearch throws', async () => {
+      const anomaly = makeAnomaly({ byFieldValue: 'evil-ip' });
+      mockEsMsearch.mockRejectedValueOnce(new Error('cluster unavailable'));
 
       const result = await fetchBaselineBehavior({
         ...defaultOpts,
-        anomalies: [makeAnomaly()],
+        anomalies: [anomaly],
         esClient,
         logger,
         ml: mockMl,
         soClient,
       });
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([anomaly]);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+    });
+
+    it('msearch request matches snapshot', async () => {
+      const anomaly = makeAnomaly({ byFieldName: 'source.ip', byFieldValue: 'evil-ip' });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([
+          { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        ])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      expect(mockEsMsearch.mock.calls[0][0]).toMatchSnapshot();
     });
   });
 
-  describe('non-rare detector', () => {
+  describe('time_of_day detector', () => {
     beforeEach(() => {
       mockJobsFn.mockResolvedValue({
         jobs: [
           makeJob({
             analysis_config: {
-              detectors: [
-                {
-                  function: 'high_distinct_count',
-                  field_name: 'process.name',
-                  by_field_name: 'dept',
-                },
-              ],
-              influencers: [],
+              detectors: [{ function: 'time_of_day' }],
             },
           }),
         ],
       });
     });
 
-    it('adds filters for groupFields and issues a sample_hits agg', async () => {
-      await fetchBaselineBehavior({
-        ...defaultOpts,
-        anomalies: [makeAnomaly({ timestamp: 2_000_000 })],
-        esClient,
-        logger,
-        ml: mockMl,
-        soClient,
-      });
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.aggs.sample_hits.top_hits).toBeDefined();
-      expect(searchBody.query.bool.filter).toContainEqual(
-        expect.objectContaining({
-          range: expect.objectContaining({
-            '@timestamp': expect.objectContaining({ lt: 2_000_000 }),
-          }),
-        })
+    it('returns enriched anomaly with typical as baseline and actual as anomalous value', async () => {
+      // actual = 43200 → 12:00:00 (seconds since midnight)
+      const anomaly = makeAnomaly({ actual: 43200, typical: 36000 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 10 } } }])
       );
-    });
-
-    it('uses terms filter for by/over/partition fields with known anomalous values', async () => {
-      await fetchBaselineBehavior({
-        ...defaultOpts,
-        anomalies: [makeAnomaly({ byFieldValue: 'engineering' })],
-        esClient,
-        logger,
-        ml: mockMl,
-        soClient,
-      });
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.query.bool.filter).toContainEqual({ terms: { dept: ['engineering'] } });
-    });
-
-    it('falls back to exists filter for fields without known anomalous values', async () => {
-      await fetchBaselineBehavior({
-        ...defaultOpts,
-        anomalies: [makeAnomaly()],
-        esClient,
-        logger,
-        ml: mockMl,
-        soClient,
-      });
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      // process.name is field_name (no dimensional values) → exists
-      expect(searchBody.query.bool.filter).toContainEqual({ exists: { field: 'process.name' } });
-      // dept is by_field_name with no anomaly value → exists
-      expect(searchBody.query.bool.filter).toContainEqual({ exists: { field: 'dept' } });
-    });
-
-    it('returns top hits from sample_hits aggregation', async () => {
-      const hit = { _source: { dept: 'engineering', 'process.name': 'python' } };
-      mockEsSearch.mockResolvedValueOnce(makeMetricSearchResponse([hit]));
 
       const result = await fetchBaselineBehavior({
         ...defaultOpts,
-        anomalies: [makeAnomaly()],
+        anomalies: [anomaly],
         esClient,
         logger,
         ml: mockMl,
         soClient,
       });
 
-      expect(result).toEqual([{ value: '', doc_count: 0, topHits: [hit] }]);
-
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody).toMatchSnapshot();
+      expect(result).toEqual([
+        { ...anomaly, baselineValues: [36000], anomalousValue: 43200, anomalousValueCount: 10 },
+      ]);
     });
-  });
 
-  describe('influencers as sourceIncludes', () => {
-    it('passes influencers as _source includes when defined', async () => {
+    it('filters the time_bucket agg by hour_of_day derived from actual', async () => {
+      // actual = 43200 → hour = Math.floor(43200 / 3600) = 12
+      const anomaly = makeAnomaly({ actual: 43200 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 0 } } }])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      expect(searches[1].aggs.time_bucket.filter).toEqual({ term: { hour_of_day: 12 } });
+    });
+
+    it('includes hour_of_day and day_of_week runtime mappings', async () => {
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 0 } } }])
+      );
+
       await fetchBaselineBehavior({
         ...defaultOpts,
         anomalies: [makeAnomaly()],
@@ -796,24 +495,105 @@ describe('fetchBaselineBehavior', () => {
         soClient,
       });
 
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.aggs.baseline.aggs.sample_hits.top_hits._source).toEqual({
-        includes: ['user.name', 'source.ip'],
-      });
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      expect(searches[1].runtime_mappings.hour_of_day).toBeDefined();
+      expect(searches[1].runtime_mappings.day_of_week).toBeDefined();
     });
 
-    it('omits _source when influencers list is empty', async () => {
-      mockJobsFn.mockResolvedValueOnce({
+    it('msearch request matches snapshot', async () => {
+      // actual = 43200 → 12:00:00 (hour_of_day = 12)
+      const anomaly = makeAnomaly({ actual: 43200, typical: 36000 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 0 } } }])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      expect(mockEsMsearch.mock.calls[0][0]).toMatchSnapshot();
+    });
+  });
+
+  describe('time_of_week detector', () => {
+    beforeEach(() => {
+      mockJobsFn.mockResolvedValue({
         jobs: [
           makeJob({
             analysis_config: {
-              detectors: [{ function: 'rare', by_field_name: 'source.ip' }],
-              influencers: [],
+              detectors: [{ function: 'time_of_week' }],
             },
           }),
         ],
       });
+    });
 
+    it('filters the time_bucket agg by day_of_week and hour_of_day', async () => {
+      // actual = 259200 → 3 full days from Sunday midnight (Wednesday, hour 0)
+      // anomalousDay = Math.floor(259200 / 86400) = 3
+      // anomalousHour = Math.floor((259200 % 86400) / 3600) = 0
+      const anomaly = makeAnomaly({ actual: 259200 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 7 } } }])
+      );
+
+      await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      const { searches } = mockEsMsearch.mock.calls[0][0];
+      expect(searches[1].aggs.time_bucket.filter).toEqual({
+        bool: {
+          filter: [{ term: { day_of_week: 3 } }, { term: { hour_of_day: 0 } }],
+        },
+      });
+    });
+
+    it('returns anomalousValueCount from the time_bucket doc_count', async () => {
+      const anomaly = makeAnomaly({ actual: 259200, typical: 0 });
+      mockEsMsearch.mockResolvedValueOnce(
+        makeMsearchResponse([{ aggregations: { time_bucket: { doc_count: 7 } } }])
+      );
+
+      const result = await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      expect(result).toEqual([
+        { ...anomaly, baselineValues: [0], anomalousValue: 259200, anomalousValueCount: 7 },
+      ]);
+    });
+  });
+
+  describe('metric (default) detector', () => {
+    beforeEach(() => {
+      mockJobsFn.mockResolvedValue({
+        jobs: [
+          makeJob({
+            analysis_config: {
+              detectors: [{ function: 'high_mean', by_field_name: 'bytes' }],
+            },
+          }),
+        ],
+      });
+    });
+
+    it('does not call msearch', async () => {
       await fetchBaselineBehavior({
         ...defaultOpts,
         anomalies: [makeAnomaly()],
@@ -823,39 +603,109 @@ describe('fetchBaselineBehavior', () => {
         soClient,
       });
 
-      const [searchBody] = mockEsSearch.mock.calls[0];
-      expect(searchBody.aggs.baseline.aggs.sample_hits.top_hits._source).toBeUndefined();
+      expect(mockEsMsearch).not.toHaveBeenCalled();
+    });
+
+    it('returns anomalousValue equal to actual and baselineValues equal to [typical]', async () => {
+      const anomaly = makeAnomaly({ actual: 100, typical: 10 });
+
+      const result = await fetchBaselineBehavior({
+        ...defaultOpts,
+        anomalies: [anomaly],
+        esClient,
+        logger,
+        ml: mockMl,
+        soClient,
+      });
+
+      expect(result).toEqual([{ ...anomaly, anomalousValue: 100, baselineValues: [10] }]);
     });
   });
 
-  it('flattens baseline buckets from multiple detector configs', async () => {
+  it('routes anomalies to different handlers based on detector function and flattens results', async () => {
     mockJobsFn.mockResolvedValueOnce({
       jobs: [
         makeJob({
           analysis_config: {
             detectors: [
               { function: 'rare', by_field_name: 'source.ip' },
-              { function: 'rare', by_field_name: 'process.name' },
+              { function: 'high_mean', field_name: 'bytes' },
             ],
-            influencers: [],
           },
         }),
       ],
     });
-    mockEsSearch
-      .mockResolvedValueOnce(makeEsSearchResponse([makeRareBucket('1.2.3.4', 3)]))
-      .mockResolvedValueOnce(makeEsSearchResponse([makeRareBucket('malware.exe', 1)]));
+    // rare anomaly → msearch; metric anomaly → no msearch
+    const rareAnomaly = makeAnomaly({
+      detectorIndex: 0,
+      byFieldName: 'source.ip',
+      byFieldValue: '1.2.3.4',
+    });
+    const metricAnomaly = makeAnomaly({ detectorIndex: 1, actual: 200, typical: 50 });
+
+    mockEsMsearch.mockResolvedValueOnce(
+      makeMsearchResponse([
+        {
+          aggregations: {
+            baseline: { buckets: [{ key: '9.9.9.9', doc_count: 2 }] },
+            anomaly: { doc_count: 1 },
+          },
+        },
+      ])
+    );
 
     const result = await fetchBaselineBehavior({
       ...defaultOpts,
-      anomalies: [makeAnomaly({ detectorIndex: 0 }), makeAnomaly({ detectorIndex: 1 })],
+      anomalies: [rareAnomaly, metricAnomaly],
       esClient,
       logger,
       ml: mockMl,
       soClient,
     });
 
+    // msearch called once for the rare detector group only
+    expect(mockEsMsearch).toHaveBeenCalledTimes(1);
+
+    // both results returned
     expect(result).toHaveLength(2);
-    expect(result?.map((b) => b.value)).toEqual(['1.2.3.4', 'malware.exe']);
+    const byId = Object.fromEntries((result ?? []).map((r) => [r.detectorIndex, r]));
+    expect(byId[0].baselineValues).toEqual(['9.9.9.9']);
+    expect(byId[1].anomalousValue).toBe(200);
+    expect(byId[1].baselineValues).toEqual([50]);
+  });
+
+  it('groups anomalies for the same detector into a single msearch call', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          analysis_config: {
+            detectors: [{ function: 'rare', by_field_name: 'source.ip' }],
+          },
+        }),
+      ],
+    });
+    const anomalies = [
+      makeAnomaly({ _id: 'a1', byFieldValue: 'ip-1', detectorIndex: 0 }),
+      makeAnomaly({ _id: 'a2', byFieldValue: 'ip-2', detectorIndex: 0 }),
+    ];
+    mockEsMsearch.mockResolvedValueOnce(
+      makeMsearchResponse([
+        { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+        { aggregations: { baseline: { buckets: [] }, anomaly: { doc_count: 0 } } },
+      ])
+    );
+
+    await fetchBaselineBehavior({
+      ...defaultOpts,
+      anomalies,
+      esClient,
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    // Both anomalies in a single msearch call → 4 items (2 header+body pairs)
+    expect(mockEsMsearch).toHaveBeenCalledTimes(1);
+    expect(mockEsMsearch.mock.calls[0][0].searches).toHaveLength(4);
   });
 });

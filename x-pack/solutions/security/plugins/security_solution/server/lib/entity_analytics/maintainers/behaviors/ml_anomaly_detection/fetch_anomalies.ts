@@ -18,6 +18,7 @@ interface RawAnomalyRecord {
   timestamp: number;
   job_id: string;
   detector_index: number;
+  function?: string;
   record_score: number;
   field_name?: string;
   by_field_name?: string;
@@ -31,7 +32,6 @@ interface RawAnomalyRecord {
 }
 
 interface StreamAnomaliesForEntityBatchOpts {
-  anomalyThreshold: number;
   entityType: EntityType;
   entityIds: string[];
   jobIds: Set<string>;
@@ -41,7 +41,6 @@ interface StreamAnomaliesForEntityBatchOpts {
 }
 
 export async function* streamAnomaliesForEntityBatch({
-  anomalyThreshold,
   entityType,
   entityIds,
   jobIds,
@@ -76,7 +75,7 @@ export async function* streamAnomaliesForEntityBatch({
                 { term: { result_type: 'record' } },
                 { terms: { entity_id: entityIds } },
                 { term: { is_interim: false } },
-                { range: { record_score: { gte: anomalyThreshold } } },
+                { range: { record_score: { gte: 1 } } },
                 { range: { timestamp: { gte: `now-${ML_AD_LOOKBACK}` } } },
               ],
             },
@@ -109,6 +108,7 @@ export async function* streamAnomaliesForEntityBatch({
             entityId,
             jobId: src.job_id,
             detectorIndex: src.detector_index,
+            detectorFunction: src.function ?? '',
             timestamp: src.timestamp,
             recordScore: src.record_score,
             actual: src.actual[0],
@@ -142,10 +142,7 @@ export async function* streamAnomaliesForEntityBatch({
 }
 
 export interface EntityAnomalies {
-  [jobId: string]: {
-    anomalies: AnomalyHit[];
-    baselineBehaviors: string[];
-  };
+  [jobId: string]: AnomalyHit[];
 }
 
 export interface FetchAnomaliesResult {
@@ -159,8 +156,8 @@ export interface FetchAnomaliesResult {
  * Result shape:
  * {
  *   "user:alice": {
- *     "job-A": { anomalies: [...], baselineBehaviors: [...] },
- *     "job-B": { anomalies: [...], baselineBehaviors: [...] },
+ *     "job-A": [anomalies...],
+ *     "job-B": [anomalies...],
  *   },
  *   "user:bob": { ... },
  * }

@@ -11,7 +11,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { EntityAnomalies } from './fetch_anomalies';
 import { fetchBaselineBehavior } from './fetch_baseline_behavior';
 import { getMlAdDetailsIndexName } from './constants';
-import type { EnrichedAnomalyRecord } from './types';
+import type { EnrichedAnomalyHit, EnrichedAnomalyRecord } from './types';
 
 interface EnrichAndPersistAnomaliesOpts {
   abortSignal: AbortSignal;
@@ -35,15 +35,15 @@ export const enrichAndPersistAnomalies = async ({
   namespace,
   soClient,
 }: EnrichAndPersistAnomaliesOpts) => {
-  const fetchTasks = [...anomaliesByEntity.entries()].flatMap(([entityId, entityAnomalies]) =>
-    Object.entries(entityAnomalies).map(([jobId, jobData]) => ({ entityId, jobId, jobData }))
+  const fetchTasks = [...anomaliesByEntity.entries()].flatMap(([entityId, anomaliesByJobId]) =>
+    Object.entries(anomaliesByJobId).map(([jobId, anomalies]) => ({ entityId, jobId, anomalies }))
   );
 
   const fetchResults = await Promise.all(
-    fetchTasks.map(({ entityId, jobId, jobData }) =>
+    fetchTasks.map(({ entityId, jobId, anomalies }) =>
       fetchBaselineBehavior({
         abortSignal,
-        anomalies: jobData.anomalies,
+        anomalies,
         entityId,
         entityType,
         esClient,
@@ -52,19 +52,19 @@ export const enrichAndPersistAnomalies = async ({
         ml,
         soClient,
       })
-        .then((baselinesBehaviors) => ({ entityId, jobId, jobData, baselinesBehaviors }))
+        .then((anomaliesWithBaseline) => ({ entityId, jobId, anomalies: anomaliesWithBaseline }))
         .catch((err) => {
           logger.warn(
             `Failed to fetch baseline behavior for entity ${entityId}, job ${jobId}: ${err}`
           );
-          return { entityId, jobId, jobData, baselinesBehaviors: null };
+          return { entityId, jobId, anomalies: anomalies as EnrichedAnomalyHit[] };
         })
     )
   );
 
   const enrichedRecords: EnrichedAnomalyRecord[] = fetchResults.flatMap(
-    ({ entityId, jobId, jobData, baselinesBehaviors }) =>
-      jobData.anomalies.map((anomaly) => ({
+    ({ entityId, jobId, anomalies }) =>
+      anomalies?.map((anomaly) => ({
         entity: {
           id: entityId,
           type: entityType,
@@ -74,6 +74,7 @@ export const enrichAndPersistAnomalies = async ({
           job_id: jobId,
           job_name: jobNameById.get(jobId) ?? jobId,
           detector_index: anomaly.detectorIndex,
+          detector_function: anomaly.detectorFunction,
           timestamp: anomaly.timestamp,
           record_score: anomaly.recordScore,
           field_name: anomaly.fieldName,
@@ -85,12 +86,12 @@ export const enrichAndPersistAnomalies = async ({
           over_field_value: anomaly.overFieldValue,
           partition_field_name: anomaly.partitionFieldName,
           partition_field_value: anomaly.partitionFieldValue,
+          ...(anomaly.baselineValues != null ? { baseline_values: anomaly.baselineValues } : {}),
+          ...(anomaly.anomalousValue != null ? { anomalous_value: anomaly.anomalousValue } : {}),
+          ...(anomaly.anomalousValueCount != null
+            ? { anomalous_value_count: anomaly.anomalousValueCount }
+            : {}),
         },
-        baseline: (baselinesBehaviors ?? []).map((bb) => ({
-          value: bb.value,
-          doc_count: bb.doc_count,
-          top_hits: bb.topHits,
-        })),
       }))
   );
 

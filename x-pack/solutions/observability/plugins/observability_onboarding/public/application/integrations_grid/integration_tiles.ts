@@ -16,6 +16,7 @@ export interface IntegrationTileData {
   description: string;
   logo: SupportedLogo;
   darkLogo?: SupportedLogo;
+  route?: string;
 }
 
 export interface IntegrationCategory {
@@ -125,6 +126,7 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Collect system metrics and logs from Linux servers.' }
         ),
         logo: 'linux',
+        route: '/host/linux',
       },
       {
         id: 'windows',
@@ -137,6 +139,7 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Monitor event logs and performance counters.' }
         ),
         logo: 'windows',
+        route: '/host/windows',
       },
       {
         id: 'macos',
@@ -149,6 +152,7 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
         ),
         logo: 'apple_black',
         darkLogo: 'apple_white',
+        route: '/host/macos',
       },
     ],
   },

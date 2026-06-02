@@ -10,7 +10,6 @@ import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DEFAULT_ANOMALY_SCORE } from '../../../../../../common/constants';
 import {
   ENTITY_PAGE_SIZE,
   MAX_ALLOWED_ITERS,
@@ -53,8 +52,6 @@ export const createMlAnomalyDetectionBehaviorMaintainer = ({
 
       const maintainerRunStartedAtMs = Date.now();
       const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-      const anomalyThreshold = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
 
       for (const entityType of ML_AD_JOB_ENTITY_TYPES) {
         if (abortController.signal.aborted) {
@@ -63,7 +60,6 @@ export const createMlAnomalyDetectionBehaviorMaintainer = ({
         }
         await processEntityType({
           abortSignal: abortController.signal,
-          anomalyThreshold,
           crudClient,
           entityType,
           esClient,
@@ -84,7 +80,6 @@ export const createMlAnomalyDetectionBehaviorMaintainer = ({
 
 interface ProcessEntityTypeOpts {
   abortSignal: AbortSignal;
-  anomalyThreshold: number;
   crudClient: CrudClient;
   entityType: EntityType;
   esClient: ElasticsearchClient;
@@ -96,7 +91,6 @@ interface ProcessEntityTypeOpts {
 
 const processEntityType = async ({
   abortSignal,
-  anomalyThreshold,
   crudClient,
   entityType,
   esClient,
@@ -136,7 +130,6 @@ const processEntityType = async ({
 
     await processBatchOfEntities({
       abortSignal,
-      anomalyThreshold,
       crudClient,
       entityType,
       entities,
@@ -159,7 +152,6 @@ const processEntityType = async ({
 
 interface ProcessBatchOfEntitiesOpts {
   abortSignal: AbortSignal;
-  anomalyThreshold: number;
   crudClient: CrudClient;
   entities: Entity[];
   entityType: EntityType;
@@ -172,7 +164,6 @@ interface ProcessBatchOfEntitiesOpts {
 
 const processBatchOfEntities = async ({
   abortSignal,
-  anomalyThreshold,
   crudClient,
   entityType,
   entities,
