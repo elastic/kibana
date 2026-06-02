@@ -41,6 +41,8 @@ interface SecurityGuiRuleFormProps {
   onCardinalityFieldChange: (field: string) => void;
   cardinalityValue: number;
   onCardinalityValueChange: (value: number) => void;
+  filterQuery: string;
+  onFilterQueryChange: (query: string) => void;
   generatedQuery: string;
   search: ISearchGeneric;
 }
@@ -63,6 +65,8 @@ export const SecurityGuiRuleForm = ({
   onCardinalityFieldChange,
   cardinalityValue,
   onCardinalityValueChange,
+  filterQuery,
+  onFilterQueryChange,
   generatedQuery,
   search,
 }: SecurityGuiRuleFormProps) => {
@@ -92,6 +96,8 @@ export const SecurityGuiRuleForm = ({
               onCardinalityFieldChange={onCardinalityFieldChange}
               cardinalityValue={cardinalityValue}
               onCardinalityValueChange={onCardinalityValueChange}
+              filterQuery={filterQuery}
+              onFilterQueryChange={onFilterQueryChange}
               generatedQuery={generatedQuery}
               search={search}
             />

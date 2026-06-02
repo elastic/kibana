@@ -76,6 +76,19 @@ export const INDEX_PATTERNS_HELP = i18n.translate(
   { defaultMessage: 'Specify the indices to query for this rule.' }
 );
 
+export const FILTER_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.filterQueryLabel',
+  { defaultMessage: 'Filter query' }
+);
+
+export const FILTER_QUERY_HELP = i18n.translate(
+  'xpack.securitySolution.rulesV2.filterQueryHelp',
+  {
+    defaultMessage:
+      'Optional ES|QL WHERE clause to filter data before aggregation (e.g. status >= 400 AND service.name == "api").',
+  }
+);
+
 export const THRESHOLD_LABEL = i18n.translate('xpack.securitySolution.rulesV2.thresholdLabel', {
   defaultMessage: 'Threshold',
 });

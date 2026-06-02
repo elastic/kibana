@@ -101,6 +101,9 @@ export const SecurityRuleForm = ({
   const [cardinalityValue, setCardinalityValue] = useState(
     parsedThreshold?.cardinalityValue ?? 0
   );
+  const [filterQuery, setFilterQuery] = useState(
+    parsedThreshold?.filterQuery ?? ''
+  );
 
   const [threat, setThreat] = useState<ThreatEntry[]>(initialParams?.threat ?? []);
   const [note, setNote] = useState(initialParams?.note ?? '');
@@ -123,8 +126,9 @@ export const SecurityRuleForm = ({
       thresholdValue,
       cardinalityField: cardinalityField || undefined,
       cardinalityValue: cardinalityField ? cardinalityValue : undefined,
+      filterQuery: filterQuery || undefined,
     });
-  }, [ruleType, indexPatterns, groupByFields, thresholdValue, cardinalityField, cardinalityValue]);
+  }, [ruleType, indexPatterns, groupByFields, thresholdValue, cardinalityField, cardinalityValue, filterQuery]);
 
   const defaultFromClause = `FROM ${DEFAULT_INDEX_PATTERN.join(', ')}`;
 
@@ -303,6 +307,8 @@ export const SecurityRuleForm = ({
                 onCardinalityFieldChange={setCardinalityField}
                 cardinalityValue={cardinalityValue}
                 onCardinalityValueChange={setCardinalityValue}
+                filterQuery={filterQuery}
+                onFilterQueryChange={setFilterQuery}
                 generatedQuery={generatedQuery}
                 search={services.data.search.search}
                 threat={threat}

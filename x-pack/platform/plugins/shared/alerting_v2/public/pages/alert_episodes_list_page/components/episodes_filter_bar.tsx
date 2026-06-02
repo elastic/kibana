@@ -34,8 +34,8 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import deepEqual from 'fast-deep-equal';
-import { INCLUDE_BUILDING_BLOCKS_LABEL } from '../translations';
 import { css } from '@emotion/react';
+import { INCLUDE_BUILDING_BLOCKS_LABEL } from '../translations';
 import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
 import * as i18n from '../translations';
 

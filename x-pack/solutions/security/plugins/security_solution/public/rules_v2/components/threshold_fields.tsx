@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -73,6 +74,8 @@ interface ThresholdFieldsProps {
   onCardinalityFieldChange: (field: string) => void;
   cardinalityValue: number;
   onCardinalityValueChange: (value: number) => void;
+  filterQuery: string;
+  onFilterQueryChange: (query: string) => void;
   generatedQuery: string;
   search: ISearchGeneric;
 }
@@ -88,6 +91,8 @@ export const ThresholdFields = ({
   onCardinalityFieldChange,
   cardinalityValue,
   onCardinalityValueChange,
+  filterQuery,
+  onFilterQueryChange,
   generatedQuery,
   search,
 }: ThresholdFieldsProps) => {
@@ -105,6 +110,18 @@ export const ThresholdFields = ({
           onChange={(options) => onIndexPatternsChange(options.map((o) => o.label))}
           data-test-subj="rulesV2IndexPatterns"
           noSuggestions
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow label={i18n.FILTER_QUERY_LABEL} helpText={i18n.FILTER_QUERY_HELP} fullWidth>
+        <EuiFieldText
+          fullWidth
+          value={filterQuery}
+          onChange={(e) => onFilterQueryChange(e.target.value)}
+          placeholder={'status >= 400 AND service.name == "api"'}
+          data-test-subj="rulesV2FilterQuery"
         />
       </EuiFormRow>
 
