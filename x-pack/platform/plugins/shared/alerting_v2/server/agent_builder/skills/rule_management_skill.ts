@@ -32,14 +32,14 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 - **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
 - Supports state transitions (\`consecutive_breaches\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
-- UI label: **"Alerting"**.
+- UI label: **"Alert"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
 ### Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
-- UI label: **"Detect only"**.
+- UI label: **"Signal"**.
 - Use for logging or detection without automated action.
 
 ### Immutability
@@ -229,7 +229,7 @@ Action policies only process alert episodes. Signal rules (\`kind: signal\`) do 
 
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
-1. **Explain the difference**: signal rules are observation-only ("Detect only") and do not trigger notifications. Alert rules ("Alerting") track episode lifecycle and can dispatch to action policies.
+1. **Explain the difference**: signal rules are observation-only ("Signal") and do not trigger notifications. Alert rules ("Alert") track episode lifecycle and can dispatch to action policies.
 2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then proceed with notification setup (Part 3).
 3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing signal rule cannot be converted. Offer to create a new alert rule with the same query and schedule, then set up notifications on the new rule.
 4. After ensuring the rule is \`kind: alert\`, proceed with the notification setup flow (Part 3).
