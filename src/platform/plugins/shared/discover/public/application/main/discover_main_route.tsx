@@ -284,22 +284,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView
-                {...props}
-                headerTitle={
-                  persistedDiscoverSession?.title ??
-                  i18n.translate('discover.pageTitleWithoutSavedSearch', {
-                    defaultMessage: 'New session',
-                  })
-                }
-              />
+              <TabsView {...props} />
             ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
             ) : (
-              <SingleTabViewWithAppMenu
-                {...props}
-                headerTitle={persistedDiscoverSession?.title ?? ''}
-              />
+              <SingleTabViewWithAppMenu {...props} />
             )
           }
         </>

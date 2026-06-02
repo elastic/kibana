@@ -28,21 +28,21 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
-interface TabsViewProps extends SingleTabViewProps {
-  headerTitle: string;
-}
 
-export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) => {
+export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const { getPreviewData } = usePreviewData(singleTabViewProps.runtimeStateManager);
+  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
   const isChromeNextProjectHeader = useMemo(
     () => services.chrome.next.isEnabled && services.chrome.getChromeStyle() === 'project',
     [services.chrome]
@@ -79,8 +79,8 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
   );
 
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
-    () => <SingleTabView key={currentTabId} {...singleTabViewProps} />,
-    [currentTabId, singleTabViewProps]
+    () => <SingleTabView key={currentTabId} {...props} />,
+    [currentTabId, props]
   );
 
   const renderTabsBar = useMemo((): UnifiedTabsProps['renderTabsBar'] => {
@@ -90,14 +90,19 @@ export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) 
 
     return (tabsBar) => (
       <AppHeader
-        title={headerTitle}
+        title={
+          persistedDiscoverSession?.title ??
+          i18n.translate('discover.pageTitleWithoutSavedSearch', {
+            defaultMessage: 'New session',
+          })
+        }
         menu={topNavMenuItems}
         sticky={false}
         padding="m"
         titleAppend={tabsBar}
       />
     );
-  }, [isChromeNextProjectHeader, headerTitle, topNavMenuItems]);
+  }, [isChromeNextProjectHeader, persistedDiscoverSession?.title, topNavMenuItems]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
