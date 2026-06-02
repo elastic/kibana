@@ -38,6 +38,13 @@ export function CompositeSloMembersSection() {
     control,
     name: 'members',
     rules: {
+      required: {
+        value: true,
+        message: i18n.translate('xpack.slo.compositeSloEdit.members.requiredError', {
+          defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
+          values: { min: MIN_COMPOSITE_MEMBERS },
+        }),
+      },
       minLength: {
         value: MIN_COMPOSITE_MEMBERS,
         message: i18n.translate('xpack.slo.compositeSloEdit.members.minError', {
