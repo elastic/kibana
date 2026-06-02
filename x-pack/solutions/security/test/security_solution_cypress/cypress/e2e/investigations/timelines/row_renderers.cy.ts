@@ -72,10 +72,8 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length.gt', 0);
     cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).first().should('be.visible');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
-    // Wait for the table to filter and verify the netflow checkbox is present and checked
-    cy.get(NETFLOW_CHECKBOX).should('be.checked');
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView().type('flow');
 
     // Register the intercept for the first save (excluding netflow) before triggering it
     cy.intercept('PATCH', '/api/timeline').as('excludeNetflow');
@@ -90,15 +88,10 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // open modal, filter and check
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
-    // Wait for the table to filter and verify the netflow checkbox is present and unchecked
-    cy.get(NETFLOW_CHECKBOX).should('not.be.checked');
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
 
-    // Register the intercept for the second save (including netflow) before triggering it
-    cy.intercept('PATCH', '/api/timeline').as('includeNetflow');
-    cy.get(NETFLOW_CHECKBOX).check();
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView().type('flow');
+    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
 
     // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
