@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -46,6 +48,15 @@ describe('UiamAPIKeys', () => {
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
+      convertApiKeys: jest.fn(),
+      exchangeOAuthToken: jest.fn(),
+      createOAuthClient: jest.fn(),
+      listOAuthClients: jest.fn(),
+      updateOAuthClient: jest.fn(),
+      revokeOAuthClient: jest.fn(),
+      listOAuthConnections: jest.fn(),
+      updateOAuthConnection: jest.fn(),
+      revokeOAuthConnection: jest.fn(),
     };
 
     uiamApiKeys = new UiamAPIKeys({
@@ -270,7 +281,7 @@ describe('UiamAPIKeys', () => {
       expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });
 
-    it('returns error details when UIAM API key invalidation fails', async () => {
+    it('returns error details with type "exception" when a non-Boom error occurs', async () => {
       const request = createMockRequest('ApiKey essu_uiam_credential_123');
       const error = new Error('Revocation failed');
       mockUiam.revokeApiKey.mockRejectedValue(error);
@@ -293,6 +304,123 @@ describe('UiamAPIKeys', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to invalidate API key key_id_123: Revocation failed'
       );
+    });
+
+    it('surfaces the UIAM error code in error_details type when a Boom error with payload occurs', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('APIKEY_REVOKED');
+      boomError.output = {
+        statusCode: 404,
+        payload: { error: { code: '0xD38358', message: 'APIKEY_REVOKED' } } as any,
+        headers: {},
+      };
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result).toEqual({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [
+          {
+            type: 'exception',
+            reason: expect.stringContaining('Failed to invalidate API key key_id_123'),
+            code: '0xD38358',
+          },
+        ],
+      });
+    });
+
+    it('does not include code when Boom error has no UIAM error code', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('Bad request', { statusCode: 400 });
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result!.error_details![0].type).toBe('exception');
+      expect(result!.error_details![0].code).toBeUndefined();
+    });
+  });
+
+  describe('convert()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      const result = await uiamApiKeys.convert(['es-api-key']);
+
+      expect(result).toBeNull();
+      expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
+    });
+
+    it('successfully converts API keys via UIAM', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success' as const,
+            id: 'converted-key-id',
+            key: 'essu_converted_key',
+            description: 'converted key',
+            organization_id: 'org-123',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+        ],
+      };
+      mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
+
+      const result = await uiamApiKeys.convert(['es-api-key-base64']);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['es-api-key-base64']);
+      expect(logger.debug).toHaveBeenCalledWith('Trying to convert 1 API key(s)');
+    });
+
+    it('injects the same elasticsearch URL endpoint for all keys', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success' as const,
+            id: 'k1',
+            key: 'essu_k1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed' as const,
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
+        ],
+      };
+      mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
+
+      const result = await uiamApiKeys.convert(['valid-key', 'invalid-key']);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['valid-key', 'invalid-key']);
+    });
+
+    it('logs and throws error when UIAM conversion fails', async () => {
+      const error = new Error('UIAM service error');
+      mockUiam.convertApiKeys.mockRejectedValue(error);
+
+      await expect(uiamApiKeys.convert(['es-api-key'])).rejects.toThrow('UIAM service error');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -29,16 +29,22 @@ export async function resolveConnectorId({
   connectorId,
   uiSettingsClient,
   logger,
+  request,
 }: {
   connectorId?: string;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
+  request?: KibanaRequest;
 }): Promise<string> {
   if (connectorId) {
     return connectorId;
   }
 
-  const defaultConnector = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const context = request ? { request } : undefined;
+  const defaultConnector = await uiSettingsClient.get<string>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    context
+  );
 
   if (defaultConnector && defaultConnector !== NO_DEFAULT_CONNECTOR) {
     logger.debug(`No connector ID provided, using default AI connector: ${defaultConnector}`);

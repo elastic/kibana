@@ -3,8 +3,8 @@ x-on-merge-gates: &on_merge_gates
 
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-    cancel_on_build_failing: true
     label: 'Serverless Entity Analytics - Security Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -18,11 +18,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
-    cancel_on_build_failing: true
     label: 'Serverless Explore - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -36,16 +38,19 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-    cancel_on_build_failing: true
     label: 'Serverless Investigations - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -54,16 +59,19 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -72,11 +80,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -90,11 +100,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -108,11 +120,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -126,11 +140,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -144,10 +160,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -162,10 +179,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -180,10 +198,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -198,10 +217,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -216,10 +236,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -234,11 +255,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
-    cancel_on_build_failing: true
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -252,11 +275,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
-    cancel_on_build_failing: true
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -270,10 +295,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
-    cancel_on_build_failing: true
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -288,10 +314,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
-    cancel_on_build_failing: true
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -306,11 +333,13 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
-    cancel_on_build_failing: true
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -324,10 +353,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
-    cancel_on_build_failing: true
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -342,10 +372,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
-    cancel_on_build_failing: true
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -360,10 +391,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
-    cancel_on_build_failing: true
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -378,16 +410,18 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
-    cancel_on_build_failing: true
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -396,16 +430,18 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
-    cancel_on_build_failing: true
     label: 'Osquery Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -414,16 +450,19 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    cancel_on_build_failing: true
     label: 'Osquery Cypress Tests on Serverless'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -432,18 +471,19 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
-      diskSizeGb: 105
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -452,18 +492,20 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests on Serverless'
+    branches: main
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
-      diskSizeGb: 105
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -472,10 +514,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
-    cancel_on_build_failing: true
     label: 'APM Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
@@ -490,4 +533,6 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

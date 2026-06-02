@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonIcon, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -73,7 +73,9 @@ export const useResponsiveTabs = ({
   useEffect(() => {
     onScroll();
     // `dimensions.width` added here to trigger in cases when the container width changes
-  }, [onScroll, dimensions.width]);
+    // `tabsSizeConfig.isScrollable` added here to trigger scroll state recalculation
+    // when items are added/removed and scrollability changes (e.g. after tab restoration)
+  }, [onScroll, dimensions.width, tabsSizeConfig.isScrollable]);
 
   const scrollLeft = useCallback(() => {
     if (tabsContainerElement) {
@@ -95,15 +97,16 @@ export const useResponsiveTabs = ({
   const scrollLeftButton = useMemo(
     () =>
       tabsSizeConfig.isScrollable ? (
-        <EuiButtonIcon
-          data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
-          iconType="arrowLeft"
-          color="text"
-          disabled={scrollState?.isScrollableLeft === false}
-          aria-label={scrollLeftButtonLabel}
-          title={scrollLeftButtonLabel}
-          onClick={scrollLeft}
-        />
+        <EuiToolTip content={scrollLeftButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
+            iconType="chevronSingleLeft"
+            color="text"
+            disabled={scrollState?.isScrollableLeft === false}
+            aria-label={scrollLeftButtonLabel}
+            onClick={scrollLeft}
+          />
+        </EuiToolTip>
       ) : null,
     [scrollLeftButtonLabel, scrollLeft, tabsSizeConfig.isScrollable, scrollState?.isScrollableLeft]
   );
@@ -111,15 +114,16 @@ export const useResponsiveTabs = ({
   const scrollRightButton = useMemo(
     () =>
       tabsSizeConfig.isScrollable ? (
-        <EuiButtonIcon
-          data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
-          iconType="arrowRight"
-          color="text"
-          disabled={scrollState?.isScrollableRight === false}
-          aria-label={scrollRightButtonLabel}
-          title={scrollRightButtonLabel}
-          onClick={scrollRight}
-        />
+        <EuiToolTip content={scrollRightButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
+            iconType="chevronSingleRight"
+            color="text"
+            disabled={scrollState?.isScrollableRight === false}
+            aria-label={scrollRightButtonLabel}
+            onClick={scrollRight}
+          />
+        </EuiToolTip>
       ) : null,
     [
       scrollRightButtonLabel,

@@ -6,20 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 
 import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
@@ -66,7 +57,7 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
     );
 
     expect(
-      (result?.current?.state.visualization as XYState).layers.find(
+      (result?.current?.state.visualization as XYVisualizationState).layers.find(
         (layer) => layer.layerType === 'referenceLine'
       )
     ).toEqual(
@@ -80,7 +71,7 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
             axisMode: 'left',
             lineWidth: 2,
             color: '#aa6556',
-            icon: 'alert',
+            icon: 'warning',
             textVisibility: true,
             fill: 'none',
             iconPosition: 'left',

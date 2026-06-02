@@ -12,24 +12,6 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ---
 
-## App wrapper — `getRenderAppWrapper`
-
-**Changes:** Wraps the entire Discover app (React providers, banners).
-
-**Use when:** You need profile-specific context, theme, or messaging.
-
-**Returns:** `FunctionComponent<PropsWithChildren<{}>>`
-
-**Screenshot:**
-![App wrapper example](./docs/extension_points/get_render_app_wrapper.png)
-
-**Implementation examples:**
-- [Security root profile](profile_providers/security/security_root_profile/profile.tsx)
-- [Observability root profile](profile_providers/observability/observability_root_profile/profile.tsx)
-- [Example root profile](profile_providers/example/example_root_profile/profile.tsx)
-
----
-
 ## Default app state — `getDefaultAppState`
 
 **Changes:** Initial columns, row height, breakdown field, chart visibility.
@@ -42,6 +24,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Default app state example](./docs/extension_points/get_default_app_state.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_default_app_state.ts)
 - [Security data source profile](profile_providers/security/accessors/get_default_app_state.ts)
 
@@ -59,6 +42,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Default ad-hoc data views example](./docs/extension_points/get_default_ad_hoc_data_views.png)
 
 **Implementation examples:**
+
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_default_ad_hoc_data_views.ts)
 - [Classic nav root profile](profile_providers/common/classic_nav_root_profile/accessors/get_default_ad_hoc_data_views.ts)
 
@@ -78,6 +62,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Modified vis attributes example](./docs/extension_points/get_modified_vis_attributes.png)
 
 **Implementation examples:**
+
 - [Metrics data source profile](profile_providers/common/metrics_data_source_profile/profile.ts)
 
 ---
@@ -88,9 +73,10 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Use when:** Add buttons like "Open in new tab" or swap chart section.
 
-**Returns:** `ChartSectionConfiguration` (can use `actions.openInNewTab`, `actions.updateESQLQuery`)
+**Returns:** `ChartSectionConfiguration`
 
 **Implementation examples:**
+
 - [Metrics data source profile](profile_providers/common/metrics_data_source_profile/accessor/chart_section.tsx)
 - [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/chart_session.tsx)
 
@@ -110,6 +96,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Cell renderers example](./docs/extension_points/get_cell_renderers.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_cell_renderers.tsx)
 - [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/get_cell_renderers.tsx)
 - [Patterns data source profile](profile_providers/common/patterns_data_source_profile/profile.ts)
@@ -128,6 +115,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Row indicator example](./docs/extension_points/get_row_indicator_provider.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_row_indicator_provider.ts)
 
 ---
@@ -144,6 +132,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Row leading controls example](./docs/extension_points/get_row_additional_leading_controls.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_row_additional_leading_controls.ts)
 
 ---
@@ -160,6 +149,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Additional cell actions example](./docs/extension_points/get_additional_cell_actions.png)
 
 **Implementation examples:**
+
 - See [types.ts](./types.ts) for the `AdditionalCellAction` interface definition
 
 ---
@@ -176,6 +166,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Pagination config example](./docs/extension_points/get_pagination_config.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_pagination_config.ts)
 
 ---
@@ -184,20 +175,22 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ### Doc viewer — `getDocViewer`
 
-**Changes:** Flyout title and tabs (add/modify).
+**Changes:** Flyout title, custom header, custom footer, and tabs (add/modify).
 
-**Use when:** Add "Related events", "Stack trace", "Analysis".
+**Use when:** Add "Related events", "Stack trace", "Analysis", custom header section, or sticky footer.
 
-**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry }`
+**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderHeader?(props) => ReactElement, renderFooter?(props) => ReactElement }`
 
 **Screenshot:**
 ![Doc viewer example](./docs/extension_points/get_doc_viewer.png)
 
 **Implementation examples:**
+
 - [Log document profile](profile_providers/observability/log_document_profile/accessors/get_doc_viewer.tsx)
 - [Traces document profile](profile_providers/observability/traces_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability document profile](profile_providers/observability/observability_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_doc_viewer.tsx)
+- [Example data source profile with custom header](profile_providers/example/example_data_source_profile/profile.tsx)
 
 ---
 
@@ -215,6 +208,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![App menu example](./docs/extension_points/get_app_menu.png)
 
 **Implementation examples:**
+
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_app_menu.tsx)
 
 ---
@@ -233,6 +227,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_columns_configuration.tsx)
 - [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/get_columns_configuration.tsx)
 
@@ -252,4 +247,5 @@ A concise, non-technical map of the Discover Profile extension points (what they
 ![Recommended fields example](./docs/extension_points/get_recommended_fields.png)
 
 **Implementation examples:**
+
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_recommended_fields.ts)

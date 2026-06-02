@@ -15,14 +15,20 @@ export {
   type StepsElseKeyOffsets,
 } from './get_steps_else_key_offsets';
 export { getStepNodeAtPosition } from './get_step_node_at_position';
-export { getStepNode } from './get_step_node';
 export { getStepNodesWithType, isStepLikeMap } from './get_step_nodes_with_type';
 export { getTriggerNodes, getTriggersPair } from './get_trigger_nodes';
+export { getTriggerOnChainOptionPairs } from './get_trigger_on_chain_option_pairs';
 export { getTriggerNodesWithType } from './get_trigger_nodes_with_type';
-export { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
-export { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
-export { parseWorkflowYamlForAutocomplete } from './parse_workflow_yaml_for_autocomplete';
 export { correctYamlSyntax } from './correct_yaml_syntax';
-export { stringifyWorkflowDefinition } from './stringify_workflow_definition';
-export { updateYamlField } from './update_yaml_field';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';
+export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  NESTED_STEP_KEYS,
+  isNestedStepKey,
+  type NestedStepKey,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from '@kbn/workflows-yaml';

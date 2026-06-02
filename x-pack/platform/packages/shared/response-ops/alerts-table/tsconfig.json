@@ -47,5 +47,11 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/es-query",
+    "@kbn/rison",
+    "@kbn/reporting-common",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-rendering-browser",
   ]
 }

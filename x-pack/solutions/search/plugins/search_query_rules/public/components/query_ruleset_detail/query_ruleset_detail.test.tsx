@@ -70,10 +70,21 @@ jest.mock('../../hooks/use_kibana', () => {
         history: {
           block: jest.fn().mockReturnValue(jest.fn()),
           listen: jest.fn().mockReturnValue(jest.fn()),
+          createHref: jest.fn().mockImplementation((location) => location.pathname || '/'),
         },
         console: {},
         share: {},
         notifications: notificationServiceMock.createStartContract(),
+        searchNavigation: {
+          useClassicNavigation: jest.fn(),
+          breadcrumbs: {
+            setSearchBreadCrumbs: jest.fn(),
+            clearBreadcrumbs: jest.fn(),
+          },
+        },
+        chrome: {
+          getChromeStyle: jest.fn().mockReturnValue('classic'),
+        },
       },
     }),
   };

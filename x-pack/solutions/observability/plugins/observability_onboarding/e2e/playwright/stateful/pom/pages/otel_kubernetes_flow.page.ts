@@ -6,7 +6,6 @@
  */
 
 import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
-import { DiscoverValidationPage } from './discover_validation.page';
 
 export class OtelKubernetesFlowPage {
   page: Page;
@@ -18,7 +17,9 @@ export class OtelKubernetesFlowPage {
     this.page = page;
     this.context = context;
 
-    this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -67,32 +68,14 @@ export class OtelKubernetesFlowPage {
     }
   }
 
-  public async openServiceInventoryInNewTab(): Promise<Page> {
-    const serviceInventoryURL = await this.page
-      .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
-      .getAttribute('href');
-
-    if (serviceInventoryURL) {
-      const newPage = await this.context.newPage();
-
-      await newPage.goto(serviceInventoryURL);
-
-      return newPage;
-    } else {
-      throw new Error('Service inventory URL not found');
-    }
-  }
-
-  public async assertLogsExplorationButtonVisible() {
-    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
+    ).toBeVisible();
   }
 
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
-  }
-
-  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
-    await this.exploreLogsButton.click();
-    return new DiscoverValidationPage(this.page);
   }
 }

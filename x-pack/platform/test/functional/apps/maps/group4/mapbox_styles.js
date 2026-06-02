@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: mapbox style smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
@@ -83,19 +88,19 @@ export default function ({ getPageObjects, getService }) {
             2,
             'rgba(0,0,0,0)',
             3,
-            '#d8e7ff',
+            '#e0ecff',
             4.125,
-            '#c8ddff',
+            '#cfe1ff',
             5.25,
-            '#b8d4ff',
+            '#bed7ff',
             6.375,
-            '#a8caff',
+            '#adccff',
             7.5,
-            '#98c0ff',
+            '#9bc2ff',
             8.625,
-            '#87b6ff',
+            '#89b7ff',
             9.75,
-            '#75acff',
+            '#76adff',
             10.875,
             '#61a2ff',
           ],
@@ -162,19 +167,19 @@ export default function ({ getPageObjects, getService }) {
             2,
             'rgba(0,0,0,0)',
             3,
-            '#d8e7ff',
+            '#e0ecff',
             4.125,
-            '#c8ddff',
+            '#cfe1ff',
             5.25,
-            '#b8d4ff',
+            '#bed7ff',
             6.375,
-            '#a8caff',
+            '#adccff',
             7.5,
-            '#98c0ff',
+            '#9bc2ff',
             8.625,
-            '#87b6ff',
+            '#89b7ff',
             9.75,
-            '#75acff',
+            '#76adff',
             10.875,
             '#61a2ff',
           ],

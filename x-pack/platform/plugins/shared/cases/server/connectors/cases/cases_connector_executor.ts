@@ -15,7 +15,6 @@ import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
-  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
@@ -24,9 +23,10 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
-  MAX_OPEN_CASES,
 } from '../../../common/constants';
-import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
@@ -53,6 +53,7 @@ import {
   GROUPED_BY_DESC,
   GROUPED_BY_TITLE,
 } from './translations';
+import { toStringArray } from '../../../common/utils/attachments/string_utils';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -60,6 +61,7 @@ interface CasesConnectorExecutorParams {
   casesService: CasesService;
   casesClient: CasesClient;
   spaceId: string;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
@@ -73,6 +75,7 @@ export class CasesConnectorExecutor {
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
   private readonly spaceId: string;
+  private readonly isCasesAttachmentsEnabled: boolean;
 
   constructor({
     logger,
@@ -80,12 +83,14 @@ export class CasesConnectorExecutor {
     casesService,
     casesClient,
     spaceId,
+    isCasesAttachmentsEnabled = false,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
     this.spaceId = spaceId;
+    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
   }
 
   public async execute(params: CasesConnectorRunParams) {
@@ -288,11 +293,9 @@ export class CasesConnectorExecutor {
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
     const groupSize = groupedAlerts.length;
-    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
-      const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
-
+    if (groupSize > params.maximumCasesToOpen) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${params.maximumCasesToOpen}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 
@@ -1182,31 +1185,66 @@ export class CasesConnectorExecutor {
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
-        const extraComments: UserCommentAttachmentPayload[] =
-          comments?.map((comment) => ({
-            type: AttachmentType.user,
-            comment,
-            owner: theCase.owner,
-          })) ?? [];
+        const extraComments: AttachmentRequestV2[] =
+          comments?.map((comment) =>
+            this.isCasesAttachmentsEnabled
+              ? {
+                  type: COMMENT_ATTACHMENT_TYPE,
+                  data: { content: comment },
+                  owner: theCase.owner,
+                }
+              : {
+                  type: AttachmentType.user,
+                  comment,
+                  owner: theCase.owner,
+                }
+          ) ?? [];
+        const rulePayload = internallyManagedAlerts
+          ? { id: null, name: null }
+          : { id: rule.id, name: rule.name };
+        // Collect the parallel alertId / alertIndex arrays in a single pass.
+        // Order is preserved by reduce per the ECMA-262 spec.
+        const { alertIds, alertIndices } = alerts.reduce<{
+          alertIds: string[];
+          alertIndices: string[];
+        }>(
+          (acc, alert) => {
+            acc.alertIds.push(alert._id);
+            acc.alertIndices.push(alert._index);
+            return acc;
+          },
+          { alertIds: [], alertIndices: [] }
+        );
+
+        // Only write the unified shape when the feature flag is on AND the
+        // case owner has a registered unified prefix.
+        const isUnifiedAlertValid =
+          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
+
+        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
+          this.logger.warn(
+            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
+          );
+        }
+
+        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
+          ? {
+              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+              attachmentId: alertIds,
+              metadata: { index: alertIndices, rule: rulePayload },
+              owner: theCase.owner,
+            }
+          : {
+              type: AttachmentType.alert,
+              rule: rulePayload,
+              alertId: alertIds,
+              index: alertIndices,
+              owner: theCase.owner,
+            };
+
         return {
           caseId: theCase.id,
-          attachments: [
-            ...extraComments,
-            {
-              type: AttachmentType.alert,
-              rule: internallyManagedAlerts
-                ? { id: null, name: null }
-                : { id: rule.id, name: rule.name },
-              /**
-               * Map traverses the array in ascending order.
-               * The order is guaranteed to be the same for
-               * both calls by the ECMA-262 spec.
-               */
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: theCase.owner,
-            },
-          ],
+          attachments: [...extraComments, alertAttachment],
         };
       }
     );
@@ -1218,15 +1256,21 @@ export class CasesConnectorExecutor {
        */
       async (req: BulkCreateAlertsReq) => {
         if (this.logger.isLevelEnabled('debug')) {
+          const attachmentIdsForLogging = req.attachments.flatMap((attachment) => {
+            if ('alertId' in attachment) {
+              return toStringArray(attachment.alertId);
+            }
+            if ('attachmentId' in attachment) {
+              return toStringArray(attachment.attachmentId);
+            }
+            return [];
+          });
+
           this.logger.debug(
             `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
             this.getLogMetadata(params, {
               labels: { caseId: req.caseId },
-              tags: [
-                'case-connector:attachAlertsToCases',
-                req.caseId,
-                ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
-              ],
+              tags: ['case-connector:attachAlertsToCases', req.caseId, ...attachmentIdsForLogging],
             })
           );
         }

@@ -17,24 +17,16 @@ import { getLatencyChart } from './trace_charts_definition';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
-const LatencyChartContent = ({
-  esqlQuery,
-  seriesType,
-  unit,
-  color,
-  title,
-}: LatencyChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
+const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
-    metric: {
-      name: 'duration_ms',
-      instrument: 'histogram',
-      unit,
-      index: indexes,
-      dimensions: [],
-      type: ES_FIELD_TYPES.DOUBLE,
+    metricItem: {
+      metricName: 'duration_ms',
+      metricTypes: ['histogram'],
+      units: ['ms'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     },
     color,
     seriesType,
@@ -42,6 +34,7 @@ const LatencyChartContent = ({
 
   return (
     <Chart
+      id="latency"
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -55,6 +48,7 @@ const LatencyChartContent = ({
       syncCursor
       syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };

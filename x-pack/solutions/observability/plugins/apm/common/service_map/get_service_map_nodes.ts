@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
-import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -27,6 +27,10 @@ import { FORBIDDEN_SERVICE_NAMES } from './constants';
 
 // Exports helper functions for use in React Flow transformation
 
+export const isMessagingExitSpan = (node?: ConnectionNode): node is ExternalConnectionNode => {
+  return node !== undefined && isExitSpan(node) && node[SPAN_TYPE] === 'messaging';
+};
+
 export function addMessagingConnections(
   connections: Connection[],
   destinationServices: ExitSpanDestination[]
@@ -44,7 +48,7 @@ export function addMessagingConnections(
 
   const messagingConnections = connections.reduce<Connection[]>((acc, connection) => {
     const destination = connection.destination;
-    if (isExitSpan(destination) && destination[SPAN_TYPE] === 'messaging') {
+    if (isMessagingExitSpan(destination)) {
       const matchedServices =
         servicesByDestination.get(destination[SPAN_DESTINATION_SERVICE_RESOURCE]) ?? [];
       matchedServices.forEach((matchedService) => {

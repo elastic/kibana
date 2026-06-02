@@ -39,6 +39,15 @@ describe('PROMQL Validation', () => {
         ['[PROMQL] Parameters "step" and "buckets" are mutually exclusive']
       );
     });
+
+    test('time cannot be used with range query params', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index time="2026-01-13T11:30:00.000Z" step=5m (rate(counterIntegerField[5m]))',
+        [
+          '[PROMQL] Specify either [time] for instant query or any of [step], [buckets], [start], [end]',
+        ]
+      );
+    });
   });
 
   describe('param values', () => {
@@ -82,11 +91,40 @@ describe('PROMQL Validation', () => {
         ['[PROMQL] Invalid scrape_interval value']
       );
     });
+
+    test('valid time value', () => {
+      promqlExpectErrors(
+        'PROMQL time="2026-01-13T11:30:00.000Z" (rate(counterIntegerField[5m]))',
+        []
+      );
+    });
+
+    test('invalid time format', () => {
+      promqlExpectErrors('PROMQL time=invalid (rate(counterIntegerField[5m]))', [
+        '[PROMQL] Invalid time value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
+      ]);
+    });
   });
 
   describe('query presence', () => {
     test('missing query', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend', ['[PROMQL] Missing query']);
+    });
+
+    test('param as entire query', () => {
+      promqlExpectErrors('PROMQL ?my_query', []);
+    });
+
+    test('parenthesized param as entire query', () => {
+      promqlExpectErrors('PROMQL (?my_query)', []);
+    });
+
+    test('assigned param as entire query', () => {
+      promqlExpectErrors('PROMQL col0 = ?my_query', []);
+    });
+
+    test('assigned parenthesized param as entire query', () => {
+      promqlExpectErrors('PROMQL col0 = (?my_query)', []);
     });
 
     test('named query with parens', () => {
@@ -132,6 +170,20 @@ describe('PROMQL Validation', () => {
         ['Unknown index "unknown_*"']
       );
     });
+
+    test('dot-prefixed backing index does not error', () => {
+      promqlExpectErrors(
+        'PROMQL index=.ds-metrics-x-default-000001 step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        []
+      );
+    });
+
+    test('truly unknown non-dot index still errors', () => {
+      promqlExpectErrors(
+        'PROMQL index=truly_unknown step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        ['Unknown index "truly_unknown"']
+      );
+    });
   });
 
   describe('query semantics', () => {
@@ -148,19 +200,8 @@ describe('PROMQL Validation', () => {
       );
     });
 
-    test.each([
-      [
-        'unknown metric name reports unknown column',
-        'PROMQL index=timeseries_index step=5m start=?_tstart end=?_tend (rate(bytess[5m]))',
-        ['Unknown column "bytess"'],
-      ],
-      [
-        'unknown metric name without index reports unknown column',
-        'PROMQL step=5m (rate(bytes))',
-        ['Unknown column "bytes"'],
-      ],
-    ])('%s', (_title, query, expected) => {
-      promqlExpectErrors(query, expected);
+    test('unknown metric name does not report an error', () => {
+      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (rate(unknown_metric[5m]))', []);
     });
 
     test('grouping is not allowed on non-aggregation functions', () => {

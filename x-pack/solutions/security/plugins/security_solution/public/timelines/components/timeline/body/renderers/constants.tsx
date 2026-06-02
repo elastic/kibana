@@ -7,6 +7,9 @@
 
 export const DATE_FIELD_TYPE = 'date';
 export const HOST_NAME_FIELD_NAME = 'host.name';
+export const HOST_HOSTNAME_FIELD_NAME = 'host.hostname';
+export const HOST_ID_FIELD_NAME = 'host.id';
+export const HOST_ENTITY_ID_FIELD_NAME = 'host.entity.id';
 export const USER_NAME_FIELD_NAME = 'user.name';
 export const HOST_IP_FIELD_NAME = 'host.ip';
 export const IP_FIELD_TYPE = 'ip';
@@ -17,6 +20,7 @@ export const RULE_REFERENCE_FIELD_NAME = 'rule.reference';
 export const REFERENCE_URL_FIELD_NAME = 'reference.url';
 export const EVENT_URL_FIELD_NAME = 'event.url';
 export const SIGNAL_RULE_NAME_FIELD_NAME = 'kibana.alert.rule.name';
+export const LEGACY_SIGNAL_RULE_NAME_FIELD_NAME = 'signal.rule.name';
 export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';

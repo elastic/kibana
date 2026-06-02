@@ -15,7 +15,7 @@ import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -45,7 +45,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+    query: { rangeFrom, rangeTo, showCriticalPath },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -54,18 +54,20 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId,
-    start,
-    end,
-  });
+
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
 
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
+
   const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -190,20 +192,19 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          environment={environment}
           onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfallFetchResult={waterfallFetchResult.waterfall}
-          waterfallFetchStatus={waterfallFetchResult.status}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
+          unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={transactionId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           traceId={traceId}

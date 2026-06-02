@@ -21,35 +21,75 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ILicense } from '@kbn/licensing-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 import { DataSourceSelectionChange } from '../types';
+import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
 const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
 
+interface DataSourceBrowserKibanaServices {
+  core: Pick<CoreStart, 'application' | 'http'>;
+  esql?: {
+    getLicense?: () => Promise<ILicense | undefined>;
+    enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  };
+}
+
 interface DataSourceBrowserProps {
   isOpen: boolean;
-  isLoading: boolean;
-  allSources: ESQLSourceResult[];
+  isTimeseries: boolean;
+  /**
+   * Sources passed from autocomplete to render immediately without fetching.
+   * If empty/undefined, the browser will fetch sources using Kibana services.
+   */
+  preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
+  onCloseComplete?: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
-  isLoading,
-  allSources,
+  isTimeseries,
+  preloadedSources,
   selectedSources = [],
   onClose,
+  onCloseComplete,
   onSelect,
   position,
 }) => {
+  const kibana = useKibana<DataSourceBrowserKibanaServices>();
+  const { core } = kibana.services;
+  const { http, application } = core;
+  const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
+
+  const getTimeseriesIndicesCallback = useCallback(async () => {
+    return await getTimeseriesIndices(http);
+  }, [http]);
+
+  const getSourcesCallback = useCallback(async () => {
+    return await getESQLSources({ http, application }, getLicense, enrichSources);
+  }, [application, enrichSources, getLicense, http]);
+
+  const { allSources, isLoading } = useAllSources({
+    isOpen,
+    preloadedSources,
+    getSources: getSourcesCallback,
+    getTimeseriesIndices: getTimeseriesIndicesCallback,
+    isTimeseries,
+  });
   const { euiTheme } = useEuiTheme();
 
   const [searchValue, setSearchValue] = useState('');
@@ -246,7 +286,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="arrowRight" />
+                  <EuiIcon type="chevronSingleRight" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -269,7 +309,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const filterPanel = isIntegrationPopoverOpen ? (
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
-        <EuiIcon type="arrowLeft" />
+        <EuiIcon type="chevronSingleLeft" aria-hidden={true} />
         <EuiLink
           color="text"
           css={css`
@@ -310,6 +350,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }
         listProps={{
           bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+          paddingSize: 's',
         }}
       >
         {(list) => (
@@ -335,6 +376,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       filterPanel={filterPanel}
       isOpen={isOpen}
       onClose={onClose}
+      onCloseComplete={onCloseComplete}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
@@ -344,6 +386,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      dataTestSubj="esqlDataSourceBrowser"
     />
   );
 };

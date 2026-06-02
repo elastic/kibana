@@ -9,11 +9,7 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { i18n } from '@kbn/i18n';
-import {
-  ExternalStepTypeId,
-  externalStepCommonDefinition,
-} from '../../common/step_types/external_step';
+import { externalStepCommonDefinition } from '../../common/step_types/external_step';
 import type { IExampleExternalService } from '../../common/external_service/types';
 
 export const getExternalStepDefinition = (deps: { externalService: IExampleExternalService }) =>
@@ -22,59 +18,37 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
     icon: React.lazy(() =>
       import('@elastic/eui/es/components/icon/assets/globe').then(({ icon }) => ({ default: icon }))
     ),
-    label: i18n.translate('workflowsExtensionsExample.externalStep.label', {
-      defaultMessage: 'External Step',
-    }),
-    description: i18n.translate('workflowsExtensionsExample.externalStep.description', {
-      defaultMessage: 'Executes an external service operation',
-    }),
-    documentation: {
-      details: i18n.translate('workflowsExtensionsExample.externalStep.documentation.details', {
-        defaultMessage: `The ${ExternalStepTypeId} step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {templateSyntax}.`,
-        values: { templateSyntax: '`{{ steps.stepName.output.response }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
-      }),
-      examples: [
-        `## Execute an external service operation
-\`\`\`yaml
-- name: external_step
-  type: ${ExternalStepTypeId}
-  with:
-    input: "Hello World"
-\`\`\``,
-
-        `## Execute an external service operation with a proxy
-\`\`\`yaml
-- name: external_step
-  type: ${ExternalStepTypeId}
-  proxyId: "my-proxy"
-  with:
-    input: "Hello World"
-\`\`\``,
-      ],
-    },
     editorHandlers: {
       config: {
         'proxy.id': {
           selection: {
-            search: async (input, _context) => {
+            dependsOnValues: ['config.proxy.ssl'],
+            search: async (input, context) => {
               const proxies = await deps.externalService.getProxies();
               const inputTrimmed = input.trim();
+              const sslOnly = context.values.config.proxy?.ssl === true;
               return proxies
-                .filter(
-                  (proxy) =>
+                .filter((proxy) => {
+                  if (sslOnly && !proxy.url.startsWith('https://')) return false;
+                  return (
                     inputTrimmed.length === 0 ||
                     proxy.id.includes(inputTrimmed) ||
                     proxy.name.toLowerCase().includes(inputTrimmed.toLowerCase())
-                )
+                  );
+                })
                 .map((proxy) => ({
                   value: proxy.id,
                   label: proxy.name,
                   description: 'URL: ' + proxy.url,
                 }));
             },
-            resolve: async (value, _context) => {
+            resolve: async (value, context) => {
               const proxy = await deps.externalService.getProxy(value);
               if (!proxy) {
+                return null;
+              }
+              const sslOnly = context.values.config.proxy?.ssl === true;
+              if (sslOnly && !proxy.url.startsWith('https://')) {
                 return null;
               }
               return {
@@ -83,10 +57,18 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
                 description: 'URL: ' + proxy.url,
               };
             },
-            getDetails: async (value, _context, option) => {
+            getDetails: async (value, context, option) => {
               if (option) {
                 return {
                   message: `Proxy "${option.label}" is connected`,
+                  links: [{ text: 'Manage proxies', path: 'https://example.com/proxies' }],
+                };
+              }
+              const sslOnly = context.values.config.proxy?.ssl === true;
+              const proxy = await deps.externalService.getProxy(value);
+              if (proxy && sslOnly && !proxy.url.startsWith('https://')) {
+                return {
+                  message: `Proxy "${proxy.name}" uses HTTP but proxy.ssl is enabled. Select an HTTPS proxy or set proxy.ssl to false.`,
                   links: [{ text: 'Manage proxies', path: 'https://example.com/proxies' }],
                 };
               }

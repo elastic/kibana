@@ -34,6 +34,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
 
 delete:
   summary: Delete cases
@@ -57,14 +60,17 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
-  x-code-samples:
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+  x-codeSamples:
     - label: curl
       lang: curl
       source: |
         curl \
           --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
           --header "Authorization: $API_KEY" \
-          --header "Content-Type: application/json"
+          --header "Content-Type: application/json" \
           --header "kbn-xsrf: true"
     - label: Console
       lang: console
@@ -107,3 +113,6 @@ patch:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

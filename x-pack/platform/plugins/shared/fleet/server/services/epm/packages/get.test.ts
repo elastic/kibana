@@ -37,6 +37,8 @@ import * as knowledgeBaseIndex from './knowledge_base_index';
 import {
   getAgentTemplateAssetsMap,
   getInstalledPackages,
+  getPackageDependencies,
+  getPackageFromSource,
   getPackageInfo,
   getPackages,
   getPackageUsageStats,
@@ -197,14 +199,14 @@ describe('When using EPM `get` services', () => {
       });
     });
 
-    it('should query and paginate SO using package name as filter', async () => {
+    it('should query and paginate SO using package name and NOT latest_revision:false filter', async () => {
       await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' });
       expect(soClient.find).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           perPage: 10000,
-          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
+          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision: false`,
         })
       );
     });
@@ -216,6 +218,71 @@ describe('When using EPM `get` services', () => {
         agent_policy_count: 3,
         package_policy_count: 4,
       });
+    });
+
+    it('should exclude :prev (latest_revision:false) policies from the count', async () => {
+      const soClientPrev = savedObjectsClientMock.create();
+      // Mix of current policies and a :prev policy that would be returned before
+      // the filter fix — the filter now excludes it, so mock returns only current ones.
+      soClientPrev.find.mockResolvedValue({
+        page: 1,
+        per_page: 10000,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'ingest-package-policies',
+            id: 'policy-1',
+            attributes: {
+              name: 'system-1',
+              namespace: 'default',
+              package: { name: 'system', title: 'System', version: '1.0.0' },
+              enabled: true,
+              policy_id: 'ap-1',
+              policy_ids: ['ap-1'],
+              inputs: [],
+              revision: 2,
+              created_at: '2020-01-01T00:00:00.000Z',
+              created_by: 'elastic',
+              updated_at: '2020-01-01T00:00:00.000Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+          {
+            type: 'ingest-package-policies',
+            id: 'policy-2',
+            attributes: {
+              name: 'system-2',
+              namespace: 'default',
+              package: { name: 'system', title: 'System', version: '1.0.0' },
+              enabled: true,
+              policy_id: 'ap-2',
+              policy_ids: ['ap-2'],
+              inputs: [],
+              revision: 2,
+              created_at: '2020-01-01T00:00:00.000Z',
+              created_by: 'elastic',
+              updated_at: '2020-01-01T00:00:00.000Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      const result = await getPackageUsageStats({
+        savedObjectsClient: soClientPrev,
+        pkgName: 'system',
+      });
+
+      // 2 current policies, not 3 (the :prev one is excluded by the filter)
+      expect(result.package_policy_count).toBe(2);
+      // Verify the filter contains the NOT latest_revision:false clause
+      const [[callArgs]] = soClientPrev.find.mock.calls;
+      expect(callArgs.filter).toContain('NOT');
+      expect(callArgs.filter).toContain('latest_revision');
     });
   });
 
@@ -1536,6 +1603,86 @@ owner: elastic`,
     });
   });
 
+  describe('getPackageDependencies', () => {
+    const makeRegistryPackage = (requires?: object) =>
+      ({
+        name: 'my-package',
+        version: '1.0.0',
+        ...(requires ? { requires } : {}),
+      } as unknown as RegistryPackage);
+
+    it('enriches dependency entries with the title from the registry', async () => {
+      MockRegistry.fetchInfo.mockResolvedValue(
+        makeRegistryPackage({ content: [{ package: 'dep-pkg', version: '~1.0.0' }] })
+      );
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValueOnce({
+        name: 'dep-pkg',
+        version: '1.0.0',
+        title: 'Dependency Package',
+      } as RegistryPackage);
+
+      const result = await getPackageDependencies('my-package', '1.0.0');
+
+      expect(result).toEqual([{ name: 'dep-pkg', version: '~1.0.0', title: 'Dependency Package' }]);
+    });
+
+    it('falls back to package name as title when registry lookup returns undefined', async () => {
+      MockRegistry.fetchInfo.mockResolvedValue(
+        makeRegistryPackage({ content: [{ package: 'dep-pkg', version: '~1.0.0' }] })
+      );
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValueOnce(undefined);
+
+      const result = await getPackageDependencies('my-package', '1.0.0');
+
+      expect(result).toEqual([{ name: 'dep-pkg', version: '~1.0.0', title: 'dep-pkg' }]);
+    });
+
+    it('enriches multiple dependencies in parallel', async () => {
+      MockRegistry.fetchInfo.mockResolvedValue(
+        makeRegistryPackage({
+          content: [
+            { package: 'dep-a', version: '~1.0.0' },
+            { package: 'dep-b', version: '^2.0.0' },
+          ],
+        })
+      );
+      MockRegistry.fetchFindLatestPackageOrUndefined
+        .mockResolvedValueOnce({
+          name: 'dep-a',
+          version: '1.0.0',
+          title: 'Dep A',
+        } as RegistryPackage)
+        .mockResolvedValueOnce({
+          name: 'dep-b',
+          version: '2.1.0',
+          title: 'Dep B',
+        } as RegistryPackage);
+
+      const result = await getPackageDependencies('my-package', '1.0.0');
+
+      expect(result).toEqual([
+        { name: 'dep-a', version: '~1.0.0', title: 'Dep A' },
+        { name: 'dep-b', version: '^2.0.0', title: 'Dep B' },
+      ]);
+    });
+
+    it('returns an empty array when the package has no dependencies', async () => {
+      MockRegistry.fetchInfo.mockResolvedValue(makeRegistryPackage());
+
+      const result = await getPackageDependencies('my-package', '1.0.0');
+
+      expect(result).toEqual([]);
+    });
+
+    it('throws PackageNotFoundError when the package is not in the registry', async () => {
+      MockRegistry.fetchInfo.mockRejectedValue(new Error('not found'));
+
+      await expect(getPackageDependencies('my-package', '1.0.0')).rejects.toThrow(
+        PackageNotFoundError
+      );
+    });
+  });
+
   describe('getAgentTemplateAssetsMap', () => {
     const assetsMap = new Map([
       ['test-1.0.0/LICENSE.txt', Buffer.from('')],
@@ -1823,6 +1970,60 @@ owner: elastic`,
       );
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getPackageFromSource', () => {
+    const pkgName = 'apm';
+    const pkgVersion = '9.3.1';
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const bundledResult = {
+      paths: ['/bundled/path'],
+      packageInfo: { name: pkgName, version: pkgVersion } as any,
+      assetsMap: new Map(),
+      archiveIterator: {} as any,
+    };
+
+    it('falls back to bundled archive for an installed bundled package when ES assets are missing', async () => {
+      const installedPkg = {
+        install_status: 'installed',
+        install_source: 'bundled',
+        version: pkgVersion,
+        package_assets: [{ id: 'asset-1', type: 'epm-packages-assets' }],
+      } as any;
+
+      jest.mocked(getEsPackage).mockResolvedValueOnce(undefined);
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
+    });
+
+    it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
+      const { RegistryResponseError } = jest.requireActual('../../../errors');
+      MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
     });
   });
 });

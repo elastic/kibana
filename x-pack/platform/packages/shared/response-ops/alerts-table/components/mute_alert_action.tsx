@@ -52,12 +52,7 @@ export const MuteAlertAction = typedMemo(
     }
 
     return (
-      <EuiContextMenuItem
-        data-test-subj="toggle-alert"
-        onClick={toggleAlert}
-        size="s"
-        disabled={!rule}
-      >
+      <EuiContextMenuItem data-test-subj="toggle-alert" onClick={toggleAlert} disabled={!rule}>
         {!rule
           ? i18n.translate('xpack.triggersActionsUI.alertsTable.loadingMutedState', {
               defaultMessage: 'Loading muted state',

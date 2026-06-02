@@ -80,7 +80,7 @@ export const DatasetFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           data-test-subj="agentList.datasetFilterBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}
@@ -95,7 +95,7 @@ export const DatasetFilter: React.FunctionComponent<{
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -111,7 +111,6 @@ export const DatasetFilter: React.FunctionComponent<{
         data-test-subj="agentList.datasetFilterOptions"
         isLoading={isLoading}
         listProps={{
-          paddingSize: 's',
           style: {
             minWidth: 220,
           },

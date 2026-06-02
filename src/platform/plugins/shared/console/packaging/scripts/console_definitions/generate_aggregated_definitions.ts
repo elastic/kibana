@@ -120,8 +120,15 @@ class StandaloneSpecDefinitionsService {
     }
 
     if (isServerless) {
-      description.documentation =
-        description.documentation_serverless || 'https://www.elastic.co/docs/api';
+      const serverlessDocUrl =
+        typeof description.documentation_serverless === 'string'
+          ? description.documentation_serverless.trim()
+          : undefined;
+      description.documentation = serverlessDocUrl || 'https://www.elastic.co/docs/api';
+
+      if (!serverlessDocUrl) {
+        delete description.documentation_serverless;
+      }
     }
 
     Object.assign(copiedDescription, description);

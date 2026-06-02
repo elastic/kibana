@@ -26,14 +26,13 @@ export const promqlCommand = {
   methods: promqlCommandMethods,
   metadata: {
     type: 'source' as const,
-    hidden: process.env.NODE_ENV === 'test' ? false : true, // TODO: Temporary until making it GA
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.promqlDoc', {
       defaultMessage:
-        'Execute PromQL queries against time series data. Use step= or buckets= for time resolution. The index= parameter defaults to * if not specified.',
+        'Execute PromQL queries against time series data. Use time= for instant queries, or step= or buckets= for range query time resolution. The index= parameter defaults to * if not specified.',
     }),
     declaration:
-      'PROMQL [step=<duration>|buckets=<integer>] [start=<time>] [end=<time>] [index=<pattern>] [column=](<query>)',
+      'PROMQL [time=<time>|[step=<duration>|buckets=<integer>] [start=<time>] [end=<time>]] [index=<pattern>] [column=](<query>)',
     examples: [
       'PROMQL index=metrics step=1m start=?_tstart end=?_tend (sum by (instance) (bytes))',
       'PROMQL index=metrics buckets=6 start=?_tstart end=?_tend (avg(cpu_usage))',

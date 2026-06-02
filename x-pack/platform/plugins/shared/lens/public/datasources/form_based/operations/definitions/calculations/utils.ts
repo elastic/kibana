@@ -15,6 +15,7 @@ import type {
   LensLayerType,
   TimeScaleUnit,
   FormBasedLayer,
+  GenericIndexPatternColumn,
 } from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
@@ -40,6 +41,27 @@ export const buildLabelFunction =
       undefined
     );
   };
+
+/**
+ * Gets the effective label for a referenced column.
+ * Returns the custom label if set, otherwise computes the default label.
+ */
+export const getReferencedColumnLabel = (
+  refColumnId: string | undefined,
+  columns: Record<string, GenericIndexPatternColumn>,
+  indexPattern?: IndexPattern
+): string | undefined => {
+  if (!refColumnId) return undefined;
+  const refColumn = columns[refColumnId];
+  if (!refColumn) return undefined;
+
+  if (refColumn.customLabel) {
+    return refColumn.label;
+  }
+
+  const opDef = operationDefinitionMap[refColumn.operationType];
+  return opDef?.getDefaultLabel(refColumn, columns, indexPattern);
+};
 
 export function checkForDataLayerType(layerType: LensLayerType, name: string) {
   if (layerType === LayerTypes.REFERENCELINE) {
@@ -168,7 +190,8 @@ export function dateBasedOperationToExpression(
   layer: FormBasedLayer,
   columnId: string,
   functionName: string,
-  additionalArgs: Record<string, unknown[]> = {}
+  additionalArgs: Record<string, unknown[]> = {},
+  indexPattern: IndexPattern
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
@@ -176,6 +199,14 @@ export function dateBasedOperationToExpression(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   )!;
   buckets.splice(dateColumnIndex, 1);
+
+  const effectiveLabel =
+    currentColumn.label ||
+    operationDefinitionMap[currentColumn.operationType].getDefaultLabel(
+      currentColumn,
+      layer.columns,
+      indexPattern
+    );
 
   return [
     {
@@ -185,7 +216,7 @@ export function dateBasedOperationToExpression(
         by: buckets,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
-        outputColumnName: [currentColumn.label],
+        outputColumnName: [effectiveLabel],
         ...additionalArgs,
       },
     },

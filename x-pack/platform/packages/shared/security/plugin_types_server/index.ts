@@ -23,6 +23,10 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
   UiamAPIKeysType,
   ClientAuthentication,
 } from './src/authentication';
@@ -83,6 +87,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
 } from '@kbn/core-security-server';
 export { isCreateRestAPIKeyParams } from '@kbn/core-security-server';
 

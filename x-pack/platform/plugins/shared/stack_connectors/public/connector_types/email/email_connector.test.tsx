@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
@@ -16,6 +16,12 @@ import { AdditionalEmailServices } from '../../../common';
 import { getServiceConfig } from './api';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('./api', () => {
@@ -353,26 +359,28 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.email',
-          config: {
-            from: 'test@test.com',
-            hasAuth: true,
-            host: 'localhost',
-            port: 2323,
-            secure: false,
-            service: 'other',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.email',
+            config: {
+              from: 'test@test.com',
+              hasAuth: true,
+              host: 'localhost',
+              port: 2323,
+              secure: false,
+              service: 'other',
+            },
+            id: 'email',
+            isDeprecated: false,
+            name: 'email',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'email',
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -383,7 +391,7 @@ describe('EmailActionConnectorFields', () => {
           password: null,
           clientSecret: null,
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -414,22 +422,24 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.email',
-          config: {
-            from: 'test@test.com',
-            port: 2323,
-            host: 'localhost',
-            hasAuth: false,
-            service: 'other',
-            secure: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.email',
+            config: {
+              from: 'test@test.com',
+              port: 2323,
+              host: 'localhost',
+              hasAuth: false,
+              service: 'other',
+              secure: false,
+            },
+            id: 'email',
+            isDeprecated: false,
+            name: 'email',
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'email',
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -445,7 +455,7 @@ describe('EmailActionConnectorFields', () => {
           user: 'user',
           password: 'pass',
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -473,26 +483,28 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.email',
-          config: {
-            from: 'test@test.com',
-            hasAuth: true,
-            host: 'https://example.com',
-            port: 80,
-            secure: false,
-            service: 'gmail',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.email',
+            config: {
+              from: 'test@test.com',
+              hasAuth: true,
+              host: 'https://example.com',
+              port: 80,
+              secure: false,
+              service: 'gmail',
+            },
+            id: 'email',
+            isDeprecated: false,
+            name: 'email',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'email',
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -533,9 +545,11 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -578,9 +592,11 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -622,9 +638,11 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -665,9 +683,11 @@ describe('EmailActionConnectorFields', () => {
 
         await userEvent.click(getByTestId('form-test-provide-submit'));
 
-        expect(onSubmit).toBeCalledWith({
-          data: {},
-          isValid: false,
+        await waitFor(() => {
+          expect(onSubmit).toBeCalledWith({
+            data: {},
+            isValid: false,
+          });
         });
       }
     );
@@ -678,7 +698,7 @@ describe('EmailActionConnectorFields', () => {
           user: 'user',
           password: 'pass',
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -708,26 +728,28 @@ describe('EmailActionConnectorFields', () => {
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.email',
-          config: {
-            from: 'test@notallowed.com',
-            hasAuth: true,
-            host: 'my-host',
-            port,
-            secure: false,
-            service: 'other',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.email',
+            config: {
+              from: 'test@notallowed.com',
+              hasAuth: true,
+              host: 'my-host',
+              port,
+              secure: false,
+              service: 'other',
+            },
+            id: 'email',
+            isDeprecated: false,
+            name: 'email',
+            secrets: {
+              password: 'pass',
+              user: 'user',
+            },
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'email',
-          secrets: {
-            password: 'pass',
-            user: 'user',
-          },
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
   });

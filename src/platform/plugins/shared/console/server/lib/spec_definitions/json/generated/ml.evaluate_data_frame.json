@@ -13,6 +13,7 @@
       "_ml/data_frame/_evaluate"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-evaluate-data-frame",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-evaluate-data-frame",
     "availability": {
       "stack": true,
       "serverless": true

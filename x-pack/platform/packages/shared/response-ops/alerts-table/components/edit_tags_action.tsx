@@ -25,12 +25,7 @@ export const EditTagsAction = typedMemo(
     }, [alert, openFlyout, onActionExecuted]);
 
     return (
-      <EuiContextMenuItem
-        data-test-subj="editTags"
-        key="editTags"
-        size="s"
-        onClick={handleOpenFlyout}
-      >
+      <EuiContextMenuItem data-test-subj="editTags" key="editTags" onClick={handleOpenFlyout}>
         {i18n.translate('xpack.responseOpsAlertsTable.actions.editTags', {
           defaultMessage: 'Edit tags',
         })}

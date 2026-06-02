@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { parse, isColumn } from '@kbn/esql-language';
+import { Parser, isColumn } from '@elastic/esql';
 
 export const getMvExpandFields = (query: string): string[] => {
-  const { root } = parse(query);
+  const { root } = Parser.parse(query);
 
   const mvExpandCommands = root.commands.filter((command) => command.name === 'mv_expand');
 

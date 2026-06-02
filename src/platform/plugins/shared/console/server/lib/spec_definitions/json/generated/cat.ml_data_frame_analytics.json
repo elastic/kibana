@@ -73,6 +73,7 @@
       "_cat/ml/data_frame/analytics/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-ml-data-frame-analytics",
     "availability": {
       "stack": true,
       "serverless": true

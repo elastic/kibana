@@ -19,6 +19,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const roleScopedSupertest = getService('roleScopedSupertest');
 
+  // semconv coverage gap: see metrics_process_list.ts for details.
+  // `infra.semconvHost(...)` does not emit Otel process docs, so a meaningful
+  // schema='semconv' assertion requires extending synthtrace or shipping an
+  // Otel process archive. Tracked under issue #264011 follow-up.
   describe('API /metrics/process_list/chart', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 

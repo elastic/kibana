@@ -23,8 +23,10 @@ import type {
   ISearchOptions,
   IEsSearchResponse,
   IEsSearchRequest,
+  ISearchMethods,
 } from '@kbn/search-types';
 
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import type { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import type { AggsSetup, AggsStart } from './aggs';
 import type { SearchUsage } from './collectors/search';
@@ -83,7 +85,7 @@ export interface ISearchStrategy<
   ) => Promise<void>;
 }
 
-export interface IScopedSearchClient extends ISearchClient {
+export interface IScopedSearchClient extends ISearchClient, ISearchMethods {
   saveSession: IScopedSearchSessionsClient['save'];
   getSession: IScopedSearchSessionsClient['get'];
   findSessions: IScopedSearchSessionsClient['find'];
@@ -114,9 +116,9 @@ export interface ISearchStart<
   getSearchStrategy: (
     name?: string | symbol // Name of the search strategy (defaults to the Elasticsearch strategy)
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  asScoped: (request: KibanaRequest) => IScopedSearchClient;
+  asScoped: (request: KibanaRequest, opts?: AsScopedOptions) => IScopedSearchClient;
   searchSource: {
-    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+    asScoped: (request: KibanaRequest, opts?: AsScopedOptions) => Promise<ISearchStartSearchSource>;
   };
 }
 

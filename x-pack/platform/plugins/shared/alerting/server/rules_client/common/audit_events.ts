@@ -11,6 +11,7 @@ import type { ArrayElement } from '@kbn/utility-types';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../saved_objects';
 
 export enum RuleAuditAction {
@@ -38,6 +39,7 @@ export enum RuleAuditAction {
   GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
   GET_GLOBAL_EXECUTION_SUMMARY = 'rule_get_global_execution_summary',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
+  GET_HISTORY = 'rule_get_history',
   GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
@@ -110,6 +112,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'access action error log for',
     'accessing action error log for',
     'accessed action error log for',
+  ],
+  rule_get_history: [
+    'access change history for',
+    'accessing change history for',
+    'accessed change history for',
   ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
@@ -189,6 +196,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_get_execution_log: 'access',
   rule_get_global_execution_log: 'access',
   rule_get_action_error_log: 'access',
+  rule_get_history: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
   rule_run_soon: 'access',
@@ -285,6 +293,68 @@ export function adHocRunAuditEvent({
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = adHocRunEventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export enum RuleTemplateAuditAction {
+  GET = 'rule_template_get',
+  FIND = 'rule_template_find',
+}
+
+const ruleTemplateEventVerbs: Record<RuleTemplateAuditAction, VerbsTuple> = {
+  rule_template_get: ['access', 'accessing', 'accessed'],
+  rule_template_find: ['access', 'accessing', 'accessed'],
+};
+
+const ruleTemplateEventTypes: Record<RuleTemplateAuditAction, ArrayElement<EcsEvent['type']>> = {
+  rule_template_get: 'access',
+  rule_template_find: 'access',
+};
+
+export interface RuleTemplateAuditEventParams {
+  action: RuleTemplateAuditAction;
+  outcome?: EcsEvent['outcome'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+  error?: Error;
+}
+
+export function ruleTemplateAuditEvent({
+  action,
+  savedObject,
+  outcome,
+  error,
+}: RuleTemplateAuditEventParams): AuditEvent {
+  const doc = savedObject
+    ? [
+        `${RULE_TEMPLATE_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`,
+        savedObject.name && `[name=${savedObject.name}]`,
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : 'a rule template';
+  const [present, progressive, past] = ruleTemplateEventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+  const type = ruleTemplateEventTypes[action];
 
   return {
     message,

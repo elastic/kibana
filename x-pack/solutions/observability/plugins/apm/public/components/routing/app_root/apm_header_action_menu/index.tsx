@@ -16,7 +16,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { GiveFeedbackHeaderLink } from './give_feedback_header_link';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config, share } = useApmPluginContext();
@@ -45,8 +44,6 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <GiveFeedbackHeaderLink />
-
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="primary"

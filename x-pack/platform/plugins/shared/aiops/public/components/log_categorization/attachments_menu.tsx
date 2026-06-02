@@ -17,14 +17,12 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -34,8 +32,6 @@ import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-rand
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface AttachmentsMenuProps {
   randomSamplerMode: RandomSamplerOption;
@@ -145,7 +141,7 @@ export const AttachmentsMenu = ({
                       minimumTimeRangeOption: 'No minimum',
                       randomSamplerMode,
                       randomSamplerProbability,
-                      timeRange,
+                      time_range: timeRange,
                     });
                   },
                 },
@@ -212,22 +208,35 @@ export const AttachmentsMenu = ({
       {!!panels[0]?.items?.length && (
         <EuiFlexItem>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.aiops.logCategorization.attachmentsPopoverAriaLabel',
+              {
+                defaultMessage: 'Attachments',
+              }
+            )}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate(
-                  'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
-                  {
-                    defaultMessage: 'Attachments',
-                  }
-                )}
-                size="m"
-                color="text"
-                display="base"
-                isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
+                  defaultMessage: 'Attachments',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  size="m"
+                  color="text"
+                  display="base"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

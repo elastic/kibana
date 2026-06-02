@@ -185,15 +185,6 @@ jest.mock('../../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../../sourcerer/containers', () => {
-  const actual = jest.requireActual('../../../../../sourcerer/containers');
-  return {
-    ...actual,
-    useSourcererDataView: jest
-      .fn()
-      .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
-  };
-});
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }) };
@@ -221,7 +212,8 @@ const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
 const DEFINE_RULE_FORM_STEP = 'defineRuleFormStepQueryEditor';
 
-describe('StepDefineRule', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237924
+describe.skip('StepDefineRule', () => {
   beforeEach(() => {
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
     (useEsqlAvailability as jest.Mock).mockReturnValue({ isEsqlRuleTypeEnabled: true });

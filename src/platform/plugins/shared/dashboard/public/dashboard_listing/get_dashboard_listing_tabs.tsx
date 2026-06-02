@@ -88,7 +88,8 @@ const DashboardsTabContent = ({
       <TableListViewTable<DashboardSavedObjectUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
-        {...parentProps}
+        onFetchSuccess={parentProps.onFetchSuccess}
+        setPageDataTestSubject={parentProps.setPageDataTestSubject}
       />
     </TableListViewKibanaProvider>
   );

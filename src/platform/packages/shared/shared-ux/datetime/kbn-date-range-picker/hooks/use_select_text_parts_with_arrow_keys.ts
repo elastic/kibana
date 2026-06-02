@@ -8,6 +8,9 @@
  */
 
 import { useEffect, useRef, type RefObject } from 'react';
+import { keys } from '@elastic/eui';
+
+import { getInputScrollLeftToCenter } from '../utils';
 
 // Matches text parts separated by spaces, commas, or colons
 // e.g. "Dec 29, 14:30 to now" => ["Dec", "29", "14", "30", "to", "now"]
@@ -99,7 +102,7 @@ export function useSelectTextPartsWithArrowKeys({
 
       inputEl.focus();
       inputEl.setSelectionRange(part.start, part.end);
-      inputEl.scrollLeft = getInputScrollPositionFromStart(inputEl, part.start);
+      inputEl.scrollLeft = getInputScrollLeftToCenter(inputEl, part.start);
     };
 
     const modifyPart = (action: 'increase' | 'decrease') => {
@@ -119,6 +122,8 @@ export function useSelectTextPartsWithArrowKeys({
         const updatedParts = getTextParts(newText);
         selectPart(currentIndex, updatedParts);
       }
+
+      return newText;
     };
 
     const keydownHandler = (event: KeyboardEvent) => {
@@ -137,7 +142,7 @@ export function useSelectTextPartsWithArrowKeys({
         event.preventDefault();
 
         switch (event.key) {
-          case 'ArrowRight':
+          case keys.ARROW_RIGHT:
             // If in caret mode, select the first part to the right of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -147,7 +152,7 @@ export function useSelectTextPartsWithArrowKeys({
               selectPart(currentIndex + 1, parts);
             }
             return;
-          case 'ArrowLeft':
+          case keys.ARROW_LEFT:
             // If in caret mode, select the first part to the left of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -157,13 +162,18 @@ export function useSelectTextPartsWithArrowKeys({
               selectPart(currentIndex - 1, parts);
             }
             return;
-          case 'ArrowUp':
-            modifyPart('increase');
+          case keys.ARROW_UP: {
+            const modifiedUp = modifyPart('increase');
+            // Allow propagation if no modification was made
+            if (modifiedUp) event.stopImmediatePropagation();
             return;
-          case 'ArrowDown':
-            event.stopImmediatePropagation();
-            modifyPart('decrease');
+          }
+          case keys.ARROW_DOWN: {
+            const modifiedDown = modifyPart('decrease');
+            // Allow propagation if no modification was made
+            if (modifiedDown) event.stopImmediatePropagation();
             return;
+          }
         }
       }
     };
@@ -206,25 +216,4 @@ function getTextParts(value: string): TextPart[] {
     start: match.index,
     end: match.index + match[0].length,
   }));
-}
-
-/**
- * Computes the scroll position needed to center a given caret position within a text input.
- * Uses Canvas text measurement to avoid DOM manipulation and layout thrashing.
- * @param input - The input element to measure
- * @param start - The character index to center on
- * @returns The `scrollLeft` value to apply, or `0` if the input is not scrollable
- */
-function getInputScrollPositionFromStart(input: HTMLInputElement, start: number): number {
-  if (input.scrollWidth <= input.clientWidth) return 0;
-
-  const textBeforeCaret = input.value.substring(0, start);
-  const style = window.getComputedStyle(input);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = style.font;
-  const textWidth = ctx.measureText(textBeforeCaret).width;
-  const offset = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
-
-  return textWidth + offset - input.clientWidth / 2;
 }

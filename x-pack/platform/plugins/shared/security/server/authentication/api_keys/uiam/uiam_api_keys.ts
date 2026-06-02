@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
+  ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
@@ -133,6 +136,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       const errorMessage = `Failed to invalidate API key ${id}: ${getDetailedErrorMessage(e)}`;
       this.logger.error(errorMessage);
 
+      const code = Boom.isBoom(e)
+        ? (e.output.payload as Record<string, any>)?.error?.code
+        : undefined;
+
       return {
         invalidated_api_keys: [],
         previously_invalidated_api_keys: [],
@@ -141,9 +148,31 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           {
             type: 'exception',
             reason: errorMessage,
+            ...(code ? { code } : {}),
           },
         ],
       };
+    }
+  }
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys.
+   *
+   * @param keys Array containing the keys to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
+   */
+  async convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug(`Trying to convert ${keys.length} API key(s)`);
+
+    try {
+      return await this.uiam.convertApiKeys(keys);
+    } catch (e) {
+      this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
+      throw e;
     }
   }
 

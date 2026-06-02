@@ -1,0 +1,47 @@
+{
+  "sha1": "baa4a52f37c33f2059a264a0decb8090c7787a28",
+  "tests": [
+    {
+      "id": "b9848f1d3e746fc-69e42704f821faa",
+      "title": "HTTP connector secret query params bugs Bug 1: toggle should be enabled when editing, and clicking it OFF should disable query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "b9848f1d3e746fc-62392c8f9a1431f",
+      "title": "HTTP connector secret query params bugs Bug 2: typing into a key field should edit in place, not create a new param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "b9848f1d3e746fc-31d0f729b1d4254",
+      "title": "HTTP connector secret query params bugs Bug 3: clicking delete should remove the param, not reorder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    }
+  ]
+}

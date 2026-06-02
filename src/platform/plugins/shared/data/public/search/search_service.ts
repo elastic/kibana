@@ -71,6 +71,7 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
+import { SearchMethodsService } from '../../common/search';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -80,6 +81,8 @@ import {
 } from './session';
 import { registerSearchSessionsMgmt, openSearchSessionsFlyout } from './session/sessions_mgmt';
 import type { ISearchSetup, ISearchStart } from './types';
+import { BackgroundSearchNotifier } from './session/background_search_notifier';
+import { BACKGROUND_SESSION_POLLING_INTERVAL } from './session/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -104,9 +107,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
+  private searchMethodsService!: SearchMethodsService;
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
+  private backgroundSearchNotifier!: BackgroundSearchNotifier;
   private searchSessionEBTManager!: ISearchSessionEBTManager;
   private cpsManager?: ICPSManager;
 
@@ -253,6 +258,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
+    this.searchMethodsService = new SearchMethodsService(
+      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric
+    );
+
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
@@ -306,9 +315,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
     const config = this.initializerContext.config.get();
 
+    this.backgroundSearchNotifier = new BackgroundSearchNotifier(
+      this.sessionsClient,
+      coreStart,
+      share.url.locators
+    );
+    this.backgroundSearchNotifier.startPolling(BACKGROUND_SESSION_POLLING_INTERVAL);
+
     return {
       aggs,
       search,
+      dsl: (params, options) => this.searchMethodsService.dsl(params, options),
+      dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
+      esql: (params, options) => this.searchMethodsService.esql(params, options),
+      eql: (params, options) => this.searchMethodsService.eql(params, options),
+      sql: (params, options) => this.searchMethodsService.sql(params, options),
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
@@ -352,5 +373,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.aggsService.stop();
     this.searchSourceService.stop();
     this.searchInterceptor.stop();
+    this.backgroundSearchNotifier.stopPolling();
   }
 }

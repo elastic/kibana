@@ -9,11 +9,13 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { extractWorkflowMetadata } from '../../../../../common/lib/telemetry/utils/extract_workflow_metadata';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflow, selectYamlString } from '../selectors';
+import { selectWorkflow, selectWorkflowDefinition, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
@@ -32,31 +34,27 @@ export const testWorkflowThunk = createAsyncThunk<
   'detail/testWorkflowThunk',
   async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
       ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
       : null;
 
     try {
-      const yamlString = selectYamlString(getState());
-      const workflow = selectWorkflow(getState());
+      const state = getState();
+      const yamlString = selectYamlString(state);
+      const workflow = selectWorkflow(state);
+      const workflowDefinition = selectWorkflowDefinition(state);
+      const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
 
       if (!yamlString) {
         return rejectWithValue('No YAML content to test');
       }
 
-      const requestBody: Record<string, unknown> = {
+      const response = await api.testWorkflow({
         workflowYaml: yamlString,
+        workflowId: workflow?.id,
         inputs,
-      };
-
-      if (workflow?.id) {
-        requestBody.workflowId = workflow.id;
-      }
-
-      // Make the API call to test the workflow
-      const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
-        body: JSON.stringify(requestBody),
       });
 
       // Report telemetry for successful test run
@@ -69,6 +67,7 @@ export const testWorkflowThunk = createAsyncThunk<
         editorType: 'yaml',
         origin: 'workflow_detail',
         triggerTab,
+        hasCustomEventTrigger,
       });
 
       // Show success notification
@@ -85,8 +84,10 @@ export const testWorkflowThunk = createAsyncThunk<
       const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
-      const state = getState();
-      const workflow = selectWorkflow(state);
+      const errorState = getState();
+      const workflow = selectWorkflow(errorState);
+      const workflowDefinition = selectWorkflowDefinition(errorState);
+      const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
       const inputCount = Object.keys(inputs).length;
 
       // Report telemetry for failed test run
@@ -98,6 +99,7 @@ export const testWorkflowThunk = createAsyncThunk<
         origin: 'workflow_detail',
         editorType: 'yaml',
         triggerTab,
+        hasCustomEventTrigger,
       });
 
       notifications.toasts.addError(new Error(errorMessage), {

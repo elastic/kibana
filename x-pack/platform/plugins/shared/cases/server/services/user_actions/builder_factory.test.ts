@@ -17,14 +17,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -34,9 +32,7 @@ describe('UserActionBuilder', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry,
-    });
+    builderFactory = new BuilderFactory();
   });
 
   beforeAll(() => {
@@ -160,7 +156,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -207,7 +203,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -264,7 +260,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -316,7 +312,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -353,11 +349,6 @@ describe('UserActionBuilder', () => {
               "id": "test-id",
               "name": "associated-cases-comments",
               "type": "cases-comments",
-            },
-            Object {
-              "id": "testRef",
-              "name": "myTestReference",
-              "type": "test-so",
             },
           ],
         }
@@ -885,7 +876,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -910,7 +901,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -935,7 +926,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -960,7 +951,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -1105,6 +1096,26 @@ describe('UserActionBuilder', () => {
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the status for case id: 123 - user action id: 123"`
       );
+    });
+
+    it('logs a status user action with close reason when alerts are synced', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
+      const userAction = builder.build({
+        payload: {
+          status: CaseStatuses.closed,
+          closeReason: 'false_positive',
+          syncAlerts: true,
+        },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User closed case id: 123 and synced alerts with a close reason - user action id: 123"`
+      );
+      expect(userAction!.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
     });
 
     it('logs a severity user action correctly', () => {

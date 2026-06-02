@@ -7,15 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stats, timeseries, where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { MetricField } from '../../../types';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import { firstNonNullable } from '../first_null_nullable';
+import type { ParsedMetricItem } from '../../../types';
+
+/**
+ * Formats a single-line ES|QL query into a multi-line format where each
+ * pipe command is on its own line with `  | ` indentation.
+ */
+function formatQuery(basicQuery: string): string {
+  return basicQuery.replace(/ \| /g, '\n  | ');
+}
 
 interface CreateESQLQueryParams {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
+  originalSource?: string;
+}
+
+/**
+ * METRICS_INFO returns the parent source name (index or data stream), even
+ * when invoked against a single backing index. Naively reusing that for the
+ * rebuilt chart query widens the scope back to the whole source and
+ * re-introduces any cross backing-index field-type conflicts that
+ * METRICS_INFO had already filtered out at the narrower scope. When the user
+ * typed a single concrete source (no glob, no comma list), prefer it so the
+ * chart query stays at the same scope METRICS_INFO actually scanned.
+ */
+function isConcreteSingleSource(source: string | undefined): source is string {
+  return !!source && !source.includes('*') && !source.includes(',');
 }
 
 /**
@@ -26,38 +49,53 @@ interface CreateESQLQueryParams {
  * @param metric - The full metric field object, including dimension type information.
  * @param splitAccessors - An array of field names to use as split accessors in the BY clause.
  * @param whereStatements - Optional WHERE clause statements.
+ * @param originalSource - The source the user typed in their query. When it is a single
+ *   concrete index (e.g., a backing index), it is used as the chart query source instead
+ *   of `metricItem.indexName` so the chart's scope matches the scope METRICS_INFO scanned.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
-  metric,
+  metricItem,
   splitAccessors = [],
   whereStatements = [],
+  originalSource,
 }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, type } = metric;
-  const source = timeseries(index);
+  const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
+  const index = isConcreteSingleSource(originalSource) ? originalSource : indexName;
+  const instrument = firstNonNullable(metricTypes);
 
-  const whereCommands = whereStatements.flatMap((statement) => {
-    const trimmed = statement.trim();
-    return trimmed.length > 0 ? [where(trimmed)] : [];
+  if (fieldTypes.length === 0 || !instrument) {
+    return '';
+  }
+
+  const metricAggregation = createMetricAggregation({
+    types: fieldTypes,
+    instrument,
+    metricName,
+    placeholderName: 'metricName',
   });
 
-  const queryPipeline = source.pipe(
-    ...whereCommands,
-    stats(
-      `${createMetricAggregation({
-        type,
-        instrument,
-        placeholderName: 'metricField',
-      })} BY ${createTimeBucketAggregation({})}${
-        splitAccessors.length > 0
-          ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
-          : ''
-      }`,
-      {
-        metricField,
-      }
-    )
-  );
+  if (!metricAggregation) {
+    return '';
+  }
 
-  return queryPipeline.toString();
+  const query = esql.ts(index);
+  const timeBucketAggregation = createTimeBucketAggregation({});
+  const splitAccessorsClause =
+    splitAccessors.length > 0
+      ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
+      : '';
+  const statsClause = `STATS ${metricAggregation} BY ${timeBucketAggregation}${splitAccessorsClause}`;
+
+  for (const statement of whereStatements) {
+    const trimmed = statement.trim();
+    if (trimmed.length > 0) {
+      query.pipe(`WHERE ${trimmed}`);
+    }
+  }
+
+  // TODO rename instrument to match metrics_info response
+  query.pipe(statsClause);
+
+  return formatQuery(query.print('basic'));
 }

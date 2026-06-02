@@ -417,4 +417,43 @@ describe('SpecDefinitionsService', () => {
       },
     });
   });
+
+  it('falls back to API_DOCS_LINK when documentation_serverless is empty', () => {
+    mockGlobbySync.mockImplementation((pattern) => {
+      if (pattern.includes('generated')) {
+        return ['/generated/endpoint1.json'];
+      }
+      return [];
+    });
+
+    mockReadFileSync.mockImplementation((path) => {
+      if (path.toString() === '/generated/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            methods: ['POST'],
+            patterns: ['/endpoint1'],
+            documentation_serverless: '   ',
+            availability: { stack: true, serverless: true },
+          })
+        );
+      }
+      return '';
+    });
+
+    const specDefinitionsService = new SpecDefinitionsService();
+    specDefinitionsService.start({
+      endpointsAvailability: 'serverless',
+    });
+    const endpoints = specDefinitionsService.asJson().endpoints;
+    expect(endpoints).toEqual({
+      endpoint1: {
+        availability: { stack: true, serverless: true },
+        id: 'endpoint1',
+        documentation: 'https://www.elastic.co/docs/api',
+        methods: ['POST'],
+        patterns: ['/endpoint1'],
+      },
+    });
+  });
 });

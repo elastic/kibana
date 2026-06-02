@@ -16,6 +16,10 @@ export const commandsMetadata: Record<string, unknown> = {
     license: 'platinum',
     observability_tier: 'COMPLETE',
   },
+  dedup: {
+    type: 'command',
+    name: 'dedup',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -68,9 +72,9 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'lookup_join',
   },
-  metricsinfo: {
+  metrics_info: {
     type: 'command',
-    name: 'metricsinfo',
+    name: 'metrics_info',
   },
   mmr: {
     type: 'command',
@@ -79,6 +83,10 @@ export const commandsMetadata: Record<string, unknown> = {
   mv_expand: {
     type: 'command',
     name: 'mv_expand',
+  },
+  registered_domain: {
+    type: 'command',
+    name: 'registered_domain',
   },
   rename: {
     type: 'command',
@@ -100,9 +108,17 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'stats',
   },
-  uriparts: {
+  ts_info: {
     type: 'command',
-    name: 'uriparts',
+    name: 'ts_info',
+  },
+  uri_parts: {
+    type: 'command',
+    name: 'uri_parts',
+  },
+  user_agent: {
+    type: 'command',
+    name: 'user_agent',
   },
   where: {
     type: 'command',
@@ -112,6 +128,7 @@ export const commandsMetadata: Record<string, unknown> = {
 
 export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
+  DEDUP = 'dedup',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',
@@ -125,14 +142,17 @@ export enum EsqlCommandNames {
   LIMIT = 'limit',
   LOOKUP = 'lookup',
   LOOKUP_JOIN = 'lookup_join',
-  METRICSINFO = 'metricsinfo',
+  METRICS_INFO = 'metrics_info',
   MMR = 'mmr',
   MV_EXPAND = 'mv_expand',
+  REGISTERED_DOMAIN = 'registered_domain',
   RENAME = 'rename',
   RERANK = 'rerank',
   SAMPLE = 'sample',
   SORT = 'sort',
   STATS = 'stats',
-  URIPARTS = 'uriparts',
+  TS_INFO = 'ts_info',
+  URI_PARTS = 'uri_parts',
+  USER_AGENT = 'user_agent',
   WHERE = 'where',
 }

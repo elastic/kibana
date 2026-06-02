@@ -9,7 +9,7 @@
 
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
-import type { XYState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {
@@ -41,6 +41,7 @@ test('generates xy chart config', async () => {
 
   expect(result).toMatchInlineSnapshot(`
     Object {
+      "description": undefined,
       "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
@@ -256,7 +257,7 @@ test('it generates xy chart with multiple reference lines', async () => {
     }
   );
 
-  const xyState = result.state.visualization as XYState;
+  const xyState = result.state.visualization as XYVisualizationState;
 
   expect(xyState.layers).toHaveLength(3);
 
@@ -327,7 +328,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toBeUndefined();
@@ -361,7 +362,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
@@ -395,7 +396,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
@@ -429,7 +430,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual([
@@ -479,7 +480,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const layer0 = xyState.layers[0] as any;
     const layer1 = xyState.layers[1] as any;
 
@@ -488,5 +489,44 @@ describe('breakdown handling', () => {
       'metric_formula_accessor1_breakdown_0',
       'metric_formula_accessor1_breakdown_1',
     ]);
+  });
+});
+
+describe('annotation layer handling', () => {
+  it('does not create a datasource entry or spurious references for a manual annotation layer', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: { esql: 'from main_index | limit 10' },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            yAxis: [{ label: 'count', value: 'count' }],
+          },
+          {
+            type: 'annotation',
+            yAxis: [],
+            events: [{ name: 'deploy', datetime: '2024-01-15T00:00:00.000Z' }],
+          },
+        ],
+      },
+      { dataViewsAPI: mockDataViewsService() as any }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const annotationLayer = xyState.layers[1] as any;
+
+    // manual annotations do not require an index pattern
+    expect(annotationLayer.indexPatternId).toBeUndefined();
+
+    // no datasource entry is created for the annotation layer
+    expect(Object.keys(result.state.datasourceStates.textBased?.layers ?? {})).toEqual(['layer_0']);
+
+    // no spurious datasource-style reference for the annotation layer
+    const allRefs = [...result.references, ...(result.state.internalReferences ?? [])];
+    expect(allRefs.some((r) => r.name === 'indexpattern-datasource-layer-layer_1')).toBe(false);
   });
 });

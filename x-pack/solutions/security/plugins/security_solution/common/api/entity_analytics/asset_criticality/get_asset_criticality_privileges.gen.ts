@@ -14,11 +14,12 @@
  *   version: 1
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { EntityAnalyticsPrivileges } from '../common/common.gen';
 
+export const AssetCriticalityGetPrivilegesResponse = lazySchema(() => EntityAnalyticsPrivileges);
 export type AssetCriticalityGetPrivilegesResponse = z.infer<
   typeof AssetCriticalityGetPrivilegesResponse
 >;
-export const AssetCriticalityGetPrivilegesResponse = EntityAnalyticsPrivileges;

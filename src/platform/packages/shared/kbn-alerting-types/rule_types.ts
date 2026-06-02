@@ -20,6 +20,48 @@ export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export enum RuleChangeTrackingAction {
+  ruleCreate = 'rule_create',
+  ruleUpdate = 'rule_update',
+  ruleUpdateApiKey = 'rule_update_api_key',
+  ruleEnable = 'rule_enable',
+  ruleDisable = 'rule_disable',
+  ruleSnooze = 'rule_snooze',
+  ruleUnsnooze = 'rule_unsnooze',
+  ruleDelete = 'rule_delete',
+}
+
+export interface RuleChangeTrackingMetadata {
+  /**
+   * Bulk operation rules count. Due to chunking the actual total number of rules isn't available
+   * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
+   */
+  bulkCount?: number;
+  /**
+   * Rule duplication action original rule's Saved Object id
+   */
+  originalRuleSoId?: string;
+}
+
+/**
+ * Rule change tracking context.
+ * Contains information to be logged when change tracking functionality is active.
+ */
+export interface RuleChangeTracking<ChangeAction extends string = string> {
+  /**
+   * Change action to be logged. RulesClient supports RuleChangeTrackingAction while
+   * consumers may use much wider actions spectrum. The action is indexed and searchable.
+   *
+   * Will use the default action for the current operation when omitted.
+   */
+  action?: ChangeAction;
+  /**
+   * Optional change tracking metadata to be logged. It contains extra information regarding the
+   * change. E.g. `metadata.bulkCount` says about how many rules were involved in a bulk operation.
+   */
+  metadata?: RuleChangeTrackingMetadata;
+}
+
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
 
@@ -263,6 +305,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
+  lastEnabledAt?: Date;
   flapping?: Flapping | null;
   artifacts?: Artifacts | null;
 }

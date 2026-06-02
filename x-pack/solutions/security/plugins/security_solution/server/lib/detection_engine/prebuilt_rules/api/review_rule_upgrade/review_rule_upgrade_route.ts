@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { Logger } from '@kbn/core/server';
 import {
   REVIEW_RULE_UPGRADE_URL,
   ReviewRuleUpgradeRequestBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { buildSiemResponse } from '../../../routes/utils';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import {
@@ -18,8 +21,9 @@ import {
   PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY,
 } from '../../constants';
 import { reviewRuleUpgradeHandler } from './review_rule_upgrade_handler';
+import { validateGranularReviewRequestBody } from '../validate_granular_review_request';
 
-export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
+export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
@@ -41,10 +45,21 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ReviewRuleUpgradeRequestBody),
+            body: buildRouteValidationWithZod(
+              // If the request body is undefined, pass it as an empty object to the schema
+              // to let the schema add default values.
+              z.preprocess((data: unknown) => data ?? {}, ReviewRuleUpgradeRequestBody)
+            ),
           },
         },
       },
-      reviewRuleUpgradeHandler
+      (context, request, response) => {
+        const validationErrors = validateGranularReviewRequestBody(request.body);
+        if (validationErrors.length) {
+          const siemResponse = buildSiemResponse(response);
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
+        return reviewRuleUpgradeHandler(context, request, response, logger);
+      }
     );
 };

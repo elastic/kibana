@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-plugin'
+  title: '@kbn/discover-plugin'
   description: Moon project for @kbn/discover-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/discover
+  sourceRoot: src/platform/plugins/shared/discover
 dependsOn:
   - '@kbn/core'
   - '@kbn/charts-plugin'
@@ -65,7 +64,6 @@ dependsOn:
   - '@kbn/cell-actions'
   - '@kbn/shared-ux-utility'
   - '@kbn/discover-utils'
-  - '@kbn/search-errors'
   - '@kbn/search-response-warnings'
   - '@kbn/content-management-plugin'
   - '@kbn/unified-doc-viewer'
@@ -88,7 +86,6 @@ dependsOn:
   - '@kbn/data-view-utils'
   - '@kbn/presentation-publishing'
   - '@kbn/aiops-log-pattern-analysis'
-  - '@kbn/field-types'
   - '@kbn/elastic-agent-utils'
   - '@kbn/custom-icons'
   - '@kbn/observability-ai-assistant-plugin'
@@ -101,7 +98,6 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/esql-language'
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
   - '@kbn/shared-ux-page-analytics-no-data-types'
@@ -118,7 +114,7 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/timerange'
   - '@kbn/unified-chart-section-viewer'
-  - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/change-point-chart-viewer'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
@@ -128,10 +124,33 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/es-query-constants'
+  - '@kbn/presentation-publishing-schemas'
   - '@kbn/esql'
   - '@kbn/controls-schemas'
+  - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/cps-utils'
+  - '@kbn/aiops-log-rate-analysis'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/as-code-filters-constants'
+  - '@kbn/core-analytics-browser-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/reporting-public'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/react-hooks'
 tags:
   - plugin
   - prod
@@ -146,16 +165,6 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

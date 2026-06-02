@@ -8,13 +8,21 @@
 import { of } from 'rxjs';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { findLiveQueryRoute } from './find_live_query_route';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 
 jest.mock('../../lib/get_result_counts_for_actions', () => ({
   getResultCountsForActions: jest.fn(),
+}));
+
+jest.mock('../../utils/ccs_utils', () => ({
+  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock('../../utils/get_internal_saved_object_client', () => ({
+  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
 }));
 
 describe('findLiveQueryRoute', () => {
@@ -43,6 +51,9 @@ describe('findLiveQueryRoute', () => {
       }),
     };
   };
+
+  const createRouteContext = (mockSearchFn: jest.Mock): Parameters<RequestHandler>[0] =>
+    createMockContext(mockSearchFn) as unknown as Parameters<RequestHandler>[0];
 
   const mockEsClient = { search: jest.fn() };
 
@@ -98,7 +109,7 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
     expect(getResultCountsForActions).not.toHaveBeenCalled();
     expect(mockResponse.ok).toHaveBeenCalledWith(
@@ -144,9 +155,14 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
-    expect(getResultCountsForActions).toHaveBeenCalledWith(mockEsClient, ['query-1'], 'default');
+    expect(getResultCountsForActions).toHaveBeenCalledWith(
+      mockEsClient,
+      ['query-1'],
+      ['default'],
+      false
+    );
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
       data: { items: Array<{ _source: Record<string, unknown> }> };
@@ -202,7 +218,7 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
       data: { items: Array<{ _source: Record<string, unknown> }> };
@@ -250,7 +266,7 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -263,7 +279,7 @@ describe('findLiveQueryRoute', () => {
     );
   });
 
-  it('passes custom spaceId to getResultCountsForActions', async () => {
+  it('falls back to the active space id when integration namespaces are unavailable', async () => {
     (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
       id: 'custom-space',
     });
@@ -299,12 +315,69 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space'
+      ['custom-space'],
+      false
+    );
+  });
+
+  it('uses integration namespaces for result counts instead of the active space id', async () => {
+    const service = mockOsqueryContext.service as unknown as {
+      getActiveSpace: jest.Mock;
+      getIntegrationNamespaces?: jest.Mock;
+    };
+    service.getActiveSpace.mockResolvedValue({
+      id: 'production',
+    });
+    service.getIntegrationNamespaces = jest.fn().mockResolvedValue({
+      [OSQUERY_INTEGRATION_NAME]: ['prod'],
+    });
+    mockOsqueryContext.logFactory = {
+      get: jest.fn().mockReturnValue({ debug: jest.fn() }),
+    } as unknown as OsqueryAppContext['logFactory'];
+
+    const edges = [
+      {
+        _source: {
+          action_id: 'action-1',
+          queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+        },
+        fields: { action_id: ['action-1'] },
+      },
+    ];
+
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        edges,
+        rawResponse: { hits: { total: 1 } },
+        total: 1,
+      })
+    );
+
+    (getResultCountsForActions as jest.Mock).mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
+    );
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
+
+    expect(getResultCountsForActions).toHaveBeenCalledWith(
+      mockEsClient,
+      ['query-1'],
+      ['prod'],
+      false
     );
   });
 
@@ -333,7 +406,7 @@ describe('findLiveQueryRoute', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
       data: { items: Array<{ _source: Record<string, unknown> }> };

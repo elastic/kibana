@@ -239,10 +239,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
     // TODO: Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -276,6 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleId = value;
     }
 
+    await testSubjects.click('discoverQueryTotalHits'); // dismiss tooltip
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
 
     await retry.waitFor('results', async () => {
@@ -304,7 +305,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openAlertRuleInManagement = async (ruleName: string) => {
     // Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -326,7 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
-    await testSubjects.click('ruleDetails-viewInApp');
+    await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -468,6 +471,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       await testSubjects.click('ruleFormStep-definition');
@@ -496,6 +500,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -504,7 +509,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
+      await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
@@ -520,6 +525,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -607,6 +613,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -679,7 +686,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
-      await PageObjects.common.navigateToApp('triggersActions');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

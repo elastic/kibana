@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isGroupingBucket } from '@kbn/grouping/src';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -21,6 +21,8 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -34,20 +36,22 @@ import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_sett
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
-
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
-import * as i18n from './translations';
-import { buildConnectorIdFilter } from './filtering_configs';
+import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
 import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
 import { AlertActionItems } from './alerts_action_items';
+import { AttacksViewOptionsPopover } from './attacks_view_options_popover';
+import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
 
 export interface TableSectionProps {
   /**
@@ -104,29 +108,37 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
+    const {
+      services: { telemetry },
+    } = useKibana();
+
     const [{ loading: userInfoLoading }] = useUserData();
 
     const { loading: listsConfigLoading } = useListsConfig();
 
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAttacksPage
-    );
+    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnAttacksPage);
 
     // for showing / hiding anonymized data:
     const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
     const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
-    const showAnonymizedSwitch = useMemo(() => {
+
+    // for showing / hiding attacks only:
+    const [showAttacksOnly, setShowAttacksOnly] = useState<boolean>(true);
+    const onToggleShowAttacksOnly = useCallback(
+      () => setShowAttacksOnly((current) => !current),
+      []
+    );
+
+    const attacksViewOptionsPopover = useMemo(() => {
       return (
-        <EuiSwitch
-          key="show-anonymized-switch"
-          checked={showAnonymized}
-          compressed={true}
-          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
-          label={i18n.SHOW_ANONYMIZED_LABEL}
-          onChange={onToggleShowAnonymized}
+        <AttacksViewOptionsPopover
+          showAnonymized={showAnonymized}
+          onToggleShowAnonymized={onToggleShowAnonymized}
+          showAttacksOnly={showAttacksOnly}
+          onToggleShowAttacksOnly={onToggleShowAttacksOnly}
         />
       );
-    }, [onToggleShowAnonymized, showAnonymized]);
+    }, [onToggleShowAnonymized, showAnonymized, onToggleShowAttacksOnly, showAttacksOnly]);
 
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
     const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
@@ -145,9 +157,13 @@ export const TableSection = React.memo(
               },
             },
           });
+          telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
+            id: attack.id,
+            source: 'attacks_page_table',
+          });
         }
       },
-      [dataView, getAttack, openFlyout]
+      [dataView, getAttack, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
@@ -175,22 +191,22 @@ export const TableSection = React.memo(
     );
 
     // AlertsTable manages global filters itself, so not including `filters`
-    const defaultFilters = useMemo(
-      () => [
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+    const defaultFilters = useMemo(() => {
+      return [
+        ...buildShowBuildingBlockFilter(true),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
         ...buildConnectorIdFilter(selectedConnectorNames),
-      ],
-      [
-        showBuildingBlockAlerts,
-        showOnlyThreatIndicatorAlerts,
-        pageFilters,
-        assignees,
-        selectedConnectorNames,
-      ]
-    );
+        ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
+      ];
+    }, [
+      showOnlyThreatIndicatorAlerts,
+      pageFilters,
+      assignees,
+      selectedConnectorNames,
+      showAttacksOnly,
+    ]);
 
     const isLoading = useMemo(
       () => userInfoLoading || listsConfigLoading || !Array.isArray(pageFilters),
@@ -210,14 +226,13 @@ export const TableSection = React.memo(
         if (!attack) {
           return (
             <AlertsTab
+              attackAlertIds={[]}
               groupingFilters={groupingFilters}
               defaultFilters={defaultFilters}
               isTableLoading={isLoading}
             />
           );
         }
-
-        const filteredAlertsCount = fieldBucket?.attackRelatedAlerts?.doc_count ?? 0;
 
         return (
           <AttackDetailsContainer
@@ -226,7 +241,6 @@ export const TableSection = React.memo(
             groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
             isTableLoading={isLoading}
-            filteredAlertsCount={filteredAlertsCount}
           />
         );
       },
@@ -237,23 +251,32 @@ export const TableSection = React.memo(
       (props) => {
         const attack = getAttack(props.selectedGroup, props.groupBucket);
         if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={props.closePopover} />;
+        return (
+          <AttacksGroupTakeActionItems
+            attack={attack}
+            closePopover={props.closePopover}
+            telemetrySource="attacks_page_group_take_action"
+            isRemoteDocument={isNonLocalIndexName(attack.index ?? '')}
+          />
+        );
       },
       [getAttack, statusFilter]
     );
 
-    const accordionExtraActionGroupStats = useGroupStats();
-
-    const dataViewSpec = useMemo(() => {
-      return dataView.toSpec(true);
-    }, [dataView]);
+    const accordionExtraActionGroupStats = useGroupStats({ getAttack });
 
     const emptyGroupingComponent = useMemo(
       () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
       [openSchedulesFlyout]
     );
 
-    const [sort, setSort] = useState<GroupingSort>(DEFAULT_ATTACKS_SORT);
+    const [sort, setSort] = useLocalStorage<GroupingSort>({
+      key: ATTACKS_TABLE_SORT_STORAGE_KEY,
+      defaultValue: DEFAULT_ATTACKS_SORT,
+      isInvalidDefault: (value) => {
+        return value == null || (Array.isArray(value) && value.length === 0);
+      },
+    });
 
     const attacksTableSortSelect = useMemo(
       () => (
@@ -269,8 +292,10 @@ export const TableSection = React.memo(
           <EuiSpacer />
         </EuiFlexGroup>
       ),
-      [sort]
+      [sort, setSort]
     );
+
+    const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
@@ -278,7 +303,6 @@ export const TableSection = React.memo(
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
           dataView={dataView}
-          dataViewSpec={dataViewSpec}
           defaultFilters={defaultFilters}
           defaultGroupingOptions={groupingOptions}
           from={from}
@@ -290,11 +314,12 @@ export const TableSection = React.memo(
           tableId={TableId.alertsOnAttacksPage}
           to={to}
           onAggregationsChange={onAggregationsChange}
-          additionalToolbarControls={[showAnonymizedSwitch, attacksTableSortSelect]}
+          additionalToolbarControls={[attacksViewOptionsPopover, attacksTableSortSelect]}
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
+          unitsCountFilter={dslFilter}
         />
       </div>
     );

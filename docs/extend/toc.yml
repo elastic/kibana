@@ -31,6 +31,7 @@ toc:
           - file: saved-objects/create.md
           - file: saved-objects/update.md
           - file: saved-objects/validate.md
+          - file: saved-objects/troubleshooting.md
           - file: saved-objects/delete.md
           - file: saved-objects/use.md
           - file: saved-objects/export.md
@@ -61,6 +62,7 @@ toc:
           - file: scout/run-tests.md
           - file: scout/debugging.md
           - file: scout/best-practices.md
+          - file: scout/migrate-tests.md
       - file: scout/core-concepts.md
         children:
           - file: scout/fixtures.md
@@ -70,14 +72,17 @@ toc:
           - file: scout/global-setup-hook.md
           - file: scout/deployment-tags.md
           - file: scout/skip-tests.md
+          - file: scout/feature-flags.md
       - file: scout/ui-testing.md
         children:
           - file: scout/write-ui-tests.md
+          - file: scout/ui-best-practices.md
           - file: scout/browser-auth.md
           - file: scout/a11y-checks.md
       - file: scout/api-testing.md
         children:
           - file: scout/write-api-tests.md
+          - file: scout/api-best-practices.md
           - file: scout/api-auth.md
   - file: external-plugin-development.md
     children:

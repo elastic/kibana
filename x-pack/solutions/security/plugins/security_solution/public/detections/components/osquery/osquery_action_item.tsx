@@ -16,6 +16,5 @@ export const getOsqueryActionItem = ({ handleClick }: IProps): AlertTableContext
   key: 'osquery-action-item',
   'data-test-subj': 'osquery-action-item',
   onClick: handleClick,
-  size: 's',
   name: ACTION_OSQUERY,
 });

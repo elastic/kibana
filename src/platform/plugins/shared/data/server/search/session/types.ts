@@ -28,8 +28,12 @@ import type { SearchSessionsConfigSchema } from '../../config';
 export { SearchStatus } from '../../../common/search';
 
 export interface IScopedSearchSessionsClient {
-  getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
-  trackId: (searchId: string, options: ISearchOptions) => Promise<void>;
+  getId: (
+    request: IKibanaSearchRequest,
+    options: ISearchOptions,
+    skipRealmCheck?: boolean
+  ) => Promise<string>;
+  trackId: (searchId: string, options: ISearchOptions, skipRealmCheck?: boolean) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
   save: (
     sessionId: string,

@@ -9,6 +9,7 @@
 
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OptionalKeys } from 'utility-types';
 import type { CollapseFunction, LensLayerType } from '../types';
 
@@ -16,6 +17,8 @@ export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;
 
 export type PrimaryMetricPosition = MetricStyle['valuePosition'];
+export type MetricStyleTemplateId = 'top' | 'middle' | 'bottom' | 'custom';
+export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom'>;
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
@@ -25,7 +28,7 @@ export type SecondaryTrend =
   | {
       type: 'dynamic';
       visuals: 'icon' | 'value' | 'both';
-      paletteId: string;
+      paletteId: KbnPaletteId;
       reversed: boolean;
       baselineValue: number | 'primary';
     };
@@ -60,8 +63,12 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: MetricStyle['titleWeight'];
-  primaryPosition?: MetricStyle['valuePosition'];
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: Extract<MetricStyle['titleWeight'], string>;
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
@@ -91,7 +98,6 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'iconAlign'
   | 'valueFontMode'
   | 'primaryPosition'
-  | 'titleWeight'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
 >;
@@ -99,13 +105,10 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign' | 'primaryPosition'>
 > & {
-  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
-
-export type TitleFontWeight = MetricStyle['titleWeight'];
 
 export type IconPosition = MetricStyle['iconAlign'];
 

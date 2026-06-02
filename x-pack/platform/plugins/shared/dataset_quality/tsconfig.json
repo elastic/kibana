@@ -33,6 +33,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/ebt-tools",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-formats-plugin",
@@ -72,7 +73,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/streams-schema",
-    "@kbn/streams-plugin"
+    "@kbn/streams-plugin",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*"

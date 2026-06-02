@@ -4,30 +4,35 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-management-plugin'
+  title: '@kbn/workflows-management-plugin'
   description: Moon project for @kbn/workflows-management-plugin
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/workflows_management
+  sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/shared-ux-router'
   - '@kbn/core-application-browser'
   - '@kbn/navigation-plugin'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/human-readable-id'
   - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
   - '@kbn/monaco'
@@ -44,9 +49,12 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/discover-utils'
+  - '@kbn/unified-data-table'
+  - '@kbn/cell-actions'
+  - '@kbn/ui-actions-plugin'
   - '@kbn/storybook'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/core-chrome-layout'
+  - '@kbn/ui-chrome-layout'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
@@ -55,6 +63,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/field-types'
   - '@kbn/data-views-plugin'
+  - '@kbn/kql'
   - '@kbn/field-formats-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
@@ -68,6 +77,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/core-http-browser'
   - '@kbn/core-http-server'
   - '@kbn/test-jest-helpers'
   - '@kbn/es-errors'
@@ -83,6 +93,26 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/scout'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/share-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/logging'
+  - '@kbn/management-settings-ids'
+  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/std'
+  - '@kbn/use-observable'
+  - '@kbn/cloud-plugin'
+  - '@kbn/kbn-client'
+  - '@kbn/rule-data-utils'
+  - '@kbn/std'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/esql-types'
+  - '@kbn/esql-language'
+  - '@kbn/esql-utils'
+  - '@kbn/inbox-plugin'
+  - '@kbn/inbox-common'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
@@ -100,16 +130,6 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

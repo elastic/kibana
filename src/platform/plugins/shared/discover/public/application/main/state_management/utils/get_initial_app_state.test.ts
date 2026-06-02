@@ -63,6 +63,7 @@ describe('getInitialAppState', () => {
         appState: {
           breakdownField: 'customBreakDownField',
           hideChart: true,
+          hideTable: true,
           rowsPerPage: 250,
           hideAggregatedPreview: true,
         },
@@ -75,6 +76,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -90,6 +92,7 @@ describe('getInitialAppState', () => {
         filters: [customFilter],
         grid: {},
         hideChart: true,
+        hideTable: false,
         dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
         interval: 'auto',
         query: customQuery,
@@ -120,6 +123,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -174,8 +178,12 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideTable": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -216,8 +224,12 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideTable": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -228,10 +240,28 @@ describe('getInitialAppState', () => {
     `);
   });
 
+  test('should not allow both chart and table to be hidden at the same time', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      hasGlobalState: false,
+      initialUrlState: {
+        hideChart: true,
+        hideTable: true,
+      },
+      persistedTab: undefined,
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    expect(actual.hideChart).toBe(true);
+    expect(actual.hideTable).toBe(false);
+  });
+
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
+      currentDataView: undefined,
     });
 
   test('should set view mode correctly', () => {

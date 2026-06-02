@@ -6,6 +6,7 @@
  */
 
 import type { RepositoryStrategy } from './types';
+import { DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS } from './constants';
 
 export function createUrlRepository(snapshotUrl: string): RepositoryStrategy {
   return {
@@ -22,13 +23,19 @@ export function createUrlRepository(snapshotUrl: string): RepositoryStrategy {
         throw new Error(`Only file:// snapshot URLs are supported (received: ${url.protocol})`);
       }
     },
-    async register({ esClient, log, repoName }) {
+    async register({ esClient, log, repoName, verify }) {
       log.debug(`Connecting to snapshot at ${snapshotUrl}`);
 
-      await esClient.snapshot.createRepository({
-        name: repoName,
-        body: { type: 'url', settings: { url: snapshotUrl } },
-      });
+      await esClient.snapshot.createRepository(
+        {
+          name: repoName,
+          master_timeout: '2m',
+          timeout: '2m',
+          verify: verify ?? false,
+          body: { type: 'url', settings: { url: snapshotUrl } },
+        },
+        { requestTimeout: DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS }
+      );
     },
   };
 }

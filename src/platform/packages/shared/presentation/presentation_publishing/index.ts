@@ -43,6 +43,7 @@ export {
   timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
+export { transformTimeRangeOut } from './interfaces/fetch/bwc/time_range_transforms';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiAppliesFilters,
@@ -171,6 +172,12 @@ export {
   type PublishesWritableTitle,
 } from './interfaces/titles/publishes_title';
 export {
+  apiPublishesHideBorder,
+  apiPublishesWritableHideBorder,
+  type PublishesHideBorder,
+  type PublishesWritableHideBorder,
+} from './interfaces/titles/publishes_hide_border';
+export {
   initializeTitleManager,
   stateHasTitles,
   titleComparators,
@@ -179,7 +186,6 @@ export {
 } from './interfaces/titles/title_manager';
 export { transformTitlesOut } from './interfaces/titles/bwc/titles_transforms';
 export {
-  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,
@@ -200,14 +206,15 @@ export {
   type HasSerializedChildState,
 } from './interfaces/containers/child_state';
 
-export { childrenUnsavedChanges$ } from './interfaces/containers/unsaved_changes/children_unsaved_changes';
+export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
 
-export { initializeUnsavedChanges } from './interfaces/containers/unsaved_changes/initialize_unsaved_changes';
+export { initializeStateApi } from './interfaces/containers/container_state/initialize_state_api';
 
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   apiCanPinPanels,
+  apiHasPinnedPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
   type CanPinPanels,
@@ -258,8 +265,3 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
-
-export {
-  apiSupportsPassThroughContext,
-  type PassThroughContext,
-} from './interfaces/containers/pass_through_context';

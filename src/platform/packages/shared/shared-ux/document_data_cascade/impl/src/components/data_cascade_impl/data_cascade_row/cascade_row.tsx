@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
-import { isCascadeGroupRowNode } from '../../../lib/utils';
+import {
+  isCascadeGroupRowNode,
+  getCascadeRowNodePath,
+  getCascadeRowNodePathValueRecord,
+  getCascadeRowLeafDataCacheKey,
+} from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
   rootRowAttribute,
@@ -29,6 +34,7 @@ export { CascadeRowHeaderPrimitive };
  * @description Internal component that is used to render a row in the data cascade component.
  */
 export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
+  isMobile,
   activeStickyRenderSlotRef,
   isActiveSticky,
   innerRef,
@@ -42,6 +48,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   virtualRow,
   virtualRowStyle,
   enableRowSelection,
+  getVirtualizer,
   enableSecondaryExpansionAction,
 }: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
@@ -55,6 +62,19 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
+  const cellId = useMemo(() => {
+    if (isGroupNode) return null;
+    const nodePath = getCascadeRowNodePath(currentGroupByColumns, rowInstance);
+    const nodePathMap = getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance);
+    return getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, rowInstance.id);
+  }, [currentGroupByColumns, rowInstance, isGroupNode]);
+
+  useEffect(() => {
+    if (!rowIsExpanded && cellId) {
+      getVirtualizer().childController?.clearPersistedAnchor(cellId);
+    }
+  }, [rowIsExpanded, cellId, getVirtualizer]);
+
   const styles = useMemo(() => {
     return cascadeRowStyles(
       euiTheme,
@@ -67,6 +87,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   const rowHeader = useMemo(() => {
     return (
       <CascadeRowHeaderPrimitive<G, L>
+        isMobile={isMobile}
         isGroupNode={isGroupNode}
         rowHeaderTitleSlot={RowTitleSlot}
         rowHeaderMetaSlots={rowHeaderMetaSlots}
@@ -90,6 +111,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     rowHeaderMetaSlots,
     rowInstance,
     size,
+    isMobile,
   ]);
 
   return (

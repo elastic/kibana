@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { Coordinate } from '../../../../../typings/timeseries';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import { APM_DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from '../utils/timeseries_gap_handling';
 
 function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
@@ -129,6 +130,11 @@ export function SparkPlotItem({
   }
 
   if (hasValidTimeseries(series)) {
+    const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
+      splitSeriesAtNullGaps(series);
+
+    const comparisonSplit = hasComparisonSeries ? splitSeriesAtNullGaps(comparisonSeries) : null;
+
     return (
       <Chart size={chartSize}>
         <Settings
@@ -163,30 +169,124 @@ export function SparkPlotItem({
           </>
         ) : (
           <>
-            <LineSeries
-              id="Sparkline"
-              // Defaults to multi layer time axis as of Elastic Charts v70
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={'x'}
-              yAccessors={['y']}
-              data={series}
-              color={color}
-              curve={CurveType.CURVE_MONOTONE_X}
-            />
-            {hasComparisonSeries && (
-              <AreaSeries
-                id="comparisonSeries"
-                // Defaults to multi layer time axis as of Elastic Charts v70
+            {leadingEdge ? (
+              <LineSeries
+                id="Sparkline_edge_leading"
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
-                data={comparisonSeries}
-                color={comparisonSeriesColor}
+                data={leadingEdge}
+                color={color}
+                curve={CurveType.CURVE_MONOTONE_X}
+                lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+              />
+            ) : null}
+            {trailingEdge ? (
+              <LineSeries
+                id="Sparkline_edge_trailing"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={trailingEdge}
+                color={color}
+                curve={CurveType.CURVE_MONOTONE_X}
+                lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+              />
+            ) : null}
+            {interiorEdges.map((edge, i) => (
+              <LineSeries
+                key={`Sparkline_edge_gap_${i}`}
+                id={`Sparkline_edge_gap_${i}`}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={edge}
+                color={color}
+                curve={CurveType.CURVE_MONOTONE_X}
+                lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+              />
+            ))}
+            {mainSegments.map((segment, i) => (
+              <LineSeries
+                key={`Sparkline${mainSegments.length === 1 ? '' : `_seg_${i}`}`}
+                id={`Sparkline${mainSegments.length === 1 ? '' : `_seg_${i}`}`}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={segment}
+                color={color}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
-            )}
+            ))}
+            {hasComparisonSeries && comparisonSplit ? (
+              <>
+                {comparisonSplit.leadingEdge ? (
+                  <LineSeries
+                    id="comparisonSeries_edge_leading"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    data={comparisonSplit.leadingEdge}
+                    color={comparisonSeriesColor}
+                    curve={CurveType.CURVE_MONOTONE_X}
+                    lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+                  />
+                ) : null}
+                {comparisonSplit.trailingEdge ? (
+                  <LineSeries
+                    id="comparisonSeries_edge_trailing"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    data={comparisonSplit.trailingEdge}
+                    color={comparisonSeriesColor}
+                    curve={CurveType.CURVE_MONOTONE_X}
+                    lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+                  />
+                ) : null}
+                {comparisonSplit.interiorEdges.map((edge, i) => {
+                  const comparisonEdgeGapId = `comparisonSeries_edge_gap_${i}`;
+                  return (
+                    <LineSeries
+                      key={comparisonEdgeGapId}
+                      id={comparisonEdgeGapId}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor={'x'}
+                      yAccessors={['y']}
+                      data={edge}
+                      color={comparisonSeriesColor}
+                      curve={CurveType.CURVE_MONOTONE_X}
+                      lineSeriesStyle={APM_DOTTED_LINE_STYLE}
+                    />
+                  );
+                })}
+                {comparisonSplit.mainSegments.map((segment, i) => {
+                  const comparisonSeriesId = `comparisonSeries${
+                    comparisonSplit.mainSegments.length === 1 ? '' : `_seg_${i}`
+                  }`;
+                  return (
+                    <AreaSeries
+                      key={comparisonSeriesId}
+                      id={comparisonSeriesId}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor={'x'}
+                      yAccessors={['y']}
+                      data={segment}
+                      color={comparisonSeriesColor}
+                      curve={CurveType.CURVE_MONOTONE_X}
+                    />
+                  );
+                })}
+              </>
+            ) : null}
           </>
         )}
       </Chart>
@@ -202,7 +302,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} aria-hidden={true} />
     </div>
   );
 }

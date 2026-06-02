@@ -30,6 +30,7 @@ function renderAlertBulkActions(props?: Partial<StatefulAlertBulkActionsProps>) 
         id={TableId.alertsOnAlertsPage}
         selectedEventIds={mockSelectedEventIds}
         totalItems={10}
+        data={[]}
         clearSelected={clearSelected}
         {...props}
       />
@@ -39,7 +40,7 @@ function renderAlertBulkActions(props?: Partial<StatefulAlertBulkActionsProps>) 
 
 describe('AlertBulkActionsComponent', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('it renders', async () => {

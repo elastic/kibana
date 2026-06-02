@@ -13,6 +13,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
@@ -38,12 +39,13 @@ export type GroupingLicenseCtaPopoverDependencies =
 export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverProps>(
   ({ dependencies, showDetails }) => {
     const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+    const popoverTitleId = useGeneratedHtmlId();
 
     const groupingCtaPopoverButton = React.useMemo(
       () => (
         <EuiButton
           color="text"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           data-test-subj="logsOverviewGroupingCtaPopoverButton"
           onClick={togglePopover}
@@ -60,8 +62,9 @@ export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverPro
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         anchorPosition="downRight"
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle>{groupingLicenseCtaMessageTitle}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>{groupingLicenseCtaMessageTitle}</EuiPopoverTitle>
         <div style={{ width: '300px' }}>
           <EuiText>
             <p>{groupingLicenseCtaMessageDescription}</p>

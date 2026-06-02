@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   ElasticsearchClient,
   ISavedObjectsSerializer,
@@ -12,18 +13,17 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsRawDoc,
 } from '@kbn/core/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { v4 } from 'uuid';
 import { load as parseYaml } from 'js-yaml';
-import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { CASE_EXTENDED_FIELDS, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import { toFieldNames, trimFieldDefaults } from './utils';
+import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
@@ -35,7 +35,7 @@ export class TemplatesService {
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
-      internalClusterClient: ElasticsearchClient;
+      namespace: string;
     }
   ) {}
 
@@ -48,7 +48,9 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isDeleted,
+      isEnabled,
     } = params;
 
     const { templates, total } = await this.searchTemplates({
@@ -60,7 +62,9 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isLatest: true,
+      isEnabled,
     });
 
     const searchLower = search?.toLowerCase() ?? '';
@@ -70,8 +74,10 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some((fieldName) =>
-            fieldName.toLowerCase().includes(searchLower)
+          (so.attributes.fieldNames ?? []).some(
+            (field) =>
+              field.label.toLowerCase().includes(searchLower) ||
+              field.name.toLowerCase().includes(searchLower)
           ),
       })),
       page,
@@ -82,8 +88,61 @@ export class TemplatesService {
 
   async getTemplate(
     templateId: string,
-    version?: string
+    version?: string,
+    { includeDeleted = false }: { includeDeleted?: boolean } = {}
   ): Promise<SavedObject<Template> | undefined> {
+    return this._getTemplate(templateId, version, { includeDeleted });
+  }
+
+  /**
+   * Fetches ALL template versions (not just isLatest) for extended field filtering in case search.
+   *
+   * This is critical for extended field filtering because cases may reference
+   * older template versions where field definitions have changed. We need to
+   * resolve filters against ALL versions to correctly match cases created with
+   * historical template versions.
+   *
+   * Example: If template v1 has "effort estimate" field and v2 renames it to
+   * "some estimate", searching for "effort estimate" should only match cases
+   * created with v1, not v2. By fetching ALL versions, the filter resolution
+   * correctly identifies which template versions have which fields.
+   *
+   * @param params - Find parameters (owner, isDeleted)
+   * @returns Promise resolving to array of all template versions matching the criteria
+   *
+   * @example
+   * // Get all versions of Security Solution templates for extended field search
+   * const allVersions = await service.getTemplateVersionsForExtendedFieldSearch({
+   *   owner: ['securitySolution'],
+   * });
+   */
+  async getTemplateVersionsForExtendedFieldSearch(params: {
+    owner?: string[];
+  }): Promise<Array<SavedObject<Template>>> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      owner: params.owner,
+      // CRITICAL: Do NOT set isLatest - we want ALL versions
+    });
+
+    return templates;
+  }
+
+  private async _getTemplate(
+    templateId: string,
+    version?: string,
+    { includeDeleted = false }: { includeDeleted?: boolean } = {}
+  ): Promise<SavedObject<Template> | undefined> {
+    if (version !== undefined) {
+      const parsedVersion = parseInt(version, 10);
+      if (isNaN(parsedVersion) || version === '') {
+        return undefined;
+      }
+    }
+
     const { templates } = await this.searchTemplates({
       page: 1,
       perPage: 1,
@@ -92,6 +151,7 @@ export class TemplatesService {
       templateId,
       version,
       ...(version === undefined ? { isLatest: true } : {}),
+      ...(includeDeleted ? { isDeleted: true } : {}),
     });
 
     return templates[0];
@@ -112,6 +172,8 @@ export class TemplatesService {
     search,
     tags,
     author,
+    owner,
+    isEnabled,
   }: {
     page: number;
     perPage: number;
@@ -124,6 +186,8 @@ export class TemplatesService {
     search?: string;
     tags?: string[];
     author?: string[];
+    owner?: string[];
+    isEnabled?: boolean;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -138,6 +202,9 @@ export class TemplatesService {
 
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
+      ...(isEnabled !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isEnabled: ${isEnabled}`))]
+        : []),
       ...(templateId
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
         : []),
@@ -161,6 +228,13 @@ export class TemplatesService {
             ),
           ]
         : []),
+      ...(owner && owner.length > 0
+        ? [
+            toElasticsearchQuery(
+              fromKueryExpression(owner.map((o) => `${SO}.owner: "${o}"`).join(' OR '))
+            ),
+          ]
+        : []),
     ];
 
     const must = search
@@ -175,8 +249,28 @@ export class TemplatesService {
                   },
                 },
                 {
-                  wildcard: {
-                    [`${SO}.fieldNames`]: { value: `*${search}*`, case_insensitive: true },
+                  nested: {
+                    path: `${SO}.fieldNames`,
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            wildcard: {
+                              [`${SO}.fieldNames.name`]: {
+                                value: `*${search}*`,
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              [`${SO}.fieldNames.label`]: search,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   },
                 },
               ],
@@ -207,8 +301,8 @@ export class TemplatesService {
     ];
 
     const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
-      namespaces: ['*'],
       type: CASE_TEMPLATE_SAVED_OBJECT,
+      namespaces: [this.dependencies.namespace],
       from,
       size: perPage,
       sort,
@@ -228,31 +322,13 @@ export class TemplatesService {
     };
   }
 
-  private async updateMappings(definition: string) {
-    const parsedDefinition = parseYaml(definition) as ParsedTemplate['definition'];
-
-    await this.dependencies.internalClusterClient.indices.putMapping({
-      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      properties: {
-        cases: {
-          properties: {
-            [CASE_EXTENDED_FIELDS]: {
-              properties: parsedDefinition.fields.reduce((acc, field) => {
-                acc[[field.name, field.type].join('_as_')] = {
-                  type: field.type,
-                };
-
-                return acc;
-              }, {} as unknown as Record<PropertyName, MappingProperty>),
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async createTemplate(input: CreateTemplateInput, author: string): Promise<SavedObject<Template>> {
-    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+  async createTemplate(
+    input: CreateTemplateInput,
+    author: string,
+    id: string = v4()
+  ): Promise<SavedObject<Template>> {
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -260,7 +336,7 @@ export class TemplatesService {
         templateVersion: 1,
         isLatest: true,
         deletedAt: null,
-        definition: input.definition,
+        definition: normalizedDefinition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: v4(),
@@ -268,12 +344,11 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: toFieldNames(parsedDefinition.fields),
+        isEnabled: input.isEnabled ?? true,
       } as Template,
-      { refresh: true }
+      { refresh: true, id }
     );
-
-    await this.updateMappings(input.definition);
 
     return templateSavedObject;
   }
@@ -282,20 +357,21 @@ export class TemplatesService {
     templateId: string,
     input: UpdateTemplateInput
   ): Promise<SavedObject<Template>> {
-    const currentTemplate = await this.getTemplate(templateId);
+    const currentTemplate = await this._getTemplate(templateId);
 
     if (!currentTemplate) {
-      throw new Error('template does not exist');
+      throw Boom.notFound(`Template with id ${templateId} not found`);
     }
 
-    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
         isLatest: true,
-        definition: input.definition,
+        definition: normalizedDefinition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
@@ -304,8 +380,11 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
-      },
+        fieldNames: toFieldNames(parsedDefinition.fields),
+        usageCount: currentTemplate.attributes.usageCount,
+        lastUsedAt: currentTemplate.attributes.lastUsedAt,
+        isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
+      } as Template,
       {
         refresh: true,
       }
@@ -323,8 +402,6 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
-
-    await this.updateMappings(input.definition);
 
     return templateSavedObject;
   }
@@ -361,7 +438,35 @@ export class TemplatesService {
     return [...new Set(authors)].sort();
   }
 
+  async incrementUsageStats(templateId: string): Promise<void> {
+    const template = await this._getTemplate(templateId);
+
+    if (!template) {
+      return;
+    }
+
+    await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+      [
+        {
+          id: template.id,
+          type: CASE_TEMPLATE_SAVED_OBJECT,
+          attributes: {
+            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            lastUsedAt: new Date().toISOString(),
+          },
+        },
+      ],
+      { refresh: false }
+    );
+  }
+
   async deleteTemplate(templateId: string): Promise<void> {
+    const latestTemplate = await this._getTemplate(templateId);
+
+    if (!latestTemplate) {
+      return;
+    }
+
     const templateSnapshots = await this.dependencies.unsecuredSavedObjectsClient.find({
       type: CASE_TEMPLATE_SAVED_OBJECT,
       filter: fromKueryExpression(

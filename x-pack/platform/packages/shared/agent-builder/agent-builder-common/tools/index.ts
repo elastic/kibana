@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export {
+  ToolType,
+  ToolOrigin,
+  type ToolDefinition,
+  type ToolDefinitionWithSchema,
+} from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
+  platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  internalTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,
   isInternalTool,
+  isExcludedFromFilestore,
   isAttachmentTool,
   isFilestoreTool,
 } from './constants';

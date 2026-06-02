@@ -12,10 +12,21 @@ import type {
   HasEditCapabilities,
   CanOverrideHoverActions,
   PublishesUnsavedChanges,
+  HasLibraryTransforms,
+  HasType,
+  PublishesWritableTitle,
 } from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+import type {
+  MarkdownByReferenceState,
+  MarkdownByValueState,
+  MarkdownEmbeddableState,
+} from '../server';
+import type { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
+export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
+  DefaultEmbeddableApi<MarkdownEmbeddableState> &
+  PublishesWritableTitle &
   PublishesUnsavedChanges &
   HasEditCapabilities &
-  CanOverrideHoverActions;
+  CanOverrideHoverActions &
+  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState>;

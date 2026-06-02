@@ -21,6 +21,8 @@ const createValidDefinition = (
   overrides: Partial<ServerTriggerDefinition> = {}
 ): ServerTriggerDefinition => ({
   id: 'cases.updated',
+  title: 'Case updated',
+  description: 'Fired when a case is updated.',
   eventSchema: validEventSchema,
   ...overrides,
 });
@@ -76,6 +78,36 @@ describe('TriggerRegistry', () => {
       registry.register(createValidDefinition({ id: 'alerts.severity_high' }));
       registry.register(createValidDefinition({ id: 'my_plugin.my_event' }));
       expect(registry.list()).toHaveLength(3);
+    });
+
+    it('throws if eventSchema is null', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: null as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
+    });
+
+    it('throws if eventSchema is undefined', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: undefined as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
+    });
+
+    it('throws if eventSchema is a plain object without safeParse', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: { shape: {} } as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
     });
 
     it('throws if eventSchema is not a Zod object schema', () => {

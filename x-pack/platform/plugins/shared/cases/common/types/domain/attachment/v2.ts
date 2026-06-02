@@ -7,8 +7,20 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../../api';
-import { UserRt } from '../user/v1';
-import { AttachmentRt } from './v1';
+import {
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../constants/attachments';
+import {
+  AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
+  AttachmentAttributesBasicRt,
+  AttachmentAttributesRt,
+  AttachmentPatchAttributesRt,
+  AttachmentRt,
+} from './v1';
 
 /**
  * Payload for Reference-based Attachments
@@ -20,7 +32,8 @@ import { AttachmentRt } from './v1';
 export const UnifiedReferenceAttachmentPayloadRt = rt.intersection([
   rt.strict({
     type: rt.string,
-    attachmentId: rt.string,
+    attachmentId: rt.union([rt.string, rt.array(rt.string)]),
+    owner: rt.string,
   }),
   rt.exact(
     rt.partial({
@@ -40,6 +53,7 @@ export const UnifiedValueAttachmentPayloadRt = rt.intersection([
   rt.strict({
     type: rt.string,
     data: rt.record(rt.string, jsonValueRt),
+    owner: rt.string,
   }),
   rt.exact(
     rt.partial({
@@ -54,25 +68,12 @@ export const UnifiedAttachmentPayloadRt = rt.union([
 ]);
 
 /**
- * Basic attributes for Unified Attachments
- * Contains all the basic attributes minus the owner
- */
-export const AttachmentAttributesBasicWithoutOwnerRt = rt.strict({
-  created_at: rt.string,
-  created_by: UserRt,
-  pushed_at: rt.union([rt.string, rt.null]),
-  pushed_by: rt.union([UserRt, rt.null]),
-  updated_at: rt.union([rt.string, rt.null]),
-  updated_by: rt.union([UserRt, rt.null]),
-});
-
-/**
  * Saved Object attributes for Unified Attachments
  * Contains the payload and the basic attributes
  */
 export const UnifiedAttachmentAttributesRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
-  AttachmentAttributesBasicWithoutOwnerRt,
+  AttachmentAttributesBasicRt,
 ]);
 
 /**
@@ -87,6 +88,35 @@ export const UnifiedAttachmentRt = rt.intersection([
   }),
 ]);
 
+/**
+ * Partial payload props for patch (reference and value). We define these explicitly because
+ * UnifiedReferenceAttachmentPayloadRt and UnifiedValueAttachmentPayloadRt are rt.intersection([...]),
+ * so they have no .type.props (only rt.strict() codecs have .props); v1 payloads use rt.strict()
+ * so AttachmentPatchAttributesRt can use .type.props there.
+ */
+const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
+  rt.partial({
+    type: rt.string,
+    owner: rt.string,
+    attachmentId: rt.union([rt.string, rt.array(rt.string)]),
+    data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+    metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  })
+);
+const UnifiedValueAttachmentPayloadPartialRt = rt.exact(
+  rt.partial({
+    type: rt.string,
+    owner: rt.string,
+    data: rt.record(rt.string, jsonValueRt),
+    metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  })
+);
+
+export const UnifiedAttachmentPatchAttributesRt = rt.intersection([
+  rt.union([UnifiedReferenceAttachmentPayloadPartialRt, UnifiedValueAttachmentPayloadPartialRt]),
+  rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),
+]);
+
 export type UnifiedReferenceAttachmentPayload = rt.TypeOf<
   typeof UnifiedReferenceAttachmentPayloadRt
 >;
@@ -95,8 +125,65 @@ export type UnifiedAttachmentPayload = rt.TypeOf<typeof UnifiedAttachmentPayload
 export type UnifiedAttachmentAttributes = rt.TypeOf<typeof UnifiedAttachmentAttributesRt>;
 export type UnifiedAttachment = rt.TypeOf<typeof UnifiedAttachmentRt>;
 
+const UnifiedDocumentAttachmentAttributesRt = rt.intersection([
+  rt.strict({
+    type: rt.union([
+      rt.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+      rt.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
+      rt.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
+      rt.literal(STACK_ALERT_ATTACHMENT_TYPE),
+    ]),
+    attachmentId: rt.union([rt.string, rt.array(rt.string)]),
+    owner: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      metadata: rt.union([
+        rt.null,
+        rt.exact(
+          rt.partial({
+            index: rt.union([rt.string, rt.array(rt.string)]),
+            rule: rt.union([
+              rt.null,
+              rt.strict({
+                id: rt.union([rt.string, rt.null]),
+                name: rt.union([rt.string, rt.null]),
+              }),
+            ]),
+          })
+        ),
+      ]),
+    })
+  ),
+  AttachmentAttributesBasicRt,
+]);
+
+export const DocumentAttachmentAttributesRtV2 = rt.union([
+  AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
+  UnifiedDocumentAttachmentAttributesRt,
+]);
+export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
+
+/**
+ * Transitional read-shape mode while v1/v2 attachments coexist.
+ */
+export type AttachmentMode = 'legacy' | 'unified';
+
 /**
  * Combined v1 legacy and v2 unified attachment types
  */
-export const CombinedAttachmentRt = rt.union([AttachmentRt, UnifiedAttachmentRt]);
-export type CombinedAttachment = rt.TypeOf<typeof CombinedAttachmentRt>;
+export const AttachmentRtV2 = rt.union([AttachmentRt, UnifiedAttachmentRt]);
+export const AttachmentsRtV2 = rt.array(AttachmentRtV2);
+export const AttachmentAttributesRtV2 = rt.union([
+  AttachmentAttributesRt,
+  UnifiedAttachmentAttributesRt,
+]);
+export const AttachmentPatchAttributesRtV2 = rt.union([
+  AttachmentPatchAttributesRt,
+  UnifiedAttachmentPatchAttributesRt,
+]);
+export type AttachmentV2 = rt.TypeOf<typeof AttachmentRtV2>;
+export type AttachmentsV2 = rt.TypeOf<typeof AttachmentsRtV2>;
+export type AttachmentAttributesV2 = rt.TypeOf<typeof AttachmentAttributesRtV2>;
+export type AttachmentPatchAttributesV2 = rt.TypeOf<typeof AttachmentPatchAttributesRtV2>;

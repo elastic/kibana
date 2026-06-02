@@ -30,9 +30,6 @@ export interface IndexBadge {
   filterExpression?: string;
   color: EuiBadgeProps['color'];
 }
-export interface IndexDetailsPageRoute {
-  renderRoute: (indexName: string, detailsTabId?: string) => string;
-}
 
 export interface EmptyListContent {
   renderContent: (args: {
@@ -69,6 +66,4 @@ export interface ExtensionsSetup {
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   // sets content to render instead of the code block on the overview tab of the index page
   setIndexOverviewContent(content: IndexContent): void;
-  // sets index details page route
-  setIndexDetailsPageRoute(route: IndexDetailsPageRoute, detailsTabId?: string): void;
 }

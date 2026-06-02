@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import {
   RuleSignatureId,
   RuleVersion,
@@ -58,10 +58,13 @@ export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
  *  - version is a required field
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
+export const PrebuiltRuleAssetIdentityFields = z.object({
+  rule_id: RuleSignatureId,
+  version: RuleVersion,
+});
+export type PrebuiltRuleAssetIdentityFields = z.infer<typeof PrebuiltRuleAssetIdentityFields>;
+
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
 export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(
-  z.object({
-    rule_id: RuleSignatureId,
-    version: RuleVersion,
-  })
+  PrebuiltRuleAssetIdentityFields
 );

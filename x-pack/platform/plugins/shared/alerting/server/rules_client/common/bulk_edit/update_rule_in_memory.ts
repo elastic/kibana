@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
   getRuleNotifyWhenType,
@@ -12,7 +13,12 @@ import {
   validateRuleTypeParams,
 } from '../../../lib';
 import type { RuleDomain, RuleParams } from '../../../application/rule/types';
-import { injectReferencesIntoActions, injectReferencesIntoArtifacts } from '..';
+import {
+  injectReferencesIntoActions,
+  injectReferencesIntoArtifacts,
+  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
+} from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
 import type {
   BulkOperationError,
@@ -185,7 +191,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     apiKeyAttributes = preparedApiKeyAttributes;
   }
 
-  const { updatedAttributes } = updateAttributes({
+  const { updatedAttributes } = await updateAttributes({
     context,
     attributes: ruleAttributes,
     apiKeyAttributes,
@@ -212,6 +218,7 @@ async function prepareApiKeys(
     username,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
   });
 
   // collect generated API keys
@@ -231,7 +238,7 @@ async function prepareApiKeys(
   };
 }
 
-function updateAttributes({
+async function updateAttributes({
   context,
   attributes,
   apiKeyAttributes,
@@ -245,20 +252,32 @@ function updateAttributes({
   updatedParams: RuleParams;
   rawAlertActions: RawRuleAction[];
   username: string | null;
-}): {
+}): Promise<{
   updatedAttributes: RawRule;
-} {
+}> {
   // get notifyWhen
   const notifyWhen = getRuleNotifyWhenType(
     attributes.notifyWhen ?? null,
     attributes.throttle ?? null
   );
 
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    attributes.tags,
+    apiKeyAttributes?.uiamApiKey,
+    apiKeyAttributes?.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   // TODO (http-versioning) Remove casts when updateMeta has been converted
-  const castedAttributes = attributes;
   const updatedAttributes = updateMeta(context, {
-    ...castedAttributes,
-    ...(apiKeyAttributes ? { ...apiKeyAttributes } : {}),
+    ...(apiKeyAttributes
+      ? {
+          ...omit(attributes, [...API_KEY_ATTRIBUTES_TO_STRIP]),
+          ...apiKeyAttributes,
+        }
+      : attributes),
+    tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,
     notifyWhen,

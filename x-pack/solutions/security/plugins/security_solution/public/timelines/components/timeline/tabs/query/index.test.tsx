@@ -11,8 +11,10 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -67,7 +69,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -180,10 +181,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
@@ -246,8 +243,6 @@ describe.skip('query tab with unified timeline', () => {
     });
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
 
@@ -1053,6 +1048,87 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(mockOpenFlyout).toHaveBeenCalled();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should open the document details flyout with notes tab for a regular event',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalledWith(
+            expect.objectContaining({
+              right: expect.objectContaining({ id: 'document-details-right' }),
+              left: expect.objectContaining({ id: 'document-details-left' }),
+            })
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should open the attack details flyout with notes tab for an attack discovery event',
+      async () => {
+        const attackDiscoveryEvent = {
+          ...mockTimelineData[0],
+          data: [
+            ...mockTimelineData[0].data,
+            {
+              field: ALERT_RULE_TYPE_ID,
+              value: [ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID],
+            },
+          ],
+          ecs: {
+            ...mockTimelineData[0].ecs,
+            _index: '.alerts-security.attack.discovery.alerts-default-000001',
+          },
+        };
+
+        useTimelineEventsSpy.mockReturnValue([
+          DataLoadingState.loaded,
+          {
+            id: 'id',
+            pageInfo: {
+              activePage: 0,
+              querySize: 0,
+            },
+            events: [attackDiscoveryEvent],
+            rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
+            inspect: { dsl: [], response: [] },
+            totalCount: 1,
+            loadNextBatch: jest.fn(),
+            refreshedAt: 0,
+            refetch: jest.fn(),
+          },
+        ]);
+
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalledWith(
+            expect.objectContaining({
+              right: expect.objectContaining({ id: 'attack-details-right' }),
+              left: expect.objectContaining({ id: 'attack-details-left' }),
+            })
+          );
         });
       },
       SPECIAL_TEST_TIMEOUT

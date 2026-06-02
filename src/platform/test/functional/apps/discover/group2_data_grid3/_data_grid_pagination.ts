@@ -12,10 +12,10 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const { common, discover, header, timePicker, dashboard } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, dashboard } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -36,9 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -122,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearchTitle);
 
       // start a new search session
-      await testSubjects.click('discoverNewButton');
+      await appMenu.clickMenuItem('discoverNewButton');
       await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);

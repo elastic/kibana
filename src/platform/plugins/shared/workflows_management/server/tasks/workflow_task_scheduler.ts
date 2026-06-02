@@ -17,6 +17,8 @@ import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
+const getScheduledWorkflowTaskId = (workflowId: string) => `workflow:${workflowId}:scheduled`;
+
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
   spaceId: string;
@@ -111,7 +113,7 @@ export class WorkflowTaskScheduler {
       if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
         // Task already exists — update its schedule in place rather than failing.
         // This handles both interval and RRule schedule types.
-        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule);
+        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, { request });
         if (result.errors.length > 0) {
           const firstError = result.errors[0].error;
           // 409 (concurrent update) and 404 (task was just removed) are non-fatal
@@ -133,32 +135,45 @@ export class WorkflowTaskScheduler {
     }
   }
 
-  /**
-   * Unschedules all tasks for a workflow
-   */
+  /** Unschedules the scheduled workflow task by deterministic task id. */
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
-    try {
-      // Find all tasks for this workflow
-      const tasks = await this.taskManager.fetch({
-        query: {
-          bool: {
-            must: [
-              { term: { 'task.taskType': 'workflow:scheduled' } },
-              { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
-            ],
-          },
-        },
-      });
+    const taskId = getScheduledWorkflowTaskId(workflowId);
 
-      // Remove all tasks
-      const taskIds = tasks.docs.map((task) => task.id);
-      if (taskIds.length > 0) {
-        await this.taskManager.bulkRemove(taskIds);
-        this.logger.debug(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
-      }
+    try {
+      await this.taskManager.removeIfExists(taskId);
     } catch (error) {
       this.logger.error(`Failed to unschedule tasks for workflow ${workflowId}: ${error}`);
       throw error;
+    }
+  }
+
+  /** Unschedules scheduled workflow tasks for multiple workflows via bulkRemove. */
+  async bulkUnscheduleWorkflowTasks(workflowIds: string[]): Promise<void> {
+    if (workflowIds.length === 0) {
+      return;
+    }
+
+    const taskIdToWorkflowId = new Map(
+      workflowIds.map((workflowId) => [getScheduledWorkflowTaskId(workflowId), workflowId] as const)
+    );
+    const taskIds = [...taskIdToWorkflowId.keys()];
+
+    try {
+      const bulkRemoveResult = await this.taskManager.bulkRemove(taskIds);
+      const failedRemovals = bulkRemoveResult.statuses.filter(
+        (status) => !status.success && status.error?.statusCode !== NOT_FOUND_STATUS
+      );
+
+      for (const status of failedRemovals) {
+        const workflowId = taskIdToWorkflowId.get(status.id) ?? status.id;
+        this.logger.warn(
+          `Failed to unschedule tasks for deleted workflow ${workflowId}: ${
+            status.error?.statusCode ?? 'unknown status'
+          }: ${status.error?.message ?? 'unknown error'}`
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Failed to bulk unschedule workflow tasks: ${error}`);
     }
   }
 

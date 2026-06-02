@@ -9,7 +9,7 @@
 
 import type { DemoConfig, ServiceConfig } from '../../types';
 
-const CONTAINER_REGISTRY = 'gcr.io/google-samples/microservices-demo';
+const CONTAINER_REGISTRY = 'us-central1-docker.pkg.dev/google-samples/microservices-demo';
 
 /**
  * Google Online Boutique (microservices-demo) configuration
@@ -20,15 +20,15 @@ export const onlineBoutiqueConfig: DemoConfig = {
   displayName: 'Google Online Boutique',
   namespace: 'online-boutique',
   description: 'Google Cloud microservices demo - 11 services in Go, C#, Java, Python, Node.js',
-  defaultVersion: 'v0.10.1',
-  availableVersions: ['v0.10.1', 'v0.9.0', 'v0.8.0'],
+  defaultVersion: 'v0.10.5',
+  availableVersions: ['v0.10.5', 'v0.10.4', 'v0.10.3', 'v0.10.2', 'v0.10.1'],
 
   frontendService: {
     name: 'frontend',
     nodePort: 30080,
   },
 
-  getServices: (version = 'v0.10.1'): ServiceConfig[] => [
+  getServices: (version = 'v0.10.5'): ServiceConfig[] => [
     // Supporting services
     {
       name: 'redis-cart',
@@ -43,6 +43,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 5000,
       env: {
         PORT: '5000',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -58,6 +60,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
         EMAIL_SERVICE_ADDR: 'emailservice:5000',
         CURRENCY_SERVICE_ADDR: 'currencyservice:7000',
         CART_SERVICE_ADDR: 'cartservice:7070',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -67,6 +71,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       env: {
         PORT: '8080',
         PRODUCT_CATALOG_SERVICE_ADDR: 'productcatalogservice:3550',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -84,6 +90,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
         CHECKOUT_SERVICE_ADDR: 'checkoutservice:5050',
         AD_SERVICE_ADDR: 'adservice:9555',
         SHOPPING_ASSISTANT_SERVICE_ADDR: 'shoppingassistantservice:80',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -93,6 +101,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 50051,
       env: {
         PORT: '50051',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -102,6 +112,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 3550,
       env: {
         PORT: '3550',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -110,6 +122,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 7070,
       env: {
         REDIS_ADDR: 'redis-cart:6379',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -118,6 +132,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       env: {
         FRONTEND_ADDR: 'frontend:8080',
         USERS: '10',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -126,6 +142,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 7000,
       env: {
         PORT: '7000',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -135,6 +153,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 50051,
       env: {
         PORT: '50051',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -144,6 +164,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 9555,
       env: {
         PORT: '9555',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
   ],

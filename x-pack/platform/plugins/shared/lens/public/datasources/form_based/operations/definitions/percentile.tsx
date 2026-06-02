@@ -18,8 +18,9 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { memoize, snakeCase } from 'lodash';
+import { memoize } from 'lodash';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -27,7 +28,8 @@ import {
   getSafeName,
   isValidNumber,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getNumberParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
@@ -166,12 +168,11 @@ export const percentileOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
-    const existingPercentileParam =
-      previousColumn &&
-      isColumnOfType<PercentileIndexPatternColumn>(PERCENTILE_ID, previousColumn) &&
-      previousColumn.params.percentile;
+    const existingPercentileParam = hasOperationType(previousColumn, PERCENTILE_ID)
+      ? getNumberParam(previousColumn, 'percentile')
+      : undefined;
     const newPercentileParam =
-      columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
+      columnParams?.percentile ?? existingPercentileParam ?? DEFAULT_PERCENTILE_VALUE;
     return {
       label: ofName(
         getSafeName(field.name, indexPattern),
@@ -204,17 +205,10 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.timeShift) return;
-    // Use columnId to make param names unique
-    const fieldKey = `field_${snakeCase(columnId)}`;
-    const percentileKey = `percentile_${snakeCase(columnId)}`;
     return {
-      template: `PERCENTILE(??${fieldKey}, ?${percentileKey})`,
-      params: {
-        [fieldKey]: column.sourceField,
-        [percentileKey]: column.params.percentile,
-      },
+      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {

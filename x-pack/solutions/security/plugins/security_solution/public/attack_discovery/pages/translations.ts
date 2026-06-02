@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CONNECTOR_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorConnector',
   {
-    defaultMessage: 'No connector selected, select a connector to use attack discovery',
+    defaultMessage: 'No model selected, select a model to use attack discovery',
   }
 );
 

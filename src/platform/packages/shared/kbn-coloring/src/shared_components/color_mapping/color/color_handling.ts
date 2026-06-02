@@ -8,7 +8,7 @@
  */
 
 import chroma from 'chroma-js';
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
 import { deserializeField } from '@kbn/data-plugin/common';
@@ -27,7 +27,7 @@ export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
     | ColorMapping.Assignment['color']
-    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
   palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
@@ -58,7 +58,7 @@ export function getColor(
   color:
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
-    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
   palettes: KbnPalettes
 ): string {
   return color.type === 'colorCode'

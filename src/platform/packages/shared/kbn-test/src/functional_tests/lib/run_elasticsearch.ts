@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
@@ -15,9 +14,8 @@ import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test-es-server';
 import type { Config } from '../../functional_test_runner';
-import type { ICluster } from '../../es';
-import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -78,19 +76,6 @@ function getEsConfig({
     files,
     secureFiles,
   };
-}
-
-export async function cleanupElasticsearch(
-  node: ICluster,
-  isServerless: boolean,
-  logsDir: string | undefined,
-  log: ToolingLog
-): Promise<void> {
-  await node.cleanup();
-
-  if (isServerless) {
-    await extractAndArchiveLogs({ outputFolder: logsDir, log });
-  }
 }
 
 export async function runElasticsearch(
@@ -188,7 +173,6 @@ interface EsServerlessOptions {
   projectType: ServerlessProjectType;
   host?: string;
   resources: string[];
-  kibanaUrl: string;
   tag?: string;
   image?: string;
 }
@@ -225,11 +209,6 @@ function getESServerlessOptions(
     host: serverlessHost,
     resources: serverlessResources,
     uiam: config.get('esServerlessOptions.uiam', false),
-    kibanaUrl: Url.format({
-      protocol: config.get('servers.kibana.protocol'),
-      hostname: config.get('servers.kibana.hostname'),
-      port: config.get('servers.kibana.port'),
-    }),
   };
 
   if (esServerlessImageUrlOrTag) {

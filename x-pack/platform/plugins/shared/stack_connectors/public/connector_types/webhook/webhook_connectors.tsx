@@ -32,6 +32,7 @@ const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_con
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
 }) => {
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
@@ -84,6 +85,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyLoadedAuthConfig
           readOnly={readOnly}
+          isEdit={isEdit}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
         />

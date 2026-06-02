@@ -8,10 +8,11 @@
  */
 
 import type { ISuggestionItem } from '../../../../registry/types';
-import type { FunctionParameterType, SupportedDataType } from '../../../types';
+import type { FunctionParameterType, FunctionDefinitionTypes } from '../../../types';
 import { getFieldsSuggestions, getFunctionsSuggestions, getLiteralsSuggestions } from '../helpers';
 import { getOperatorSuggestions } from '../../operators';
 import type { ExpressionContext } from './types';
+import type { PreferredExpressionType } from './types';
 import { commaCompleteItem } from '../../../../registry/complete_items';
 import { shouldSuggestComma, type CommaContext } from './comma_decision_engine';
 
@@ -29,7 +30,6 @@ export class SuggestionBuilder {
     ignoredColumns?: string[];
     addComma?: boolean;
     addSpaceAfterField?: boolean;
-    promoteToTop?: boolean;
     openSuggestions?: boolean;
     values?: boolean;
     canBeMultiValue?: boolean;
@@ -37,7 +37,6 @@ export class SuggestionBuilder {
     const types = options?.types ?? ['any'];
     const addComma = options?.addComma ?? false;
     const addSpaceAfterField = options?.addSpaceAfterField ?? addComma;
-    const promoteToTop = options?.promoteToTop ?? true;
     const ignoredColumns = options?.ignoredColumns ?? [];
     const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
@@ -50,7 +49,6 @@ export class SuggestionBuilder {
       addSpaceAfterField,
       openSuggestions,
       addComma,
-      promoteToTop,
       values,
       canBeMultiValue,
     });
@@ -65,6 +63,7 @@ export class SuggestionBuilder {
     addSpaceAfterFunction?: boolean;
     constantGeneratingOnly?: boolean;
     excludeParentFunctions?: boolean;
+    functionTypes?: FunctionDefinitionTypes[];
   }): this {
     const types = options?.types ?? ['any'];
     const excludeParentFunctions = options?.excludeParentFunctions ?? false;
@@ -81,6 +80,7 @@ export class SuggestionBuilder {
         suggestOnlyName: this.context.options.isCursorFollowedByParens,
         addSpaceAfterFunction,
         constantGeneratingOnly,
+        functionTypes: options?.functionTypes,
       },
       context: this.context.context,
       callbacks: {
@@ -121,7 +121,7 @@ export class SuggestionBuilder {
     leftParamType?: FunctionParameterType;
     allowed?: string[];
     ignored?: string[];
-    returnTypes?: SupportedDataType[];
+    returnTypes?: PreferredExpressionType[];
   }): this {
     const operatorSuggestions = getOperatorSuggestions(
       {

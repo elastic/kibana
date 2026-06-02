@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
@@ -104,7 +104,7 @@ export const toolToLangchain = async ({
   toolId,
   logger,
   sendEvent,
-  addReasoningParam = true,
+  addReasoningParam = false,
 }: {
   tool: ExecutableTool;
   toolId?: string;

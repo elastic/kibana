@@ -8,10 +8,16 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',
@@ -38,7 +44,7 @@ describe('loadWorkflowThunk', () => {
   });
 
   it('should load workflow successfully', async () => {
-    mockServices.http.get.mockResolvedValue(mockWorkflow);
+    mockWorkflowApi.getWorkflow.mockResolvedValue(mockWorkflow);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
@@ -51,7 +57,7 @@ describe('loadWorkflowThunk', () => {
       message: 'Network Error',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
@@ -59,13 +65,28 @@ describe('loadWorkflowThunk', () => {
       title: 'Failed to load workflow',
     });
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
-    expect(result.payload).toBe('Network Error');
+    expect(result.payload).toBe(error);
+  });
+
+  it('should reject with the original error when workflow is not found', async () => {
+    const error = {
+      message: 'Workflow not found',
+      response: { status: 404 },
+      body: { message: 'Workflow not found' },
+    };
+
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(loadWorkflowThunk({ id: 'missing-workflow' }));
+
+    expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
+    expect(result.payload).toBe(error);
   });
 
   it('should handle error without message', async () => {
     const error = {};
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
@@ -76,6 +97,6 @@ describe('loadWorkflowThunk', () => {
       }
     );
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
-    expect(result.payload).toBe('Failed to load workflow');
+    expect(result.payload).toBe(error);
   });
 });

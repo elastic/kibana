@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 
@@ -19,7 +18,16 @@ import { isEmpty } from 'lodash';
  * a serializer and deserializer so it has to be done on the form level.
  */
 
-export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
+type HttpConnectorForm = ConnectorFormSchema & {
+  __internal__?: {
+    headers?: Array<{ key: string; value: string; type: string }>;
+    hasProxy?: boolean;
+    hasQueryParams?: boolean;
+    queryParams?: Array<{ key: string; value: string }>;
+  };
+};
+
+export const formDeserializer = (data: ConnectorFormSchema): HttpConnectorForm => {
   if (!data.actionTypeId) {
     // Hook form lib can call deserializer *also* while editing the form (indicated by actionTypeId
     // still being undefined). Changing the reference of form data subproperties causes problems
@@ -41,6 +49,7 @@ export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorFo
     },
     __internal__: {
       headers: configHeaders,
+      hasProxy: !!data?.config?.proxyUrl,
     },
   };
 };
@@ -57,20 +66,45 @@ const buildHeaderRecords = (
     }, {});
 };
 
-export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
+export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema => {
   const headers = formData?.__internal__?.headers ?? [];
   const configHeaders = buildHeaderRecords(headers, 'config');
   const secretHeaders = buildHeaderRecords(headers, 'secret');
+  // When the proxy section is not rendered (intermediate release: old connector without proxy
+  // fields in the schema), hasProxy is undefined. In that case we skip proxy fields entirely
+  // to avoid sending unknown fields to an older server schema that uses .strict().
+  const hasProxy = formData?.__internal__?.hasProxy;
+  const supportsProxy = hasProxy !== undefined;
+
+  const queryParams = formData?.__internal__?.queryParams ?? [];
+  const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
+    if (key?.trim() && value?.trim()) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 
   return {
     ...formData,
     config: {
       ...formData.config,
       headers: isEmpty(configHeaders) ? null : configHeaders,
+      ...(supportsProxy &&
+        !hasProxy && {
+          proxyUrl: null,
+          proxyVerificationMode: undefined,
+          hasProxyAuth: false,
+        }),
     },
     secrets: {
       ...formData.secrets,
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      secretQueryParams: isEmpty(secretQueryParams) ? undefined : secretQueryParams,
+      ...(supportsProxy &&
+        (!hasProxy || !formData.config?.hasProxyAuth) && {
+          proxyUsername: null,
+          proxyPassword: null,
+        }),
     },
   };
 };

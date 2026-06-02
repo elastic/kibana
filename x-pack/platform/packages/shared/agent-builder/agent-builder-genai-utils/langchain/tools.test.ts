@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
@@ -22,6 +22,7 @@ const createTool = (
     description: '',
     configuration: {},
     readonly: false,
+    experimental: false,
     tags: [],
     getSchema: () => z.object({}),
     execute: jest.fn(),
@@ -42,6 +43,23 @@ describe('toolToLangchain', () => {
     expect(langchainTool.name).toEqual('toolA');
     expect(langchainTool.description).toEqual('desc');
     expect(langchainTool.responseFormat).toEqual('content_and_artifact');
+
+    const toolKeys = Object.keys((langchainTool.schema as any).shape);
+    expect(toolKeys.sort()).toEqual(['foo']);
+  });
+
+  it('adds reasoning param when specified', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addReasoningParam: true,
+    });
 
     const toolKeys = Object.keys((langchainTool.schema as any).shape);
     expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);

@@ -13,9 +13,11 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
+    "@kbn/apm-utils",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
+    "@kbn/connector-specs",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
@@ -30,8 +32,11 @@
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
-    "@kbn/server-http-tools",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/crypto",
+    "@kbn/es-errors",
+    "@kbn/spaces-plugin",
+    "@kbn/spaces-utils"
   ],
   "exclude": ["target/**/*"]
 }

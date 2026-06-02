@@ -15,6 +15,7 @@ import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks'
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
@@ -45,7 +46,7 @@ let mockRetriever = new MockDashboardMigrationsRetriever();
 let mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
 let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 const esClientMock =
-  elasticsearchServiceMock.createCustomClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
+  elasticsearchServiceMock.createScopedClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
@@ -57,14 +58,7 @@ const setupAgent = (responses: NodeResponse[]) => {
     dashboardMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
-    inference: {
-      getClient: jest.fn(),
-      getChatModel: jest.fn(),
-      getConnectorList: jest.fn(),
-      getDefaultConnector: jest.fn(),
-      getConnectorById: jest.fn(),
-      ...model,
-    },
+    inference: inferenceMock.createStartContract(),
     request: httpServerMock.createKibanaRequest(),
     connectorId: 'test-connector',
     experimentalFeatures: { splunkV2DashboardsEnabled: false } as unknown as ExperimentalFeatures,
@@ -85,6 +79,12 @@ describe('getDashboardMigrationAgent', () => {
   });
 
   it('should run graph', async () => {
+    esClientMock.asCurrentUser.indices.resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+
     const agent = setupAgent([{ nodeId: 'createDescriptions', response: '{}' }]);
     const result = await agent.invoke({
       id: 'testId',

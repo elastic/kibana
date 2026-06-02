@@ -14,14 +14,15 @@ import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
-import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
+import { getRuleRoute } from './rule/apis/get/external/get_rule_route';
+import { getInternalRuleRoute } from './rule/apis/get/internal/get_internal_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
-import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
+import { deleteRuleRoute, internalDeleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
-import { findRulesRoute } from './rule/apis/find/find_rules_route';
-import { findInternalRulesRoute } from './rule/apis/find/find_internal_rules_route';
+import { findRulesRoute } from './rule/apis/find/external/find_rules_route';
+import { findInternalRulesRoute } from './rule/apis/find/internal/find_internal_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
@@ -63,10 +64,19 @@ import { alertDeleteScheduleRoute } from './alert_delete/apis/schedule/create_al
 import { alertDeleteLastRunRoute } from './alert_delete/apis/last_run/get_alert_delete_last_run_route';
 
 // backfill API
-import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
-import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
-import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
-import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
+import {
+  scheduleBackfillRoute,
+  scheduleBackfillPublicRoute,
+} from './backfill/apis/schedule/schedule_backfill_route';
+import { getBackfillRoute, getBackfillPublicRoute } from './backfill/apis/get/get_backfill_route';
+import {
+  findBackfillRoute,
+  findBackfillPublicRoute,
+} from './backfill/apis/find/find_backfill_route';
+import {
+  deleteBackfillRoute,
+  deleteBackfillPublicRoute,
+} from './backfill/apis/delete/delete_backfill_route';
 
 // Gaps ApI
 import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
@@ -118,6 +128,7 @@ export function defineRoutes(opts: RouteOptions) {
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
+  internalDeleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
@@ -156,11 +167,17 @@ export function defineRoutes(opts: RouteOptions) {
   alertDeleteScheduleRoute(router, licenseState, core);
   alertDeleteLastRunRoute(router, licenseState);
 
-  // backfill APIs
+  // backfill APIs (internal)
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
   findBackfillRoute(router, licenseState);
   deleteBackfillRoute(router, licenseState);
+
+  // backfill APIs (public)
+  scheduleBackfillPublicRoute(router, licenseState);
+  getBackfillPublicRoute(router, licenseState);
+  findBackfillPublicRoute(router, licenseState);
+  deleteBackfillPublicRoute(router, licenseState);
 
   // Gaps APIs
   findGapsRoute(router, licenseState);

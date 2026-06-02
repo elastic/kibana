@@ -121,7 +121,24 @@ export const parseControlGroupJson = (
   jsonString?: string | null
 ): ControlPanelsState<OptionsListESQLControlState> => {
   try {
-    return jsonString ? JSON.parse(jsonString) : {};
+    if (!jsonString) {
+      return {};
+    }
+
+    const controlGroup = JSON.parse(jsonString) as ControlPanelsState<OptionsListESQLControlState>;
+
+    if (!isObject(controlGroup)) {
+      return {};
+    }
+
+    for (const panel of Object.values(controlGroup)) {
+      // Migrate legacy control type if necessary
+      if (panel.type === 'esqlControl') {
+        panel.type = ESQL_CONTROL;
+      }
+    }
+
+    return controlGroup;
   } catch (e) {
     return {};
   }
@@ -146,21 +163,10 @@ export const extractEsqlVariables = (
       const isSingleSelect = panel.single_select ?? true;
       const selectedValues = panel.selected_options || [];
 
-      let value: string | number | (string | number)[];
-
-      if (isSingleSelect) {
-        // Single select: return the first selected value, converting to number if possible
-        const singleValue = selectedValues[0];
-        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
-      } else {
-        // Multi select: return array with numbers converted from strings when possible
-        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
-      }
-
       acc.push({
         key: panel.variable_name,
         type: panel.variable_type as ESQLVariableType,
-        value,
+        value: isSingleSelect ? selectedValues[0] ?? '' : selectedValues,
       });
     }
     return acc;

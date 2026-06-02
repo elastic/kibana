@@ -150,6 +150,10 @@ describe('Cases Ui Plugin', () => {
           },
           getRelatedCases: expect.any(Function),
         },
+        config: {
+          templatesEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
+        },
         helpers: {
           canUseCases: expect.any(Function),
           getRuleIdFromEvent: expect.any(Function),

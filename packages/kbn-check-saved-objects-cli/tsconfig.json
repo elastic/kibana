@@ -28,12 +28,12 @@
     "@kbn/core-saved-objects-server",
     "@kbn/utils",
     "@kbn/dev-utils",
-    "@kbn/core-saved-objects-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-so-type-serializer",
     "@kbn/core-saved-objects-api-server",
     "@kbn/migrator-test-kit",
     "@kbn/config-schema",
     "@kbn/repo-info",
+    "@kbn/encrypted-saved-objects-plugin",
   ]
 }

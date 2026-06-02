@@ -11,7 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '../../types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueText } from './format_value';
 
 interface ConvertedResult {
   formattedString: string;
@@ -53,17 +53,13 @@ export const convertValueToString = ({
 
   const formatted = valuesArray
     .map((subValue) => {
-      const formattedValue = formatFieldValue(
-        subValue,
-        dataTableRecord.raw,
+      const formattedValue = formatFieldValueText({
+        value: subValue,
         fieldFormats,
         dataView,
-        dataViewField,
-        'text',
-        {
-          skipFormattingInStringifiedJSON: disableMultiline,
-        }
-      );
+        field: dataViewField,
+        options: { skipFormattingInStringifiedJSON: disableMultiline },
+      });
 
       if (typeof formattedValue === 'string') {
         withFormula = withFormula || cellHasFormulas(formattedValue);

@@ -9,8 +9,9 @@ import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderStartDependencies } from '../../../types';
+import { getVisualizationDimensionsFromLensConfig } from '../tools/esql/shared/get_visualization_dimensions';
 
 const LazyVisualizeLens = React.lazy(() =>
   import('../tools/esql/visualize_lens').then((m) => ({ default: m.VisualizeLens }))
@@ -26,21 +27,34 @@ export const createVisualizationAttachmentDefinition = ({
   startDependencies: AgentBuilderStartDependencies;
 }): AttachmentUIDefinition<VisualizationAttachment> => {
   return {
-    getLabel: (attachment) =>
-      attachment.data.query ??
-      i18n.translate('xpack.agentBuilder.attachments.visualization.label', {
-        defaultMessage: 'Visualization',
-      }),
+    getLabel: (attachment: VisualizationAttachment): string => {
+      const { title } = attachment.data.visualization;
+      return typeof title === 'string'
+        ? title
+        : i18n.translate('xpack.agentBuilder.attachments.visualization.label', {
+            defaultMessage: 'Visualization',
+          });
+    },
     getIcon: () => 'lensApp',
-    renderInlineContent: ({ attachment }) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyVisualizeLens
-          lensConfig={attachment.data.visualization}
-          dataViews={startDependencies.dataViews}
-          lens={startDependencies.lens}
-          uiActions={startDependencies.uiActions}
-        />
-      </Suspense>
-    ),
+    getMaxWidth: (attachment) =>
+      getVisualizationDimensionsFromLensConfig(
+        attachment.data.visualization as Record<string, unknown>
+      ).width,
+    renderInlineContent: ({ attachment, screenContext }, callbacks) => {
+      const timeRange = attachment.data.time_range ?? screenContext?.time_range;
+
+      return (
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyVisualizeLens
+            lensConfig={attachment.data.visualization}
+            dataViews={startDependencies.dataViews}
+            lens={startDependencies.lens}
+            uiActions={startDependencies.uiActions}
+            timeRange={timeRange}
+            registerActionButtons={callbacks?.registerActionButtons}
+          />
+        </Suspense>
+      );
+    },
   };
 };

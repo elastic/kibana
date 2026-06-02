@@ -26,6 +26,8 @@ export const timeseriesCommand = {
   methods: timeseriesCommandMethods,
   metadata: {
     type: 'source' as const,
+    subquerySource: true,
+    subquerySourceHidden: !(process.env.NODE_ENV === 'test'),
     hidden: false,
     preview: true,
     isTimeseries: true,
@@ -38,7 +40,7 @@ export const timeseriesCommand = {
         'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
-    declaration: '',
+    declaration: 'TS timeseries_index [METADATA fields]',
     examples: ['TS index', 'TS index, index2'],
   },
 };

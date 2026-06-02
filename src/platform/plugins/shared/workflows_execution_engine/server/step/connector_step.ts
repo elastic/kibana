@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
+import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -20,10 +20,64 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
+/**
+ * Connector step types that support Layer 1 (mid-stream) response size enforcement
+ * via fetchOptions.max_content_length. All other connector types get Layer 2 only
+ * (output size check in base class after the response is in memory).
+ * When adding Layer 1 for a new connector type (e.g. one that can return large payloads),
+ * add it here and implement the limit in that connector's Actions executor.
+ */
+const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
+
+// Axios internal error message format — no typed error code is exposed for this case,
+// so regex matching is the only reliable detection method.
+const ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN = /maxContentLength size of (\d+) exceeded/;
+
+const getActionsMaxContentLengthLimit = (errorMessage: string): number | undefined => {
+  const match = errorMessage.match(ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN);
+  if (!match) {
+    return undefined;
+  }
+  return Number(match[1]);
+};
+
+const getContentLengthBytes = (
+  errorMeta: Record<string, unknown> | undefined
+): number | undefined => {
+  const contentLengthBytes = errorMeta?.contentLengthBytes;
+  return typeof contentLengthBytes === 'number' ? contentLengthBytes : undefined;
+};
+
+const getEstimatedOutputBytes = (
+  errorMeta: Record<string, unknown> | undefined
+): number | undefined => {
+  const estimatedOutputBytes = errorMeta?.estimatedOutputBytes;
+  return typeof estimatedOutputBytes === 'number' ? estimatedOutputBytes : undefined;
+};
+
+const isSpecConnectorType = (connectorType: string): boolean =>
+  getConnectorSpec(`.${connectorType}`) !== undefined;
+
+const shouldUseWorkflowTransportLimit = ({
+  rawType,
+  stepType,
+  hasStepMaxSize,
+}: {
+  rawType: string;
+  stepType: string;
+  hasStepMaxSize: boolean;
+}): boolean => {
+  if (CONNECTOR_TYPES_WITH_LAYER_1.has(rawType)) {
+    return true;
+  }
+
+  return hasStepMaxSize && isSpecConnectorType(stepType);
+};
+
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
   'connector-id'?: string;
-  with?: Record<string, any>;
+  with?: Record<string, unknown>;
 }
 
 export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
@@ -43,7 +97,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     );
   }
 
-  public async _run(withInputs?: any): Promise<RunStepResult> {
+  public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {
     try {
       const step = this.step;
 
@@ -55,30 +109,64 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console') {
-        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
+        const consoleMessage = withInputs?.message ?? '';
+
+        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${consoleMessage}`, {
           workflow: { step_id: step.name },
           event: { action: 'log', outcome: 'success' },
           tags: ['console', 'log'],
         });
         return {
           input: withInputs,
-          output: withInputs.message,
+          output: consoleMessage,
           error: undefined,
         };
       }
 
       // Build final rendered inputs
-      const renderedInputs = isSubAction
+      let renderedInputs = isSubAction
         ? {
             subActionParams: withInputs,
             subAction: subActionName,
           }
         : withInputs;
 
+      // For connector types with Layer 1 support, inject max_content_length
+      // so axios can abort mid-stream (Layer 1 OOM prevention).
+      // The HTTP system connector uses "fetcher"; spec-based connectors use "fetchOptions".
+      const rawType = step.type;
+      const isSpecConnector = isSpecConnectorType(stepType);
+      const hasStepMaxSize = Boolean(step['max-step-size']);
+      const usesWorkflowTransportLimit = shouldUseWorkflowTransportLimit({
+        rawType,
+        stepType,
+        hasStepMaxSize,
+      });
+      if (usesWorkflowTransportLimit) {
+        const maxBytes = this.getMaxResponseBytes();
+        if (maxBytes > 0) {
+          const fetchKey = CONNECTOR_TYPES_WITH_LAYER_1.has(rawType) ? 'fetcher' : 'fetchOptions';
+          renderedInputs = {
+            ...renderedInputs,
+            [fetchKey]: {
+              ...(renderedInputs?.[fetchKey] || {}),
+              max_content_length: maxBytes,
+            },
+          };
+        }
+      }
+
       const connectorIdRendered =
         this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
           step['connector-id']
         );
+
+      if (!this.connectorExecutor) {
+        throw new ExecutionError({
+          type: 'ConnectorExecutionError',
+          message: 'Connector executor is not set',
+        });
+      }
 
       let output: ActionTypeExecutorResult<unknown>;
       if (connectorIdRendered) {
@@ -86,7 +174,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         output = await this.connectorExecutor.execute({
           connectorType: stepType,
           connectorNameOrId: connectorIdRendered,
-          input: renderedInputs,
+          input: renderedInputs || {},
           abortController: this.stepExecutionRuntime.abortController,
         });
       } else {
@@ -94,7 +182,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         if (systemConnectorActionTypeId) {
           output = await this.connectorExecutor.executeSystemConnector({
             connectorType: systemConnectorActionTypeId,
-            input: renderedInputs,
+            input: renderedInputs || {},
             abortController: this.stepExecutionRuntime.abortController,
           });
         } else {
@@ -102,7 +190,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         }
       }
 
-      const { data, status, message, serviceMessage } = output;
+      const { data, status, message, serviceMessage, errorMeta } = output;
 
       if (status === 'ok') {
         return {
@@ -111,12 +199,40 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           error: undefined,
         };
       } else {
+        const errorMsg = serviceMessage ?? message ?? 'Unknown error';
+
+        if (errorMsg.includes('maxContentLength')) {
+          if (!usesWorkflowTransportLimit) {
+            const limitBytes = getActionsMaxContentLengthLimit(errorMsg);
+            return {
+              input: withInputs,
+              output: undefined,
+              error: new ActionsResponseContentLengthLimitError(step.name, {
+                limitBytes,
+                contentLengthBytes: getContentLengthBytes(errorMeta),
+                estimatedOutputBytes: getEstimatedOutputBytes(errorMeta),
+                canOverrideWithMaxStepSize: isSpecConnector,
+              }),
+            };
+          }
+
+          const limitBytes = this.getMaxResponseBytes();
+          return {
+            input: withInputs,
+            output: undefined,
+            error: new ResponseSizeLimitError(limitBytes, step.name, {
+              contentLengthBytes: getContentLengthBytes(errorMeta),
+              estimatedOutputBytes: getEstimatedOutputBytes(errorMeta),
+            }),
+          };
+        }
+
         return {
           input: withInputs,
           output: undefined,
           error: new ExecutionError({
             type: 'ConnectorExecutionError',
-            message: serviceMessage ?? message ?? 'Unknown error',
+            message: errorMsg,
           }),
         };
       }

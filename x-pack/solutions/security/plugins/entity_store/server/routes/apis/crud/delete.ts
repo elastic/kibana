@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import path from 'node:path';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { EntityNotFoundError } from '../../../domain/errors';
 
 const bodySchema = z.object({
-  entityId: z.string(),
+  entityId: z.string().describe('The identifier of the entity to delete.'),
 });
 
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
     .delete({
-      path: '/internal/security/entity-store/entities/',
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.CRUD_DELETE,
+      access: 'public',
+      summary: 'Delete an entity',
+      description:
+        'Delete a single entity record from the Entity Store. The entity is immediately removed from the latest index.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -29,11 +37,14 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_delete.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

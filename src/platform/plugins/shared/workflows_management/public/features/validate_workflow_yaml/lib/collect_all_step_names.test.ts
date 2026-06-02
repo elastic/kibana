@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import { collectAllStepNames } from './collect_all_step_names';
+
+function parse(yaml: string) {
+  const lineCounter = new LineCounter();
+  const yamlDocument = parseDocument(yaml, { lineCounter });
+  return { yamlDocument, lineCounter };
+}
 
 describe('collectAllStepNames', () => {
   it('should return empty array for empty document', () => {
-    const yamlDocument = parseDocument('');
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse('');
+    const result = collectAllStepNames(yamlDocument, lineCounter);
     expect(result).toEqual([]);
   });
 
   it('should return empty array for document without contents', () => {
-    const yamlDocument = parseDocument('');
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse('');
+    const result = collectAllStepNames(yamlDocument, lineCounter);
     expect(result).toEqual([]);
   });
 
@@ -30,8 +36,8 @@ steps:
     action: test
   - name: Second Step
     action: test2`;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe('First Step');
@@ -54,8 +60,8 @@ steps:
     else:
       - name: Else Step
         action: test2`;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     // Note: collectAllStepNames only collects direct step names under 'steps' or 'else',
     // not those under 'then' blocks
@@ -74,8 +80,8 @@ steps:
   - name: Unique Name
     action: test3
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(3);
     expect(result.filter((r) => r.name === 'Duplicate Name')).toHaveLength(2);
@@ -93,8 +99,8 @@ steps:
       name: This is not a step name
       value: 123
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('Step Name');
@@ -107,8 +113,8 @@ steps:
     action: test
   - name: Valid Name
     action: test2`;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     // Empty step names are not collected since they have no value
     expect(result).toHaveLength(1);
@@ -122,8 +128,8 @@ steps:
     action: test
   - name: Second Step with longer name
     action: test2`;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(2);
 
@@ -156,11 +162,40 @@ steps:
       - name: Inner Step
         action: test
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = collectAllStepNames(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
 
     // Should only collect direct step names, not those inside 'do' blocks
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('Foreach Step');
+  });
+
+  it('should collect step names from on-failure fallback steps', () => {
+    const yaml = `
+name: Test Workflow
+steps:
+  - name: step_one
+    type: slack
+    on-failure:
+      fallback:
+        - name: notify_failure
+          type: email
+  - name: step_two
+    type: slack
+    on-failure:
+      fallback:
+        - name: notify_failure
+          type: email
+`;
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = collectAllStepNames(yamlDocument, lineCounter);
+
+    expect(result).toHaveLength(4);
+    expect(result.map((r) => r.name)).toEqual([
+      'step_one',
+      'notify_failure',
+      'step_two',
+      'notify_failure',
+    ]);
   });
 });

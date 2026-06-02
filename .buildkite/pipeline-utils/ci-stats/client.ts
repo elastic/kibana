@@ -47,10 +47,12 @@ export interface TestGroupRunOrderResponse {
     count: number;
     queue?: string;
     groups: Array<{
+      title?: string;
       durationMin: number;
       names: string[];
     }>;
     tooLong?: Array<{ config: string; durationMin: number }>;
+    tooLongMin?: number;
     namesWithoutDurations: string[];
   }>;
 }
@@ -170,6 +172,7 @@ export class CiStatsClient {
       queue?: string;
       defaultMin?: number;
       maxMin: number;
+      tooLongMin?: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
       warmupMin?: number;

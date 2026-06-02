@@ -14,6 +14,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -105,6 +106,7 @@ describe('SloOverviewFlyout', () => {
             },
           },
         },
+        telemetry: mockTelemetryClient,
       },
     });
 
@@ -411,13 +413,75 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
+    const nameCell = screen.getByTestId('apmSloNameCell');
+    expect(nameCell).toBeInTheDocument();
+    // Name cell is no longer an interactive link; clicking it should not open SLO details.
+    expect(nameCell.tagName).not.toBe('A');
+    expect(nameCell.tagName).not.toBe('BUTTON');
 
-    const sloLink = screen.getByTestId('apmSloNameLink');
-    fireEvent.mouseOver(sloLink);
+    fireEvent.mouseOver(nameCell);
 
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toHaveTextContent(sloName);
+    });
+  });
+
+  it('toggles the expand button between maximize and minimize when clicked', async () => {
+    const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
+    const getSLODetailsFlyoutMock = jest.fn(() => null);
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        uiSettings: { get: jest.fn().mockReturnValue('0.00%') },
+        slo: { getSLODetailsFlyout: getSLODetailsFlyoutMock },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        telemetry: mockTelemetryClient,
+      },
+    });
+
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
+
+    const expandButton = screen.getByTestId('apmSloExpandButton');
+    expect(expandButton).toBeInTheDocument();
+    expect(expandButton).toHaveAttribute('aria-label', 'Open SLO details');
+    expect(getSLODetailsFlyoutMock).not.toHaveBeenCalled();
+
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Close SLO details'
+      );
+    });
+    expect(getSLODetailsFlyoutMock).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('apmSloExpandButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Open SLO details'
+      );
     });
   });
 

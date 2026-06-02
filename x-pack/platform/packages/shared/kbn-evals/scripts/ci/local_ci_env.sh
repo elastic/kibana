@@ -15,7 +15,7 @@ die() {
 # This file uses bash features (`[[ ]]`, here-strings, etc.), so sourcing it from zsh will behave poorly
 # and can terminate the session. Ensure we're running under bash.
 if [[ -z "${BASH_VERSION:-}" ]]; then
-  die "This script must be sourced from bash. Try: bash -lc 'source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json && env | rg \"^(LITELLM_|EVALUATION_|EVALUATIONS_ES_|TRACING_ES_|TRACING_EXPORTERS|KIBANA_TESTING_AI_CONNECTORS)\"'"
+  die "This script must be sourced from bash. Try: bash -lc 'source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json && env | rg \"^(LITELLM_|EVALUATION_|EVALUATIONS_KBN_|TRACING_ES_|TRACING_EXPORTERS|KIBANA_TESTING_AI_CONNECTORS)\"'"
 fi
 
 CONFIG_PATH="${1:-x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json}"
@@ -38,14 +38,13 @@ LITELLM_TEAM_NAME="$(jq -r '.litellm.teamName // "kibana-ci-evals"' <<<"$CONFIG_
 
 EVALUATION_CONNECTOR_ID="$(jq -r '.evaluationConnectorId // empty' <<<"$CONFIG_JSON")"
 
-EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$CONFIG_JSON")"
-EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$CONFIG_JSON")"
-
 TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$CONFIG_JSON")"
 TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$CONFIG_JSON")"
 
 TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$CONFIG_JSON")"
 GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$CONFIG_JSON")"
+EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$CONFIG_JSON")"
+EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$CONFIG_JSON")"
 
 if [[ -z "$LITELLM_BASE_URL" || -z "$LITELLM_VIRTUAL_KEY" ]]; then
   die "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
@@ -59,11 +58,15 @@ export LITELLM_BASE_URL
 export LITELLM_VIRTUAL_KEY
 export LITELLM_TEAM_NAME
 export EVALUATION_CONNECTOR_ID
-export EVALUATIONS_ES_URL
-export EVALUATIONS_ES_API_KEY
 export TRACING_ES_URL
 export TRACING_ES_API_KEY
 export GCS_CREDENTIALS
+if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
+  export EVALUATIONS_KBN_URL
+fi
+if [[ -n "$EVALUATIONS_KBN_API_KEY" ]]; then
+  export EVALUATIONS_KBN_API_KEY
+fi
 if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
   export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
 fi
@@ -114,7 +117,8 @@ echo "  LITELLM_BASE_URL=$LITELLM_BASE_URL"
 echo "  LITELLM_TEAM_NAME=$LITELLM_TEAM_NAME"
 echo "  LITELLM_TEAM_ID=${LITELLM_TEAM_ID:+<redacted>}"
 echo "  EVALUATION_CONNECTOR_ID=$EVALUATION_CONNECTOR_ID"
-echo "  EVALUATIONS_ES_URL=${EVALUATIONS_ES_URL:-<empty>}"
+echo "  EVALUATIONS_KBN_URL=${EVALUATIONS_KBN_URL:-<empty>}"
+echo "  EVALUATIONS_KBN_API_KEY=${EVALUATIONS_KBN_API_KEY:+<redacted>}"
 echo "  TRACING_ES_URL=${TRACING_ES_URL:-<empty>}"
 if [[ -n "${TRACING_EXPORTERS:-}" ]]; then
   echo "  TRACING_EXPORTERS=<set (JSON array)>"

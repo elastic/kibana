@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
   formatDate,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -34,19 +35,16 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { useTableSeverity } from '../components/controls/select_severity';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import type { AnomalyChartsEmbeddableState } from '../../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -62,8 +60,6 @@ interface AnomalyContextMenuProps {
   chartsCount: number;
   mergedGroupsAndJobsIds: string[];
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
@@ -165,7 +161,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       // so we are not passing the time range here
       return {
         ...config,
-        ...(timeRange ? { timeRange } : {}),
+        ...(timeRange ? { time_range: timeRange } : {}),
         jobIds: mergedGroupsAndJobsIds,
         maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
         severityThreshold: severity.val,
@@ -277,7 +273,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -299,7 +294,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToCasePanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
           defaultMessage: 'Add to case',
         }),
@@ -330,23 +324,33 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
-              <EuiButtonIcon
-                size="s"
-                aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="text"
-                display="base"
-                iconType="boxesHorizontal"
-                onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                data-test-subj="mlExplorerAnomalyPanelMenu"
-                disabled={chartsCount < 1}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  size="s"
+                  aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+                    defaultMessage: 'Actions',
+                  })}
+                  color="text"
+                  display="base"
+                  iconType="boxesVertical"
+                  onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                  data-test-subj="mlExplorerAnomalyPanelMenu"
+                  disabled={chartsCount < 1}
+                />
+              </EuiToolTip>
             }
             isOpen={isMenuOpen}
             closePopover={setIsMenuOpen.bind(null, false)}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverAriaLabel', {
+              defaultMessage: 'Anomaly actions menu',
+            })}
           >
             <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>

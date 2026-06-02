@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.5';
+const REGISTRY_SPEC_MAX_VERSION = '3.6';
 
 export const config: PluginConfigDescriptor = {
   dynamicConfig: {
@@ -59,6 +59,7 @@ export const config: PluginConfigDescriptor = {
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
+    isAirGapped: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -223,9 +224,9 @@ export const config: PluginConfigDescriptor = {
           ),
           backgroundSync: schema.maybe(
             schema.object({
-              enabled: schema.boolean({ defaultValue: false }),
+              enabled: schema.boolean({ defaultValue: true }),
               dryRun: schema.boolean({ defaultValue: false }),
-              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
+              interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
         })
@@ -255,6 +256,15 @@ export const config: PluginConfigDescriptor = {
           maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
           /** Batch size for package upgrade operations */
           packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
+        })
+      ),
+      /**
+       * Package installation settings to tune ES operation concurrency and error handling.
+       */
+      packageInstallation: schema.maybe(
+        schema.object({
+          /** Maximum data stream operations to run concurrently per Kibana node during package installation */
+          maxConcurrentDatastreamOperations: schema.number({ defaultValue: 50, min: 1, max: 50 }),
         })
       ),
       developer: schema.object({
@@ -417,6 +427,11 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       versionSpecificPolicyAssignment: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      unenrollInactiveAgents: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
         })

@@ -27,6 +27,7 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -108,6 +109,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -125,6 +127,8 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     });
 
     unsecuredSavedObjectsClient.get.mockResolvedValue(schedulerSO);

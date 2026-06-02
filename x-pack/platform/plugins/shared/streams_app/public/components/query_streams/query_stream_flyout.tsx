@@ -63,6 +63,7 @@ export function QueryStreamFlyout({
   disableSubmitWhenLoading = false,
 }: QueryStreamFlyoutProps) {
   const { core, dependencies } = useKibana();
+  const { uiSettings } = core;
   const { data } = dependencies.start;
 
   const { timeState } = useTimefilter();
@@ -72,7 +73,7 @@ export function QueryStreamFlyout({
   const { formState, register, handleSubmit, setValue, watch } = useForm<FormState>({
     defaultValues: {
       name: initialName,
-      esqlQuery: '',
+      esqlQuery: initialEsql ?? '',
     },
   });
 
@@ -110,11 +111,12 @@ export function QueryStreamFlyout({
         start: timeStateRef.current.start,
         end: timeStateRef.current.end,
         dropNullColumns: true,
+        uiSettings,
       });
 
       return esqlResultToPlainObjects(results) as SampleDocument[];
     },
-    [data.search.search]
+    [data.search.search, uiSettings]
   );
 
   useEffect(() => {
@@ -136,7 +138,12 @@ export function QueryStreamFlyout({
   });
 
   return (
-    <EuiFlyout size="l" onClose={onClose} aria-labelledby="query-stream-flyout-title">
+    <EuiFlyout
+      size="l"
+      onClose={onClose}
+      aria-labelledby="query-stream-flyout-title"
+      data-test-subj="streamsAppQueryStreamFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id="query-stream-flyout-title">{title}</h2>
@@ -182,6 +189,13 @@ export function QueryStreamFlyout({
                           defaultMessage: 'View documentation',
                         })}
                       </EuiLink>
+                      <EuiSpacer size="s" />
+                      <EuiText component="p" size="xs" color="subdued">
+                        {i18n.translate('xpack.streams.queryStreamFlyout.isolationNote', {
+                          defaultMessage:
+                            "This query stream's data is independent and won't appear in the parent stream's queries. Access it directly through Discover or its ES|QL view.",
+                        })}
+                      </EuiText>
                       <EuiSpacer size="m" />
                       <QueryStreamForm>
                         {showNameField && (
@@ -226,7 +240,7 @@ export function QueryStreamFlyout({
                       <EuiFlexItem grow={false} data-test-subj="streamsAppQueryStreamPreviewPanel">
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
                           <EuiFlexGroup component="span" gutterSize="s">
-                            <EuiIcon type="inspect" />
+                            <EuiIcon type="inspect" aria-hidden={true} />
                             <strong>
                               {i18n.translate('xpack.streams.queryStreamFlyout.previewHeader', {
                                 defaultMessage: 'Data Preview for query stream',

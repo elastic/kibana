@@ -207,11 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(
-                anErrorMessageWith(
-                  '[request body]: entries.0.value: Array must contain at least 1 element(s)'
-                )
-              );
+              .expect(anErrorMessageWith(/entries\.0\.value.*(?:at least 1|>=1 items)/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if signer is set to match_any and a string is provided`, async () => {

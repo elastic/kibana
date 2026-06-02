@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { partitionStream } from '@kbn/streams-ai';
 import { Streams } from '@kbn/streams-schema';
+import { conditionSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
@@ -26,6 +27,8 @@ export interface SuggestPartitionsParams {
     connector_id: string;
     start: number;
     end: number;
+    user_prompt?: string;
+    existing_partitions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
   };
 }
 
@@ -35,14 +38,15 @@ export const suggestPartitionsSchema = z.object({
     connector_id: z.string(),
     start: z.number(),
     end: z.number(),
+    user_prompt: z.string().max(2000).optional(),
+    existing_partitions: z
+      .array(z.object({ name: z.string(), condition: conditionSchema }))
+      .optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
 type SuggestPartitionsResponse = Observable<
-  ServerSentEventBase<
-    'suggested_partitions',
-    { partitions: Awaited<ReturnType<typeof partitionStream>> }
-  >
+  ServerSentEventBase<'suggested_partitions', Awaited<ReturnType<typeof partitionStream>>>
 >;
 
 export const suggestPartitionsRoute = createServerRoute({
@@ -68,31 +72,41 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { inferenceClient, scopedClusterClient, streamsClient, getFeatureClient } =
+      await getScopedClients({
+        request,
+      });
+
+    const { connector_id: connectorId } = params.body;
 
     const stream = await streamsClient.getStream(params.path.name);
-    if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new StatusError('Partitioning suggestions are only available for ingest streams', 400);
+    if (!Streams.WiredStream.Definition.is(stream)) {
+      throw new StatusError('Partitioning suggestions are only available for wired streams', 400);
     }
 
     const partitionsPromise = partitionStream({
       definition: stream,
-      inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+      inferenceClient: inferenceClient.bindTo({ connectorId }),
       esClient: scopedClusterClient.asCurrentUser,
       logger,
       start: params.body.start,
       end: params.body.end,
-      maxSteps: 1, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
+      maxSteps: 4, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
       signal: getRequestAbortSignal(request),
+      userPrompt: params.body.user_prompt,
+      existingPartitions: params.body.existing_partitions,
+      getFeatures: async (filters) => {
+        const featureClient = await getFeatureClient();
+        const { hits } = await featureClient.getFeatures(params.path.name, filters);
+        return hits;
+      },
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
     // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
     return from(partitionsPromise).pipe(
-      map((partitions) => ({
-        partitions,
+      map((suggestions) => ({
+        ...suggestions,
         type: 'suggested_partitions' as const,
       }))
     );

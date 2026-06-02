@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BooleanFromString } from '@kbn/zod-helpers';
+
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -87,16 +89,32 @@ const lifecycleStatsRoute = createServerRoute({
       throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
     }
 
-    const { policy } = await scopedClusterClient.asCurrentUser.ilm
-      .getLifecycle({ name: lifecycle.ilm.policy })
-      .then((policies) => policies[lifecycle.ilm.policy]);
+    const policyName = lifecycle.ilm.policy;
+    let policyDetails: Awaited<
+      ReturnType<typeof scopedClusterClient.asCurrentUser.ilm.getLifecycle>
+    >;
+    try {
+      policyDetails = await scopedClusterClient.asCurrentUser.ilm.getLifecycle({
+        name: policyName,
+      });
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return { phases: undefined, policy_missing: true };
+      }
+      throw error;
+    }
+
+    const { policy } = policyDetails[policyName];
 
     const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
       scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
       scopedClusterClient.asCurrentUser.indices.stats({ index: dataStream.name }),
     ]);
 
-    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }) };
+    return {
+      phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }),
+      policy_missing: false,
+    };
   },
 });
 
@@ -158,12 +176,10 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
   },
 });
 
-const ilmPhaseSchema = z
-  .object({
-    min_age: z.string().optional(),
-    actions: z.record(z.string(), z.any()).optional(),
-  })
-  .passthrough();
+const ilmPhaseSchema = z.looseObject({
+  min_age: z.string().optional(),
+  actions: z.record(z.string(), z.any()).optional(),
+});
 
 const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/streams/lifecycle/_policy',

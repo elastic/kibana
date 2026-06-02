@@ -70,11 +70,15 @@ export const EmptyList: FunctionComponent = () => {
         <EuiPopover
           isOpen={showPopover}
           closePopover={() => setShowPopover(false)}
+          aria-label={i18n.translate(
+            'xpack.ingestPipelines.list.table.emptyPrompt.createPipelinePopoverAriaLabel',
+            { defaultMessage: 'Create pipeline options' }
+          )}
           button={
             <EuiButton
               fill
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               data-test-subj="emptyStateCreatePipelineDropdown"
               key="emptyStateCreatePipelineDropdown"
               onClick={() => setShowPopover((previousBool) => !previousBool)}

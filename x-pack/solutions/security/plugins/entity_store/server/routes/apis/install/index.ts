@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import path from 'node:path';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { getMissingPrivileges } from '../utils/get_missing_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.INSTALL,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.INSTALL,
+      access: 'public',
+      summary: 'Install the Entity Store',
+      description:
+        'Install the Entity Store and create engines for the specified entity types. ' +
+        'A single `logExtraction` configuration is shared across all entity types. ' +
+        'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'To change settings after install, use the update endpoint.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -26,20 +36,30 @@ export function registerInstall(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(BodySchema),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entity_store_install.yaml'),
+        },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
-        const { entityTypes, logExtraction: params } = req.body;
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+        } = entityStoreCtx;
+        const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
-        const privileges = await assetManager.getPrivileges(req, params?.additionalIndexPatterns);
+        const privileges = await assetManager.getPrivileges(
+          req,
+          logExtraction?.additionalIndexPatterns
+        );
         if (!privileges.hasAllRequested) {
           return res.forbidden({
             body: {
@@ -56,28 +76,10 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(req, toInstall, params);
+        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
+        await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });
       })
     );
-}
-
-function getMissingPrivileges({ privileges: { kibana, elasticsearch } }: CheckPrivilegesResponse) {
-  const unauthorized = (p: { authorized: boolean }) => !p.authorized;
-  const toPrivilege = (p: { privilege: string }) => p.privilege;
-
-  return {
-    missing_kibana_privileges: kibana.filter(unauthorized).map(toPrivilege),
-    missing_elasticsearch_privileges: {
-      cluster: elasticsearch.cluster.filter(unauthorized).map(toPrivilege),
-      index: Object.entries(elasticsearch.index).reduce<
-        Array<{ index: string; privileges: string[] }>
-      >((acc, [index, p]) => {
-        const missing = p.filter(unauthorized).map(toPrivilege);
-        if (missing.length) acc.push({ index, privileges: missing });
-        return acc;
-      }, []),
-    },
-  };
 }

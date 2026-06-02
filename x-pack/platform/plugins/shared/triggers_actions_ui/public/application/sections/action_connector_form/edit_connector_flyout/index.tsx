@@ -7,12 +7,17 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { IconType } from '@elastic/eui';
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
   EuiConfirmModal,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -23,11 +28,10 @@ import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
-  ActionTypeModel,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../../types';
@@ -61,6 +65,7 @@ const getConnectorWithoutSecrets = (
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
+  authMode: connector.authMode ?? 'shared',
 });
 
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
@@ -77,6 +82,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const {
     docLinks,
+    http,
+    uiSettings,
     application: { capabilities },
   } = useKibana().services;
 
@@ -133,9 +140,46 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
-  const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
-  const disabled = !isFormModified || hasErrors || isSaving;
+
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId: connector.actionTypeId,
+    http,
+    uiSettings,
+  });
+
+  // Delay the spinner so quick spec loads don't flash a loading state.
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
+  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
+    isLoadingActionTypeModel,
+  ]);
+
+  const showButtons =
+    canSave &&
+    actionTypeModel &&
+    !connector.isPreconfigured &&
+    !isLoadingActionTypeModel &&
+    !actionTypeModelError;
+  const disabled =
+    !isFormModified ||
+    hasErrors ||
+    isSaving ||
+    isLoadingActionTypeModel ||
+    !!actionTypeModelError ||
+    !actionTypeModel;
+
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+      ),
+    [connector]
+  );
 
   const onExecutionAction = useCallback(async () => {
     try {
@@ -270,14 +314,80 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
-                isEdit={isEdit}
-                onChange={setFormState}
-                onFormModifiedChange={onFormModifiedChange}
-              />
-              {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+              {showLoadingSpinner && (
+                <EuiFlexGroup
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  style={{ minHeight: 200 }}
+                  aria-live="polite"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.loadingConnectorConfiguration',
+                      {
+                        defaultMessage: 'Loading connector configuration...',
+                      }
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+
+              {actionTypeModelError && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-spec-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                      {
+                        defaultMessage: 'Failed to load connector configuration',
+                      }
+                    )}
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                        }
+                      )}
+                    </p>
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      color="danger"
+                      data-test-subj="connector-spec-load-retry"
+                      onClick={() => refetchConnectorSpec()}
+                    >
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorRetry',
+                        { defaultMessage: 'Retry' }
+                      )}
+                    </EuiButton>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
+                <>
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={connectorWithoutSecrets}
+                    isEdit={isEdit}
+                    onChange={setFormState}
+                    onFormModifiedChange={onFormModifiedChange}
+                  />
+                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                </>
+              )}
             </>
           )}
         </>
@@ -294,12 +404,17 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
+    actionTypeModelError,
     isEdit,
+    isLoadingActionTypeModel,
+    showLoadingSpinner,
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
+    refetchConnectorSpec,
   ]);
 
   const renderTestTab = useCallback(() => {
@@ -342,9 +457,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return actionTypeModel?.isExperimental;
   }, [actionTypeModel, connector]);
 
-  const isTestable =
-    isTestableProp ??
-    (!actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack);
+  const isTestable = isTestableProp ?? actionTypeRegistry.has(connector.actionTypeId);
 
   return (
     <>
@@ -358,7 +471,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           isPreconfigured={connector.isPreconfigured}
           connectorName={connector.name}
           connectorTypeDesc={
-            actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage
+            actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage || ''
           }
           setTab={handleSetTab}
           selectedTab={selectedTab}

@@ -31,7 +31,7 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing mappings before each test
       await apiServices.streams.clearStreamMappings('logs.otel.info');
@@ -157,7 +157,7 @@ test.describe(
 
       // Open the field actions menu
       await pageObjects.streams.openFieldActionsMenu();
-      await pageObjects.streams.clickFieldAction('Map field');
+      await pageObjects.streams.clickFieldAction('Edit field');
 
       // Verify the flyout opens and set field mapping type
       await pageObjects.streams.expectFieldFlyoutOpen();
@@ -199,7 +199,7 @@ test.describe(
 
       // Open the field actions menu
       await pageObjects.streams.openFieldActionsMenu();
-      await pageObjects.streams.clickFieldAction('Map field');
+      await pageObjects.streams.clickFieldAction('Edit field');
 
       // Verify the flyout opens and set field mapping type
       await pageObjects.streams.expectFieldFlyoutOpen();
@@ -291,6 +291,28 @@ test.describe(
         columnName: 'status',
         rowIndex: 0,
         value: 'Mapped',
+      });
+    });
+
+    test('should allow adding a description when mapping a field', async ({ pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await pageObjects.streams.searchFields('resource.attributes.host.ip');
+      await pageObjects.streams.openFieldActionsMenu();
+      await pageObjects.streams.clickFieldAction('Edit field');
+      await pageObjects.streams.expectFieldFlyoutOpen();
+      await pageObjects.streams.setFieldMappingType('ip');
+      await pageObjects.streams.fillFieldDescription('The IP address of the host');
+      await pageObjects.streams.stageFieldMappingChanges();
+
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
+
+      // Verify the description is visible in the table
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'description',
+        rowIndex: 0,
+        value: 'The IP address of the host',
       });
     });
   }

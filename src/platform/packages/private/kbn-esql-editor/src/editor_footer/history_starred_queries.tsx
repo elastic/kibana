@@ -105,7 +105,9 @@ export const getTableColumns = (
   const columnsArray = [
     {
       field: 'status',
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.statusColumnHeader', {
+        defaultMessage: 'Status',
+      }),
       sortable: false,
       'data-test-subj': 'status',
       render: (status: QueryHistoryItem['status']) => {
@@ -118,7 +120,7 @@ export const getTableColumns = (
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-                type="checkCircle"
+                type="checkCircleFill"
                 color="text"
                 size="m"
                 iconProps={{
@@ -195,7 +197,9 @@ export const getTableColumns = (
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.actionsColumnHeader', {
+        defaultMessage: 'Actions',
+      }),
       actions,
       'data-test-subj': 'actions',
       width: isOnReducedSpaceLayout ? 'auto' : '60px',
@@ -317,17 +321,24 @@ export function QueryList({
                   })}
                 >
                   {(copy) => (
-                    <EuiButtonIcon
-                      iconType="copyClipboard"
-                      iconSize="m"
-                      onClick={copy}
-                      css={css`
-                        cursor: pointer;
-                      `}
-                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                    <EuiToolTip
+                      content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="copy"
+                        iconSize="m"
+                        onClick={copy}
+                        css={css`
+                          cursor: pointer;
+                        `}
+                        aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                          defaultMessage: 'Copy query to clipboard',
+                        })}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -419,12 +430,8 @@ export function QueryColumn({
   return (
     <>
       {isExpandable && (
-        <EuiButtonIcon
-          onClick={() => {
-            setIsRowExpanded(!isRowExpanded);
-          }}
-          data-test-subj="ESQLEditor-queryList-queryString-expanded"
-          aria-label={
+        <EuiToolTip
+          content={
             isRowExpanded
               ? i18n.translate('esqlEditor.query.collapseLabel', {
                   defaultMessage: 'Collapse',
@@ -433,13 +440,30 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
-          size="xs"
-          color="text"
-          css={css`
-            flex-shrink: 0;
-          `}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              setIsRowExpanded(!isRowExpanded);
+            }}
+            data-test-subj="ESQLEditor-queryList-queryString-expanded"
+            aria-label={
+              isRowExpanded
+                ? i18n.translate('esqlEditor.query.collapseLabel', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('esqlEditor.query.expandLabel', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+            size="xs"
+            color="text"
+            css={css`
+              flex-shrink: 0;
+            `}
+          />
+        </EuiToolTip>
       )}
       <span
         css={css`
@@ -465,12 +489,14 @@ export function HistoryAndStarredQueriesTabs({
   containerWidth,
   isSpaceReduced,
   onUpdateAndSubmit,
+  onClose,
   height,
   starredQueriesService = null,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string, querySource: QuerySource) => void;
+  onClose: () => void;
   isSpaceReduced?: boolean;
   height: number;
   starredQueriesService: EsqlStarredQueriesService | null;
@@ -725,6 +751,26 @@ export function HistoryAndStarredQueriesTabs({
                 />
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('esqlEditor.history.closeLabel', {
+                  defaultMessage: 'Close',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="cross"
+                  size="xs"
+                  color="text"
+                  onClick={onClose}
+                  aria-label={i18n.translate('esqlEditor.history.closeLabel', {
+                    defaultMessage: 'Close',
+                  })}
+                  data-test-subj="ESQLEditor-history-close-button"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -48,7 +48,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',
+            'ruleChangesHistoryEnabled',
+            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
+          '--xpack.alerting.ruleChangeTracking.enabled=true',
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
             __dirname,

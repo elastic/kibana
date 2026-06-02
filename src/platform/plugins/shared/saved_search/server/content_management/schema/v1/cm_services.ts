@@ -16,9 +16,9 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-import { SCHEMA_SEARCH_MODEL_VERSION_11 } from '../../../saved_objects/schema';
+import { SCHEMA_DISCOVER_SESSION_LATEST } from '../../../saved_objects/schema';
 
-const savedSearchSavedObjectSchema = savedObjectSchema(SCHEMA_SEARCH_MODEL_VERSION_11);
+const savedSearchSavedObjectSchema = savedObjectSchema(SCHEMA_DISCOVER_SESSION_LATEST);
 
 const savedSearchCreateOptionsSchema = schema.maybe(
   schema.object({
@@ -35,8 +35,8 @@ const savedSearchUpdateOptionsSchema = schema.maybe(
 );
 const savedSearchSearchOptionsSchema = schema.maybe(
   schema.object({
-    searchFields: schema.maybe(schema.arrayOf(schema.string())),
-    fields: schema.maybe(schema.arrayOf(schema.string())),
+    searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   })
 );
 
@@ -56,7 +56,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchCreateOptionsSchema,
       },
       data: {
-        schema: SCHEMA_SEARCH_MODEL_VERSION_11,
+        schema: SCHEMA_DISCOVER_SESSION_LATEST,
       },
     },
     out: {
@@ -71,7 +71,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchUpdateOptionsSchema,
       },
       data: {
-        schema: SCHEMA_SEARCH_MODEL_VERSION_11,
+        schema: SCHEMA_DISCOVER_SESSION_LATEST,
       },
     },
   },

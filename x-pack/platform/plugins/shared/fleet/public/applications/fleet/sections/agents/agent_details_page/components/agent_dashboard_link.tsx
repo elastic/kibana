@@ -20,6 +20,7 @@ import {
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE,
   DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
 import { getDashboardIdForSpace } from '../../services/dashboard_helpers';
@@ -48,11 +49,15 @@ function useAgentDashboardLink(agent: Agent, packageName: string) {
 
   let link: string | undefined;
   if (agent.type === 'OPAMP') {
+    // 'elastic.display.name' is set by the Add Collector form (PR #262196) as the hostname/display
+    // name for the collector, and maps to service.instance.id in its self-telemetry. Fall back to
+    // agent.id for collectors enrolled before that field was introduced (9.4 compatibility).
+    const instanceId = agent.non_identifying_attributes?.['elastic.display.name'] ?? agent.id;
     link = dashboardLocator?.getRedirectUrl({
-      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_INTERNAL_TELEMETRY,
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
       query: {
         language: 'kuery',
-        query: `service.instance.id:${agent.id}`,
+        query: `service.instance.id:"${instanceId}"`,
       },
     });
   } else {
@@ -85,14 +90,17 @@ export const AgentDashboardLink: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
   const packageName =
-    agent.type === 'OPAMP' ? 'otel_internal_telemetry' : FLEET_ELASTIC_AGENT_PACKAGE;
+    agent.type === 'OPAMP'
+      ? FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE
+      : FLEET_ELASTIC_AGENT_PACKAGE;
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
-  const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
+  const isMetricsEnabled =
+    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
 
   const buttonArgs =
-    !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
+    !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
     <EuiButtonCompressed
@@ -109,26 +117,26 @@ export const AgentDashboardLink: React.FunctionComponent<{
     </EuiButtonCompressed>
   );
 
-  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
+  if (!isLoading && !isMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip"
-            defaultMessage="Logs and metrics for agent are not enabled in the agent policy."
+            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
+            defaultMessage="Metrics for agent are not enabled in the agent policy."
           />
         }
       >
         <EuiButtonCompressed
-          data-test-subj="agentDetails.enableLogsAndMetricsButton"
+          data-test-subj="agentDetails.enableMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
           disabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
-            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
-            defaultMessage="Enable logs and metrics"
+            id="xpack.fleet.agentDetails.enableMetricsLabel"
+            defaultMessage="Enable agent metrics"
           />
         </EuiButtonCompressed>
       </EuiToolTip>

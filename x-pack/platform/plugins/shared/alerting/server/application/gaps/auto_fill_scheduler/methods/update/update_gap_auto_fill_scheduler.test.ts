@@ -30,6 +30,7 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../../backfill_client/backfill_client.mock';
 import type { UpdateGapAutoFillSchedulerParams } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -55,6 +56,7 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn().mockResolvedValue('elastic'),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get() as Logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -73,6 +75,8 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const defaultRuleType = { type: 'test-rule-type', consumer: 'test-consumer' };

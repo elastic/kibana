@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router-dom';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
+import { useSyntheticsSettingsContext } from '../../contexts';
+import { SyntheticsDiagnosticsFlyoutLauncher } from './synthetics_diagnostics_flyout';
 
 export type SettingsTabId =
   | 'data-retention'
@@ -17,7 +20,8 @@ export type SettingsTabId =
   | 'alerting'
   | 'private-locations'
   | 'api-keys'
-  | 'advanced';
+  | 'advanced'
+  | 'remote-clusters';
 
 export const getSettingsPageHeader = (
   history: ReturnType<typeof useHistory>,
@@ -25,6 +29,7 @@ export const getSettingsPageHeader = (
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ tabId: SettingsTabId }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const { isServerless, isCCSEnabled } = useSyntheticsSettingsContext(); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -40,7 +45,7 @@ export const getSettingsPageHeader = (
     pageTitle: i18n.translate('xpack.synthetics.settingsRoute.pageHeaderTitle', {
       defaultMessage: 'Settings',
     }),
-    rightSideItems: [],
+    rightSideItems: [<SyntheticsDiagnosticsFlyoutLauncher key="syntheticsDiagnostics" />],
     tabs: [
       {
         label: i18n.translate('xpack.synthetics.settingsTabs.alerting', {
@@ -84,6 +89,17 @@ export const getSettingsPageHeader = (
         isSelected: tabId === 'advanced',
         href: replaceTab('advanced'),
       },
+      ...(!isServerless && isCCSEnabled
+        ? [
+            {
+              label: i18n.translate('xpack.synthetics.settingsTabs.remoteClusters', {
+                defaultMessage: 'Remote Clusters',
+              }),
+              isSelected: tabId === 'remote-clusters',
+              href: replaceTab('remote-clusters'),
+            },
+          ]
+        : []),
     ],
   };
 };

@@ -10,15 +10,16 @@
 import React, { useMemo, useReducer, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { ContentListClientState, ContentListStateContextValue } from './types';
-import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
 import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
+import { DEFAULT_INITIAL_SORT } from '../features/sorting';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
+import { ContentListUrlSync } from '../features/url_sync';
 
 /**
  * Props for `ContentListStateProvider`.
@@ -71,7 +72,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     if (isSortingConfig(sorting) && sorting.initialSort) {
       return sorting.initialSort;
     }
-    return { field: 'title', direction: 'asc' as const };
+    return DEFAULT_INITIAL_SORT;
   }, [sorting]);
 
   // Determine initial page size from pagination config or persisted value.
@@ -88,11 +89,10 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     return undefined;
   }, [search]);
 
-  // Initial client state (search, filters, sort, page, selection).
+  // Initial client state (query text, sort, page, selection).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
-      search: { queryText: initialSearch ?? '' },
-      filters: { ...DEFAULT_FILTERS, search: initialSearch },
+      queryText: initialSearch ?? '',
       sort: initialSort,
       page: { index: 0, size: initialPageSize },
       selection: { ...DEFAULT_SELECTION },
@@ -109,13 +109,22 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     isLoading,
     isFetching,
     error,
+    hasNoItems,
+    hasNoResults,
+    hasActiveQuery,
     refetch: queryRefetch,
+    requery: queryRequery,
   } = useContentListItemsQuery(clientState);
 
-  // Expose refetch for manual refresh.
+  const { dataSource } = useContentListConfig();
+
   const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
 
-  // Combine client state with query data for unified state interface.
+  const refresh = useCallback(async () => {
+    await dataSource.onRefresh?.();
+    await queryRequery();
+  }, [dataSource, queryRequery]);
+
   const contextValue: ContentListStateContextValue = useMemo(
     () => ({
       state: {
@@ -125,15 +134,33 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         isLoading,
         isFetching,
         error,
+        hasNoItems,
+        hasNoResults,
+        hasActiveQuery,
       },
       dispatch,
       refetch,
+      refresh,
     }),
-    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch]
+    [
+      clientState,
+      items,
+      totalItems,
+      isLoading,
+      isFetching,
+      error,
+      hasNoItems,
+      hasNoResults,
+      hasActiveQuery,
+      dispatch,
+      refetch,
+      refresh,
+    ]
   );
 
   return (
     <ContentListStateContext.Provider value={contextValue}>
+      <ContentListUrlSync />
       {children}
     </ContentListStateContext.Provider>
   );

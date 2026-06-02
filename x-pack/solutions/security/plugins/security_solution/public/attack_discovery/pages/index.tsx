@@ -19,8 +19,8 @@ import {
   QUERY_LOCAL_STORAGE_KEY,
   START_LOCAL_STORAGE_KEY,
   useAssistantContext,
-  useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -45,7 +45,6 @@ import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
 import { SETTINGS_TAB_ID } from './settings_flyout/constants';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
@@ -58,10 +57,10 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     services: { uiSettings, settings },
   } = useKibana();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
 
@@ -152,20 +151,18 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView();
+  const { dataView } = useDataView();
 
   // filterQuery is the combined search bar query and filters in ES format:
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         queries: [query ?? getDefaultQuery()], // <-- search bar query
         filters: filters ?? [], // <-- search bar filters
       }),
-    [experimentalDataView, filters, oldSourcererDataView, query, uiSettings]
+    [dataView, filters, query, uiSettings]
   );
 
   // renders a toast if the filter query is invalid:
@@ -195,6 +192,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           size,
           start,
           overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideConnectorName: overrideOptions?.overrideConnectorId
+            ? getConnectorNameFromId({
+                aiConnectors,
+                connectorId: overrideOptions.overrideConnectorId,
+              })
+            : undefined,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,
@@ -205,6 +208,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       }
     },
     [
+      aiConnectors,
       end,
       fetchAttackDiscoveries,
       filterQuery,

@@ -10,7 +10,7 @@
 import type { EsClient } from '@kbn/scout';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
-import { METRICS_TEST_INDEX_NAME } from '../constants';
+import { METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_NAME_OTHER } from '../constants';
 
 export interface MetricDefinition {
   readonly name: string;
@@ -58,12 +58,33 @@ export const DEFAULT_CONFIG: MetricsIndexConfig = {
   timeRange: INDEX_TIME_RANGE,
 };
 
+/**
+ * Companion TSDB index emitting a dimension set that overlaps with
+ * `DEFAULT_CONFIG` only on `dimension_0`, so switching between the two
+ * exercises the dimensions wipe path.
+ */
+export const DIMENSIONS_WIPE_CONFIG: MetricsIndexConfig = {
+  indexName: METRICS_TEST_INDEX_NAME_OTHER,
+  dimensions: [
+    { name: 'dimension_0', values: ['shared_v0', 'shared_v1', 'shared_v2'] },
+    { name: 'dimension_only_in_b', values: ['b_v0', 'b_v1', 'b_v2'] },
+  ],
+  metrics: [...generateMetrics(3, 'gauge'), ...generateMetrics(2, 'counter')],
+  timeRange: INDEX_TIME_RANGE,
+};
+
 export const TOTAL_METRIC_FIELDS = DEFAULT_CONFIG.metrics.length;
 
 export const PAGINATION = {
   PAGE_SIZE,
   TOTAL_PAGES: Math.ceil(TOTAL_METRIC_FIELDS / PAGE_SIZE),
   LAST_PAGE_CARDS: TOTAL_METRIC_FIELDS % PAGE_SIZE || PAGE_SIZE,
+} as const;
+
+export const DIMENSIONS_PAGINATION = {
+  PAGE_SIZE,
+  TOTAL_PAGES: Math.ceil(DEFAULT_CONFIG.dimensions.length / PAGE_SIZE),
+  LAST_PAGE_ITEMS: DEFAULT_CONFIG.dimensions.length % PAGE_SIZE || PAGE_SIZE,
 } as const;
 
 function getEsMapping({ type }: MetricDefinition): EsMappingProperty {

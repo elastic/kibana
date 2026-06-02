@@ -18,6 +18,7 @@ export type StaticPage =
   | 'uninstall_tokens'
   | 'data_streams'
   | 'settings'
+  | 'collectors'
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
@@ -52,6 +53,7 @@ export type DynamicPage =
   | 'agent_details_logs'
   | 'agent_details_settings'
   | 'agent_details_diagnostics'
+  | 'agent_details_collector_config'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
@@ -75,6 +77,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
   agent_details_settings: '/agents/:agentId/settings',
+  agent_details_collector_config: '/agents/:agentId/collector-config',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -85,6 +88,7 @@ export const FLEET_ROUTING_PATHS = {
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
   data_streams: '/data-streams',
+  collectors: '/collectors',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
   settings_edit_fleet_server_hosts: '/settings/fleet-server-hosts/:itemId',
@@ -258,16 +262,9 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useMultiPageLayout,
-    prerelease,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
@@ -307,9 +304,14 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
+  agent_details_collector_config: ({ agentId }) => [
+    FLEET_BASE_PATH,
+    `/agents/${agentId}/collector-config`,
+  ],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  collectors: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.collectors],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
   settings_edit_fleet_server_hosts: ({ itemId }) => [
     FLEET_BASE_PATH,

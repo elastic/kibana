@@ -20,14 +20,19 @@ import {
 
 apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKey('viewer');
+  });
+
+  apiTest.beforeEach(async ({ kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterEach(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -47,7 +52,7 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
     });
   });
 
-  apiTest('should return 200 if the dashboard is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 if the dashboard is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -56,6 +61,22 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(204);
   });
+
+  apiTest(
+    'authorization - should return 403 if the user is not authorized to delete the dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to delete dashboard');
+    }
+  );
 });

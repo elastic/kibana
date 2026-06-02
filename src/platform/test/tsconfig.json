@@ -13,8 +13,6 @@
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
-    "api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
     , "../../../x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform copy.ts"  ],
@@ -77,6 +75,7 @@
     "@kbn/visualizations-common",
     "@kbn/unified-data-table",
     "@kbn/session-notifications-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/deeplinks-analytics"
   ]
 }

@@ -50,6 +50,7 @@ import {
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
+import { DEFAULT_GROUP_BY_TRANSACTION_DURATION } from '../../../../../common/rules/get_all_groupby_fields';
 
 export interface TransactionDurationRuleParams {
   aggregationType: AggregationType;
@@ -92,6 +93,8 @@ export function TransactionDurationRuleType(props: Props) {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
+  const isNewRule = ruleParams.threshold === undefined;
+
   const params = defaults(
     {
       ...omit(metadata, ['start', 'end']),
@@ -103,6 +106,7 @@ export function TransactionDurationRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
+      ...(isNewRule && { groupBy: [...DEFAULT_GROUP_BY_TRANSACTION_DURATION] }),
     }
   );
 
@@ -272,7 +276,7 @@ export function TransactionDurationRuleType(props: Props) {
           'xpack.apm.ruleFlyout.transactionDuration.createAlertPerHelpText',
           {
             defaultMessage:
-              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+              'Create an alert for every unique value. By default, alert is created for every unique service.name, service.environment, transaction.type and transaction.name.',
           }
         )}
         fullWidth
@@ -280,7 +284,7 @@ export function TransactionDurationRuleType(props: Props) {
       >
         <APMRuleGroupBy
           onChange={onGroupByChange}
-          options={{ groupBy: ruleParams.groupBy }}
+          options={{ groupBy: params.groupBy }}
           fields={[TRANSACTION_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE]}
         />

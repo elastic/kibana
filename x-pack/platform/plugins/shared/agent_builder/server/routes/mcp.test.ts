@@ -11,8 +11,8 @@ import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
-import { MCP_SERVER_PATH } from '../../common/mcp';
+import { z } from '@kbn/zod/v4';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 
 const createMockTool = (
   id: string,
@@ -24,6 +24,7 @@ const createMockTool = (
   tags: [],
   configuration: {},
   readonly: false,
+  experimental: false,
   isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
   getSchema: jest.fn().mockResolvedValue(z.object({})),
   getHandler: jest.fn().mockResolvedValue(jest.fn()),

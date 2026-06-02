@@ -6,7 +6,6 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -34,13 +33,14 @@ const mockDataViewsService = {
     isPersisted: () => false,
     toSpec: () => ({ id: 'adhoc_test-*', title: 'test-*' }),
   }),
-  getAllDataViewLazy: jest.fn().mockReturnValue([]),
+  getIdsWithTitle: jest.fn().mockReturnValue([]),
 } as unknown as DataViewsServicePublic;
 
 const http = {} as unknown as CoreStart['http'];
 const application = {} as unknown as CoreStart['application'];
 const uiSettings = {} as unknown as CoreStart['uiSettings'];
 const spaces = { getActiveSpace: async () => ({ id: 'default' }) } as unknown as SpacesPluginStart;
+const mockToastsDanger = jest.fn();
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => {
@@ -61,7 +61,6 @@ const mockListenerApi = {
   getState: mockGetState,
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
-const mockLogger = loggingSystemMock.createLogger();
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
@@ -78,10 +77,14 @@ describe('createInitListener', () => {
     listener = createInitListener(
       {
         dataViews: mockDataViewsService,
-        logger: mockLogger,
         http,
         application,
         uiSettings,
+        notifications: {
+          toasts: {
+            addDanger: mockToastsDanger,
+          },
+        } as unknown as CoreStart['notifications'],
         spaces,
         storage: {
           get: jest.fn(),
@@ -94,15 +97,34 @@ describe('createInitListener', () => {
     );
   });
 
-  it('should load the data views and dispatch further actions', async () => {
+  it('should load the data views from getIdsWithTitle and dispatch further actions', async () => {
+    jest.mocked(mockDataViewsService.getIdsWithTitle).mockResolvedValue([
+      {
+        id: 'logs-*',
+        title: 'logs-*',
+        name: 'logs',
+        managed: false,
+      },
+    ]);
+
     await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
     expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
+    expect(jest.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
 
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
-      sharedDataViewManagerSlice.actions.setDataViews([])
+      sharedDataViewManagerSlice.actions.setDataViews([
+        {
+          id: 'logs-*',
+          title: 'logs-*',
+          name: 'logs',
+          managed: false,
+          timeFieldName: undefined,
+          type: undefined,
+          typeMeta: undefined,
+        },
+      ])
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       sharedDataViewManagerSlice.actions.setDataViewId({
@@ -141,12 +163,13 @@ describe('createInitListener', () => {
         scope: PageScope.analyzer,
       })
     );
+    expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 
-  describe('when data views fetch returns an error', () => {
+  describe('when getIdsWithTitle fetch returns an error', () => {
     beforeEach(() => {
       jest
-        .mocked(mockDataViewsService.getAllDataViewLazy)
+        .mocked(mockDataViewsService.getIdsWithTitle)
         .mockRejectedValue(new Error('some loading error'));
     });
 
@@ -156,6 +179,10 @@ describe('createInitListener', () => {
       expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
         sharedDataViewManagerSlice.actions.error()
       );
+      expect(mockToastsDanger).toHaveBeenCalledWith({
+        title: 'Error initializing data views',
+        text: 'Error: some loading error',
+      });
     });
   });
 });

@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -25,6 +26,7 @@ import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -35,6 +37,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
     isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
@@ -49,6 +52,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
@@ -149,9 +153,12 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
               exceptionsList: installedRule.exceptions_list,
             }),
           }),
-          options: {
+          options: expect.objectContaining({
             id: installedRule.id, // id is maintained
-          },
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+          }),
         })
       );
     });
@@ -221,6 +228,9 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
             }),
           }),
           id: installedRule.id,
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+          }),
         })
       );
     });

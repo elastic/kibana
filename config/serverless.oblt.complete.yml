@@ -3,10 +3,6 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 ## Enabled plugins
 xpack.infra.enabled: true
 xpack.slo.enabled: true
@@ -26,7 +22,11 @@ xpack.features.overrides:
   uptime.name: 'Synthetics'
   ### Workflows Management should be moved from Analytics category to the Observability one.
   workflowsManagement.category: 'observability'
-
+  ### Agent Builder should be moved from Analytics category to the Observability one.
+  agentBuilder.category: 'observability'
+  ### Agent Context Layer should match Agent Builder for role management (avoid orphan Kibana category).
+  agentContextLayer.category: 'observability'
+  
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
   Anthropic-Claude-Sonnet-3-7:

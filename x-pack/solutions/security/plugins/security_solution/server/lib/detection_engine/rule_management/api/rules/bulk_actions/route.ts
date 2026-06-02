@@ -8,9 +8,14 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type {
+  BulkActionSkipResult,
+  GapFillStatus,
+  GapReasonType,
+} from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -22,6 +27,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -204,6 +210,7 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const rulesAuthz = ctx.securitySolution.getRulesAuthz();
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
@@ -236,6 +243,7 @@ export const performBulkActionRoute = (
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
+            schedulerId: body.gap_auto_fill_scheduler_id,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
@@ -253,6 +261,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'enable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
@@ -265,6 +274,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'disable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
@@ -298,6 +308,8 @@ export const performBulkActionRoute = (
                     rulePayload: {},
                     spaceId,
                     existingRule: rule,
+                    checkOsqueryResponseActionAuthz:
+                      ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
                   });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
@@ -318,7 +330,18 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
+                    changeTracking: {
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                      metadata: {
+                        bulkCount: rules.length,
+                        originalRuleSoId: rule.id,
+                      },
+                    },
                   });
+
+                  if (!shouldDuplicateExceptions) {
+                    return createdRule;
+                  }
 
                   // we try to create exceptions after rule created, and then update rule
                   const exceptions = shouldDuplicateExceptions
@@ -337,6 +360,11 @@ export const performBulkActionRoute = (
                       params: {
                         ...duplicateRuleToCreate.params,
                         exceptionsList: exceptions,
+                      },
+                    },
+                    changeTracking: {
+                      metadata: {
+                        bulkCount: rules.length,
                       },
                     },
                     shouldIncrementRevision: () => false,
@@ -392,6 +420,7 @@ export const performBulkActionRoute = (
                   executor: async (rule) => {
                     await dryRunValidateBulkEditRule({
                       mlAuthz,
+                      rulesAuthz,
                       rule,
                       edit: body.edit,
                       ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
@@ -412,6 +441,7 @@ export const performBulkActionRoute = (
                   prebuiltRuleAssetClient,
                   rules,
                   actions: body.edit,
+                  rulesAuthz,
                   mlAuthz,
                   ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                 });
@@ -428,6 +458,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 runPayload: body.run,
               });
               errors.push(...bulkActionErrors);
@@ -436,6 +467,11 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.fill_gaps: {
+              const uiSettingsClient = ctx.core.uiSettings.client;
+              const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+                EXCLUDED_GAP_REASONS_KEY
+              );
+
               const {
                 backfilled,
                 errors: bulkActionErrors,
@@ -445,7 +481,9 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 fillGapsPayload: body.fill_gaps,
+                excludedReasons,
               });
               errors.push(...bulkActionErrors);
               updated = backfilled;

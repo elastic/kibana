@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddFilterButton } from './add_filter_btn';
-import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 describe('AddFilterButton component', () => {
   it('provides all filter choices', () => {
@@ -23,7 +23,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -89,7 +89,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -142,7 +142,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={true}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -172,7 +172,8 @@ describe('AddFilterButton component', () => {
     );
     component.find(EuiButtonEmpty).simulate('click', { target: { value: '0' } });
     component
-      .find(EuiContextMenuItem)
+      .find('[data-test-subj^="uptimeAlertAddFilter"]')
+      .hostNodes()
       .first()
       .simulate('click', { target: { value: '0' } });
     expect(mockOnNewFilter).toHaveBeenCalled();

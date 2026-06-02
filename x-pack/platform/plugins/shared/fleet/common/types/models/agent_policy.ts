@@ -67,6 +67,7 @@ export interface NewAgentPolicy {
   };
   required_versions?: AgentTargetVersion[] | null;
   has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -86,11 +87,26 @@ export interface AgentlessPolicy {
       cpu?: string;
     };
   };
+  cluster_id?: string;
+}
+
+/**
+ * An agentless policy with cloud_connectors guaranteed to be present and enabled.
+ * Used by verifier agent policies that target a specific cloud provider.
+ */
+export interface VerifierAgentlessPolicy extends AgentlessPolicy {
+  cloud_connectors: Required<CloudConnectors> & { enabled: true };
 }
 
 export interface GlobalDataTag {
   name: string;
   value: string | number;
+}
+
+export interface AgentPolicyAgentVersionCondition {
+  name: string;
+  title: string;
+  version_condition: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -99,6 +115,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
+  created_at?: string;
   updated_at: string;
   updated_by: string;
   revision: number;
@@ -108,6 +125,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -354,6 +373,7 @@ export interface AgentlessApiListDeploymentResponse {
   deployments: Array<{
     policy_id: string;
     revision_idx?: number;
+    cluster_id?: string;
   }>;
   next_token?: string;
 }

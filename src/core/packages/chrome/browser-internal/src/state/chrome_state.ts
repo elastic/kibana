@@ -18,8 +18,10 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  GlobalSearchConfig,
   ChromeNavLink,
   ChromeUserBanner,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -35,6 +37,7 @@ import { createVisibilityState, type VisibilityState } from './visibility_state'
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const INITIAL_SIDENAV_WIDTH = 0;
 
 export interface ChromeState {
   /** Visibility management */
@@ -46,22 +49,27 @@ export interface ChromeState {
   /** Side navigation state */
   sideNav: {
     collapsed: State<boolean>;
+    width: State<number>;
   };
 
-  /** Breadcrumbs state */
+  /** Breadcrumbs state (includes legacy badge from setBadge()) */
   breadcrumbs: {
     classic: ArrayState<ChromeBreadcrumb>;
     appendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
     badges: ArrayState<ChromeBreadcrumbsBadge>;
+    legacyBadge: State<ChromeBadge | undefined>;
     appendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   };
 
   /** UI elements */
-  badge: State<ChromeBadge | undefined>;
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
+  globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
+  inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 
   /** Help system */
   help: {
@@ -89,22 +97,27 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
+  const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
 
-  // Breadcrumbs
+  // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
     breadcrumbs,
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
+    legacyBadge,
     breadcrumbsAppendExtensionsWithBadges$,
   } = createBreadcrumbsState();
 
   // UI Elements (per-app reset handled in setupAppChangeHandler)
-  const badge = createState<ChromeBadge | undefined>(undefined);
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
+  const inlineAppHeader = createState<boolean>(false);
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -116,22 +129,27 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     style,
     sideNav: {
       collapsed: sideNavCollapsed,
+      width: sideNavWidth,
     },
     breadcrumbs: {
       classic: breadcrumbs,
       appendExtensions: breadcrumbsAppendExtensions,
       badges: breadcrumbsBadges,
+      legacyBadge,
       appendExtensionsWithBadges$: breadcrumbsAppendExtensionsWithBadges$,
     },
-    badge,
     headerBanner,
     globalFooter,
+    globalSearch,
     customNavLink,
     appMenu,
+    inlineAppHeader,
+    appHeader,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    contextSwitcher,
   };
 }

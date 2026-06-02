@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
-import { isPackageLimited } from '../../../common/services';
+
 import type {
   PackagePolicy,
   FullAgentPolicyInput,
@@ -24,8 +24,8 @@ import type {
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 import {
-  DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
   USE_APM_VAR_NAME,
@@ -33,10 +33,23 @@ import {
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
-import { FleetError } from '../../errors';
+import { FleetError, PackagePolicyValidationError } from '../../errors';
+import {
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  getInputEffectiveName,
+} from '../../../common/services';
+
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
+};
+
+const combineConditions = (conditions: Array<string | undefined>): string | undefined => {
+  const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
+  if (filtered.length === 0) return undefined;
+  if (filtered.length === 1) return filtered[0];
+  return filtered.map((c) => `(${c})`).join(' and ');
 };
 
 export function getInputId(
@@ -44,15 +57,15 @@ export function getInputId(
   packagePolicyId?: string,
   packageInfo?: PackageInfo
 ): string {
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+  // Only the endpoint (Elastic Defend) package uses a simplified ID format for backward compatibility.
+  // All other packages (including other limited packages) use the standard format with type and policy template.
+  const useSimplifiedId = packageInfo?.name === FLEET_ENDPOINT_PACKAGE;
 
-  return appendInputId
-    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+  return useSimplifiedId
+    ? packagePolicyId || 'default'
+    : `${getInputEffectiveName(input)}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
-      }`
-    : packagePolicyId || 'default';
+      }`;
 }
 
 export const storedPackagePolicyToAgentInputs = (
@@ -68,10 +81,21 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
+  const isAgentless = packagePolicy.supports_agentless === true;
+
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
       return;
     }
+
+    const integrationLevelCondition =
+      !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
+        ? packagePolicy.condition
+        : undefined;
+
+    const inputStreams = getFullInputStreams(input, {
+      userIntegrationCondition: integrationLevelCondition,
+    });
 
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
@@ -85,8 +109,30 @@ export const storedPackagePolicyToAgentInputs = (
       },
       use_output: packagePolicy.output_id || agentPolicyOutputId,
       package_policy_id: packagePolicy.id,
-      ...getFullInputStreams(input),
+      ...inputStreams,
     };
+
+    // Guard: undefined data_stream.type is only valid for inputs that allow dynamic signal types.
+    // Checked per-input so mixed packages (some dynamic, some static) are handled correctly.
+    if (fullInput.streams) {
+      const inputAllowsDynamic =
+        packageInfo !== undefined &&
+        packagePolicyInputAllowsUndefinedDataStreamType(packageInfo, input);
+      for (const stream of fullInput.streams) {
+        if (stream.data_stream?.type === undefined) {
+          if (inputAllowsDynamic) {
+            // For dynamic inputs, type is determined at runtime — strip the undefined key
+            const { type: _type, ...restDataStream } = stream.data_stream ?? {};
+            stream.data_stream = restDataStream as FullAgentPolicyInputStream['data_stream'];
+          } else {
+            // Should never reach here if preflightCheckPackagePolicy ran, but throw defensively
+            throw new PackagePolicyValidationError(
+              `[data_stream.type]: unexpected undefined stream type for non-dynamic package`
+            );
+          }
+        }
+      }
+    }
 
     if (addFields && !GLOBAL_DATA_TAG_EXCLUDED_INPUTS.has(fullInput.type)) {
       fullInput.processors = [addFields];
@@ -134,21 +180,48 @@ export const mergeInputsOverrides = (
   return fullInput;
 };
 
+export interface GetFullInputStreamsOptions {
+  /** Force-include disabled streams (used for template-inputs previews). */
+  allStreamEnabled?: boolean;
+  /** Map of stream ids <destinationId, originalId>. */
+  streamsOriginalIdsMap?: Map<string, string>;
+  /** Pre-gated by the caller; layered onto the input-level condition. */
+  userIntegrationCondition?: string;
+}
+
 export const getFullInputStreams = (
   input: PackagePolicyInput,
-  allStreamEnabled: boolean = false,
-  streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
+  {
+    allStreamEnabled = false,
+    streamsOriginalIdsMap,
+    userIntegrationCondition,
+  }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
+  const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
+  const inputCondition = combineConditions([
+    userIntegrationCondition,
+    compiledInputCondition,
+    input.condition,
+  ]);
+
   return {
-    ...(input.compiled_input || {}),
+    ...compiledInputRest,
+    ...(inputCondition !== undefined ? { condition: inputCondition } : {}),
     ...(input.streams.length
       ? {
           streams: input.streams
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
               const streamId = stream.id;
-              const { data_stream: compiledDataStream, ...compiledStream } =
-                stream.compiled_stream ?? {};
+              const {
+                data_stream: compiledDataStream,
+                condition: compiledStreamCondition,
+                ...compiledStream
+              } = stream.compiled_stream ?? {};
+              const streamCondition = combineConditions([
+                compiledStreamCondition,
+                stream.condition,
+              ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
                 data_stream: {
@@ -156,20 +229,25 @@ export const getFullInputStreams = (
                   ...compiledDataStream,
                 },
                 ...compiledStream,
+                ...(streamCondition !== undefined ? { condition: streamCondition } : {}),
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                   acc[key] = value;
                   return acc;
                 }, {} as { [k: string]: any }),
               };
-              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                // otelcol inputs are not going to have the data_stream type and dataset in
-                // the compiled stream, get them directly from the user-defined variables.
-                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+              if (dsTypeVar) {
                 fullStream.data_stream = {
                   ...fullStream.data_stream,
-                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
-                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                  type: dsTypeVar,
+                };
+              }
+
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                // Replace policy output dataset verbatim (no .otel append); EPM templates use registry dataset + isOtelInputType separately.
+                fullStream.data_stream = {
+                  ...fullStream.data_stream,
+                  dataset: getEffectiveOtelStreamDataset(stream),
                 };
 
                 const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
@@ -232,10 +310,10 @@ export const storedPackagePoliciesToAgentInputs = async (
       : undefined;
 
     const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
-    const addFields =
-      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
-        ? globalDataTagsToAddFields(filteredGlobalDataTags)
-        : undefined;
+    const packagePolicyTags =
+      filterGlobalDataTags(packagePolicy.global_data_tags ?? [], packageInfo) ?? [];
+    const allTags = [...(filteredGlobalDataTags ?? []), ...packagePolicyTags];
+    const addFields = allTags.length > 0 ? globalDataTagsToAddFields(allTags) : undefined;
 
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions

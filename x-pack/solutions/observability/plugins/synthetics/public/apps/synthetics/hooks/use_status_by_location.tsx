@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
+import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -15,6 +16,7 @@ import {
 } from '../../../../common/constants/client_defaults';
 import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
+import { useGetUrlParams } from './use_url_params';
 import { useLocations } from './use_locations';
 
 export type LocationsStatus = Array<{ status: string; id: string; label: string; color: string }>;
@@ -26,15 +28,16 @@ export function useStatusByLocation({
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) {
-  const { euiTheme } = useEuiTheme();
-
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const { remoteName } = useGetUrlParams();
 
   const { locations: allLocations } = useLocations();
 
   const { data, loading } = useEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      // For remote monitors the heartbeat docs live on the source cluster, so
+      // query `${remoteName}:synthetics-*` via CCS instead of the local index.
+      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
@@ -67,52 +70,40 @@ export function useStatusByLocation({
         },
       },
     },
-    [lastRefresh, configId],
+    [lastRefresh, configId, remoteName],
     { name: 'getMonitorStatusByLocation' }
   );
 
-  return useMemo(() => {
-    const getColor = (status: string) => {
-      switch (status) {
-        case 'up':
-          return euiTheme.colors.success;
-        case 'down':
-          return euiTheme.colors.vis.euiColorVis6;
-        default:
-          return euiTheme.colors.backgroundBaseSubdued;
-      }
-    };
+  const getColor = useMonitorHealthColor();
 
+  return useMemo(() => {
     const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
       return loc.summary.hits.hits?.[0]._source as Ping;
     });
-    const locations = (monitorLocations ?? [])
-      .map((loc) => {
-        const fullLoc = allLocations.find((l) => l.id === loc.id);
-        if (fullLoc) {
-          const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
-          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
-          return {
-            status,
-            id: fullLoc?.id,
-            label: fullLoc?.label,
-            color: getColor(status),
-          };
-        }
-      })
-      .filter(Boolean) as LocationsStatus;
+    const locations = (monitorLocations ?? []).map((loc) => {
+      // Prefer the local service-locations registry (so private/managed
+      // locations render with their full metadata) but fall back to the
+      // monitor's own location entry for ids unknown locally — this is the
+      // case for remote monitors whose location ids live only on the source
+      // cluster's Kibana.
+      const fullLoc = allLocations.find((l) => l.id === loc.id) ?? loc;
+      const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc.label);
+      const status = ping
+        ? (ping.summary?.down ?? 0) > 0
+          ? MONITOR_STATUS_ENUM.DOWN
+          : MONITOR_STATUS_ENUM.UP
+        : MONITOR_STATUS_ENUM.PENDING;
+      return {
+        status,
+        id: fullLoc.id,
+        label: fullLoc.label,
+        color: getColor(status),
+      };
+    });
 
     return {
       locations,
       loading,
     };
-  }, [
-    allLocations,
-    data?.aggregations?.locations.buckets,
-    loading,
-    monitorLocations,
-    euiTheme.colors.success,
-    euiTheme.colors.vis.euiColorVis6,
-    euiTheme.colors.backgroundBaseSubdued,
-  ]);
+  }, [data?.aggregations?.locations.buckets, monitorLocations, loading, allLocations, getColor]);
 }

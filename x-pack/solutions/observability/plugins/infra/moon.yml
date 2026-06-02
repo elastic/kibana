@@ -4,20 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/infra-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/infra-plugin'
+  title: '@kbn/infra-plugin'
   description: Moon project for @kbn/infra-plugin
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/infra
+  sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -101,7 +102,6 @@ dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/react-hooks'
   - '@kbn/search-types'
-  - '@kbn/router-utils'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/deeplinks-observability'
@@ -113,6 +113,7 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/config'
   - '@kbn/observability-utils-common'
+  - '@kbn/observability-utils-server'
   - '@kbn/charts-theme'
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-test-helpers-model-versions'
@@ -140,6 +141,11 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
   - '@kbn/css-utils'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/controls-constants'
+  - '@kbn/cps-utils'
+  - '@kbn/es-query-constants'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -152,17 +158,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

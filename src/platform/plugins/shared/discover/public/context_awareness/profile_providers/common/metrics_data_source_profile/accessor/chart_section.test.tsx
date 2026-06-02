@@ -19,21 +19,28 @@ import type {
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
 import { createChartSection } from './chart_section';
-import type {
-  ChartSectionConfiguration,
-  ChartSectionConfigurationExtensionParams,
-} from '../../../../types';
+import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
 import {
   useAppStateSelector,
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 type UnifiedGridProps = ChartSectionProps & {
-  actions: ChartSectionConfigurationExtensionParams['actions'];
+  actions: ContextAwarenessToolkitActions;
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  externalServices?: {
+    discoverShared?: unknown;
+    dataViews?: unknown;
+    notifications?: { showErrorDialog: (args: { title: string; error: Error }) => void };
+    docLinks?: { links: { query: { queryESQL: string } } };
+    logger?: unknown;
+  };
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -54,6 +61,31 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
   useInternalStateDispatch: jest.fn(),
 }));
 
+const mockDiscoverShared = { __sentinel: 'discoverShared' };
+const mockDataViews = { __sentinel: 'dataViews' };
+const mockShowErrorDialog = jest.fn();
+const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
+const mockScopedLogger = { __sentinel: 'scopedLogger' };
+const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
+
+jest.mock('../../../../../hooks/use_discover_services', () => ({
+  useDiscoverServices: jest.fn(() => ({
+    discoverShared: mockDiscoverShared,
+    dataViews: mockDataViews,
+    notifications: {
+      showErrorDialog: mockShowErrorDialog,
+    },
+    docLinks: {
+      links: {
+        query: {
+          queryESQL: mockEsqlReferenceHref,
+        },
+      },
+    },
+    logger: mockLogger,
+  })),
+}));
+
 const mockDispatch = jest.fn();
 const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
 
@@ -61,16 +93,23 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;
 
   return {
-    services: {} as unknown as UnifiedHistogramServices,
+    services: {
+      data: { search: { search: jest.fn() } },
+      uiSettings: {},
+    } as unknown as UnifiedHistogramServices,
     renderToggleActions: () => undefined,
     fetchParams: {} as unknown as UnifiedHistogramFetchParams,
     fetch$,
     isComponentVisible: true,
+    isTabSelected: true,
     ...overrides,
   };
 };
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
+  const toolkitActions: ContextAwarenessToolkitActions = {
+    addFilter: jest.fn(),
+  };
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -79,20 +118,28 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 
   const configFactory = getChartSection(
     () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
-    { context: { category: DataSourceCategory.Metrics } }
+    {
+      context: { category: DataSourceCategory.Metrics },
+      toolkit: {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        actions: toolkitActions,
+      },
+    }
   );
 
   if (!configFactory) {
     throw new Error('getChartSectionConfiguration was not created.');
   }
 
-  const config = configFactory({ actions: {} } as ChartSectionConfigurationExtensionParams);
+  const config = configFactory();
 
   if (!config.replaceDefaultChart) {
     throw new Error('Expected chart section configuration to replace the default chart.');
   }
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
+
+  return { toolkitActions };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -107,7 +154,7 @@ describe('MetricsExperienceGridWrapper', () => {
     mockUpdateAppStateAction.mockClear();
   });
 
-  it('wraps onFilter to prevent default and forward the event', () => {
+  it('should not prevent default when onFilter is provided', () => {
     const onFilter = jest.fn();
     const preventDefault = jest.fn();
     const event = { preventDefault } as unknown as ExpressionRendererEvent['data'];
@@ -120,21 +167,7 @@ describe('MetricsExperienceGridWrapper', () => {
     gridOnFilter?.(event);
 
     expect(onFilter).toHaveBeenCalledWith(event);
-    expect(preventDefault).toHaveBeenCalled();
-  });
-
-  it('still prevents default when onFilter is not provided', () => {
-    const preventDefault = jest.fn();
-    const event = { preventDefault } as unknown as ExpressionRendererEvent['data'];
-
-    renderChartSection();
-
-    const gridOnFilter = unifiedGridProps?.onFilter;
-
-    expect(gridOnFilter).toEqual(expect.any(Function));
-    gridOnFilter?.(event);
-
-    expect(preventDefault).toHaveBeenCalled();
+    expect(preventDefault).not.toHaveBeenCalled();
   });
 
   it('dispatches breakdown updates from metrics grid callback', () => {
@@ -149,5 +182,28 @@ describe('MetricsExperienceGridWrapper', () => {
       type: 'updateAppState',
       payload: { appState: { breakdownField: 'service.name' } },
     });
+  });
+
+  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks, scoped logger) to the metrics grid', () => {
+    renderChartSection();
+
+    expect(mockLogger.get).toHaveBeenCalledWith(METRICS_DATA_SOURCE_PROFILE_ID);
+    expect(unifiedGridProps?.externalServices).toEqual({
+      discoverShared: mockDiscoverShared,
+      dataViews: mockDataViews,
+      notifications: expect.objectContaining({
+        showErrorDialog: mockShowErrorDialog,
+      }),
+      docLinks: expect.objectContaining({
+        links: { query: { queryESQL: mockEsqlReferenceHref } },
+      }),
+      logger: mockScopedLogger,
+    });
+  });
+
+  it('passes toolkit actions to UnifiedMetricsExperienceGrid', () => {
+    const { toolkitActions } = renderChartSection();
+
+    expect(unifiedGridProps?.actions).toBe(toolkitActions);
   });
 });

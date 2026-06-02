@@ -47,6 +47,7 @@ import {
   editorExtensions,
   inferenceEndpoints,
   views,
+  datasets,
 } from '../../../__tests__/language/helpers';
 import { IGNORED_FUNCTIONS_BY_LOCATION } from '../../../__tests__/commands/autocomplete';
 
@@ -386,9 +387,9 @@ export function createCustomCallbackMocks(
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
+    getDatasets: jest.fn(async () => ({ datasets })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      // from * is called in the empty state
-      if (queryString.includes('logs*') || queryString === 'from *') {
+      if (queryString.includes('logs*') || queryString.includes('a_index')) {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,
