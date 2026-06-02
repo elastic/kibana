@@ -79,9 +79,7 @@ const buildDiscoveryDescription = (
       defaultMessage: 'All detection signals resolved',
     });
   }
-  const occurrence = discovery.change_point_occurrence;
   const parts: string[] = [];
-  if (occurrence) parts.push(occurrence);
   parts.push(
     i18n.translate('xpack.streams.lifecycle.discoveryCriticality', {
       defaultMessage: 'criticality {criticality}',

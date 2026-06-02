@@ -8,7 +8,7 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 
 | | Boundary |
 |---|---|
-| **INPUT SCOPE** | The `detections` batch and supporting context (`open_discoveries`, `confirmed_significant_events`). Every rule you act on must appear in `detections`. |
+| **INPUT SCOPE** | The `detections` batch and supporting context (`open_discoveries`). Every rule you act on must appear in `detections`. |
 | **ACTIVE BATCH** | `## Active batch` contains all currently-firing rules. Run `search_knowledge_indicators` and all tool calls for every rule in this list. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
 | **EARLY EXIT** | `detections` absent or empty → return `{ "discoveries": [] }` immediately. `open_discoveries` is supporting context, not a work item. |
 | **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 8 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
@@ -18,8 +18,7 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 <inputs>
 
 - `detections`: per-rule change-point signals. Each doc represents ONE rule whose alert firing pattern changed significantly.
-- `open_discoveries`: active discoveries from prior investigations (each with `discovery_slug`, `rule_names`, `stream_names`) — used for semantic dedup.
-- `confirmed_significant_events`: events already promoted (or acknowledged). Use for: (1) semantic dedup — reuse the existing `discovery_slug` if a new detection matches; (2) grouping sources — `grouped_discovery_ids` may reference slugs from this list.
+- `open_discoveries`: active discoveries from prior investigations (each with `discovery_slug`, `detections`, `summary`, `root_cause`) — fallback context when `## Continuation Candidates` is absent, and additional context for entity confirmation gate and partial recovery check.
 
 **Input fields:**
 - `detection_evidence.p_value`: statistical confidence (lower = stronger); use to calibrate `confidence`.
@@ -255,28 +254,16 @@ Apply the correlation rules above. When uncertain, default to splitting.
 
 ### Step 7: Group and Dedup
 
-#### Step 7-pre: Coverage Absorption
-
-Build the set of covered rule UUIDs:
-1. `promoted_slugs` = discovery slugs from `confirmed_significant_events` where `status == "promoted"`.
-2. `covered_uuids` = `rule_uuid` values from `open_discoveries` whose `discovery_slug` is in `promoted_slugs`.
-3. A detection `D` is covered when `D.rule_uuid` is in `covered_uuids`.
-
-**Re-detection exception**: a detection in both `## Active batch` AND `## Resolution context` `Rules:` is a re-detection — never covered, always investigate normally.
-
-**Apply per detection:**
-- All covered (none are re-detections): return `{ "discoveries": [] }`.
-- Partially covered: remove covered rules from the working batch; proceed with uncovered only. Do NOT include covered rules in any discovery's `detections`.
-- None covered: proceed normally.
-
 #### Step 7a: Continuation Check (Semantic Dedup)
 
 - **Continuation**: same underlying failure still active. Reuse the exact `discovery_slug` from the matching open discovery — do NOT append any suffix.
 - **New independent event**: unrelated root cause. Create a new `discovery_slug`.
 
-**Skip group slugs.** Any open discovery whose `discovery_slug` starts with `group-` is not a valid continuation target.
+**For each slug in `## Continuation Candidates` (if present)**, confirm whether the open discovery's `summary` and `root_cause` describe the same operational concern as the current detection batch. If yes, reuse the slug verbatim. If no, create a new `discovery_slug`.
 
-**UUID-match narrows candidates; semantic match decides.** UUID overlap alone is not sufficient. Confirm that the open discovery's `stream_names`, `root_cause`, and `summary` describe the same operational concern. Same UUID + different failure context = new independent event.
+**If `## Continuation Candidates` is absent** (upstream step failed), fall back to the full UUID-match protocol: find open discoveries whose `detections[].rule_uuid` overlaps with the current batch, then apply the semantic match above to each candidate.
+
+**You may receive detections for rules already covered by a promoted or acknowledged discovery.** Reuse the slug via this step — the judge evaluates fresh evidence on every cycle.
 
 **Entity confirmation gate** (when `rule_names` overlap): check whether any `stream_name` from the current detection batch appears in `cause_kis[].stream_name` of the open discovery. If `cause_kis` is missing or empty → inconclusive → do not reuse the slug.
 
@@ -284,27 +271,6 @@ Build the set of covered rule UUIDs:
 
 - Do not create a new discovery for detections describing the same concern as an existing open discovery.
 - **Partial recovery**: if an open discovery had 5 affected rules and 2 were superseded (in `## Resolution context`), produce a new discovery with a fresh slug, include only the still-active rules' detections, and note partial recovery in `summary`.
-- A match here disqualifies the detection from Step 7b.
-
-#### Step 7b: Cross-Discovery Group Check
-
-Only for detections that did not match in Step 7a. When in doubt, do not group.
-
-A group discovery is produced when multiple EXISTING open discoveries share a demonstrable causal link — one root cause explains them all and you can cite a Dependency KI or tool output to confirm the link.
-
-**ALL must hold:**
-- Symptom domains are compatible (same 2–4 word symptom class from `summary`, `root_cause`, `cause_kis`, `evidences`).
-- Source discoveries have **different** `rule_names`.
-- One source's root cause demonstrably explains the other — a cascade, not a coincidence.
-- A Dependency KI confirms the causal path: `feature.type: "dependency"`, `source → target` connects the root-cause service of discovery A to the service of discovery B.
-- Topology corroborates: if discovery A's `dependency_edges` has an exposed edge matching discovery B's service, use that edge to find the KI. At most one additional `search_knowledge_indicators` call (across the entire batch) before concluding no KI exists.
-
-**Do NOT group when:** the current detections match an existing open discovery (that is a continuation), or you are uncertain about the causal link.
-
-**Output constraints:**
-- `grouped_discovery_ids`: slugs from `open_discoveries` or `confirmed_significant_events` only — never from the current batch.
-- Only leaf (non-group) slugs — never include slugs starting with `group-`.
-- Must contain ≥1 slug — omit both `grouped_discovery_ids` and `grouping_rationale` entirely when no grouping applies.
 
 ### Step 8: Document Your Findings
 
@@ -351,7 +317,6 @@ Translate your investigation findings into this structured format. Output discip
     - Apply the transformation mechanically — do not abbreviate or paraphrase:
       - `rule_name` = "High HTTP 5xx Error Rate on api-gateway" → ✓ `api-gateway__high-http-5xx-error-rate-on-api-g`
       - ✗ `api-gateway__http-5xx-errors` (abbreviated) ✗ `api-gateway__error-spike` (paraphrased)
-- `grouped_discovery_ids` / `grouping_rationale`: group discoveries only (Step 7b). Omit entirely for non-group discoveries.
 - `dependency_edges`: always emit — `[]` when empty. Each entry: `source`, `target`, `protocol` (omit if absent), `exposure`.
 - `infra_components`: always emit — `[]` when empty. Each entry: `title` (omit if absent), `workloads`, `exposure`.
 - `cause_kis`: always emit. Each entry: `name` (from `feature.id`), `stream_name` (from `feature.stream_name`). No `confirmed` field.
