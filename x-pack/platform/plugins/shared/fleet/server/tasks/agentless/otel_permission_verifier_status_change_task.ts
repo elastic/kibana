@@ -224,53 +224,55 @@ async function aggregateLatestPerPackagePolicy(
         buckets: ConnectorBucket[];
       };
     }
-  >({
-    index: VERIFIER_LOG_INDEX,
-    size: 0,
-    // No coarse `@timestamp` filter — `max(verification.verified_at)` and top_hits
-    // give us the latest verification run's docs regardless of age. If index-cost
-    // becomes a concern, wrap in a multi-day range filter here.
-    aggs: {
-      by_connector: {
-        // Resource-level attribute — connector identity is shared across all log
-        // records emitted by one verifier instance.
-        terms: {
-          field: 'resource.attributes.identity_federation.id',
-          size: SO_SEARCH_LIMIT,
-        },
-        aggs: {
-          by_package_policy: {
-            // Per-record attribute — each log doc is one permission check for one target.
-            terms: {
-              field: 'attributes.package_policy.id',
-              size: MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR,
-            },
-            aggs: {
-              // No `max(verification.verified_at)` sub-agg: that field is mapped as
-              // keyword in the OTel-emitted index. Instead we sort top_hits by @timestamp
-              // desc and take the latest hit's verified_at as the "latest run" marker on
-              // the consumer side, then filter remaining hits to that value.
-              recent_permission_docs: {
-                top_hits: {
-                  size: PERMISSION_HITS_PER_BUCKET,
-                  sort: [{ '@timestamp': { order: 'desc' } }],
-                  _source: {
-                    includes: [
-                      '@timestamp',
-                      'resource.attributes.identity_federation.id',
-                      'attributes.policy.id',
-                      'attributes.policy.name',
-                      'attributes.policy_template',
-                      'attributes.package.name',
-                      'attributes.package.title',
-                      'attributes.package.version',
-                      'attributes.package_policy.id',
-                      'attributes.permission.action',
-                      'attributes.permission.status',
-                      'attributes.permission.required',
-                      'attributes.verification.verified_at',
-                      'body.text',
-                    ],
+  >(
+    {
+      index: VERIFIER_LOG_INDEX,
+      size: 0,
+      // No coarse `@timestamp` filter — `max(verification.verified_at)` and top_hits
+      // give us the latest verification run's docs regardless of age. If index-cost
+      // becomes a concern, wrap in a multi-day range filter here.
+      aggs: {
+        by_connector: {
+          // Resource-level attribute — connector identity is shared across all log
+          // records emitted by one verifier instance.
+          terms: {
+            field: 'resource.attributes.identity_federation.id',
+            size: SO_SEARCH_LIMIT,
+          },
+          aggs: {
+            by_package_policy: {
+              // Per-record attribute — each log doc is one permission check for one target.
+              terms: {
+                field: 'attributes.package_policy.id',
+                size: MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR,
+              },
+              aggs: {
+                // No `max(verification.verified_at)` sub-agg: that field is mapped as
+                // keyword in the OTel-emitted index. Instead we sort top_hits by @timestamp
+                // desc and take the latest hit's verified_at as the "latest run" marker on
+                // the consumer side, then filter remaining hits to that value.
+                recent_permission_docs: {
+                  top_hits: {
+                    size: PERMISSION_HITS_PER_BUCKET,
+                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    _source: {
+                      includes: [
+                        '@timestamp',
+                        'resource.attributes.identity_federation.id',
+                        'attributes.policy.id',
+                        'attributes.policy.name',
+                        'attributes.policy_template',
+                        'attributes.package.name',
+                        'attributes.package.title',
+                        'attributes.package.version',
+                        'attributes.package_policy.id',
+                        'attributes.permission.action',
+                        'attributes.permission.status',
+                        'attributes.permission.required',
+                        'attributes.verification.verified_at',
+                        'body.text',
+                      ],
+                    },
                   },
                 },
               },
@@ -279,7 +281,8 @@ async function aggregateLatestPerPackagePolicy(
         },
       },
     },
-  });
+    { signal: abortController.signal }
+  );
 
   const connectorBuckets = response.aggregations?.by_connector?.buckets ?? [];
 
