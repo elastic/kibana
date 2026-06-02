@@ -10,7 +10,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlIndexer } from './sml_indexer';
 import { createSmlStorage, smlIndexName } from './sml_storage';
-import type { SmlTypeDefinition } from './types';
+import type {
+  SmlChunk,
+  SmlDeleteScope,
+  SmlIndexerContentParams,
+  SmlIndexerDeleteParams,
+  SmlIndexerOriginParams,
+  SmlTypeDefinition,
+} from './types';
 
 jest.mock('./sml_storage', () => ({
   smlIndexName: '.test-sml-data',
@@ -27,7 +34,10 @@ jest.mock('./sml_service', () => ({
   ),
 }));
 
-jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
+// Distinct mock id per call so tests can assert each bulk operation gets its
+// own _id. Reset in `beforeEach` so cross-test counts stay stable.
+let mockUuidCounter = 0;
+jest.mock('uuid', () => ({ v4: () => `mock-uuid-${++mockUuidCounter}` }));
 
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
@@ -59,27 +69,84 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   has: jest.fn().mockReturnValue(!!definition),
 });
 
-const createIndexerParams = (
-  overrides: Partial<{
-    originId: string;
-    attachmentType: string;
-    action: 'create' | 'update' | 'delete';
-    spaces: string[];
-    esClient: jest.Mocked<ElasticsearchClient>;
-    logger: ReturnType<typeof createMockLogger>;
-  }> = {}
-) => ({
-  originId: 'att-123',
-  attachmentType: 'lens',
-  action: 'create' as const,
-  spaces: ['default'],
-  esClient: createMockEsClient(),
+// Discriminate-aware so tests can spread the result into the indexer's union
+// without TypeScript widening `action` to `'create' | 'update' | 'delete'` —
+// which would no longer satisfy any single variant of `SmlIndexerParams`.
+function createIndexerParams(overrides: {
+  originId?: string;
+  attachmentType?: string;
+  spaces?: string[];
+  esClient?: jest.Mocked<ElasticsearchClient>;
+  logger?: ReturnType<typeof createMockLogger>;
+  action: 'delete';
+  ingestionMethod?: SmlDeleteScope;
+}): SmlIndexerDeleteParams;
+function createIndexerParams(overrides?: {
+  originId?: string;
+  attachmentType?: string;
+  spaces?: string[];
+  esClient?: jest.Mocked<ElasticsearchClient>;
+  logger?: ReturnType<typeof createMockLogger>;
+  action?: 'create' | 'update';
+}): SmlIndexerOriginParams;
+function createIndexerParams(
+  overrides: {
+    originId?: string;
+    attachmentType?: string;
+    spaces?: string[];
+    esClient?: jest.Mocked<ElasticsearchClient>;
+    logger?: ReturnType<typeof createMockLogger>;
+    action?: 'create' | 'update' | 'delete';
+    ingestionMethod?: SmlDeleteScope;
+  } = {}
+): SmlIndexerOriginParams | SmlIndexerDeleteParams {
+  const base = {
+    originId: overrides.originId ?? 'att-123',
+    attachmentType: overrides.attachmentType ?? 'lens',
+    spaces: overrides.spaces ?? ['default'],
+    esClient: overrides.esClient ?? createMockEsClient(),
+    savedObjectsClient: {} as unknown as ISavedObjectsRepository,
+    logger: overrides.logger ?? createMockLogger(),
+  };
+  if (overrides.action === 'delete') {
+    return {
+      ...base,
+      action: 'delete',
+      ...(overrides.ingestionMethod !== undefined
+        ? { ingestionMethod: overrides.ingestionMethod }
+        : {}),
+    };
+  }
+  return { ...base, action: overrides.action ?? 'create' };
+}
+
+// Content-mode params can't be derived from `createIndexerParams` via spread
+// because the origin-mode return type carries `force?: boolean`, which conflicts
+// with content mode's `force?: undefined`. Build content params directly.
+const createContentIndexerParams = (overrides: {
+  originId?: string;
+  attachmentType?: string;
+  spaces?: string[];
+  esClient?: jest.Mocked<ElasticsearchClient>;
+  logger?: ReturnType<typeof createMockLogger>;
+  action?: 'create' | 'update';
+  content: SmlChunk[];
+}): SmlIndexerContentParams => ({
+  originId: overrides.originId ?? 'att-123',
+  attachmentType: overrides.attachmentType ?? 'lens',
+  spaces: overrides.spaces ?? ['default'],
+  esClient: overrides.esClient ?? createMockEsClient(),
   savedObjectsClient: {} as unknown as ISavedObjectsRepository,
-  logger: createMockLogger(),
-  ...overrides,
+  logger: overrides.logger ?? createMockLogger(),
+  action: overrides.action ?? 'create',
+  content: overrides.content,
 });
 
 describe('createSmlIndexer', () => {
+  beforeEach(() => {
+    mockUuidCounter = 0;
+  });
+
   describe('indexAttachment', () => {
     it('delete action: calls deleteByQuery and does NOT call getSmlData', async () => {
       const getSmlData = jest.fn();
@@ -157,9 +224,12 @@ describe('createSmlIndexer', () => {
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.refresh).toBe('wait_for');
       expect(bulkCall.operations).toHaveLength(1);
-      expect(bulkCall.operations[0].index._id).toBe('lens:att-2:mock-uuid');
+      // _id is a bare UUID (no `${type}:${origin}:...` prefix) so it cannot
+      // overflow ES's 512-byte _id limit no matter how long caller-supplied
+      // inputs are. Document carries `origin_id`/`type` as searchable fields.
+      expect(bulkCall.operations[0].index._id).toBe('mock-uuid-1');
       expect(bulkCall.operations[0].index.document).toEqual({
-        id: 'lens:att-2:mock-uuid',
+        id: 'mock-uuid-1',
         type: 'lens',
         title: 'My Viz',
         origin_id: 'att-2',
@@ -560,7 +630,7 @@ describe('createSmlIndexer', () => {
     });
 
     describe('content mode (manual)', () => {
-      it('writes provided chunks with deterministic ids and ingestion_method=manual', async () => {
+      it('writes provided chunks with unique bare-UUID ids and ingestion_method=manual', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -573,19 +643,19 @@ describe('createSmlIndexer', () => {
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
-        await indexer.indexAttachment({
-          ...createIndexerParams({
+        await indexer.indexAttachment(
+          createContentIndexerParams({
             originId: 'att-manual',
             attachmentType: 'lens',
             action: 'create',
             spaces: ['default'],
             esClient,
-          }),
-          content: [
-            { type: 'lens', title: 'First', content: 'one', permissions: ['p1'] },
-            { type: 'lens', title: 'Second', content: 'two' },
-          ],
-        });
+            content: [
+              { type: 'lens', title: 'First', content: 'one', permissions: ['p1'] },
+              { type: 'lens', title: 'Second', content: 'two' },
+            ],
+          })
+        );
 
         // getSmlData must NOT be called in content mode
         expect(getSmlData).not.toHaveBeenCalled();
@@ -597,11 +667,16 @@ describe('createSmlIndexer', () => {
         expect(bulkMock).toHaveBeenCalledTimes(1);
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops).toHaveLength(2);
-        expect(ops[0].index._id).toBe('lens:att-manual:manual:0');
-        expect(ops[1].index._id).toBe('lens:att-manual:manual:1');
+        // Each chunk gets its own UUID (no `${type}:${origin}:manual:${index}`
+        // construction). Idempotency on repeat calls comes from the
+        // unconditional `deleteByQuery` for this `origin_id` above, not from
+        // deterministic ids.
+        expect(ops[0].index._id).toBe('mock-uuid-1');
+        expect(ops[1].index._id).toBe('mock-uuid-2');
+        expect(ops[0].index._id).not.toBe(ops[1].index._id);
         expect(ops[0].index.document).toEqual(
           expect.objectContaining({
-            id: 'lens:att-manual:manual:0',
+            id: 'mock-uuid-1',
             title: 'First',
             origin_id: 'att-manual',
             content: 'one',
@@ -609,6 +684,7 @@ describe('createSmlIndexer', () => {
             ingestion_method: 'manual',
           })
         );
+        expect(ops[1].index.document.id).toBe('mock-uuid-2');
         expect(ops[1].index.document.ingestion_method).toBe('manual');
         expect(ops[1].index.document.permissions).toEqual([]);
       });
@@ -624,16 +700,16 @@ describe('createSmlIndexer', () => {
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
-        await indexer.indexAttachment({
-          ...createIndexerParams({
+        await indexer.indexAttachment(
+          createContentIndexerParams({
             originId: 'att-no-type',
             attachmentType: 'unregistered',
             action: 'create',
             esClient,
             logger,
-          }),
-          content: [{ type: 'unregistered', title: 'T', content: 'c' }],
-        });
+            content: [{ type: 'unregistered', title: 'T', content: 'c' }],
+          })
+        );
 
         expect(logger.warn).not.toHaveBeenCalled();
         expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -649,42 +725,99 @@ describe('createSmlIndexer', () => {
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
-        await indexer.indexAttachment({
-          ...createIndexerParams({
+        await indexer.indexAttachment(
+          createContentIndexerParams({
             originId: 'att-empty-manual',
             attachmentType: 'lens',
             action: 'create',
             esClient,
-          }),
-          content: [],
-        });
+            content: [],
+          })
+        );
 
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
-      it('delete action removes chunks even with content provided', async () => {
-        const bulkMock = jest.fn();
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+      // Note: the prior test "delete action removes chunks even with content
+      // provided" has been removed. That combination
+      // (`{ action: 'delete', content: [...] }`) is now a compile error — the
+      // SmlIndexerDeleteParams variant has `content?: undefined`. Delete-mode
+      // semantics are exercised by the `describe('delete (ingestionMethod
+      // selector)', ...)` block below.
+    });
 
+    describe('delete (ingestionMethod selector)', () => {
+      it('omits ingestion_method filter when ingestionMethod is "all" (wipes every chunk for the origin)', async () => {
         const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
-        await indexer.indexAttachment({
-          ...createIndexerParams({
-            originId: 'att-manual-del',
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-wipe-all',
+            attachmentType: 'lens',
+            action: 'delete',
+            ingestionMethod: 'all',
+            esClient,
+          })
+        );
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+        // Filter must contain ONLY the origin_id term — no ingestion_method
+        // term means deleteByQuery removes manual + crawled.
+        expect(callArgs.query.bool.filter).toEqual([{ term: { origin_id: 'att-wipe-all' } }]);
+      });
+
+      it('filters on ingestion_method=manual when ingestionMethod is "manual"', async () => {
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-wipe-manual',
+            attachmentType: 'lens',
+            action: 'delete',
+            ingestionMethod: 'manual',
+            esClient,
+          })
+        );
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+        expect(callArgs.query.bool.filter).toEqual([
+          { term: { origin_id: 'att-wipe-manual' } },
+          { term: { ingestion_method: 'manual' } },
+        ]);
+      });
+
+      it('defaults to ingestionMethod="crawled" when omitted (back-compat with crawler/connector lifecycle callers)', async () => {
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        // No `ingestionMethod` passed — should behave exactly like the historical
+        // `action: 'delete'` call (preserve manual entries, wipe crawled).
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-default-scope',
             attachmentType: 'lens',
             action: 'delete',
             esClient,
-          }),
-          content: [{ type: 'lens', title: 'unused', content: 'x' }],
-        });
+          })
+        );
 
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-        expect(bulkMock).not.toHaveBeenCalled();
+        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+        expect(callArgs.query.bool.filter).toEqual([
+          { term: { origin_id: 'att-default-scope' } },
+          { term: { ingestion_method: 'crawled' } },
+        ]);
       });
     });
   });

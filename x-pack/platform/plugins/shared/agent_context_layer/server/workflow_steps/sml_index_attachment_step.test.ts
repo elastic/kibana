@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
 import type { AgentContextLayerPluginStart } from '../types';
 import { createSmlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
 
@@ -18,22 +21,9 @@ const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
 });
 
-type StepInput =
-  | {
-      originId: string;
-      attachmentType: string;
-      action: 'create' | 'update';
-      chunks: Array<{
-        type: string;
-        title: string;
-        content: string;
-        description?: string;
-        user_id?: string;
-        references?: string[];
-        permissions?: string[];
-      }>;
-    }
-  | { originId: string; attachmentType: string; action: 'delete' };
+// Reuse the Zod schema as the source of truth for the test input shape so
+// the test fixtures cannot silently drift from the contract.
+type StepInput = z.infer<typeof SmlIndexAttachmentInputSchema>;
 
 const buildHandlerContext = (input: StepInput, request = httpServerMock.createKibanaRequest()) => ({
   input,
@@ -56,6 +46,10 @@ const buildHandlerContext = (input: StepInput, request = httpServerMock.createKi
   stepType: 'agentContextLayer.smlIndexAttachment',
 });
 
+// Minimal `spaces` mock — only `spacesService.getSpaceId` is consumed. The
+// `Pick` makes the partial-mock intent explicit so we don't cast to `any`.
+type MockedSpaces = Pick<SpacesPluginStart, 'spacesService'>;
+
 describe('createSmlIndexAttachmentStepDefinition', () => {
   it('exposes the expected step type id and schemas', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
@@ -68,12 +62,14 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     expect(typeof definition.handler).toBe('function');
   });
 
-  it('forwards caller-supplied chunks as content-mode write for create', async () => {
+  it('forwards caller-supplied chunks as content-mode write for upsert', async () => {
     const startContract = buildStartContract();
-    const spacesService = { getSpaceId: jest.fn().mockReturnValue('test-space') };
+    const spaces: MockedSpaces = {
+      spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } as any,
+    };
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
-      getSpaces: () => ({ spacesService } as any),
+      getSpaces: () => spaces as SpacesPluginStart,
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -81,7 +77,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
       {
         originId: 'doc-42',
         attachmentType: 'custom',
-        action: 'create',
+        action: 'upsert',
         chunks: [
           {
             type: 'custom',
@@ -100,6 +96,8 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
       request,
       originId: 'doc-42',
       attachmentType: 'custom',
+      // 'upsert' is translated to 'create' on the start contract — see
+      // handler comment for why.
       action: 'create',
       // Workflow writes always go through content-mode → manual chunks.
       content: [
@@ -115,9 +113,9 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
       output: {
         originId: 'doc-42',
         attachmentType: 'custom',
-        action: 'create',
+        action: 'upsert',
         spaceId: 'test-space',
-        chunkCount: 1,
+        requestedChunkCount: 1,
         acknowledged: true,
       },
     });
@@ -133,7 +131,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'update',
+      action: 'upsert',
       chunks: [{ type: 'custom', title: 't', content: 'c' }],
     });
 
@@ -153,7 +151,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'update',
+      action: 'upsert',
       chunks: [
         {
           type: 'custom',
@@ -180,7 +178,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     });
   });
 
-  it('handles delete by issuing a content-mode wipe (empty chunks) and reports chunkCount = 0', async () => {
+  it('handles delete by issuing a wipe-all (ingestionMethod="all") and reports requestedChunkCount = 0', async () => {
     const startContract = buildStartContract();
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
@@ -200,21 +198,58 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
       originId: 'doc-1',
       attachmentType: 'custom',
       action: 'delete',
-      // Empty content array → indexer wipes every chunk for the origin
-      // (manual + crawled), matching "workflow owns this origin" semantics.
-      content: [],
+      // Workflow steps "own" the origin they wrote → wipe everything.
+      // 'all' tells the AGL indexer to skip the ingestion_method filter
+      // and remove every chunk for the origin (manual + crawled).
+      ingestionMethod: 'all',
     });
+    // The previous misleading `content: []` workaround MUST NOT be sent —
+    // it was a no-op (the indexer's `action === 'delete'` branch fires
+    // before the content-mode check) and would confuse the union types.
+    expect(startContract.indexAttachment.mock.calls[0][0]).not.toHaveProperty('content');
     expect(result).toEqual({
       output: expect.objectContaining({
         action: 'delete',
         spaceId: 'default',
-        chunkCount: 0,
+        requestedChunkCount: 0,
         acknowledged: true,
       }),
     });
   });
 
-  it('returns an error result when the attachment_type is not registered', async () => {
+  it('allows delete to proceed when the attachment type is not registered', async () => {
+    const startContract = buildStartContract();
+    startContract.getTypeDefinition.mockReturnValue(undefined);
+    const definition = createSmlIndexAttachmentStepDefinition({
+      getStartContract: () => startContract,
+      getSpaces: () => undefined,
+    });
+
+    // Cleanup must remain functional after the plugin that registered the
+    // type is disabled — otherwise stale chunks become unreachable from
+    // the workflow surface.
+    const context = buildHandlerContext({
+      originId: 'doc-1',
+      attachmentType: 'unregistered-but-was-written-before',
+      action: 'delete',
+    });
+
+    const result = await definition.handler(context as any);
+
+    expect(startContract.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachmentType: 'unregistered-but-was-written-before',
+        action: 'delete',
+        ingestionMethod: 'all',
+      })
+    );
+    // The type-definition lookup must NOT be consulted for delete.
+    expect(startContract.getTypeDefinition).not.toHaveBeenCalled();
+    expect(result.error).toBeUndefined();
+    expect(result.output?.action).toBe('delete');
+  });
+
+  it('returns an error result when upsert targets an unregistered attachment type', async () => {
     const startContract = buildStartContract();
     startContract.getTypeDefinition.mockReturnValueOnce(undefined);
     const definition = createSmlIndexAttachmentStepDefinition({
@@ -225,7 +260,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'unknown',
-      action: 'create',
+      action: 'upsert',
       chunks: [{ type: 'unknown', title: 't', content: 'c' }],
     });
 
@@ -247,7 +282,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'create',
+      action: 'upsert',
       chunks: [{ type: 'custom', title: 't', content: 'c' }],
     });
 
@@ -272,7 +307,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'create',
+      action: 'upsert',
       chunks: [{ type: 'custom', title: 't', content: 'c' }],
     });
 
@@ -291,7 +326,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const context = buildHandlerContext({
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'create',
+      action: 'upsert',
       chunks: [{ type: 'custom', title: 't', content: 'c' }],
     });
 

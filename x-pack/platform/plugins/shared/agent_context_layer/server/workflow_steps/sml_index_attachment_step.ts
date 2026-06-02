@@ -15,17 +15,29 @@ import type { AgentContextLayerPluginStart } from '../types';
  * Factory for the SML "index attachment" workflow step.
  *
  * Workflow writes always go through the **content-mode** path on the AGL
- * start contract — the workflow author supplies `chunks` (for
- * `create`/`update`), which the indexer writes as
- * `ingestion_method: 'manual'`. For `delete`, the handler invokes
- * content-mode with an empty `content` array, which the indexer treats as
- * "wipe every chunk for this `origin_id`" (manual + crawled). This matches
- * the POC's "workflow owns this origin" semantics on top of main's
- * post-#270921 API.
+ * start contract — the workflow author supplies `chunks` for `upsert`,
+ * which the indexer writes as `ingestion_method: 'manual'`. The indexer's
+ * content-mode path is idempotent (always a full replace), so we expose a
+ * single `upsert` action rather than the misleading `create`/`update`
+ * pair the start contract internally allows for content-mode writes
+ * (neither would actually fail-if-exists / fail-if-not-found here).
  *
- * The handler defers resolving the AGL start contract until execution time
- * so the step can be registered during plugin `setup()` and still call into
- * the service after `start()` has run.
+ * For `delete`, the handler dispatches the AGL contract's delete variant
+ * with `ingestionMethod: 'all'`, which wipes every chunk for the
+ * `origin_id` regardless of how it was produced (manual + crawled). This
+ * matches the "workflow owns this origin" semantic — opposite of the
+ * crawler's default delete, which keeps curated manuals around.
+ *
+ * The `getTypeDefinition` guard intentionally only fires on the `upsert`
+ * branch: writes against an unregistered type are nonsensical (no
+ * `getSmlData` hook to fall back to, no `toAttachment` for downstream
+ * consumers), but `delete` must remain functional even after a plugin
+ * that registered the type is disabled — otherwise stale chunks become
+ * unreachable from the workflow surface.
+ *
+ * The handler defers resolving the AGL start contract until execution
+ * time so the step can be registered during plugin `setup()` and still
+ * call into the service after `start()` has run.
  */
 export const createSmlIndexAttachmentStepDefinition = ({
   getStartContract,
@@ -44,23 +56,26 @@ export const createSmlIndexAttachmentStepDefinition = ({
 
         const startContract = getStartContract();
 
-        if (!startContract.getTypeDefinition(attachmentType)) {
-          return {
-            error: new Error(`Unknown SML attachment type: '${attachmentType}'`),
-          };
-        }
-
         if (action === 'delete') {
-          // Empty `content` array maps to "wipe every chunk for this origin"
-          // in the indexer — symmetric with create/update overriding everything.
+          // We do NOT gate on `getTypeDefinition` here: a workflow must be
+          // able to clean up chunks it previously wrote even if the
+          // plugin that registered the type has since been disabled.
           await startContract.indexAttachment({
             request,
             originId,
             attachmentType,
             action: 'delete',
-            content: [],
+            // Workflow steps "own" the origin they wrote — wipe every chunk,
+            // not just the crawler-default 'crawled'-only subset.
+            ingestionMethod: 'all',
           });
         } else {
+          if (!startContract.getTypeDefinition(attachmentType)) {
+            return {
+              error: new Error(`Unknown SML attachment type: '${attachmentType}'`),
+            };
+          }
+
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -75,13 +90,21 @@ export const createSmlIndexAttachmentStepDefinition = ({
             request,
             originId,
             attachmentType,
-            action,
+            // Content-mode writes only accept 'create' | 'update' at the
+            // start-contract level; both trigger the same idempotent full
+            // replace, so we always send 'create' as the canonical value
+            // for the user-facing `upsert` action.
+            action: 'create',
             content: chunks,
           });
         }
 
         const spaceId = getSpaces()?.spacesService?.getSpaceId(request) ?? 'default';
-        const chunkCount = action === 'delete' ? 0 : input.chunks.length;
+        // Reflects the caller-supplied chunk count, not the count of
+        // documents Elasticsearch confirms it has written. The indexer
+        // logs per-document bulk errors but does not throw — see the
+        // output schema's `requestedChunkCount` JSDoc.
+        const requestedChunkCount = action === 'delete' ? 0 : input.chunks.length;
 
         return {
           output: {
@@ -89,7 +112,7 @@ export const createSmlIndexAttachmentStepDefinition = ({
             attachmentType,
             action,
             spaceId,
-            chunkCount,
+            requestedChunkCount,
             acknowledged: true as const,
           },
         };

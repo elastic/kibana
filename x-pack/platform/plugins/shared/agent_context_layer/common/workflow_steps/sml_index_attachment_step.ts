@@ -40,10 +40,19 @@ const ChunkSchema = z.object({
  *
  * Workflow-driven writes always go through the content-mode path on the SML
  * start contract — caller-supplied chunks are written as
- * `ingestion_method: 'manual'`. For `create`/`update` the workflow author
- * supplies one or more `chunks`. `delete` requires only the origin/type
- * identifiers and wipes every chunk (manual + crawled) recorded for the
- * `origin_id`.
+ * `ingestion_method: 'manual'`.
+ *
+ * - `upsert` requires `chunks` and always performs a full replace: every
+ *   prior chunk for the `origin_id` is removed and the supplied chunks are
+ *   written. There is no fail-if-exists / fail-if-not-found distinction —
+ *   the indexer's content-mode path is idempotent by design, so we expose
+ *   a single `upsert` action rather than the misleading `create`/`update`
+ *   pair.
+ * - `delete` requires only the origin/type identifiers and wipes every
+ *   chunk recorded for the `origin_id` regardless of how it was produced
+ *   (both crawled and manual entries). This matches the "workflow owns
+ *   this origin" semantic and is the opposite of the crawler's default
+ *   delete (which preserves curated manual entries).
  */
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
@@ -52,13 +61,7 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .min(1)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
     attachmentType: z.string().min(1).describe('SML attachment type id (chunk namespace).'),
-    action: z.literal('create'),
-    chunks: z.array(ChunkSchema).min(1).max(100),
-  }),
-  z.object({
-    originId: z.string().min(1),
-    attachmentType: z.string().min(1),
-    action: z.literal('update'),
+    action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
   }),
   z.object({
@@ -71,9 +74,16 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
 export const SmlIndexAttachmentOutputSchema = z.object({
   originId: z.string(),
   attachmentType: z.string(),
-  action: z.enum(['create', 'update', 'delete']),
+  action: z.enum(['upsert', 'delete']),
   spaceId: z.string(),
-  chunkCount: z.number().int().nonnegative(),
+  /**
+   * Number of chunks the workflow asked the step to index. Reflects the
+   * caller-supplied `chunks.length` (0 for `delete`), not the count of
+   * documents Elasticsearch confirms it has written. Per-document bulk
+   * failures are logged by the indexer but do not throw — if you need a
+   * confirmed-write count, validate downstream.
+   */
+  requestedChunkCount: z.number().int().nonnegative(),
   acknowledged: z.literal(true),
 });
 
@@ -101,7 +111,7 @@ export const smlIndexAttachmentStepCommonDefinition: CommonStepDefinition<
       'xpack.agentContextLayer.workflowSteps.smlIndexAttachment.documentation.details',
       {
         defaultMessage:
-          "Writes chunks directly (the registered type\u2019s `getSmlData` hook is not invoked). `create`/`update` writes the supplied `chunks` tagged `ingestion_method: 'manual'`, replacing any prior chunks for the `origin_id`. `delete` wipes every chunk for the `origin_id` regardless of how it was produced.",
+          "Writes chunks directly (the registered type\u2019s `getSmlData` hook is not invoked). `upsert` writes the supplied `chunks` tagged `ingestion_method: 'manual'`, replacing any prior chunks for the `origin_id` (idempotent — no fail-if-exists / fail-if-not-found distinction). `delete` wipes every chunk for the `origin_id` regardless of how it was produced.",
       }
     ),
     examples: [
@@ -112,7 +122,7 @@ export const smlIndexAttachmentStepCommonDefinition: CommonStepDefinition<
   with:
     originId: "doc-42"
     attachmentType: "custom"
-    action: "create"
+    action: "upsert"
     chunks:
       - type: "custom"
         title: "Quarterly summary"
