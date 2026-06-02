@@ -27,7 +27,7 @@ import {
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
-import type { Case } from '../../../common';
+import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
@@ -54,6 +54,8 @@ import {
   GROUPED_BY_TITLE,
 } from './translations';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
+import { resolveV2Template } from './v2_template_utils';
+import type { ParsedTemplateDefinition } from './v2_template_utils';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -740,8 +742,21 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    const { customFieldsConfigurationMap, templatesConfigurationMap } =
-      await this.getCustomFieldsAndTemplatesConfiguration();
+    let v2Template: ParsedTemplateDefinition | null = null;
+    let customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map();
+    let templatesConfigurationMap: Map<string, TemplatesConfiguration> = new Map();
+
+    if (params.templateVersion && params.templateId) {
+      v2Template = await resolveV2Template(
+        this.casesClient,
+        params.templateId,
+        params.templateVersion,
+        this.logger
+      );
+    } else {
+      ({ customFieldsConfigurationMap, templatesConfigurationMap } =
+        await this.getCustomFieldsAndTemplatesConfiguration());
+    }
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -752,7 +767,8 @@ export class CasesConnectorExecutor {
             params,
             data,
             customFieldsConfigurationMap.get(params.owner),
-            templatesConfigurationMap.get(params.owner)
+            templatesConfigurationMap.get(params.owner),
+            v2Template ?? undefined
           )
         );
       }
@@ -792,14 +808,59 @@ export class CasesConnectorExecutor {
     return casesMap;
   }
 
+  private getCreateCaseRequestFromV2Template(
+    params: CasesConnectorRunParams,
+    groupingData: GroupedAlertsWithCaseId,
+    v2Template: ParsedTemplateDefinition
+  ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
+    const { grouping, caseId, oracleRecord, title } = groupingData;
+    const flattenGrouping = getFlattenedObject(grouping);
+
+    const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
+      id: caseId,
+      description: v2Template.description ?? this.getCaseDescription(params, flattenGrouping),
+      tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
+      title:
+        title ??
+        v2Template.name ??
+        this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      settings: {
+        syncAlerts: false,
+        extractObservables: false,
+      },
+      owner: params.owner,
+    };
+
+    if (v2Template.severity) {
+      baseRequest.severity = v2Template.severity as CaseSeverity;
+    }
+
+    if (v2Template.category) {
+      baseRequest.category = v2Template.category;
+    }
+
+    return baseRequest;
+  }
+
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
     customFieldsConfigurations?: CustomFieldsConfiguration,
-    templatesConfigurations?: TemplatesConfiguration
+    templatesConfigurations?: TemplatesConfiguration,
+    v2Template?: ParsedTemplateDefinition
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
+
+    if (v2Template) {
+      return this.getCreateCaseRequestFromV2Template(params, groupingData, v2Template);
+    }
 
     const selectedTemplate = templatesConfigurations?.find(
       (template) => template.key === params.templateId
@@ -1097,15 +1158,31 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    const { customFieldsConfigurationMap, templatesConfigurationMap } =
-      await this.getCustomFieldsAndTemplatesConfiguration();
+    let v2TemplateForReopened: ParsedTemplateDefinition | null = null;
+    let customFieldsConfigurationMapForReopened: Map<string, CustomFieldsConfiguration> = new Map();
+    let templatesConfigurationMapForReopened: Map<string, TemplatesConfiguration> = new Map();
+
+    if (params.templateVersion && params.templateId) {
+      v2TemplateForReopened = await resolveV2Template(
+        this.casesClient,
+        params.templateId,
+        params.templateVersion,
+        this.logger
+      );
+    } else {
+      ({
+        customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
+        templatesConfigurationMap: templatesConfigurationMapForReopened,
+      } = await this.getCustomFieldsAndTemplatesConfiguration());
+    }
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
         params,
         record,
-        customFieldsConfigurationMap.get(params.owner),
-        templatesConfigurationMap.get(params.owner)
+        customFieldsConfigurationMapForReopened.get(params.owner),
+        templatesConfigurationMapForReopened.get(params.owner),
+        v2TemplateForReopened ?? undefined
       )
     );
 

@@ -89,6 +89,7 @@ describe('CasesConnectorExecutor', () => {
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
+    templateVersion: null,
   };
 
   beforeEach(() => {
@@ -1219,6 +1220,125 @@ describe('CasesConnectorExecutor', () => {
                 ],
               }
             `);
+          });
+        });
+
+        describe('Templates v2', () => {
+          const v2TemplateSO = {
+            id: 'tmpl-v2-id',
+            type: 'cases-templates',
+            references: [],
+            attributes: {
+              templateId: 'tmpl-v2-id',
+              name: 'V2 Template',
+              owner: 'cases',
+              definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+fields: []
+`,
+              templateVersion: 1,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+            },
+          };
+
+          beforeEach(() => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(v2TemplateSO);
+          });
+
+          it('creates a new case using v2 template fields when templateVersion is set', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.tags).toContain('v2-tag');
+            expect(createdCase.severity).toBe('medium');
+            expect(createdCase.category).toBe('Phishing');
+            expect(createdCase.connector.type).toBe('.none');
+            expect(createdCase.customFields).toBeUndefined();
+          });
+
+          it('v2 template title wins only when groupedAlerts has no explicit title', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].title).toBe('V2 Template');
+          });
+
+          it('falls back to default fields when v2 template is not found, logs warn', async () => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(undefined);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            // falls back to generated description
+            expect(bulkCreateCall.cases[0].description).toContain('Test rule');
+          });
+
+          it('does not call templates.getTemplate when templateVersion is null (v1 path)', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: null,
+              templateVersion: null,
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
           });
         });
 
@@ -3175,6 +3295,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      templateVersion: null,
       autoPushCase: null,
     };
 

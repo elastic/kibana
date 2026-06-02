@@ -106,6 +106,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
     max: ABSOLUTE_MAX_CASES_PER_RUN,
   }),
   templateId: schema.nullable(schema.string()),
+  templateVersion: schema.nullable(schema.string()),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
@@ -200,6 +201,7 @@ export const ZCasesConnectorRunParamsSchema = z
       .max(ABSOLUTE_MAX_CASES_PER_RUN)
       .default(DEFAULT_MAX_OPEN_CASES),
     templateId: z.string().nullable().default(null),
+    templateVersion: z.string().nullable().default(null),
     internallyManagedAlerts: z.boolean().default(false).nullable(),
   })
   .strict();
@@ -212,6 +214,7 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
     templateId: schema.nullable(schema.string()),
+    templateVersion: schema.nullable(schema.string()),
     maximumCasesToOpen: schema.nullable(
       schema.number({
         min: 1,
