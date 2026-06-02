@@ -310,6 +310,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
+  const reopenChildRef = useRef(false);
 
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
@@ -322,14 +323,16 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   }, [onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
+    reopenChildRef.current = false;
     setIsConfirmCloseVisible(false);
     onClose();
   }, [onClose]);
 
   const handleCancelDiscard = useCallback(() => {
+    reopenChildRef.current = uiState.yamlMode;
     setIsConfirmCloseVisible(false);
     setFlyoutKey((k) => k + 1);
-  }, []);
+  }, [uiState.yamlMode]);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
@@ -358,6 +361,19 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   });
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  const isAlertRef = useRef(isAlert);
+  isAlertRef.current = isAlert;
+
+  // After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
+  // the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
+  // Read isAlert via ref so this effect only fires on flyoutKey changes,
+  // not on kind toggles (where reopenChildRef is always false anyway).
+  useEffect(() => {
+    if (reopenChildRef.current) {
+      reopenChildRef.current = false;
+      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+    }
+  }, [flyoutKey, dispatch]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {

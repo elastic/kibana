@@ -288,6 +288,38 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
+    it('"Continue editing" does not open sandbox when it was closed before close attempt', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose, mode: 'edit' });
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+    });
+
+    it('"Continue editing" reopens sandbox in YAML mode', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
+      const yamlButton =
+        toggleGroup.querySelector('button[data-test-subj="yaml"]') ??
+        toggleGroup.querySelectorAll('button')[1];
+      fireEvent.click(yamlButton!);
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+    });
+
     it('shows confirmation after editing in YAML mode and switching back to form mode', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
