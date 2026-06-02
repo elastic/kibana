@@ -44,6 +44,39 @@ export const FILTER_WORKPAD_ID = 'workpad-b5618217-56d2-47fa-b756-1be2306cda68';
 export const REPORTS_WORKPAD_NAME = 'The Very Cool Workpad for PDF Tests';
 
 /**
+ * By-reference embeddables used by the Canvas embeddable specs.
+ * `libraryName` is the dashed name shown in the "Add from library" finder;
+ * `headingId` is the space-stripped title rendered as `embeddablePanelHeading-<id>`.
+ */
+export const EMBEDDABLES = {
+  SAVED_SEARCH: {
+    libraryName: 'Rendering-Test:-saved-search',
+    headingId: 'RenderingTest:savedsearch',
+  },
+  VISUALIZATION: {
+    libraryName: 'Rendering-Test: metric',
+    headingId: 'RenderingTest:metric',
+  },
+  LENS: {
+    libraryName: 'Artistpreviouslyknownaslens',
+    headingId: 'Artistpreviouslyknownaslens',
+  },
+} as const;
+
+/** Expected legacy-metric label/value rendered by the saved Lens visualization (logstash_lens data). */
+export const LENS_METRIC = { label: 'Maximum of bytes', value: '16,788' } as const;
+
+/**
+ * Absolute time range that covers the `logstash_lens` / `logstash_functional` data
+ * (matches the FTR time picker defaults). Used so the Lens editor shows data instead
+ * of the "this time range doesn't contain any data" popover.
+ */
+export const LOGSTASH_TIME_RANGE = {
+  from: 'Sep 19, 2015 @ 06:31:44.000',
+  to: 'Sep 23, 2015 @ 18:31:44.000',
+} as const;
+
+/**
  * Workpad IDs for saved_object_resolve scenarios.
  * These are the IDs of workpads in the saved_object_resolve KBN archive
  * set up with legacy-url-alias redirects for alias + conflict resolution testing.
@@ -103,7 +136,7 @@ export const CANVAS_MAPS_ROLE: KibanaRole = {
   kibana: [
     {
       base: [],
-      feature: { canvas: ['all'], maps: ['all'] },
+      feature: { canvas: ['all'], maps: ['all'], indexPatterns: ['all'] },
       spaces: ['*'],
     },
   ],

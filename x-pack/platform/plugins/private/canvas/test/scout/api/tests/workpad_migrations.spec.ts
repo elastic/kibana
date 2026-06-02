@@ -20,9 +20,9 @@
 import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data';
-import { expect, tags } from '@kbn/scout/api';
+import { expect } from '@kbn/scout/api';
 import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { testData } from '../fixtures';
 
 const EXPORTS_DIR = path.join(__dirname, '../fixtures/exports');

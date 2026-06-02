@@ -238,10 +238,10 @@ export class CanvasPage {
 
   /**
    * Add a new Lens panel by opening the editor menu and clicking
-   * the "Visualization" action (which launches the Lens editor).
+   * the "Lens" action (which launches the Lens editor).
    */
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Lens');
   }
 
   /**
@@ -257,6 +257,111 @@ export class CanvasPage {
   async clickAddFromLibrary() {
     await this.page.testSubj.locator('canvas-add-from-library-button').click();
     await this.page.testSubj.locator('dashboardAddPanel').waitFor({ state: 'visible' });
+  }
+
+  /** Close the "Add from library" flyout and wait for it to disappear. */
+  async closeAddFromLibrary() {
+    await this.page.testSubj.locator('euiFlyoutCloseButton').click();
+    await this.page.testSubj.locator('dashboardAddPanel').waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Add an existing saved object to the workpad via the "Add from library" flyout.
+   * Mirrors the FTR `dashboardAddPanel.addEmbeddable` finder flow: open the flyout,
+   * filter by an optional type + quoted name, click the matching row, then close.
+   *
+   * @param name dashed finder name (e.g. `'Rendering-Test:-saved-search'`)
+   * @param type optional saved-object type filter (e.g. `'search'`, `'lens'`, `'Visualization'`)
+   */
+  async addEmbeddableFromLibrary(name: string, type?: string) {
+    await this.clickAddFromLibrary();
+    const typePrefix = type ? `type:(${type}) ` : '';
+    const query = `${typePrefix}"${name.replace('-', ' ')}"`;
+    const search = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    await search.click();
+    await search.clear();
+    // The finder's debounced search reacts to real keyboard events; `fill()` sets
+    // the value without firing them, so the list stays unfiltered. Type natively.
+    await search.pressSequentially(query, { delay: 50 });
+    await this.page.testSubj
+      .locator('savedObjectFinderLoadingIndicator')
+      .waitFor({ state: 'hidden', timeout: 30_000 })
+      .catch(() => {});
+    await this.page.testSubj
+      .locator(`savedObjectTitle${name.split(' ').join('-')}`)
+      .click({ timeout: 20_000 });
+    await this.closeAddFromLibrary();
+  }
+
+  /** Locator for an embeddable panel heading on the workpad by its space-stripped title id. */
+  embeddablePanelHeading(titleId: string): Locator {
+    return this.page.testSubj.locator(`embeddablePanelHeading-${titleId}`);
+  }
+
+  /**
+   * Hover-actions wrapper for an embeddable panel — by title, or the first panel
+   * when no title is given. Mirrors the FTR `getPanelWrapper` selector strategy.
+   */
+  private panelHoverActions(title?: string): Locator {
+    if (!title) {
+      return this.page.locator('.embPanel__hoverActionsAnchor').first();
+    }
+    return this.page.testSubj.locator(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
+  }
+
+  /** Open the context menu for an embeddable panel. */
+  async openPanelContextMenu(title?: string) {
+    const wrapper = this.panelHoverActions(title);
+    await wrapper.scrollIntoViewIfNeeded();
+    await wrapper.hover();
+    const contextMenuOpen = this.page.testSubj.locator('embeddablePanelContextMenuOpen');
+    if (await contextMenuOpen.isVisible()) {
+      return;
+    }
+    await wrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+    await contextMenuOpen.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Click a panel action, preferring the hover action if it is present and
+   * falling back to the context menu otherwise (mirrors FTR `clickPanelAction`).
+   */
+  async clickPanelAction(actionTestSubj: string, title?: string) {
+    const wrapper = this.panelHoverActions(title);
+    await wrapper.scrollIntoViewIfNeeded();
+    await wrapper.hover();
+    const actionInWrapper = wrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
+    if (await actionInWrapper.isVisible()) {
+      await actionInWrapper.click();
+      return;
+    }
+    await this.openPanelContextMenu(title);
+    await this.page.testSubj.locator(actionTestSubj).click();
+  }
+
+  /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */
+  async editPanel(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+  }
+
+  /** Within a saved-search inline-edit flyout, click "Edit in Discover". */
+  async clickEditInDiscover() {
+    await this.page.testSubj
+      .locator('discoverEmbeddableInlineEditEditInDiscoverLink')
+      .click({ timeout: 20_000 });
+  }
+
+  /** Click "Save and return" in the Lens editor and wait for Canvas to take over again. */
+  async saveLensAndReturn() {
+    await this.page.testSubj.locator('lnsApp_saveAndReturnButton').click();
+    await this.page.testSubj.locator('lnsApp').waitFor({ state: 'hidden' });
+  }
+
+  /** Click "Save and return" in the Visualize editor and wait for Canvas to take over again. */
+  async saveVisualizeAndReturn() {
+    const saveAndReturn = this.page.testSubj.locator('visualizesaveAndReturnButton');
+    await saveAndReturn.click({ timeout: 20_000 });
+    await saveAndReturn.waitFor({ state: 'hidden' });
   }
 
   /** Delete the currently selected element via the workpad edit menu. */
