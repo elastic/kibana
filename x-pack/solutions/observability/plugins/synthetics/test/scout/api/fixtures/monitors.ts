@@ -346,6 +346,58 @@ export async function triggerPrivateLocationCleanup(
 }
 
 /**
+ * `POST /internal/synthetics/service/monitor/inspect` — inspects a monitor and
+ * returns the would-be Fleet policy. Mirrors the FTR
+ * `SyntheticsMonitorTestService.inspectMonitor`: it strips the server-generated
+ * `id` / `config_id` identifiers and per-run secrets (api_key, license info,
+ * stack_version) so callers can assert against a stable shape.
+ */
+export async function inspectMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitor: Record<string, unknown>,
+  opts: { hideParams?: boolean; statusCode?: number } = {}
+) {
+  const { hideParams = true, statusCode = 200 } = opts;
+  const res = await apiClient.post(
+    `internal/synthetics/service/monitor/inspect?hideParams=${hideParams}`,
+    {
+      headers,
+      body: monitor,
+      responseType: 'json',
+    }
+  );
+  expect(res).toHaveStatusCode(statusCode);
+
+  const body = res.body as {
+    result: {
+      publicConfigs?: Array<Record<string, any>>;
+      privateConfig: any;
+    };
+    decodedCode: string;
+    [key: string]: any;
+  };
+
+  const publicConfig = body.result?.publicConfigs?.[0];
+  const monitor0 = publicConfig?.monitors?.[0];
+  if (monitor0) {
+    delete monitor0.id;
+    delete monitor0.streams?.[0]?.id;
+    delete monitor0.streams?.[0]?.config_id;
+    if (monitor0.streams?.[0]?.fields) {
+      delete monitor0.streams[0].fields.config_id;
+    }
+  }
+  if (publicConfig) {
+    delete publicConfig.output?.api_key;
+    delete publicConfig.license_issued_to;
+    delete publicConfig.stack_version;
+  }
+
+  return body;
+}
+
+/**
  * `PUT /internal/synthetics/service/enablement` — enables synthetics. Internal
  * route, so no `elastic-api-version` header (matching the FTR enablement call).
  */
