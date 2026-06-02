@@ -782,6 +782,7 @@ export class LogsExtractionClient {
         targetIndex: latestIndex,
         logger: this.logger,
         abortController: opts?.abortController,
+        refresh: true,
       });
 
       if (pagination) {

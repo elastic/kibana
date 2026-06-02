@@ -27,6 +27,24 @@ export const SYNTHETICS_API_URLS = {
 export const PUBLIC_API_VERSION = '2023-10-31';
 export const INTERNAL_API_VERSION = '1';
 
+/**
+ * Synthetics monitor saved-object types created by the create/edit specs.
+ * Cleaned in `beforeAll`/`afterAll` so the worker-shared Fleet package and
+ * private location survive across specs (matching the FTR suite's design).
+ */
+export const SYNTHETICS_MONITOR_SO_TYPES = ['synthetics-monitor', 'synthetics-monitor-multi-space'];
+
+/**
+ * Elastic-managed "local" public location available in the test environment.
+ * Mirrors `LOCAL_PUBLIC_LOCATION` from the FTR `apis/synthetics/helpers/location.ts`.
+ */
+export const LOCAL_PUBLIC_LOCATION = {
+  geo: { lat: 0, lon: 0 },
+  id: 'dev',
+  label: 'Dev Service',
+  isServiceManaged: true,
+} as const;
+
 /** Default headers for Synthetics *public* API requests (versioned). */
 export const PUBLIC_API_HEADERS = {
   'elastic-api-version': PUBLIC_API_VERSION,
