@@ -185,6 +185,7 @@ export class SecurityPlugin
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
   private elasticsearchUrl?: string;
+  private kibanaServerURL?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -249,6 +250,11 @@ export class SecurityPlugin
     if (cloud?.cloudId) {
       this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
     }
+
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
+    this.kibanaServerURL = core.http.basePath.publicBaseUrl ?? serverBaseUrl;
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
@@ -426,9 +432,6 @@ export class SecurityPlugin
 
     const config = this.getConfig();
 
-    const { protocol, hostname, port } = core.http.getServerInfo();
-    const serverConfig = { protocol, hostname, port, ...config.public };
-
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -440,7 +443,7 @@ export class SecurityPlugin
       session,
       uiam: config.uiam?.enabled
         ? new UiamService(this.logger.get('uiam'), config.uiam, {
-            kibanaServerURL: `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`,
+            kibanaServerURL: this.kibanaServerURL!,
             elasticsearchUrl: this.elasticsearchUrl,
           })
         : undefined,
