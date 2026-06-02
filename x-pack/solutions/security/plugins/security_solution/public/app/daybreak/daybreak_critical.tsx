@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -468,8 +467,14 @@ const TABLE_COLUMN = {
   maximize: 24,
   type: 96,
   severity: 96,
-  action: 116,
-  iconButton: 24,
+  /*
+   * Single trailing-actions column hosting the action text button + the
+   * paperclip + the overflow menu icons in a tight flex group. Width
+   * is sized for the widest action label (`Investigate`) plus the two
+   * `xs` icon buttons and their inner gutter; the cluster aligns
+   * flush to the row's right edge.
+   */
+  actions: 180,
 } as const;
 
 const tableColumn = (px: number) => css`
@@ -477,7 +482,7 @@ const tableColumn = (px: number) => css`
   min-width: ${px}px;
   max-width: ${px}px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 `;
 
 const SecurityEventRow: React.FC<{ event: SecurityEvent; isLast: boolean }> = ({
@@ -519,22 +524,32 @@ const SecurityEventRow: React.FC<{ event: SecurityEvent; isLast: boolean }> = ({
             flex: 1 1 0;
           `}
         >
-          <EuiLink
-            color="primary"
-            css={css`
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              display: inline-block;
-              max-width: 100%;
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
+          {/*
+           * Title rendered as the same `xs` `EuiButtonEmpty` shape used
+           * by the "Go to alerts" CTA at the top of the queue and the
+           * per-row action button at the end of the row, so all primary
+           * in-row affordances read as the same button family with the
+           * same hover footprint (default `EuiButtonEmpty` padding, no
+           * `flush` override). The button still ellipses long titles
+           * via `.euiButtonEmpty__text` so the column constraint wins.
+           */}
+          <EuiButtonEmpty
+            size="xs"
             data-test-subj={`daybreakCriticalEvent-${event.id}-title`}
             onClick={() => {}}
             title={event.title}
+            css={css`
+              max-width: 100%;
+              font-weight: ${euiTheme.font.weight.semiBold};
+              .euiButtonEmpty__text {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            `}
           >
             {event.title}
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         {/*
          * Col 3 — type badge (Attack / Alert). Both hollow; the
@@ -561,50 +576,57 @@ const SecurityEventRow: React.FC<{ event: SecurityEvent; isLast: boolean }> = ({
           </EuiBadge>
         </EuiFlexItem>
         {/*
-         * Col 5 — per-row primary action. `xs` text-empty button
-         * with `flush="both"` so the label aligns flush against the
-         * column edges and the fixed-width column does the alignment.
+         * Col 5 — trailing actions cluster. The per-row primary action
+         * (Block IP / Add to Case / Investigate) plus the paperclip
+         * and overflow icons live in a single fixed-width column so
+         * the whole cluster aligns flush against the row's right edge
+         * across every row, regardless of action label length.
          */}
-        <EuiFlexItem grow={false} css={tableColumn(TABLE_COLUMN.action)}>
-          <EuiButtonEmpty
-            size="xs"
-            color="primary"
-            flush="both"
-            data-test-subj={`daybreakCriticalEvent-${event.id}-action-${event.action}`}
-            onClick={() => {}}
+        <EuiFlexItem grow={false} css={tableColumn(TABLE_COLUMN.actions)}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            justifyContent="flexEnd"
+            responsive={false}
           >
-            {actionLabel}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {/* Col 6 — paperclip (attach to input) */}
-        <EuiFlexItem grow={false} css={tableColumn(TABLE_COLUMN.iconButton)}>
-          <EuiButtonIcon
-            iconType="paperClip"
-            color="text"
-            size="xs"
-            aria-label={i18n.translate(
-              'xpack.securitySolution.daybreak.critical.event.attachAriaLabel',
-              {
-                defaultMessage: 'Attach "{title}" to the input',
-                values: { title: event.title },
-              }
-            )}
-            data-test-subj={`daybreakCriticalEvent-${event.id}-attach`}
-            onClick={() => {}}
-          />
-        </EuiFlexItem>
-        {/* Col 7 — overflow menu */}
-        <EuiFlexItem grow={false} css={tableColumn(TABLE_COLUMN.iconButton)}>
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            color="text"
-            size="xs"
-            aria-label={i18n.translate(
-              'xpack.securitySolution.daybreak.critical.event.moreAriaLabel',
-              { defaultMessage: 'More actions' }
-            )}
-            onClick={() => {}}
-          />
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj={`daybreakCriticalEvent-${event.id}-action-${event.action}`}
+                onClick={() => {}}
+              >
+                {actionLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="paperClip"
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.daybreak.critical.event.attachAriaLabel',
+                  {
+                    defaultMessage: 'Attach "{title}" to the input',
+                    values: { title: event.title },
+                  }
+                )}
+                data-test-subj={`daybreakCriticalEvent-${event.id}-attach`}
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="boxesHorizontal"
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.daybreak.critical.event.moreAriaLabel',
+                  { defaultMessage: 'More actions' }
+                )}
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

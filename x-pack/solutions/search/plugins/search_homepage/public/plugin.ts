@@ -19,6 +19,7 @@ import { PLUGIN_ID } from '../common';
 import { docLinks } from '../common/doc_links';
 import { SearchHomepage } from './embeddable';
 import { NIGHTSHIFT_API_KEY_TYPE } from './components/search_homepage/agent_brief/nightshift_api_key_constants';
+import { NIGHTSHIFT_CREATE_API_KEY_TYPE } from './components/search_homepage/agent_brief/nightshift_create_api_key_constants';
 import { initQueryClient } from './services/query_client';
 import type {
   SearchHomepageAppInfo,
@@ -110,6 +111,35 @@ export class SearchHomepagePlugin
           }
         }
       );
+
+      /*
+       * Register the "Create API key" attachment UI definition. Each
+       * conversation started from the homepage input is seeded with
+       * one of these as a "blank ticket" the user can open mid-chat
+       * to create a key without leaving the conversation.
+       *
+       * Mount the dedicated flyout host into `document.body` so the
+       * Open flyout action button has somewhere to portal its
+       * `ApiKeyFlyout` instance from — the attachment definition
+       * skips `renderInlineContent` to match the Figma single-row
+       * layout, which means the action handler has no in-tree mount
+       * point.
+       */
+      void import(
+        './components/search_homepage/agent_brief/nightshift_create_api_key_definition'
+      ).then(({ createNightshiftCreateApiKeyDefinition }) => {
+        if (!attachments.getAttachmentUiDefinition(NIGHTSHIFT_CREATE_API_KEY_TYPE)) {
+          attachments.addAttachmentType(
+            NIGHTSHIFT_CREATE_API_KEY_TYPE,
+            createNightshiftCreateApiKeyDefinition()
+          );
+        }
+      });
+      void import(
+        './components/search_homepage/agent_brief/nightshift_create_api_key_flyout_host'
+      ).then(({ mountCreateApiKeyFlyoutHost }) => {
+        mountCreateApiKeyFlyoutHost(core);
+      });
     }
 
     return {

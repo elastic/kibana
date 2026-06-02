@@ -28,6 +28,10 @@ import {
   EXPIRING_API_KEYS,
   NIGHTSHIFT_API_KEY_TYPE,
 } from './agent_brief/nightshift_api_key_constants';
+import {
+  NIGHTSHIFT_CREATE_API_KEY_TYPE,
+  type NightshiftCreateApiKeyAttachmentData,
+} from './agent_brief/nightshift_create_api_key_constants';
 import type { NightshiftAttachmentPayload } from './nightshift_attachments';
 import { NightshiftExpiringKeysSummary } from './nightshift_expiring_keys_summary';
 import { NightshiftSearchHomepageInput } from './nightshift_search_homepage_input';
@@ -95,7 +99,7 @@ const OVERVIEW_STATS: OverviewStat[] = [
     }),
     iconType: 'tokenVectorDense',
     value: '1.4M',
-    variant: 'success',
+    variant: 'subdued',
   },
   {
     id: 'indices',
@@ -202,6 +206,29 @@ const useStartAgentConversation = () => {
     (initialMessage: string, initialAttachments?: NightshiftAttachmentPayload[]) => {
       if (timeoutRef.current) return;
       setIsExiting(true);
+
+      /*
+       * Always seed the new conversation with a "Create API key" ticket
+       * so the user has an in-conversation affordance to mint a key
+       * via the platform-shared `ApiKeyFlyout`. Each conversation gets
+       * its own ticket id so the per-attachment "created" store state
+       * (see `nightshift_created_api_keys_store`) doesn't bleed across
+       * sessions.
+       */
+      const createTicketId = `nightshift-create-api-key-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 9)}`;
+      const createTicket: NightshiftAttachmentPayload<NightshiftCreateApiKeyAttachmentData> = {
+        id: createTicketId,
+        type: NIGHTSHIFT_CREATE_API_KEY_TYPE,
+        data: { id: createTicketId },
+      };
+
+      const combinedAttachments: NightshiftAttachmentPayload[] = [
+        ...(initialAttachments ?? []),
+        createTicket,
+      ];
+
       timeoutRef.current = setTimeout(() => {
         application.navigateToApp(AGENT_BUILDER_APP_ID, {
           path: `/agents/${NIGHTSHIFT_AGENT_ID}/conversations/new`,
@@ -213,13 +240,12 @@ const useStartAgentConversation = () => {
              * `initialAttachments` is consumed by Agent Builder's
              * `RoutedConversationsProvider`: each entry's `type` maps
              * to a registered `AttachmentUIDefinition` and the `data`
-             * is rendered by that definition. For the prototype we
-             * forward the attachment payloads drained from the
-             * homepage input (one per API key the user pinned via the
-             * per-row paperclip).
+             * is rendered by that definition. We always include the
+             * blank "Create API key" ticket and append any payloads
+             * the user staged via paperclip (existing API keys) or
+             * the footer CTA (one ticket per expiring key).
              */
-            initialAttachments:
-              initialAttachments && initialAttachments.length > 0 ? initialAttachments : undefined,
+            initialAttachments: combinedAttachments,
           },
         });
       }, EXIT_FADE_DURATION_MS);
@@ -342,20 +368,20 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
                     width: 40px;
                     height: 40px;
                     border-radius: 20px;
-                    background: ${euiTheme.colors.backgroundBaseSuccess};
+                    background: ${euiTheme.colors.backgroundBasePrimary};
                     display: flex;
                     align-items: center;
                     justify-content: center;
                   `}
                 >
-                  <EuiIcon type="faceHappy" size="l" color={euiTheme.colors.textSuccess} />
+                  <EuiIcon type="workplaceSearchApp" size="l" color={euiTheme.colors.textPrimary} />
                 </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
                   <h2>
                     {i18n.translate('xpack.searchHomepage.nightshift.title', {
-                      defaultMessage: 'All systems operating as expected',
+                      defaultMessage: 'Welcome to your VectorDB workspace',
                     })}
                   </h2>
                 </EuiTitle>
@@ -372,7 +398,7 @@ export const NightshiftSearchHomepageBody: React.FC = () => {
                   <p>
                     {i18n.translate('xpack.searchHomepage.nightshift.description', {
                       defaultMessage:
-                        "No big spikes or drops to flag \u2014 this is the steady pattern we'd expect based on the recent activity in the Overview below.",
+                        "VectorDB is keeping an eye on your project — vector data, indices, agents, tools, and workflows.",
                     })}
                   </p>
                 </EuiText>

@@ -49,6 +49,7 @@
     "@kbn/zod",
     "@kbn/scout-search",
     "@kbn/shared-ux-ai-components",
+    "@kbn/security-api-key-management",
   ],
   "exclude": [
     "target/**/*"
