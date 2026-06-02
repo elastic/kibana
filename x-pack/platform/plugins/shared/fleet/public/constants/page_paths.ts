@@ -262,16 +262,9 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useMultiPageLayout,
-    prerelease,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
