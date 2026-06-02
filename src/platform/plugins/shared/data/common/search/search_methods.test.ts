@@ -226,136 +226,333 @@ describe('SearchMethodsService', () => {
       expect(result.pagination.nextPage).toBeDefined();
     });
 
-    it('hasNextPage is true when hits remain', async () => {
-      const mockResponse = {
-        hits: {
-          hits: [
-            { _id: '1', _source: { message: 'test' }, sort: [1000] },
-            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-          ],
-          total: { value: 100 },
-        },
-      };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+    describe('hasNextPage', () => {
+      it('is true when hits remain', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        expect(result.pagination.hasNextPage).toBe(true);
       });
 
-      expect(result.pagination.hasNextPage).toBe(true);
+      it('is false when no more results', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 2 },
+          },
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        expect(result.pagination.hasNextPage).toBe(false);
+      });
+
+      it('is false when no sort values', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' } },
+              { _id: '2', _source: { message: 'test2' } },
+            ],
+            total: { value: 100 },
+          },
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+        });
+
+        expect(result.pagination.hasNextPage).toBe(false);
+      });
     });
 
-    it('hasNextPage is false when no more results', async () => {
-      const mockResponse = {
-        hits: {
-          hits: [
-            { _id: '1', _source: { message: 'test' }, sort: [1000] },
-            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-          ],
-          total: { value: 2 },
-        },
-      };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+    describe('nextPage()', () => {
+      it('uses search_after from last hit sort', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
 
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
-      });
+        const secondPageResponse = {
+          hits: {
+            hits: [
+              { _id: '3', _source: { message: 'test3' }, sort: [3000] },
+              { _id: '4', _source: { message: 'test4' }, sort: [4000] },
+            ],
+            total: { value: 100 },
+          },
+        };
 
-      expect(result.pagination.hasNextPage).toBe(false);
-    });
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
 
-    it('hasNextPage is false when no sort values', async () => {
-      const mockResponse = {
-        hits: {
-          hits: [
-            { _id: '1', _source: { message: 'test' } },
-            { _id: '2', _source: { message: 'test2' } },
-          ],
-          total: { value: 100 },
-        },
-      };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+          sort: [{ timestamp: 'desc' }],
+        });
 
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-      });
+        await result.pagination.nextPage();
 
-      expect(result.pagination.hasNextPage).toBe(false);
-    });
-
-    it('nextPage() uses search_after from last hit sort', async () => {
-      const firstPageResponse = {
-        hits: {
-          hits: [
-            { _id: '1', _source: { message: 'test' }, sort: [1000] },
-            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-          ],
-          total: { value: 100 },
-        },
-      };
-
-      const secondPageResponse = {
-        hits: {
-          hits: [
-            { _id: '3', _source: { message: 'test3' }, sort: [3000] },
-            { _id: '4', _source: { message: 'test4' }, sort: [4000] },
-          ],
-          total: { value: 100 },
-        },
-      };
-
-      mockSearch
-        .mockReturnValueOnce(createMockResponse(firstPageResponse))
-        .mockReturnValueOnce(createMockResponse(secondPageResponse));
-
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
-      });
-
-      await result.pagination.nextPage();
-
-      expect(mockSearch).toHaveBeenCalledTimes(2);
-      expect(mockSearch).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          params: expect.objectContaining({
-            body: expect.objectContaining({
-              search_after: [2000],
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            params: expect.objectContaining({
+              body: expect.objectContaining({
+                search_after: [2000],
+              }),
             }),
           }),
-        }),
-        expect.anything()
-      );
-    });
-
-    it('nextPage() returns null when no more pages', async () => {
-      const mockResponse = {
-        hits: {
-          hits: [
-            { _id: '1', _source: { message: 'test' }, sort: [1000] },
-            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-          ],
-          total: { value: 2 },
-        },
-      };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-      const result = await service.dslPaginated({
-        index: 'logs-*',
-        query: { match_all: {} },
-        sort: [{ timestamp: 'desc' }],
+          expect.anything()
+        );
       });
 
-      const nextPage = await result.pagination.nextPage();
+      it('returns null when no more pages', async () => {
+        const mockResponse = {
+          hits: {
+            hits: [
+              { _id: '1', _source: { message: 'test' }, sort: [1000] },
+              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+            ],
+            total: { value: 2 },
+          },
+        };
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      expect(nextPage).toBeNull();
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { match_all: {} },
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        const nextPage = await result.pagination.nextPage();
+
+        expect(nextPage).toBeNull();
+      });
+
+      it('does not include the original session ID', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { sessionId: 'original-session-id' }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ sessionId: undefined })
+        );
+      });
+
+      it('does not include the original abort signal', async () => {
+        const originalAbortController = new AbortController();
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { abortSignal: originalAbortController.signal }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal: undefined })
+        );
+      });
+
+      it('inherits execution context from parent by default', async () => {
+        const executionContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch documents',
+        };
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { executionContext }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext })
+        );
+      });
+
+      it('allows overriding abort signal', async () => {
+        const originalAbortController = new AbortController();
+        const newAbortController = new AbortController();
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { abortSignal: originalAbortController.signal }
+        );
+
+        await result.pagination?.nextPage({ abortSignal: newAbortController.signal });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal: newAbortController.signal })
+        );
+      });
+
+      it('allows overriding execution context', async () => {
+        const originalContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch documents',
+        };
+        const overrideContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch more documents',
+        };
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.dslPaginated(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { executionContext: originalContext }
+        );
+
+        await result.pagination?.nextPage({ executionContext: overrideContext });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext: overrideContext })
+        );
+      });
     });
   });
   describe('eql', () => {

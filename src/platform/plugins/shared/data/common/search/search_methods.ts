@@ -210,27 +210,45 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       hasNextPage,
-      nextPage: async (): Promise<IDslPaginatedSearchResult | null> => {
+      nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult | null> => {
+        const { abortSignal, executionContext } = pageOptions ?? {};
+
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
+
+        // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
+        const paginationOptions = {
+          ...options,
+          abortSignal,
+          executionContext: executionContext ?? options?.executionContext,
+          // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
+          sessionId: undefined,
+        };
 
         // Build next search with search_after
         const nextParams: IDslSearchParams = {
           ...originalParams,
         };
 
-        const request = self.buildDslRequest(nextParams, options);
+        const request = self.buildDslRequest(nextParams, paginationOptions);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(request, self.mapDslOptions(options));
+        const nextResponse = await self.executeSearch(
+          request,
+          self.mapDslOptions(paginationOptions)
+        );
 
         return {
           rawResponse: nextResponse.rawResponse,
           requestParams: nextResponse.requestParams,
-          pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
+          pagination: self.buildDslPagination(
+            nextResponse.rawResponse,
+            nextParams,
+            paginationOptions
+          ),
         };
       },
     };

@@ -124,7 +124,9 @@ export interface IDslPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
+  nextPage: (
+    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext'>
+  ) => Promise<IDslPaginatedSearchResult | null>;
 }
 
 /**
