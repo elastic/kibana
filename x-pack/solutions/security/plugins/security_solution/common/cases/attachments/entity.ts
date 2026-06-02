@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+
+/**
+ * The kind of entity being attached. Mirrors the Entity Analytics entity types.
+ */
+export const ENTITY_ATTACHMENT_TYPES = ['user', 'host', 'service', 'generic'] as const;
+
+const EntityAttachmentMetadataSchema = z
+  .object({
+    /** Human-readable entity name, used as the link label in the attachment view. */
+    entityName: z.string(),
+    /** The kind of entity (user, host, service, generic). */
+    entityType: z.enum(ENTITY_ATTACHMENT_TYPES),
+    /** Optional risk score (0-100) captured at attach time. */
+    riskScore: z.number().optional(),
+    /** Optional risk level (e.g. Low, Moderate, High, Critical) captured at attach time. */
+    riskLevel: z.string().optional(),
+  })
+  .strict();
+
+export const EntityAttachmentPayloadSchema = z
+  .object({
+    type: z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
+    owner: z.string(),
+    /** The entity identifier (e.g. the user name, host name, or IP). */
+    attachmentId: z.string(),
+    metadata: EntityAttachmentMetadataSchema,
+  })
+  .strict();
+
+export type EntityAttachmentPayload = z.infer<typeof EntityAttachmentPayloadSchema>;
+export type EntityAttachmentMetadata = z.infer<typeof EntityAttachmentMetadataSchema>;
+export type EntityAttachmentType = (typeof ENTITY_ATTACHMENT_TYPES)[number];

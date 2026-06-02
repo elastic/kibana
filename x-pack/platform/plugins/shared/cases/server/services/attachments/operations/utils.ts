@@ -14,7 +14,10 @@ import {
   type AttachmentMode,
   UnifiedAttachmentAttributesRt,
 } from '../../../../common/types/domain/attachment/v2';
-import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
+import {
+  isMigratedAttachmentType,
+  isUnifiedOnlyAttachmentType,
+} from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
@@ -38,7 +41,12 @@ export function transformAttributesForMode({
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
 
-  if (mode === 'unified' && isMigratedAttachmentType(attachmentType, owner)) {
+  // Unified-only attachment types (no legacy counterpart, e.g. `security.entity`)
+  // cannot be represented in the legacy schema. Always keep them unified so the
+  // legacy decode path doesn't reject them.
+  const unifiedOnly = isUnifiedOnlyAttachmentType(attachmentType, owner);
+
+  if ((mode === 'unified' || unifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
     return { isUnified: true, attributes: validatedAttributes };

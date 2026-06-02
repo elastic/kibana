@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
@@ -13,14 +13,25 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { AiAssistantButton } from '../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { AddToNewCase } from '../../../cases/attachments/entity/components/add_to_new_case';
+import { AddToExistingCase } from '../../../cases/attachments/entity/components/add_to_existing_case';
+import {
+  ADD_TO_NEW_CASE_TEST_ID,
+  ADD_TO_EXISTING_CASE_TEST_ID,
+} from '../../../cases/attachments/entity/components/test_ids';
 
 export const UserPanelFooter = ({
   identityFields,
   entity,
+  riskLevel,
 }: {
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
+  /** Current risk level for the entity, when known. Captured at attach time on the case. */
+  riskLevel?: RiskSeverity;
 }) => {
   const userName = useMemo(
     () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
@@ -34,6 +45,35 @@ export const UserPanelFooter = ({
     }
     return euidApi.euid.kql.getEuidFilterBasedOnDocument('user', entity);
   }, [euidApi?.euid, entity]);
+
+  const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
+
+  const additionalItems = useCallback(
+    (closePopover: () => void) => {
+      if (!entityAttachmentsEnabled || !userName) return [];
+      const entityToAttach = {
+        id: userName,
+        name: userName,
+        type: 'user' as const,
+        riskLevel,
+      };
+      return [
+        <AddToNewCase
+          key="addToNewCase"
+          entity={entityToAttach}
+          onClick={closePopover}
+          data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
+        />,
+        <AddToExistingCase
+          key="addToExistingCase"
+          entity={entityToAttach}
+          onClick={closePopover}
+          data-test-subj={ADD_TO_EXISTING_CASE_TEST_ID}
+        />,
+      ];
+    },
+    [entityAttachmentsEnabled, userName, riskLevel]
+  );
 
   return (
     <EuiFlyoutFooter>
@@ -50,6 +90,7 @@ export const UserPanelFooter = ({
             <TakeAction
               isDisabled={!userName}
               kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}
+              additionalItems={additionalItems}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

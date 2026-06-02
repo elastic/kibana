@@ -24,6 +24,21 @@ export const isMigratedAttachmentType = (type: string, owner: string): boolean =
   );
 };
 
+/**
+ * Returns true when the attachment type is a unified-only type (no legacy
+ * counterpart). These attachments can only be persisted/read in the unified
+ * shape and must not be coerced through the legacy decode path.
+ */
+export const isUnifiedOnlyAttachmentType = (type: string, owner: string): boolean => {
+  const unifiedType = toUnifiedAttachmentType(type, owner);
+  if (!MIGRATED_ATTACHMENT_TYPES.has(unifiedType)) {
+    return false;
+  }
+  const hasLegacyMapping = unifiedType in UNIFIED_TO_LEGACY_MAP;
+  const isPersistable = PERSISTABLE_ATTACHMENT_TYPES.has(unifiedType);
+  return !hasLegacyMapping && !isPersistable;
+};
+
 export const toLegacyAttachmentType = (type?: string): string | undefined => {
   if (typeof type !== 'string') {
     return undefined;
