@@ -75,12 +75,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * known (e.g. fixture-loaded visualizations).
      *
      * @param id - the saved object id of the Lens visualization
-     * @param visDataTestSubj - the chart container `data-test-subj`
-     *   (defaults to `lnsVisualizationContainer`). Use the chart-specific
-     *   test subject (e.g. `mtrVis`, `xyVisChart`, `partitionVisChart`) for a
-     *   stricter wait.
+     * @param visDataTestSubj - the chart container `data-test-subj`.
+     *   example: `xyVisChart` (line/bar/area), `partitionVisChart`
+     *   (pie/treemap/donut), `mtrVis` (new metric), `legacyMtrVis` (legacy
+     *   metric), `heatmapChart`, `lnsVisualizationContainer` (datatable).
      */
-    async openEditor(id: string, visDataTestSubj?: string) {
+    async openEditor(id: string, visDataTestSubj: string) {
       await common.navigateToApp('lens', { hash: `#/edit/${id}` });
       await this.waitForVisualization(visDataTestSubj);
     },

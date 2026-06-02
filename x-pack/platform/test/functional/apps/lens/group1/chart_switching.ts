@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {
-      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis);
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis, 'xyVisChart');
 
       expect(await lens.hasChartSwitchWarning('pie')).to.eql(true);
       await lens.switchToVisualization('pie');
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from bar chart to line chart', async () => {
-      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis);
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.xyVis, 'xyVisChart');
 
       await lens.switchToVisualization('line');
       expect(await lens.getTitle()).to.eql('lnsXYvis');
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should transition from pie chart to treemap chart', async () => {
-      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.pieVis);
+      await lens.openEditor(LENS_BASIC_FIXTURE_IDS.pieVis, 'partitionVisChart');
 
       expect(await lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await lens.switchToVisualization('treemap');
