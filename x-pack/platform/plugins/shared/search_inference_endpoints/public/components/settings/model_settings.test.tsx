@@ -130,7 +130,10 @@ describe('ModelSettings', () => {
       services: {
         application: {
           navigateToUrl: mockNavigateToUrl,
-          capabilities: { searchInferenceEndpoints: { show: true, manage: true }, advancedSettings: { save: true } },
+          capabilities: {
+            searchInferenceEndpoints: { show: true, manage: true },
+            advancedSettings: { save: true },
+          },
         },
         http: { basePath: mockBasePath },
       },
@@ -562,7 +565,10 @@ describe('ModelSettings', () => {
         services: {
           application: {
             navigateToUrl: mockNavigateToUrl,
-            capabilities: { searchInferenceEndpoints: { show: true, manage: false }, advancedSettings: { save: true } },
+            capabilities: {
+              searchInferenceEndpoints: { show: true, manage: false },
+              advancedSettings: { save: true },
+            },
           },
           http: { basePath: mockBasePath },
         },
