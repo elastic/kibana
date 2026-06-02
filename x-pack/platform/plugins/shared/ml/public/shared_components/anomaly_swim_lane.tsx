@@ -39,18 +39,16 @@ const buildEmbeddableState = ({
   jobIds,
   swimlaneType,
   viewBy,
-  timeRange,
   perPage,
 }: Pick<
   AnomalySwimLaneProps,
-  'jobIds' | 'swimlaneType' | 'viewBy' | 'timeRange' | 'perPage'
+  'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'
 >): AnomalySwimLaneEmbeddableState => {
   if (swimlaneType === 'viewBy' && viewBy) {
     return {
       job_ids: jobIds,
       swimlane_type: 'viewBy',
       view_by: viewBy,
-      ...(timeRange ? { time_range: timeRange } : {}),
       ...(perPage !== undefined ? { per_page: perPage } : {}),
     };
   }
@@ -58,7 +56,6 @@ const buildEmbeddableState = ({
   return {
     job_ids: jobIds,
     swimlane_type: 'overall',
-    ...(timeRange ? { time_range: timeRange } : {}),
     ...(perPage !== undefined ? { per_page: perPage } : {}),
   };
 };
@@ -77,8 +74,8 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
   const embeddableState = useMemo(
-    () => buildEmbeddableState({ jobIds, swimlaneType, viewBy, timeRange, perPage }),
-    [jobIds, swimlaneType, viewBy, timeRange, perPage]
+    () => buildEmbeddableState({ jobIds, swimlaneType, viewBy, perPage }),
+    [jobIds, swimlaneType, viewBy, perPage]
   );
 
   useEffect(
