@@ -19,19 +19,17 @@ const getFieldIconToken = (title: string) => getFieldIcon(title).closest('.kbnFi
 
 describe('FieldIcon', () => {
   describe('FieldIcon renders known field types', () => {
-    availableTypes.forEach((type) => {
-      it(`${type} is rendered`, () => {
-        const expected = typeToEuiIconMap[type as keyof typeof typeToEuiIconMap];
+    it.each(availableTypes)('%s is rendered', (type) => {
+      const expected = typeToEuiIconMap[type as keyof typeof typeToEuiIconMap];
 
-        render(<FieldIcon type={type} />);
+      render(<FieldIcon type={type} />);
 
-        const icon = getFieldIcon(type);
-        expect(icon).toBeVisible();
-        expect(icon).toHaveAttribute('data-euiicon-type', expected.iconType);
+      const icon = getFieldIcon(type);
+      expect(icon).toBeVisible();
+      expect(icon).toHaveAttribute('data-euiicon-type', expected.iconType);
 
-        const token = getFieldIconToken(type);
-        expect(token).toBeVisible();
-      });
+      const token = getFieldIconToken(type);
+      expect(token).toBeVisible();
     });
   });
 
