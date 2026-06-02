@@ -31,7 +31,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { VERDICT_OPTIONS, getVerdictColor } from './filter_constants';
+import { STATUS_OPTIONS, getStatusColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -68,12 +68,13 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
+    // TODO: rename field binding to 'status' once the data stream field is renamed
     field: 'verdict',
-    name: i18n.translate('xpack.streams.sigEventsTab.verdictColumn', {
-      defaultMessage: 'Verdict',
+    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+      defaultMessage: 'Status',
     }),
     width: '110px',
-    render: (verdict: string) => <EuiBadge color={getVerdictColor(verdict)}>{verdict}</EuiBadge>,
+    render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
   },
   {
     field: 'title',
@@ -155,7 +156,7 @@ export const SigEventsTab = () => {
   const { updateTimeRange } = useTimeRangeUpdate();
   const { filteredStreams } = useKiGeneration();
 
-  const [verdictFilter, setVerdictFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
@@ -168,16 +169,17 @@ export const SigEventsTab = () => {
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchSigEvents({
     from: timeState.start,
     to: timeState.end,
-    verdict: verdictFilter.length > 0 ? verdictFilter : undefined,
+    status: statusFilter.length > 0 ? statusFilter : undefined,
     stream: streamFilter.length > 0 ? streamFilter : undefined,
     search: debouncedSearch || undefined,
   });
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
-  const onVerdictChange = useCallback(
-    (opts: EuiSelectableOption[]) => setVerdictFilter(extractCheckedKeys(opts)),
+  const onStatusChange = useCallback(
+    (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
     []
   );
+
   const onStreamChange = useCallback(
     (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
     []
@@ -186,16 +188,16 @@ export const SigEventsTab = () => {
   const filters = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.verdict', {
-          defaultMessage: 'Verdict',
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.status', {
+          defaultMessage: 'Status',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
-          defaultMessage: 'Filter by verdict',
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
+          defaultMessage: 'Filter by status',
         }),
-        options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
-        numFilters: VERDICT_OPTIONS.length,
-        numActiveFilters: verdictFilter.length,
-        onChange: onVerdictChange,
+        options: buildSelectableOptions({ values: STATUS_OPTIONS, selected: statusFilter }),
+        numFilters: STATUS_OPTIONS.length,
+        numActiveFilters: statusFilter.length,
+        onChange: onStatusChange,
       },
       {
         label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
@@ -214,7 +216,7 @@ export const SigEventsTab = () => {
         onChange: onStreamChange,
       },
     ],
-    [verdictFilter, streamFilter, streamOptions, onVerdictChange, onStreamChange]
+    [statusFilter, streamFilter, streamOptions, onStatusChange, onStreamChange]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {

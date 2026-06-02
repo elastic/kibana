@@ -667,10 +667,12 @@ describe('autocomplete', () => {
         'FROM /',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
-          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
-          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          'index1',
+          'index2',
+          ...views.map((v) => v.name),
+          ...datasets.map((d) => d.name),
         ],
         undefined,
         [
@@ -741,18 +743,11 @@ describe('autocomplete', () => {
         'FROM index1, index2/',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 | ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2, ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 METADATA ',
-            filterText: 'index2',
-          } as ISuggestionItem),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 | ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2, ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 METADATA ', filterText: 'index2' } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,

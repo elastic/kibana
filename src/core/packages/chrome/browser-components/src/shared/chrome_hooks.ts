@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { combineLatest, debounceTime, map } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -276,11 +277,20 @@ export function useHasAppMenu(): boolean {
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */
-
 export function useGlobalSearch(): GlobalSearchConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
   return useObservable(config$, undefined);
+}
+
+/**
+ * Returns the current context switcher content set via
+ * `chrome.next.contextSwitcher.set()`, or null if not set.
+ */
+export function useContextSwitcher(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.contextSwitcher.get$(), [chrome]);
+  return useObservable(content$, null);
 }
 
 /** Whether an inline `AppHeader` is currently mounted by the active app. */

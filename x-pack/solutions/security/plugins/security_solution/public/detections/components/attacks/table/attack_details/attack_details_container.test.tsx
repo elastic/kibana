@@ -51,7 +51,6 @@ describe('AttackDetailsContainer', () => {
     groupingFilters: [],
     defaultFilters: [],
     isTableLoading: false,
-    filteredAlertsCount: 5,
   };
   const mockSetSelectedTabId = jest.fn();
   const reportEventMock = jest.fn();
@@ -83,7 +82,7 @@ describe('AttackDetailsContainer', () => {
       expect(tabs).toHaveLength(2);
       expect(tabs[0]).toHaveTextContent('Attack summary');
       expect(tabs[1]).toHaveTextContent('Alerts');
-      expect(tabs[1]).toHaveTextContent(`5/${mockAttack.alertIds.length}`);
+      expect(tabs[1]).toHaveTextContent(`${mockAttack.alertIds.length}`);
     });
 
     it('renders the attack summary tab by default with correct props', () => {
