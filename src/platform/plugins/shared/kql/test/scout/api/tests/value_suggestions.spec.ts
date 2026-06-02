@@ -16,13 +16,14 @@ const {
   COMMON_HEADERS,
   ES_ARCHIVE_BASIC_INDEX,
   KBN_ARCHIVE_BASIC_KIBANA,
+  VALUE_SUGGESTIONS_READER_ROLE,
 } = testData;
 
 apiTest.describe('Suggestions API - non time based', { tag: tags.deploymentAgnostic }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
-    ({ cookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+    ({ cookieHeader } = await samlAuth.asInteractiveUser(VALUE_SUGGESTIONS_READER_ROLE));
     await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
     await kbnClient.importExport.load(KBN_ARCHIVE_BASIC_KIBANA);
   });

@@ -16,6 +16,7 @@ const {
   COMMON_HEADERS,
   ES_ARCHIVE_LOGSTASH_FUNCTIONAL,
   KBN_ARCHIVE_SAVED_OBJECTS_BASIC,
+  VALUE_SUGGESTIONS_READER_ROLE,
 } = testData;
 
 const timestampRange = (gte: string, lte: string) => [
@@ -34,7 +35,7 @@ apiTest.describe('Suggestions API - time based', { tag: tags.deploymentAgnostic 
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
-    ({ cookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+    ({ cookieHeader } = await samlAuth.asInteractiveUser(VALUE_SUGGESTIONS_READER_ROLE));
     await esArchiver.loadIfNeeded(ES_ARCHIVE_LOGSTASH_FUNCTIONAL);
     await kbnClient.importExport.load(KBN_ARCHIVE_SAVED_OBJECTS_BASIC);
   });

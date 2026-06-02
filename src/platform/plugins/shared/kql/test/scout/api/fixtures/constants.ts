@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -14,6 +15,25 @@ import {
 
 /** Base path for the internal value suggestions route registered by the kql plugin. */
 export const SUGGESTIONS_VALUES_PATH = 'internal/kibana/suggestions/values';
+
+/**
+ * Least-privilege role used to exercise the value suggestions route.
+ *
+ * The route opts out of Kibana authorization and queries Elasticsearch as the
+ * current user, so read-only access is sufficient. We grant ES read on all
+ * indices because the "index not found" case targets a non-existent index,
+ * which must surface as a 404 rather than a privilege error, plus Kibana read
+ * so the route's data view (index pattern) lookup succeeds. Unlike the
+ * predefined `viewer`/`editor` roles, this works on serverless security too,
+ * where those roles lack read access to non-security data indices.
+ */
+export const VALUE_SUGGESTIONS_READER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+};
 
 /**
  * The value suggestions route is an internal, versioned API (version `1`).
