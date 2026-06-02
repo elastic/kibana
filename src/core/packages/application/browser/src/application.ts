@@ -102,18 +102,16 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   status?: AppStatus;
 
   /**
-   * Optional list of locations where the app is visible.
+   * Locations where the app is visible. Each value enables one surface:
+   * - `globalSearch`: top-bar search results
+   * - `classicSideNav`: classic (hamburger) side navigation
+   * - `projectSideNav`: project side navs (Observability, Security, Search)
+   * - `home`: Kibana home page
+   * - `kibanaOverview`: Kibana overview page
    *
-   * Accepts the following values:
-   * - "globalSearch": the link will appear in the global search bar
-   * - "home": the link will appear on the Kibana home page
-   * - "kibanaOverview": the link will appear in the Kibana overview page
-   * - "sideNav": the link will appear in the side navigation.
-   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
-   *
-   * @default ['globalSearch', 'sideNav']
+   * @default ['globalSearch', 'classicSideNav', 'projectSideNav']
    * unless the status is marked as `inaccessible`.
-   * @note Set to `[]` (empty array) to hide this link
+   * @note Set to `[]` (empty array) to hide this link from every surface.
    */
   visibleIn?: AppDeepLinkLocations[];
 
@@ -150,9 +148,9 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *
    *   start() {
    *      // later, when the navlink needs to be updated
-   *      appUpdater.next(() => {
+   *      appUpdater.next(() => ({
    *        visibleIn: ['globalSearch'],
-   *      })
+   *      }))
    *   }
    * ```
    */
@@ -254,7 +252,13 @@ export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' |
 };
 
 /** The places in the UI where a deepLink can be shown */
-export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'home' | 'kibanaOverview';
+export type AppDeepLinkLocations =
+  | 'globalSearch'
+  | 'classicSideNav'
+  // TODO: rename to 'sideNav' when 'classicSideNav' is removed (classic nav deprecation).
+  | 'projectSideNav'
+  | 'home'
+  | 'kibanaOverview';
 
 /**
  * Input type for registering secondary in-app locations for an application.
@@ -272,7 +276,8 @@ export type AppDeepLink<Id extends string = string> = {
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
   keywords?: string[];
   /**
-   * Optional list of locations where the deepLink is visible. By default the deepLink is visible in "globalSearch".
+   * Locations where the deep link is visible. See {@link App.visibleIn} for the list of surfaces.
+   * @default ['globalSearch']
    */
   visibleIn?: AppDeepLinkLocations[];
   /**
