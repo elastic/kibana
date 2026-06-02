@@ -181,13 +181,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             description: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
               defaultMessage: 'Delete endpoint',
             }),
-            icon: 'trash' as const,
-            type: 'icon' as const,
+            icon: 'trash',
+            type: 'icon',
             available: () => canManage,
-            enabled: (item: InferenceInferenceEndpointInfo) =>
-              !isEndpointPreconfigured(item.inference_id),
-            onClick: (item: InferenceInferenceEndpointInfo) => displayDeleteActionItem(item),
-            'data-test-subj': (item: InferenceInferenceEndpointInfo) =>
+            enabled: (item) => !isEndpointPreconfigured(item.inference_id),
+            onClick: (item) => displayDeleteActionItem(item),
+            'data-test-subj': (item) =>
               isEndpointPreconfigured(item.inference_id)
                 ? 'inferenceUIDeleteAction-preconfigured'
                 : 'inferenceUIDeleteAction-user-defined',
