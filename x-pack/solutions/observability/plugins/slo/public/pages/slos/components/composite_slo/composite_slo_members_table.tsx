@@ -10,7 +10,7 @@ import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
-import React, { lazy, Suspense, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   SloBurnRateWindowColumnHeader,
@@ -150,16 +150,12 @@ export function CompositeSloMembersTable({
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
 
-  const columns = useMemo(
-    () =>
-      getMemberColumns(
-        percentFormat,
-        burnRateWindow,
-        setBurnRateWindow,
-        isBurnRatePopoverOpen,
-        setIsBurnRatePopoverOpen
-      ),
-    [percentFormat, burnRateWindow, isBurnRatePopoverOpen]
+  const columns = getMemberColumns(
+    percentFormat,
+    burnRateWindow,
+    setBurnRateWindow,
+    isBurnRatePopoverOpen,
+    setIsBurnRatePopoverOpen
   );
 
   return (
