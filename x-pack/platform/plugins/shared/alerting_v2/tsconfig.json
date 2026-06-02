@@ -112,7 +112,8 @@
     "@kbn/workflows-yaml",
     "@kbn/workflows-ui",
     "@kbn/datemath",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-ui-settings-server-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
