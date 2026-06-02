@@ -14,7 +14,8 @@ Write `.exploratory-session/report.md` using this template:
 **Mode:** <single | parallel>
 **Flows explored:** <N>
 **Session started:** <session_started_at from config.json>
-**Session duration:** <total elapsed from session_started_at to now>
+**Session duration:** <total elapsed — compute: now minus session_started_at>
+**Session cap:** <session_timeout_minutes from config.json> min
 
 ## Summary
 - Level 1 (confirmed bugs): N
@@ -24,18 +25,27 @@ Write `.exploratory-session/report.md` using this template:
 - **Flows completed:** N of N
 - **Flows not fully completed:** N — list each with its status
 
-## Timing
+## Timing & Cost
+
+Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <ISO> -->` header in each findings file. Compute total session duration as `report_written_at − session_started_at`.
+
 | Flow | Source | Started | Duration | Budget | Over? | Status |
 |---|---|---|---|---|---|---|
-| <flow name> | specified / agent | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost |
-| **Total session** | — | <session_started_at> | **<Xh Ym>** | — | — | — |
+| <flow name> | specified / agent | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost / cap reached |
+| **Total session** | — | <session_started_at> | **<Xh Ym>** | <session_timeout_minutes>m cap | ✓ / ⚠️ over cap | — |
 
 **Status definitions:**
 - `completed` — all 5 checklist steps were attempted
-- `timed out` — time budget exhausted; list which steps were skipped
+- `timed out` — per-flow time budget exhausted; list which steps were skipped
 - `blocked` — unresolvable prerequisite; state the blocker
-- `not started` — flow never reached
+- `not started` — flow never reached (session ended before it started)
+- `cap reached` — session time cap fired before this flow began
 - `session lost` — browser session lost mid-flow
+
+**Reading the table:**
+- **Over?** for individual flows: ⚠️ if `Duration > Budget`
+- **Over?** for total session: ⚠️ if `Session duration > session_timeout_minutes`
+- Flows cut short by the session cap are a signal to either raise `Session-timeout:` or reduce the number / scope of flows
 
 ## Level 1 — Confirmed Bugs
 <all Level 1 findings in full finding format>

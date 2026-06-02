@@ -63,7 +63,7 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 
 ## Step 0b — Parse input
 
-**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, and `mode` directly from the invocation text.
+**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, and `mode` directly from the invocation text.
 
 For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
 
@@ -186,6 +186,7 @@ Write `.exploratory-session/config.json`:
   },
   "specs": "<URL or file path provided in Specs: field, or null if not provided>",
   "specs_fallback": "https://www.elastic.co/docs/solutions/security",
+  "session_timeout_minutes": 90,
   "skipped_setup": [],
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],

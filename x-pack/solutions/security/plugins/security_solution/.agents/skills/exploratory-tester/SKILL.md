@@ -34,8 +34,9 @@ Flows:
     timeout: <minutes>
 Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
+Session-timeout: 90    # optional, total session cap in minutes (default 90)
 ```
-`Specs:` is optional. If omitted, the agent falls back to the official docs at `https://www.elastic.co/docs/solutions/security`. For user-provided environments append an `Environment:` block — see `phases/0-setup.md`.
+`Specs:` and `Session-timeout:` are optional. If omitted, the agent falls back to the official docs at `https://www.elastic.co/docs/solutions/security`. For user-provided environments append an `Environment:` block — see `phases/0-setup.md`.
 
 ## Red Flags
 

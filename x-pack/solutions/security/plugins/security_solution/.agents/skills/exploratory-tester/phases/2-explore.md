@@ -2,9 +2,30 @@
 
 ---
 
+## Session cap check — run before every flow
+
+Before starting each flow (single or parallel), check whether the session time cap has been reached:
+
+```bash
+python3 - <<'EOF'
+import sys, json, datetime
+cfg = json.load(open('.exploratory-session/config.json'))
+started = datetime.datetime.fromisoformat(cfg['session_started_at'].replace('Z', '+00:00'))
+elapsed_min = (datetime.datetime.now(datetime.timezone.utc) - started).total_seconds() / 60
+cap = cfg.get('session_timeout_minutes', 90)
+print(f'{elapsed_min:.1f} min elapsed of {cap} min cap')
+sys.exit(1 if elapsed_min >= cap else 0)
+EOF
+```
+
+- **Exit 0** (within cap) → proceed with the flow.
+- **Exit 1** (cap reached) → mark this flow and all remaining flows as `not started: session time cap reached` in `config.json → skipped_setup`, then **jump to Phase 3 immediately**. Do not start any more flows.
+
+---
+
 ## Single mode
 
-For each flow in `config.json` in order, run the Explore Loop. Do not move to the next flow until the current one is complete.
+For each flow in `config.json` in order, run the session cap check then the Explore Loop. Do not move to the next flow until the current one is complete.
 
 ---
 
