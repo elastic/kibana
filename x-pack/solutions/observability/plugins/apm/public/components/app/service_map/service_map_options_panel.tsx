@@ -292,9 +292,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onConnectionFilterChange(
-                selected.map((s) => s.value as ConnectionFilter)
-              );
+              onConnectionFilterChange(selected.map((s) => s.value as ConnectionFilter));
             }}
             fullWidth
             compressed
@@ -363,9 +361,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onAnomalySeverityFilterChange(
-                selected.map((s) => s.value as ML_ANOMALY_SEVERITY)
-              );
+              onAnomalySeverityFilterChange(selected.map((s) => s.value as ML_ANOMALY_SEVERITY));
             }}
             fullWidth
             compressed
