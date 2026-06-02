@@ -18,9 +18,11 @@ import {
 } from '../../../../common/api/timeline';
 import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../common/hooks/use_selector');
+jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -29,8 +31,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
-
-jest.mock('../../../common/hooks/use_experimental_features');
 
 const renderNewTimelineButton = (type: TimelineType) =>
   render(<NewTimelineButton type={type} />, { wrapper: TestProviders });
@@ -49,8 +49,15 @@ describe('NewTimelineButton', () => {
     '-*elastic-cloud-logs-*',
     '.siem-signals-spacename',
   ];
-  (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({
-    resetDiscoverAppState: jest.fn(),
+
+  beforeEach(() => {
+    (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({
+      resetDiscoverAppState: jest.fn(),
+    });
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      id: dataViewId,
+      indexPatterns: selectedPatterns,
+    });
   });
 
   it('should render timeline button and call correct action when clicking on the button', async () => {
