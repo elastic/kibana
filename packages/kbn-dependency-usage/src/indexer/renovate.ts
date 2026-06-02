@@ -37,26 +37,20 @@ function normalizeTeam(reviewer: string): string {
   return reviewer.startsWith('team:') ? `elastic/${reviewer.slice(5)}` : reviewer;
 }
 
-function ruleMatchesDep(rule: PackageRule, dep: string): boolean {
-  const exactNames = [...(rule.matchDepNames ?? []), ...(rule.matchPackageNames ?? [])];
-  if (exactNames.includes(dep)) return true;
-
-  if (rule.matchDepPatterns) {
-    return rule.matchDepPatterns.some((pattern) => {
-      try {
-        return new RegExp(pattern).test(dep);
-      } catch {
-        return false;
-      }
-    });
-  }
-
-  return false;
+interface CompiledRule {
+  exactNames: Set<string>;
+  patterns: RegExp[];
+  team: string | null;
+  group: string | null;
 }
 
 /**
  * Returns a function that, given a dep name, returns its renovate reviewer team
  * and group, or marks it as an orphan if no enabled rule covers it.
+ *
+ * Patterns are compiled once at construction time (not per-lookup) and anchored
+ * with ^ and $ to match Renovate's own anchoring behaviour and avoid substring
+ * false-positives (e.g. "cypress" matching "cypress-axe").
  */
 export function buildRenovateMatcher(
   renovatePath?: string
@@ -69,20 +63,29 @@ export function buildRenovateMatcher(
     // no config found — everything will be an orphan
   }
 
-  // Only keep rules that are explicitly enabled and have reviewers.
+  // Only keep rules that are explicitly enabled and have a non-empty first reviewer.
   // The first rule {"matchDepPatterns": [".*"], "enabled": false} acts as a
   // global disable; specific rules then opt packages in with "enabled": true.
-  const enabledRules = (config.packageRules ?? []).filter(
-    (r) => r.enabled !== false && (r.reviewers?.length ?? 0) > 0
-  );
+  const compiledRules: CompiledRule[] = (config.packageRules ?? [])
+    .filter((r) => r.enabled !== false && r.reviewers?.[0])
+    .map((r) => ({
+      exactNames: new Set([...(r.matchDepNames ?? []), ...(r.matchPackageNames ?? [])]),
+      patterns: (r.matchDepPatterns ?? []).flatMap((p) => {
+        try {
+          return [new RegExp(`^(?:${p})$`)];
+        } catch {
+          return [];
+        }
+      }),
+      team: normalizeTeam(r.reviewers![0]),
+      group: r.groupName ?? null,
+    }));
 
   return (dep: string): RenovateMatch => {
-    const match = enabledRules.find((rule) => ruleMatchesDep(rule, dep));
+    const match = compiledRules.find(
+      (r) => r.exactNames.has(dep) || r.patterns.some((re) => re.test(dep))
+    );
     if (!match) return { team: null, group: null, orphan: true };
-    return {
-      team: match.reviewers![0] ? normalizeTeam(match.reviewers![0]) : null,
-      group: match.groupName ?? null,
-      orphan: false,
-    };
+    return { team: match.team, group: match.group, orphan: false };
   };
 }

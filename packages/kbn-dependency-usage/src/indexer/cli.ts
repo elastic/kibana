@@ -142,6 +142,9 @@ yargs(process.argv.slice(2))
           if (argv.group && argv.paths?.length) {
             throw new Error('--group and --paths are mutually exclusive.');
           }
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(argv['snapshot-id'] as string)) {
+            throw new Error('--snapshot-id must be a date in YYYY-MM-DD format.');
+          }
           return true;
         }),
     async (argv) => {

@@ -59,17 +59,17 @@ function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
  * `maxDepth` limits how many grouping levels we'll traverse (default 3) to
  * avoid accidentally walking deep trees that don't follow the expected structure.
  */
-export function discoverPackages(searchPath: string, maxDepth = 3, _depth = 0): string[] {
-  const abs = nodePath.join(REPO_ROOT, searchPath);
-  if (!existsSync(abs)) return [];
-
-  if (existsSync(nodePath.join(abs, 'kibana.jsonc'))) return [searchPath];
-
-  if (_depth >= maxDepth) return [];
-
-  return readdirSync(abs, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
-    .flatMap((e) => discoverPackages(`${searchPath}/${e.name}`, maxDepth, _depth + 1));
+export function discoverPackages(searchPath: string, maxDepth = 3): string[] {
+  function walk(relPath: string, depth: number): string[] {
+    const abs = nodePath.join(REPO_ROOT, relPath);
+    if (!existsSync(abs)) return [];
+    if (existsSync(nodePath.join(abs, 'kibana.jsonc'))) return [relPath];
+    if (depth >= maxDepth) return [];
+    return readdirSync(abs, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+      .flatMap((e) => walk(`${relPath}/${e.name}`, depth + 1));
+  }
+  return walk(searchPath, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -192,6 +192,7 @@ export async function buildDocsForPackage(
   }
 
   const manifest = readKibanaJsonc(pkgPath);
+  const codeOwners = getCodeOwnersForFile(pkgPath, ctx.reversedCodeowners);
   const docs: DepUsageDoc[] = [];
 
   for (const mod of result.output.modules) {
@@ -214,7 +215,7 @@ export async function buildDocsForPackage(
       'package.type': manifest?.type ?? null,
       'package.group': manifest?.group ?? null,
       'package.visibility': manifest?.visibility ?? null,
-      code_owners: getCodeOwnersForFile(pkgPath, ctx.reversedCodeowners),
+      code_owners: codeOwners,
       'dependency.name': depName,
       'dependency.declared_version': ctx.declaredVersions.get(depName) ?? null,
       'dependent.file_count': dependents.length,
