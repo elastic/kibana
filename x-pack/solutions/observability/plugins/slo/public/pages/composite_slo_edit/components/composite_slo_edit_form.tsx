@@ -34,7 +34,8 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
   const name = watch('name');
 
   const isMembersSectionValid =
-    members.length >= MIN_COMPOSITE_MEMBERS && members.every((m) => Number.isInteger(m.weight) && m.weight >= 1);
+    members.length >= MIN_COMPOSITE_MEMBERS &&
+    members.every((m) => Number.isInteger(m.weight) && m.weight >= 1);
   const isObjectiveSectionValid =
     formState.isValid || (!formState.errors.timeWindow && !formState.errors.objective);
   const isDescriptionSectionValid = Boolean(name);

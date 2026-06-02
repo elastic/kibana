@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -28,17 +29,23 @@ import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH, MIN_COMPOSITE_MEMBERS } from '../cons
 import type { CreateCompositeSLOForm } from '../types';
 
 export function CompositeSloMembersSection() {
-  const { control, watch, formState: { errors } } = useFormContext<CreateCompositeSLOForm>();
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<CreateCompositeSLOForm>();
   const { fields, append, remove } = useFieldArray({
-    control, name: 'members', rules: {
+    control,
+    name: 'members',
+    rules: {
       minLength: {
         value: MIN_COMPOSITE_MEMBERS,
         message: i18n.translate('xpack.slo.compositeSloEdit.members.minError', {
           defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
           values: { min: MIN_COMPOSITE_MEMBERS },
         }),
-      }
-    }
+      },
+    },
   });
   const members = watch('members');
   const minMembersError = errors.members?.root?.message;
@@ -85,6 +92,7 @@ export function CompositeSloMembersSection() {
       <EuiFlexGroup direction="column" gutterSize="m">
         {atMax && (
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.compositeSloEdit.members.maxWarning', {
@@ -262,8 +270,8 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
               error={
                 fieldState.invalid
                   ? i18n.translate('xpack.slo.compositeSloEdit.members.weight.error', {
-                    defaultMessage: 'Weight must be a positive integer.',
-                  })
+                      defaultMessage: 'Weight must be a positive integer.',
+                    })
                   : undefined
               }
             >
@@ -282,16 +290,24 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
             defaultMessage: 'Remove {name}',
             values: { name: sloName },
           })}
-          onClick={onRemove}
-          data-test-subj={`compositeSloMemberRemoveButton-${index}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+              defaultMessage: 'Remove {name}',
+              values: { name: sloName },
+            })}
+            onClick={onRemove}
+            data-test-subj={`compositeSloMemberRemoveButton-${index}`}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
