@@ -99,7 +99,7 @@ function MetricCell({
       gutterSize="xs"
       alignItems="flexEnd"
       responsive={false}
-      style={{ overflow: 'hidden' }}
+      style={{ overflow: 'hidden', paddingRight: 8 }}
     >
       <EuiFlexItem>
         <EuiText size="s" textAlign="right">
@@ -238,7 +238,6 @@ export function getBuiltInColumns({
     name: {
       field: 'name',
       sortable: true,
-      width: '40%',
       name: i18n.translate('apmUiShared.transactionsTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
@@ -295,8 +294,8 @@ export function getBuiltInColumns({
       sortable: ({ latency }: TransactionGroup) => latency.value ?? -Infinity,
       name: getLatencyColumnLabel(latencyAggregationType),
       align: RIGHT_ALIGNMENT,
-      width: '15em',
-      maxWidth: '15em',
+      width: showSparklines ? '15em' : '10em',
+      maxWidth: showSparklines ? '15em' : '10em',
       className: 'eui-textNoWrap',
       render: (_: unknown, { latency }: TransactionGroup) => (
         <MetricCell
@@ -315,8 +314,8 @@ export function getBuiltInColumns({
         defaultMessage: 'Throughput',
       }),
       align: RIGHT_ALIGNMENT,
-      width: '15em',
-      maxWidth: '15em',
+      width: showSparklines ? '15em' : '10em',
+      maxWidth: showSparklines ? '15em' : '10em',
       className: 'eui-textNoWrap',
       render: (_: unknown, { throughput }: TransactionGroup) => (
         <MetricCell
@@ -332,8 +331,8 @@ export function getBuiltInColumns({
       field: 'errorRate',
       sortable: ({ errorRate }: TransactionGroup) => errorRate.value ?? -Infinity,
       align: RIGHT_ALIGNMENT,
-      width: '15em',
-      maxWidth: '15em',
+      width: showSparklines ? '15em' : '10em',
+      maxWidth: showSparklines ? '15em' : '10em',
       className: 'eui-textNoWrap',
       name: i18n.translate('apmUiShared.transactionsTable.errorRateColumnLabel', {
         defaultMessage: 'Failed transaction rate',
