@@ -284,6 +284,7 @@ describe('SearchMethodsService', () => {
         const result = await service.dslPaginated({
           index: 'logs-*',
           query: { match_all: {} },
+          sort: [{ '@timestamp': 'desc' }],
         });
 
         expect(result.pagination.hasNextPage).toBe(false);

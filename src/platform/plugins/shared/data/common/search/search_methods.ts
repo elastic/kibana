@@ -8,6 +8,7 @@
  */
 
 import { lastValueFrom, takeWhile } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -69,7 +70,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params ?? {}) as Record<string, unknown>,
-        getStats: getEsqlInspectorStats,
+        getStats: (finalResponse) => getEsqlInspectorStats(finalResponse.rawResponse),
       }
     );
     return {
@@ -89,7 +90,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-        getStats: getResponseInspectorStats,
+        getStats: (finalResponse) => getResponseInspectorStats(finalResponse.rawResponse),
         // this is here to support the esdsl expression function. evaluate for removal if that expression function is ever abandoned
         getRequestMetadata: options?.getRequestMetadata,
       }
@@ -119,7 +120,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-        getStats: getResponseInspectorStats,
+        getStats: (finalResponse) => getResponseInspectorStats(finalResponse.rawResponse),
       }
     );
     return {
@@ -140,6 +141,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+        getRequestMetadata: options?.getRequestMetadata,
       }
     );
     return {
@@ -159,6 +161,31 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+        getStats: (finalResponse) => ({
+          hits: {
+            label: i18n.translate('data.search.es_search.hitsLabel', {
+              defaultMessage: 'Hits',
+            }),
+            value: `${finalResponse.rawResponse.rows?.length ?? 0}`,
+            description: i18n.translate('data.search.es_search.hitsDescription', {
+              defaultMessage: 'The number of documents returned by the query.',
+            }),
+          },
+          queryTime: {
+            label: i18n.translate('data.search.es_search.queryTimeLabel', {
+              defaultMessage: 'Query time',
+            }),
+            value: i18n.translate('data.search.es_search.queryTimeValue', {
+              defaultMessage: '{queryTime}ms',
+              values: { queryTime: finalResponse.took },
+            }),
+            description: i18n.translate('data.search.es_search.queryTimeDescription', {
+              defaultMessage:
+                'The time it took to process the query. ' +
+                'Does not include the time to send the request or parse it in the browser.',
+            }),
+          },
+        }),
       }
     );
     return {
@@ -181,7 +208,7 @@ export class SearchMethodsService implements ISearchMethods {
     inspector: IBaseSearchOptions['inspector'],
     inspectorCallbacks?: {
       getRequestBody: (request: T) => Record<string, unknown>;
-      getStats?: (rawResponse: any) => RequestStatistics;
+      getStats?: (response: any) => RequestStatistics;
       getRequestMetadata?: () => RequestStatistics;
     }
   ): Promise<any> {
@@ -208,7 +235,7 @@ export class SearchMethodsService implements ISearchMethods {
 
       if (requestResponder && inspectorCallbacks) {
         if (inspectorCallbacks.getStats) {
-          requestResponder.stats(inspectorCallbacks.getStats(finalResponse.rawResponse));
+          requestResponder.stats(inspectorCallbacks.getStats(finalResponse));
         }
         requestResponder.ok({
           json: { rawResponse: finalResponse.rawResponse },
@@ -332,7 +359,8 @@ export class SearchMethodsService implements ISearchMethods {
           paginationInspector,
           {
             getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-            getStats: getResponseInspectorStats,
+            getStats: (paginationResponse) =>
+              getResponseInspectorStats(paginationResponse.rawResponse),
           }
         );
 

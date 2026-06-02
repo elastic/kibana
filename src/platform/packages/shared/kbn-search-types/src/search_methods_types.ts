@@ -305,6 +305,11 @@ export interface IEqlSearchOptions extends IBaseSearchOptions {
    * Field to use for tiebreaking
    */
   tiebreakerField?: string;
+
+  /**
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   */
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**
