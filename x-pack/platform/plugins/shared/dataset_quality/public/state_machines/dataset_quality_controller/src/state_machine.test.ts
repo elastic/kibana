@@ -312,28 +312,29 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should authorize all known types even when a wildcard privilege check fails (negated role)', async () => {
-      const { machine } = buildStateMachine({
-        dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(partialPrivilegesResponse),
-        }),
+    it('should still query a type whose wildcard privilege check fails (negated role) while excluding it from the types filter', async () => {
+      const dataStreamStatsClient = createMockDataStreamStatsClient({
+        getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(partialPrivilegesResponse),
       });
+      const { machine } = buildStateMachine({ dataStreamStatsClient });
       const actor = createActor(machine);
       actor.start();
 
-      await waitForPredicate(
-        actor,
-        (state) => typeof state.value === 'object' && 'main' in state.value
+      await waitForState(actor, 'main.stats.datasets.loaded');
+
+      // `logs` is excluded from the authorized types (the types filter UI) because its
+      // wildcard `logs-*-*` privilege check fails for a negated/complement role.
+      const { authorizedDatasetTypes } = actor.getSnapshot().context;
+      expect(authorizedDatasetTypes).not.toContain('logs');
+      expect(authorizedDatasetTypes).toEqual(
+        expect.arrayContaining(['metrics', 'traces', 'synthetics'])
       );
 
-      const { authorizedDatasetTypes } = actor.getSnapshot().context;
-      // `logs` must remain even though its wildcard `logs-*-*` privilege is false,
-      // because the server enforces per-data-stream authorization. All known types
-      // are considered so accessible data streams of every type are still queried.
-      expect(authorizedDatasetTypes).toEqual(
-        expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
+      // `logs` is still queried so its accessible data streams are discovered and listed;
+      // authorization is enforced per data stream server-side.
+      expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith(
+        expect.objectContaining({ types: expect.arrayContaining(['logs']) })
       );
-      expect(authorizedDatasetTypes).toHaveLength(4);
 
       actor.stop();
     });

@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         it('user has access to dataset quality app but cannot read any dataset', async () => {
           await testSubjects.existOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoDataEmptyState
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoPrivilegesEmptyState
           );
         });
       });

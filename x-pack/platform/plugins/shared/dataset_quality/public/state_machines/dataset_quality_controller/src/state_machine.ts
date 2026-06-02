@@ -11,12 +11,16 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom } from 'xstate';
 import { assign, fromCallback, fromPromise, setup } from 'xstate';
 import type {
+  DatasetTypesPrivileges,
   DataStreamDocsStat,
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
-import type { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
+import type {
+  DataStreamStatServiceResponse,
+  GetDataStreamsTypesPrivilegesResponse,
+} from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type { DataStreamType } from '../../../../common/types';
 import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
@@ -525,23 +529,31 @@ export const createDatasetQualityControllerStateMachine = ({
 
   return createPureDatasetQualityControllerStateMachine(initialContext).provide({
     actions: {
-      storeAuthorizedDatasetTypes: assign(({ context }) => {
-        // The wildcard type privilege check (e.g. `logs-*-*`) returns `canRead: false`
-        // for roles built with ES negated/complement index patterns, even when the user
-        // can read individual data streams of that type. Relying on it would drop entire
-        // types (e.g. all logs) from the query. Authorization is enforced per data stream
-        // server-side, so we consider all known types and let the server return only the
-        // streams the user can actually access.
+      storeAuthorizedDatasetTypes: assign(({ context, event }) => {
+        if (!('output' in event)) return {};
+
+        const output = event.output as GetDataStreamsTypesPrivilegesResponse;
+
+        // `authorizedDatasetTypes` only drives the types filter UI, so it reflects the
+        // wildcard privilege check (a type whose `${type}-*-*` check passes). Roles built
+        // with ES negated/complement patterns fail the wildcard check for the negated type
+        // even though individual data streams of that type are readable; those streams are
+        // still discovered because stats are queried for all known types (see
+        // `getValidDatasetTypes`), so the page lists them regardless of this list.
+        const authorizedDatasetTypes = extractAuthorizedDatasetTypes(output.datasetTypesPrivileges);
+
         const filterTypes = context.filters.types as DataStreamType[];
 
-        const validTypes = filterTypes.filter((type) => KNOWN_TYPES.includes(type));
+        const validTypes = filterTypes.filter(
+          (type) => authorizedDatasetTypes.includes(type) && KNOWN_TYPES.includes(type)
+        );
 
         return {
           filters: {
             ...context.filters,
             types: validTypes,
           },
-          authorizedDatasetTypes: [...KNOWN_TYPES],
+          authorizedDatasetTypes,
         };
       }),
 
@@ -672,6 +684,10 @@ export type DatasetQualityControllerStateService = ActorRefFrom<
   ReturnType<typeof createDatasetQualityControllerStateMachine>
 >;
 
+// When no explicit type filter is set we query all known types rather than only the
+// wildcard-authorized ones. This ensures data streams of a type whose `${type}-*-*`
+// privilege check fails (ES negated/complement roles) are still discovered; the server
+// enforces per-data-stream authorization and returns only the accessible ones.
 const getValidDatasetTypes = (
   context: DatasetQualityControllerContext,
   isDatasetQualityAllSignalsAvailable: boolean
@@ -679,12 +695,17 @@ const getValidDatasetTypes = (
   (isDatasetQualityAllSignalsAvailable
     ? context.filters.types.length
       ? context.filters.types
-      : context.authorizedDatasetTypes
+      : KNOWN_TYPES
     : [DEFAULT_DATASET_TYPE]) as DataStreamType[];
 
 const isTypeSelected = (type: DataStreamType, context: DatasetQualityControllerContext) =>
-  (context.filters.types.length === 0 && context.authorizedDatasetTypes.includes(type)) ||
+  (context.filters.types.length === 0 && KNOWN_TYPES.includes(type)) ||
   context.filters.types.includes(type);
+
+const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
+  Object.entries(datasetTypesPrivileges)
+    .filter(([_type, priv]) => priv.canMonitor || priv.canRead)
+    .map(([type, _priv]) => type.replace(/-\*-\*$/, '')) as DataStreamType[];
 
 interface ActorDeps {
   dataStreamStatsClient: IDataStreamsStatsClient;
