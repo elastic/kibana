@@ -29,6 +29,17 @@ export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatO
 const MIN_DAYS_FOR_YEAR_UNIT = 180; // 6 months
 
 /**
+ * Units supported by react-intl's `updateIntervalInSeconds`. Passing this prop
+ * with a unit longer than 'hour' causes react-intl to throw:
+ * "Cannot schedule update with unit longer than hour"
+ */
+const INCREMENTABLE_UNITS: ReadonlyArray<Intl.RelativeTimeFormatUnit> = [
+  'second',
+  'minute',
+  'hour',
+] as const;
+
+/**
  * Mimic `FormattedRelative` previous behavior from formatJS v2,
  * with a fix for year boundaries to avoid misleading "last year" displays.
  *
@@ -78,7 +89,9 @@ export const FormattedRelativeEnhanced = ({
     <FormattedRelativeTime
       value={value}
       unit={unit}
-      updateIntervalInSeconds={updateIntervalInSeconds}
+      updateIntervalInSeconds={
+        INCREMENTABLE_UNITS.includes(unit) ? updateIntervalInSeconds : undefined
+      }
       {...rest}
     />
   );
