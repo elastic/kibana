@@ -122,10 +122,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
       // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
       const keys = Object.keys(currentValues);
-      if (
-        keys.includes(UNGROUPED_FACTORY_KEY) &&
-        keys.some((k) => k !== UNGROUPED_FACTORY_KEY)
-      ) {
+      if (keys.includes(UNGROUPED_FACTORY_KEY) && keys.some((k) => k !== UNGROUPED_FACTORY_KEY)) {
         delete currentValues[UNGROUPED_FACTORY_KEY];
       }
 
