@@ -76,6 +76,7 @@
     "@kbn/search-index-documents",
     "@kbn/cloud-connect-plugin",
     "@kbn/shared-ux-column-presets",
+    "@kbn/index-lifecycle-management-common-shared",
   ],
   "exclude": ["target/**/*"]
 }
