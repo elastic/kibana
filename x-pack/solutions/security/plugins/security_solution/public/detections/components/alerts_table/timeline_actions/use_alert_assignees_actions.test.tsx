@@ -52,6 +52,7 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
