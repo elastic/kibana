@@ -10,6 +10,7 @@ import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import { ENTITY_FIELDS, TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from './constants';
 import { useEntityGrouping } from './grouping/use_entity_grouping';
+import { DEFAULT_ENTITIES_TABLE_CONFIG, type EntitiesTableConfig } from '.';
 
 const ENTITY_ANALYTICS_TEST_SUBJECTS = {
   grouping: TEST_SUBJ_GROUPING,
@@ -19,14 +20,29 @@ import { EntitiesDataTable } from './entities_data_table';
 
 export interface EntitiesTableSectionProps {
   state: EntityURLStateResult;
+  /**
+   * Per-instance identifiers/localStorage keys. Defaults to the EA home page
+   * values so existing call sites are unaffected; consumers like the case
+   * attachments accordion supply their own to avoid collisions.
+   */
+  config?: EntitiesTableConfig;
 }
 
-export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
-  const { grouping } = useEntityGrouping({ state });
+export const EntitiesTableSection = ({
+  state,
+  config = DEFAULT_ENTITIES_TABLE_CONFIG,
+}: EntitiesTableSectionProps) => {
+  const { grouping } = useEntityGrouping({ state, tableId: config.tableId });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
-    return <EntitiesDataTable state={state} groupSelectorComponent={grouping.groupSelector} />;
+    return (
+      <EntitiesDataTable
+        state={state}
+        groupSelectorComponent={grouping.groupSelector}
+        config={config}
+      />
+    );
   }
 
   return (
@@ -35,6 +51,7 @@ export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
       selectedGroup={selectedGroup}
       selectedGroupOptions={grouping.selectedGroups}
       groupSelectorComponent={grouping.groupSelector}
+      config={config}
     />
   );
 };
@@ -44,6 +61,7 @@ interface GroupWithURLPaginationProps {
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
 
 const GroupWithURLPagination = ({
@@ -51,6 +69,7 @@ const GroupWithURLPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithURLPaginationProps) => {
   const onChangePageRef = useRef(state.onChangePage);
   onChangePageRef.current = state.onChangePage;
@@ -59,6 +78,7 @@ const GroupWithURLPagination = ({
     state,
     selectedGroup,
     groupFilters: [],
+    tableId: config.tableId,
   });
 
   useEffect(() => {
@@ -77,6 +97,7 @@ const GroupWithURLPagination = ({
           selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          config={config}
         />
       )}
       activePageIndex={state.pageIndex}
@@ -100,6 +121,7 @@ interface GroupContentProps {
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
 
 const mergeCurrentAndParentFilters = (
@@ -186,6 +208,7 @@ const GroupContent = ({
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
+  config,
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
@@ -202,6 +225,7 @@ const GroupContent = ({
         selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
+        config={config}
       />
     );
   }
@@ -212,6 +236,7 @@ const GroupContent = ({
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
       selectedGroup={selectedGroup}
+      config={config}
     />
   );
 };
@@ -228,6 +253,7 @@ const GroupWithLocalPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
@@ -238,6 +264,7 @@ const GroupWithLocalPagination = ({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters,
+    tableId: config.tableId,
   });
 
   useEffect(() => {
@@ -257,6 +284,7 @@ const GroupWithLocalPagination = ({
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
+          config={config}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -277,6 +305,7 @@ interface DataTableWithLocalPaginationProps {
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
   selectedGroup?: string;
+  config: EntitiesTableConfig;
 }
 
 const DataTableWithLocalPagination = ({
@@ -284,6 +313,7 @@ const DataTableWithLocalPagination = ({
   currentGroupFilters,
   parentGroupFilters,
   selectedGroup,
+  config,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -311,5 +341,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} />;
+  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} config={config} />;
 };

@@ -168,10 +168,13 @@ export const useEntityGrouping = ({
   state,
   groupFilters = [],
   selectedGroup,
+  tableId,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
+  /** Forwarded to `createGroupPanelRenderer` so resolution group flyouts open in the right scope. */
+  tableId?: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
@@ -313,8 +316,8 @@ export const useEntityGrouping = ({
   const targetMetadata = useFetchTargetMetadata(targetEntityIds);
 
   const groupPanelRenderer = useMemo(
-    () => createGroupPanelRenderer(targetMetadata),
-    [targetMetadata]
+    () => createGroupPanelRenderer(targetMetadata, tableId),
+    [targetMetadata, tableId]
   );
 
   const groupStatsRenderer = useMemo(
