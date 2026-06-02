@@ -11,13 +11,22 @@
 export * as cli from './src/cli';
 
 // Test framework
-export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
+export {
+  test,
+  spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  tags,
+} from './src/playwright';
 
 // Fixtures & configuration
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -49,7 +58,6 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
-  SynthtraceFixture,
 } from './src/playwright';
 
 // Service & configuration types

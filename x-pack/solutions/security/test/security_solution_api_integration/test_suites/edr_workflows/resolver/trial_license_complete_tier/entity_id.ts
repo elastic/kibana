@@ -38,8 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/235457
-  describe.skip('@ess @serverless Resolver handling of entity ids', function () {
+  describe('@ess @serverless Resolver handling of entity ids', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {

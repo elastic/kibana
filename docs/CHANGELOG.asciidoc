@@ -10,6 +10,9 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.16>>
+* <<release-notes-8.19.15>>
+* <<release-notes-8.19.14>>
 * <<release-notes-8.19.13>>
 * <<release-notes-8.19.12>>
 * <<release-notes-8.19.11>>
@@ -120,12 +123,126 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.16]]
+== {kib} 8.19.16
+
+The 8.19.16 release includes the following fixes.
+
+IMPORTANT: The 8.19.16 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[fixes-v8.19.16]]
+=== Fixes
+Alerting::
+* Fixes alert index template updates failing when auto-increasing `total_fields.limit` due to system-managed read-only fields ({kibana-pull}262534[#262534]).
+Data ingestion and Fleet::
+* Fixes integration package `elasticsearch` settings (`index_mode`, `source_mode`, `dynamic_namespace`, and `dynamic_dataset`) changing unexpectedly on package upgrade or reinstall ({kibana-pull}269080[#269080]).
+* Fixes Fleet background tasks failing when paginating agent policies sorted on the non-existent `created_at` field ({kibana-pull}267285[#267285]).
+* Fixes the **IP Location** processor in **Ingest pipelines** selecting the wrong database when a local `.mmdb` filename matches a managed database display name ({kibana-pull}265740[#265740]).
+Elastic Security solution::
+For the Elastic Security 8.19.16 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Elasticsearch solution::
+* Fixes behavioral analytics APIs to reject collection names longer than 1024 characters ({kibana-pull}266225[#266225]).
+
+[[release-notes-8.19.15]]
+== {kib} 8.19.15
+
+The 8.19.15 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.15]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.19.15 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search ({kibana-pull}261152[#261152]).
+
+[float]
+[[fixes-v8.19.15]]
+=== Fixes
+Alerting::
+* Fixes an issue where Stack and Observability alerts sent recovery notifications but remained `active` in {kib} instead of transitioning to `recovered` ({kibana-pull}261012[#261012]).
+
+Data ingestion and Fleet::
+* Fixes YAML file downloads being truncated at the first `#` character by properly URL-encoding the content ({kibana-pull}264083[#264083]).
+* Fixes Fleet Server diagnostic bundles failing to download when `elasticsearch.compression` is enabled ({kibana-pull}262394[#262394]).
+* Fixes missing sort-state announcements for screen readers in the **Ingest pipelines** list ({kibana-pull}262226[#262226]).
+* Fixes screen readers announcing duplicate row indices in the **Ingest pipelines** list ({kibana-pull}261369[#261369]).
+* Fixes the inference processor form to accept the `input_output` configuration shape ({kibana-pull}260517[#260517]).
+* Fixes screen readers announcing icon labels twice in the **Ingest pipelines** list ({kibana-pull}259185[#259185]).
+Data management::
+* Fixes the transforms detail summary to show all `source_index` entries when `source_index` is an array ({kibana-pull}261875[#261875]).
+* Fixes screen readers announcing duplicate row indices on the data streams table ({kibana-pull}261366[#261366]).
+* Fixes screen readers announcing icon labels twice in the **Edit policy** flyout ({kibana-pull}261324[#261324]).
+* Fixes screen readers announcing policy actions tooltip text twice in the index lifecycle policies list ({kibana-pull}261322[#261322]).
+* Fixes screen readers announcing copy button labels twice ({kibana-pull}261311[#261311]).
+* Fixes screen readers announcing grey color badge text twice in the transforms list ({kibana-pull}261307[#261307]).
+* Fixes screen readers not announcing invalid field validation errors ({kibana-pull}260673[#260673]).
+Elastic Observability solution::
+For the Elastic Observability 8.19.15 release information, refer to {observability-guide}/release-notes.html[_Elastic Observability Release Notes_].
+Elastic Security solution::
+For the Elastic Security 8.19.15 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes screen readers announcing data stream and index options twice in the **Create policy** and **Restore snapshot** selectable lists ({kibana-pull}261786[#261786]).
+Machine Learning::
+* Fixes the single metric chart in Anomaly Explorer not showing anomaly actions correctly ({kibana-pull}263925[#263925]).
+
+[[release-notes-8.19.14]]
+== {kib} 8.19.14
+
+The 8.19.14 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.14]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1168]
+
+[float]
+[[fixes-v8.19.14]]
+=== Fixes
+Dashboards and Visualizations::
+*  Fixes Lens panels appearing to revert after inline edits until you refresh the page, even though changes are saved ({kibana-pull}256984[#256984]).
+Data ingestion and Fleet::
+* Fixes Fleet bulk agent actions (unenroll, upgrade, reassign to policy) not respecting the current space when selection uses a kuery filter ({kibana-pull}258582[#258582]).
+Data management::
+* Restores keyboard focus to the **Create a transform** button on the **Transforms** page ({kibana-pull}258095[#258095]).
+Elastic Observability solution::
+* Fixes alert tags on inventory threshold, metric threshold, and custom threshold rules when tags are provided as a string instead of an array ({kibana-pull}259729[#259729]).
+Elastic Security solution::
+For the Elastic Security 8.19.14 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Elasticsearch solution::
+* Fixes the query rules UI rejecting case variants as duplicate values ({kibana-pull}259506[#259506]).
+* Fixes only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor ({kibana-pull}259503[#259503]).
+Machine Learning::
+* Fixes the anomaly swim lane dashboard panel not refreshing ({kibana-pull}259962[#259962]). 
+
 [[release-notes-8.19.13]]
 == {kib} 8.19.13
 
-The 8.19.13 release includes the following fixes.
+The 8.19.13 release includes the following known issues and fixes.
 
 IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[known-issues-8.19.13]]
+=== Known issues
+
+// tag::known-issue-1168[]
+.Stack and Observability alerts remain active instead of transitioning to recovered.
+[%collapsible]
+====
+*Details* +
+
+Some Stack and Observability alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {kib} instead of transitioning to `recovered`.
+
+*Workaround* +
+Manually untrack stale alerts or upgrade to 8.19.15, 9.3.4, or 9.4.0.
+
+*Resolved* + 
+This issue is resolved in 8.19.15, 9.3.4, and 9.4.0.
+====
+// end::known-issue-1168[]
 
 [float]
 [[fixes-v8.19.13]]
@@ -741,6 +858,7 @@ Alerting::
 * Allows users to delete a snooze schedule from a rule using schedule ID ({kibana-pull}213247[#213247]).
 * Allows users to create a snooze schedule for rules using the schedule API ({kibana-pull}210584[#210584]).
 * Implements functionality to add observables, procedures, and custom fields to alerts for {hive} ({kibana-pull}207255[#207255]).
+* Updates the `context.link` variable to use the new Discover URL formatting in all {es} query rule types ({kibana-pull}216376[#216376]).
 Dashboards and Visualizations::
 * Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning. ({kibana-pull}210579[#210579]).
 * Adds a **Point visibility** option to Area and Line charts in **Lens** ({kibana-pull}222187[#222187]).

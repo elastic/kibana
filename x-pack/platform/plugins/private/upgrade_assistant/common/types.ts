@@ -374,3 +374,14 @@ export type DataSourceAutoResolution = Record<string, 'readOnly'>;
 
 export type IndicesResolutionType = 'readonly' | 'reindex' | 'unfreeze' | 'delete';
 export type UpdateActions = 'readonly' | 'unfreeze' | 'delete';
+
+export interface CloudStackVersionInfo {
+  currentVersion: string;
+  lookupVersionUsed: string;
+  latestAvailableVersion: string;
+  minVersionToUpgradeToLatest?: string;
+  directUpgradeableVersionRange?: {
+    min: string;
+    max: string;
+  };
+}

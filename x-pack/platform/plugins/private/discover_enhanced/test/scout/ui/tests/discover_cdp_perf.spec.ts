@@ -29,7 +29,7 @@ test.describe(
       cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
       await page.gotoApp('home');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
       await perfTracker.waitForJsLoad(cdp); // Ensure JS bundles are fully loaded
     });
 
@@ -51,8 +51,8 @@ test.describe(
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 
-      // Ensure all JS bundles are loaded
-      await perfTracker.waitForJsLoad(cdp);
+      // Ensure all JS bundles are loaded (longer timeout to account for lazy-loaded plugins like aiops)
+      await perfTracker.waitForJsLoad(cdp, 5000);
 
       // Collect and validate stats
       const stats = perfTracker.collectJsBundleStats(currentUrl);
@@ -105,7 +105,7 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('discoverLayoutResizableContainer', { timeout: 20000 });
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 

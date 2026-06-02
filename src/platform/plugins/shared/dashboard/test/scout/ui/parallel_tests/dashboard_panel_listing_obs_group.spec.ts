@@ -21,7 +21,8 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
 
 const DASHBOARD_PANEL_TYPE_COUNT = 21;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/259576
+spaceTest.describe.skip(
   'Dashboard panel listing (includes observability group)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -31,9 +32,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

@@ -46,29 +46,9 @@ fileGroups:
     - src/painless/autocomplete_definitions/string_script_field_script_field.json
     - '!target/**/*'
     - version_dependencies.txt
+  jest-config:
+    - jest.config.js
 tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
   extract-version-dependencies:
     command: node
     args:

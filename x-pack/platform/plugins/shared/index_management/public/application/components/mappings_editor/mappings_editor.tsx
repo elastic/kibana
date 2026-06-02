@@ -34,7 +34,11 @@ import { DocLinksStart } from './shared_imports';
 import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
 import { SearchResult } from './components/document_fields/search_fields';
 import { parseMappings } from '../../shared/parse_mappings';
-import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../common/constants';
+import {
+  STANDARD_INDEX_MODE,
+  LOGSDB_INDEX_MODE,
+  TIME_SERIES_MODE,
+} from '../../../../common/constants';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -58,13 +62,50 @@ export interface Props {
   indexMode?: IndexMode;
 }
 
+const getSourceModeFromIndexSettings = (
+  settings?: IndexSettings | any
+): 'stored' | 'synthetic' | undefined => {
+  if (!settings) return undefined;
+
+  const nestedMode = settings.index?.mapping?.source?.mode;
+  if (nestedMode === 'stored' || nestedMode === 'synthetic') return nestedMode;
+
+  const flatMode = settings['index.mapping.source.mode'];
+  if (flatMode === 'stored' || flatMode === 'synthetic') return flatMode;
+
+  return undefined;
+};
+
 export const MappingsEditor = React.memo(
   ({ onChange, value, docLinks, indexSettings, esNodesPlugins, indexMode }: Props) => {
     const { canUseSyntheticSource } = useAppContext();
-    const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
-      () => parseMappings(value),
-      [value]
-    );
+    const { parsedDefaultValue, multipleMappingsDeclared } =
+      useMemo<MappingsEditorParsedMetadata>(() => {
+        const parsed = parseMappings(value);
+        const modeFromSettings = getSourceModeFromIndexSettings(indexSettings);
+
+        if (
+          parsed.parsedDefaultValue?.configuration &&
+          modeFromSettings !== undefined &&
+          parsed.parsedDefaultValue.configuration?._source?.enabled !== false &&
+          parsed.parsedDefaultValue.configuration?._source?.mode === undefined
+        ) {
+          return {
+            ...parsed,
+            parsedDefaultValue: {
+              ...parsed.parsedDefaultValue,
+              configuration: {
+                ...parsed.parsedDefaultValue.configuration,
+                _source: {
+                  ...(parsed.parsedDefaultValue.configuration._source ?? {}),
+                  mode: modeFromSettings,
+                },
+              },
+            },
+          };
+        }
+        return parsed;
+      }, [value, indexSettings]);
     /**
      * Hook that will listen to:
      * 1. "value" prop changes in order to reset the mappings editor
@@ -169,6 +210,7 @@ export const MappingsEditor = React.memo(
       advanced: (
         <ConfigurationForm
           value={state.configuration.defaultValue}
+          indexMode={indexMode ?? STANDARD_INDEX_MODE}
           esNodesPlugins={esNodesPlugins}
         />
       ),

@@ -12,7 +12,7 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import {
   DocumentEntryType,
   DocumentEntry,

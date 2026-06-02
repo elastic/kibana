@@ -39,9 +39,8 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
   - '@kbn/peggy'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/apm-synthtrace-client'
   - '@kbn/test-docker-servers'
+  - '@kbn/test'
 tags:
   - test-helper
   - package
@@ -53,26 +52,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

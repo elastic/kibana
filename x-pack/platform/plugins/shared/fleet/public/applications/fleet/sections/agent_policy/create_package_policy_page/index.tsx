@@ -13,17 +13,11 @@ import { useGetSettings } from '../../../hooks';
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
-import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const useMultiPageLayout = useMemo(
-    () =>
-      queryParams.has('useMultiPageLayout') && queryParams.get('useMultiPageLayout') !== 'false',
-    [queryParams]
-  );
   const queryParamsPolicyId = useMemo(
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
@@ -58,10 +52,6 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     queryParamsPolicyId,
     prerelease,
   };
-
-  if (useMultiPageLayout) {
-    return <CreatePackagePolicyMultiPage {...pageParams} />;
-  }
 
   return <CreatePackagePolicySinglePage {...pageParams} />;
 };

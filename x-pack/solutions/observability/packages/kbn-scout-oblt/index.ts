@@ -11,14 +11,13 @@ export { test, apiTest, spaceTest } from './src/playwright';
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, tags } from '@kbn/scout';
 
-// Custom global setup hook with profiling support
-export { globalSetupHook } from './src/playwright/global_hook';
+// Custom global setup/teardown hooks with profiling support
+export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hook';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from '@kbn/scout';
@@ -60,12 +59,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type {
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
-  SynthtraceFixture,
-} from '@kbn/scout';
+export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

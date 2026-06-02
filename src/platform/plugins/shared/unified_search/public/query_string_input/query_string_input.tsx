@@ -722,6 +722,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
   }

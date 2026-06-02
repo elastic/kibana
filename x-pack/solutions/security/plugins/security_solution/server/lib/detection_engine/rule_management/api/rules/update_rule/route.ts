@@ -82,6 +82,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             rulePayload: request.body,
             spaceId: ctx.securitySolution.getSpaceId(),
             existingRule,
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
           });
 
           const updatedRule = await detectionRulesClient.updateRule({

@@ -26,6 +26,7 @@ export interface RouteDependencies {
   config: {
     dataSourceExclusions: DataSourceExclusions;
     featureSet: FeatureSet;
+    cloudStackVersionsApiBaseUrl: string;
     isSecurityEnabled: () => boolean;
   };
   current: SemVer;

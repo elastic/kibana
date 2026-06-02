@@ -21,6 +21,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
+import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -52,16 +53,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const coreContext = await context.core;
         const soClient = coreContext.savedObjects.client;
 
-        const {
-          osquery: { writeLiveQueries, runSavedQueries },
-        } = await coreStartServices.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'osquery.*',
-        });
-
-        const isInvalid = !(
-          writeLiveQueries ||
-          (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
-        );
+        const isInvalid = !(await isOsqueryResponseActionAuthorized(coreStartServices, request, {
+          saved_query_id: request.body.saved_query_id,
+          pack_id: request.body.pack_id,
+        }));
 
         const client = await osqueryContext.service
           .getRuleRegistryService()

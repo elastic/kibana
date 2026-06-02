@@ -27,7 +27,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import { AgentFinish } from 'langchain/agents';
+import type { AgentFinish } from '@langchain/core/agents';
 import { omit } from 'lodash/fp';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';

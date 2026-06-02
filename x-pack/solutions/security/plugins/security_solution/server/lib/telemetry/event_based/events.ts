@@ -1144,6 +1144,10 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
                 },
               },
             },
+            _meta: {
+              optional: true,
+              description: 'Reason for the failure if the query execution was unsuccessful.',
+            },
           },
         },
         _meta: {
@@ -1165,6 +1169,49 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
         _meta: {
           optional: true,
           description: 'Circuit breaker metrics such as execution time and memory usage.',
+        },
+      },
+      descriptorVersion: {
+        type: 'integer',
+        _meta: {
+          description: 'Version of the query descriptor that produced this event.',
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: {
+          description: "Execution status: 'success', 'failed', or 'skipped'.",
+        },
+      },
+      skipReason: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description:
+            "Reason for skipping: 'datastreams_not_matched', 'integration_not_installed' or 'unknown_version'.",
+        },
+      },
+      integration: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Name of the matched integration.' },
+          },
+          version: {
+            type: 'keyword',
+            _meta: { description: 'Version of the matched integration.' },
+          },
+          indices: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Index patterns for this integration after type filtering.' },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Integration resolution metadata. Present only for v2 query descriptors.',
         },
       },
     },

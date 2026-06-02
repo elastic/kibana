@@ -71,9 +71,10 @@ const ParamsSchema = schema.object({
   prompts: schema.maybe(
     schema.arrayOf(
       schema.object({
-        statuses: schema.arrayOf(schema.string()),
+        statuses: schema.arrayOf(schema.string(), { maxSize: 3 }),
         message: schema.string({ minLength: 1 }),
-      })
+      }),
+      { maxSize: 3 }
     )
   ),
   status: schema.maybe(schema.string()),

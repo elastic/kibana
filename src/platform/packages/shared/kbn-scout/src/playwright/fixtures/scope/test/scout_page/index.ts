@@ -28,12 +28,6 @@ export type ScoutPage = Page & {
    */
   gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
   /**
-   * Waits for the Kibana loading spinner indicator to disappear.
-   * @deprecated This method is flaky on CI. We strongly recommend waiting for specific elements instead: page.testSubj.waitForSelector('table-is-ready', { state: 'visible' })
-   * @returns A Promise resolving when the indicator is hidden.
-   */
-  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
-  /**
    * Performs an accessibility (a11y) scan of the current page using axe-core.
    * Use this in tests to collect formatted violation summaries (one string per violation).
    *

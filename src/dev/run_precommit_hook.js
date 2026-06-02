@@ -16,7 +16,7 @@ import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { load as yamlLoad } from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
@@ -84,9 +84,13 @@ class LinterCheck extends PrecommitCheck {
   async execute(log, files, options) {
     const filesToLint = await this.linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
-      await this.linter.lintFiles(log, filesToLint, {
+      const result = await this.linter.lintFiles(log, filesToLint, {
         fix: options.fix,
       });
+
+      if (result?.failedFiles?.length > 0) {
+        throw new Error(`${this.name} errors in ${result.failedFiles.length} file(s)`);
+      }
 
       if (options.fix && options.stage) {
         const simpleGit = new SimpleGit(REPO_ROOT);
@@ -120,9 +124,7 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoad(content, {
-          filename: file.getRelativePath(),
-        });
+        yamlParse(content);
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }

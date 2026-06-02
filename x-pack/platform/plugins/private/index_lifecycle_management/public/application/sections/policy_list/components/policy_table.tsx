@@ -54,6 +54,32 @@ const actionTooltips = {
   ),
 };
 
+/** Full labels for row icon actions: EuiBasicTable sets tooltip SR output off only when name === description (string). */
+const editPolicyRowActionText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.editActionDescription',
+  {
+    defaultMessage: 'Edit this policy',
+  }
+);
+const addPolicyToTemplateRowActionText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionDescription',
+  { defaultMessage: 'Add policy to index template' }
+);
+const deletePolicyDisabledText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
+  {
+    defaultMessage: 'You cannot delete a policy that is being used by an index',
+  }
+);
+const deletePolicyEnabledText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.deleteActionDescription',
+  {
+    defaultMessage: 'Delete this policy',
+  }
+);
+const getDeletePolicyRowActionText = (policy: PolicyFromES) =>
+  hasLinkedIndices(policy) ? deletePolicyDisabledText : deletePolicyEnabledText;
+
 interface Props {
   policies: PolicyFromES[];
 }
@@ -240,15 +266,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       actions: [
         {
           isPrimary: true,
-          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.editActionLabel', {
-            defaultMessage: 'Edit',
-          }),
-          description: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.editActionDescription',
-            {
-              defaultMessage: 'Edit this policy',
-            }
-          ),
+          name: editPolicyRowActionText,
+          description: editPolicyRowActionText,
           type: 'icon',
           icon: 'pencil',
           onClick: ({ name }) => history.push(getPolicyEditPath(name)),
@@ -256,16 +275,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         },
 
         {
-          name: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionLabel',
-            {
-              defaultMessage: 'Add to index template',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionDescription',
-            { defaultMessage: 'Add policy to index template' }
-          ),
+          name: addPolicyToTemplateRowActionText,
+          description: addPolicyToTemplateRowActionText,
           type: 'icon',
           icon: 'plusInCircle',
           onClick: (policy) =>
@@ -275,21 +286,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
 
         {
           isPrimary: true,
-          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionLabel', {
-            defaultMessage: 'Delete',
-          }),
-          description: (policy) => {
-            return hasLinkedIndices(policy)
-              ? i18n.translate(
-                  'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
-                  {
-                    defaultMessage: 'You cannot delete a policy that is being used by an index',
-                  }
-                )
-              : i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionDescription', {
-                  defaultMessage: 'Delete this policy',
-                });
-          },
+          name: getDeletePolicyRowActionText,
+          description: getDeletePolicyRowActionText,
           type: 'icon',
           icon: 'trash',
           color: 'danger',

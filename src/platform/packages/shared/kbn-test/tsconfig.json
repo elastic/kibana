@@ -9,6 +9,7 @@
   "exclude": ["types/**/*", "**/__fixtures__/**/*", "target/**/*"],
   "kbn_references": [
     "@kbn/kbn-client",
+    "@kbn/dev-validation-runner",
     "@kbn/std",
     "@kbn/test-es-server",
     "@kbn/tooling-log",
@@ -32,5 +33,6 @@
     "@kbn/scout-info",
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/babel-preset",
+    "@kbn/moon"
   ]
 }

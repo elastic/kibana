@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { load as yamlLoad } from 'js-yaml';
+import { parse as yamlLoad } from 'yaml';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
 
 const mockAreChangesSkippable = jest.fn();
@@ -104,7 +104,7 @@ describe('pull_request pipeline generation', () => {
 
     expect(mockRunPreBuild).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
-      'Isolated changes to renovate.json. Skipping main PR pipeline.'
+      'Isolated changes to renovate.json or .buildkite/pipelines/pull_request/renovate.yml. Skipping main PR pipeline.'
     );
 
     const parsed = yamlLoad(output) as Record<string, unknown>;

@@ -21,8 +21,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { AxiosError } from 'axios';
-import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
+import type { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
@@ -90,7 +89,7 @@ export class JourneyFtrHarness {
         body: { telemetry: { labels } },
       });
     } catch (error) {
-      const statusCode = (error as AxiosError).response?.status;
+      const statusCode = (error as { status?: number }).status;
       if (statusCode === 404) {
         throw new Error(
           `Failed to update labels, supported Kibana version is 8.11.0+ and must be started with "coreApp.allowDynamicConfigOverrides:true"`

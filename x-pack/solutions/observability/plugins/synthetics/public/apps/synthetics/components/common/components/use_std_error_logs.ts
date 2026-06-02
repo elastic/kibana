@@ -37,7 +37,7 @@ export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
         },
       },
     }),
-    [],
+    [checkGroup],
     { name: 'getStdErrLogs' }
   );
 

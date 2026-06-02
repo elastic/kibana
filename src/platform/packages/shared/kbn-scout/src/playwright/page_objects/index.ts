@@ -22,6 +22,7 @@ import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
+import { VisualizeApp } from './visualize_app';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -41,6 +42,7 @@ export interface PageObjects {
   toasts: Toasts;
   inspector: Inspector;
   lens: LensApp;
+  visualize: VisualizeApp;
 }
 
 /**
@@ -62,6 +64,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
-    // Add new page objects here
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }

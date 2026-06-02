@@ -9,7 +9,7 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
 import { castArray } from 'lodash';
-import { AgentAction } from 'langchain/agents';
+import type { AgentAction } from '@langchain/core/agents';
 import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { getActionTypeId } from '../../../../../routes/utils';

@@ -10,7 +10,7 @@
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -35,57 +35,9 @@ if (Number.isNaN(concurrency)) {
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
 
-function getScoutConfigGroupType(configPath: string): string | null {
-  // Match platform paths: x-pack/platform/... or src/platform/...
-  if (/^(x-pack|src)\/platform\//.test(configPath)) {
-    return 'platform';
-  }
-  // Match solution paths: x-pack/solutions/<solution>/plugins/...
-  const match = configPath.match(/^x-pack\/solutions\/([^/]+)\/plugins\//);
-  if (match) {
-    return match[1];
-  }
-  return null;
-}
-
-function getScoutServerRunFlags(configPath: string): string[] {
-  const groupType = getScoutConfigGroupType(configPath);
-
-  if (!groupType) {
-    throw new Error(
-      `Unable to determine scout config group type from path: ${configPath}. ` +
-        `Expected path to match platform pattern (x-pack/platform/... or src/platform/...) ` +
-        `or solution pattern (x-pack/solutions/<solution>/plugins/...)`
-    );
-  }
-
-  if (groupType === 'platform') {
-    return [
-      '--arch stateful --domain classic',
-      '--arch serverless --domain search',
-      '--arch serverless --domain observability_complete',
-      '--arch serverless --domain security_complete',
-    ];
-  }
-
-  if (groupType === 'workplaceai') {
-    return ['--arch serverless --domain workplaceai'];
-  }
-  if (groupType === 'observability') {
-    return [
-      '--arch stateful --domain classic',
-      '--arch serverless --domain observability_complete',
-    ];
-  }
-  if (groupType === 'security') {
-    return ['--arch stateful --domain classic', '--arch serverless --domain security_complete'];
-  }
-  if (groupType === 'search') {
-    return ['--arch stateful --domain classic', '--arch serverless --domain search'];
-  }
-
-  throw new Error(`Unknown solution type: ${groupType}.`);
-}
+// Scout discovery target for the flaky-setup step. We read the branch name
+// from `package.json` (set when forking a release branch).
+const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -168,6 +120,7 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
+const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -199,6 +152,22 @@ steps.push({
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+if (hasScoutSuites) {
+  steps.push({
+    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
+    label: 'Discover Scout Playwright configs',
+    agents: expandAgentQueue('n2-4-spot'),
+    key: 'scout_playwright_configs',
+    timeout_in_minutes: 30,
+    env: {
+      SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
+    },
+    retry: {
+      automatic: [{ exit_status: '-1', limit: 3 }],
+    },
+  });
+}
+
 let suiteIndex = 0;
 for (const testSuite of testSuites) {
   if (testSuite.count <= 0) {
@@ -229,14 +198,12 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_REPORTER_ENABLED: 'true',
-        SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,
@@ -245,7 +212,7 @@ for (const testSuite of testSuites) {
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-      depends_on: 'build',
+      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
       timeout_in_minutes: 60,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
@@ -265,12 +232,13 @@ for (const testSuite of testSuites) {
       }
       const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
       const diskSizeOverride =
-        {
-          osquery_cypress: 115,
-          security_serverless_osquery: 115,
-          defend_workflows: 120,
-        }[suiteName] || 105;
-
+        (
+          {
+            osquery_cypress: 115,
+            security_serverless_osquery: 115,
+            defend_workflows: 120,
+          } as Record<string, number>
+        )[suiteName] || 105;
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
@@ -296,6 +264,7 @@ for (const testSuite of testSuites) {
         },
       });
       break;
+
     default:
       throw new Error(`unknown test suite: ${testSuite.key}`);
   }

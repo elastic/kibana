@@ -236,7 +236,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
               "nonce": undefined,
               "registered": Object {},
               "sheet": StyleSheet {
-                "_alreadyInsertedOrderInsensitiveRule": true,
                 "_insertTag": [Function],
                 "before": null,
                 "container": <head>
@@ -245,12 +244,11 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
                     data-s=""
                   >
                     
-                    .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                   </style>
                 </head>,
                 "ctr": 1,
                 "insertionPoint": undefined,
-                "isSpeedy": false,
+                "isSpeedy": true,
                 "key": "css",
                 "nonce": undefined,
                 "prepend": undefined,
@@ -260,7 +258,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
                     data-s=""
                   >
                     
-                    .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                   </style>,
                 ],
               },
@@ -269,7 +266,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
           isStringTag={true}
           serialized={
             Object {
-              "map": undefined,
               "name": "gb1zbv-euiScreenReaderOnly",
               "next": undefined,
               "styles": ";
@@ -292,7 +288,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   /* Chrome requires the negative margin to not cause overflows of parent containers */
   margin: -1px;
 ;label:euiScreenReaderOnly;;;",
-              "toString": [Function],
             }
           }
         />

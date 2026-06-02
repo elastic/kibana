@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StructuredOutputParser } from 'langchain/output_parsers';
+import { StructuredOutputParser } from '@langchain/classic/output_parsers';
 
 import { GenerationPrompts } from '../prompts';
 import { getAttackDiscoveriesGenerationSchema } from '../../generate/schema';

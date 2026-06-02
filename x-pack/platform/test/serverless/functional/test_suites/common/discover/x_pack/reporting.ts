@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await reportingAPI.initEcommerce({
         batchSize: 5000,
-        concurrency: 4,
+        concurrency: 1,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilTabIsLoaded();
@@ -235,6 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await reset();
         await createDocs();
+        await es.indices.refresh({ index: TEST_INDEX_NAME });
         // TODO: Manually loading logs archive and logs SOs in Serverless
         // instead of using `reportingAPI.initLogs()` since the original
         // logs SOs include a canvas SO which is not supported in Serverless

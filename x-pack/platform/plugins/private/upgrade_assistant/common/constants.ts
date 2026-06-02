@@ -50,6 +50,3 @@ export const APP_LOGS_COUNT_CLUSTER_PRIVILEGES = ['manage_security'];
  * Duration for the "recent" time period (24 hours in milliseconds)
  */
 export const RECENT_DURATION_MS = 24 * 60 * 60 * 1000;
-
-export const LATEST_VERSION = '9.1.0';
-export const MIN_VERSION_TO_UPGRADE_TO_LATEST = '8.19.0';

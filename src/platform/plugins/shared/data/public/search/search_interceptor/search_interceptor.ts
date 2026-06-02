@@ -51,6 +51,7 @@ import type {
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
@@ -370,7 +371,15 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', {
+          strategy: `${strategy}`,
+          id: id as string,
+        }),
+        {
+          version: '1',
+        }
+      )
     );
 
     const cancel = async () => {
@@ -469,7 +478,10 @@ export class SearchInterceptor {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
         .post<IKibanaSearchResponse | ErrorResponseBase>(
-          `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+          buildPath('/internal/search/{strategy}/{id?}', {
+            strategy: `${strategy}`,
+            id: request.id,
+          }),
           {
             version: '1',
             signal: abortSignal,

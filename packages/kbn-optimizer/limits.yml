@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
   aiAssistantManagementSelection: 6917
   aiops: 19890
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   home: 13710
   imageEmbeddable: 21386
   indexLifecycleManagement: 29870
-  indexManagement: 35861
+  indexManagement: 39694
   inference: 10368
   infra: 56302
   ingestPipelines: 17866

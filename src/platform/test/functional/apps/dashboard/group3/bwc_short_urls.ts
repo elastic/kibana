@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect((await find.allByCssSelector('.mapTocEntry')).length).to.be(4);
   }
 
-  describe('bwc short urls', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239960
+  describe.skip('bwc short urls', () => {
     let baseUrl: string;
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {

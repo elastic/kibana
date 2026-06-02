@@ -17,7 +17,7 @@ import {
   hrefReference,
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';

@@ -43,6 +43,7 @@ import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import type { CheckOsqueryResponseActionAuthz } from './endpoint/services/actions/utils/rule_response_actions_validators';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -51,6 +52,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getEndpointService: () => EndpointAppContextService;
+  getCheckOsqueryResponseActionAuthz: () => CheckOsqueryResponseActionAuthz;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;

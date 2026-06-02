@@ -392,6 +392,32 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should disable select and not call onRowClick for closed cases with modal=true', async () => {
+    const theCase = {
+      ...defaultGetCases.data.cases[0],
+      status: CaseStatuses.closed,
+    };
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [theCase, ...defaultGetCases.data.cases.slice(1)],
+      },
+    });
+
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
+
+    const selectButton = await screen.findByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(selectButton).toBeDisabled();
+    expect(selectButton).toHaveTextContent('Select');
+    expect(selectButton).not.toHaveTextContent('Added');
+
+    await userEvent.click(selectButton);
+    await waitFor(() => {
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={false} />);
 

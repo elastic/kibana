@@ -70,6 +70,7 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                   <EuiCopy
                     beforeMessage={copyToClipboardPivotDescription}
                     textToCopy={copyToClipboardPivot}
+                    tooltipProps={{ disableScreenReaderOutput: true }}
                   >
                     {(copy: () => void) => (
                       <EuiButtonIcon

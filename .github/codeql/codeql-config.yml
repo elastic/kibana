@@ -8,9 +8,15 @@ paths-ignore:
   - '**/.storybook/**'
   - '**/*-mocks/**'
   - '**/*.cy.*'
+  - '**/*.md'
+  - '**/*.yaml'
+  - '**/*.yml'
+  - '**/*.hbs'
+  - '**/*.njk'
   - '**/*.mock.*'
   - '**/*.mocks.*'
   - '**/*.test.*'
+  - '**/*.spec.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'
@@ -40,6 +46,7 @@ paths-ignore:
   - packages/kbn-capture-oas-snapshot-cli
   - packages/kbn-check-mappings-update-cli
   - packages/kbn-check-prod-native-modules-cli
+  - packages/kbn-check-saved-objects-cli
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-dependency-*
@@ -107,6 +114,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-kbn-client
   - src/platform/packages/shared/kbn-openapi-*
   - src/platform/packages/shared/kbn-scout
   - src/platform/packages/shared/kbn-storybook
@@ -119,6 +127,7 @@ paths-ignore:
   - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/packages/kbn-synthetics-private-location
   - x-pack/platform/packages/shared/kbn-ai-tools-cli
+  - x-pack/platform/packages/shared/kbn-data-forge
   - x-pack/platform/packages/shared/kbn-inference-cli
   - x-pack/platform/packages/shared/kbn-kibana-api-cli
   - x-pack/platform/packages/shared/kbn-sample-parser
@@ -126,5 +135,8 @@ paths-ignore:
   - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
+  - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
+packs:
+  - githubsecuritylab/codeql-javascript-queries

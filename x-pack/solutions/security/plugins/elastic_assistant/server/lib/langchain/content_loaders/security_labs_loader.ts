@@ -8,10 +8,10 @@
 import { globSync } from 'fs';
 import normalizePath from 'normalize-path';
 import type { Logger } from '@kbn/core/server';
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { resolve } from 'path';
-import { Document } from 'langchain/document';
-import { Metadata } from '@kbn/elastic-assistant-common';
+import type { Document } from '@langchain/core/documents';
+import type { Metadata } from '@kbn/elastic-assistant-common';
 import pMap from 'p-map';
 import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';

@@ -7,6 +7,8 @@
 
 import https from 'https';
 
+import { escapeQuotes } from '@kbn/es-query';
+
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
@@ -126,6 +128,7 @@ class AgentlessAgentService {
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.is_elastic_staff_owned = cloudSetup?.isElasticStaffOwned ?? false;
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -334,7 +337,7 @@ class AgentlessAgentService {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
       showInactive: true,
-      kuery: `policy_id:"${policyId}"`,
+      kuery: `policy_id:"${escapeQuotes(policyId)}"`,
     });
 
     const { items: fleetHosts } = await listFleetServerHosts(soClient);

@@ -104,6 +104,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       dataStreams: snapshotDataStreams.map(
         (dataStream): EuiSelectableOption => ({
           label: dataStream,
+          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+          // list item, which screen readers announce in addition to the accessible name.
+          title: '',
           append: <DataStreamBadge />,
           checked:
             isAllIndicesAndDataStreams ||
@@ -118,6 +121,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       indices: snapshotIndices.map(
         (index): EuiSelectableOption => ({
           label: index,
+          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+          // list item, which screen readers announce in addition to the accessible name.
+          title: '',
           checked:
             isAllIndicesAndDataStreams ||
             // If indices is a string, we default to custom input mode, so we mark individual indices

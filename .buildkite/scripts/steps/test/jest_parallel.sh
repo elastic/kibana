@@ -60,9 +60,9 @@ while read -r config; do
   # --trace-warnings to debug
   # Node.js process-warning detected:
   # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings"
 
-  if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
+  if should_enable_fips; then
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
   fi
 

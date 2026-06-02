@@ -164,7 +164,7 @@ function parseJestArguments(): ParsedJestArguments {
  * @param configNames - Array of config file names to search for (in priority order)
  * @returns Path to the first config file found, or null if none found
  */
-function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null {
+export function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null {
   let currentPath = startPath;
 
   while (currentPath !== REPO_ROOT && currentPath !== resolve(currentPath, '..')) {

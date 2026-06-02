@@ -13,11 +13,11 @@ import {
 } from '@kbn/langchain/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import {
-  AgentRunnableSequence,
+  type AgentRunnableSequence,
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
-} from 'langchain/agents';
+} from '@langchain/classic/agents';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 

@@ -8,6 +8,7 @@ components:
   schemas:
     UserEntity:
       type: object
+      description: An entity record representing a user, stored in the Entity Store latest index.
       required:
         - user
         - entity
@@ -15,6 +16,7 @@ components:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           type: object
           required:
@@ -27,31 +29,39 @@ components:
               type: string
         user:
           type: object
+          description: Elastic Common Schema (ECS) user fields collected on the entity.
           properties:
             full_name:
               type: array
+              description: Observed full names of the user.
               items:
                 type: string
             domain:
               type: array
+              description: Observed user domains.
               items:
                 type: string
             roles:
               type: array
+              description: Observed roles assigned to the user.
               items:
                 type: string
             name:
               type: string
+              description: Primary user name.
             id:
               type: array
+              description: Observed user IDs.
               items:
                 type: string
             email:
               type: array
+              description: Observed email addresses.
               items:
                 type: string
             hash:
               type: array
+              description: Observed user hashes.
               items:
                 type: string
             risk:
@@ -71,8 +81,10 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
     HostEntity:
       type: object
+      description: An entity record representing a host, stored in the Entity Store latest index.
       required:
         - host
         - entity
@@ -80,6 +92,7 @@ components:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           type: object
           required:
@@ -92,35 +105,44 @@ components:
               type: string
         host:
           type: object
+          description: Elastic Common Schema (ECS) host fields collected on the entity.
           properties:
             hostname:
               type: array
+              description: Observed hostnames.
               items:
                 type: string
             domain:
               type: array
+              description: Observed host domains.
               items:
                 type: string
             ip:
               type: array
+              description: Observed IP addresses.
               items:
                 type: string
             name:
               type: string
+              description: Primary host name.
             id:
               type: array
+              description: Observed host IDs.
               items:
                 type: string
             type:
               type: array
+              description: Observed host types.
               items:
                 type: string
             mac:
               type: array
+              description: Observed MAC addresses.
               items:
                 type: string
             architecture:
               type: array
+              description: Observed CPU architectures.
               items:
                 type: string
             risk:
@@ -140,8 +162,10 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
     ServiceEntity:
       type: object
+      description: An entity record representing a service, stored in the Entity Store latest index.
       required:
         - service
         - entity
@@ -149,6 +173,7 @@ components:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           type: object
           required:
@@ -161,9 +186,11 @@ components:
               type: string
         service:
           type: object
+          description: Elastic Common Schema (ECS) service fields collected on the entity.
           properties:
             name:
               type: string
+              description: Primary service name.
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
           required:
@@ -181,7 +208,10 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
+
     Entity:
+      description: An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'

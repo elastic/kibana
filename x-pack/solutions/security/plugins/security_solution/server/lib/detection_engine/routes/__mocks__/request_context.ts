@@ -142,6 +142,7 @@ const createSecuritySolutionRequestContextMock = (
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getCheckOsqueryResponseActionAuthz: jest.fn(() => jest.fn()),
     getEndpointService: jest.fn(() => {
       throw new Error(
         `getEndpointService() not mocked. Needs to be done from withing testing context (due to circular dependencies)`

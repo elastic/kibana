@@ -221,6 +221,7 @@ describe('InterceptDisplayManager', () => {
         runId: 1,
         stepId: 'hello',
         stepResponse: 'louie',
+        interceptId: '1',
       })
     );
   });

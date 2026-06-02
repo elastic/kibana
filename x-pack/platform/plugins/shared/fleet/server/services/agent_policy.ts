@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeQuotes } from '@kbn/es-query';
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
@@ -39,6 +40,7 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
@@ -376,6 +378,8 @@ class AgentPolicyService {
       skipDeploy?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
+    validateFleetSavedObjectId(options.id);
+
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
@@ -656,7 +660,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
+              kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(agentPolicy.id)}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -1233,7 +1237,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(id)}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -1813,7 +1817,7 @@ class AgentPolicyService {
       findRequest: {
         type: savedObjectType,
         perPage,
-        sortField: 'created_at',
+        sortField: 'updated_at',
         sortOrder: 'asc',
         fields: ['id'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
@@ -1838,7 +1842,7 @@ class AgentPolicyService {
       perPage = 1000,
       kuery,
       sortOrder = 'asc',
-      sortField = 'created_at',
+      sortField = 'updated_at',
       fields = [],
       spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}

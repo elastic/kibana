@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
@@ -45,10 +45,21 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
 
-        const savedQuery = await savedObjectsClient.get<SavedQuerySavedObject>(
-          savedQuerySavedObjectType,
-          request.params.id
-        );
+        let savedQuery;
+        try {
+          savedQuery = await savedObjectsClient.get<SavedQuerySavedObject>(
+            savedQuerySavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         if (savedQuery.attributes.ecs_mapping) {
           // @ts-expect-error update types

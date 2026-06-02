@@ -170,10 +170,13 @@ describe('GlobalDataTagsTable', () => {
 
   it('should delete a tag when confirming the modal', async () => {
     renderComponent(globalDataTags);
-    renderer.startServices.overlays.openConfirm.mockResolvedValue(true);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Delete')[0]);
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Remove'));
     });
 
     expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
@@ -181,12 +184,15 @@ describe('GlobalDataTagsTable', () => {
     });
   });
 
-  it('should not delete a tag when confirming the modal', async () => {
+  it('should not delete a tag when cancelling the modal', async () => {
     renderComponent(globalDataTags);
-    renderer.startServices.overlays.openConfirm.mockResolvedValue(false);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Delete')[0]);
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Cancel'));
     });
 
     expect(mockUpdateAgentPolicy).not.toHaveBeenCalledWith({

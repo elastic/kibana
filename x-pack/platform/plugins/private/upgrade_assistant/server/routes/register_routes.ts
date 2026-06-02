@@ -26,11 +26,13 @@ import { registerUpdateIndexRoute } from './update_index';
 import { registerEnterpriseSearchDeprecationRoutes } from '../lib/enterprise_search/enterprise_search_deprecations_routes';
 import { registerDeleteIndexRoute } from './delete_index';
 import { registerMLEnabledRoute } from './ml_enabled_cluster';
+import { registerCloudStackVersionsRoute } from './cloud_stack_versions';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
 
   registerCloudBackupStatusRoutes(dependencies);
+  registerCloudStackVersionsRoute(dependencies);
   registerClusterUpgradeStatusRoutes(dependencies);
   registerSystemIndicesMigrationRoutes(dependencies);
   registerESDeprecationRoutes(dependencies);

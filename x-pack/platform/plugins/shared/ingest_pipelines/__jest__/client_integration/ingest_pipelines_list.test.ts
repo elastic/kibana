@@ -87,7 +87,7 @@ describe('<PipelinesList />', () => {
           '',
           `test_pipeline${i + 1} description`,
           '0',
-          'EditDelete',
+          'Edit this pipelineDelete this pipeline',
         ]);
       });
     });

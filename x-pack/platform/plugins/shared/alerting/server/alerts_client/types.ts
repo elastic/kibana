@@ -42,7 +42,6 @@ export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   indices: Record<string, string>;
   active: Record<string, Alert & AlertData>;
   recovered: Record<string, Alert & AlertData>;
-  delayed: Record<string, Alert & AlertData>;
   all: Record<string, Alert & AlertData>;
   seqNo: Record<string, number | undefined>;
   primaryTerm: Record<string, number | undefined>;
