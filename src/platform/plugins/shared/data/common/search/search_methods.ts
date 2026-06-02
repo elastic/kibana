@@ -138,6 +138,7 @@ export class SearchMethodsService implements ISearchMethods {
       options?.inspector,
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+        // this is here to support the eql expression function. evaluate for removal if that expression function is ever abandoned
         getRequestMetadata: options?.getRequestMetadata,
       }
     );
@@ -326,6 +327,7 @@ export class SearchMethodsService implements ISearchMethods {
         const paginationInspector = options?.inspector
           ? {
               ...options.inspector,
+              adapter: options.inspector.adapter,
               title: inspectorTitle ?? options.inspector.title,
               description: inspectorDescription ?? options.inspector.description,
             }
