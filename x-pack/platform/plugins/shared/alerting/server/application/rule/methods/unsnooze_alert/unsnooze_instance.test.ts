@@ -8,6 +8,8 @@
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { RulesClientContext } from '../../../../rules_client';
 import { unsnoozeAlertInstance } from './unsnooze_instance';
+import { AlertAuditAction } from '../../../../lib/alert_audit_events';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 describe('unsnooze alert instance', () => {
   const savedObjectsMock = savedObjectsRepositoryMock.create();
@@ -110,5 +112,87 @@ describe('unsnooze alert instance', () => {
     await unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'missing-instance' });
 
     expect(savedObjectsMock.update).not.toHaveBeenCalled();
+  });
+
+  it('logs an alert_unsnooze audit event before the SO update', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        name: 'test rule',
+        alertTypeId: '123',
+        consumer: 'alerts',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        snoozedInstances: [
+          {
+            instanceId: 'instance1',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' });
+
+    expect(auditLoggerMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: AlertAuditAction.UNSNOOZE,
+          outcome: 'unknown',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'test rule' },
+        }),
+        message: 'User is unsnoozing alert [id=instance1] of rule [id=1] and [name=test rule]',
+      })
+    );
+  });
+
+  it('logs an alert_unsnooze failure audit event when authorization fails', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        name: 'test rule',
+        alertTypeId: '123',
+        consumer: 'alerts',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        snoozedInstances: [],
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    const authError = new Error('Unauthorized');
+    authorizationMock.ensureAuthorized.mockRejectedValueOnce(authError);
+
+    await expect(() =>
+      unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' })
+    ).rejects.toThrow('Unauthorized');
+
+    expect(auditLoggerMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: AlertAuditAction.UNSNOOZE,
+          outcome: 'failure',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'test rule' },
+        }),
+      })
+    );
   });
 });

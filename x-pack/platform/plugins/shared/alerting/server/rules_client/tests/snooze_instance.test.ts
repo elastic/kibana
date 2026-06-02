@@ -309,7 +309,7 @@ describe('snoozeAlertInstance()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_alert_mute',
+            action: 'alert_snooze',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
@@ -347,7 +347,7 @@ describe('snoozeAlertInstance()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_alert_mute',
+            action: 'alert_snooze',
             outcome: 'failure',
           }),
           kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },

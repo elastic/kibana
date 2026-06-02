@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         'viewRuleDetails',
         'viewAlertDetailsPage',
         'untrackAlert',
-        'toggle-alert',
+        'alertSnoozePopoverTrigger',
       ]) {
         expect(await testSubjects.exists(action, { allowHidden: true })).to.be(true);
       }

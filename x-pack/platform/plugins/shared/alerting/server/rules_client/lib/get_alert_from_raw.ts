@@ -150,6 +150,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     snoozeSchedule: snoozeScheduleDates ?? [],
     activeSnoozes,
     isSnoozedUntil,
+    ...(snoozedInstances?.length ? { snoozedInstances } : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
     ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
     ...(lastEnabledAt ? { lastEnabledAt: new Date(lastEnabledAt) } : {}),

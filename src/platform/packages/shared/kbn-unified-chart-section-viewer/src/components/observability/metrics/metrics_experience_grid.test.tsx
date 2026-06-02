@@ -187,7 +187,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
     dimensionFields: [dimensions[0]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],
@@ -195,7 +195,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field2',
     dimensionFields: [dimensions[1]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],

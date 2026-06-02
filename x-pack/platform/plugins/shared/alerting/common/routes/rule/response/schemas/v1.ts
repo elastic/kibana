@@ -490,6 +490,50 @@ export const artifactsSchema = schema.object({
   investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
+const snoozedAlertConditionSchema = schema.oneOf([
+  schema.object({ type: schema.literal('field_change'), field: schema.string() }),
+  schema.object({ type: schema.literal('severity_change') }),
+  schema.object({
+    type: schema.literal('severity_equals'),
+    value: schema.oneOf([
+      schema.literal('critical'),
+      schema.literal('high'),
+      schema.literal('medium'),
+      schema.literal('low'),
+      schema.literal('info'),
+    ]),
+  }),
+]);
+
+export const snoozedAlertInstanceSchema = schema.object({
+  instance_id: schema.string({
+    meta: { description: 'The identifier of the snoozed alert instance.' },
+  }),
+  expires_at: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The datetime at which the per-alert snooze expires, in ISO 8601 format.',
+      },
+    })
+  ),
+  conditions: schema.maybe(
+    schema.arrayOf(snoozedAlertConditionSchema, {
+      meta: { description: 'Conditions that automatically expire the snooze when met.' },
+    })
+  ),
+  condition_operator: schema.maybe(
+    schema.oneOf([schema.literal('any'), schema.literal('all')], {
+      meta: { description: 'Logical operator applied to the conditions array.' },
+    })
+  ),
+  snoozed_at: schema.string({
+    meta: { description: 'The datetime at which the alert was snoozed, in ISO 8601 format.' },
+  }),
+  snoozed_by: schema.string({
+    meta: { description: 'The identifier of the user who snoozed the alert.' },
+  }),
+});
+
 /**
  * This is a public schema that is used to generate the OpenAPI schema for all of our public APIs that return a rule response.
  */
@@ -757,6 +801,11 @@ export const ruleResponseInternalSchema = schema.object(
           },
         })
       )
+    ),
+    snoozed_alert_instances: schema.maybe(
+      schema.arrayOf(snoozedAlertInstanceSchema, {
+        meta: { description: 'List of per-alert snooze entries for this rule.' },
+      })
     ),
     is_snoozed_until: schema.maybe(
       schema.nullable(

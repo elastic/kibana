@@ -131,6 +131,9 @@ export interface InternalChromeStart extends ChromeStart {
 
 /** @internal */
 export interface InternalChromeNext extends ChromeNext {
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
   globalSearch: ChromeNext['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };

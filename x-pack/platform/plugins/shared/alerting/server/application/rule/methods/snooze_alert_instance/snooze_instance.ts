@@ -21,7 +21,7 @@ import type {
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { AlertAuditAction, alertAuditEvent } from '../../../../lib/alert_audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMeta } from '../../../../rules_client/lib';
 import {
@@ -92,9 +92,10 @@ async function snoozeAlertInstanceWithOCC(
     }
   } catch (error) {
     context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.MUTE_ALERT,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+      alertAuditEvent({
+        action: AlertAuditAction.SNOOZE,
+        id: alertInstanceId,
+        ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
     );
@@ -102,10 +103,11 @@ async function snoozeAlertInstanceWithOCC(
   }
 
   context.auditLogger?.log(
-    ruleAuditEvent({
-      action: RuleAuditAction.MUTE_ALERT,
+    alertAuditEvent({
+      action: AlertAuditAction.SNOOZE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+      id: alertInstanceId,
+      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
   );
 

@@ -25,6 +25,7 @@ import {
   type verdictsMappings,
 } from './data_stream';
 import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { enrichFromEvidences } from '../utils';
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
 
@@ -57,13 +58,15 @@ export class VerdictClient {
   async findLatestPaginated(
     options: PaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<Verdict>> {
-    return runPaginatedLatestSourceEsqlQuery<Verdict>({
+    const result = await runPaginatedLatestSourceEsqlQuery<Verdict>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: VERDICTS_DATA_STREAM,
       groupBy: FIELD_DISCOVERY_ID,
     });
+
+    return { ...result, hits: result.hits.map(enrichFromEvidences) };
   }
 
   async findByDiscoveryId(discoveryId: string): Promise<{ hits: Verdict[] }> {

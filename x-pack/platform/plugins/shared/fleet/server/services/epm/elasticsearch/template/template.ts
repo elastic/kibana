@@ -48,6 +48,7 @@ import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 import { MappingsBuilder } from './mappings_builder';
+import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 
 export interface IndexTemplateMapping {
   [key: string]: any;
@@ -397,13 +398,16 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
+  const concurrency =
+    appContextService.getConfig()?.packageInstallation?.maxConcurrentDatastreamOperations ??
+    MAX_CONCURRENT_DATASTREAM_OPERATIONS;
   const dataStreamObjects = await pMap(
     templates,
     (template) => {
       return getDataStreams(esClient, template);
     },
     {
-      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+      concurrency,
     }
   );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
@@ -455,21 +459,22 @@ function errorNeedRollover(err: any): boolean {
   return false;
 }
 
-const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
-  try {
-    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
-    });
-  } catch (error) {
-    throw new PackageESError(
-      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
-    );
-  }
+const rolloverDataStream = (
+  dataStreamName: string,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  return retryDataStreamUpdateOnClusterEventTimeout(
+    () =>
+      esClient.transport.request({
+        method: 'POST',
+        path: `/${dataStreamName}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      }),
+    { logger, dataStreamName }
+  );
 };
 
 const updateAllDataStreams = async (
@@ -481,6 +486,9 @@ const updateAllDataStreams = async (
     skipDataStreamRollover?: boolean;
   }
 ): Promise<void> => {
+  const concurrency =
+    appContextService.getConfig()?.packageInstallation?.maxConcurrentDatastreamOperations ??
+    MAX_CONCURRENT_DATASTREAM_OPERATIONS;
   await pMap(
     indexNameWithTemplates,
     (templateEntry) => {
@@ -493,7 +501,7 @@ const updateAllDataStreams = async (
       });
     },
     {
-      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+      concurrency,
     }
   );
 };
@@ -583,7 +591,7 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient);
+        await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
     }
@@ -640,7 +648,7 @@ const updateExistingDataStream = async ({
           ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
           : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient);
+      await rolloverDataStream(dataStreamName, esClient, logger);
     }
   }
 

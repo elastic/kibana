@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';

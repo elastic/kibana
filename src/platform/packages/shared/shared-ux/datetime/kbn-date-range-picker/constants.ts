@@ -16,6 +16,9 @@ export const DATE_TYPE_RELATIVE = 'RELATIVE' as const;
 /** Date type representing the current moment ("now") */
 export const DATE_TYPE_NOW = 'NOW' as const;
 
+/** Keyword users type to refer to the current moment in input and display text. */
+export const NOW_KEYWORD = 'now';
+
 /** Default Moment.js format for displaying dates at full precision (e.g. "Feb 3, 2025, 14:30:07.801") */
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY, HH:mm:ss.SSS';
 

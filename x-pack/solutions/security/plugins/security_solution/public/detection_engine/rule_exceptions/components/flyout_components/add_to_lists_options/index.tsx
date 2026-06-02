@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiButtonEmpty,
   EuiPopoverFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -60,15 +61,21 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
             <EuiFlexItem grow={false} data-test-subj="addToListsOption">
               <EuiPopover
                 button={
-                  <EuiButtonIcon
-                    iconType="info"
-                    onClick={onPopOverButtonClick}
-                    aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
-                  />
+                  <EuiToolTip
+                    content={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="info"
+                      onClick={onPopOverButtonClick}
+                      aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isPopoverOpen}
                 closePopover={closePopover}
                 anchorPosition="upCenter"
+                aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
               >
                 <div css={{ width: '300px' }}>
                   <EuiText size="s">
