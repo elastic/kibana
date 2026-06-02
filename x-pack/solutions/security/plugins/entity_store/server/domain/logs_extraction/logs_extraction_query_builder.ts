@@ -81,6 +81,7 @@ export function buildRemainingLogsCountQuery(params: {
   logsPageCursorStart?: LogSlicePaginationParams;
 }): string {
   return (
+    `SET unmapped_fields="nullify";\n` +
     buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
@@ -102,6 +103,8 @@ export function buildLogsExtractionEsqlQuery({
   const { fields, type, entityTypeFallback } = entityDefinition;
 
   const parts = [];
+
+  parts.push(`SET unmapped_fields="nullify";`);
 
   // FROM and WHERE
   parts.push(

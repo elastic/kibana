@@ -27,6 +27,7 @@ export function buildLogPaginationCursorProbeEsql(
 ): string {
   const { maxLogsPerPage, ...sourceParams } = params;
   return (
+    `SET unmapped_fields="nullify";\n` +
     buildLogPageProbeSourceClause(sourceParams) +
     `
   | SORT ${TIMESTAMP_FIELD} ASC
