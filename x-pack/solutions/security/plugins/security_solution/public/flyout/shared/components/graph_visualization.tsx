@@ -26,11 +26,9 @@ import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/comp
 import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,
@@ -39,7 +37,7 @@ import {
 } from '../../document_details/preview/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
-import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
+import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -94,14 +92,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
 
   const toasts = useToasts();
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.default,
-  });
 
-  const { dataView: experimentalDataView } = useDataView(PageScope.default);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -303,7 +295,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         width: 100%;
       `}
     >
-      {dataView && (
+      {status === 'ready' && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
             scopeId={scopeId}
