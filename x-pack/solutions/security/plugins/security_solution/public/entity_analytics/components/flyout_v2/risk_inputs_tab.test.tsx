@@ -634,7 +634,9 @@ describe('RiskInputsTab (v2)', () => {
       },
     });
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
-      params?.skip ? { loading: false, error: false, data: [] } : { loading: false, error: false, data: [riskScore] }
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : { loading: false, error: false, data: [riskScore] }
     );
 
     const { getByRole } = render(

@@ -72,9 +72,7 @@ describe('VulnerabilitiesFindingsDetailsTable (v2)', () => {
       </TestProviders>
     );
 
-    expect(
-      getByTestId('securitySolutionFlyoutVulnerabilitiesFindingsTable')
-    ).toBeInTheDocument();
+    expect(getByTestId('securitySolutionFlyoutVulnerabilitiesFindingsTable')).toBeInTheDocument();
   });
 
   it('accepts required onShowVulnerability callback without throwing', () => {

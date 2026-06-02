@@ -67,11 +67,7 @@ describe('AlertsDetailsTable (v2)', () => {
   it('renders without crashing', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsDetailsTable
-          field="host.name"
-          value="my-host"
-          onShowAlert={mockOnShowAlert}
-        />
+        <AlertsDetailsTable field="host.name" value="my-host" onShowAlert={mockOnShowAlert} />
       </TestProviders>
     );
 

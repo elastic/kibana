@@ -64,9 +64,7 @@ describe('MisconfigurationFindingsDetailsTable (v2)', () => {
       </TestProviders>
     );
 
-    expect(
-      getByTestId('securitySolutionFlyoutMisconfigurationFindingsTable')
-    ).toBeInTheDocument();
+    expect(getByTestId('securitySolutionFlyoutMisconfigurationFindingsTable')).toBeInTheDocument();
   });
 
   it('accepts required onShowFinding callback without throwing', () => {
