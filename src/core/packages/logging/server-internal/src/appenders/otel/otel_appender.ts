@@ -28,6 +28,7 @@ import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-ser
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
+import { JsonLayout } from '../../layouts/json_layout';
 import {
   buildGrpcVerifyOptions,
   buildHttpsAgentTlsOptions,
@@ -78,22 +79,6 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
     traceFlags: TraceFlags.NONE,
   });
 };
-
-/**
- * Builds a sanitised copy of a `LogRecord` for use as `body.structured`.
- *
- * The raw record is stripped of:
- * - `level`: a Kibana-internal `LogLevel` object that is redundant given the
- *   top-level `severity_number` / `severity_text` OTLP fields.
- * - Fields with `null` or `undefined` values (e.g. `spanId`/`traceId` when no
- *   trace context is present) to avoid noisy empty entries in Elasticsearch.
- */
-const toStructuredBody = (record: LogRecord): AnyValueMap =>
-  Object.fromEntries(
-    Object.entries(record as unknown as Record<string, unknown>).filter(
-      ([key, v]) => key !== 'level' && v != null
-    )
-  ) as AnyValueMap;
 
 /**
  * Resolves the effective layout config for the OTel appender.
@@ -277,13 +262,15 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      // JSON layout: send a sanitised LogRecord as a structured object.
-      // Elastic's OTel ingest indexes this as body.structured. Note that the ECS
-      // `message` field will be empty because it aliases body.text, not body.structured.
+      // JSON layout: send a ECS record as a structured object.
+      // Elastic's OTel ingest indexes this as body.structured.
       //
       // Pattern layout (default): format the record to a human-readable string.
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
-      body: this.useStructuredBody ? toStructuredBody(record) : this.layout.format(record),
+      body:
+        this.layout instanceof JsonLayout
+          ? (JsonLayout.ecsRecord(record) as unknown as AnyValueMap)
+          : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.

@@ -27,7 +27,7 @@ const jsonLayoutSchema = object({
 export class JsonLayout implements Layout {
   public static configSchema = jsonLayoutSchema;
 
-  public format(record: LogRecord): string {
+  public static ecsRecord(record: LogRecord): Ecs {
     const spanId = record.meta?.span?.id ?? record.spanId;
     const traceId = record.meta?.trace?.id ?? record.traceId;
     const transactionId = record.meta?.transaction?.id ?? record.transactionId;
@@ -58,6 +58,12 @@ export class JsonLayout implements Layout {
       }
       output = merge(serializedMeta, log);
     }
+
+    return output;
+  }
+
+  public format(record: LogRecord): string {
+    const output = JsonLayout.ecsRecord(record);
 
     return JSON.stringify(output);
   }
