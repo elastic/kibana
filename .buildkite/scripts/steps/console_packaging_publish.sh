@@ -44,7 +44,7 @@ fi
 
 CONSOLE_DIR="src/platform/plugins/shared/console"
 
-# Pipeline infrastructure files — a change here rebuilds regardless of source diff.
+# Pipeline infrastructure files, a change here rebuilds regardless of source diff.
 PIPELINE_FILES=(
   ".buildkite/pipelines/console_packaging_publish.yml"
   ".buildkite/scripts/steps/console_packaging_publish.sh"
@@ -102,7 +102,7 @@ fi
 report_step "Prepare tarball"
 
 # Write a publish-ready package.json into target/: fix the relative paths that
-# point from packaging/ → target/ (../target/index.js) to paths relative to
+# point from packaging/ -> target/ (../target/index.js) to paths relative to
 # where the file will live inside the tarball (./index.js).
 node -e "
   const fs = require('fs');
