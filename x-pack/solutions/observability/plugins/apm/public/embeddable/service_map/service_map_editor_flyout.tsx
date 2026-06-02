@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSkeletonText,
-  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -247,9 +246,6 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
-  const [applyCustomFilters, setApplyCustomFilters] = useState<boolean>(
-    initialState?.apply_custom_filters ?? true
-  );
   const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
     initialState?.alert_status_filter ?? []
   );
@@ -396,7 +392,9 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
-      apply_custom_filters: applyCustomFilters,
+      // `apply_custom_filters` is owned by the "Service map filter settings" panel-menu
+      // action, not this data-editing flyout — intentionally not set here so editing other
+      // fields never resets it.
       // Empty arrays drop to undefined so they're omitted from the saved object payload.
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
@@ -409,7 +407,6 @@ export function ServiceMapEditorFlyout({
     environment,
     kuery,
     serviceName,
-    applyCustomFilters,
     alertStatusFilter,
     sloStatusFilter,
     connectionFilter,
@@ -588,9 +585,7 @@ export function ServiceMapEditorFlyout({
                 const opt = SLO_STATUS_OPTIONS.find((o) => o.value === value);
                 return { label: opt?.label ?? value, value };
               })}
-              onChange={(selected) =>
-                setSloStatusFilter(selected.map((s) => s.value as SloStatus))
-              }
+              onChange={(selected) => setSloStatusFilter(selected.map((s) => s.value as SloStatus))}
               data-test-subj="apmServiceMapEditorSloStatusFilter"
               onFocus={onFilterFocus}
             />
@@ -616,9 +611,7 @@ export function ServiceMapEditorFlyout({
                 return { label: opt?.label ?? value, value };
               })}
               onChange={(selected) =>
-                setAnomalySeverityFilter(
-                  selected.map((s) => s.value as ML_ANOMALY_SEVERITY)
-                )
+                setAnomalySeverityFilter(selected.map((s) => s.value as ML_ANOMALY_SEVERITY))
               }
               data-test-subj="apmServiceMapEditorAnomalySeverityFilter"
               onFocus={onFilterFocus}
@@ -660,24 +653,6 @@ export function ServiceMapEditorFlyout({
               data-test-subj="apmServiceMapEditorOrientation"
             />
           </EuiFormRow>
-
-          <EuiFormRow
-            helpText={i18n.translate('xpack.apm.serviceMapEditor.applyCustomFiltersHelpText', {
-              defaultMessage:
-                "When on, the panel uses only its own filters and ignores the dashboard's KQL / Controls.",
-            })}
-            fullWidth
-          >
-            <EuiSwitch
-              label={i18n.translate('xpack.apm.serviceMapEditor.applyCustomFiltersLabel', {
-                defaultMessage: 'Apply custom panel filters',
-              })}
-              checked={applyCustomFilters}
-              onChange={(e) => setApplyCustomFilters(e.target.checked)}
-              data-test-subj="apmServiceMapEditorApplyCustomFiltersToggle"
-            />
-          </EuiFormRow>
-
         </EuiForm>
         {filterCountsEnabled && (
           <FlyoutFilterOptionCountsResolver

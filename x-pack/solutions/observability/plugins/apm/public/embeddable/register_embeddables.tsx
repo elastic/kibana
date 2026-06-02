@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreSetup } from '@kbn/core/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
@@ -16,6 +16,7 @@ import type { EmbeddableDeps } from './types';
 import {
   ADD_APM_SERVICE_MAP_PANEL_ACTION_ID,
   APM_SERVICE_MAP_EMBEDDABLE,
+  APM_SERVICE_MAP_SETTINGS_ACTION_ID,
 } from './service_map/constants';
 
 export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>) {
@@ -81,6 +82,18 @@ export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pl
         coreSetup.getStartServices(),
       ]);
       return createAddServiceMapPanelAction({ ...deps, coreStart, pluginsStart });
+    }
+  );
+
+  pluginsSetup.uiActions.addTriggerActionAsync(
+    ON_OPEN_PANEL_MENU,
+    APM_SERVICE_MAP_SETTINGS_ACTION_ID,
+    async () => {
+      const [{ createServiceMapSettingsAction }, [coreStart, pluginsStart]] = await Promise.all([
+        import('./service_map/create_service_map_settings_action'),
+        coreSetup.getStartServices(),
+      ]);
+      return createServiceMapSettingsAction({ ...deps, coreStart, pluginsStart });
     }
   );
 }
