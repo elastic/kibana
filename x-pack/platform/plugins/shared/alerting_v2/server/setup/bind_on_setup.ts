@@ -14,8 +14,8 @@ import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
-import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '../../common/advanced_settings';
+import { alertingAdvancedSettings } from '../settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
@@ -63,7 +63,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
-    uiSettingsSetup.registerGlobal(alertingV2UiSettings);
+    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
@@ -130,7 +130,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
         .then(([coreStart]) => {
           const soClient = coreStart.savedObjects.createInternalRepository();
           const uiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(soClient);
-          return uiSettingsClient.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+          return uiSettingsClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID);
         })
         .then((enabled) => {
           if (enabled) {
@@ -154,14 +154,12 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
                 workflowsManagementApi.getAvailableConnectors(sid, req),
             });
 
-            logger.info(
-              'Rule management skill and attachments registered (experimental features enabled)'
-            );
+            logger.info('Rule management skill and attachments registered (alerting v2 enabled)');
           }
         })
         .catch((err) => {
           logger.warn(
-            `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
+            `Failed to read alerting v2 enabled setting; rule management skill not registered: ${err}`
           );
         });
     }
