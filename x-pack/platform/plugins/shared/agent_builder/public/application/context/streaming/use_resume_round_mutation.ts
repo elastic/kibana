@@ -11,6 +11,7 @@ import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_too
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Conversation, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
 import { queryKeys } from '../../query_keys';
@@ -19,7 +20,7 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 
 export interface ResumeRoundVars {
-  prompts: Record<string, { allow: boolean }>;
+  prompts: Record<string, PromptResponse>;
   conversationId: string;
   agentId: string;
   connectorId?: string;
