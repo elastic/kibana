@@ -20,16 +20,16 @@ const TIMELION_PANEL_INDEX = 1;
 const HISTOGRAM_PANEL_INDEX = 2;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, dashboard } = getPageObjects(['lens', 'dashboard']);
+  const { header, lens, dashboard } = getPageObjects(['header', 'lens', 'dashboard']);
 
   const testSubjects = getService('testSubjects');
   const panelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/271816
-  describe.skip('Convert to Lens action on dashboard', function describeIndexTests() {
+  describe('Convert to Lens action on dashboard', function describeIndexTests() {
     before(async () => {
       await dashboard.initTests();
+      await header.waitUntilLoadingHasFinished();
       await dashboard.loadDashboardInEditMode('legacy visualizations');
     });
 

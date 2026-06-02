@@ -30,6 +30,7 @@ interface AppMenuContextMenuProps {
   switchConfig?: AppMenuSwitch;
   popoverTestId?: string;
   anchorPosition?: PopoverAnchorPosition;
+  repositionToCrossAxis?: boolean;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
 }
@@ -47,6 +48,7 @@ export const AppMenuPopover = ({
   switchConfig,
   popoverTestId = 'app-menu-popover',
   anchorPosition = 'downLeft',
+  repositionToCrossAxis,
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
@@ -100,6 +102,7 @@ export const AppMenuPopover = ({
       hasArrow={false}
       anchorPosition={anchorPosition}
       aria-label={title || content}
+      repositionToCrossAxis={repositionToCrossAxis}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 180 }} />
     </EuiPopover>

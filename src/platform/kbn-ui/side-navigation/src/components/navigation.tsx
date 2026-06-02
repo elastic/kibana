@@ -11,7 +11,7 @@ import React, { useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -29,6 +29,7 @@ import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
+import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -50,7 +51,7 @@ export interface NavigationProps {
   /**
    * The logo object containing the route ID, href, label, and type.
    */
-  logo: SideNavLogo;
+  logo?: SideNavLogo;
   /**
    * Required by the grid layout to set the width of the navigation slot.
    */
@@ -71,6 +72,11 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * When true, renders a centered horizontal separator at the top of the side nav,
+   * between the global header and the logo/primary menu.
+   */
+  showTopSeparator?: boolean;
+  /**
    * (optional) Callback fired when the customize button is clicked.
    * When not provided, the button is hidden.
    */
@@ -90,11 +96,20 @@ export const Navigation = ({
   onItemClick,
   onToggleCollapsed,
   setWidth,
+  showTopSeparator = false,
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = forcedCollapsed || isCollapsedProp;
+  const euiThemeContext = useEuiTheme();
+
+  const topSeparatorStyles = css`
+    position: relative;
+    flex-shrink: 0;
+    ${getHighContrastSeparator(euiThemeContext, { side: 'bottom' })}
+  `;
+
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
   const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
   const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
@@ -106,7 +121,7 @@ export const Navigation = ({
     visuallyActiveSubpageId,
     isSidePanelOpen,
     openerNode,
-  } = useNavigation(isCollapsed, items, logo.id, activeItemId);
+  } = useNavigation(isCollapsed, items, logo?.id, activeItemId);
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
@@ -140,13 +155,16 @@ export const Navigation = ({
       id={NAVIGATION_ROOT_SELECTOR}
     >
       <SideNav isCollapsed={isCollapsed}>
-        <SideNav.Logo
-          isCollapsed={isCollapsed}
-          isCurrent={actualActiveItemId === logo.id}
-          isHighlighted={visuallyActivePageId === logo.id}
-          onClick={() => onItemClick?.(logo)}
-          {...logo}
-        />
+        {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
+        {logo && (
+          <SideNav.Logo
+            isCollapsed={isCollapsed}
+            isCurrent={actualActiveItemId === logo.id}
+            isHighlighted={visuallyActivePageId === logo.id}
+            onClick={() => onItemClick?.(logo)}
+            {...logo}
+          />
+        )}
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
