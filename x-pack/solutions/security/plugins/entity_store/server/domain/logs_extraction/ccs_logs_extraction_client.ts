@@ -516,6 +516,7 @@ export class CcsLogsExtractionClient {
           abortController,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
           transformDocument: this.buildTransformDocument(type),
+          refresh: false,
         });
       }
 
