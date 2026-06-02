@@ -8,6 +8,7 @@
  */
 
 import type { SpecDefinitionsService } from '../../../services';
+import { BOOLEAN } from './shared';
 
 const commonPipelineParams = {
   on_failure: [],
@@ -16,6 +17,7 @@ const commonPipelineParams = {
   },
   if: '',
   tag: '',
+  description: '',
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
@@ -31,6 +33,28 @@ const appendProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/attachment.html
+const attachmentProcessorDefinition = {
+  attachment: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'attachment',
+    indexed_chars: 100000,
+    indexed_chars_field: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    remove_binary: {
+      __one_of: [false, true],
+    },
+    resource_name: '',
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/bytes-processor.html
 const bytesProcessorDefinition = {
   bytes: {
@@ -42,6 +66,23 @@ const bytesProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/cef-processor.html
+const cefProcessorDefinition = {
+  cef: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ignore_empty_values: BOOLEAN,
+    timezone: 'UTC',
     ...commonPipelineParams,
   },
 };
@@ -67,6 +108,27 @@ const circleProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/community-id-processor.html
+const communityIdProcessorDefinition = {
+  community_id: {
+    __template: {},
+    source_ip: 'source.ip',
+    source_port: 'source.port',
+    destination_ip: 'destination.ip',
+    destination_port: 'destination.port',
+    iana_number: 'network.iana_number',
+    icmp_type: 'icmp.type',
+    icmp_code: 'icmp.code',
+    transport: '',
+    target_field: 'network.community_id',
+    seed: 0,
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/csv-processor.html
 const csvProcessorDefinition = {
   csv: {
@@ -79,9 +141,7 @@ const csvProcessorDefinition = {
     separator: '',
     quote: '',
     empty_value: '',
-    trim: {
-      __one_of: [true, false],
-    },
+    trim: BOOLEAN,
     ignore_missing: {
       __one_of: [false, true],
     },
@@ -194,9 +254,7 @@ const enrichProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
-    override: {
-      __one_of: [true, false],
-    },
+    override: BOOLEAN,
     max_matches: 1,
     shape_relation: 'INTERSECTS',
     ...commonPipelineParams,
@@ -210,6 +268,25 @@ const failProcessorDefinition = {
       message: '',
     },
     message: '',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/fingerprint-processor.html
+const fingerprintProcessorDefinition = {
+  fingerprint: {
+    __template: {
+      fields: [],
+    },
+    fields: [],
+    target_field: 'fingerprint',
+    salt: '',
+    method: {
+      __one_of: ['SHA-1', 'SHA-256', 'SHA-512', 'MD5', 'MurmurHash3'],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
     ...commonPipelineParams,
   },
 };
@@ -245,6 +322,33 @@ const geoipProcessorDefinition = {
     first_only: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-geo-grid-processor.html
+const geoGridProcessorDefinition = {
+  geo_grid: {
+    __template: {
+      field: '',
+      tile_type: '',
+    },
+    field: '',
+    tile_type: {
+      __one_of: ['geotile', 'geohex', 'geohash'],
+    },
+    target_field: '',
+    target_format: {
+      __one_of: ['GeoJSON', 'WKT'],
+    },
+    parent_field: '',
+    children_field: '',
+    non_children_field: '',
+    precision_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
   },
 };
 
@@ -327,6 +431,24 @@ const inferenceProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ip-location-processor.html
+const ipLocationProcessorDefinition = {
+  ip_location: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'ip_location',
+    database_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    first_only: BOOLEAN,
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/join-processor.html
 const joinProcessorDefinition = {
   join: {
@@ -389,6 +511,24 @@ const lowercaseProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/network-direction-processor.html
+const networkDirectionProcessorDefinition = {
+  network_direction: {
+    __template: {
+      internal_networks: [],
+    },
+    source_ip: 'source.ip',
+    destination_ip: 'destination.ip',
+    target_field: 'network.direction',
+    internal_networks: [],
+    internal_networks_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/pipeline-processor.html
 const pipelineProcessorDefinition = {
   pipeline: {
@@ -411,6 +551,46 @@ const removeProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/redact-processor.html
+const redactProcessorDefinition = {
+  redact: {
+    __template: {
+      field: '',
+      patterns: [],
+    },
+    field: '',
+    patterns: [],
+    pattern_definitions: {},
+    prefix: '<',
+    suffix: '>',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    skip_if_unlicensed: {
+      __one_of: [false, true],
+    },
+    trace_redact: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/registered-domain-processor.html
+const registeredDomainProcessorDefinition = {
+  registered_domain: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/rename-processor.html
 const renameProcessorDefinition = {
   rename: {
@@ -423,6 +603,17 @@ const renameProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/reroute-processor.html
+const rerouteProcessorDefinition = {
+  reroute: {
+    __template: {},
+    destination: '',
+    dataset: '',
+    namespace: '',
     ...commonPipelineParams,
   },
 };
@@ -449,9 +640,7 @@ const setProcessorDefinition = {
     },
     field: '',
     value: '',
-    override: {
-      __one_of: [true, false],
-    },
+    override: BOOLEAN,
     ...commonPipelineParams,
   },
 };
@@ -510,6 +699,14 @@ const trimProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/terminate-processor.html
+const terminateProcessorDefinition = {
+  terminate: {
+    __template: {},
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/uppercase-processor.html
 const uppercaseProcessorDefinition = {
   uppercase: {
@@ -539,6 +736,25 @@ const urlDecodeProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/uri-parts-processor.html
+const uriPartsProcessorDefinition = {
+  uri_parts: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'url',
+    keep_original: BOOLEAN,
+    remove_if_successful: {
+      __one_of: [false, true],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/user-agent-processor.html
 const userAgentProcessorDefinition = {
   user_agent: {
@@ -552,16 +768,20 @@ const userAgentProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
   },
 };
 
 const processorDefinition = {
   __one_of: [
     appendProcessorDefinition,
+    attachmentProcessorDefinition,
     bytesProcessorDefinition,
-    csvProcessorDefinition,
+    cefProcessorDefinition,
     circleProcessorDefinition,
+    communityIdProcessorDefinition,
     convertProcessorDefinition,
+    csvProcessorDefinition,
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
     dissectProcessorDefinition,
@@ -569,26 +789,35 @@ const processorDefinition = {
     dropProcessorDefinition,
     enrichProcessorDefinition,
     failProcessorDefinition,
+    fingerprintProcessorDefinition,
     foreachProcessorDefinition,
+    geoGridProcessorDefinition,
     geoipProcessorDefinition,
     grokProcessorDefinition,
     gsubProcessorDefinition,
     htmlStripProcessorDefinition,
     inferenceProcessorDefinition,
+    ipLocationProcessorDefinition,
     joinProcessorDefinition,
     jsonProcessorDefinition,
     kvProcessorDefinition,
     lowercaseProcessorDefinition,
+    networkDirectionProcessorDefinition,
     pipelineProcessorDefinition,
+    redactProcessorDefinition,
+    registeredDomainProcessorDefinition,
     removeProcessorDefinition,
     renameProcessorDefinition,
+    rerouteProcessorDefinition,
     scriptProcessorDefinition,
     setProcessorDefinition,
     setSecurityUserProcessorDefinition,
-    splitProcessorDefinition,
     sortProcessorDefinition,
+    splitProcessorDefinition,
+    terminateProcessorDefinition,
     trimProcessorDefinition,
     uppercaseProcessorDefinition,
+    uriPartsProcessorDefinition,
     urlDecodeProcessorDefinition,
     userAgentProcessorDefinition,
   ],
