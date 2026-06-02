@@ -756,18 +756,27 @@ function GraphInner({
               )}
             </Panel>
             {!isEmbedded && (
-              <Panel position="top-right">
-                <AddToDashboardButton
-                  environment={environment}
-                  kuery={kuery}
-                  start={start}
-                  end={end}
-                  serviceName={serviceName}
-                  serviceGroupId={serviceGroupId}
-                  mapOrientation={mapOrientation}
-                  viewFilters={viewFilters}
-                  searchQuery={searchQuery}
-                />
+              <Panel position="top-right" css={topLeftToolbarStyles}>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  borderRadius="m"
+                  grow={false}
+                >
+                  <AddToDashboardButton
+                    environment={environment}
+                    kuery={kuery}
+                    start={start}
+                    end={end}
+                    serviceName={serviceName}
+                    serviceGroupId={serviceGroupId}
+                    mapOrientation={mapOrientation}
+                    viewFilters={viewFilters}
+                    searchQuery={searchQuery}
+                    controlIconCss={mapToolbarControlIconCss}
+                  />
+                </EuiPanel>
               </Panel>
             )}
             {!isEmbedded && <ServiceMapMinimap />}

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/serialize';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -33,6 +34,8 @@ interface AddToDashboardButtonProps {
   viewFilters: ServiceMapViewFilters;
   /** Current find-in-page query — captured into the dashboard panel state. */
   searchQuery: string;
+  /** Optional Emotion styles for the icon button; lets the toolbar enforce a consistent hit target. */
+  controlIconCss?: SerializedStyles;
 }
 
 /** Serialize a single string value as a quoted KQL phrase. */
@@ -150,6 +153,7 @@ export function AddToDashboardButton({
   mapOrientation,
   viewFilters,
   searchQuery,
+  controlIconCss,
 }: AddToDashboardButtonProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const embeddable = services?.embeddable;
@@ -259,13 +263,15 @@ export function AddToDashboardButton({
     <>
       <EuiToolTip content={buttonLabel} disableScreenReaderOutput position="top">
         <EuiButtonIcon
-          iconType="addToDashboard"
+          display="empty"
           color="text"
           size="s"
           iconSize="m"
+          iconType="addToDashboard"
           aria-label={buttonLabel}
           onClick={() => setIsModalOpen(true)}
           data-test-subj="apmServiceMapCopyToDashboardButton"
+          css={controlIconCss}
         />
       </EuiToolTip>
       {isModalOpen && (
