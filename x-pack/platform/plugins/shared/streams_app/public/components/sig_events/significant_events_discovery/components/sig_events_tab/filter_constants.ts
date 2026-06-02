@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-export const VERDICT_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
-export type VerdictOption = (typeof VERDICT_OPTIONS)[number];
+export const STATUS_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
+export type StatusOption = (typeof STATUS_OPTIONS)[number];
 
-export const VERDICT_COLORS: Record<VerdictOption, string> = {
+export const STATUS_COLORS: Record<StatusOption, string> = {
   promoted: 'success',
   acknowledged: 'warning',
   demoted: 'default',
 };
 
-const isVerdict = (v: string): v is VerdictOption =>
-  (VERDICT_OPTIONS as ReadonlyArray<string>).includes(v);
+const isStatusOption = (v: string): v is StatusOption =>
+  (STATUS_OPTIONS as ReadonlyArray<string>).includes(v);
 
-export const getVerdictColor = (verdict: string): string =>
-  isVerdict(verdict) ? VERDICT_COLORS[verdict] : 'default';
+export const getStatusColor = (status: string): string =>
+  isStatusOption(status) ? STATUS_COLORS[status] : 'default';

@@ -1,5 +1,5 @@
 {
-  "sha1": "aaf353227c251a7404922c549334c2f66f5676c8",
+  "sha1": "3d0589a2e9901c9fe7cbe46ca2e11343b5afd612",
   "tests": [
     {
       "id": "afd8b26596cdd7f-5bb39416912e9b9",
@@ -12,6 +12,34 @@
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/add_data.spec.ts",
         "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "406828173bd9464-780b60f62abc1b8",
+      "title": "Home page — feature controls global:all sees every solution panel and the Manage section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "406828173bd9464-ef644ef0f01355a",
+      "title": "Home page — feature controls dashboard:all sees only the Kibana solution and no Manage section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 43,
         "column": 7
       }
     },

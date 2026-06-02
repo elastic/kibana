@@ -25,3 +25,7 @@ export const FAIL_ALL_RESULTS = i18n.translate('xpack.osquery.results.failSearch
 export const PAGINATION_LIMIT_TITLE = i18n.translate('xpack.osquery.results.paginationLimitTitle', {
   defaultMessage: 'Results limit reached',
 });
+
+export const EXPORT_NO_DATA_TOOLTIP = i18n.translate('xpack.osquery.exportResults.noDataTooltip', {
+  defaultMessage: 'No exportable data available',
+});

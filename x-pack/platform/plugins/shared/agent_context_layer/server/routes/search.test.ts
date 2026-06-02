@@ -63,6 +63,7 @@ describe('registerSearchRoute', () => {
         updated_at: '2024-01-02',
         spaces: ['test-space'],
         permissions: [],
+        ingestion_method: 'crawled',
         score: 1.5,
       },
     ];
@@ -97,6 +98,7 @@ describe('registerSearchRoute', () => {
         updated_at: '2024-01-02',
         spaces: ['test-space'],
         permissions: [],
+        ingestion_method: 'crawled',
         score: 1.5,
       },
     ];

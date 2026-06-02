@@ -26,7 +26,6 @@ import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
-import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
 import { listWorkflowExecutionsTool } from './tools/list_workflow_executions';
@@ -68,7 +67,6 @@ export class AgentBuilderWorkflowsPlugin
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
     registerWorkflowExecuteStepTool(agentBuilder, api);
-    registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types
     registerWorkflowYamlAttachment(agentBuilder, api);
@@ -85,7 +83,7 @@ export class AgentBuilderWorkflowsPlugin
       getWorkflowExecutionStatusTool({ workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
       listWorkflowExecutionsTool({ workflowsManagement }),
-      generateWorkflowTool({ workflowsManagement }),
+      generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
