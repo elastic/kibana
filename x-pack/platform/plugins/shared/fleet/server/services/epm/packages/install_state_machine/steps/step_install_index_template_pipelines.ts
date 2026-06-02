@@ -122,16 +122,14 @@ async function reinstallCustomDatasetTemplates({
 
   if (customDataStreamRefs.length === 0) return esReferences;
 
-  const customDataStreams: RegistryDataStream[] = [];
-  const seen = new Set<string>();
-  const originInfo = new Map<string, { dataset: string; type: string }>();
+  const toReinstall: Array<{
+    dataStream: RegistryDataStream;
+    originInfo: { dataset: string; type: string };
+  }> = [];
 
   for (const ref of customDataStreamRefs) {
     const i = ref.id.indexOf('-');
     const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
-    const dedupeKey = `${dataset}:${ref.customDataStreamOriginType}`;
-    if (seen.has(dedupeKey)) continue;
-    seen.add(dedupeKey);
 
     const templateDs = (packageInfo.data_streams || []).find(
       (ds) =>
@@ -139,17 +137,18 @@ async function reinstallCustomDatasetTemplates({
         ds.type === ref.customDataStreamOriginType
     );
     if (templateDs) {
-      customDataStreams.push({ ...templateDs, dataset });
-      originInfo.set(dedupeKey, { dataset: templateDs.dataset, type: templateDs.type });
+      toReinstall.push({
+        dataStream: { ...templateDs, dataset },
+        originInfo: { dataset: templateDs.dataset, type: templateDs.type },
+      });
     }
   }
 
-  if (customDataStreams.length === 0) return esReferences;
+  if (toReinstall.length === 0) return esReferences;
 
   let currentRefs = esReferences;
 
-  for (const dataStream of customDataStreams) {
-    const origin = originInfo.get(`${dataStream.dataset}:${dataStream.type}`);
+  for (const { dataStream, originInfo } of toReinstall) {
     try {
       await installIndexTemplatesAndPipelines({
         installedPkg,
@@ -159,8 +158,8 @@ async function reinstallCustomDatasetTemplates({
         logger,
         esReferences: currentRefs,
         onlyForDataStreams: [dataStream],
-        customDataStreamOriginDataset: origin?.dataset,
-        customDataStreamOriginType: origin?.type,
+        customDataStreamOriginDataset: originInfo.dataset,
+        customDataStreamOriginType: originInfo.type,
       });
 
       currentRefs = await optimisticallyAddEsAssetReferences(

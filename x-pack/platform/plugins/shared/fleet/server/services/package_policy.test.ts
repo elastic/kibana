@@ -13400,13 +13400,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
     appContextService.stop();
   });
 
-  const pkgInfo = {
-    name: 'custom_logs',
-    title: 'Custom Logs',
-    version: '1.0.0',
-    type: 'input',
-  } as any as PackageInfo;
-
   const createInputPkgPolicy = (opts: { namespace: string; dataset: string }) => {
     const { namespace, dataset } = opts;
     return {
@@ -13463,7 +13456,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: oldPackagePolicy,
-        pkgInfo,
       })
     ).not.toThrow();
   });
@@ -13481,7 +13473,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
-        pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Package policy dataset cannot be modified, please create a new package policy."`
@@ -13501,7 +13492,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
-        pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Package policy dataset cannot be modified, please create a new package policy."`
@@ -13531,7 +13521,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: oldPackagePolicy,
-        pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).not.toThrow();
   });
@@ -13563,7 +13552,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('metrics'),
-        pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Package policy data stream type cannot be modified, please create a new package policy."`
@@ -13597,7 +13585,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('logs'),
-        pkgInfo,
       })
     ).not.toThrow();
   });

@@ -1648,7 +1648,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
     _validateRestrictedFieldsNotModifiedOrThrow({
-      pkgInfo,
       oldPackagePolicy,
       packagePolicyUpdate,
     });
@@ -4497,7 +4496,6 @@ export function preconfigurePackageInputs(
 
 // input only packages cannot have their namespace or dataset modified
 export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
-  pkgInfo: PackageInfo;
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
 }) {
