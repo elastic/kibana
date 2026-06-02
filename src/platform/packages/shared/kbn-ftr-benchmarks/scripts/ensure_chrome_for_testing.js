@@ -141,6 +141,18 @@ function findChromeDownload(versions, chromeDriverVersion, platform) {
   );
 }
 
+function hasExpectedChromeBinary(binaryPath, expectedVersion) {
+  if (!fs.existsSync(binaryPath)) {
+    return false;
+  }
+
+  const { stdout, error } = childProcess.spawnSync(binaryPath, ['--version'], {
+    encoding: 'utf8',
+  });
+
+  return !error && stdout.includes(expectedVersion);
+}
+
 async function main() {
   const platform = getChromeForTestingPlatform();
   const chromeDriverVersion = getChromeDriverVersion();
@@ -160,7 +172,7 @@ async function main() {
   );
   const binaryPath = path.join(installDir, getChromeBinaryRelativePath(platform));
 
-  if (fs.existsSync(binaryPath)) {
+  if (hasExpectedChromeBinary(binaryPath, chromeDownload.version)) {
     process.stdout.write(binaryPath);
     return;
   }
