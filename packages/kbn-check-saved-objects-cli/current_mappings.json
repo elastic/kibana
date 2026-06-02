@@ -375,9 +375,6 @@
         },
         "type": "text"
       },
-      "ruleId": {
-        "type": "keyword"
-      },
       "snoozedUntil": {
         "type": "date"
       },
@@ -391,9 +388,6 @@
           }
         },
         "type": "object"
-      },
-      "type": {
-        "type": "keyword"
       },
       "updatedAt": {
         "type": "date"
