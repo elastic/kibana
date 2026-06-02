@@ -80,10 +80,30 @@ export class AttachmentsService {
     origin: string
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
-      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
+      `${publicApiPath}/conversations/${encodeURIComponent(
+        conversationId
+      )}/attachments/${encodeURIComponent(attachmentId)}/origin`,
       {
         body: JSON.stringify({ origin }),
       }
+    );
+  }
+
+  /**
+   * Shallow-merges new data/description into an existing attachment.
+   * Use when you need to write fields (e.g. ruleId, intent) into the attachment
+   * from outside the plugin without going through a raw HTTP call.
+   */
+  async updateAttachment(
+    conversationId: string,
+    attachmentId: string,
+    input: { data?: unknown; description?: string }
+  ): Promise<void> {
+    await this.http.put(
+      `${publicApiPath}/conversations/${encodeURIComponent(
+        conversationId
+      )}/attachments/${encodeURIComponent(attachmentId)}`,
+      { body: JSON.stringify(input) }
     );
   }
 
@@ -92,7 +112,7 @@ export class AttachmentsService {
    */
   async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
     return await this.http.get<CheckStaleAttachmentsResponse>(
-      `${publicApiPath}/conversations/${conversationId}/attachments/stale`
+      `${publicApiPath}/conversations/${encodeURIComponent(conversationId)}/attachments/stale`
     );
   }
 }

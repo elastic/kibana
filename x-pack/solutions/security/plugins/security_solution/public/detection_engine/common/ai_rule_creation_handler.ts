@@ -9,7 +9,6 @@ import type { Subscription } from 'rxjs';
 import { pairwise } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 import { RuleCreationEventTypes } from '../../common/lib/telemetry/types';
@@ -54,44 +53,16 @@ const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
   return rest as RuleUpdateProps;
 };
 
-/**
- * Persists `ruleId` and `intent:'update'` into the attachment via shallow-merge PUT so they
- * survive subsequent agent edits and the button label never flips. Non-fatal — `origin` is a
- * legacy fallback set in parallel.
- */
-const linkRuleIdToAttachment = (
-  http: HttpSetup,
-  conversationId: string,
-  attachmentId: string,
-  ruleId: string
-): void => {
-  http
-    .put(
-      `/api/agent_builder/conversations/${encodeURIComponent(
-        conversationId
-      )}/attachments/${encodeURIComponent(attachmentId)}`,
-      {
-        version: '2023-10-31',
-        body: JSON.stringify({ data: { ruleId, intent: 'update' } }),
-      }
-    )
-    .catch(() => {
-      // Non-fatal: origin fallback is set in parallel by updateAttachmentOrigin.
-    });
-};
-
 export const createAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
   telemetry,
-  http,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
   telemetry: TelemetryServiceStart;
-  http: HttpSetup;
 }): Subscription => {
   let activeConversationId: string | undefined;
   const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
@@ -154,7 +125,15 @@ export const createAiRuleCreationHandler = ({
 
       const convId = activeConversationId;
       if (convId) {
-        linkRuleIdToAttachment(http, convId, SECURITY_RULE_ATTACHMENT_ID, saved.id);
+        // Persist ruleId + intent:'update' into the attachment so they survive subsequent
+        // agent edits and the button label never flips back to "Save rule".
+        agentBuilder
+          ?.updateAttachment(convId, SECURITY_RULE_ATTACHMENT_ID, {
+            data: { ruleId: saved.id, intent: 'update' },
+          })
+          .catch(() => {
+            // Non-fatal: the addAttachment call below keeps the UI consistent locally.
+          });
         if (!isUpdate) {
           agentBuilder
             ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)

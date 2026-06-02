@@ -314,7 +314,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       notifications: core.notifications,
       agentBuilder: plugins.agentBuilder,
       telemetry: this.services.startTelemetry(),
-      http: core.http,
       register: (subscription) => {
         if (this.saveRuleHandlerStopped) {
           subscription.unsubscribe();
