@@ -78,18 +78,18 @@ export interface ProvidersProps {
   services: CoreStart;
   history: History;
   authc: AuthenticationServiceSetup;
+  usageCollection?: UsageCollectionStart;
   securityApiClients: SecurityApiClients;
   onChange?: BreadcrumbsChangeHandler;
-  usageCollection?: UsageCollectionStart;
 }
 
 export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   history,
   authc,
+  usageCollection,
   securityApiClients,
   onChange,
-  usageCollection,
   children,
 }) => (
   <KibanaContextProvider services={{ ...services, usageCollection }}>

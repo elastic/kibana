@@ -31,8 +31,8 @@ export const LanguageSelector = ({ security, core, closePopover, usageCollection
       <LanguageSelectorUI
         core={core}
         security={security}
-        closePopover={closePopover}
         usageCollection={usageCollection}
+        closePopover={closePopover}
       />
     </UserProfilesKibanaProvider>
   );

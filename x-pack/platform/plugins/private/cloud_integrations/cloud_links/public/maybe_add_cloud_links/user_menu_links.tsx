@@ -86,8 +86,8 @@ export const createUserMenuLinks = async ({
       <LanguageSelector
         core={core}
         security={security}
-        closePopover={closePopover}
         usageCollection={usageCollection}
+        closePopover={closePopover}
       />
     ),
     order: 500,
