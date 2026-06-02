@@ -560,7 +560,7 @@ describe('GlobalCaseFields', () => {
     name,
     definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
     owner: 'securitySolution',
-    applyToAllCases: true,
+    isGlobal: true,
     description: '',
   });
 
@@ -590,7 +590,7 @@ describe('GlobalCaseFields', () => {
     expect(container.textContent).toBe('');
   });
 
-  it('renders nothing when there are no applyToAllCases definitions', () => {
+  it('renders nothing when there are no isGlobal definitions', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },
       isLoading: false,
@@ -601,7 +601,7 @@ describe('GlobalCaseFields', () => {
     expect(container.textContent).toBe('');
   });
 
-  it('renders global fields form when applyToAllCases definitions exist', () => {
+  it('renders global fields form when isGlobal definitions exist', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
       isLoading: false,
@@ -658,14 +658,14 @@ describe('GlobalCaseFields', () => {
     expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
   });
 
-  it('queries field definitions with applyToAllCases: true and the case owner', () => {
+  it('queries field definitions with isGlobal: true and the case owner', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },
       isLoading: false,
     });
     render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
     expect(mockUseGetFieldDefinitions).toHaveBeenCalledWith(
-      expect.objectContaining({ owner: 'securitySolution', applyToAllCases: true })
+      expect.objectContaining({ owner: 'securitySolution', isGlobal: true })
     );
   });
 

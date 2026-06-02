@@ -2373,7 +2373,7 @@ describe('update', () => {
       name,
       owner,
       description: '',
-      applyToAllCases: true,
+      isGlobal: true,
       definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
     });
 
@@ -2486,7 +2486,7 @@ describe('update', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('are not global (applyToAllCases) field definitions');
+      ).rejects.toThrow('are not global (isGlobal) field definitions');
     });
   });
 

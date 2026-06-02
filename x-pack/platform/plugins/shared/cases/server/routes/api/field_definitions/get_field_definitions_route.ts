@@ -29,16 +29,16 @@ export const getFieldDefinitionsRoute = createCasesRoute<{}, FieldDefinitionsFin
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const { owner, applyToAllCases: rawApplyToAllCases } = request.query;
+      const { owner, isGlobal: rawApplyToAllCases } = request.query;
       // HTTP query params arrive as strings; use String() comparison to handle
       // both the string form ("true"/"false") and the already-coerced boolean.
-      const applyToAllCases =
+      const isGlobal =
         rawApplyToAllCases === undefined ? undefined : String(rawApplyToAllCases) === 'true';
       const owners = owner ? castArray(owner) : [];
 
       const result = await casesClient.fieldDefinitions.getFieldDefinitions({
         owner: owners,
-        applyToAllCases,
+        isGlobal,
       });
 
       return response.ok({ body: result });

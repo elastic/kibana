@@ -61,7 +61,7 @@ describe('template field key utils', () => {
         name: 'my_field',
         owner: 'securitySolution',
         description: '',
-        applyToAllCases: true,
+        isGlobal: true,
         definition: yaml.dump(
           defYaml ?? { name: 'my_field', type: 'keyword', control: 'INPUT_TEXT', label: 'My Field' }
         ),

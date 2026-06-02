@@ -159,7 +159,7 @@ export const validateRequiredCustomFields = ({
 };
 
 /**
- * Parses applyToAllCases field definitions for the given owner and returns the
+ * Parses isGlobal field definitions for the given owner and returns the
  * set of valid extended-field snake_case keys those definitions produce.
  *
  * Uses the unsecured SO client directly because the `owner` has already been
@@ -171,7 +171,7 @@ export const resolveGlobalFieldKeys = async (
   fieldDefinitionsService: FieldDefinitionsService
 ): Promise<Set<string>> => {
   const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
-    applyToAllCases: true,
+    isGlobal: true,
   });
   const inlineFields = parseFieldDefinitionsToInlineFields(fieldDefinitions);
   return new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
@@ -203,7 +203,7 @@ export const validateExtendedFieldsInRequest = async ({
       throw Boom.badRequest(
         `extended_fields keys [${invalidKeys.join(
           ', '
-        )}] are not global (applyToAllCases) field definitions`
+        )}] are not global (isGlobal) field definitions`
       );
     }
     return;

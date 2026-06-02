@@ -29,7 +29,7 @@ const mappings = {
     description: {
       type: 'text',
     },
-    applyToAllCases: {
+    isGlobal: {
       type: 'boolean',
     },
   },

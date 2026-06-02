@@ -8,14 +8,14 @@
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 
 /**
- * Adds the applyToAllCases field to the case-field-definition SO.
+ * Adds the isGlobal field to the case-field-definition SO.
  */
 export const modelVersion1: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        applyToAllCases: {
+        isGlobal: {
           type: 'boolean',
         },
       },
@@ -26,7 +26,7 @@ export const modelVersion1: SavedObjectsModelVersion = {
       // behave consistently with newly created ones — no "apply to all" without
       // an explicit opt-in.
       backfillFn: (doc) => ({
-        attributes: { applyToAllCases: doc.attributes.applyToAllCases ?? false },
+        attributes: { isGlobal: doc.attributes.isGlobal ?? false },
       }),
     },
   ],

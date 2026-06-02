@@ -51,7 +51,7 @@ interface FieldDefinitionFlyoutProps {
     name: string;
     description: string;
     definition: string;
-    applyToAllCases: boolean;
+    isGlobal: boolean;
   }) => void;
   onClose: () => void;
   isSaving?: boolean;
@@ -68,7 +68,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
-  const [applyToAllCases, setApplyToAllCases] = useState(fieldDefinition?.applyToAllCases ?? false);
+  const [isGlobal, setApplyToAllCases] = useState(fieldDefinition?.isGlobal ?? false);
   const [definitionError, setDefinitionError] = useState<string | undefined>();
 
   const definitionRef = useRef(definition);
@@ -97,8 +97,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   const handleSave = useCallback(() => {
     if (!validate()) return;
     const name = parseName(definition) as string;
-    onSave({ name, description: description.trim(), definition, applyToAllCases });
-  }, [validate, parseName, onSave, description, definition, applyToAllCases]);
+    onSave({ name, description: description.trim(), definition, isGlobal });
+  }, [validate, parseName, onSave, description, definition, isGlobal]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -182,7 +182,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             <EuiCheckbox
               id="fieldDefinitionApplyToAllCases"
               label={i18n.APPLY_TO_ALL_CASES_LABEL}
-              checked={applyToAllCases}
+              checked={isGlobal}
               onChange={(e) => setApplyToAllCases(e.target.checked)}
               data-test-subj="fieldDefinitionApplyToAllCasesCheckbox"
             />

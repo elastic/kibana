@@ -102,7 +102,7 @@ describe('FieldDefinitionsService', () => {
       );
     });
 
-    it('adds applyToAllCases filter when applyToAllCases is true', async () => {
+    it('adds isGlobal filter when isGlobal is true', async () => {
       soClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -110,16 +110,16 @@ describe('FieldDefinitionsService', () => {
         page: 1,
       } as SavedObjectsFindResponse<FieldDefinition>);
 
-      await service.getFieldDefinitions('securitySolution', { applyToAllCases: true });
+      await service.getFieldDefinitions('securitySolution', { isGlobal: true });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `(${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution") AND ${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.applyToAllCases: true`,
+          filter: `(${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution") AND ${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.isGlobal: true`,
         })
       );
     });
 
-    it('does not add applyToAllCases filter when applyToAllCases is false', async () => {
+    it('does not add isGlobal filter when isGlobal is false', async () => {
       soClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -127,7 +127,7 @@ describe('FieldDefinitionsService', () => {
         page: 1,
       } as SavedObjectsFindResponse<FieldDefinition>);
 
-      await service.getFieldDefinitions('securitySolution', { applyToAllCases: false });
+      await service.getFieldDefinitions('securitySolution', { isGlobal: false });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({

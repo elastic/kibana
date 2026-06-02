@@ -64,17 +64,17 @@ describe('createFieldDefinitionsSubClient', () => {
       expect(result.fieldDefinitions).toHaveLength(1);
     });
 
-    it('forwards applyToAllCases to fieldDefinitionsService', async () => {
+    it('forwards isGlobal to fieldDefinitionsService', async () => {
       clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
         fieldDefinitions: [],
         total: 0,
       });
 
-      await client.getFieldDefinitions({ owner: 'securitySolution', applyToAllCases: true });
+      await client.getFieldDefinitions({ owner: 'securitySolution', isGlobal: true });
 
       expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(
         ['securitySolution'],
-        { applyToAllCases: true }
+        { isGlobal: true }
       );
     });
   });

@@ -15,7 +15,7 @@ export const FieldDefinitionsFindRequestSchema = z.object({
   // HTTP query parameters arrive as strings at the route layer; the route handler
   // coerces "true"/"false" strings manually because the route uses escapeHatch
   // for query validation rather than applying this Zod schema at runtime.
-  applyToAllCases: z.boolean().optional(),
+  isGlobal: z.boolean().optional(),
 });
 
 export type FieldDefinitionsFindRequest = z.infer<typeof FieldDefinitionsFindRequestSchema>;

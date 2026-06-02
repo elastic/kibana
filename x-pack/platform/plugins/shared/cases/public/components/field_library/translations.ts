@@ -182,23 +182,29 @@ export const DELETE_CONFIRM_BODY = (name: string) =>
     values: { name },
   });
 
-export const APPLY_TO_ALL_CASES_LABEL = i18n.translate(
-  'xpack.cases.fieldLibrary.applyToAllCasesLabel',
-  { defaultMessage: 'Apply to all cases' }
-);
+export const APPLY_TO_ALL_CASES_LABEL = i18n.translate('xpack.cases.fieldLibrary.isGlobalLabel', {
+  defaultMessage: 'Global field',
+});
 
 export const APPLY_TO_ALL_CASES_HELP_TEXT = i18n.translate(
-  'xpack.cases.fieldLibrary.applyToAllCasesHelpText',
+  'xpack.cases.fieldLibrary.isGlobalHelpText',
   {
     defaultMessage:
       'When enabled, this field appears in every case regardless of which template is applied.',
   }
 );
 
-export const APPLY_TO_ALL_CASES_COLUMN = i18n.translate(
-  'xpack.cases.fieldLibrary.applyToAllCasesColumn',
-  { defaultMessage: 'Apply to all cases' }
-);
+export const APPLY_TO_ALL_CASES_COLUMN = i18n.translate('xpack.cases.fieldLibrary.isGlobalColumn', {
+  defaultMessage: 'Global field',
+});
+
+export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalFieldYes', {
+  defaultMessage: 'Yes',
+});
+
+export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
+  defaultMessage: 'No',
+});
 
 export const GLOBAL_FIELDS_TITLE = i18n.translate('xpack.cases.fieldLibrary.globalFieldsTitle', {
   defaultMessage: 'Global fields',

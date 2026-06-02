@@ -16,11 +16,11 @@ import * as i18n from '../translations';
 
 export const useGetFieldDefinitions = ({
   owner,
-  applyToAllCases,
+  isGlobal,
   staleTime,
 }: {
   owner?: string | string[];
-  applyToAllCases?: boolean;
+  isGlobal?: boolean;
   /** Override React Query's default staleTime (ms). Pass `Infinity` for data that
    * should be fetched once and never re-fetched during the session. */
   staleTime?: number;
@@ -29,8 +29,8 @@ export const useGetFieldDefinitions = ({
   const hasOwner = Array.isArray(owner) ? owner.length > 0 : owner !== undefined;
 
   return useQuery(
-    casesQueriesKeys.fieldDefinitionsList({ owner, applyToAllCases }),
-    ({ signal }) => getFieldDefinitions({ owner, applyToAllCases, signal }),
+    casesQueriesKeys.fieldDefinitionsList({ owner, isGlobal }),
+    ({ signal }) => getFieldDefinitions({ owner, isGlobal, signal }),
     {
       enabled: hasOwner,
       keepPreviousData: true,

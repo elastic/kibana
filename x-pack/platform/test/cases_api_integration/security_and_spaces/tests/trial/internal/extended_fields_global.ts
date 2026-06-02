@@ -14,10 +14,10 @@ import { getPostCaseRequest } from '../../../../common/lib/mock';
 
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
 
-const buildFieldDef = (name: string, type = 'keyword', applyToAllCases = true) => ({
+const buildFieldDef = (name: string, type = 'keyword', isGlobal = true) => ({
   name,
   owner: 'securitySolutionFixture',
-  applyToAllCases,
+  isGlobal,
   definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
 });
 
@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('extended_fields — global field definitions (applyToAllCases)', () => {
+  describe('extended_fields — global field definitions (isGlobal)', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });

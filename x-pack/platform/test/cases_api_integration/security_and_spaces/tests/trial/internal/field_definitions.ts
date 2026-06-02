@@ -158,28 +158,28 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.fieldDefinitions).to.have.length(0);
       });
 
-      describe('applyToAllCases filter', () => {
+      describe('isGlobal filter', () => {
         beforeEach(async () => {
-          // Add a second definition with applyToAllCases: true alongside the one from the outer beforeEach
+          // Add a second definition with isGlobal: true alongside the one from the outer beforeEach
           await supertest
             .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
             .set('kbn-xsrf', 'true')
-            .send(buildCreateBody({ name: 'severity', applyToAllCases: true }))
+            .send(buildCreateBody({ name: 'severity', isGlobal: true }))
             .expect(200);
         });
 
-        it('returns only applyToAllCases definitions when filtered with applyToAllCases=true', async () => {
+        it('returns only isGlobal definitions when filtered with isGlobal=true', async () => {
           const { body } = await supertest
             .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
-            .query({ owner: 'securitySolutionFixture', applyToAllCases: true })
+            .query({ owner: 'securitySolutionFixture', isGlobal: true })
             .expect(200);
 
           expect(body.fieldDefinitions).to.have.length(1);
           expect(body.fieldDefinitions[0].name).to.eql('severity');
-          expect(body.fieldDefinitions[0].applyToAllCases).to.eql(true);
+          expect(body.fieldDefinitions[0].isGlobal).to.eql(true);
         });
 
-        it('returns all definitions when applyToAllCases is not specified', async () => {
+        it('returns all definitions when isGlobal is not specified', async () => {
           const { body } = await supertest
             .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
             .query({ owner: 'securitySolutionFixture' })
@@ -188,22 +188,22 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body.total).to.eql(2);
         });
 
-        it('returns all definitions when applyToAllCases=false (no filter applied)', async () => {
+        it('returns all definitions when isGlobal=false (no filter applied)', async () => {
           const { body } = await supertest
             .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
-            .query({ owner: 'securitySolutionFixture', applyToAllCases: false })
+            .query({ owner: 'securitySolutionFixture', isGlobal: false })
             .expect(200);
 
           expect(body.total).to.eql(2);
         });
 
-        it('persists the applyToAllCases flag returned in the response', async () => {
+        it('persists the isGlobal flag returned in the response', async () => {
           const { body } = await supertest
             .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
-            .query({ owner: 'securitySolutionFixture', applyToAllCases: true })
+            .query({ owner: 'securitySolutionFixture', isGlobal: true })
             .expect(200);
 
-          expect(body.fieldDefinitions[0].applyToAllCases).to.eql(true);
+          expect(body.fieldDefinitions[0].isGlobal).to.eql(true);
         });
       });
     });

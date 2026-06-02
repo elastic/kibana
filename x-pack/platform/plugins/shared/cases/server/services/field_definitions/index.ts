@@ -30,15 +30,15 @@ export class FieldDefinitionsService {
   /**
    * Returns field definitions for the given owner(s).
    *
-   * `applyToAllCases: true`  — returns only definitions flagged as global.
-   * `applyToAllCases: false` — same as `undefined`: returns ALL definitions
-   *   (no applyToAllCases KQL filter is added). Pass `true` explicitly when
+   * `isGlobal: true`  — returns only definitions flagged as global.
+   * `isGlobal: false` — same as `undefined`: returns ALL definitions
+   *   (no isGlobal KQL filter is added). Pass `true` explicitly when
    *   you need only global defs; omit the option (or pass `false`) for the
    *   full set.
    */
   async getFieldDefinitions(
     owner: string | string[],
-    { applyToAllCases }: { applyToAllCases?: boolean } = {}
+    { isGlobal }: { isGlobal?: boolean } = {}
   ): Promise<FieldDefinitionsFindResponse> {
     const owners = castArray(owner);
 
@@ -51,10 +51,10 @@ export class FieldDefinitionsService {
       .join(' OR ');
 
     // Only `true` adds a KQL filter; `false` and `undefined` both return all
-    // definitions for the owner without any applyToAllCases restriction.
+    // definitions for the owner without any isGlobal restriction.
     const globalFilter =
-      applyToAllCases === true
-        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.applyToAllCases: true`
+      isGlobal === true
+        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.isGlobal: true`
         : undefined;
 
     const filter = globalFilter ? `(${ownerFilter}) AND ${globalFilter}` : ownerFilter;

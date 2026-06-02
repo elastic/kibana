@@ -79,13 +79,13 @@ export const create = async (
       const globalKeys = await resolveGlobalFieldKeys(query.owner, fieldDefinitionsService);
 
       if (!query.template?.id) {
-        // No template — only global (applyToAllCases) field keys are permitted.
+        // No template — only global (isGlobal) field keys are permitted.
         const invalidKeys = Object.keys(query.extended_fields).filter((k) => !globalKeys.has(k));
         if (invalidKeys.length) {
           throw Boom.badRequest(
             `extended_fields keys [${invalidKeys.join(
               ', '
-            )}] are not global (applyToAllCases) field definitions`
+            )}] are not global (isGlobal) field definitions`
           );
         }
       } else {

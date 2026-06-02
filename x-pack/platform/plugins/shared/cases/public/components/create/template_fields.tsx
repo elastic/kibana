@@ -35,7 +35,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   // owner is effectively a single-element array. Taking the first element is safe here.
   const ownerStr = Array.isArray(owner) ? owner[0] : owner;
 
-  // Fetch applyToAllCases field definitions for this owner.
+  // Fetch isGlobal field definitions for this owner.
   // staleTime: Infinity — field definitions don't change during a user session, so we
   // prevent background refetches that would create a new Set object reference, re-run the
   // useTemplateFormSync effect, and unexpectedly reset the form.
@@ -45,7 +45,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
     isError: isGlobalDefsError,
   } = useGetFieldDefinitions({
     owner: ownerStr,
-    applyToAllCases: true,
+    isGlobal: true,
     staleTime: Infinity,
   });
 

@@ -135,7 +135,7 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpd
 
   const { data: globalFieldDefsData } = useGetFieldDefinitions({
     owner: caseData.owner,
-    applyToAllCases: true,
+    isGlobal: true,
   });
 
   const globalFieldNames = useMemo<ReadonlySet<string>>(
@@ -183,7 +183,7 @@ interface GlobalCaseFieldsProps {
 }
 
 /**
- * Renders all field definitions that have `applyToAllCases: true` for the
+ * Renders all field definitions that have `isGlobal: true` for the
  * case's owner, regardless of which template (if any) the case uses.
  * Fields that are also referenced via `$ref` in the active template are
  * excluded here — the template section owns their display and may apply
@@ -197,7 +197,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     isError,
   } = useGetFieldDefinitions({
     owner: caseData.owner,
-    applyToAllCases: true,
+    isGlobal: true,
   });
 
   // React Query deduplicates this fetch — TemplateFields makes the same call.

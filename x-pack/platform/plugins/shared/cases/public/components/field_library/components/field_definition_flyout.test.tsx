@@ -43,12 +43,12 @@ const defaultProps = {
   onClose: jest.fn(),
 };
 
-describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
+describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the applyToAllCases checkbox unchecked by default', () => {
+  it('renders the isGlobal checkbox unchecked by default', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     const checkbox = screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox');
@@ -56,13 +56,13 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('renders the applyToAllCases checkbox checked when fieldDefinition has applyToAllCases: true', () => {
+  it('renders the isGlobal checkbox checked when fieldDefinition has isGlobal: true', () => {
     const fieldDefinition = {
       fieldDefinitionId: 'fd-1',
       name: 'my_field',
       owner: 'securitySolution' as const,
       definition: VALID_YAML,
-      applyToAllCases: true,
+      isGlobal: true,
     };
 
     renderWithTestingProviders(
@@ -73,7 +73,7 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
     expect(checkbox).toBeChecked();
   });
 
-  it('passes applyToAllCases: false to onSave when checkbox is unchecked', async () => {
+  it('passes isGlobal: false to onSave when checkbox is unchecked', async () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     // Set a valid YAML so validation passes
@@ -82,12 +82,10 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
 
     fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
 
-    expect(defaultProps.onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ applyToAllCases: false })
-    );
+    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({ isGlobal: false }));
   });
 
-  it('passes applyToAllCases: true to onSave when checkbox is checked', async () => {
+  it('passes isGlobal: true to onSave when checkbox is checked', async () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
@@ -98,12 +96,10 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
 
     fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
 
-    expect(defaultProps.onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ applyToAllCases: true })
-    );
+    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({ isGlobal: true }));
   });
 
-  it('toggles applyToAllCases when checkbox is clicked', async () => {
+  it('toggles isGlobal when checkbox is clicked', async () => {
     const user = userEvent.setup();
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
@@ -117,9 +113,9 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('displays the applyToAllCases label text', () => {
+  it('displays the isGlobal label text', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
-    expect(screen.getByText('Apply to all cases')).toBeInTheDocument();
+    expect(screen.getByText('Global field')).toBeInTheDocument();
   });
 });

@@ -8,7 +8,6 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiBasicTable,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -75,23 +74,23 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name,
       description,
       definition,
-      applyToAllCases,
+      isGlobal,
     }: {
       name: string;
       description: string;
       definition: string;
-      applyToAllCases: boolean;
+      isGlobal: boolean;
     }) => {
       const ownerValue = (Array.isArray(owner) ? owner[0] : owner) as Owner;
 
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue, applyToAllCases },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       } else {
         createFieldDef({
-          fieldDefinition: { name, description, definition, owner: ownerValue, applyToAllCases },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       }
     },
@@ -132,10 +131,10 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       truncateText: true,
     },
     {
-      field: 'applyToAllCases',
+      field: 'isGlobal',
       name: i18n.APPLY_TO_ALL_CASES_COLUMN,
       render: (value: boolean | undefined) =>
-        value ? <EuiBadge color="primary">{i18n.APPLY_TO_ALL_CASES_LABEL}</EuiBadge> : null,
+        value ? i18n.GLOBAL_FIELD_YES : i18n.GLOBAL_FIELD_NO,
       'data-test-subj': 'fieldDefinitionApplyToAllCasesCell',
     },
     {

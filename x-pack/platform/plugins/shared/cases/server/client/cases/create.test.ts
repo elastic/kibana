@@ -835,12 +835,12 @@ describe('create', () => {
   });
 
   describe('extended_fields validation', () => {
-    const makeFieldDef = (name: string, type: string, applyToAllCases = true) => ({
+    const makeFieldDef = (name: string, type: string, isGlobal = true) => ({
       fieldDefinitionId: `fd-${name}`,
       name,
       owner: SECURITY_SOLUTION_OWNER,
       description: '',
-      applyToAllCases,
+      isGlobal,
       definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
     });
 
@@ -894,7 +894,7 @@ describe('create', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'extended_fields keys [risk_score_as_keyword] are not global (applyToAllCases) field definitions'
+        'extended_fields keys [risk_score_as_keyword] are not global (isGlobal) field definitions'
       );
     });
 

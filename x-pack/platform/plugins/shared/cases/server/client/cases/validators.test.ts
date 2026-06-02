@@ -768,7 +768,7 @@ describe('validators', () => {
           globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
+        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
       );
     });
 
@@ -912,7 +912,7 @@ describe('validators', () => {
           globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
+        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
       );
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();
