@@ -124,6 +124,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
               <EuiFlexItem css={styles.rightPanelContentCss}>
                 <RuleChangesHistoryTimeline
                   items={items}
+                  selectedItem={selectedItem}
                   isLoading={isLoading || isFetching}
                   startedAt={changeHistoryStartedAt}
                   onLoadMore={handleNextPageLoading}
