@@ -8,7 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ActionableFinding, ContinuityPayload } from '@kbn/siem-readiness';
-import { isCriticalFailureRate } from '@kbn/siem-readiness';
+import {
+  isCriticalFailureRate,
+  VOLUME_DROP_WARNING_PCT,
+  VOLUME_DROP_CRITICAL_PCT,
+} from '@kbn/siem-readiness';
 import { fetchPipelines } from '../fetchers';
 
 export const getContinuity = async ({
@@ -22,13 +26,52 @@ export const getContinuity = async ({
 }): Promise<ContinuityPayload> => {
   const pipelines = await fetchPipelines({ esClient, isServerless, logger });
 
-  const actionableFindings: ActionableFinding[] = pipelines
+  const actionableFindings: ActionableFinding[] = [];
+
+  // pipeline failure-rate findings (existing)
+  pipelines
     .filter((p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount))
-    .map((p) => ({
-      severity: 'CRITICAL' as const,
-      message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
-      resource: p.name,
-    }));
+    .forEach((p) =>
+      actionableFindings.push({
+        severity: 'CRITICAL' as const,
+        type: 'pipeline_failure' as const,
+        message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
+        resource: p.name,
+      })
+    );
+
+  // silence findings
+  pipelines
+    .filter((p) => p.isSilent)
+    .forEach((p) =>
+      actionableFindings.push({
+        severity: 'WARNING' as const,
+        type: 'silence' as const,
+        message: `Data stream serving pipeline ${p.name} has gone silent`,
+        resource: p.name,
+      })
+    );
+
+  // volume-drop findings
+  pipelines
+    .filter((p) => p.volumeDropPct !== null && p.volumeDropPct !== undefined)
+    .forEach((p) => {
+      if (p.volumeDropPct! >= VOLUME_DROP_CRITICAL_PCT) {
+        actionableFindings.push({
+          severity: 'CRITICAL' as const,
+          type: 'volume_drop_critical' as const,
+          message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline`,
+          resource: p.name,
+        });
+      } else if (p.volumeDropPct! >= VOLUME_DROP_WARNING_PCT) {
+        actionableFindings.push({
+          severity: 'WARNING' as const,
+          type: 'volume_drop_warning' as const,
+          message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline`,
+          resource: p.name,
+        });
+      }
+    });
 
   const status =
     pipelines.length === 0

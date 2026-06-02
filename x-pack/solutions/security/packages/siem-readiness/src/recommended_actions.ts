@@ -7,11 +7,11 @@
 
 import type { ActionableFinding, RecommendedAction } from './types';
 
-type FindingType = `${string}:${string}`;
+type RegistryKey = `${string}:${string}`;
 
 type ActionBuilder = (finding: ActionableFinding) => RecommendedAction[];
 
-export const recommendedActionsRegistry = new Map<FindingType, ActionBuilder>();
+export const recommendedActionsRegistry = new Map<RegistryKey, ActionBuilder>();
 
 const createResourceSlug = (resource: string): string => {
   return resource
@@ -55,16 +55,48 @@ export const getDimensionActions = (dimension: string): RecommendedAction[] => {
   }
 };
 
+const getSilenceActions = (finding: ActionableFinding): RecommendedAction[] => {
+  const slug = createResourceSlug(finding.resource);
+  return [
+    { label: 'Check Fleet integrations', href: '/app/integrations' },
+    {
+      label: 'View affected rules',
+      href: `/app/security/rules?index=${encodeURIComponent(finding.resource)}`,
+    },
+    {
+      label: 'Open case',
+      href: `/app/security/cases/create?tags=readiness:continuity,silence,${slug}`,
+    },
+  ];
+};
+
+const getVolumeDropActions = (finding: ActionableFinding): RecommendedAction[] => {
+  const slug = createResourceSlug(finding.resource);
+  return [
+    { label: 'Review integration policy', href: '/app/integrations' },
+    { label: 'Open ingest pipelines', href: '/app/management/ingest/ingest_pipelines' },
+    {
+      label: 'Open case',
+      href: `/app/security/cases/create?tags=readiness:continuity,volume-drop,${slug}`,
+    },
+  ];
+};
+
 export const buildRecommendedActions = (
   finding: ActionableFinding,
   dimension: string
 ): RecommendedAction[] => {
-  const findingType: FindingType = `${dimension}:${finding.category ?? 'general'}`;
-  const customBuilder = recommendedActionsRegistry.get(findingType);
-
-  if (customBuilder) {
-    return customBuilder(finding);
+  // Built-in continuity sub-type playbooks take precedence over the registry
+  if (dimension === 'continuity') {
+    if (finding.type === 'silence') return getSilenceActions(finding);
+    if (finding.type === 'volume_drop_warning' || finding.type === 'volume_drop_critical') {
+      return getVolumeDropActions(finding);
+    }
   }
+
+  const key: RegistryKey = `${dimension}:${finding.category ?? 'general'}`;
+  const customBuilder = recommendedActionsRegistry.get(key);
+  if (customBuilder) return customBuilder(finding);
 
   return [...getDefaultActions(finding, dimension), ...getDimensionActions(dimension)];
 };

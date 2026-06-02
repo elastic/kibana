@@ -9,6 +9,8 @@ import type { NodesStatsRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PipelineStats } from '@kbn/siem-readiness';
+import { SILENCE_THRESHOLD_MS, SILENCE_THRESHOLD_DEFAULT_MS } from '@kbn/siem-readiness';
+import { fetchIndexHealth } from './fetch_index_health';
 
 export const fetchPipelines = async ({
   esClient,
@@ -78,7 +80,7 @@ export const fetchPipelines = async ({
     });
   });
 
-  const pipelines: PipelineStats[] = Object.keys(pipelineStatsMap)
+  const rawPipelines: PipelineStats[] = Object.keys(pipelineStatsMap)
     .filter((name) => pipelineStatsMap[name].count > 0)
     .map((name) => ({
       name,
@@ -87,6 +89,37 @@ export const fetchPipelines = async ({
       failedDocsCount: pipelineStatsMap[name].failed,
       statsAvailable: true,
     }));
+
+  const indexHealth = await fetchIndexHealth({ esClient });
+
+  const pipelines: PipelineStats[] = rawPipelines.map((p) => {
+    // fetchIndexHealth keys results by data stream name; try direct lookup first,
+    // then extract the data stream name from each backing index name as fallback.
+    const health =
+      p.indices
+        .map((idx) => {
+          if (indexHealth[idx]) return indexHealth[idx];
+          const dsName = idx.replace(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/, '$1');
+          return dsName !== idx ? indexHealth[dsName] : undefined;
+        })
+        .find((h) => h !== undefined) ?? null;
+
+    const silenceMs = health?.silenceMs ?? null;
+    // Apply per-category silence threshold; fall back to default when category unknown
+    const category = p.categories?.[0];
+    const threshold = SILENCE_THRESHOLD_MS[category ?? ''] ?? SILENCE_THRESHOLD_DEFAULT_MS;
+    const isSilent = silenceMs !== null && silenceMs > threshold;
+
+    return {
+      ...p,
+      lastEventMs: health?.lastEventMs ?? null,
+      silenceMs,
+      isSilent,
+      last24hDocs: health?.last24hDocs ?? null,
+      baseline7dAvg: health?.baseline7dAvg ?? null,
+      volumeDropPct: health?.volumeDropPct ?? null,
+    };
+  });
 
   logger.info(`Retrieved ${pipelines.length} active ingest pipelines`);
   return pipelines;
