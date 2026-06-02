@@ -8,12 +8,14 @@
 import Fs from 'fs';
 import Path from 'path';
 import { createHash } from 'crypto';
-import { spawn, type SpawnOptions } from 'child_process';
+import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
+const EDOT_DOCKER_COMPOSE_FILE = 'data/edot_collector/docker-compose.yaml';
+export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -155,7 +157,51 @@ export const startService = (
 };
 
 /**
+ * Stop the EDOT Docker container. The container runs independently of the
+ * tracked node process, so killing the PID alone is not enough.
+ */
+const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
+  const composePath = Path.join(repoRoot, EDOT_DOCKER_COMPOSE_FILE);
+
+  try {
+    if (Fs.existsSync(composePath)) {
+      execFileSync('docker', ['compose', '-f', composePath, 'down'], {
+        stdio: 'ignore',
+        timeout: 15_000,
+      });
+      log.info('[edot] Docker container stopped via compose');
+      return;
+    }
+  } catch {
+    // fall through to docker stop
+  }
+
+  try {
+    execFileSync('docker', ['stop', EDOT_CONTAINER_NAME], {
+      stdio: 'ignore',
+      timeout: 15_000,
+    });
+    log.info('[edot] Docker container stopped');
+  } catch {
+    // container not running or docker unavailable
+  }
+};
+
+/**
+ * Best-effort kill of a process group. Useful when the group leader (tracked
+ * PID) has exited but children (ES, Kibana) may still be running.
+ */
+const killProcessGroup = (pid: number, signal: NodeJS.Signals): void => {
+  try {
+    process.kill(-pid, signal);
+  } catch {
+    // no remaining group members
+  }
+};
+
+/**
  * Stop a service by PID. Sends SIGTERM, waits briefly, then SIGKILL if needed.
+ * For EDOT, also tears down the Docker container.
  */
 export const stopService = async (
   repoRoot: string,
@@ -166,12 +212,23 @@ export const stopService = async (
   const entry = state[name];
 
   if (!entry) {
+    if (name === 'edot') {
+      stopEdotDockerContainer(repoRoot, log);
+    }
     log.info(`[${name}] no tracked process`);
     return false;
   }
 
   if (!isAlive(entry.pid)) {
-    log.info(`[${name}] already stopped (PID ${entry.pid})`);
+    log.info(`[${name}] tracked process already exited (PID ${entry.pid})`);
+
+    // Children (ES/Kibana) may outlive the process group leader
+    killProcessGroup(entry.pid, 'SIGTERM');
+
+    if (name === 'edot') {
+      stopEdotDockerContainer(repoRoot, log);
+    }
+
     delete state[name];
     writeState(repoRoot, state);
     return false;
@@ -207,6 +264,10 @@ export const stopService = async (
         // already dead
       }
     }
+  }
+
+  if (name === 'edot') {
+    stopEdotDockerContainer(repoRoot, log);
   }
 
   log.info(`[${name}] stopped`);

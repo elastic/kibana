@@ -6,7 +6,7 @@
  */
 
 import type { Command } from '@kbn/dev-cli-runner';
-import { stopAll, stopService, readState, isAlive, type ServiceName } from '../services';
+import { stopAll, stopService, type ServiceName } from '../services';
 
 export const stopCmd: Command<void> = {
   name: 'stop',
@@ -34,17 +34,9 @@ export const stopCmd: Command<void> = {
       }
       await stopService(repoRoot, serviceName, log);
     } else {
-      const state = readState(repoRoot);
-      const edotAlive = state.edot && isAlive(state.edot.pid);
-      const scoutAlive = state.scout && isAlive(state.scout.pid);
-
-      if (!edotAlive && !scoutAlive) {
-        log.info('No managed services are running.');
-        return;
-      }
-
+      // Always run stopAll — Docker containers and orphaned child processes
+      // can outlive the tracked PIDs recorded in services.json.
       await stopAll(repoRoot, log);
-      log.info('All eval services stopped.');
     }
   },
 };

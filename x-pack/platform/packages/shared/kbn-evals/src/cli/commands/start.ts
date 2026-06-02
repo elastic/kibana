@@ -29,6 +29,7 @@ import {
   stopService,
   connectorsHash,
   tailLog,
+  EDOT_CONTAINER_NAME,
 } from '../services';
 import { safeExec } from '../utils';
 import { readCachedEisConnectors } from '../eis_connectors_cache';
@@ -52,7 +53,7 @@ const isEdotRunningViaDocker = (): boolean => {
   const result = safeExec('docker', [
     'ps',
     '--filter',
-    'name=kibana-edot-collector',
+    `name=${EDOT_CONTAINER_NAME}`,
     '--format',
     '{{.Names}}',
   ]);

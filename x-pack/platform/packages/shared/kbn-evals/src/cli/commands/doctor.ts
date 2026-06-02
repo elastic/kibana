@@ -11,7 +11,13 @@ import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
-import { isServiceRunning, readState, startService, tailLog } from '../services';
+import {
+  isServiceRunning,
+  readState,
+  startService,
+  tailLog,
+  EDOT_CONTAINER_NAME,
+} from '../services';
 import { safeExec } from '../utils';
 import { defaultExportProfile, readVaultConfigFromFile, resolveVaultConfigPath } from '../profiles';
 
@@ -106,7 +112,7 @@ export const doctorCmd: Command<void> = {
     const dockerPs = safeExec('docker', [
       'ps',
       '--filter',
-      'name=kibana-edot-collector',
+      `name=${EDOT_CONTAINER_NAME}`,
       '--format',
       '{{.Names}}',
     ]);
@@ -133,7 +139,7 @@ export const doctorCmd: Command<void> = {
           const edotUpAfterFix = safeExec('docker', [
             'ps',
             '--filter',
-            'name=kibana-edot-collector',
+            `name=${EDOT_CONTAINER_NAME}`,
             '--format',
             '{{.Names}}',
           ]);
