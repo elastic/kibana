@@ -69,7 +69,6 @@ export const createRuleAttachmentDefinition = ({
       aiRuleCreation,
       application,
       uiSettings,
-      isSaving: aiRuleCreation.getIsSaving(),
       intent,
       ruleId,
     });

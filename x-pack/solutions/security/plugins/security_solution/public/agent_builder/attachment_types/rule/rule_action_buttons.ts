@@ -26,7 +26,6 @@ interface BuildRuleActionButtonsParams {
   aiRuleCreation: AiRuleCreationService;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  isSaving: boolean;
   /** Drives the primary button label: 'create' stays "Create rule", 'update' becomes "Update rule". */
   intent: RuleAttachmentIntent;
   /** Saved-rule id — PATCH target for update-intent saves and "View rule" link. */
@@ -39,7 +38,6 @@ export const buildRuleActionButtons = ({
   aiRuleCreation,
   application,
   uiSettings,
-  isSaving,
   intent,
   ruleId,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
@@ -72,7 +70,6 @@ export const buildRuleActionButtons = ({
           }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
-          disabled: isSaving,
           handler: () => {
             // getActionButtons is not reactive to saving$, so guard against double-submit here.
             if (aiRuleCreation.getIsSaving()) {
@@ -87,7 +84,6 @@ export const buildRuleActionButtons = ({
           }),
           icon: 'plusInCircle',
           type: ActionButtonType.PRIMARY,
-          disabled: isSaving,
           handler: () => {
             if (aiRuleCreation.getIsSaving()) {
               return;

@@ -273,7 +273,6 @@ describe('buildRuleActionButtons', () => {
       aiRuleCreation,
       application: makeApplication(true),
       uiSettings: makeUiSettings(),
-      isSaving: false,
       intent: 'create',
       ruleId: undefined,
     };
@@ -314,13 +313,6 @@ describe('buildRuleActionButtons', () => {
     primaryButton(buttons)!.handler();
     expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'rule-123' })
-    );
-  });
-
-  it('disables the primary action only while saving', () => {
-    expect(primaryButton(buildRuleActionButtons(baseProps))?.disabled).toBe(false);
-    expect(primaryButton(buildRuleActionButtons({ ...baseProps, isSaving: true }))?.disabled).toBe(
-      true
     );
   });
 
