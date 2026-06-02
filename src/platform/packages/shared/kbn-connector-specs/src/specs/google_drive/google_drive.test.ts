@@ -488,6 +488,56 @@ describe('GoogleDriveConnector', () => {
       );
     });
 
+    describe('responseType: text', () => {
+      it('should return a native text file as a plain string with utf-8 encoding', async () => {
+        mockClient.get
+          .mockResolvedValueOnce({
+            data: { id: 'txt-1', name: 'notes.txt', mimeType: 'text/plain', size: '512' },
+          })
+          .mockResolvedValueOnce({ data: 'hello world' });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'txt-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/txt-1',
+          { params: { alt: 'media' }, responseType: 'text' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({ content: 'hello world', encoding: 'utf-8' })
+        );
+      });
+
+      it.each([
+        ['application/vnd.google-apps.document', 'text/markdown'],
+        ['application/vnd.google-apps.spreadsheet', 'text/csv'],
+        ['application/vnd.google-apps.presentation', 'text/plain'],
+      ])('should export Google Workspace type %s as %s', async (sourceMimeType, exportMimeType) => {
+        mockClient.get
+          .mockResolvedValueOnce({ data: { id: 'ws-1', name: 'file', mimeType: sourceMimeType } })
+          .mockResolvedValueOnce({ data: 'text content' });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'ws-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/ws-1/export',
+          { params: { mimeType: exportMimeType }, responseType: 'text' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({
+            mimeType: exportMimeType,
+            content: 'text content',
+            encoding: 'utf-8',
+          })
+        );
+      });
+    });
+
     it('should throw Google Drive API error when present', async () => {
       const error = {
         response: {
