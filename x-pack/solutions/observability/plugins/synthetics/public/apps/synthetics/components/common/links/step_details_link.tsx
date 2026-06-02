@@ -63,15 +63,16 @@ export const StepDetailsLinkIcon = ({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="syntheticsStepDetailsLinkIconButton"
-      {...commonProps}
-      title={VIEW_DETAILS(stepIndex)}
-      size="s"
-      href={stepDetailsLink}
-      target={target}
-      iconType="chartWaterfall"
-    />
+    <EuiToolTip content={VIEW_DETAILS(stepIndex)}>
+      <EuiButtonIcon
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
+        {...commonProps}
+        size="s"
+        href={stepDetailsLink}
+        target={target}
+        iconType="chartWaterfall"
+      />
+    </EuiToolTip>
   );
 };
 
