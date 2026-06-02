@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ loadTestFile }) {
-  describe('suggestions', () => {
-    loadTestFile(require.resolve('./suggestions'));
-  });
-}
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
