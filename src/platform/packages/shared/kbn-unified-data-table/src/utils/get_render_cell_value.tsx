@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
@@ -237,16 +237,23 @@ function renderPopoverContent({
   isPlainRecord?: boolean;
 }) {
   const closeButton = (
-    <EuiButtonIcon
-      aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+    <EuiToolTip
+      content={i18n.translate('unifiedDataTable.grid.closePopover', {
         defaultMessage: `Close popover`,
       })}
-      data-test-subj="docTableClosePopover"
-      iconSize="s"
-      iconType="cross"
-      size="xs"
-      onClick={closePopover}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+          defaultMessage: `Close popover`,
+        })}
+        data-test-subj="docTableClosePopover"
+        iconSize="s"
+        iconType="cross"
+        size="xs"
+        onClick={closePopover}
+      />
+    </EuiToolTip>
   );
   if (
     useTopLevelObjectColumns ||

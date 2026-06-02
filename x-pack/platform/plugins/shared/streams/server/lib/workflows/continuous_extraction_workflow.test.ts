@@ -35,14 +35,23 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains(`name: lookbackHours\n        type: number\n        default: 24`);
   });
 
+  it('declares consts that match the input defaults', () => {
+    assertYamlContains(`maxScheduledStreams: ${MAX_SCHEDULED_STREAMS}`);
+    assertYamlContains('lookbackHours: 24');
+  });
+
   it('declares extractionIntervalHours as an optional input without default', () => {
     assertYamlContains('name: extractionIntervalHours\n        type: number\n        description:');
-    expect(WORKFLOW_YAML).not.toMatch(/name: extractionIntervalHours[\s\S]*?default:/m);
+    expect(WORKFLOW_YAML).not.toMatch(
+      /- name: extractionIntervalHours\n\s+type: number\n\s+default:/m
+    );
   });
 
   it('declares excludedStreamPatterns as an optional input without default', () => {
     assertYamlContains('name: excludedStreamPatterns\n        type: string\n        description:');
-    expect(WORKFLOW_YAML).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
+    expect(WORKFLOW_YAML).not.toMatch(
+      /- name: excludedStreamPatterns\n\s+type: string\n\s+default:/m
+    );
   });
 
   it('uses the correct poll delay duration', () => {
@@ -51,8 +60,10 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
 
   it('calls the eligibility endpoint with the correct query params', () => {
     assertYamlContains('_extraction/_eligible');
-    assertYamlContains('maxScheduledStreams={{ inputs.maxScheduledStreams }}');
-    assertYamlContains('lookbackHours={{ inputs.lookbackHours }}');
+    assertYamlContains(
+      'maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}'
+    );
+    assertYamlContains('lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}');
     assertYamlContains(
       '{%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}'
     );
@@ -61,7 +72,15 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     );
   });
 
-  it('calls the task scheduling endpoint', () => {
-    assertYamlContains('features/_task');
+  it('calls the onboarding scheduling endpoint', () => {
+    assertYamlContains('onboarding/_execute');
+  });
+
+  it('calls the onboarding status endpoint', () => {
+    assertYamlContains('onboarding/_status');
+  });
+
+  it('passes features_identification step', () => {
+    assertYamlContains('features_identification');
   });
 });

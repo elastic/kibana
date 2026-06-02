@@ -14,15 +14,17 @@ import {
   EuiCopy,
   EuiContextMenuPanel,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useIsUIAMEnabled } from '../../../hooks/use_is_uiam_enabled';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { useUiamOAuthClientManagement } from '../../../hooks/use_uiam_oauth_client_management';
-import { MCP_SERVER_PATH } from '../../../../../common/mcp';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { labels } from '../../../utils/i18n';
 
 export const McpConnectionButton = () => {
   const { createAgentBuilderUrl } = useNavigation();
@@ -37,6 +39,7 @@ export const McpConnectionButton = () => {
   const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
   return (
     <EuiPopover
+      aria-label={labels.tools.mcpServerConnectionButton}
       button={
         <EuiButtonEmpty
           key="mcp-server-connection-button"
@@ -44,12 +47,13 @@ export const McpConnectionButton = () => {
           iconSide="right"
           onClick={toggleContextOpen}
           data-test-subj="agentBuilderManageMcpButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_MCP,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
         >
-          <EuiText size="s">
-            {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
-              defaultMessage: 'Manage MCP',
-            })}
-          </EuiText>
+          <EuiText size="s">{labels.tools.mcpServerConnectionButton}</EuiText>
         </EuiButtonEmpty>
       }
       isOpen={isContextOpen}
@@ -65,10 +69,17 @@ export const McpConnectionButton = () => {
             tooltipProps={{ anchorClassName: 'eui-fullWidth' }}
           >
             {(copy) => (
-              <EuiContextMenuItem key="copy" icon="copy" onClick={copy}>
-                {i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
-                  defaultMessage: 'Copy MCP Server URL',
+              <EuiContextMenuItem
+                key="copy"
+                icon="copy"
+                onClick={copy}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.COPY_MCP_URL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
                 })}
+              >
+                {labels.tools.copyMcpServerUrlButton}
               </EuiContextMenuItem>
             )}
           </EuiCopy>,
@@ -77,10 +88,13 @@ export const McpConnectionButton = () => {
             icon="plus"
             href={createAgentBuilderUrl(appPaths.tools.bulkImportMcp)}
             data-test-subj="agentBuilderBulkImportMcpMenuItem"
-          >
-            {i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
-              defaultMessage: 'Bulk import MCP tools',
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_IMPORT_MCP,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
             })}
+          >
+            {labels.tools.bulkImportMcpToolsButton}
           </EuiContextMenuItem>,
           ...(showMcpClientManagement
             ? [
@@ -89,10 +103,13 @@ export const McpConnectionButton = () => {
                   icon="gear"
                   href={createAgentBuilderUrl(appPaths.manage.mcpClients)}
                   data-test-subj="agentBuilderManageMcpClientsMenuItem"
-                >
-                  {i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
-                    defaultMessage: 'Manage MCP clients (OAuth)',
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_MCP_CLIENTS,
+                    detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
                   })}
+                >
+                  {labels.tools.manageMcpClientsButton}
                 </EuiContextMenuItem>,
               ]
             : []),
@@ -101,10 +118,13 @@ export const McpConnectionButton = () => {
             icon="documentation"
             href={docLinksService.mcpServer}
             target="_blank"
-          >
-            {i18n.translate('xpack.agentBuilder.tools.aboutMcpServerDocumentationButton', {
-              defaultMessage: 'Documentation',
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_DOCS,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
             })}
+          >
+            {labels.tools.aboutMcpServerDocumentationButton}
           </EuiContextMenuItem>,
         ]}
       />

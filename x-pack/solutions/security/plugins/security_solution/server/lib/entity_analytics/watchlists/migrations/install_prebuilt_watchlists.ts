@@ -203,6 +203,7 @@ export const installPrebuiltWatchlists = async ({
     const watchlistClient = new WatchlistConfigClientClass({
       soClient,
       esClient,
+      internalEsClient: esClient,
       namespace,
       logger,
     });

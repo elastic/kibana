@@ -1,18 +1,18 @@
 {
-  "sha1": "01dee58c369aed3d2ffd3532e27e1f62db36f830",
+  "sha1": "5693bca66c351d8d3475541bcf30ce6c22cc061b",
   "tests": [
     {
       "id": "f6d065371af5227-8e2fb993048f286",
       "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 44,
-        "column": 12
+        "line": 56,
+        "column": 13
       }
     },
     {
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 132,
+        "line": 142,
         "column": 12
       }
     },

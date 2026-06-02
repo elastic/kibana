@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
@@ -23,10 +24,22 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
-import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_OPEN_IN_DISCOVER,
+  ACTION_VIEW_DETAILS,
+} from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+
+const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_INSPECT_PANEL,
+  ACTION_VIEW_DETAILS,
+  ACTION_COPY_TO_DASHBOARD,
+];
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -334,6 +347,7 @@ const ChartItem = React.memo(
           syncTooltips={false}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
           profileId={profileId}
         />

@@ -13,7 +13,9 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
   router,
+  config,
   getAuthenticationService,
+  serverlessProjectId,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -42,7 +44,33 @@ export function defineCreateOAuthClientRoute({
             });
           }
 
-          const result = await oauth.createClient(request, request.body);
+          const resource = config.mcp?.oauth2?.metadata?.resource;
+          if (!resource) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: MCP protected resource metadata is not configured',
+              },
+            });
+          }
+
+          // UIAM requires the project the client belongs to. It is always available on serverless
+          // (where OAuth client management is offered), so a missing value indicates a
+          // deployment where this feature is not available.
+          if (!serverlessProjectId) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: serverless project id is not configured',
+              },
+            });
+          }
+
+          const result = await oauth.createClient(request, {
+            ...request.body,
+            resource,
+            project_id: serverlessProjectId,
+          });
           if (!result) {
             return response.notFound({
               body: {

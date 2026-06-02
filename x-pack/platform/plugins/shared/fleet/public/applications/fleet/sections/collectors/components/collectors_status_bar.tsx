@@ -20,11 +20,24 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-const GROUP_BY_OPTIONS: EuiSelectableOption[] = [
+const GROUP_BY_OPTIONS: Array<{ key: string; label: string }> = [
   {
-    label: i18n.translate('xpack.fleet.collectors.groupBy.none', { defaultMessage: 'None' }),
     key: 'none',
-    checked: 'on',
+    label: i18n.translate('xpack.fleet.collectors.groupBy.none', {
+      defaultMessage: 'None',
+    }),
+  },
+  {
+    key: 'collector.group',
+    label: i18n.translate('xpack.fleet.collectors.groupBy.collectorGroup', {
+      defaultMessage: 'Collector Group',
+    }),
+  },
+  {
+    key: 'config.name',
+    label: i18n.translate('xpack.fleet.collectors.groupBy.configName', {
+      defaultMessage: 'Configuration',
+    }),
   },
 ];
 
@@ -33,6 +46,8 @@ interface CollectorsStatusBarProps {
   dataUpdatedAt: number;
   isAutoRefreshOn: boolean;
   onAutoRefreshChange: (on: boolean) => void;
+  selectedGroupBy: string;
+  onGroupByChange: (groupBy: string) => void;
 }
 
 export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
@@ -40,26 +55,47 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
   dataUpdatedAt,
   isAutoRefreshOn,
   onAutoRefreshChange,
+  selectedGroupBy,
+  onGroupByChange,
 }) => {
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
-  const [groupByOptions, setGroupByOptions] = useState<EuiSelectableOption[]>(GROUP_BY_OPTIONS);
 
-  const onGroupByChange = useCallback((options: EuiSelectableOption[]) => {
-    setGroupByOptions(options);
-    setIsGroupByOpen(false);
-  }, []);
+  const selectableOptions: EuiSelectableOption[] = GROUP_BY_OPTIONS.map((opt) => ({
+    ...opt,
+    checked: opt.key === selectedGroupBy ? 'on' : undefined,
+  }));
 
-  const selectedGroupBy = groupByOptions.find((o) => o.checked === 'on')?.label ?? 'None';
+  const handleGroupByChange = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const selected = options.find((o) => o.checked === 'on');
+      if (selected?.key) {
+        onGroupByChange(selected.key);
+      }
+      setIsGroupByOpen(false);
+    },
+    [onGroupByChange]
+  );
+
+  const selectedLabel =
+    GROUP_BY_OPTIONS.find((o) => o.key === selectedGroupBy)?.label ?? selectedGroupBy;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem grow>
         <EuiText size="xs" color="subdued" data-test-subj="fleetCollectorsCount">
-          <FormattedMessage
-            id="xpack.fleet.collectors.statusBar.showingCount"
-            defaultMessage="Showing {count, plural, one {# collector} other {# collectors}}"
-            values={{ count: totalCount }}
-          />
+          {selectedGroupBy === 'none' ? (
+            <FormattedMessage
+              id="xpack.fleet.collectors.statusBar.showingCount"
+              defaultMessage="Showing {count, plural, one {# collector} other {# collectors}}"
+              values={{ count: totalCount }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.collectors.statusBar.showingGroupCount"
+              defaultMessage="Showing {count, plural, one {# collector group} other {# collector groups}}"
+              values={{ count: totalCount }}
+            />
+          )}
         </EuiText>
       </EuiFlexItem>
 
@@ -71,7 +107,9 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
                 <FormattedMessage
                   id="xpack.fleet.collectors.statusBar.updatedAt"
                   defaultMessage="Updated {date}"
-                  values={{ date: <FormattedRelative value={dataUpdatedAt} /> }}
+                  values={{
+                    date: <FormattedRelative value={dataUpdatedAt} updateIntervalInSeconds={30} />,
+                  }}
                 />
               </EuiText>
             </EuiFlexItem>
@@ -104,6 +142,9 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
 
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.translate('xpack.fleet.collectors.statusBar.groupByPopoverLabel', {
+                defaultMessage: 'Select group by field',
+              })}
               button={
                 <EuiButtonEmpty
                   size="xs"
@@ -115,7 +156,7 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
                   <FormattedMessage
                     id="xpack.fleet.collectors.statusBar.groupBy"
                     defaultMessage="Group collectors by: {groupBy}"
-                    values={{ groupBy: selectedGroupBy }}
+                    values={{ groupBy: selectedLabel }}
                   />
                 </EuiButtonEmpty>
               }
@@ -126,8 +167,8 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
             >
               <EuiSelectable
                 singleSelection
-                options={groupByOptions}
-                onChange={onGroupByChange}
+                options={selectableOptions}
+                onChange={handleGroupByChange}
                 listProps={{ bordered: false }}
               >
                 {(list) => list}

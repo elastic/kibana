@@ -9,6 +9,8 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
+import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { AgentBuilderAgentConnectorsPage } from './pages/agent_connectors';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -26,8 +28,8 @@ import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
-import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
+import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -109,6 +111,14 @@ export const agentRoutes: RouteDefinition[] = [
     isExperimental: true,
     navLabel: navLabels.plugins,
     element: <AgentBuilderAgentPluginsPage />,
+  },
+  {
+    path: '/agents/:agentId/connectors',
+    viewId: agentBuilderViewIds.agentConnectors,
+    sidebarView: 'conversation',
+    navLabel: navLabels.connectors,
+    isExperimental: true,
+    element: <AgentBuilderAgentConnectorsPage />,
   },
   {
     path: '/agents/:agentId/tools',
@@ -206,6 +216,14 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageToolBulkImportMcp,
     sidebarView: 'manage',
     element: <AgentBuilderBulkImportMcpToolsPage />,
+  },
+  {
+    path: '/manage/tools/mcp_clients/new',
+    viewId: agentBuilderViewIds.manageMcpClientCreate,
+    sidebarView: 'manage',
+    requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
+    element: <AgentBuilderMcpClientCreatePage />,
   },
   {
     path: '/manage/tools/mcp_clients',

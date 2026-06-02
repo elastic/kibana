@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -670,6 +669,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -685,7 +685,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -894,6 +895,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -908,7 +910,8 @@ describe('bulkEdit()', () => {
         { overwrite: true }
       );
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -1041,6 +1044,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -1056,7 +1060,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -1212,6 +1217,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -1230,7 +1236,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {

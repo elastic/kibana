@@ -19,7 +19,7 @@ import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProvider } from '@elastic/eui';
-import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
+import type { SLORouteRepository } from '../../server/routes/utils/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;

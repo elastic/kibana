@@ -79,14 +79,6 @@ const getTestUtils = (
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
-                ...(describeType === 'internal'
-                  ? {
-                      artifacts: {
-                        dashboards: [],
-                        investigation_guide: { blob: '' },
-                      },
-                    }
-                  : {}),
                 api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],

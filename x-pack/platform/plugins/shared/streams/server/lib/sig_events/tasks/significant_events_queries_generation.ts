@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Queries generation is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -60,7 +65,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 getFeatureClient,
                 getQueryClient,
                 scopedClusterClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
@@ -82,7 +86,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     featureClient,
                     queryClient,
                     esClient: scopedClusterClient.asCurrentUser,
-                    uiSettingsClient,
+                    featureFlags: taskContext.server.core.featureFlags,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                     request: fakeRequest,
                     logger: taskLogger,
