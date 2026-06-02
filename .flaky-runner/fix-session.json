@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "phase": "review",
+  "createdAt": "2026-06-02T21:35:43.532Z",
+  "updatedAt": "2026-06-02T21:35:43.533Z",
+  "suiteSlug": "direct",
+  "test": {
+    "id": "local",
+    "file_name": "cypress/e2e/entity_analytics/watchlists/watchlists_page.cy.ts",
+    "location": "cypress/e2e/entity_analytics/watchlists/watchlists_page.cy.ts",
+    "scope": "(user-provided spec)",
+    "name": "watchlists_page.cy.ts",
+    "web_url": "",
+    "labels": [
+      "flaky"
+    ]
+  },
+  "repoSpecPath": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/watchlists/watchlists_page.cy.ts",
+  "workspace": {
+    "cwd": "/Users/jonwalstedt/repos/jonwalstedt/kibana/flaky-test-runner-tryout",
+    "mode": "worktree"
+  },
+  "yolo": false,
+  "org": "elastic"
+}
