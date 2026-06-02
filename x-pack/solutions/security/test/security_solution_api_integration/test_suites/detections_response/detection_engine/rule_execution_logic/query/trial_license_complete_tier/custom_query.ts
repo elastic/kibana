@@ -283,37 +283,34 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]?._source?.user?.risk).toEqual(undefined);
     });
 
-    describe('with host and user risk indices', () => {
-      before(async function () {
+    describe('@skipInServerless with host and user risk indices', () => {
+      before(async () => {
         // Auditbeat host records carry host.id so the EUID is id-based (host:<host.id>).
         // Auditbeat user records carry host.id but no user.domain, so the EUID is local-namespace-based:
         // user:<user.name>@<host.id>@local. entity.id must be supplied explicitly — the create API requires it.
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-                entity: {
-                  id: ENRICHMENT_HOST_EUID,
-                  type: 'host',
-                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
-                },
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
               },
-            ],
-            users: [
-              {
-                user: { name: ENRICHMENT_USER_NAME },
-                host: { id: [ENRICHMENT_HOST_ID] },
-                entity: {
-                  id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
-                  type: 'user',
-                  risk: { calculated_level: 'Low', calculated_score_norm: 11 },
-                },
+            },
+          ],
+          users: [
+            {
+              user: { name: ENRICHMENT_USER_NAME },
+              host: { id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                type: 'user',
+                risk: { calculated_level: 'Low', calculated_score_norm: 11 },
               },
-            ],
-          }))
-        )
-          return this.skip();
+            },
+          ],
+        });
       });
 
       after(async () => {
@@ -373,31 +370,28 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', () => {
-      before(async function () {
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-                entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
-                asset: { criticality: 'high_impact' },
+    describe('@skipInServerless with asset criticality', () => {
+      before(async () => {
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'high_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: ENRICHMENT_USER_NAME },
+              host: { id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                type: 'user',
               },
-            ],
-            users: [
-              {
-                user: { name: ENRICHMENT_USER_NAME },
-                host: { id: [ENRICHMENT_HOST_ID] },
-                entity: {
-                  id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
-                  type: 'user',
-                },
-                asset: { criticality: 'extreme_impact' },
-              },
-            ],
-          }))
-        )
-          return this.skip();
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
