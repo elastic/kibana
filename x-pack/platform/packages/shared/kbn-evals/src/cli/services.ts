@@ -183,22 +183,20 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
   try {
     if (Fs.existsSync(composePath)) {
       execFileSync('docker', ['compose', '-f', composePath, 'down'], {
-        stdio: 'ignore',
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
         timeout: 15_000,
       });
       log.info('[edot] Docker container stopped via compose');
       return;
     }
   } catch (err) {
-    const signal = (err as Record<string, unknown>).signal;
+    const { signal, stderr } = err as Record<string, unknown>;
     if (signal != null) {
       log.warning('[edot] docker compose down timed out, falling back to docker stop');
     } else {
-      log.warning(
-        `[edot] docker compose down failed (${
-          err instanceof Error ? err.message : err
-        }), falling back to docker stop`
-      );
+      const detail = typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err);
+      log.warning(`[edot] docker compose down failed (${detail}), falling back to docker stop`);
     }
   }
 
@@ -264,6 +262,11 @@ const terminateProcessGroup = async (
   if (isProcessGroupAlive(pid)) {
     log.warning(`[${label}] did not stop gracefully, sending SIGKILL`);
     killProcessGroup(pid, 'SIGKILL', log);
+
+    const killDeadline = Date.now() + 2_000;
+    while (isProcessGroupAlive(pid) && Date.now() < killDeadline) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
   }
 };
 
