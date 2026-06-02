@@ -59,6 +59,7 @@ import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
 import { PermissionStatusCell } from '../permission_status_cell';
 import { IdentityPermissionSummary } from '../identity_permission_summary';
+import { ExperimentalFeaturesService } from '../../../services';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -68,7 +69,7 @@ interface CloudConnectorPoliciesFlyoutProps {
   provider: CloudProviders;
   /**
    * Per-target verification summaries written by `fleet:otel_permission_verifier_status_change`.
-   * Optional — Story 5 wires the React Query hook that populates this; until then, callers may pass `undefined`.
+   * Optional — callers may pass `undefined` until the React Query hook populating this lands.
    */
   verificationPermissions?: PackagePolicyPermissionSummary[];
   /**
@@ -92,6 +93,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const { application } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId();
   const deleteModalTitleId = useGeneratedHtmlId();
+  // Hide all permission-verifier UX (badge column + identity summary) when the
+  // experimental feature is off. Server-side, the verifier task is also gated by
+  // this flag, so the SO never gets populated — showing the UI would be misleading.
+  const { enableOTelVerifier } = ExperimentalFeaturesService.get();
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
@@ -259,21 +264,26 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         }),
         render: (pkg: (typeof usageItems)[0]['package']) => pkg?.title || pkg?.name || '-',
       },
-      {
-        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.permissionStatusColumn', {
-          defaultMessage: 'Permission Status',
-        }),
-        render: (item: (typeof usageItems)[0]) => (
-          <PermissionStatusCell
-            packagePolicyId={item.id}
-            integrationName={item.package?.title || item.package?.name || item.name}
-            verificationPermissions={verificationPermissions}
-            verificationStatus={verificationStatus}
-          />
-        ),
-      },
+      ...(enableOTelVerifier
+        ? [
+            {
+              name: i18n.translate(
+                'xpack.fleet.cloudConnector.policiesFlyout.permissionStatusColumn',
+                { defaultMessage: 'Permission Status' }
+              ),
+              render: (item: (typeof usageItems)[0]) => (
+                <PermissionStatusCell
+                  packagePolicyId={item.id}
+                  integrationName={item.package?.title || item.package?.name || item.name}
+                  verificationPermissions={verificationPermissions}
+                  verificationStatus={verificationStatus}
+                />
+              ),
+            },
+          ]
+        : []),
     ],
-    [handleNavigateToPolicy, verificationPermissions, verificationStatus]
+    [handleNavigateToPolicy, verificationPermissions, verificationStatus, enableOTelVerifier]
   );
 
   return (
@@ -333,12 +343,15 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           )}
         </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
-
-        <IdentityPermissionSummary
-          verificationPermissions={verificationPermissions}
-          verificationStatus={verificationStatus}
-        />
+        {enableOTelVerifier && (
+          <>
+            <EuiSpacer size="m" />
+            <IdentityPermissionSummary
+              verificationPermissions={verificationPermissions}
+              verificationStatus={verificationStatus}
+            />
+          </>
+        )}
 
         <EuiSpacer size="m" />
 
