@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
@@ -213,7 +215,14 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
+    getSSLSettings: () => ({
+      ...getSSLSettingsFromConfig(config.ssl?.verificationMode),
+      cert: config.ssl?.certificate ? readFileSync(config.ssl.certificate) : undefined,
+      key: config.ssl?.key ? readFileSync(config.ssl.key) : undefined,
+      ca: config.ssl?.certificateAuthorities
+        ? readFileSync(config.ssl.certificateAuthorities)
+        : undefined,
+    }),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
