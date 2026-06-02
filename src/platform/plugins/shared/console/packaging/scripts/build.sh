@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --help|-h)
       echo "Usage: $0 [--output-dir|-o <directory>]"
-      echo "  --output-dir, -o    Output directory for build assets (default: ../../../console/packaging/target)"
+      echo "  --output-dir, -o    Output directory for build assets (default: <packaging>/target)"
       exit 0
       ;;
     *)
@@ -57,7 +57,7 @@ echo "Build react TS definitions..."
 # tsc --outFile wraps everything in 'declare module "types" { ... }' which is
 # not usable as a package declaration. Compile first, then strip the wrapper,
 # dedent, and append the OneConsole component export.
-npx tsc ../react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
+npx tsc "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
 node -e "
   const fs = require('fs');
   let src = fs.readFileSync('$OUTPUT_DIR/index.d.ts', 'utf8');
