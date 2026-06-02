@@ -20,7 +20,7 @@ import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../..
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const rulePreviewAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  previewId: z.string().min(1),
+  previewId: z.string().min(1).max(1_000),
 });
 
 type RulePreviewAttachmentData = z.infer<typeof rulePreviewAttachmentDataSchema>;
@@ -55,6 +55,7 @@ const getRulePreviewAlertsToolSchema = z.object({
   previewId: z
     .string()
     .min(1)
+    .max(1_000)
     .describe(
       'The preview ID of the security rule preview attachment to fetch alerts for, as shown in the rule preview attachment.'
     ),
