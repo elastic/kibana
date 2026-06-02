@@ -329,6 +329,23 @@ export async function testNowMonitor(
 }
 
 /**
+ * `POST /api/synthetics/monitor/test/{id}` is for individual monitors; this is
+ * `PUT /internal/synthetics/private_locations/_cleanup` — triggers the orphaned
+ * package-policy cleanup. Mirrors the FTR `triggerCleanup` helper.
+ */
+export async function triggerPrivateLocationCleanup(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) {
+  const res = await apiClient.put('internal/synthetics/private_locations/_cleanup', {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return res;
+}
+
+/**
  * `PUT /internal/synthetics/service/enablement` — enables synthetics. Internal
  * route, so no `elastic-api-version` header (matching the FTR enablement call).
  */

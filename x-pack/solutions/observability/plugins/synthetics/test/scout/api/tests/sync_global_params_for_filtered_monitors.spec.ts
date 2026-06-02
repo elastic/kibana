@@ -10,7 +10,10 @@ import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_MONITOR_SO_TYPES } from '../fixtures';
 import { addMonitor } from '../fixtures/monitors';
 import { createParam, updateParam } from '../fixtures/params';
-import { getSyntheticsPackagePolicies } from '../fixtures/fleet';
+import {
+  deleteAllSyntheticsPackagePolicies,
+  getSyntheticsPackagePolicies,
+} from '../fixtures/fleet';
 import { delay, tryForTime } from '../fixtures/retry';
 import { httpMonitorFixture } from '../fixtures/data/http_monitor';
 
@@ -39,7 +42,7 @@ apiTest.describe(
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(editorKey);
       const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
@@ -48,12 +51,15 @@ apiTest.describe(
       await kbnClient.savedObjects.clean({
         types: [...SYNTHETICS_MONITOR_SO_TYPES, 'synthetics-param'],
       });
+      // guarantee a clean Fleet baseline (other suites can leave orphaned policies)
+      await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
+    apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
       await kbnClient.savedObjects.clean({
         types: [...SYNTHETICS_MONITOR_SO_TYPES, 'synthetics-param'],
       });
+      await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
       await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
     });
 

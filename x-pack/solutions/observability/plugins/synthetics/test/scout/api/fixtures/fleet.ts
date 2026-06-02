@@ -34,3 +34,29 @@ export async function getSyntheticsPackagePolicies(
   expect(res).toHaveStatusCode(200);
   return (res.body as { items: PackagePolicy[] }).items;
 }
+
+/**
+ * Force-deletes every synthetics Fleet package policy via the Fleet bulk-delete
+ * API. Used by package-policy-count-sensitive suites to guarantee a clean Fleet
+ * baseline, since `savedObjects.clean` does not reliably remove the hidden
+ * `ingest-package-policies` saved objects (and leaves orphans behind).
+ */
+export async function deleteAllSyntheticsPackagePolicies(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  opts: { spaceId?: string } = {}
+) {
+  const policies = await getSyntheticsPackagePolicies(apiClient, headers, opts);
+  if (policies.length === 0) {
+    return;
+  }
+  const res = await apiClient.post(
+    `${opts.spaceId ? `s/${opts.spaceId}/` : ''}api/fleet/package_policies/delete`,
+    {
+      headers,
+      body: { packagePolicyIds: policies.map((p) => p.id), force: true },
+      responseType: 'json',
+    }
+  );
+  expect(res).toHaveStatusCode(200);
+}

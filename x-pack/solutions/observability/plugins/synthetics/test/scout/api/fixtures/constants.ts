@@ -26,6 +26,7 @@ export const SYNTHETICS_API_URLS = {
   SERVICE_LOCATIONS: '/internal/uptime/service/locations',
   DYNAMIC_SETTINGS: '/internal/synthetics/settings',
   PARAMS: '/api/synthetics/params',
+  PRIVATE_LOCATIONS_CLEANUP: '/internal/synthetics/private_locations/_cleanup',
   SYNC_GLOBAL_PARAMS: '/internal/synthetics/sync_global_params',
   ENABLE_DEFAULT_ALERTING: '/internal/synthetics/enable_default_alerting',
   SYNTHETICS_MONITOR_INSPECT: '/internal/synthetics/service/monitor/inspect',
