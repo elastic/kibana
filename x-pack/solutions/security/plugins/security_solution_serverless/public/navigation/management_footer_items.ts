@@ -88,6 +88,10 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'management:application_connections',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'management:roles',
               breadcrumbStatus: 'hidden',
             },

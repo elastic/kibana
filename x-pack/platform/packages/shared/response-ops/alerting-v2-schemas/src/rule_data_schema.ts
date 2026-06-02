@@ -20,6 +20,8 @@ import {
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
   MIN_SCHEDULE_INTERVAL,
+  MAX_BULK_ITEMS,
+  ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
 } from './constants';
 
@@ -435,3 +437,36 @@ export const bulkOperationResponseSchema = z
   .describe('Result of a bulk rule operation.');
 
 export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
+
+export const ruleIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(ID_MAX_LENGTH)
+  .describe('A rule identifier.');
+
+/**
+ * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesParamsSchema = z
+  .object({
+    ids: z
+      .array(ruleIdSchema)
+      .min(1)
+      .max(MAX_BULK_ITEMS)
+      .describe('Rule identifiers to retrieve. The response preserved this order.'),
+  })
+  .strict();
+
+export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
+
+/**
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesResponseSchema = z.object({
+  rules: z
+    .array(ruleResponseSchema)
+    .describe('The requested rules, in the same order as the requested ids.'),
+});
+
+export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;

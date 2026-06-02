@@ -15,8 +15,11 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
+  bulkGetRulesResponseSchema,
+  bulkGetRulesParamsSchema,
   updateRuleBodySchema,
 } from './rule_data_schema';
+import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 const validCreateData = {
   kind: 'alert',
@@ -987,5 +990,89 @@ describe('rule field immutability classification', () => {
         "time_field",
       ]
     `);
+  });
+});
+
+describe('bulkGetRulesParamsSchema', () => {
+  it('accepts a single id', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
+    expect(result).toEqual({ ids: ['rule-1'] });
+  });
+
+  it('accepts up to MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
+  });
+
+  it('preserves caller-provided id order (no sorting)', () => {
+    const ids = ['rule-z', 'rule-a', 'rule-m'];
+    const result = bulkGetRulesParamsSchema.parse({ ids });
+    expect(result.ids).toEqual(ids);
+  });
+
+  it('trims whitespace around ids', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
+    expect(result.ids).toEqual(['rule-1']);
+  });
+
+  it('rejects a missing ids field', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
+  });
+
+  it('rejects an id longer than ID_MAX_LENGTH', () => {
+    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
+  });
+
+  it('rejects an empty-string id', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
+  });
+
+  it('rejects a whitespace-only id (after trim it is empty)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  });
+});
+
+describe('bulkGetRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r' },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    createdBy: 'user-a',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'user-a',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts an empty rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
+    expect(result).toEqual({ rules: [] });
+  });
+
+  it('accepts a populated rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });

@@ -952,61 +952,106 @@ describe('RulesClient', () => {
       );
     });
 
-    it('excludes missing ids returned as bulk get errors', async () => {
+    it('returns rules in the same order as the requested ids, regardless of bulkGet response order', async () => {
       const client = createClient();
-      const soAttrs = createRuleSoAttributes({
-        metadata: { name: 'rule-get-many-success' },
+
+      // Request order: z, a, m. Mock returns in a different order.
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-a',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'A' } }),
+            references: [],
+          },
+          {
+            id: 'rule-m',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'M' } }),
+            references: [],
+          },
+          {
+            id: 'rule-z',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'Z' } }),
+            references: [],
+          },
+        ],
       });
+
+      const res = await client.getRules(['rule-z', 'rule-a', 'rule-m']);
+
+      expect(res.map((r) => r.id)).toEqual(['rule-z', 'rule-a', 'rule-m']);
+    });
+
+    it('filters out ids absent from the bulkGet response', async () => {
+      const client = createClient();
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: 'rule-id-get-many-success',
+            id: 'rule-id-present',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: soAttrs,
+            attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-present', 'rule-id-absent']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-present',
+          metadata: expect.objectContaining({ name: 'present' }),
+        })
+      );
+    });
+
+    it('throws with the SO error status when a requested id is missing', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-present',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
             references: [],
           },
           {
-            id: 'rule-id-get-many-missing',
+            id: 'rule-id-missing',
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {} as RuleSavedObjectAttributes,
             references: [],
             error: {
               statusCode: 404,
               error: 'Not Found',
-              message: 'Saved object [alerting-rule/rule-id-get-many-missing] not found',
+              message: 'Saved object [alerting-rule/rule-id-missing] not found',
             },
           },
         ],
       });
 
-      const res = await client.getRules(['rule-id-get-many-success', 'rule-id-get-many-missing']);
-
-      expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(
-        expect.objectContaining({
-          id: 'rule-id-get-many-success',
-          metadata: expect.objectContaining({ name: 'rule-get-many-success' }),
-        })
-      );
+      await expect(client.getRules(['rule-id-present', 'rule-id-missing'])).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
 
-    it('ignores documents with non-404 errors and returns valid documents', async () => {
+    it('throws with the SO error status when bulkGet reports a non-404 error', async () => {
       const client = createClient();
-      const validAttrs = createRuleSoAttributes({
-        metadata: { name: 'rule-get-many-valid' },
-      });
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: 'rule-id-get-many-valid',
+            id: 'rule-id-valid',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: validAttrs,
+            attributes: createRuleSoAttributes({ metadata: { name: 'valid' } }),
             references: [],
           },
           {
-            id: 'rule-id-get-many-failure',
+            id: 'rule-id-failure',
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {} as RuleSavedObjectAttributes,
             references: [],
@@ -1019,15 +1064,47 @@ describe('RulesClient', () => {
         ],
       });
 
-      const res = await client.getRules(['rule-id-get-many-valid', 'rule-id-get-many-failure']);
+      await expect(client.getRules(['rule-id-valid', 'rule-id-failure'])).rejects.toMatchObject({
+        output: { statusCode: 500 },
+      });
+    });
 
-      expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(
-        expect.objectContaining({
-          id: 'rule-id-get-many-valid',
-          metadata: expect.objectContaining({ name: 'rule-get-many-valid' }),
-        })
-      );
+    it('throws on the first encountered error', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-first-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [alerting-rule/rule-id-first-missing] not found',
+            },
+          },
+          {
+            id: 'rule-id-second-failure',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'bulk get failed',
+            },
+          },
+        ],
+      });
+
+      // 'first error wins': the 404 surfaces, not the later 500.
+      await expect(
+        client.getRules(['rule-id-first-missing', 'rule-id-second-failure'])
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 

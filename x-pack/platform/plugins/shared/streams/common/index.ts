@@ -13,6 +13,8 @@ export type {
   ProcessorSuggestionsResponse,
 } from './ingest_processor_suggestions';
 
+export { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './feature_flags';
+
 export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
