@@ -5,10 +5,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND ((TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != \\"\\"))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL recent.entity.EngineMetadata.UntypedId = entity.id
@@ -32,8 +32,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.attributes.permissions = VALUES(TO_STRING(entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(entity.behaviors.anomaly_job_ids)),
@@ -261,7 +261,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
  entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
 | RENAME
@@ -281,15 +281,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\")
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
+| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
+(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
+(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -364,8 +364,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
@@ -572,7 +572,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -595,15 +595,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\")
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
+| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
+(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
+(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -678,8 +678,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
@@ -889,7 +889,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -912,15 +912,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\")
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
+| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
+(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
+(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -995,8 +995,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
@@ -1206,7 +1206,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -1229,10 +1229,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((service.name IS NOT NULL AND service.name != \\"\\"))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND ((TO_STRING(service.name) IS NOT NULL AND TO_STRING(service.name) != \\"\\"))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL recent.entity.EngineMetadata.UntypedId = service.name
@@ -1279,8 +1279,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.attributes.permissions = VALUES(TO_STRING(service.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(service.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(service.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(service.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(service.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(service.entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(service.entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(service.entity.behaviors.anomaly_job_ids)),
@@ -1456,7 +1456,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Service\\")
@@ -1476,21 +1476,21 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\"))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+      AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(event.module),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
+ _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND NOT (\`user.name\` IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR (\`event.kind\` != \\"enrichment\\" OR \`event.kind\` IS NULL) AND MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((\`entity.namespace\` == \\"local\\"), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
-(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL)
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
+| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1538,8 +1538,8 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  recent.entity.attributes.permissions = VALUES(TO_STRING(user.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(user.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(user.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(user.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(user.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(user.entity.lifecycle.last_activity) IS NOT NULL,
  recent.entity.behaviors.rule_names = VALUES(TO_STRING(user.entity.behaviors.rule_names)),
  recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(user.entity.behaviors.anomaly_job_ids)),
@@ -1610,14 +1610,14 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-| WHERE NOT(\`entity.id\` IS NULL) OR \`recent.entity.namespace\` == \\"local\\" OR MV_CONTAINS(\`recent.event.kind\`, \\"asset\\") OR (\`recent.event.kind\` != \\"enrichment\\" OR \`recent.event.kind\` IS NULL) AND MV_CONTAINS(\`recent.event.category\`, \\"iam\\") AND (MV_CONTAINS(\`recent.event.type\`, \\"user\\") OR MV_CONTAINS(\`recent.event.type\`, \\"creation\\") OR MV_CONTAINS(\`recent.event.type\`, \\"deletion\\") OR MV_CONTAINS(\`recent.event.type\`, \\"group\\")) 
+| WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") OR (TO_STRING(recent.event.kind) != \\"enrichment\\" OR TO_STRING(recent.event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(recent.event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(recent.event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"group\\")) 
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
-| EVAL recent.entity.name = CASE((\`recent.entity.namespace\` == \\"local\\" AND recent.host.name IS NOT NULL AND recent.host.name != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name)
-| EVAL recent.entity.name = CASE((\`recent.entity.namespace\` == \\"local\\" AND NOT (recent.host.name IS NOT NULL AND recent.host.name != \\"\\")), TO_STRING(recent.user.name), recent.entity.name)
-| EVAL recent.entity.name = CASE((\`recent.entity.namespace\` != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
-    recent.entity.confidence = CASE((\`recent.entity.namespace\` != \\"local\\"), \\"high\\", recent.entity.confidence)
-| EVAL recent.entity.confidence = CASE((\`recent.entity.namespace\` == \\"local\\"), \\"medium\\", recent.entity.confidence)
+| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name)
+| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), TO_STRING(recent.user.name), recent.entity.name)
+| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
+    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), \\"high\\", recent.entity.confidence)
+| EVAL recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) == \\"local\\"), \\"medium\\", recent.entity.confidence)
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 49),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 49),
@@ -1731,7 +1731,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 49),
  host.name = COALESCE(recent.host.name, host.name),
               @timestamp = recent.timestamp,
- entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Identity\\")
@@ -1752,7 +1752,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
+      AND ((TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != \\"\\"))
   | STATS document_count = COUNT()"
 `;
 
@@ -1761,7 +1761,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\")
+      AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
   | STATS document_count = COUNT()"
 `;
 
@@ -1770,7 +1770,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((service.name IS NOT NULL AND service.name != \\"\\"))
+      AND ((TO_STRING(service.name) IS NOT NULL AND TO_STRING(service.name) != \\"\\"))
   | STATS document_count = COUNT()"
 `;
 
@@ -1779,6 +1779,6 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\"))
+      AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
   | STATS document_count = COUNT()"
 `;
