@@ -66,6 +66,18 @@ export const createMockSearchBar = () => {
             }
           }}
         />
+        <button
+          type="button"
+          data-test-subj="mock-search-bar-submit"
+          onClick={() =>
+            onQuerySubmit?.({
+              query: { query: query?.query ?? '', language: 'kuery' },
+              dateRange,
+            })
+          }
+        >
+          {'Submit search'}
+        </button>
       </div>
     );
   };

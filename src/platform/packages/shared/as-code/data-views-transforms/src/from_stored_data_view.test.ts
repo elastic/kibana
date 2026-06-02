@@ -161,4 +161,34 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
       },
     });
   });
+
+  it('maps sourceFilters to field_filters', () => {
+    expect(
+      fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        field_filters: ['field_a', 'field_b'],
+      })
+    );
+  });
+
+  it('omits field_filters when sourceFilters is empty', () => {
+    const result = fromStoredDataViewToAsCodeSavedSchema({
+      title: 'logs-*',
+      sourceFilters: [],
+    });
+
+    expect(result).not.toHaveProperty('field_filters');
+  });
+
+  it('omits field_filters when sourceFilters is absent', () => {
+    const result = fromStoredDataViewToAsCodeSavedSchema({
+      title: 'logs-*',
+    });
+
+    expect(result).not.toHaveProperty('field_filters');
+  });
 });

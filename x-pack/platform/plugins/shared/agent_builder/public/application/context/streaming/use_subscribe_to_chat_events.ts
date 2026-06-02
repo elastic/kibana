@@ -27,7 +27,6 @@ import {
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
-import { i18n } from '@kbn/i18n';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -40,7 +39,6 @@ interface SubscribeOptions {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   browserToolExecutor?: BrowserToolExecutor;
   isAborted: () => boolean;
-  setAgentReasoning: (agentReasoning: string) => void;
 }
 
 /**
@@ -59,7 +57,6 @@ export const subscribeToChatEvents = ({
   browserApiTools,
   browserToolExecutor,
   isAborted,
-  setAgentReasoning,
 }: SubscribeOptions): Promise<void> => {
   const nextChatEvent = (event: ChatEvent) => {
     if (isMessageChunkEvent(event)) {
@@ -69,7 +66,6 @@ export const subscribeToChatEvents = ({
         assistantMessage: event.data.message_content,
       });
     } else if (isToolProgressEvent(event)) {
-      const isInternalProgress = event.data.metadata?.internal === 'true';
       conversationActions.setToolCallProgress({
         progress: {
           message: event.data.message,
@@ -77,19 +73,21 @@ export const subscribeToChatEvents = ({
         },
         toolCallId: event.data.tool_call_id,
       });
-      if (!isInternalProgress) {
-        setAgentReasoning(event.data.message);
-      }
     } else if (isReasoningEvent(event)) {
+      // Skip transient reasoning entirely. The backend emits these as
+      // throwaway "thinking..." placeholders that aren't meant to be
+      // persisted, rendered as a step, or surfaced as the live indicator.
+      if (event.data.transient) {
+        return;
+      }
+      conversationActions.clearAssistantMessage();
       conversationActions.addReasoningStep({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
-          transient: event.data.transient,
           tool_call_id: event.data.tool_call_id,
           tool_call_group_id: event.data.tool_call_group_id,
         }),
       });
-      setAgentReasoning(event.data.reasoning);
     } else if (isToolCallEvent(event)) {
       conversationActions.addToolCall({
         step: createToolCallStep({
@@ -146,11 +144,6 @@ export const subscribeToChatEvents = ({
       conversationActions.addCompactionStep({
         tokenCountBefore: event.data.token_count_before,
       });
-      setAgentReasoning(
-        i18n.translate('xpack.agentBuilder.chatEvents.compactionStarted', {
-          defaultMessage: 'Compacting conversation context',
-        })
-      );
     } else if (isCompactionCompletedEvent(event)) {
       conversationActions.setCompactionStepComplete({
         tokenCountAfter: event.data.token_count_after,

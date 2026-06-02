@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 143
- * Metric groups: 533
+ * Registry groups: 144
+ * Metric groups: 534
  * Hardcoded fields: 34
- * Total fields: 1196
+ * Total fields: 1200
  *
  * @internal
  *
- * WARNING: This object contains 1196+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1200+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1632,6 +1632,27 @@ export const semconvFlat = {
     description: 'Inode representing the file in the filesystem.',
     type: 'keyword',
     example: '256383',
+  },
+  'file.lock.mechanism': {
+    name: 'file.lock.mechanism',
+    description:
+      'The lock mechanism such as noted by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)',
+    type: 'keyword',
+    example: 'POSIX',
+  },
+  'file.lock.mode': {
+    name: 'file.lock.mode',
+    description:
+      'Mode of lock or operation such as documented by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)',
+    type: 'keyword',
+    example: 'ADVISORY',
+  },
+  'file.lock.type': {
+    name: 'file.lock.type',
+    description:
+      "The lock type as represented by i.e. [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)'s l_type.",
+    type: 'keyword',
+    example: 'read',
   },
   'file.mode': {
     name: 'file.mode',
@@ -3407,7 +3428,7 @@ export const semconvFlat = {
   },
   'metrics.container.cpu.time': {
     name: 'metrics.container.cpu.time',
-    description: 'Total CPU time consumed.',
+    description: 'CPU time consumed.',
     type: 'double',
   },
   'metrics.container.cpu.usage': {
@@ -5289,6 +5310,11 @@ export const semconvFlat = {
   'metrics.system.filesystem.limit': {
     name: 'metrics.system.filesystem.limit',
     description: 'The total storage capacity of the filesystem.',
+    type: 'double',
+  },
+  'metrics.system.filesystem.lock.count': {
+    name: 'metrics.system.filesystem.lock.count',
+    description: 'Filesystem lock counts.',
     type: 'double',
   },
   'metrics.system.filesystem.usage': {

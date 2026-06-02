@@ -38,8 +38,10 @@ import type {
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
   ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
@@ -438,6 +440,15 @@ export class WorkflowsService {
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.getManagedWorkflowStatus(id, options, registeredPluginId);
   }
 
   public async executeManagedWorkflow(

@@ -10,6 +10,7 @@
 import React, { type ReactNode } from 'react';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
+import type { AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -39,6 +40,7 @@ export interface ChromeApiDeps {
   };
   sidebar: SidebarStart;
   featureFlags: FeatureFlagsStart;
+  componentDeps: InternalChromeStart['componentDeps'];
 }
 
 export function createChromeApi({
@@ -46,6 +48,7 @@ export function createChromeApi({
   services,
   sidebar,
   featureFlags,
+  componentDeps,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
@@ -78,7 +81,11 @@ export function createChromeApi({
     getProjectHome$: () => projectNavigation.getProjectHome$(),
   };
 
+  let appHeaderRegistrationId = 0;
+
   const chromeStart: InternalChromeStart = {
+    componentDeps,
+
     withProvider: (children: ReactNode) => {
       return (
         <ChromeServiceProvider value={{ chrome: chromeStart }}>
@@ -117,6 +124,7 @@ export function createChromeApi({
     },
     getBreadcrumbsAppendExtensions$: () => state.breadcrumbs.appendExtensions.$,
     getBreadcrumbsAppendExtensionsWithBadges$: () => state.breadcrumbs.appendExtensionsWithBadges$,
+    getBreadcrumbsBadges$: () => state.breadcrumbs.badges.$,
     setBreadcrumbsAppendExtension: (extension) => {
       state.breadcrumbs.appendExtensions.addSorted(
         extension,
@@ -181,6 +189,26 @@ export function createChromeApi({
       globalSearch: {
         get$: () => state.globalSearch.$,
         set: (config) => state.globalSearch.set(config),
+      },
+      contextSwitcher: {
+        get$: () => state.contextSwitcher.$,
+        set: state.contextSwitcher.set,
+      },
+      inlineAppHeader: {
+        get$: () => state.inlineAppHeader.$,
+        set: state.inlineAppHeader.set,
+      },
+      appHeader: {
+        get$: () => state.appHeader.$,
+        set: (config: AppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
+          state.appHeader.set(config);
+          return () => {
+            if (registrationId === appHeaderRegistrationId) {
+              state.appHeader.set(undefined);
+            }
+          };
+        },
       },
     },
     sidebar,

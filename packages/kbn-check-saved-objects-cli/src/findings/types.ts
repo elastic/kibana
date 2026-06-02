@@ -61,7 +61,7 @@ export interface SavedObjectsCheckFinding {
   /**
    * Path fragment appended to the Saved Objects docs base URL.
    * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
-   * or `/` (relative path, e.g. `/validate#troubleshooting`).
+   * or `/` (relative path, e.g. `/troubleshooting#existing-type-mutated-migrations`).
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;

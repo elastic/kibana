@@ -71,7 +71,6 @@ export * from './ui_components';
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
   ContentListWrapper,
-  DataViewsManagementPage,
   ListingTable,
   buildContentListSearch,
   buildContentListUrlRegex,

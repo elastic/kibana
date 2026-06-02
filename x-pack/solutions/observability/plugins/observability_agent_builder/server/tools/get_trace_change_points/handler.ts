@@ -92,9 +92,15 @@ export async function getToolHandler({
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
+
+  // Change point detection requires at least 22 buckets. APM's finest rollup is 1m, so a
+  // 30-minute floor guarantees enough buckets when the requested window is shorter.
+  const MINIMUM_RANGE_MS = 30 * 60 * 1000;
+  const effectiveStartMs = endMs - startMs < MINIMUM_RANGE_MS ? endMs - MINIMUM_RANGE_MS : startMs;
+
   const source = await getPreferredDocumentSource({
     apmDataAccessServices,
-    start: startMs,
+    start: effectiveStartMs,
     end: endMs,
     groupBy,
     kqlFilter,
@@ -114,7 +120,7 @@ export async function getToolHandler({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', {
-            start: startMs,
+            start: effectiveStartMs,
             end: endMs,
           }),
           ...buildKqlFilter(kqlFilter),

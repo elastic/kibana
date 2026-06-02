@@ -37,6 +37,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
@@ -75,6 +79,7 @@ export interface StreamsPluginSetupDependencies {
   fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
@@ -94,4 +99,5 @@ export interface StreamsPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }

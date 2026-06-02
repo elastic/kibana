@@ -42,6 +42,5 @@ export interface AnswerAgentPromptRuntimeParams {
 
 export interface PromptFactory {
   getMainPrompt(params: ResearchAgentPromptRuntimeParams): Promise<BaseMessageLike[]>;
-  getAnswerPrompt(params: AnswerAgentPromptRuntimeParams): Promise<BaseMessageLike[]>;
   getStructuredAnswerPrompt(params: AnswerAgentPromptRuntimeParams): Promise<BaseMessageLike[]>;
 }
