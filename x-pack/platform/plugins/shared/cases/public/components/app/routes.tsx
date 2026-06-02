@@ -58,11 +58,7 @@ const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
 const CaseViewRedesignLazy = lazy(() => import('../cases_redesign/case_view'));
 const ConfigureCasesRedesignLazy = lazy(() => import('../cases_redesign/configure_cases'));
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
-  actionsNavigation,
-  refreshRef,
-  timelineIntegration,
-}) => {
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
@@ -163,11 +159,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             {casesRedesign.details ? (
               <CaseViewRedesignLazy />
             ) : (
-              <CaseViewLazy
-                actionsNavigation={actionsNavigation}
-                refreshRef={refreshRef}
-                timelineIntegration={timelineIntegration}
-              />
+              <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
             )}
           </Suspense>
         </Route>
