@@ -7,11 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { Suspense } from 'react';
+import { EuiFilterButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { filter } from '../part';
-import { TagFilterRenderer } from './tag_filter_renderer';
+import type { TagFilterRendererProps } from './tag_filter_renderer';
 
-// Re-export the props type for consumers.
 export type { TagFilterProps } from '../part';
+
+const LazyTagFilterRenderer = React.lazy(() =>
+  import('./tag_filter_renderer').then((m) => ({ default: m.TagFilterRenderer }))
+);
+
+const TagFilterRendererSuspended = (props: TagFilterRendererProps) => (
+  <Suspense
+    fallback={
+      <EuiFilterButton isLoading isDisabled grow>
+        {i18n.translate('contentManagement.contentList.toolbar.tagFilter.loading', {
+          defaultMessage: 'Tags',
+        })}
+      </EuiFilterButton>
+    }
+  >
+    <LazyTagFilterRenderer {...props} />
+  </Suspense>
+);
+TagFilterRendererSuspended.displayName = 'TagFilterRendererSuspended';
 
 /**
  * `TagFilter` declarative component (non-rendering).
@@ -19,8 +40,8 @@ export type { TagFilterProps } from '../part';
  * This is a declarative component that doesn't render anything.
  * It specifies that a tag filter dropdown should appear in the toolbar filters.
  * The `resolve` callback checks whether tags are available and returns
- * a `SearchFilterConfig` wrapping {@link TagFilterRenderer}, or `undefined`
- * to skip the filter entirely.
+ * a `SearchFilterConfig` wrapping the lazy-loaded `TagFilterRenderer`, or
+ * `undefined` to skip the filter entirely.
  *
  * Tags must be enabled via the provider's `services.tags` configuration.
  *
@@ -38,8 +59,8 @@ export const TagFilter = filter.createPreset({
   name: 'tags',
   resolve: (_attributes, { hasTags }) => {
     if (!hasTags) {
-      return undefined;
+      return;
     }
-    return { type: 'custom_component', component: TagFilterRenderer };
+    return { type: 'custom_component', component: TagFilterRendererSuspended };
   },
 });
