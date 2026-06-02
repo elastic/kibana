@@ -25,14 +25,13 @@ import {
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
-import type { RulesClientContext } from '../../../../rules_client/types';
+import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { createRuleDataSchema } from '../create/schemas';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import type {
   ApiKeyEntry,
   BatchResult,
-  BulkCreateOperationError,
   BulkCreateRulesItem,
   BulkCreateRulesParams,
   BulkCreateRulesResult,
@@ -41,7 +40,6 @@ import type {
 import {
   buildTaskInstance,
   collectNewKeysToInvalidate,
-  demotePreparedRules,
   flushKeysToInvalidate,
   prepareRule,
 } from './utils';
@@ -78,7 +76,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   const username = await context.getUserName();
   const actionsClient = await context.getActionsClient();
   const successfulIds: string[] = [];
-  const errors: BulkCreateOperationError[] = [];
+  const errors: BulkOperationError[] = [];
 
   const inputs = rules.map((rule) => ({
     id: rule.options?.id ?? SavedObjectsUtils.generateId(),
@@ -138,10 +136,10 @@ async function preValidate<Params extends RuleParams>({
   inputs: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
 }): Promise<{
   validated: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
-  errors: BulkCreateOperationError[];
+  errors: BulkOperationError[];
 }> {
   const validated = new Map<string, { id: string; rule: BulkCreateRulesItem<Params> }>();
-  const errors: BulkCreateOperationError[] = [];
+  const errors: BulkOperationError[] = [];
   const authPairs = new Map<
     string,
     { ruleTypeId: string; consumer: string; ids: string[]; names: Map<string, string> }
@@ -266,12 +264,12 @@ async function runBatch<Params extends RuleParams>({
 }: RunBatchArgs<Params>): Promise<BatchResult> {
   const { logger } = context;
 
-  // NOTE: in order to minimise external calls, the values below get mutated
-  // at different stages in the process (ie if we fail schedule creation).
+  // NOTE: the values below get mutated at different stages
+  // in the process (ie if we fail schedule creation).
   const preparedRules = new Map<string, PreparedRule>();
   const keysToInvalidate = new Set<string>();
   const apiKeysMap = new Map<string, ApiKeyEntry>();
-  const errors: BulkCreateOperationError[] = [];
+  const errors: BulkOperationError[] = [];
 
   // Phase B1: per-rule prepare (high latency validation + API key generation).
   await withSpan({ name: 'runBatch.pMap.prepareRule', type: 'rules' }, () =>
@@ -284,7 +282,6 @@ async function runBatch<Params extends RuleParams>({
           username,
           id,
           rule,
-          errors,
           apiKeysMap,
         });
         if (prepared) preparedRules.set(id, prepared);
@@ -306,7 +303,7 @@ async function runBatch<Params extends RuleParams>({
     return { successfulIds: [], errors };
   }
 
-  // Phase B2: check schedule-limit on the enabled subset; demote on overflow.
+  // Phase B2: check schedule-limit on the enabled subset; exclude on overflow.
   const enabled = [...preparedRules.values()].filter((p) => p.enabled);
 
   if (enabled.length > 0) {
@@ -319,24 +316,22 @@ async function runBatch<Params extends RuleParams>({
         })
     );
     if (validationPayload) {
-      const enabledIds = enabled.map((p) => p.id);
-      const reasonMessage = getRuleCircuitBreakerErrorMessage({
+      const message = getRuleCircuitBreakerErrorMessage({
         interval: validationPayload.interval,
         intervalAvailable: validationPayload.intervalAvailable,
         action: 'bulkCreate',
-        rules: enabledIds.length,
+        rules: enabled.length,
       });
-      logger.debug(`Demoting ${enabledIds.length} rules -> disabled, schedule limit exceeded.`);
-      demotePreparedRules({
-        ids: enabledIds,
-        reason: 'schedule_limit_exceeded',
-        message: reasonMessage,
-        preparedRules,
-        apiKeysMap,
-        keysToInvalidate,
-        errors,
-        username,
-      });
+      logger.debug(`Excluding ${enabled.length} rule(s) from batch: schedule limit exceeded.`);
+      for (const { id, name } of enabled) {
+        const apiKey = apiKeysMap.get(id);
+        if (apiKey) {
+          for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
+          apiKeysMap.delete(id);
+        }
+        preparedRules.delete(id);
+        errors.push({ message, rule: { id, name } });
+      }
     }
   }
 
@@ -351,55 +346,46 @@ async function runBatch<Params extends RuleParams>({
   const newlyScheduledTaskIds = new Set<string>();
 
   if (survivingEnabled.length > 0) {
-    const tasksToSchedule = survivingEnabled.map((preparedRule) =>
-      buildTaskInstance(context, preparedRule)
-    );
+    const tasksToSchedule = survivingEnabled.map((p) => buildTaskInstance(context, p));
 
-    let scheduledIds: string[] = [];
-    const survivingEnabledIds = survivingEnabled.map((p) => p.id);
     try {
       const scheduledTasks = await withSpan({ name: 'runBatch.bulkSchedule', type: 'tasks' }, () =>
         context.taskManager.bulkSchedule(tasksToSchedule)
       );
-      scheduledIds = scheduledTasks.map((task) => task.id);
-    } catch (error) {
-      // Whole-call TM throw: demote enabled subset to disabled, continue.
-      logger.warn(
-        `Demoting ${survivingEnabledIds.length} rules -> disabled, task scheduling failed.`
-      );
-      demotePreparedRules({
-        ids: survivingEnabledIds,
-        reason: 'task_schedule_failed',
-        message: `Failed to schedule tasks: ${error.message}`,
-        preparedRules,
-        apiKeysMap,
-        keysToInvalidate,
-        errors,
-        username,
-      });
-    }
+      scheduledTasks.forEach((t) => newlyScheduledTaskIds.add(t.id));
 
-    if (scheduledIds.length > 0) {
-      scheduledIds.forEach((id) => newlyScheduledTaskIds.add(id));
-    }
-
-    // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` validation
-    // logs+skips invalid instances. Diff requested vs returned and demote the missing ones.
-    if (preparedRules.size > 0 && scheduledIds.length < survivingEnabledIds.length) {
-      const returned = new Set(scheduledIds);
-      const dropped = survivingEnabledIds.filter((id) => !returned.has(id));
+      // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` logs+skips
+      // invalid instances. Diff requested vs returned and exclude the missing ones.
+      const dropped = survivingEnabled.filter((p) => !newlyScheduledTaskIds.has(p.id));
       if (dropped.length > 0) {
-        logger.warn(`Demoting ${dropped.length} rules -> disabled, task validation failed.`);
-        demotePreparedRules({
-          ids: dropped,
-          reason: 'task_validation_failed',
-          message: 'Task scheduling silently dropped this rule (validation failure in task store)',
-          preparedRules,
-          apiKeysMap,
-          keysToInvalidate,
-          errors,
-          username,
-        });
+        logger.warn(`Excluding ${dropped.length} rule(s) from batch: task validation failed.`);
+        const message =
+          'Task scheduling silently dropped this rule (validation failure in task store)';
+        for (const { id, name } of dropped) {
+          const apiKey = apiKeysMap.get(id);
+          if (apiKey) {
+            for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
+            apiKeysMap.delete(id);
+          }
+          preparedRules.delete(id);
+          errors.push({ message, rule: { id, name } });
+        }
+      }
+    } catch (error) {
+      // Whole-call TM throw: exclude enabled subset from the batch, continue.
+      logger.warn(
+        `Excluding ${survivingEnabled.length} rule(s) from batch: task scheduling failed.`
+      );
+      const message = `Failed to schedule tasks: ${error.message}`;
+      const status = error.output?.statusCode;
+      for (const { id, name } of survivingEnabled) {
+        const apiKey = apiKeysMap.get(id);
+        if (apiKey) {
+          for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
+          apiKeysMap.delete(id);
+        }
+        preparedRules.delete(id);
+        errors.push({ message, status, rule: { id, name } });
       }
     }
   }
@@ -434,7 +420,6 @@ async function runBatch<Params extends RuleParams>({
     })
   );
 
-  const createTime = Date.now();
   let bulkResponse;
   try {
     bulkResponse = await withSpan({ name: 'runBatch.bulkCreateRulesSo', type: 'rules' }, () =>
@@ -459,15 +444,16 @@ async function runBatch<Params extends RuleParams>({
       }
     }
     await flushKeysToInvalidate(keysToInvalidate, context);
-    errors.push({
-      message: `Failed to bulk create rule saved objects: ${error.message}`,
-      status: error.output?.statusCode,
-      rule: { id: 'n/a', name: 'n/a' },
-    });
+    const message = `Failed to bulk create rule saved objects: ${error.message}`;
+    const status = error.output?.statusCode;
+    for (const { id, name } of preparedRules.values()) {
+      errors.push({ message, status, rule: { id, name } });
+    }
     return { successfulIds: [], errors };
   }
 
   // Phase B4 per-row outcomes.
+  const createTime = Date.now();
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
@@ -475,7 +461,7 @@ async function runBatch<Params extends RuleParams>({
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
       errors.push({
-        message: so.error.message ?? 'n/a',
+        message: so.error.message ?? 'Error saving rule SO',
         status: so.error.statusCode,
         rule: { id: so.id, name: preparedRules.get(so.id)?.name ?? 'n/a' },
       });

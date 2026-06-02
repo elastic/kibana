@@ -6,7 +6,6 @@
  */
 
 import Semver from 'semver';
-import { i18n } from '@kbn/i18n';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -24,26 +23,13 @@ import {
 } from '../../../../rules_client/lib';
 import {
   addMissingUiamKeyTagIfNeeded,
-  apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
-import type {
-  PreparedRule,
-  PrepareRuleArgs,
-  ApiKeyEntry,
-  BulkCreateOperationError,
-  BulkCreateDisabledReason,
-} from './types';
-
-export const getBulkCreateAsDisabledMessage = (message: string): string =>
-  i18n.translate('xpack.alerting.rulesClient.bulkCreate.ruleCreatedDisabledErrorMessage', {
-    defaultMessage: 'Rule created in a disabled state: {message}',
-    values: { message },
-  });
+import type { PreparedRule, PrepareRuleArgs, ApiKeyEntry } from './types';
 
 export const collectNewKeysToInvalidate = (entries: Iterable<ApiKeyEntry>): string[] => {
   const keys: string[] = [];
@@ -83,7 +69,6 @@ export const prepareRule = async <Params extends RuleParams>({
   username,
   id,
   rule,
-  errors,
   apiKeysMap,
 }: PrepareRuleArgs<Params>): Promise<{ prepared?: PreparedRule; error?: BulkOperationError }> => {
   const { allowMissingConnectorSecrets } = rule;
@@ -108,10 +93,6 @@ export const prepareRule = async <Params extends RuleParams>({
       rule: { consumer: data.consumer, producer: ruleType.producer },
     });
 
-    // Mint API key for enabled rules.
-    // Soft-fail: a key-mint failure does NOT reject the rule. We persist it as
-    // disabled, push a degraded error so the caller knows.
-    let effectiveEnabled = data.enabled;
     let apiKeyProps:
       | ReturnType<typeof apiKeyAsRuleDomainProperties>
       | Awaited<ReturnType<typeof createNewAPIKeySet>> = apiKeyAsRuleDomainProperties(
@@ -120,29 +101,18 @@ export const prepareRule = async <Params extends RuleParams>({
       false
     );
     if (data.enabled) {
-      try {
-        apiKeyProps = await createNewAPIKeySet(context, {
-          id: ruleType.id,
-          ruleName: data.name,
-          username,
-          shouldUpdateApiKey: true,
-          errorMessage: 'Error creating rule: could not create API key',
-        });
-        apiKeysMap.set(id, {
-          apiKey: apiKeyProps.apiKey ?? null,
-          uiamApiKey: apiKeyProps.uiamApiKey ?? null,
-          apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
-        });
-      } catch (apiKeyErr) {
-        effectiveEnabled = false;
-        apiKeyProps = apiKeyAsRuleDomainProperties(null, username, false);
-        errors.push({
-          message: getBulkCreateAsDisabledMessage(apiKeyErr.message),
-          status: apiKeyErr.output?.statusCode,
-          rule: { id, name: data.name },
-          disabledReason: 'api_key_creation_failed',
-        });
-      }
+      apiKeyProps = await createNewAPIKeySet(context, {
+        id: ruleType.id,
+        ruleName: data.name,
+        username,
+        shouldUpdateApiKey: true,
+        errorMessage: 'Error creating rule: could not create API key',
+      });
+      apiKeysMap.set(id, {
+        apiKey: apiKeyProps.apiKey ?? null,
+        uiamApiKey: apiKeyProps.uiamApiKey ?? null,
+        apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
+      });
     }
 
     const allActions = [...data.actions, ...(data.systemActions ?? [])];
@@ -176,7 +146,7 @@ export const prepareRule = async <Params extends RuleParams>({
         ...restData,
         tags: tagsWithUiamCheck,
         ...apiKeyProps,
-        enabled: effectiveEnabled,
+        enabled: data.enabled,
         id,
         createdBy: username,
         updatedBy: username,
@@ -195,7 +165,7 @@ export const prepareRule = async <Params extends RuleParams>({
       params: { legacyId, paramsWithRefs: updatedParams },
     });
 
-    if (effectiveEnabled) {
+    if (data.enabled) {
       ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
       ruleAttributes.scheduledTaskId = id;
     }
@@ -203,7 +173,7 @@ export const prepareRule = async <Params extends RuleParams>({
     const prepared = {
       id,
       name: data.name,
-      enabled: effectiveEnabled,
+      enabled: data.enabled,
       rawRule: ruleAttributes,
       references,
       schedule: data.schedule,
@@ -218,60 +188,6 @@ export const prepareRule = async <Params extends RuleParams>({
       rule: { id, name: rule.data?.name ?? 'n/a' },
     };
     return { error };
-  }
-};
-
-/**
- * Demote in-memory (enabled -> disabled): flips a set of currently-enabled
- * prepared rules to disabled, queues their API keys for invalidation, records a degraded
- * error so the caller can surface "rule was created in a disabled state".
- */
-export const demotePreparedRules = ({
-  ids,
-  reason,
-  message,
-  preparedRules,
-  apiKeysMap,
-  keysToInvalidate,
-  errors,
-  username,
-}: {
-  ids: string[];
-  reason: BulkCreateDisabledReason;
-  message: string;
-  preparedRules: Map<string, PreparedRule>;
-  apiKeysMap: Map<string, ApiKeyEntry>;
-  keysToInvalidate: Set<string>;
-  errors: BulkCreateOperationError[];
-  username: string | null;
-}): void => {
-  for (const id of ids) {
-    const prepared = preparedRules.get(id);
-    if (!prepared || !prepared.enabled) continue;
-
-    const apiKey = apiKeysMap.get(id);
-    if (apiKey) {
-      for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
-      apiKeysMap.delete(id);
-    }
-
-    // Re-shape `rawRule` to the disabled-rule form.
-    const nullKey = apiKeyAsAlertAttributes(null, username, false);
-    prepared.rawRule = {
-      ...prepared.rawRule,
-      ...nullKey,
-      uiamApiKey: null,
-      enabled: false,
-    };
-    delete prepared.rawRule.scheduledTaskId;
-    delete prepared.rawRule.lastEnabledAt;
-    prepared.enabled = false;
-
-    errors.push({
-      message: getBulkCreateAsDisabledMessage(message),
-      rule: { id, name: prepared.name },
-      disabledReason: reason,
-    });
   }
 };
 

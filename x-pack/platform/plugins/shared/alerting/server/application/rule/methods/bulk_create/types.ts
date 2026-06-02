@@ -37,7 +37,6 @@ export interface PrepareRuleArgs<Params extends RuleParams> {
   username: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
-  errors: BulkCreateOperationError[];
   apiKeysMap: Map<string, ApiKeyEntry>;
 }
 
@@ -57,24 +56,14 @@ export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   changeTracking?: RuleChangeTracking;
 }
 
-export type BulkCreateDisabledReason =
-  | 'api_key_creation_failed'
-  | 'schedule_limit_exceeded'
-  | 'task_schedule_failed'
-  | 'task_validation_failed';
-
-export interface BulkCreateOperationError extends BulkOperationError {
-  disabledReason?: BulkCreateDisabledReason;
-}
-
 export interface BulkCreateRulesResult {
   /** IDs of rules whose SO was successfully persisted. */
   successfulIds: string[];
-  errors: BulkCreateOperationError[];
+  errors: BulkOperationError[];
   total: number;
 }
 
 export interface BatchResult {
   successfulIds: string[];
-  errors: BulkCreateOperationError[];
+  errors: BulkOperationError[];
 }
