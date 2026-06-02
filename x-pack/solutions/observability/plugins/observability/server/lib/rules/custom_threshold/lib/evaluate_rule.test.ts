@@ -8,8 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { SearchConfigurationType } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { UNGROUPED_FACTORY_KEY } from '../constants';
+import type { EvaluatedRuleParams } from './evaluate_rule';
 import { evaluateRule } from './evaluate_rule';
 import { getData } from './get_data';
 import { checkMissingGroups } from './check_missing_group';
@@ -33,13 +35,22 @@ const criterion = {
   comparator: COMPARATORS.GREATER_THAN,
 };
 
-const baseParams = {
+const searchConfiguration: SearchConfigurationType = {
+  index: {
+    index: {
+      id: 'test-*',
+      name: 'Test',
+      timeFieldName: '@timestamp',
+      title: 'test-*',
+    },
+  },
+  query: { query: '', language: 'kuery' },
+};
+
+const baseParams: EvaluatedRuleParams = {
   criteria: [criterion],
   groupBy: ['host.name'],
-  searchConfiguration: {
-    index: { title: 'test-*', timeFieldName: '@timestamp' },
-    query: { query: '', language: 'kuery' },
-  },
+  searchConfiguration,
 };
 
 const esQueryConfig = {
