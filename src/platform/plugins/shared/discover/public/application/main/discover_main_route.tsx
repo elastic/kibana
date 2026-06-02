@@ -10,7 +10,7 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -236,15 +236,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     tabsInitializationState.loading ||
     areTabsInitializing;
 
-  const chromeNextHeaderTitle = useMemo(
-    () =>
-      persistedDiscoverSession?.title ??
-      i18n.translate('discover.pageTitleWithoutSavedSearch', {
-        defaultMessage: 'New session',
-      }),
-    [persistedDiscoverSession?.title]
-  );
-
   if (isLoading) {
     return <BrandedLoadingIndicator />;
   }
@@ -293,11 +284,22 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView {...props} headerTitle={chromeNextHeaderTitle} />
+              <TabsView
+                {...props}
+                headerTitle={
+                  persistedDiscoverSession?.title ??
+                  i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                    defaultMessage: 'New session',
+                  })
+                }
+              />
             ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
             ) : (
-              <SingleTabViewWithAppMenu {...props} headerTitle={chromeNextHeaderTitle} />
+              <SingleTabViewWithAppMenu
+                {...props}
+                headerTitle={persistedDiscoverSession?.title ?? ''}
+              />
             )
           }
         </>
