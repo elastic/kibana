@@ -10,10 +10,17 @@
 import { tags } from '@kbn/scout';
 
 /**
- * Default tags for Discover core / platform specs that should run across all
- * stateful + serverless deployment types.
+ * Deployment-agnostic tags for Discover core / platform specs that should run
+ * everywhere: all stateful deployments plus the serverless project types that
+ * have a stateful counterpart.
  */
-export const DISCOVER_CORE_TAGS = tags.deploymentAgnostic;
+export const DISCOVER_DEPLOYMENT_AGNOSTIC_TAGS = tags.deploymentAgnostic;
+
+/**
+ * Stateful-only tags. Use for specs migrated from FTR suites that ran
+ * stateful-only, to preserve (not expand) their original coverage.
+ */
+export const DISCOVER_STATEFUL_TAGS = tags.stateful.all;
 
 /**
  * Standard `kbn_archiver/discover` archive. Loads the `logstash-*` data view

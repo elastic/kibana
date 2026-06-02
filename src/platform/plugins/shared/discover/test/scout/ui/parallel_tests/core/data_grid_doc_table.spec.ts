@@ -28,80 +28,84 @@ const addColumnFromSidebar = async (page: ScoutPage, column: string) => {
   await page.testSubj.click(`fieldToggle-${column}`);
 };
 
-spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CORE_TAGS }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
-    await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
-  });
+spaceTest.describe(
+  'Discover data grid - doc table',
+  { tag: testData.DISCOVER_DEPLOYMENT_AGNOSTIC_TAGS },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
+      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+      await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
+    });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // Viewer is sufficient for read-only grid interactions.
-    await browserAuth.loginAsViewer();
-    await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    // Search can finish before the grid leaves "Loading documents" (histogram may
-    // render first). Wait until the table reports a stable render before row counts.
-    await pageObjects.discover.waitForDocTableRendered();
-  });
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      // Viewer is sufficient for read-only grid interactions.
+      await browserAuth.loginAsViewer();
+      await pageObjects.discover.setQueryMode('classic');
+      await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      // Search can finish before the grid leaves "Loading documents" (histogram may
+      // render first). Wait until the table reports a stable render before row counts.
+      await pageObjects.discover.waitForDocTableRendered();
+    });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset(
-      'defaultIndex',
-      'timepicker:timeDefaults',
-      'discover:rowHeightOption'
-    );
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset(
+        'defaultIndex',
+        'timepicker:timeDefaults',
+        'discover:rowHeightOption'
+      );
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
 
-  spaceTest('renders rows by default', async ({ page }) => {
-    await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
-    const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
-    expect(await rows.count()).toBeGreaterThan(0);
-  });
+    spaceTest('renders rows by default', async ({ page }) => {
+      await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
+      const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+      expect(await rows.count()).toBeGreaterThan(0);
+    });
 
-  spaceTest('refreshes the table when the time range changes', async ({ page, pageObjects }) => {
-    const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
-    const initialCount = await rows.count();
-    expect(initialCount).toBeGreaterThan(0);
+    spaceTest('refreshes the table when the time range changes', async ({ page, pageObjects }) => {
+      const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+      const initialCount = await rows.count();
+      expect(initialCount).toBeGreaterThan(0);
 
-    await pageObjects.datePicker.setAbsoluteRange(NARROWED_TIME_RANGE);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.datePicker.setAbsoluteRange(NARROWED_TIME_RANGE);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
 
-    const finalCount = await rows.count();
-    expect(finalCount).toBeLessThan(initialCount);
-  });
+      const finalCount = await rows.count();
+      expect(finalCount).toBeLessThan(initialCount);
+    });
 
-  spaceTest('adds columns via the sidebar field list', async ({ page, pageObjects }) => {
-    for (const column of EXTRA_COLUMNS) {
-      await addColumnFromSidebar(page, column);
-    }
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    spaceTest('adds columns via the sidebar field list', async ({ page, pageObjects }) => {
+      for (const column of EXTRA_COLUMNS) {
+        await addColumnFromSidebar(page, column);
+      }
+      await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    for (const column of EXTRA_COLUMNS) {
-      await expect(
-        pageObjects.discover.getColumnHeader(column),
-        `column ${column} should be present in the grid header`
-      ).toBeVisible();
-    }
-  });
+      for (const column of EXTRA_COLUMNS) {
+        await expect(
+          pageObjects.discover.getColumnHeader(column),
+          `column ${column} should be present in the grid header`
+        ).toBeVisible();
+      }
+    });
 
-  spaceTest('removes columns via the sidebar field list', async ({ page, pageObjects }) => {
-    // Add both, then remove only the second.
-    for (const column of EXTRA_COLUMNS) {
-      await addColumnFromSidebar(page, column);
-    }
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    spaceTest('removes columns via the sidebar field list', async ({ page, pageObjects }) => {
+      // Add both, then remove only the second.
+      for (const column of EXTRA_COLUMNS) {
+        await addColumnFromSidebar(page, column);
+      }
+      await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    const [firstColumn, secondColumn] = EXTRA_COLUMNS;
-    await page.testSubj.fill('fieldListFiltersFieldSearch', secondColumn);
-    await page.testSubj.click(`fieldToggle-${secondColumn}`);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+      const [firstColumn, secondColumn] = EXTRA_COLUMNS;
+      await page.testSubj.fill('fieldListFiltersFieldSearch', secondColumn);
+      await page.testSubj.click(`fieldToggle-${secondColumn}`);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    await expect(pageObjects.discover.getColumnHeader(secondColumn)).toBeHidden();
-    await expect(pageObjects.discover.getColumnHeader(firstColumn)).toBeVisible();
-  });
-});
+      await expect(pageObjects.discover.getColumnHeader(secondColumn)).toBeHidden();
+      await expect(pageObjects.discover.getColumnHeader(firstColumn)).toBeVisible();
+    });
+  }
+);

@@ -65,6 +65,14 @@ export class FilterBar {
     ).toBeVisible();
   }
 
+  /**
+   * Returns the number of filter pills currently shown in the global filter bar.
+   * Mirrors the FTR `filterBar.getFilterCount()` (`~filter` token match).
+   */
+  async getFilterCount(): Promise<number> {
+    return this.page.testSubj.locator('~filter').count();
+  }
+
   async hasFilter(options: FilterStateOptions) {
     const testSubjLocator = [
       '~filter',

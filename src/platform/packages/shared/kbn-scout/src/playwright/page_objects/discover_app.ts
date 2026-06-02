@@ -12,6 +12,8 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
+import { EuiComboBoxWrapper } from '../eui_components';
+import { DataViewEditorPage } from './data_view_editor_page';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
@@ -97,6 +99,52 @@ export class DiscoverApp {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')
       .or(this.page.testSubj.locator('dataView-switch-link'));
+  }
+
+  /**
+   * Returns the trimmed display name of the currently selected data view.
+   */
+  async getSelectedDataViewName(): Promise<string> {
+    return (await this.getSelectedDataView().innerText()).trim();
+  }
+
+  /**
+   * Selects the "no time filter" option for the timestamp field in the open data
+   * view editor flyout, so the created data view has no time field.
+   */
+  async selectNoTimeFieldInDataViewEditor() {
+    const timestampField = new EuiComboBoxWrapper(this.page, 'timestampField');
+    await timestampField.selectSingleOption("--- I don't want to use the time filter ---");
+  }
+
+  /**
+   * Creates and saves a new data view from the Discover search bar data-view
+   * switcher (classic mode only). The editor appends `*` to the title
+   * automatically. When `hasTimeField` is false, the "no time filter" option is
+   * selected; when true, the editor's default time field selection is kept.
+   */
+  async createDataViewFromSearchBar({
+    name,
+    hasTimeField = false,
+  }: {
+    name: string;
+    hasTimeField?: boolean;
+  }) {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await dataViewSwitch.click();
+    await this.page.testSubj.click('dataview-create-new');
+
+    const editor = new DataViewEditorPage(this.page);
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+
+    await editor.setTitle(name);
+
+    if (!hasTimeField) {
+      await this.selectNoTimeFieldInDataViewEditor();
+    }
+
+    await editor.save();
+    await this.waitUntilTabIsLoaded();
   }
 
   private async clickAppMenuItem(
@@ -249,6 +297,12 @@ export class DiscoverApp {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  // Waits for a Discover tab to finish loading.
+  async waitUntilTabIsLoaded() {
+    await this.waitForDiscoverPage();
+    await this.waitUntilSearchingHasFinished();
   }
 
   // Waits for the document table to be fully rendered and stable
@@ -578,6 +632,28 @@ export class DiscoverApp {
     const tab = tabsBar.getByRole('tab', { name });
     await tab.click();
     await expect(tab).toHaveAttribute('aria-selected', 'true');
+  }
+
+  /**
+   * Switches to the Discover tab at the given 0-based index in the unified tab
+   * bar and waits for it to become active and finish loading.
+   */
+  async navigateToTabByIndex(index: number) {
+    const tabs = await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
+      .locator(`[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`)
+      .all();
+
+    // Fail fast with a clear message instead of letting an out-of-range index
+    // resolve to nothing and time out on the click below.
+    if (index < 0 || index >= tabs.length) {
+      throw new Error(`Tab index ${index} is out of bounds (found ${tabs.length} tabs)`);
+    }
+
+    const tab = tabs[index];
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    await this.waitUntilTabIsLoaded();
   }
 
   /**
