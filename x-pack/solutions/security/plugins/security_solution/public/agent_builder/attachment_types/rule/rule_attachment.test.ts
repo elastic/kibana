@@ -142,17 +142,6 @@ describe('createRuleAttachmentDefinition', () => {
       ).toBe('Update rule');
     });
 
-    it('uses the in-session last-saved rule id for "View rule" before the server write completes', () => {
-      aiRuleCreation.setLastSavedRuleId('rule-session');
-      const buttonLabels = buildButtons({ text: JSON.stringify(validRule) }).map((b) => b.label);
-      expect(buttonLabels).toContain('View rule');
-    });
-
-    it('shows "Create rule" even when an in-session id exists — intent is attachment-driven', () => {
-      aiRuleCreation.setLastSavedRuleId('rule-session');
-      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Create rule');
-    });
-
     it('returns no buttons when the user cannot edit rules', () => {
       expect(buildButtons({ text: JSON.stringify(validRule) }, { canEdit: false })).toEqual([]);
     });

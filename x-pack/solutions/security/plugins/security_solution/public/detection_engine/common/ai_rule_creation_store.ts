@@ -17,18 +17,12 @@ export interface AiRuleCreationSession {
 
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<RuleResponse>();
-  // In-session rule id for PATCH vs POST decisions. Needed because addAttachment re-renders
-  // the attachment card with a snapshot that drops attachment.origin, so it can't be read
-  // from the component after save. On reload, attachment.origin is persisted and available
-  // on mount, making this unnecessary.
-  private readonly lastSavedRuleIdSubject = new BehaviorSubject<string | null>(null);
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
-  public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
@@ -65,14 +59,6 @@ export class AiRuleCreationService {
     return this.savingSubject.getValue();
   };
 
-  public setLastSavedRuleId = (id: string | null): void => {
-    this.lastSavedRuleIdSubject.next(id);
-  };
-
-  public getLastSavedRuleId = (): string | null => {
-    return this.lastSavedRuleIdSubject.getValue();
-  };
-
   public setAiCreatedRule = (rule: RuleResponse): void => {
     this.aiRuleSubject.next(rule);
   };
@@ -90,7 +76,6 @@ export class AiRuleCreationService {
   };
 
   public reset = (): void => {
-    this.lastSavedRuleIdSubject.next(null);
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);

@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { pairwise } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -120,7 +119,6 @@ export const createAiRuleCreationHandler = ({
         });
       }
 
-      aiRuleCreation.setLastSavedRuleId(saved.id);
       aiRuleCreation.clearSaving();
 
       const convId = activeConversationId;
@@ -188,18 +186,6 @@ export const createAiRuleCreationHandler = ({
     }
   });
 
-  // Reset lastSavedRuleId on conversation switch so each new conversation starts fresh.
-  // pairwise() prevents the initial BehaviorSubject emission from triggering a spurious reset.
-  const conversationSub = agentBuilder?.events.ui.activeConversation$
-    .pipe(pairwise())
-    .subscribe(([prev, curr]) => {
-      // != guards against both null and undefined on BehaviorSubject's initial emission.
-      if (prev != null && curr != null && prev?.id !== curr?.id) {
-        aiRuleCreation.setLastSavedRuleId(null);
-      }
-    });
-
   saveSub.add(conversationIdSub);
-  saveSub.add(conversationSub);
   return saveSub;
 };

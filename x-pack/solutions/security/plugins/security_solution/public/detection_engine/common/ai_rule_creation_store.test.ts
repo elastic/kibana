@@ -27,25 +27,6 @@ describe('AiRuleCreationService', () => {
     });
   });
 
-  describe('lastSavedRuleId$', () => {
-    it('initially emits null', async () => {
-      const value = await firstValueFrom(service.lastSavedRuleId$);
-      expect(value).toBeNull();
-    });
-
-    it('emits the id after setLastSavedRuleId', async () => {
-      service.setLastSavedRuleId('rule-1');
-      const value = await firstValueFrom(service.lastSavedRuleId$);
-      expect(value).toBe('rule-1');
-    });
-
-    it('getLastSavedRuleId returns current value synchronously', () => {
-      expect(service.getLastSavedRuleId()).toBeNull();
-      service.setLastSavedRuleId('rule-1');
-      expect(service.getLastSavedRuleId()).toBe('rule-1');
-    });
-  });
-
   describe('session management', () => {
     it('startSession creates a new session', () => {
       const session = service.startSession();
@@ -68,25 +49,10 @@ describe('AiRuleCreationService', () => {
   });
 
   describe('reset', () => {
-    it('resets lastSavedRuleId$ to null', async () => {
-      service.setLastSavedRuleId('rule-1');
-      service.reset();
-      const value = await firstValueFrom(service.lastSavedRuleId$);
-      expect(value).toBeNull();
-    });
-
     it('resets session to null', () => {
       service.startSession();
       service.reset();
       expect(service.getSession()).toBeNull();
     });
-  });
-
-  it('each instance maintains independent state', async () => {
-    const other = new AiRuleCreationService();
-
-    service.setLastSavedRuleId('rule-1');
-
-    expect(await firstValueFrom(other.lastSavedRuleId$)).toBeNull();
   });
 });

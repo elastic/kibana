@@ -62,8 +62,7 @@ export const createRuleAttachmentDefinition = ({
   renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
   getActionButtons: ({ attachment }) => {
     const intent = getRuleAttachmentIntent(attachment);
-    const ruleId =
-      getRuleIdFromAttachment(attachment) ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
+    const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
     return buildRuleActionButtons({
       rule: parseRuleFromAttachment(attachment),
       aiRuleCreation,

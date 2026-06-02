@@ -103,34 +103,8 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Seed lastSavedRuleId from the edit-page rule id; re-seed when the conversation-switch
-  // handler clears it so the edit page always shows the correct linked rule id.
-  useEffect(() => {
-    if (!existingRuleId) return;
-    aiRuleCreation.setLastSavedRuleId(existingRuleId);
-    const sub = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
-      if (id === null) {
-        aiRuleCreation.setLastSavedRuleId(existingRuleId);
-      }
-    });
-    return () => {
-      sub.unsubscribe();
-      aiRuleCreation.setLastSavedRuleId(null);
-    };
-  }, [existingRuleId, aiRuleCreation]);
-
-  useEffect(() => {
-    const subscription = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
-      if (id) {
-        syncRuleIdRef.current = id;
-      } else if (!existingRuleIdRef.current) {
-        syncRuleIdRef.current = undefined;
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [aiRuleCreation]);
-
-  // On conversation switch, restore the rule id if the attachment already has one.
+  // On conversation switch, restore the rule id if the attachment already has one,
+  // or clear the sync ref so stale ids don't bleed into a fresh create conversation.
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
       return;
@@ -143,17 +117,17 @@ export const useAgentBuilderRuleCreation = ({
         (a) => a.type === SecurityAgentBuilderAttachments.rule
       );
       if (!ruleAttachment) {
+        syncRuleIdRef.current = undefined;
         return;
       }
       const ruleId = getRuleIdFromAttachment(ruleAttachment as never);
       intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
       if (ruleId) {
         syncRuleIdRef.current = ruleId;
-        aiRuleCreation.setLastSavedRuleId(ruleId);
       }
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder, aiRuleCreation]);
+  }, [agentBuilder]);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string, savedRuleId?: string) => {
@@ -274,16 +248,13 @@ export const useAgentBuilderRuleCreation = ({
         // Malformed attachment text — ignore silently
         return;
       }
-      const savedRuleId =
-        getRuleIdFromAttachment(ruleAttachment as never) ??
-        aiRuleCreation.getLastSavedRuleId() ??
-        undefined;
+      const savedRuleId = getRuleIdFromAttachment(ruleAttachment as never) ?? undefined;
       intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
       const ruleToApply = savedRuleId ? { ...parsed, id: savedRuleId } : parsed;
       updateFormFromChatRef.current(ruleToApply, { silent: true });
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder, aiRuleCreation]);
+  }, [agentBuilder]);
 
   useEffect(() => {
     if (
@@ -346,7 +317,6 @@ export const useAgentBuilderRuleCreation = ({
     actionsStepData,
     actionTypeRegistry,
     addRuleAttachment,
-    aiRuleCreation,
     getRuleIdForSync,
   ]);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -70,24 +70,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   const { services } = useKibana();
   const { aiRuleCreation } = services;
-
-  // Seed lastSavedRuleId so saves from the chat card know to PATCH not POST.
-  // Re-seed when conversation switch clears it (Add to chat opens a new conversation).
-  // existingRuleId (form-based edit page) is already handled by useAgentBuilderRuleCreation.
-  const ruleId = rule?.id;
-  useEffect(() => {
-    if (!ruleId) return;
-    aiRuleCreation.setLastSavedRuleId(ruleId);
-    const sub = aiRuleCreation.lastSavedRuleId$.subscribe((id) => {
-      if (id === null) {
-        aiRuleCreation.setLastSavedRuleId(ruleId);
-      }
-    });
-    return () => {
-      sub.unsubscribe();
-      aiRuleCreation.setLastSavedRuleId(null);
-    };
-  }, [ruleId, aiRuleCreation]);
 
   // Format rule for AI assistant attachment from either form state or an existing rule response.
   const isFormBased =
