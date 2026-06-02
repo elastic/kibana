@@ -195,6 +195,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
+  console.log('meow', serverWarning);
 
   // To make server side errors less "sticky", register the query that last errored
   const [lastErroredCode, setLastErroredCode] = useState<string | undefined>(() =>
