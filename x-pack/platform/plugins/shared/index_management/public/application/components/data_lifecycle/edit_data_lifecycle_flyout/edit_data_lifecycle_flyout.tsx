@@ -92,7 +92,7 @@ export interface EditDataLifecycleFlyoutProps {
     indexTemplateHref?: string;
     failureStoreEnabled: boolean;
     onFailureStoreChange: (next: boolean) => void;
-   deletePhaseDefaultValue?: DlmPhaseDuration;
+    deletePhaseDefaultValue?: DlmPhaseDuration;
   };
 }
 
