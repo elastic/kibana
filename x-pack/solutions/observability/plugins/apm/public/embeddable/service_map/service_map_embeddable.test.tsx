@@ -309,9 +309,9 @@ describe('ServiceMapEmbeddable', () => {
       expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
     });
 
-    it('hides the fit view button when embedded', () => {
+    it('shows the fit view button when embedded', () => {
       renderEmbeddable();
-      expect(screen.queryByTestId('serviceMapFitViewButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('serviceMapFitViewButton')).toBeInTheDocument();
     });
 
     it('falls back to raw range values when date range is unresolved', () => {
