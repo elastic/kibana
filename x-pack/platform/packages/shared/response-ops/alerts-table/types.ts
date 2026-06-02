@@ -49,6 +49,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
@@ -56,6 +57,35 @@ import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { Case } from './apis/bulk_get_cases';
 import type { ItemsSelectionState } from './components/tags/items/types';
+
+/**
+ * A single conversation attachment or a group of attachments. Defined structurally
+ * here to avoid a compile-time dependency on agent-builder packages. The payload is
+ * passed through to openChat without inspection, so a broad structural type is enough.
+ */
+export interface ConversationAttachmentInput {
+  type: string;
+}
+
+/**
+ * Minimal structural interface for the chat service required by the alerts table.
+ * Using a local structural type avoids a compile-time dependency on agent-builder packages
+ * from this shared platform package.
+ */
+export interface OpenChatService {
+  openChat(options?: {
+    attachments?: ConversationAttachmentInput[];
+    newConversation?: boolean;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+  }): void;
+}
+
+export interface BulkAddToChatConfig {
+  convertAlertToAttachment: (alerts: TimelineItem[]) => ConversationAttachmentInput[];
+  initialMessage?: string;
+  onAddedToChat?: (itemCount: number) => void;
+}
 
 export interface Consumer {
   id: AlertConsumers;
@@ -410,6 +440,21 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * @default new LocalStorageWrapper(window.localStorage)
    */
   configurationStorage?: IStorageWrapper | null;
+
+  /**
+   * Configuration for the bulk "Add to chat" action. When provided, a bulk
+   * action will appear in the table allowing users to add selected alerts to
+   * the Agent Builder chat.
+   */
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+
+  /**
+   * Show a CSV export button in the toolbar. The button exports all alerts matching
+   * the current filters using the reporting CSV endpoint.
+   * Note: `services.rendering` must also be provided, otherwise the button will not render.
+   * @default false
+   */
+  showCsvExportButton?: boolean;
   /**
    * Dependencies
    */
@@ -417,6 +462,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    /**
+     * Required to render the CSV export button (`showCsvExportButton`). The button will
+     * not appear if this is omitted, even when `showCsvExportButton` is true.
+     */
+    rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
@@ -425,6 +475,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
+    agentBuilder?: OpenChatService;
   };
 }
 
@@ -450,6 +501,23 @@ export interface AdditionalContext {}
 export type RenderContext<AC extends AdditionalContext> = {
   tableId?: string;
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
+
+  /**
+   * The rule type IDs used to filter alerts
+   */
+  ruleTypeIds: string[];
+  /**
+   * The consumers used to filter alerts
+   */
+  consumers?: string[];
+  /**
+   * The ES query used to filter alerts
+   */
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
+  /**
+   * The current sort configuration
+   */
+  sort: AlertsTableSortCombinations[];
 
   /**
    * Refetches all the queries, resetting the alerts pagination if necessary
@@ -583,6 +651,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   extends PublicAlertsDataGridProps,
     Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];
@@ -593,6 +662,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
+  showCsvExportButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.

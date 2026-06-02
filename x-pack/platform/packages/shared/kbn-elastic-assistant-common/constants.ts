@@ -103,6 +103,12 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_enable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_delete` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
 
 // Attack discovery internal API

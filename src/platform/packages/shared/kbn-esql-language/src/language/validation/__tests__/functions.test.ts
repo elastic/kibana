@@ -811,6 +811,26 @@ describe('function validation', () => {
         'Function TS_FUNCTION not allowed in STATS',
       ]);
     });
+
+    it('rejects tsdbCompatible:false functions in TS pipelines', async () => {
+      setTestFunctions([
+        {
+          name: 'tsdb_incompatible_agg',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          tsdbCompatible: false,
+          signatures: [{ params: [], returnType: 'double' }],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('TS a_index | STATS TSDB_INCOMPATIBLE_AGG()', [
+        'Function TSDB_INCOMPATIBLE_AGG is not supported in time series (TS) pipelines',
+      ]);
+      await expectErrors('FROM a_index | STATS TSDB_INCOMPATIBLE_AGG()', []);
+    });
   });
 
   it('should flag nested aggregation functions', async () => {

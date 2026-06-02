@@ -8,9 +8,11 @@
 import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 import { buildEpisodeTagOptionsQuery } from './episode_tag_options_query';
 
+const SPACE_ID = 'default';
+
 describe('buildEpisodeTagOptionsQuery', () => {
   it('should query distinct tags from tag actions', () => {
-    const queryString = buildEpisodeTagOptionsQuery().print('basic');
+    const queryString = buildEpisodeTagOptionsQuery(SPACE_ID).print('basic');
 
     expect(queryString).toContain(`FROM ${ALERT_ACTIONS_DATA_STREAM}`);
     expect(queryString).toContain('action_type == "tag"');

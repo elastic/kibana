@@ -67,6 +67,7 @@ export interface InferenceFeatureResponse {
   recommendedEndpoints: string[];
   isBeta?: boolean;
   isTechPreview?: boolean;
+  ignoreGlobalDefault?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;

@@ -56,6 +56,8 @@ export interface ServiceMapEmbeddableProps {
   strictEnvironmentScope?: boolean;
   /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
+  /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
+  filterPills?: Array<{ field: string; value: string }>;
 }
 
 function LoadingSpinner() {
@@ -84,6 +86,7 @@ export function ServiceMapEmbeddable({
   alwaysNavigateOnPopoverFocus,
   strictEnvironmentScope,
   onEmptyStateChange,
+  filterPills,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -230,9 +233,9 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
     serviceName,
     serviceGroupId,
+    filterPills,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;

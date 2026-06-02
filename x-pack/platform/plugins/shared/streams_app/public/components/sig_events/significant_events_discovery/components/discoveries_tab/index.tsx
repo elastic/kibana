@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { Discovery } from '@kbn/streams-schema';
+import {
+  useFetchDiscoveriesEntities,
+  useFetchDiscoveryHistory,
+} from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { DiscoveryFlyout } from './discovery_flyout';
+import { formatTimestamp } from '../../../../../util/formatters';
+import { DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERY_KIND_COLORS } from '../shared/constants';
+
+const MAX_VISIBLE_STREAMS = 3;
+
+const columns: Array<EuiBasicTableColumn<Discovery>> = [
+  {
+    field: 'discovered_at',
+    name: i18n.translate('xpack.streams.discoveriesTab.timestampColumn', {
+      defaultMessage: 'Timestamp',
+    }),
+    width: '200px',
+    render: (discoveredAt: string | undefined, discovery: Discovery) =>
+      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
+  },
+  {
+    field: 'kind',
+    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
+      defaultMessage: 'Kind',
+    }),
+    width: '90px',
+    render: (kind: Discovery['kind']) => (
+      <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
+    ),
+  },
+  {
+    field: 'title',
+    name: i18n.translate('xpack.streams.discoveriesTab.titleColumn', {
+      defaultMessage: 'Title',
+    }),
+    truncateText: true,
+  },
+  {
+    name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
+      defaultMessage: 'Streams',
+    }),
+    width: '160px',
+    render: (discovery: Discovery) => {
+      const streamNames = [
+        ...new Set(
+          (discovery.detections ?? []).map((d) => d.stream_name).filter((s): s is string => !!s)
+        ),
+      ];
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {streamNames.slice(0, MAX_VISIBLE_STREAMS).map((name) => (
+            <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
+              <EuiBadge color="hollow">{name}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {streamNames.length > MAX_VISIBLE_STREAMS && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
+  },
+  {
+    field: 'criticality',
+    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
+      defaultMessage: 'Criticality',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+  },
+  {
+    field: 'confidence',
+    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
+      defaultMessage: 'Confidence',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
+  },
+];
+
+const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
+
+export const DiscoveriesTab = () => {
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
+
+  const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
+    from: absoluteRange.from,
+    to: absoluteRange.to,
+  });
+  const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
+
+  const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
+    selectedDiscovery?.discovery_slug
+  );
+
+  const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
+    if (page) {
+      setPagination({ page: page.index + 1, perPage: page.size });
+    }
+  };
+
+  const euiPagination = {
+    pageIndex: pagination.page - 1,
+    pageSize: pagination.perPage,
+    totalItemCount: data?.total ?? 0,
+    pageSizeOptions: [10, 25, 50],
+  };
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
+              onRefresh={() => {
+                refreshAbsoluteRange();
+                refetch();
+              }}
+              compressed
+              showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
+            defaultMessage: 'Discoveries',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
+            defaultMessage: 'No discoveries found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedDiscovery(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
+        />
+      </EuiFlexItem>
+      {selectedDiscovery && (
+        <DiscoveryFlyout
+          discovery={selectedDiscovery}
+          history={historyData?.hits ?? []}
+          isHistoryLoading={isHistoryLoading}
+          onClose={() => setSelectedDiscovery(undefined)}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+};

@@ -201,6 +201,7 @@ export function IntegrationActionsMenu({
       button={actionButton}
       isOpen={isOpen}
       closePopover={handleCloseMenu}
+      aria-label={integrationActionsText}
     >
       <EuiContextMenu panels={panelItems} initialPanelId={0} />
     </EuiPopover>

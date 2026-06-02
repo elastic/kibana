@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import type { ApmIndicatorType } from '../../../../common/slo_indicator_types';
 import type { ServiceTransactionGroupItem } from './get_columns';
@@ -17,6 +18,7 @@ import { getESQLQuery } from '../links/discover_links/get_esql_query';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAlertSloActions } from '../../../hooks/use_alert_slo_actions';
 import { getManageSlosUrl } from '../../../hooks/use_manage_slos_url';
+import { TRANSACTIONS_TABLE_EBT_ELEMENTS } from './ebt_constants';
 
 interface UseTransactionActionsParams {
   kuery: string;
@@ -54,6 +56,10 @@ export function useTransactionActions({
           name: i18n.translate('xpack.apm.transactionsTable.openTracesInDiscover', {
             defaultMessage: 'Open traces in Discover',
           }),
+          ebt: {
+            action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+            element: TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_ACTIONS,
+          },
           href: (item) => {
             const esqlQuery = getESQLQuery({
               indexType: 'traces',

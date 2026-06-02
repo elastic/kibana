@@ -30,6 +30,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
@@ -65,18 +66,15 @@ import {
 export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
 
 // =============================================================================
-// Inspect Flyout (mock content editor)
+// Content Editor Flyout (mock)
 // =============================================================================
 
 /**
- * Mock "View details" flyout for Storybook stories.
- *
- * Renders a lightweight EuiFlyout showing item metadata. Stands in for the
- * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
- * which requires Kibana core services not available in Storybook.
+ * Lightweight stand-in for `@kbn/content-management-content-editor`'s flyout
+ * — that one needs Kibana core services that Storybook doesn't provide.
  */
-const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'contentListInspectFlyoutTitle' });
+const ContentEditorFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'contentListContentEditorFlyoutTitle' });
 
   return (
     <EuiFlyout aria-labelledby={titleId} onClose={onClose} size="s" ownFocus>
@@ -106,28 +104,25 @@ const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () =
 };
 
 /**
- * Hook that manages the open/close state for a mock inspect flyout.
- *
- * Returns an `onInspect` callback suitable for `ContentListItemConfig.onInspect`
- * and a `flyout` element to render in the component tree.
+ * Returns `open` (suitable for `features.contentEditor.open`) and a
+ * `flyout` element to render alongside the list.
  *
  * @example
  * ```tsx
- * const { onInspect, flyout } = useInspectFlyout();
- * // pass onInspect to item config, render {flyout} in JSX
+ * const { open, flyout } = useContentEditorFlyout();
  * ```
  */
-export const useInspectFlyout = (): {
-  onInspect: (item: ContentListItem) => void;
+export const useContentEditorFlyout = (): {
+  open: (item: ContentListItem) => void;
   flyout: ReactNode;
 } => {
-  const [inspectedItem, setInspectedItem] = useState<ContentListItem | null>(null);
-  const onInspect = useCallback((item: ContentListItem) => setInspectedItem(item), []);
-  const flyout = inspectedItem ? (
-    <InspectFlyout item={inspectedItem} onClose={() => setInspectedItem(null)} />
+  const [openItem, setOpenItem] = useState<ContentListItem | null>(null);
+  const open = useCallback((item: ContentListItem) => setOpenItem(item), []);
+  const flyout = openItem ? (
+    <ContentEditorFlyout item={openItem} onClose={() => setOpenItem(null)} />
   ) : null;
 
-  return { onInspect, flyout };
+  return { open, flyout };
 };
 
 // =============================================================================
@@ -563,12 +558,17 @@ export const StateDiagnosticPanel = ({
       <EuiPanel color="subdued" hasBorder paddingSize={isOpen ? 'm' : 's'}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
-              size="s"
-            />
+            <EuiToolTip
+              content={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
+                size="s"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xxs">

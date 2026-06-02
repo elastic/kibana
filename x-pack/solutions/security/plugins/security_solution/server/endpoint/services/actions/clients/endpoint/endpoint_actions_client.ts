@@ -10,6 +10,7 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
+import { isResponseActionCancelable } from '../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { getActionDetailsById } from '../../action_details_by_id';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
@@ -211,6 +212,13 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         if (actionToCancel.isCompleted) {
           throw new ResponseActionsClientError(
             `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`,
+            400
+          );
+        }
+
+        if (!isResponseActionCancelable(actionToCancel.command, this.agentType)) {
+          throw new ResponseActionsClientError(
+            `[${actionToCancel.command}] response action cannot be canceled.`,
             400
           );
         }

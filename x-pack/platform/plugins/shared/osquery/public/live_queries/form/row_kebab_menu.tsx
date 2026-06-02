@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useContext, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
@@ -17,11 +23,12 @@ import { useIsExperimentalFeatureEnabled } from '../../common/experimental_featu
 import { useExportResults } from '../../results/use_export_results';
 import { ExportResultsModal } from '../../results/export_results_modal';
 import { useExportFilters } from '../../results/export_filters_context';
+import { EXPORT_NO_DATA_TOOLTIP } from '../../results/translations';
 import type { ExportFormat } from '../../results/use_export_results';
 import type { AddToTimelineHandler } from '../../types';
 
 interface RowKebabMenuProps {
-  row: { action_id?: string; id?: string };
+  row: { action_id?: string; id?: string; docs?: number };
   actionId: string | undefined;
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
@@ -44,6 +51,13 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       exportFilters?.kuery ||
       (exportFilters?.activeFilters && exportFilters.activeFilters.length > 0)
     );
+    // Strict `=== 0` so unknown counts (initial fetch, error response, or a
+    // collapsed pack row that cleared its store entry) leave the action
+    // enabled. Only a successfully-fetched zero-row result disables it.
+    // EuiContextMenuItem has no `isLoading` equivalent, so the action stays
+    // clickable during a brief initial load — the lesser evil compared to
+    // flashing a disabled state.
+    const isEmpty = exportFilters?.total === 0;
 
     const esFilters = useMemo(
       () =>
@@ -127,6 +141,8 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
                 key="export"
                 icon="exportAction"
                 onClick={openExportModal}
+                disabled={isEmpty}
+                toolTipContent={isEmpty ? EXPORT_NO_DATA_TOOLTIP : undefined}
                 data-test-subj="osqueryExportResultsMenuItem"
               >
                 {i18n.translate('xpack.osquery.kebab.exportResults', {
@@ -147,6 +163,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         executionCount,
         close,
         openExportModal,
+        isEmpty,
       ]
     );
 
@@ -156,12 +173,14 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       <>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              aria-label={kebabLabel}
-              onClick={toggle}
-              data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
-            />
+            <EuiToolTip content={kebabLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                aria-label={kebabLabel}
+                onClick={toggle}
+                data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
+              />
+            </EuiToolTip>
           }
           isOpen={isOpen}
           closePopover={close}
@@ -179,7 +198,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
             isExporting={isExporting}
             hasActiveFilters={hasActiveFilters}
             filteredTotal={exportFilters?.filteredTotal}
-            total={exportFilters?.total}
+            total={exportFilters?.total ?? row.docs}
           />
         )}
       </>

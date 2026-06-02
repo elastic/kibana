@@ -56,6 +56,16 @@ const childFeature: InferenceFeatureConfig = {
   recommendedEndpoints: ['ep-1'],
 };
 
+const optOutChildFeature: InferenceFeatureConfig = {
+  featureId: 'child_opt_out',
+  parentFeatureId: 'workflows',
+  featureName: 'Workflow Feature',
+  featureDescription: 'runs in background',
+  taskType: 'chat_completion',
+  recommendedEndpoints: [],
+  ignoreGlobalDefault: true,
+};
+
 const defaultFormState = {
   isLoading: false,
   isSaving: false,
@@ -536,6 +546,81 @@ describe('ModelSettings', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault sections', () => {
+    const optOutFormState = {
+      ...defaultFormState,
+      sections: [
+        {
+          featureId: 'workflows',
+          featureName: 'Workflows',
+          featureDescription: 'Background workflows',
+          taskType: '',
+          recommendedEndpoints: [],
+          children: [optOutChildFeature],
+        },
+      ],
+    };
+
+    it('hides opt-out sections when featureSpecificModels is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('renders opt-out sections when featureSpecificModels is on', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('featureSection-Workflows')).toBeInTheDocument();
+    });
+
+    it('hides opt-out sections when enableAi is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: false, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('does not render regular sections in default-only mode', () => {
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
     });
   });
 });

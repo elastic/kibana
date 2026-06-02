@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSelectable,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { Document } from '../../../types';
@@ -58,6 +59,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   openFlyout,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const managePipelineButton = (
     <EuiButtonEmpty
@@ -84,6 +86,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       repositionOnScroll
       data-test-subj="documentsDropdown"
       panelStyle={panelStyle}
+      aria-labelledby={popoverTitleId}
     >
       <EuiSelectable
         singleSelection
@@ -111,7 +114,9 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       >
         {(list) => (
           <>
-            <EuiPopoverTitle paddingSize="s">{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {i18nTexts.popoverTitle}
+            </EuiPopoverTitle>
             {list}
           </>
         )}

@@ -69,6 +69,9 @@ const mockRules = [
   },
 ];
 
+const mockOnEditInFlyout = jest.fn();
+const mockOnCloneInFlyout = jest.fn();
+
 const renderContainer = (overrides = {}) => {
   const props = {
     items: mockRules as any,
@@ -79,6 +82,8 @@ const renderContainer = (overrides = {}) => {
     hasActiveFilters: false,
     isLoading: false,
     onTableChange: jest.fn(),
+    onEditInFlyout: mockOnEditInFlyout,
+    onCloneInFlyout: mockOnCloneInFlyout,
     ...overrides,
   };
   return render(
@@ -110,7 +115,7 @@ describe('RulesListTableContainer', () => {
   });
 
   describe('navigation callbacks', () => {
-    it('navigates to edit page when edit action is clicked', async () => {
+    it('calls onEditInFlyout when edit action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -121,12 +126,10 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/rules/edit/rule-1'
-      );
+      expect(mockOnEditInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('navigates to clone page when clone action is clicked', async () => {
+    it('calls onCloneInFlyout when clone action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -137,9 +140,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
-      );
+      expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 
@@ -179,7 +180,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockDeleteMutate).toHaveBeenCalledWith(
-        'rule-1',
+        { id: 'rule-1', name: 'Rule One' },
         expect.objectContaining({ onSettled: expect.any(Function) })
       );
     });

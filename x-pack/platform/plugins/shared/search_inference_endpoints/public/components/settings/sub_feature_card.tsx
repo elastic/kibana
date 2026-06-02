@@ -278,7 +278,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 invalidEndpointIds={invalidEndpointIds}
                 deprecatedEndpointsMap={deprecatedEndpointsMap}
                 globalDefaultRow={
-                  showGlobalDefaultRow
+                  showGlobalDefaultRow && globalDefaultId
                     ? {
                         icon: globalDefaultIcon,
                         label: globalDefaultLabel,
@@ -293,7 +293,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
                   <EuiSplitPanel.Outer hasBorder>
-                    {showGlobalDefaultRow && (
+                    {showGlobalDefaultRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
                         icon={globalDefaultIcon}

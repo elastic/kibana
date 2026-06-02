@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantAppPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observabilityAIAssistant',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       deepLinks: [
         {
           id: 'conversations',
@@ -181,10 +181,17 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const getHideInUi = () => chatExperience !== AIChatExperience.Classic;
+
     const isObservabilityAIAssistantEnabled = service.isEnabled();
     if (isObservabilityAIAssistantEnabled) {
       pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-        getObsAIAssistantConnectorType(service)
+        getObsAIAssistantConnectorType({
+          service,
+          getHideInUi,
+          isDisabled: chatExperience !== AIChatExperience.Classic,
+        })
       );
     }
 

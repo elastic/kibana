@@ -9,6 +9,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -31,10 +32,15 @@ export const AgentBuilderConnectorsTable = memo(() => {
   }, [tableConnectors]);
 
   const { euiTheme } = useEuiTheme();
-  const { isEarsEnabled } = useAgentBuilderServices();
+  const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
 
-  const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
-    !isEarsEnabled && connector.config?.authType === 'ears';
+  const isDisabledEarsConnector = (connector: ConnectorItem): boolean => {
+    if (connector.config?.authType !== 'ears') return false;
+    if (!isEarsEnabled) return true;
+    if (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled)
+      return true;
+    return false;
+  };
 
   const disabledRowCss = css({ backgroundColor: euiTheme.colors.lightestShade });
 

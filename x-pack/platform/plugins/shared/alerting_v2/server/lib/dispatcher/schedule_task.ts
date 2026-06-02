@@ -7,7 +7,7 @@
 
 import type { AlertingServerStartDependencies } from '../../types';
 import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
-import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './task_definition';
+import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './constants';
 
 export const INTERVAL = '5s';
 

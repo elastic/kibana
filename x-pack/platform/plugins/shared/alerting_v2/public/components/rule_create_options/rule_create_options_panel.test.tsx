@@ -11,11 +11,17 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
+const onCreateWithAgent = jest.fn();
+const onCreateThresholdAlert = jest.fn();
 
 const renderPanel = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsPanel onCreateEsqlRule={onCreateEsqlRule} />
+      <RuleCreateOptionsPanel
+        onCreateEsqlRule={onCreateEsqlRule}
+        onCreateWithAgent={onCreateWithAgent}
+        onCreateThresholdAlert={onCreateThresholdAlert}
+      />
     </I18nProvider>
   );
 
@@ -46,16 +52,25 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Create with AI Agent" card as disabled and non-interactive', () => {
+  it('calls onCreateWithAgent when the "Create with AI Agent" card is clicked', () => {
     renderPanel();
 
-    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+
+    expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Threshold Alert" card as coming soon', () => {
+  it('renders the "Threshold Alert" card', () => {
     renderPanel();
 
     expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+  });
+
+  it('calls onCreateThresholdAlert when the "Threshold Alert" card is clicked', () => {
+    renderPanel();
+
+    fireEvent.click(screen.getByRole('button', { name: /threshold alert/i }));
+
+    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 });

@@ -25,6 +25,75 @@ describe('searchWorkflowExecutions', () => {
     mockLogger.error = jest.fn();
   });
 
+  describe('response transformation', () => {
+    it('should include concurrencyGroupKey in list results when present', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: 'exec-1',
+              _source: {
+                spaceId: 'default',
+                status: 'completed',
+                error: null,
+                isTestRun: false,
+                startedAt: '2024-01-01T00:00:00Z',
+                finishedAt: '2024-01-01T00:00:03Z',
+                duration: 3000,
+                workflowId: 'workflow-1',
+                triggeredBy: 'manual',
+                executedBy: 'elastic',
+                concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await searchWorkflowExecutions({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        workflowExecutionIndex: '.workflows-executions',
+        query: { term: { workflowId: 'workflow-1' } },
+        page: 1,
+        size: 20,
+      });
+
+      expect(result.results[0]).toEqual(
+        expect.objectContaining({
+          id: 'exec-1',
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
+        })
+      );
+    });
+  });
+
+  describe('search options', () => {
+    it('should forward collapse to Elasticsearch search', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+
+      await searchWorkflowExecutions({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        workflowExecutionIndex: '.workflows-executions',
+        query: { term: { workflowId: 'workflow-1' } },
+        collapse: { field: 'concurrencyGroupKey' },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collapse: { field: 'concurrencyGroupKey' },
+        })
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('should not log error when index_not_found_exception occurs (expected behavior)', async () => {
       mockLogger.error.mockClear();
