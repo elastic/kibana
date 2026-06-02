@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+const childProcess = require('child_process');
+const fs = require('fs');
+const https = require('https');
+const os = require('os');
+const path = require('path');
+const { pipeline } = require('stream/promises');
+const extract = require('extract-zip');
+const chromeDriver = require('chromedriver');
+
+const KNOWN_GOOD_VERSIONS_URL =
+  'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json';
+
+function getChromeForTestingPlatform() {
+  if (process.platform === 'darwin') {
+    return process.arch === 'arm64' ? 'mac-arm64' : 'mac-x64';
+  }
+
+  if (process.platform === 'linux' && process.arch === 'x64') {
+    return 'linux64';
+  }
+
+  if (process.platform === 'win32') {
+    return process.arch === 'x64' ? 'win64' : 'win32';
+  }
+
+  throw new Error(`Unsupported Chrome for Testing platform: ${process.platform}-${process.arch}`);
+}
+
+function getChromeBinaryRelativePath(platform) {
+  if (platform === 'mac-arm64' || platform === 'mac-x64') {
+    return path.join(
+      `chrome-${platform}`,
+      'Google Chrome for Testing.app',
+      'Contents',
+      'MacOS',
+      'Google Chrome for Testing'
+    );
+  }
+
+  if (platform === 'linux64') {
+    return path.join('chrome-linux64', 'chrome');
+  }
+
+  return path.join(`chrome-${platform}`, 'chrome.exe');
+}
+
+function getChromeDriverVersion() {
+  const { stdout } = childProcess.spawnSync(chromeDriver.path, ['--version'], {
+    encoding: 'utf8',
+  });
+  const versionMatch = stdout?.match(/ChromeDriver\s+([^\s]+)/);
+
+  if (versionMatch) {
+    return versionMatch[1];
+  }
+
+  return chromeDriver.version;
+}
+
+async function fetchJson(url) {
+  return await new Promise((resolve, reject) => {
+    https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to fetch ${url}: ${response.statusCode}`));
+          response.resume();
+          return;
+        }
+
+        let body = '';
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => {
+          body += chunk;
+        });
+        response.on('end', () => {
+          resolve(JSON.parse(body));
+        });
+      })
+      .on('error', reject);
+  });
+}
+
+async function download(url, destination) {
+  await fs.promises.mkdir(path.dirname(destination), { recursive: true });
+
+  await new Promise((resolve, reject) => {
+    https
+      .get(url, async (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download ${url}: ${response.statusCode}`));
+          response.resume();
+          return;
+        }
+
+        try {
+          await pipeline(response, fs.createWriteStream(destination));
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      })
+      .on('error', reject);
+  });
+}
+
+function findChromeDownload(versions, chromeDriverVersion, platform) {
+  const major = chromeDriverVersion.split('.')[0];
+  const matchingVersions = versions
+    .filter(({ version }) => version === chromeDriverVersion || version.startsWith(`${major}.`))
+    .reverse();
+  const exactMatch = matchingVersions.find(({ version }) => version === chromeDriverVersion);
+
+  for (const versionInfo of [exactMatch, ...matchingVersions]) {
+    if (!versionInfo) {
+      continue;
+    }
+
+    const downloadInfo = versionInfo.downloads.chrome?.find(
+      (downloadItem) => downloadItem.platform === platform
+    );
+
+    if (downloadInfo) {
+      return {
+        version: versionInfo.version,
+        url: downloadInfo.url,
+      };
+    }
+  }
+
+  throw new Error(
+    `Unable to find Chrome for Testing download for ChromeDriver ${chromeDriverVersion} on ${platform}`
+  );
+}
+
+async function main() {
+  const platform = getChromeForTestingPlatform();
+  const chromeDriverVersion = getChromeDriverVersion();
+  const knownGoodVersions = await fetchJson(KNOWN_GOOD_VERSIONS_URL);
+  const chromeDownload = findChromeDownload(
+    knownGoodVersions.versions,
+    chromeDriverVersion,
+    platform
+  );
+  const installDir = path.resolve(
+    process.cwd(),
+    'data',
+    'kbn-ftr-benchmarks',
+    'chrome-for-testing',
+    chromeDownload.version,
+    platform
+  );
+  const binaryPath = path.join(installDir, getChromeBinaryRelativePath(platform));
+
+  if (fs.existsSync(binaryPath)) {
+    process.stdout.write(binaryPath);
+    return;
+  }
+
+  const archivePath = path.join(os.tmpdir(), `chrome-for-testing-${chromeDownload.version}.zip`);
+  process.stderr.write(
+    `Downloading Chrome for Testing ${chromeDownload.version} for ${platform}\n`
+  );
+  await download(chromeDownload.url, archivePath);
+  await fs.promises.rm(installDir, { recursive: true, force: true });
+  await fs.promises.mkdir(installDir, { recursive: true });
+  await extract(archivePath, { dir: installDir });
+  await fs.promises.chmod(binaryPath, 0o755).catch(() => {});
+  process.stdout.write(binaryPath);
+}
+
+main().catch((error) => {
+  process.stderr.write(`${error.stack || error.message}\n`);
+  process.exitCode = 1;
+});

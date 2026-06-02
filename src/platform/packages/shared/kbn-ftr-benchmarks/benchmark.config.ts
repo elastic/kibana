@@ -11,6 +11,9 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
+const CHROME_FOR_TESTING_SCRIPT =
+  'src/platform/packages/shared/kbn-ftr-benchmarks/scripts/ensure_chrome_for_testing.js';
+
 function getBuildPlatform() {
   if (process.platform === 'win32') {
     return `windows-${process.arch === 'arm64' ? 'arm64' : 'x86_64'}`;
@@ -25,7 +28,7 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    run: `node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/${KIBANA_BUILD_VERSION}"`,
+    run: `TEST_BROWSER_BINARY_PATH="$(node ${CHROME_FOR_TESTING_SCRIPT})" node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/${KIBANA_BUILD_VERSION}"`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
