@@ -292,9 +292,9 @@ for (const owner of filteredOwners) {
 
   // Annotation
   annotationLines.push(
-    `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(
-      1
-    )}/100) · ${totalDeadCode} dead code · ${critical.length} critical functions`
+    `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
+      2
+    )} · ${critical.length} critical`
   );
 }
 
