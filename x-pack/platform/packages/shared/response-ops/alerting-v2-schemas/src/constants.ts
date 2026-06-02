@@ -45,7 +45,7 @@ export const MAX_DESCRIPTION_LENGTH = 1024;
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
 /**
- * Maximum length for the `version` field on action policy update bodies. Used
- * by the optimistic concurrency control check on `PATCH /{id}` and `PUT /{id}`.
+ * Maximum length for the `version` field. Used by the optimistic concurrency control check on `PATCH /{id}`
+ * and `PUT /{id}`.
  */
-export const ACTION_POLICY_VERSION_MAX_LENGTH = 256;
+export const VERSION_MAX_LENGTH = 256;

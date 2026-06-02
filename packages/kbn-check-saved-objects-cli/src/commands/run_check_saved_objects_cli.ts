@@ -264,7 +264,7 @@ export function runCheckSavedObjectsCli() {
       }
       if (exitCode) {
         log.warning(
-          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/troubleshooting'
         );
       }
       process.exit(exitCode);

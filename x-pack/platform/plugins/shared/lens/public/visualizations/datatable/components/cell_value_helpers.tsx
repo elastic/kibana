@@ -72,7 +72,7 @@ export const getRenderMode = (
  * dynamic coloring (cell/text/badge). They should remain subdued, consistent with
  * the non-colored ("none") mode.
  */
-export const isNonColorableValue = (rawValue: RawValue): boolean =>
+export const isEmptyValue = (rawValue: RawValue): boolean =>
   rawValue == null ||
   rawValue === MISSING_TOKEN ||
   rawValue === '' ||
@@ -102,7 +102,7 @@ export const applyCellColoring = ({
   isDarkMode,
 }: ApplyColoringArgs): React.CSSProperties | null => {
   if (colorMode === 'none' || colorMode === 'badge') return null;
-  if (isNonColorableValue(rawValue)) return null;
+  if (isEmptyValue(rawValue)) return null;
 
   const color = getCellColor(columnId, palette, colorMapping)(rawValue);
   if (!color) return null;

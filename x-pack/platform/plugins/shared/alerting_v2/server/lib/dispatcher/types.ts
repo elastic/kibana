@@ -6,6 +6,7 @@
  */
 
 import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
+import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
 
 export type RuleId = string;
 export type ActionPolicyId = string;
@@ -23,6 +24,7 @@ export interface AlertEpisode {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
 

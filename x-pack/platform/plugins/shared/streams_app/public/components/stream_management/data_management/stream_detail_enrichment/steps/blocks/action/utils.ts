@@ -210,6 +210,17 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'uri_parts') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.uriPartsProcessorDescription',
+        {
+          defaultMessage: 'Parses "{from}" into URI components under "{prefix}"',
+          values: {
+            from: step.from,
+            prefix: step.to || 'url',
+          },
+        }
+      );
     } else if (step.action === 'registered_domain') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.registeredDomainProcessorDescription',

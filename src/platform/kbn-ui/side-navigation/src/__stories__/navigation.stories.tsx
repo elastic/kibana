@@ -12,7 +12,7 @@ import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 import { Box } from '@kbn/ui-chrome-layout/src/__stories__/box';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import { css, Global } from '@emotion/react';
