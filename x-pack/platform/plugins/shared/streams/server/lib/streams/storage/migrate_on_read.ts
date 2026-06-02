@@ -194,16 +194,18 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
 
   // Add required type discriminator field based on stream structure
   if (!('type' in migratedDefinition)) {
-    let streamType: 'wired' | 'classic' | 'query';
+    let streamType: 'wired' | 'classic' | 'query' | 'graph';
     if (isObject(migratedDefinition.ingest) && 'wired' in migratedDefinition.ingest) {
       streamType = 'wired';
     } else if (isObject(migratedDefinition.ingest) && 'classic' in migratedDefinition.ingest) {
       streamType = 'classic';
+    } else if (isObject(migratedDefinition.ingest) && 'graph' in migratedDefinition.ingest) {
+      streamType = 'graph';
     } else if (!('ingest' in migratedDefinition)) {
       streamType = 'query';
     } else {
       throw new Error(
-        `Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'. This may indicate a corrupted stream definition.`
+        `Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired', 'classic', or 'graph'. This may indicate a corrupted stream definition.`
       );
     }
     migratedDefinition = { ...migratedDefinition, type: streamType };

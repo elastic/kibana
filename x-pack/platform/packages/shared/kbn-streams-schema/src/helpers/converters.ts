@@ -54,6 +54,21 @@ export const convertUpsertRequestIntoDefinition = (
     };
   }
 
+  if (Streams.GraphStream.UpsertRequest.is(request)) {
+    return {
+      ...request.stream,
+      name,
+      updated_at: now,
+      ingest: {
+        ...request.stream.ingest,
+        processing: {
+          ...request.stream.ingest.processing,
+          updated_at: now,
+        },
+      },
+    };
+  }
+
   if (QueryStream.UpsertRequest.is(request)) {
     return {
       ...request.stream,
@@ -96,6 +111,21 @@ export const convertGetResponseIntoUpsertRequest = (
   }
 
   if (Streams.ClassicStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: {
+        ...omit(getResponse.stream, ['name', 'updated_at']),
+        ingest: {
+          ...getResponse.stream.ingest,
+          processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
+        },
+      },
+    };
+  }
+
+  if (Streams.GraphStream.GetResponse.is(getResponse)) {
     return {
       dashboards: getResponse.dashboards,
       queries: getResponse.queries,

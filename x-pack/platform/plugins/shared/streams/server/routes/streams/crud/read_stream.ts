@@ -150,16 +150,34 @@ export async function readStream({
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
+  // Graph streams have no name-based inheritance — return definition directly
+  if (Streams.GraphStream.Definition.is(streamDefinition)) {
+    return {
+      stream: streamDefinition,
+      dashboards,
+      rules,
+      privileges,
+      queries,
+      index_mode: dataStream?.index_mode,
+      replicated: dataStream?.replicated ?? false,
+      data_stream_exists: !!dataStream,
+    } satisfies Streams.GraphStream.GetResponse;
+  }
+
+  // Remaining: WiredStream
   // For OTEL-based streams (logs, logs.otel), process inherited fields to add OTEL aliases
   // For ECS streams (logs.ecs), use inherited fields directly without OTEL-specific processing
-  const rootStream = getRoot(streamDefinition.name);
+  const wiredDefinition = streamDefinition as Streams.WiredStream.Definition;
+  const wiredAncestors = ancestors as Streams.WiredStream.Definition[];
+
+  const rootStream = getRoot(wiredDefinition.name);
   const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
 
   const inheritedFields = isEcsStream
-    ? getInheritedFieldsFromAncestors(ancestors)
-    : addAliasesForNamespacedFields(streamDefinition, getInheritedFieldsFromAncestors(ancestors));
+    ? getInheritedFieldsFromAncestors(wiredAncestors)
+    : addAliasesForNamespacedFields(wiredDefinition, getInheritedFieldsFromAncestors(wiredAncestors));
 
-  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
+  const inheritedFailureStore = findInheritedFailureStore(wiredDefinition, wiredAncestors);
 
   const effectiveFailureStore: WiredIngestStreamEffectiveFailureStore = dataStream
     ? {
@@ -169,7 +187,7 @@ export async function readStream({
     : inheritedFailureStore;
 
   const body: Streams.WiredStream.GetResponse = {
-    stream: streamDefinition,
+    stream: wiredDefinition,
     dashboards,
     rules,
     privileges,
@@ -177,8 +195,8 @@ export async function readStream({
     index_mode: dataStream?.index_mode,
     replicated: dataStream?.replicated ?? false,
     data_stream_exists: !!dataStream,
-    effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
+    effective_lifecycle: findInheritedLifecycle(wiredDefinition, wiredAncestors),
+    effective_settings: getInheritedSettings([...wiredAncestors, wiredDefinition]),
     inherited_fields: inheritedFields,
     effective_failure_store: effectiveFailureStore,
   };

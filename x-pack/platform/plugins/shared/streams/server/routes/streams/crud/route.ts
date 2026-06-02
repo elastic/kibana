@@ -200,10 +200,11 @@ export const editStreamRoute = createServerRoute({
     }
 
     if (
-      Streams.WiredStream.UpsertRequest.is(params.body) &&
+      (Streams.WiredStream.UpsertRequest.is(params.body) ||
+        Streams.GraphStream.UpsertRequest.is(params.body)) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
-      throw badData('Streams are not enabled for Wired streams.');
+      throw badData('Streams are not enabled.');
     }
 
     const core = await context.core;
