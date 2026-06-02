@@ -21,6 +21,7 @@ export interface AppHeaderShellProps {
   titleActions?: ReactNode;
   titleAppend?: ReactNode;
   trailing?: ReactNode;
+  metadata?: ReactNode;
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
@@ -65,7 +66,8 @@ const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
-  hasPrimaryContent: boolean
+  hasPrimaryContent: boolean,
+  hasMetadata: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -120,7 +122,7 @@ const useHeaderStyles = (
       ${paddingBlock &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
+        padding-block-end: ${hasTabs || hasMetadata ? euiTheme.size.xs : paddingBlock};
       `}
     `;
 
@@ -167,6 +169,19 @@ const useHeaderStyles = (
       align-items: stretch;
     `;
 
+    const metadataRow = css`
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: ${euiTheme.size.m};
+      row-gap: ${euiTheme.size.xs};
+      min-width: 0;
+      ${paddingBlock &&
+      css`
+        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
+      `}
+    `;
+
     const titleActionsReveal = css`
       display: flex;
       flex-shrink: 0;
@@ -186,15 +201,26 @@ const useHeaderStyles = (
       titleAppend,
       trailingSlot,
       titleActionsReveal,
+      metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent]);
+  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent, hasMetadata]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, titleAppend, trailing, tabs, sticky = true, padding }) => {
+  ({
+    title,
+    badges,
+    titleActions,
+    titleAppend,
+    metadata,
+    trailing,
+    tabs,
+    sticky = true,
+    padding,
+  }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend);
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
@@ -214,6 +240,11 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           </div>
           {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
+        {metadata && (
+          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
+            {metadata}
+          </div>
+        )}
         {tabs && (
           <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
             {tabs}
