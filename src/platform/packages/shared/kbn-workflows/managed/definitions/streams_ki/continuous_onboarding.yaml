@@ -10,7 +10,7 @@
 #      (completed/failed), then captures the result.
 #
 # Values below (timeouts, intervals, defaults) must stay in sync with the
-# constants in streams/common/constants.ts — see continuous_extraction_workflow.test.ts.
+# constants in streams/common/constants.ts — see continuous_onboarding_workflow.test.ts.
 #
 # This is a managed workflow installed by the streams plugin. It is created
 # disabled and enabled/disabled via the continuous KI extraction setting.
