@@ -308,7 +308,7 @@ function ToggleAccordionButton({
               transform: 'translate(0, -50%)',
             }}
           >
-            <EuiToolTip content={childrenCount} delay="long">
+            <EuiToolTip content={childrenCount}>
               <EuiText size="xs" tabIndex={0}>
                 {asBigNumber(childrenCount)}
               </EuiText>

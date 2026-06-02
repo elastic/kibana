@@ -55,7 +55,6 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
       <EuiFlexItem>
         <EuiToolTip
           className="eui-fullWidth"
-          delay="regular"
           content={i18n.translate('xpack.infra.hostsViewPage.hostLimit.tooltip', {
             defaultMessage:
               'To ensure faster query performance, there is a limit to the number of hosts returned',

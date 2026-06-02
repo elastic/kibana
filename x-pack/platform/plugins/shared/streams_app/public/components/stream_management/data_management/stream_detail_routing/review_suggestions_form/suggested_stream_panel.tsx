@@ -6,17 +6,18 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
   EuiButton,
   EuiButtonEmpty,
-  EuiSpacer,
-  EuiText,
-  EuiIcon,
-  EuiLoadingSpinner,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -179,7 +180,7 @@ export function SuggestedStreamPanel({
           </EuiFlexItem>
         ) : matchRate.value !== undefined ? (
           <>
-            <EuiIcon type="check" color="success" size="s" />
+            <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
             <EuiText size="s" color="success">
               {matchRate.value}
             </EuiText>
@@ -188,14 +189,21 @@ export function SuggestedStreamPanel({
         <EuiFlexItem grow={false}>
           <VerticalRule />
         </EuiFlexItem>
-        <EuiButtonIcon
-          iconType="pencil"
-          onClick={() => onEdit(index, currentSuggestion)}
-          aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.streamDetailRouting.edit', {
             defaultMessage: 'Edit',
           })}
-          data-test-subj={`suggestionEditButton-${currentSuggestion.name}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="pencil"
+            onClick={() => onEdit(index, currentSuggestion)}
+            aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+              defaultMessage: 'Edit',
+            })}
+            data-test-subj={`suggestionEditButton-${currentSuggestion.name}`}
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <div data-test-subj={`suggestionConditionPanel-${currentSuggestion.name}`}>

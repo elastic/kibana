@@ -225,7 +225,6 @@ export const ToolbarSelector = ({
                 ? buttonTooltipContent
                 : buttonLabel
             }
-            delay="long"
             display="block"
           >
             <ToolbarButton

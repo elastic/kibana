@@ -64,7 +64,6 @@ export function ColorRangesExtraActions({
           )}
           condition={shouldDisableAdd}
           position="top"
-          delay="regular"
         >
           <EuiButtonEmpty
             data-test-subj={`lnsPalettePanel_dynamicColoring_addColor`}
@@ -90,7 +89,6 @@ export function ColorRangesExtraActions({
           tooltipContent={oneColorRangeWarn}
           condition={shouldDisableReverse}
           position="top"
-          delay="regular"
         >
           <EuiButtonEmpty
             data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
@@ -116,7 +114,6 @@ export function ColorRangesExtraActions({
           tooltipContent={oneColorRangeWarn}
           condition={shouldDisableDistribute}
           position="top"
-          delay="regular"
         >
           <EuiButtonEmpty
             data-test-subj={`lnsPalettePanel_dynamicColoring_distributeValues`}
