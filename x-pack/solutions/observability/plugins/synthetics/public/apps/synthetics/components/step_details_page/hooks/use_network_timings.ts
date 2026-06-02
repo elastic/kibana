@@ -18,7 +18,7 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-shared-plugin/common';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -44,7 +44,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
   const { remoteName } = useGetUrlParams();
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({

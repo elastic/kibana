@@ -20,7 +20,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
 import { getTimingWithLabels } from './use_network_timings';
@@ -56,7 +56,7 @@ export const useNetworkTimingsPrevious24Hours = (
   const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
   const { remoteName } = useGetUrlParams();
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({

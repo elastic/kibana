@@ -10,7 +10,7 @@ import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -35,7 +35,7 @@ export const usePreviousObjectMetrics = () => {
   const timestamp = data?.details?.timestamp;
 
   const { remoteName } = useGetUrlParams();
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {

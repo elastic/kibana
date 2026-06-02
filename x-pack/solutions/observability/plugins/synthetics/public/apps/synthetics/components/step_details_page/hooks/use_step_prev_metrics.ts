@@ -18,7 +18,7 @@ import {
 } from './use_step_metrics';
 import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { median } from './use_network_timings_prev';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -43,7 +43,7 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
   const { remoteName } = useGetUrlParams();
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const { data, loading } = useReduxEsSearch(
     {

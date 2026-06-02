@@ -18,7 +18,7 @@ import {
   LCP_HELP_LABEL,
   TRANSFER_SIZE_HELP,
 } from '../step_metrics/labels';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import type { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
@@ -38,7 +38,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
   const { remoteName } = useGetUrlParams();
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const { data } = useReduxEsSearch(
     {

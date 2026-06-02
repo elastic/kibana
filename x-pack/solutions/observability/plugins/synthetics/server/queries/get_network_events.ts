@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { SyntheticsEsClient } from '../lib';
 import type { NetworkEvent } from '../../common/runtime_types';
 
@@ -32,16 +33,8 @@ export const getNetworkEvents = async ({
   isWaterfallSupported: boolean;
   hasNavigationRequest: boolean;
 }> => {
-  // For network events belonging to a journey on a remote cluster, target
-  // `${remoteName}:synthetics-*` via Cross-Cluster Search. When `remoteName`
-  // is absent we let SyntheticsEsClient.search fall back to its default
-  // (local) heartbeat indices.
-  const remoteIndex = remoteName
-    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
-    : undefined;
-
   const params = {
-    ...(remoteIndex ? { index: remoteIndex } : {}),
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     track_total_hits: true,
     query: {
       bool: {
