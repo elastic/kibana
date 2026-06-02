@@ -59,7 +59,7 @@ export function getWarningsDescription(warnings: SearchResponseWarning[]) {
 
 export function getParsedReasonFromShardFailure(causedBy?: {
   type: string;
-  reason?: string;
+  reason?: string | null;
 }): string | null {
   // example of a reason: "Can't sort on field [log.level]; the field has incompatible sort types: [LONG] and [STRING] across shards!"
   const cantSortRegExp = /Can't sort on field \[(.+)\];/;
