@@ -10,7 +10,7 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
+import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { ShareAction } from './hooks';
 
@@ -80,7 +80,9 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
             data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
-            onClick={(event) => shareAction.onClick(event.currentTarget)}
+            onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
+              shareAction.onClick(event.currentTarget)
+            }
           />
         </EuiToolTip>
       ) : null}
