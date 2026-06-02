@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
+import type { QueryClient } from '@kbn/react-query';
 import * as api from './api';
 import { basicCaseId, basicFileMock } from './mock';
+import { casesQueriesKeys } from './constants';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { useToasts } from '../common/lib/kibana';
 import { useDeleteFileAttachment } from './use_delete_file_attachment';
-import { TestProviders } from '../common/mock';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -107,5 +110,85 @@ describe('useDeleteFileAttachment', () => {
     });
 
     expect(addError).toHaveBeenCalled();
+  });
+
+  describe('optimistic file stats update', () => {
+    let queryClient: QueryClient;
+    const statsKey = casesQueriesKeys.caseFileStats(basicCaseId, { searchTerm: undefined });
+
+    beforeEach(() => {
+      queryClient = createTestQueryClient();
+    });
+
+    const getWrapper =
+      (qc: QueryClient): React.FC<{ children: React.ReactNode }> =>
+      // eslint-disable-next-line react/display-name
+      ({ children }) =>
+        <TestProviders queryClient={qc}>{children}</TestProviders>;
+
+    it('decrements the file stats count optimistically on mutate', async () => {
+      queryClient.setQueryData(statsKey, { total: 3 });
+
+      const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
+      let resolveDelete: () => void;
+      spyOnDeleteFileAttachments.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolveDelete = resolve))
+      );
+
+      const { result } = renderHook(() => useDeleteFileAttachment(), {
+        wrapper: getWrapper(queryClient),
+      });
+
+      act(() => {
+        result.current.mutate({ caseId: basicCaseId, fileId: basicFileMock.id });
+      });
+
+      await waitFor(() => {
+        expect(queryClient.getQueryData(statsKey)).toEqual({ total: 2 });
+      });
+
+      await act(async () => resolveDelete!());
+    });
+
+    it('does not set file stats below zero', async () => {
+      queryClient.setQueryData(statsKey, { total: 0 });
+
+      let resolveDelete: () => void;
+      jest
+        .spyOn(api, 'deleteFileAttachments')
+        .mockImplementationOnce(() => new Promise<void>((resolve) => (resolveDelete = resolve)));
+
+      const { result } = renderHook(() => useDeleteFileAttachment(), {
+        wrapper: getWrapper(queryClient),
+      });
+
+      act(() => {
+        result.current.mutate({ caseId: basicCaseId, fileId: basicFileMock.id });
+      });
+
+      await waitFor(() => {
+        expect(queryClient.getQueryData(statsKey)).toEqual({ total: 0 });
+      });
+
+      await act(async () => resolveDelete!());
+    });
+
+    it('rolls back file stats on error', async () => {
+      jest.spyOn(api, 'deleteFileAttachments').mockRejectedValueOnce(new Error('Error'));
+
+      queryClient.setQueryData(statsKey, { total: 5 });
+
+      const { result } = renderHook(() => useDeleteFileAttachment(), {
+        wrapper: getWrapper(queryClient),
+      });
+
+      act(() => {
+        result.current.mutate({ caseId: basicCaseId, fileId: basicFileMock.id });
+      });
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(queryClient.getQueryData(statsKey)).toEqual({ total: 5 });
+    });
   });
 });
