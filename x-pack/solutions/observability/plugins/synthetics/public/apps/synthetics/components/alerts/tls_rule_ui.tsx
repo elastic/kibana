@@ -9,7 +9,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback, useEffect } from 'react';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
 import { AlertTlsCondition } from './alert_tls';
@@ -37,6 +45,14 @@ const INCLUDE_BROWSER_CERTS_LABEL = i18n.translate(
   'xpack.synthetics.tlsRule.includeBrowserCerts.label',
   { defaultMessage: 'Include browser monitor certificates' }
 );
+
+const FILTER_SECTION_TITLE = i18n.translate('xpack.synthetics.tlsRule.filterSection.title', {
+  defaultMessage: 'Monitors',
+});
+
+const CERT_TYPE_SECTION_TITLE = i18n.translate('xpack.synthetics.tlsRule.certTypeSection.title', {
+  defaultMessage: 'Certificate type',
+});
 
 export const TLSRuleComponent: React.FC<{
   ruleParams: TLSRuleParamsProps['ruleParams'];
@@ -94,6 +110,10 @@ export const TLSRuleComponent: React.FC<{
 
   return (
     <>
+      <EuiTitle size="xs">
+        <h3>{FILTER_SECTION_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <AlertSearchBar
         kqlQuery={ruleParams.kqlQuery ?? ''}
         onChange={onFiltersChange}
@@ -105,43 +125,48 @@ export const TLSRuleComponent: React.FC<{
         setRuleParams={setRuleParams}
         filters={{ monitorTypes: tlsMonitorTypes }}
       />
-      <EuiSwitch
-        label={INCLUDE_BROWSER_CERTS_LABEL}
-        checked={includeBrowserCerts}
-        onChange={(e) => onToggleBrowserCerts(e.target.checked)}
-        data-test-subj="syntheticsTLSRuleIncludeBrowserCerts"
-      />
-      {includeBrowserCerts && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <CertQuickFilter
-                  label={certLabels.PARTY_FILTER}
-                  dataTestSubj="syntheticsTLSRulePartyFilter"
-                  options={PARTY_FILTER_OPTIONS}
-                  selectedValues={ruleParams.certOrigin ?? []}
-                  onChange={(values) =>
-                    setRuleParams('certOrigin', values.length > 0 ? values : undefined)
-                  }
-                />
-                <CertQuickFilter
-                  label={certLabels.RESOURCE_TYPE_FILTER}
-                  dataTestSubj="syntheticsTLSRuleResourceTypeFilter"
-                  options={BROWSER_RESOURCE_TYPE_OPTIONS}
-                  selectedValues={ruleParams.browserResourceTypes ?? []}
-                  onChange={(values) =>
-                    setRuleParams('browserResourceTypes', values.length > 0 ? values : undefined)
-                  }
-                />
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
       <TLSRuleViz ruleParams={ruleParams} />
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule size="half" margin="s" />
+      <EuiTitle size="xs">
+        <h3>{CERT_TYPE_SECTION_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={INCLUDE_BROWSER_CERTS_LABEL}
+            checked={includeBrowserCerts}
+            onChange={(e) => onToggleBrowserCerts(e.target.checked)}
+            data-test-subj="syntheticsTLSRuleIncludeBrowserCerts"
+          />
+        </EuiFlexItem>
+        {includeBrowserCerts && (
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup compressed>
+              <CertQuickFilter
+                label={certLabels.PARTY_FILTER}
+                dataTestSubj="syntheticsTLSRulePartyFilter"
+                options={PARTY_FILTER_OPTIONS}
+                selectedValues={ruleParams.certOrigin ?? []}
+                onChange={(values) =>
+                  setRuleParams('certOrigin', values.length > 0 ? values : undefined)
+                }
+              />
+              <CertQuickFilter
+                label={certLabels.RESOURCE_TYPE_FILTER}
+                dataTestSubj="syntheticsTLSRuleResourceTypeFilter"
+                options={BROWSER_RESOURCE_TYPE_OPTIONS}
+                selectedValues={ruleParams.browserResourceTypes ?? []}
+                onChange={(values) =>
+                  setRuleParams('browserResourceTypes', values.length > 0 ? values : undefined)
+                }
+              />
+            </EuiFilterGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiHorizontalRule size="half" margin="s" />
       <AlertTlsCondition
         ageThreshold={
           ruleParams.certAgeThreshold ??
