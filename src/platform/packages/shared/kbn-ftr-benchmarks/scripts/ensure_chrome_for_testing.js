@@ -19,6 +19,10 @@ const chromeDriver = require('chromedriver');
 const KNOWN_GOOD_VERSIONS_URL =
   'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json';
 
+function log(message) {
+  process.stderr.write(`[ftr-benchmarks] ${message}\n`);
+}
+
 function getChromeForTestingPlatform() {
   if (process.platform === 'darwin') {
     return process.arch === 'arm64' ? 'mac-arm64' : 'mac-x64';
@@ -178,14 +182,16 @@ async function main() {
   }
 
   const archivePath = path.join(os.tmpdir(), `chrome-for-testing-${chromeDownload.version}.zip`);
-  process.stderr.write(
-    `Downloading Chrome for Testing ${chromeDownload.version} for ${platform}\n`
+  log(
+    `Downloading Chrome for Testing ${chromeDownload.version} for ${platform} from ${chromeDownload.url}`
   );
   await download(chromeDownload.url, archivePath);
+  log(`Extracting Chrome for Testing ${chromeDownload.version} to ${installDir}`);
   await fs.promises.rm(installDir, { recursive: true, force: true });
   await fs.promises.mkdir(installDir, { recursive: true });
   await extract(archivePath, { dir: installDir });
   await fs.promises.chmod(binaryPath, 0o755).catch(() => {});
+  log(`Chrome for Testing binary ready at ${binaryPath}`);
   process.stdout.write(binaryPath);
 }
 
