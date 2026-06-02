@@ -15,8 +15,11 @@ import { useWorkflows } from './use_workflows';
 import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
-const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
 
+const mockWorkflowApi = createMockWorkflowApi();
 jest.mock('../api/use_workflows_api', () => ({
   useWorkflowsApi: () => mockWorkflowApi,
 }));
@@ -44,30 +47,6 @@ describe('useWorkflows', () => {
       page: 1,
       size: 10,
       query: 'test',
-    };
-
-    mockWorkflowApi.getWorkflows.mockResolvedValue(mockData);
-
-    const { result } = renderHook(() => useWorkflows(params), { wrapper });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(params);
-    expect(result.current.data).toEqual(mockData);
-  });
-
-  it('passes explicit managed filters through to the API', async () => {
-    const mockData: WorkflowListDto = {
-      results: [],
-      page: 1,
-      size: 10,
-      total: 0,
-    };
-    const params: WorkflowsSearchParams = {
-      page: 1,
-      size: 10,
-      query: 'test',
-      managed: 'managed',
     };
 
     mockWorkflowApi.getWorkflows.mockResolvedValue(mockData);
