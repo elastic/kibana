@@ -21,12 +21,12 @@ apiTest.describe(`Built-in ES roles`, { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    `setBuiltinRole should throw when called on a Serverless deployment`,
+    `setBuiltinRole should throw when called on a Serverless project`,
     { tag: [...tags.serverless.all] },
     async ({ samlAuth, config }) => {
       apiTest.skip(
         !config.serverless,
-        'Only validates the Serverless guard on Serverless deployments'
+        'Only validates the Serverless guard on Serverless projects'
       );
       await expect(samlAuth.setBuiltinRole('kibana_admin')).rejects.toThrow(
         `setBuiltinRole('kibana_admin') is not supported on Serverless deployments`
