@@ -58,13 +58,17 @@ apiTest.describe(
 
     /** Builds `count` project monitors of `template` type, bound to the private location. */
     const buildMonitors = (template: Record<string, any>, prefix: string, count: number) =>
-      Array.from({ length: count }, (_, i) => ({
-        ...(JSON.parse(JSON.stringify(template)) as Record<string, any>),
-        id: `${prefix} ${i}`,
-        name: `test name ${i}`,
-        locations: [],
-        privateLocations: [privateLocation.label],
-      }));
+      Array.from({ length: count }, (_, i) => {
+        const monitor = JSON.parse(JSON.stringify(template)) as Record<string, any>;
+        return {
+          ...monitor,
+          id: `${prefix} ${i}`,
+          name: `test name ${i}`,
+          hash: monitor.hash as string,
+          locations: [],
+          privateLocations: [privateLocation.label],
+        };
+      });
 
     /** Asserts every input monitor is present (by journey_id + hash) in the metadata. */
     const checkFields = (

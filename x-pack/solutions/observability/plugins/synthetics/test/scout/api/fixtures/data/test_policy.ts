@@ -544,7 +544,10 @@ export const omitIds = (policy: PackagePolicy) => {
   return omit(policy, ignoreTestFields);
 };
 
-export const comparePolicies = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) => {
+export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: PackagePolicy) => {
+  if (!aPolicy) {
+    throw new Error('comparePolicies: expected a defined package policy but received undefined');
+  }
   const a = omitIds(aPolicy);
   const b = omitIds(bPolicy);
 

@@ -440,7 +440,7 @@ apiTest.describe(
           id: 'test-id-2',
           privateLocations: [testPrivateLocationName],
         };
-        const testMonitors = [monitors[0], secondMonitor];
+        const testMonitors: ProjectMonitor[] = [monitors[0], secondMonitor];
 
         const created = await pushProjectMonitors(apiClient, editorHeaders, project, testMonitors);
         expect(created.body.createdMonitors).toHaveLength(2);
