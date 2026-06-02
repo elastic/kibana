@@ -11,7 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import type { ServerTriggerDefinition } from '../types';
 
 /** Id must be <namespace>.<event> (kebab-case namespace, camelCase event; e.g. my-namespace.customTrigger) */
-const TRIGGER_ID_REGEX = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_.]+$/;
+const TRIGGER_ID_REGEX = /^[a-zA-Z0-9-]+\.[a-zA-Z0-9.]+$/;
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return typeof schema === 'object' && schema !== null && 'shape' in schema;

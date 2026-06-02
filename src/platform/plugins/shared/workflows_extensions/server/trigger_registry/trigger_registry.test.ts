@@ -75,9 +75,19 @@ describe('TriggerRegistry', () => {
 
     it('accepts valid id formats', () => {
       registry.register(createValidDefinition({ id: 'cases.updated' }));
-      registry.register(createValidDefinition({ id: 'alerts.severity_high' }));
-      registry.register(createValidDefinition({ id: 'my_plugin.my_event' }));
+      registry.register(createValidDefinition({ id: 'alerts.severityHigh' }));
+      registry.register(createValidDefinition({ id: 'my-namespace.myEvent' }));
       expect(registry.list()).toHaveLength(3);
+    });
+
+    it('rejects snake_case namespace or event segments', () => {
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my_plugin.myEvent' }));
+      }).toThrow('must follow namespaced format');
+
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my-namespace.my_event' }));
+      }).toThrow('must follow namespaced format');
     });
 
     it('accepts kebab-case namespace ids from naming conventions', () => {
