@@ -194,10 +194,6 @@ async function installAgentBuilderOverviewDashboard(
   namespace: string | undefined
 ): Promise<void> {
   const dashboardId = overviewDashboardId(spaceId);
-  logger.debug(
-    `Installing Agent Builder overview dashboard (${dashboardId}, definition v${AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION}) in space "${spaceId}"...`
-  );
-
   const { panels, sections } = buildOverviewDashboardPanels();
 
   await client.create(
@@ -237,8 +233,6 @@ async function installAgentBuilderOverviewDashboard(
       refresh: false,
     }
   );
-
-  logger.debug(`Agent Builder overview dashboard installed in space "${spaceId}"`);
 }
 
 // remove the dashboard from the given space
@@ -328,7 +322,7 @@ export async function syncAgentBuilderOverviewDashboard(
     page++;
   }
 
-  logger.info(`Agent Builder dashboard sync: found ${allSpaceObjects.length} space(s)`);
+  logger.debug(`Agent Builder dashboard sync: found ${allSpaceObjects.length} space(s)`);
 
   const spaceIds = [
     'default',
@@ -340,7 +334,6 @@ export async function syncAgentBuilderOverviewDashboard(
       const namespace = spaceId === 'default' ? undefined : spaceId;
 
       const enabled = await isExperimentalFeaturesEnabledForSpace(client, kibanaVersion, namespace);
-      logger.info(`Experimental features enabled: ${enabled}`);
       if (enabled) {
         const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
         if (installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION) {
