@@ -93,7 +93,7 @@ export class AlertsTablePage {
     await this.openAlertContextMenu(ruleName);
     await this.page.testSubj.locator('add-exception-menu-item').click();
   }
-  
+
   async waitForRuleAlert(ruleName: string) {
     const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
     await expect(cell).toBeVisible({ timeout: 60_000 });
