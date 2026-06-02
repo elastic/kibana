@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
@@ -57,6 +58,15 @@ export const fetchDocuments = async (
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
       executionContext: { description: 'fetch documents' },
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('discover.inspectorRequestDataTitleDocuments', {
+          defaultMessage: 'Documents',
+        }),
+        description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
+          defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
+        }),
+      },
     }
   );
 

@@ -12,6 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SanitizedConnectionRequestParams } from './types';
 
 /**
@@ -37,6 +38,16 @@ export interface IBaseSearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * Inspector integration options for tracking requests
+   */
+  inspector?: {
+    adapter?: RequestAdapter;
+    title: string;
+    description?: string;
+    id?: string;
+  };
 }
 
 // ============================================================================
@@ -125,7 +136,7 @@ export interface IDslPagination {
    * Fetch the next page of results using search_after
    */
   nextPage: (
-    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext'>
+    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext' | 'inspector'>
   ) => Promise<IDslPaginatedSearchResult | null>;
 }
 
