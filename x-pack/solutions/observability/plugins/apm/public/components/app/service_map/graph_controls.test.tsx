@@ -171,14 +171,14 @@ describe('ServiceMapGraph - Controls', () => {
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
     expect(fullscreenButton).toBeInTheDocument();
-    expect(fullscreenButton).toHaveAttribute('title', 'Enter fullscreen');
+    expect(fullscreenButton).toHaveAttribute('aria-label', 'Enter fullscreen');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
       expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+        'aria-label',
         'Exit fullscreen (esc)'
       );
     });
@@ -192,14 +192,14 @@ describe('ServiceMapGraph - Controls', () => {
     );
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
-    expect(fullscreenButton).toHaveAttribute('title', 'Exit fullscreen (esc)');
+    expect(fullscreenButton).toHaveAttribute('aria-label', 'Exit fullscreen (esc)');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
       expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+        'aria-label',
         'Enter fullscreen'
       );
     });
@@ -216,7 +216,7 @@ describe('ServiceMapGraph - Controls', () => {
     const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
     expect(viewFullMapButton).toBeInTheDocument();
     expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
-    expect(viewFullMapButton).toHaveAttribute('title', 'View full service map');
+    expect(viewFullMapButton).toHaveAttribute('aria-label', 'View full service map');
   });
 
   it('does not render "View full service map" button when fullMapHref is not provided', () => {
