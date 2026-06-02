@@ -19,7 +19,6 @@ import { safeExec, getVaultAddr } from '../utils';
 import { readCachedEisConnectors, writeCachedEisConnectors } from '../eis_connectors_cache';
 import { VAULT_CONFIG_DIR, resolveVaultConfigPath, readVaultConfigFromDevVault } from '../profiles';
 
-const CONFIG_FILENAME = 'config.json';
 const CONFIG_EXAMPLE_FILENAME = 'config.example.json';
 
 const resolveUserIdentifier = (): string => {
@@ -143,10 +142,14 @@ export const runConfigInit = async (
   log: ToolingLog,
   options?: { profile?: string }
 ): Promise<boolean> => {
-  const configDir = Path.resolve(repoRoot, VAULT_CONFIG_DIR);
-  const configFileName = options?.profile ? `config.${options.profile}.json` : CONFIG_FILENAME;
-  const configPath = Path.join(configDir, configFileName);
-  const examplePath = Path.join(configDir, CONFIG_EXAMPLE_FILENAME);
+  if (options?.profile === 'local') {
+    await ensureLocalConfig(repoRoot, log);
+    return true;
+  }
+
+  const configPath = resolveVaultConfigPath(repoRoot, options?.profile);
+  const configFileName = Path.basename(configPath);
+  const examplePath = Path.join(Path.dirname(configPath), CONFIG_EXAMPLE_FILENAME);
   const userIdentifier = resolveUserIdentifier();
 
   if (Fs.existsSync(configPath)) {

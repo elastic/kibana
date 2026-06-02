@@ -237,7 +237,7 @@ export const startCmd: Command<void> = {
             message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
             default: '',
           });
-          const resolvedProfile = customProfile.trim() || undefined;
+          const resolvedProfile = customProfile.trim() || 'default';
           await runConfigInit(repoRoot, log, { profile: resolvedProfile });
           profile = resolvedProfile;
         }
