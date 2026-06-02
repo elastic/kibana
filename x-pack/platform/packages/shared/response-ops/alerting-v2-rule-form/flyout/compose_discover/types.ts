@@ -5,66 +5,79 @@
  * 2.0.
  */
 
-export type ComposeDiscoverMode = 'create' | 'edit';
+import type React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import type { ComposeFormValues } from './compose_form_types';
+import type { BuilderState, RuleBuilderRecoveryProps } from './rule_builder/types';
+
+export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
+
+export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-/**
- * Describes which tabs the Discover Sandbox should show.
- * Always `{ type: 'single' }` for now — tabs (Base/Alert/Recovery) are added in the
- * custom recovery follow-up PR.
- */
-export interface SandboxTabConfig {
-  type: 'single';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
+
+export interface StepRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  services: RuleFormServices;
+  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
+  renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
 }
 
-/**
- * Pending query values being edited in the Discover Sandbox.
- * These are draft values — NOT yet committed to FormValues / the API.
- * They become the source of truth only after the user clicks "Apply changes",
- * which syncs them into RHF via the bridge in ComposeDiscoverFlyout.
- *
- * Tracking mode follow-up will extend this with:
- *   baseQuery: string;
- *   alertBlock: string;
- *   recoveryBlock: string;
- */
-export interface SandboxDraft {
-  query: string;
+export interface StepDefinition {
+  id: StepId;
+  title: string;
+  render: (props: StepRenderProps) => React.ReactNode;
+  validate?: (
+    methods: UseFormReturn<ComposeFormValues>,
+    state: ComposeDiscoverState,
+    services?: RuleFormServices,
+    builderState?: BuilderState
+  ) => Promise<boolean> | boolean;
 }
 
 /**
  * UI-only state for the ComposeDiscover flyout.
  *
- * This reducer manages navigation and Sandbox state only.
- * All form values (name, schedule, query fields, delays, etc.) live in
- * useForm<FormValues>() via RHF and are never stored here.
+ * Query content lives in RHF (committed state) and local useState in the parent flyout (editing buffer).
+ * This reducer owns navigation, Sandbox open/close, tab selection, and mode flags only —
+ * no query strings are stored here.
+ *
+ * Whether the rule is signal vs alert is read directly from RHF `kind` — it is NOT
+ * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  /**
-   * Pending (draft) query values being edited in the Sandbox.
-   * Not committed to FormValues until the user clicks "Apply changes".
-   */
-  sandbox: SandboxDraft;
+  /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
+  recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
-  /** Date range for the Discover Sandbox preview window — persists across open/close.
-   *  Intentionally NOT connected to FormValues.schedule.lookback. */
-  sandboxDateStart: string;
-  sandboxDateEnd: string;
+  /** When true the stepped form is replaced by a full YAML editor. */
+  yamlMode: boolean;
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_SANDBOX_QUERY'; query: string }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
+  | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT' }
+  | { type: 'GO_NEXT'; isAlert: boolean }
   | { type: 'GO_BACK' }
-  | { type: 'SET_SANDBOX_DATE_RANGE'; start: string; end: string }
-  | { type: 'OPEN_CHILD' }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
+  | { type: 'OPEN_CHILD'; isAlert: boolean }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_SANDBOX_QUERY'; query: string };
+  | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
+  | { type: 'SET_YAML_MODE'; enabled: boolean };

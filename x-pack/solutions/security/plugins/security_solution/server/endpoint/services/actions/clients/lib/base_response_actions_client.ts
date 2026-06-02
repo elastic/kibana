@@ -415,10 +415,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       {
         type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,
+        data: { content: comment || EMPTY_COMMENT },
         metadata: {
           targets,
           command,
-          comment: comment || EMPTY_COMMENT,
         },
         owner: APP_ID,
       },

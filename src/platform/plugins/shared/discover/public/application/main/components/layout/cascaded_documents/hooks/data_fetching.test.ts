@@ -184,6 +184,59 @@ describe('data_fetching related hooks', () => {
       expect(result.current.columnTypes.get('ext')).toBe('array');
     });
 
+    it('should package scalar string aggregation values into arrays', () => {
+      const mockRows = createMockRows([{ category: 'A', count: 10, host: 'host-1' }]);
+
+      const queryMetaWithStringValues: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'host', aggregation: 'values' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithStringValues,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.host).toEqual(['host-1']);
+      expect(result.current.columnTypes.get('host')).toBe('array');
+    });
+
+    it('should concatenate scalar string aggregation values across rows in the same group', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, host: 'host-1' },
+        { category: 'A', count: 5, host: 'host-2' },
+      ]);
+
+      const queryMetaWithStringValues: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'host', aggregation: 'values' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithStringValues,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.host).toEqual(['host-1', 'host-2']);
+      expect(result.current.columnTypes.get('host')).toBe('array');
+    });
+
     it('should resolve esql variable for group key', () => {
       const mockRows = createMockRows([
         { actualField: 'X', count: 10 },

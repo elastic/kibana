@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
 import { useDeleteSkill } from '../../hooks/skills/use_delete_skill';
 import { useSkillsService } from '../../hooks/skills/use_skills';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -32,9 +35,13 @@ import { SkillContextMenu } from './skills_table_context_menu';
 
 export const AgentBuilderSkillsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { skills, isLoading: isLoadingSkills, error: skillsError } = useSkillsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
+  const hasFiredListViewRef = useRef(false);
 
   const {
     isOpen: isDeleteModalOpen,
@@ -48,6 +55,35 @@ export const AgentBuilderSkillsTable = memo(() => {
     confirmForceDelete,
     cancelForceDelete,
   } = useDeleteSkill();
+
+  useEffect(() => {
+    if (!isLoadingSkills && !hasFiredListViewRef.current) {
+      hasFiredListViewRef.current = true;
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityListView, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        entity_count: skills.length,
+      });
+    }
+  }, [isLoadingSkills, skills.length, analytics]);
+
+  useEffect(() => {
+    if (isForceConfirmModalOpen && usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+  }, [isForceConfirmModalOpen, usedByAgents, analytics]);
+
+  const handleConfirmForceDelete = useCallback(() => {
+    if (usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+    confirmForceDelete();
+  }, [analytics, confirmForceDelete, usedByAgents]);
 
   const deleteSkillTitleId = useGeneratedHtmlId({ prefix: 'deleteSkillTitle' });
   const deleteSkillUsedByAgentsTitleId = useGeneratedHtmlId({
@@ -153,7 +189,7 @@ export const AgentBuilderSkillsTable = memo(() => {
           aria-labelledby={deleteSkillUsedByAgentsTitleId}
           titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
           onCancel={cancelForceDelete}
-          onConfirm={confirmForceDelete}
+          onConfirm={handleConfirmForceDelete}
           isLoading={isDeleting}
           cancelButtonText={labels.skills.deleteSkillUsedByAgentsCancelButton}
           confirmButtonText={labels.skills.deleteSkillUsedByAgentsConfirmButton}
@@ -213,6 +249,10 @@ const useSkillsTableColumns = ({
               <EuiLink
                 onClick={() => handleSkillClick(skill.id)}
                 data-test-subj={`agentBuilderSkillLink-${skill.id}`}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+                })}
               >
                 <EuiText size="s">
                   <strong>{skill.id}</strong>

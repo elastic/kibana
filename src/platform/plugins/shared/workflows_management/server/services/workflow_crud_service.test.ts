@@ -256,6 +256,44 @@ describe('WorkflowCrudService', () => {
     });
   });
 
+  describe('getManagedWorkflowDocumentsAllSpaces', () => {
+    it('filters managed workflow documents by plugin id when provided', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'system-workflow',
+              _source: makeSource({ managed: true, managedBy: 'testPlugin' }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getManagedWorkflowDocumentsAllSpaces({
+        pluginId: 'testPlugin',
+      });
+
+      expect(result).toEqual([
+        {
+          id: 'system-workflow',
+          source: expect.objectContaining({ managedBy: 'testPlugin' }),
+        },
+      ]);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: expect.objectContaining({
+              must: [{ term: { managed: true } }, { term: { managedBy: 'testPlugin' } }],
+              must_not: [{ exists: { field: 'deleted_at' } }],
+            }),
+          },
+        })
+      );
+    });
+  });
+
   describe('createWorkflow', () => {
     const validYaml = [
       'name: My Workflow',
@@ -297,6 +335,26 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({
             name: 'My Workflow',
             spaceId: 'default',
+          }),
+        })
+      );
+    });
+
+    it('does not generate a reserved workflow ID from the YAML name', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const reservedNameYaml = validYaml.replace('name: My Workflow', 'name: system-workflow Copy');
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: reservedNameYaml }, 'default', request);
+
+      expect(result.id).toBe('workflow-system-workflow-copy');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow-system-workflow-copy',
+          op_type: 'create',
+          document: expect.objectContaining({
+            name: 'system-workflow Copy',
           }),
         })
       );

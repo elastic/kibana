@@ -12,6 +12,8 @@ import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
+  ManagedWorkflowsSystemApiProvider,
+  PluginScopedManagedWorkflowsApi,
   WorkflowsApiRequestHandlerContext,
   WorkflowsClient,
   WorkflowsClientProvider,
@@ -55,6 +57,19 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if provider is already registered
    */
   registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
+
+  /**
+   * Register a requestless managed workflows provider for startup/system operations.
+   *
+   * @param provider - The managed workflows system API provider
+   * @throws Error if provider is already registered
+   */
+  registerManagedWorkflowsSystemApiProvider(provider: ManagedWorkflowsSystemApiProvider): void;
+
+  /**
+   * Register plugin id as a managed workflows owner during setup.
+   */
+  registerManagedWorkflowOwner(pluginId: string): void;
 }
 
 /**
@@ -80,13 +95,23 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The workflows client
      */
     getClient(request: KibanaRequest): Promise<WorkflowsClient>;
+
+    /**
+     * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
+     * and reused for install/uninstall/execute.
+     */
+    initManagedWorkflowsClient(pluginId: string): Promise<PluginScopedManagedWorkflowsApi>;
+
+    /**
+     * Returns all plugin ids registered as managed workflow owners during setup.
+     */
+    getManagedWorkflowPluginIds(): string[];
   };
 
 /**
  * Dependencies for the server plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginSetupDeps {}
+export type WorkflowsExtensionsServerPluginSetupDeps = Record<string, never>;
 
 export type ServerStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,

@@ -351,7 +351,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
               isValid: true,
               confirmModalLabels: {
                 title: 'title',
-                body: 'body',
+                warningsHeader: 'warningsHeader',
+                listOfWarnings: ['warning1', 'warning2'],
+                warningsFooter: 'warningsFooter',
                 confirmButton: 'add',
                 cancelButton: 'cancel',
               },
@@ -369,7 +371,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expect(renderResult.getByTestId('artifactConfirmModal-header').textContent).toEqual(
           'title'
         );
-        expect(renderResult.getByTestId('artifactConfirmModal-body').textContent).toEqual('body');
+        expect(renderResult.getByTestId('artifactConfirmModal-body').textContent).toEqual(
+          'warningsHeaderwarning1warning2warningsFooter'
+        );
         expect(renderResult.getByTestId('artifactConfirmModal-submitButton').textContent).toEqual(
           'add'
         );

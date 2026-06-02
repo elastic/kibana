@@ -10,6 +10,7 @@
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiLoadingElastic,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -48,6 +50,12 @@ export interface DashboardRendererProps {
   savedObjectId?: string;
   /** Whether to show a plain spinner instead of the Elastic loading animation. */
   showPlainSpinner?: boolean;
+  /**
+   * Flyout type for panel flyouts (Settings, Lens config, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout
+   * (e.g. Agent Builder canvas).
+   */
+  panelFlyoutType?: EuiFlyoutProps['type'];
   /** Callback for redirecting within the dashboard application. */
   dashboardRedirect?: DashboardRedirect;
   /** Function that returns the creation options for the dashboard. */
@@ -69,6 +77,7 @@ export function DashboardRenderer({
   locator,
   savedObjectId,
   showPlainSpinner,
+  panelFlyoutType,
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
@@ -129,7 +138,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId, panelFlyoutType })
       .then((results) => {
         if (!results) return;
         if (canceled) {
@@ -145,7 +154,14 @@ export function DashboardRenderer({
           setShowControlGroup(results.useControlsIntegration);
       })
       .catch((err) => {
-        if (!canceled) setError(err);
+        if (!canceled) {
+          apm.captureError(err, {
+            labels: {
+              error_type: 'LoadDashboardFailure',
+            },
+          });
+          setError(err);
+        }
       });
 
     return () => {

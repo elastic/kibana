@@ -85,13 +85,6 @@ interface BaseSavedObjectFinder {
   getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
-  extraItems?: {
-    metaData: Array<SavedObjectMetaData<FinderAttributes>>;
-    get: (search: {
-      query?: string;
-      perPage?: number;
-    }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
-  };
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
@@ -117,58 +110,37 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderState
 > {
   private isComponentMounted: boolean = false;
-  private metaDataMap = this.getSavedObjectMetaDataMap();
 
   private debouncedFetch = debounce(async (query: Query) => {
-    this.metaDataMap = this.getSavedObjectMetaDataMap();
+    const metaDataMap = this.getSavedObjectMetaDataMap();
     const { contentClient, uiSettings } = this.props.services;
 
     const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
-      Object.values(this.metaDataMap).map((metadata) => ({
+      Object.values(metaDataMap).map((metadata) => ({
         name: metadata.type,
         namespaceType: 'single',
         hidden: false,
         displayName: metadata.name,
       }))
     );
-
     const includeTags = getTagFindReferences({
       selectedTags,
       taggingApi: this.props.services.savedObjectsTagging,
     })?.map(({ id, type }) => id);
 
-    const contentTypes = this.props.savedObjectMetaData
-      .filter(({ type }) => {
-        return visibleTypes ? visibleTypes.includes(type) : true;
-      })
-      .map(({ type }) => ({
-        contentTypeId: type,
-      }));
-    const fetchLimit = uiSettings.get(LISTING_LIMIT_SETTING); // TODO: support pagination,
-    const response = await Promise.all([
-      contentTypes.length
-        ? contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-            contentTypes,
-            query: {
-              text: queryText ? `${queryText}*` : undefined,
-              ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-              limit: fetchLimit,
-            },
-          })
-        : Promise.resolve<{ hits: never[] }>({ hits: [] }),
-      this.props.extraItems?.get({
-        query: queryText,
-        perPage: fetchLimit,
-      }) ?? Promise.resolve<never[]>([]),
-    ]);
+    const types = visibleTypes ?? Object.keys(metaDataMap);
 
-    const savedObjects = [
-      ...response[0].hits,
-      ...response[1].filter(({ type }) => {
-        return visibleTypes ? visibleTypes.includes(type) : true;
-      }),
-    ]
+    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
+      contentTypes: types.map((type) => ({ contentTypeId: type })),
+      query: {
+        text: queryText ? `${queryText}*` : undefined,
+        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+      },
+    });
+
+    const savedObjects = response.hits
       .map((savedObject) => {
         const {
           attributes: { name, title, description },
@@ -185,7 +157,7 @@ class SavedObjectFinderUiClass extends React.Component<
         };
       })
       .filter((savedObject) => {
-        const metaData = this.metaDataMap[savedObject.type];
+        const metaData = metaDataMap[savedObject.type];
         if (metaData.showSavedObject) {
           return metaData.showSavedObject(savedObject.simple);
         }
@@ -227,7 +199,7 @@ class SavedObjectFinderUiClass extends React.Component<
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
-    return [...this.props.savedObjectMetaData, ...(this.props.extraItems?.metaData ?? [])].reduce(
+    return this.props.savedObjectMetaData.reduce(
       (map, metaData) => ({ ...map, [metaData.type]: metaData }),
       {}
     );
@@ -249,7 +221,6 @@ class SavedObjectFinderUiClass extends React.Component<
       savedObjectMetaData,
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
-
     const taggingApi = this.props.services.savedObjectsTagging;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
@@ -275,12 +246,17 @@ class SavedObjectFinderUiClass extends React.Component<
               defaultMessage: 'Type of the saved object',
             }),
             sortable: ({ type }) => {
-              const currentSavedObjectMetaData = this.metaDataMap[type];
+              const currentSavedObjectMetaData = savedObjectMetaData.find(
+                (metaData) => metaData.type === type
+              );
+
               return currentSavedObjectMetaData?.name ?? '';
             },
             'data-test-subj': 'savedObjectFinderType',
             render: (_, item) => {
-              const currentSavedObjectMetaData = this.metaDataMap[item.type];
+              const currentSavedObjectMetaData = savedObjectMetaData.find(
+                (metaData) => metaData.type === item.type
+              )!;
               const iconType = (
                 currentSavedObjectMetaData ||
                 ({
@@ -316,7 +292,9 @@ class SavedObjectFinderUiClass extends React.Component<
         sortable: ({ name }) => name?.toLowerCase(),
         'data-test-subj': 'savedObjectFinderTitle',
         render: (_, item) => {
-          const currentSavedObjectMetaData = this.metaDataMap[item.type]!;
+          const currentSavedObjectMetaData = savedObjectMetaData.find(
+            (metaData) => metaData.type === item.type
+          )!;
           const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
@@ -378,7 +356,7 @@ class SavedObjectFinderUiClass extends React.Component<
         defaultMessage: 'Types',
       }),
       multiSelect: 'or',
-      options: Object.values(this.metaDataMap).map((metaData) => ({
+      options: this.props.savedObjectMetaData.map((metaData) => ({
         value: metaData.type,
         name: metaData.name,
       })),

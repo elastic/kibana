@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import {
   ContentList,
@@ -18,8 +18,16 @@ import {
   ContentListFooter,
   ContentListToolbar,
 } from '@kbn/content-list';
+import {
+  ContentListClientProvider,
+  defineContentListFilter,
+  defineContentListSortField,
+  type ContentListClientProviderProps,
+  type TableListViewFindItemsFn,
+} from '@kbn/content-list-provider-client';
 import { KibanaContentListPage } from '@kbn/content-list-page';
 import {
+  type DashboardMockItem,
   MOCK_DASHBOARDS,
   createMockFavoritesClient,
   mockContentListUserProfilesServices,
@@ -32,7 +40,7 @@ import {
   createMockStoryFindItems,
   createMockTagFacetProvider,
   createMockUserProfileFacetProvider,
-  useInspectFlyout,
+  useContentEditorFlyout,
 } from './stories_helpers';
 
 const { Section } = KibanaContentListPage;
@@ -53,12 +61,97 @@ const labels = {
   entityPlural: 'dashboards',
 } as const;
 
+type TimeRestoreFilterValue = 'restoresTime' | 'usesGlobalTime';
+
+const getTimeRestoreValue = (item: DashboardMockItem): TimeRestoreFilterValue =>
+  item.attributes.timeRestore ? 'restoresTime' : 'usesGlobalTime';
+
+const timeRestoreFilter = defineContentListFilter<DashboardMockItem, TimeRestoreFilterValue>({
+  id: 'timeRestore',
+  title: 'Time behavior',
+  getItemValue: getTimeRestoreValue,
+  options: [
+    { value: 'restoresTime', label: 'Restores time range' },
+    { value: 'usesGlobalTime', label: 'Uses global time' },
+  ],
+});
+
+const timeRestoreSort = defineContentListSortField<DashboardMockItem>({
+  id: 'timeRestore',
+  title: 'Time behavior',
+  getValue: getTimeRestoreValue,
+});
+
+const clientProviderFeatures = {
+  sorting: {
+    initialSort: { field: 'updatedAt', direction: 'desc' },
+    fields: (defaults) => ({
+      ...defaults,
+      timeRestore: timeRestoreSort,
+    }),
+  },
+  pagination: { initialPageSize: 20 },
+  filters: (defaults) => ({
+    ...defaults,
+    timeRestore: timeRestoreFilter,
+  }),
+} satisfies ContentListClientProviderProps['features'];
+
+const clientStoryCore = {
+  analytics: { reportEvent: () => undefined },
+  i18n: {},
+  theme: { theme$: {} },
+  userProfile: { bulkGet: async () => [] },
+  overlays: {
+    openSystemFlyout: () => ({
+      onClose: Promise.resolve(),
+      close: async () => undefined,
+    }),
+  },
+  notifications: {
+    toasts: {
+      addDanger: () => undefined,
+    },
+  },
+  rendering: {
+    addContext: (element: React.ReactNode) => <>{element}</>,
+  },
+  uiSettings: {
+    get: <T,>(key: string): T => (key === 'savedObjects:listingLimit' ? 1000 : 20) as T,
+  },
+} as unknown as ContentListClientProviderProps['core'];
+
+const findDashboardItems: TableListViewFindItemsFn = async (searchQuery, options, signal) => {
+  if (signal?.aborted) {
+    throw new DOMException('The operation was aborted.', 'AbortError');
+  }
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const matchingItems = normalizedSearch
+    ? MOCK_DASHBOARDS.filter((dashboard) =>
+        [dashboard.attributes.title, dashboard.attributes.description]
+          .filter((text): text is string => Boolean(text))
+          .some((text) => text.toLowerCase().includes(normalizedSearch))
+      )
+    : MOCK_DASHBOARDS;
+  const limitedItems = matchingItems.slice(0, options?.listingLimit ?? matchingItems.length);
+
+  return {
+    hits: limitedItems,
+    total: matchingItems.length,
+  };
+};
+
+const TimeBehaviorBadge = ({ restoresTime }: { restoresTime: boolean }) => (
+  <EuiBadge color={restoresTime ? 'primary' : 'hollow'}>
+    {restoresTime ? 'Restores time range' : 'Uses global time'}
+  </EuiBadge>
+);
+
 const useDashboardProviderProps = ({
-  onInspect,
-  includeInspect = false,
+  openContentEditor,
 }: {
-  onInspect?: (item: ContentListItem) => void;
-  includeInspect?: boolean;
+  openContentEditor?: (item: ContentListItem) => void;
 }) => {
   const favoritesClient = useMemo(
     () => createMockFavoritesClient(['dashboard-001', 'dashboard-003', 'dashboard-007']),
@@ -89,20 +182,29 @@ const useDashboardProviderProps = ({
       tags: createMockTagFacetProvider(MOCK_DASHBOARDS),
       starred: true as const,
       userProfiles: createMockUserProfileFacetProvider(MOCK_DASHBOARDS),
+      // Original story leaves this undefined, which makes `<Action.ContentEditor />` self-skip.
+      ...(openContentEditor ? { contentEditor: { open: openContentEditor } } : {}),
     }),
-    []
+    [openContentEditor]
   );
 
   const item = useMemo(
     () => ({
       getHref: (content: ContentListItem) => `#/dashboard/${content.id}`,
-      getEditUrl: (content: ContentListItem) => `#/dashboard/${content.id}?view=edit`,
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        // The edit row icon renders as an `<a href>` link, preserving
+        // right/middle-click open-in-new-tab and keyboard activation.
+        edit: {
+          getItemActionHref: (content: ContentListItem) => `#/dashboard/${content.id}?view=edit`,
+        },
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
       },
-      ...(includeInspect && onInspect ? { onInspect } : {}),
     }),
-    [includeInspect, onInspect]
+    []
   );
 
   return { dataSource, favoritesClient, features, item };
@@ -158,10 +260,9 @@ const OriginalStory = () => {
 };
 
 const ProposalStory = () => {
-  const { onInspect, flyout } = useInspectFlyout();
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
   const { favoritesClient, ...providerProps } = useDashboardProviderProps({
-    onInspect,
-    includeInspect: true,
+    openContentEditor,
   });
 
   const pageElement = useMemo(
@@ -191,7 +292,7 @@ const ProposalStory = () => {
               <Column.CreatedBy />
               <Column.UpdatedAt />
               <Column.Actions>
-                <Action.Inspect />
+                <Action.ContentEditor />
                 <Action.Edit />
                 <Action.Delete />
               </Column.Actions>
@@ -223,10 +324,202 @@ const ProposalStory = () => {
   );
 };
 
+const ClientProviderExtensionsStory = () => {
+  const pageElement = useMemo(
+    () => (
+      <KibanaContentListPage>
+        <KibanaContentListPage.Header
+          title="Dashboards"
+          tabs={[{ label: 'Dashboards', isSelected: true, onClick: () => undefined }]}
+        />
+        <Section>
+          <ContentList emptyState={<DashboardListingEmptyPromptMock />}>
+            <ContentListToolbar />
+            <ContentListTable title="Dashboards">
+              <Column.Name showDescription showTags />
+              <Column
+                id="timeRestore"
+                name="Time behavior"
+                sortable
+                width="180px"
+                render={(item) => <TimeBehaviorBadge restoresTime={Boolean(item.timeRestore)} />}
+              />
+              <Column.CreatedBy />
+              <Column.UpdatedAt />
+            </ContentListTable>
+            <ContentListFooter />
+          </ContentList>
+        </Section>
+      </KibanaContentListPage>
+    ),
+    []
+  );
+
+  return (
+    <ContentListClientProvider
+      id="dashboard-listing-client-provider-extensions"
+      labels={labels}
+      core={clientStoryCore}
+      services={{
+        tags: mockTagsService,
+        userProfiles: mockContentListUserProfilesServices,
+      }}
+      features={clientProviderFeatures}
+      findItems={findDashboardItems}
+    >
+      {pageElement}
+      <EuiSpacer size="m" />
+      <StateDiagnosticPanel element={pageElement} />
+    </ContentListClientProvider>
+  );
+};
+
+// =============================================================================
+// Bulk-delete partition and selection gating
+// =============================================================================
+
+/**
+ * IDs of dashboards treated as managed for these stories.
+ */
+const MANAGED_DASHBOARD_IDS = new Set(['dashboard-002', 'dashboard-005']);
+
+const MANAGED_DELETE_RESTRICTION = 'Managed dashboards cannot be deleted.';
+const MANAGED_EDIT_RESTRICTION = 'Managed dashboards cannot be edited.';
+
+const decorateAsManaged = (items: typeof MOCK_DASHBOARDS): typeof MOCK_DASHBOARDS =>
+  items.map((dashboard) =>
+    MANAGED_DASHBOARD_IDS.has(dashboard.id) ? { ...dashboard, managed: true } : dashboard
+  );
+
+const restrictManagedDelete = (content: ContentListItem) =>
+  content.managed ? MANAGED_DELETE_RESTRICTION : undefined;
+const restrictManagedEdit = (content: ContentListItem) =>
+  content.managed ? MANAGED_EDIT_RESTRICTION : undefined;
+
+const BulkDeleteStory = () => {
+  const favoritesClient = useMemo(
+    () => createMockFavoritesClient(['dashboard-001', 'dashboard-003', 'dashboard-007']),
+    []
+  );
+
+  const dataSource = useMemo(
+    () => ({
+      debounceMs: 0,
+      findItems: createMockStoryFindItems({
+        items: decorateAsManaged(MOCK_DASHBOARDS),
+        favoritesClient,
+      }),
+    }),
+    [favoritesClient]
+  );
+
+  const features = useMemo(
+    () => ({
+      sorting: {
+        initialSort: { field: 'updatedAt', direction: 'desc' as const },
+        fields: [
+          { field: 'title', name: 'Name' },
+          { field: 'updatedAt', name: 'Last updated' },
+        ],
+      },
+      pagination: { initialPageSize: 20 },
+      tags: createMockTagFacetProvider(MOCK_DASHBOARDS),
+      starred: true as const,
+      userProfiles: createMockUserProfileFacetProvider(MOCK_DASHBOARDS),
+      // Selection enabled so the toolbar's bulk-delete button appears.
+      selection: true,
+    }),
+    []
+  );
+
+  const item = useMemo(
+    () => ({
+      getHref: (content: ContentListItem) => `#/dashboard/${content.id}`,
+      // Handlers and restrictions declared once on the provider.
+      actions: {
+        edit: { onItemAction: () => undefined, restriction: restrictManagedEdit },
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+          restriction: restrictManagedDelete,
+        },
+      },
+    }),
+    []
+  );
+
+  const pageElement = useMemo(
+    () => (
+      <KibanaContentListPage>
+        <KibanaContentListPage.Header
+          title="Dashboards"
+          tabs={[{ label: 'Dashboards', isSelected: true, onClick: () => undefined }]}
+        />
+        <Section>
+          <ContentList emptyState={<DashboardListingEmptyPromptMock />}>
+            <ContentListToolbar>
+              <Filters>
+                <Filters.Starred />
+                <Filters.Tags />
+                <Filters.CreatedBy />
+                <Filters.Sort />
+              </Filters>
+            </ContentListToolbar>
+            <ContentListTable title="Dashboards">
+              <Column.Name showDescription showTags showStarred />
+              <Column.CreatedBy />
+              <Column.UpdatedAt />
+              {/* Actions column default-infers Edit/Delete from itemConfig. */}
+              <Column.Actions />
+            </ContentListTable>
+            <ContentListFooter />
+          </ContentList>
+        </Section>
+      </KibanaContentListPage>
+    ),
+    []
+  );
+
+  return (
+    <ContentListProvider
+      id="dashboard-listing-bulk-delete-partition"
+      labels={labels}
+      services={{
+        favorites: favoritesClient,
+        tags: mockTagsService,
+        userProfiles: mockContentListUserProfilesServices,
+      }}
+      dataSource={dataSource}
+      features={features}
+      item={item}
+    >
+      {pageElement}
+      <EuiSpacer size="m" />
+      <StateDiagnosticPanel element={pageElement} />
+    </ContentListProvider>
+  );
+};
+
 export const Original: StoryObj = {
   render: () => <OriginalStory />,
 };
 
 export const Proposal: StoryObj = {
   render: () => <ProposalStory />,
+};
+
+export const ClientProviderExtensions: StoryObj = {
+  render: () => <ClientProviderExtensionsStory />,
+};
+
+/**
+ * Demonstrates the bulk-delete partition policy.
+ *
+ * - Selection checkboxes on managed rows are disabled with a tooltip.
+ * - Row-level Delete and Edit icons on managed rows are disabled.
+ * - The toolbar "Delete N dashboards" button is never disabled per-selection.
+ */
+export const BulkDeletePartition: StoryObj = {
+  render: () => <BulkDeleteStory />,
 };

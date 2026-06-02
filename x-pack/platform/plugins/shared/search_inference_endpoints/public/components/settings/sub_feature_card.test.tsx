@@ -17,6 +17,7 @@ import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
@@ -141,7 +142,8 @@ describe('SubFeatureCard', () => {
       hasSavedObject: boolean;
       isFeatureDirty: boolean;
       globalDefaultId: string;
-    }>
+    }>,
+    deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = new Map()
   ) =>
     render(
       <Wrapper>
@@ -152,6 +154,7 @@ describe('SubFeatureCard', () => {
           effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
           onEndpointsChange={onEndpointsChange}
           invalidEndpointIds={invalidEndpointIds}
+          deprecatedEndpointsMap={deprecatedEndpointsMap}
           {...defaultGlobalRowProps}
           {...globalRowOverrides}
         />
@@ -201,6 +204,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -233,6 +237,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -253,6 +258,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -278,6 +284,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -298,6 +305,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -319,6 +327,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set(['ep-1'])}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -365,6 +374,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
           />
         </Wrapper>
@@ -418,6 +428,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
             hasSavedObject={false}
             isFeatureDirty={false}
             globalDefaultId="ep-3"
@@ -461,15 +472,6 @@ describe('SubFeatureCard', () => {
 
       expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
       expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
-    });
-
-    it('shows Default badge only on the first endpoint', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      fireEvent.click(screen.getByTestId('show-more-test_feature'));
-
-      const badges = screen.getAllByText('Default');
-      expect(badges).toHaveLength(1);
     });
 
     it('disables remove button when only one endpoint', () => {
@@ -543,6 +545,76 @@ describe('SubFeatureCard', () => {
       expect(
         screen.getByText('Inference endpoint Claude is no longer available')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
+    it('does not render the global default locked row when globalDefaultId is NO_DEFAULT_MODEL', () => {
+      renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        globalDefaultId: NO_DEFAULT_MODEL,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('deprecation badges', () => {
+    const deprecatedInfo: EndpointDeprecationInfo = {
+      name: 'Claude 2',
+      status: EisModelStatus.Deprecated,
+      metadata: {
+        heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
+      },
+    };
+    const eolInfo: EndpointDeprecationInfo = {
+      name: 'Claude 2',
+      status: EisModelStatus.DeprecatedEOL,
+      metadata: {
+        heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+      },
+    };
+
+    it('renders the deprecated badge for an assigned deprecated endpoint', () => {
+      renderCard(
+        ['ep-2'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        new Map([['ep-2', deprecatedInfo]])
+      );
+
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelEolBadge-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('renders the EOL badge for an assigned EOL endpoint', () => {
+      renderCard(
+        ['ep-2'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        new Map([['ep-2', eolInfo]])
+      );
+
+      expect(screen.getByTestId('modelEolBadge-ep-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelDeprecatedBadge-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('renders the deprecated badge on the global default locked row', () => {
+      renderCard(
+        ['ep-1', 'ep-2'],
+        undefined,
+        new Set(),
+        ['__different__'],
+        { hasSavedObject: false, isFeatureDirty: false, globalDefaultId: 'ep-3' },
+        new Map([['ep-3', deprecatedInfo]])
+      );
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
     });
   });
 });

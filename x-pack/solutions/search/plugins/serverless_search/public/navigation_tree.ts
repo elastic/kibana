@@ -184,12 +184,11 @@ export function createNavigationTree({
           },
           {
             children: [
-              { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
+              { link: 'searchSynonyms:synonyms' },
               { link: 'searchQueryRules' },
               { link: 'searchPlayground' },
             ],
             id: 'search_relevance',
-            breadcrumbStatus: 'hidden',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
             }),
@@ -234,6 +233,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -273,6 +273,10 @@ export function createNavigationTree({
                       link: 'management:action_policies' as const,
                       breadcrumbStatus: 'hidden' as const,
                     },
+                    {
+                      link: 'management:execution_history' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
                   ],
                 },
               ]
@@ -283,7 +287,7 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'rules', breadcrumbStatus: 'hidden' },
+              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },

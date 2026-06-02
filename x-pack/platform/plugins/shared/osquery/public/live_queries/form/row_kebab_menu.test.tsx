@@ -197,8 +197,6 @@ describe('RowKebabMenu — export branch', () => {
       fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
       fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
 
-      fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('csv', {
@@ -228,6 +226,46 @@ describe('RowKebabMenu — export branch', () => {
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('json', undefined);
     });
 
+    it('disables the Export results menu item when total is 0', () => {
+      useExportFiltersMock.mockReturnValue({ total: 0 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).toBeDisabled();
+    });
+
+    it('does not open the modal when Export results is clicked with total=0', () => {
+      useExportFiltersMock.mockReturnValue({ total: 0 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      expect(screen.queryByTestId('osqueryExportResultsModal')).not.toBeInTheDocument();
+    });
+
+    it('leaves the menu item enabled when total is undefined (loading or error)', () => {
+      useExportFiltersMock.mockReturnValue({ total: undefined });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).not.toBeDisabled();
+    });
+
+    it('leaves the menu item enabled when total is greater than zero (boundary: 1)', () => {
+      useExportFiltersMock.mockReturnValue({ total: 1 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).not.toBeDisabled();
+    });
+
     it('forwards total to the modal so the button reflects unfiltered count when unchecked', () => {
       useExportFiltersMock.mockReturnValue({
         kuery: 'host.os:linux',
@@ -241,6 +279,42 @@ describe('RowKebabMenu — export branch', () => {
       fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
 
       fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
+
+      expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 100');
+    });
+
+    it('uses row.docs as total fallback when the store has no entry (collapsed row)', () => {
+      useExportFiltersMock.mockReturnValue(undefined);
+
+      render(
+        <I18nProvider>
+          <RowKebabMenu
+            row={{ action_id: 'row-action-id', id: 'row-1', docs: 42 }}
+            actionId="parent-action-id"
+          />
+        </I18nProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 42');
+    });
+
+    it('prefers store total over row.docs when both are present', () => {
+      useExportFiltersMock.mockReturnValue({ total: 100 });
+
+      render(
+        <I18nProvider>
+          <RowKebabMenu
+            row={{ action_id: 'row-action-id', id: 'row-1', docs: 42 }}
+            actionId="parent-action-id"
+          />
+        </I18nProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
 
       expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 100');
     });

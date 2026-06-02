@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
@@ -40,6 +41,11 @@ const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
   icon: 'bell',
 };
 
+const ALERTS_DEFAULT_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.alerts.label',
+  { defaultMessage: 'Security alerts' }
+);
+
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
@@ -61,6 +67,22 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
+  );
+
+  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
+    SecurityAgentBuilderAttachments.alerts,
+    {
+      getLabel: (attachment) => {
+        const count = attachment.data?.alertIds?.length ?? 0;
+        return count > 0
+          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+              values: { count },
+            })
+          : ALERTS_DEFAULT_LABEL;
+      },
+      getIcon: () => 'bell',
+    }
   );
 };
 
@@ -128,16 +150,18 @@ export const registerRuleAttachment = ({
   attachments,
   application,
   aiRuleCreation,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_rule_attachment" */
-    './rule_attachment'
+    './rule'
   ).then(({ registerRuleAttachment: register }) => {
-    register({ attachments, application, aiRuleCreation });
+    register({ attachments, application, aiRuleCreation, uiSettings });
   });
 };
 

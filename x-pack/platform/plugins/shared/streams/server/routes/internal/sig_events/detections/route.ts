@@ -6,9 +6,9 @@
  */
 
 import { detectionSchema, type Detection } from '@kbn/streams-schema';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -17,7 +17,7 @@ const detectionsSearchRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get latest detections',
-    description: 'Search detection entities using their latest derived state.',
+    description: 'Search detection entities using their latest derived state with pagination.',
   },
   security: {
     authz: {
@@ -28,19 +28,12 @@ const detectionsSearchRoute = createServerRoute({
     query: z.object({
       from: z.iso.datetime().optional(),
       to: z.iso.datetime().optional(),
+      page: z.coerce.number().int().min(1).optional(),
+      perPage: z.coerce.number().int().min(1).max(1000).optional(),
       rule_uuid: z
         .union([z.string().transform((value) => [value]), z.array(z.string())])
         .optional(),
       rule_name: z.string().optional(),
-      stream_name: z.string().optional(),
-      silent: BooleanFromString.optional(),
-      superseded: BooleanFromString.optional(),
-      superseded_at: z
-        .object({
-          from: z.iso.datetime().optional(),
-          to: z.iso.datetime().optional(),
-        })
-        .optional(),
     }),
   }),
   handler: async ({
@@ -48,12 +41,12 @@ const detectionsSearchRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<{ hits: Detection[] }> => {
+  }): Promise<PaginatedResponse<Detection>> => {
     const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDetectionClient().findLatest(params.query);
+    return getDetectionClient().findLatestPaginated(params.query);
   },
 });
 

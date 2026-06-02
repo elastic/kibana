@@ -1,5 +1,5 @@
 {
-  "sha1": "11b27e8baa8ce0fb13842de98ef29b3972af67fa",
+  "sha1": "7edcda73b7aaa4b4fa55aaecac9641109b64b983",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 271,
+        "line": 274,
         "column": 9
       }
     },
@@ -590,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 77,
+        "line": 76,
         "column": 9
       }
     },
@@ -606,7 +606,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 93,
+        "line": 90,
         "column": 9
       }
     },
@@ -622,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 106,
+        "line": 103,
         "column": 9
       }
     },
@@ -636,7 +636,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 122,
+        "line": 119,
         "column": 9
       }
     },
@@ -652,7 +652,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 147,
+        "line": 148,
         "column": 9
       }
     },
@@ -668,7 +668,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 77,
+        "line": 76,
         "column": 9
       }
     },
@@ -684,7 +684,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 93,
+        "line": 90,
         "column": 9
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 106,
+        "line": 103,
         "column": 9
       }
     },
@@ -714,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 122,
+        "line": 119,
         "column": 9
       }
     },
@@ -730,7 +730,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 147,
+        "line": 148,
         "column": 9
       }
     },
@@ -746,7 +746,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 167,
+        "line": 168,
         "column": 7
       }
     },
@@ -762,7 +762,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 179,
+        "line": 180,
         "column": 7
       }
     },
@@ -778,7 +778,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 7
       }
     },
@@ -794,7 +794,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 217,
+        "line": 218,
         "column": 7
       }
     },
@@ -810,7 +810,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 240,
+        "line": 241,
         "column": 7
       }
     },
@@ -852,7 +852,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 85,
+        "line": 87,
         "column": 7
       }
     },
@@ -866,7 +866,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 7
       }
     },
@@ -880,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 123,
+        "line": 127,
         "column": 7
       }
     },
@@ -894,7 +894,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 210,
+        "line": 214,
         "column": 9
       }
     },
@@ -908,7 +908,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 279,
+        "line": 286,
         "column": 9
       }
     },
@@ -922,13 +922,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 357,
+        "line": 367,
         "column": 9
       }
     },
     {
-      "id": "0ed00376f219437-792ee8fdbf8c56d",
-      "title": "Stream data retention - display values should show custom period badge when custom retention is set",
+      "id": "0ed00376f219437-253ccda6796062a",
+      "title": "Stream data retention - display values should show data phase count subtitle when custom retention is set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -938,7 +938,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 65,
+        "line": 63,
         "column": 9
       }
     },
@@ -954,7 +954,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 73,
+        "line": 71,
         "column": 9
       }
     },

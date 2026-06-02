@@ -25,5 +25,6 @@
     "@kbn/telemetry",
     "@kbn/inference-tracing",
     "@kbn/logging",
+    "@kbn/es",
   ]
 }

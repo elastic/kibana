@@ -16,51 +16,8 @@ import {
 import type { CaseUI, UserActionUI } from '../../containers/types';
 import type { CaseViewProps } from './types';
 
-export const alertsHit = [
-  {
-    _id: 'alert-id-1',
-    _index: 'alert-index-1',
-    _source: {
-      signal: {
-        rule: {
-          id: 'rule-id-1',
-          name: 'Awesome rule',
-        },
-      },
-    },
-  },
-  {
-    _id: 'alert-id-2',
-    _index: 'alert-index-2',
-    _source: {
-      signal: {
-        rule: {
-          id: 'rule-id-2',
-          name: 'Awesome rule 2',
-        },
-      },
-    },
-  },
-];
-
 export const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  ruleDetailsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  showAlertDetails: jest.fn(),
-  useFetchAlertData: () => [
-    false,
-    {
-      'alert-id-1': alertsHit[0],
-      'alert-id-2': alertsHit[1],
-    },
-  ],
 };
 
 export const caseData: CaseUI = {

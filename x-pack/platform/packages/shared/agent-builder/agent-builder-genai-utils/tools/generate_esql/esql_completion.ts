@@ -14,12 +14,12 @@ import type { Logger } from '@kbn/logging';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
-import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import {
   resolveResourceForEsqlWithSamplingStats,
   formatResourceWithSampledValues,
   type ResolvedResourceWithSampling,
 } from '../utils/resources';
+import { loadDocumentation, EsqlDocEntry, type EsqlLoadedDocumentation } from './documentation';
 
 const COMPLETION_FROM_PLACEHOLDER = 'FROM _completion_dummy_';
 
@@ -57,11 +57,11 @@ const formatFetchedDocs = (fetchedDocs: Record<string, string>): string => {
 const buildRequestDocsMessages = ({
   nlInstruction,
   currentQuery,
-  prompts,
+  documentation,
 }: {
   nlInstruction: string;
   currentQuery: string;
-  prompts: EsqlPrompts;
+  documentation: EsqlLoadedDocumentation;
 }): BaseMessageLike[] => [
   [
     'system',
@@ -70,7 +70,7 @@ const buildRequestDocsMessages = ({
 Your current task is to look at a partial ES|QL query in the editor and at a single instruction (a comment) the user wants to turn into pipe(s). Pick the ES|QL commands and functions you will need to write that fragment, so a later step can fetch documentation for only those keywords.
 
 <syntax-overview>
-${prompts.syntax}
+${documentation.getDocContent(EsqlDocEntry.syntax)}
 </syntax-overview>`,
   ],
   [
@@ -204,7 +204,10 @@ export const generateEsqlCompletion = async ({
       },
     },
     async () => {
-      const docBase = await EsqlDocumentBase.load();
+      const [docBase, documentation] = await Promise.all([
+        EsqlDocumentBase.load(),
+        loadDocumentation(),
+      ]);
 
       const resourceName = getIndexPatternFromESQLQuery(currentQuery) || undefined;
       const resourcePromise = resourceName
@@ -229,7 +232,7 @@ export const generateEsqlCompletion = async ({
           buildRequestDocsMessages({
             nlInstruction,
             currentQuery,
-            prompts: docBase.getPrompts(),
+            documentation,
           }),
           { signal }
         ),

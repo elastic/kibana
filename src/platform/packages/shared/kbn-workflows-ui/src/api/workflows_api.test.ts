@@ -237,6 +237,24 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('searchTriggerEvents', () => {
+    it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
+      const params = {
+        kql: 'eventId: "e1"',
+        from: '2025-01-01',
+        to: '2025-12-31',
+        page: 2,
+        size: 25,
+      };
+      await api.searchTriggerEvents(params);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/trigger_events/_search', {
+        body: JSON.stringify(params),
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // Execution operations
   // ---------------------------------------------------------------------------
@@ -284,7 +302,16 @@ describe('WorkflowApi', () => {
 
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
-      const params = { page: 1, size: 10 };
+      const params = {
+        page: 1,
+        size: 10,
+        startedAfter: 'now-1w',
+        startedBefore: 'now',
+        finishedAfter: '2026-05-01T00:00:00.000Z',
+        finishedBefore: '2026-05-14T00:00:00.000Z',
+        sortField: 'finishedAt' as const,
+        sortOrder: 'desc' as const,
+      };
       await api.getWorkflowExecutions('wf-1', params);
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions', {

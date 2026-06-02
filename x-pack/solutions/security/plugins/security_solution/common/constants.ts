@@ -55,6 +55,7 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const ALERTS_BATCH_MAX_SIZE = 20 as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
@@ -336,6 +337,18 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes (public)
+ */
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+export const DETECTION_ENGINE_ATTACKS_SEARCH_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/_search` as const;
+export const DETECTION_ENGINE_ATTACKS_STATUS_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/status` as const;
+export const DETECTION_ENGINE_ATTACKS_TAGS_URL = `${DETECTION_ENGINE_ATTACKS_URL}/tags` as const;
+export const DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/assignees` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -541,16 +554,6 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
- * Cases attachment IDs
- *
- * The endpoint attachment type id now lives in the cases plugin as
- * `SECURITY_ENDPOINT_ATTACHMENT_TYPE` (see `@kbn/cases-plugin/common`).
- * Import it from there directly so all unified attachment type ids stay in a
- * single source of truth.
- */
-export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
-
-/**
  * Rule gaps
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
@@ -722,6 +725,7 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
+  alerts = 'security.alerts',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',

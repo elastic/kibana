@@ -24,7 +24,6 @@ import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
@@ -41,15 +40,6 @@ jest.mock('../../../shared/components/flyout_provider', () => ({
 
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled', () => ({
   useIsAnalyzerEnabled: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({ selectedPatterns: [] })),
-}));
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns', () => ({
-  useSelectedPatterns: jest.fn(() => []),
 }));
 jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(() => ({
@@ -72,6 +62,14 @@ jest.mock('./session_preview_container', () => ({
   ),
 }));
 
+jest.mock('./graph_preview_container', () => ({
+  GraphPreviewContainer: () => <div data-test-subj="graphPreviewContainerMock" />,
+}));
+
+jest.mock('../hooks/use_graph_preview', () => ({
+  useGraphPreview: jest.fn(() => ({ hasGraphData: true })),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -89,7 +87,6 @@ describe('VisualizationsSection', () => {
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
   const mockIsAnalyzerEnabled = jest.mocked(useIsAnalyzerEnabled);
-  const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
   const openSystemFlyout = jest.fn();
   const renderCellActions = jest.fn();
@@ -125,7 +122,6 @@ describe('VisualizationsSection', () => {
         serverless: undefined,
       },
     } as unknown as ReturnType<typeof useKibana>);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockIsAnalyzerEnabled.mockReturnValue(true);
   });
@@ -163,6 +159,7 @@ describe('VisualizationsSection', () => {
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(getByTestId('graphPreviewContainerMock')).toBeInTheDocument();
   });
 
   it('uses Security history key when opening session flyout in Security app', () => {

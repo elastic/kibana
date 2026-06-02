@@ -100,6 +100,9 @@ export const RunTimeFilter: React.FC<RunTimeFilterProps> = ({ value, unit, onCha
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.queryActivity.runTimeFilter.popoverAriaLabel', {
+        defaultMessage: 'Run time filter',
+      })}
       button={
         <EuiFilterButton
           iconType="arrowDown"

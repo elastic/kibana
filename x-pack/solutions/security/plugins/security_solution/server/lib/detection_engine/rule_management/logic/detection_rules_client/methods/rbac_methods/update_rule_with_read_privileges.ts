@@ -9,6 +9,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { camelCase } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
+import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { ReadAuthRuleUpdateWithRuleSource } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
@@ -23,10 +24,12 @@ export const updateReadAuthEditRuleFields = async ({
   rulesClient,
   ruleUpdate,
   existingRule,
+  changeTracking,
 }: {
   rulesClient: RulesClient;
   ruleUpdate: ReadAuthRuleUpdateWithRuleSource;
   existingRule: RuleResponse;
+  changeTracking?: SecurityRuleChangeTracking;
 }): Promise<BulkEditResult<RuleParams>> => {
   const operations = Object.keys(ruleUpdate).map((field) => {
     const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
@@ -40,5 +43,6 @@ export const updateReadAuthEditRuleFields = async ({
   return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
     ids: [existingRule.id],
     operations,
+    changeTracking,
   });
 };

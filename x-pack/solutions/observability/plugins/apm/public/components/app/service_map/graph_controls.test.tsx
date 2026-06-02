@@ -27,6 +27,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -77,6 +81,21 @@ jest.mock('../../shared/service_map/layout', () => ({
 
 jest.mock('./service_map_minimap', () => ({
   ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
+}));
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const createMockNode = (id: string, label: string): ServiceMapNode => ({
@@ -152,14 +171,14 @@ describe('ServiceMapGraph - Controls', () => {
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
     expect(fullscreenButton).toBeInTheDocument();
-    expect(fullscreenButton).toHaveAttribute('title', 'Enter fullscreen');
+    expect(fullscreenButton).toHaveAttribute('aria-label', 'Enter fullscreen');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
       expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+        'aria-label',
         'Exit fullscreen (esc)'
       );
     });
@@ -173,14 +192,14 @@ describe('ServiceMapGraph - Controls', () => {
     );
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
-    expect(fullscreenButton).toHaveAttribute('title', 'Exit fullscreen (esc)');
+    expect(fullscreenButton).toHaveAttribute('aria-label', 'Exit fullscreen (esc)');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
       expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+        'aria-label',
         'Enter fullscreen'
       );
     });
@@ -197,7 +216,7 @@ describe('ServiceMapGraph - Controls', () => {
     const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
     expect(viewFullMapButton).toBeInTheDocument();
     expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
-    expect(viewFullMapButton).toHaveAttribute('title', 'View full service map');
+    expect(viewFullMapButton).toHaveAttribute('aria-label', 'View full service map');
   });
 
   it('does not render "View full service map" button when fullMapHref is not provided', () => {

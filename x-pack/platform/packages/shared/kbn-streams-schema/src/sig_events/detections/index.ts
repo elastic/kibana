@@ -7,15 +7,28 @@
 
 import { z } from '@kbn/zod/v4';
 
+const detectionEvidenceSchema = z.object({
+  change_point_type: z.string().optional(),
+  p_value: z.number().optional(),
+});
+
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  detection_id: z.string(),
-  silent: z.boolean().optional(),
-  superseded: z.boolean().optional(),
-  superseded_at: z.iso.datetime().optional(),
+  detected_at: z.iso.datetime().optional(),
+  kind: z.enum(['detection', 'quiet', 'handled']),
+  processed: z.boolean(),
+  detection_id: z.string().optional(),
   rule_uuid: z.string(),
   rule_name: z.string(),
-  stream: z.string(),
+  stream_name: z.string().optional(),
+  alert_count: z.number().optional(),
+  alert_index: z.string().optional(),
+  workflow_execution_id: z.string().optional(),
+  resolution_lookback_minutes: z.number().optional(),
+  peak_alert_count: z.number().optional(),
+  detection_evidence: detectionEvidenceSchema.optional(),
+  alert_samples: z.array(z.record(z.string(), z.unknown())).optional(),
+  rules_activity: z.array(z.record(z.string(), z.unknown())).optional(),
 });
 
 export type Detection = z.infer<typeof detectionSchema>;
