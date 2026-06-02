@@ -113,6 +113,9 @@ dependsOn:
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
   - '@kbn/datemath'
+  - '@kbn/workflows-hitl-common'
+  - '@kbn/workflows-hitl-form'
+  - '@kbn/workflows-hitl-telemetry'
 tags:
   - plugin
   - prod

@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/workflows-hitl-form'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/react-kibana-context-theme'

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/core'
+  - '@kbn/inbox-plugin'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
   - '@kbn/connector-specs'
@@ -34,6 +35,7 @@ dependsOn:
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
+  - '@kbn/workflows-hitl-telemetry'
   - '@kbn/licensing-plugin'
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'

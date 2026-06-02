@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/utility-types'
   - '@kbn/workflows'
+  - '@kbn/workflows-hitl-common'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/palettes'

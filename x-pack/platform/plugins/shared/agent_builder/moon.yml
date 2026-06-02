@@ -142,6 +142,9 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/user-profile-components'
   - '@kbn/telemetry'
+  - '@kbn/inbox-plugin'
+  - '@kbn/workflows-hitl-form'
+  - '@kbn/workflows-hitl-telemetry'
 tags:
   - plugin
   - prod
