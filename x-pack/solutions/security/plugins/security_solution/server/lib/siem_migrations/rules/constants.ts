@@ -17,15 +17,13 @@ export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<SplunkSeverity, Severity>
   '5': 'critical',
 } as const;
 
-export const MICROSOFT_SENTINEL_ELASTIC_SEVERITY_MAP: Record<
-  MicrosoftSentinelSeverity,
-  Severity
-> = {
-  high: 'high',
-  medium: 'medium',
-  low: 'low',
-  informational: 'low',
-} as const;
+export const MICROSOFT_SENTINEL_ELASTIC_SEVERITY_MAP: Record<MicrosoftSentinelSeverity, Severity> =
+  {
+    high: 'high',
+    medium: 'medium',
+    low: 'low',
+    informational: 'low',
+  } as const;
 
 export const ELASTIC_SEVERITY_TO_RISK_SCORE_MAP = defaultRiskScoreBySeverity;
 
