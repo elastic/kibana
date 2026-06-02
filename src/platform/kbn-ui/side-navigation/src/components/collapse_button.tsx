@@ -14,6 +14,10 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SIDE_PANEL_ID } from '../constants';
+import {
+  SecondaryPanelMenuHiddenIcon,
+  SecondaryPanelMenuShownIcon,
+} from './collapse_button_icons/secondary_panel_icons';
 
 interface Props {
   isCollapsed: boolean;
@@ -25,8 +29,8 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
     sideNavCollapseButtonWrapper: css`
       display: flex;
       align-items: center;
-      flex-shrink: 0;
-      margin-right: 4px;
+      justify-content: center;
+      min-width: ${euiTheme.size.xxl};
     `,
     sideNavCollapseButton: css`
       &.euiButtonIcon:hover {
@@ -40,7 +44,7 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
  * Collapse button for the side navigation
  */
 export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
-  const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
+  const iconType = isCollapsed ? SecondaryPanelMenuHiddenIcon : SecondaryPanelMenuShownIcon;
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
 
@@ -49,11 +53,11 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
       <EuiToolTip
         content={
           isCollapsed
-            ? i18n.translate('kbnUI.sideNavigation.expandSecondaryPanelButtonLabel', {
-                defaultMessage: 'Expand secondary navigation panel',
+            ? i18n.translate('kbnUI.sideNavigation.showSecondaryPanelButtonLabel', {
+                defaultMessage: 'Show secondary navigation panel',
               })
-            : i18n.translate('kbnUI.sideNavigation.collapseSecondaryPanelButtonLabel', {
-                defaultMessage: 'Collapse secondary navigation panel',
+            : i18n.translate('kbnUI.sideNavigation.hideSecondaryPanelButtonLabel', {
+                defaultMessage: 'Hide secondary navigation panel',
               })
         }
         disableScreenReaderOutput
@@ -61,17 +65,17 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
         <EuiButtonIcon
           data-test-subj="sideNavCollapseButton"
           css={styles.sideNavCollapseButton}
-          size="xs"
+          size="s"
           color="text"
           iconType={iconType}
           tabIndex={-1}
           aria-label={
             isCollapsed
-              ? i18n.translate('kbnUI.sideNavigation.expandSecondaryPanelButtonLabel', {
-                  defaultMessage: 'Expand secondary navigation panel',
+              ? i18n.translate('kbnUI.sideNavigation.showSecondaryPanelButtonLabel', {
+                  defaultMessage: 'Show secondary navigation panel',
                 })
-              : i18n.translate('kbnUI.sideNavigation.collapseSecondaryPanelButtonLabel', {
-                  defaultMessage: 'Collapse secondary navigation panel',
+              : i18n.translate('kbnUI.sideNavigation.hideSecondaryPanelButtonLabel', {
+                  defaultMessage: 'Hide secondary navigation panel',
                 })
           }
           aria-pressed={!isCollapsed}

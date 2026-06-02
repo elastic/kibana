@@ -135,7 +135,6 @@ export const Navigation = ({
 
   useLayoutWidth({ isSidePanelOpen, showPrimaryItemLabels, setWidth });
 
-  // Shown only inside secondary nav surfaces (side panel or popover), not on the primary nav chrome.
   const collapseButton =
     onToggleCollapsed && !forcedSecondaryPanelCollapsed ? (
       <SideNavCollapseButton
@@ -143,10 +142,6 @@ export const Navigation = ({
         toggle={onToggleCollapsed}
       />
     ) : null;
-
-  // Collapsed: expand control lives in popovers only. Expanded: in the side panel only.
-  const popoverCollapseButton = isSecondaryPanelCollapsed ? collapseButton : undefined;
-  const sidePanelCollapseButton = isSidePanelOpen ? collapseButton : undefined;
 
   return (
     <div
@@ -198,7 +193,6 @@ export const Navigation = ({
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
                         badgeType={item.badgeType}
-                        collapseButton={popoverCollapseButton}
                         isNew={getIsNewSecondary(item.id)}
                         title={item.label}
                       >
@@ -281,7 +275,6 @@ export const Navigation = ({
                   {(closePopover) => (
                     <SideNav.NestedSecondaryMenu>
                       <SideNav.NestedSecondaryMenu.Panel
-                        collapseButton={popoverCollapseButton}
                         id={MAIN_PANEL_ID}
                         title={i18n.translate('kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle', {
                           defaultMessage: 'More',
@@ -373,7 +366,6 @@ export const Navigation = ({
                             <>
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
-                                collapseButton={popoverCollapseButton}
                                 aria-describedby={panelNavigationInstructionsId}
                               />
                               {item.sections?.map((section) => (
@@ -411,7 +403,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isPrimaryNavCollapsed}>
+        <SideNav.Footer isCollapsed={isPrimaryNavCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -442,7 +434,6 @@ export const Navigation = ({
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
                         badgeType={item.badgeType}
-                        collapseButton={popoverCollapseButton}
                         isNew={getIsNewSecondary(item.id)}
                         title={item.label}
                       >
@@ -502,7 +493,6 @@ export const Navigation = ({
             return (
               <SideNav.SecondaryMenu
                 badgeType={openerNode.badgeType}
-                collapseButton={sidePanelCollapseButton}
                 isPanel
                 title={openerNode.label}
                 isNew={getIsNewSecondary(openerNode.id)}

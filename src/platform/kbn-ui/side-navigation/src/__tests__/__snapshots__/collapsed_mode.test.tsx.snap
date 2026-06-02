@@ -363,6 +363,35 @@ exports[`Secondary panel collapsed mode should render the side navigation 1`] = 
             </span>
           </div>
         </div>
+        <hr
+          class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
+        />
+        <div
+          class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
+        >
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            id="generated-id_euiToolTipAnchor"
+          >
+            <button
+              aria-controls="kbnChromeNav-sidePanel"
+              aria-expanded="false"
+              aria-label="Show secondary navigation panel"
+              aria-pressed="false"
+              class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-sideNavCollapseButton"
+              data-test-subj="sideNavCollapseButton"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="SecondaryPanelMenuHiddenIcon"
+              />
+            </button>
+          </span>
+        </div>
       </footer>
     </div>
   </div>

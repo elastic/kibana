@@ -11,7 +11,13 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiScreenReaderOnly,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import { FooterItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
@@ -34,6 +40,12 @@ const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boole
 
       ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
     `,
+    collapseDivider: css`
+      position: relative;
+      background-color: transparent;
+
+      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
+    `,
   };
 };
 
@@ -46,6 +58,7 @@ export type FooterChildren = ReactNode | ((ids: FooterIds) => ReactNode);
 export interface FooterProps {
   children: FooterChildren;
   isCollapsed: boolean;
+  collapseButton?: ReactNode;
 }
 
 interface FooterComponent
@@ -54,7 +67,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed }, ref) => {
+  ({ children, isCollapsed, collapseButton }, ref) => {
     const euiThemeContext = useEuiTheme();
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
@@ -107,6 +120,12 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
+          {collapseButton && (
+            <>
+              <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
+              {collapseButton}
+            </>
+          )}
         </footer>
       </>
     );
