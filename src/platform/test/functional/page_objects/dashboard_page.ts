@@ -544,12 +544,12 @@ export class DashboardPageObject extends FtrService {
     title,
     storeTimeWithDashboard,
     tags,
-    confirmDuplicateTitle
+    confirmDuplicateTitle,
   }: {
     title?: string;
-    storeTimeWithDashboard?: boolean
+    storeTimeWithDashboard?: boolean;
     tags?: string[];
-    confirmDuplicateTitle?: boolean
+    confirmDuplicateTitle?: boolean;
   }) {
     await this.openSettingsFlyout();
 
