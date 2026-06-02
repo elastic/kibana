@@ -156,11 +156,28 @@ export const startService = (
   return pid;
 };
 
+const isEdotDockerRunning = (): boolean => {
+  try {
+    const result = execFileSync(
+      'docker',
+      ['ps', '--filter', `name=${EDOT_CONTAINER_NAME}`, '--format', '{{.Names}}'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5_000 }
+    ).trim();
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Stop the EDOT Docker container. The container runs independently of the
  * tracked node process, so killing the PID alone is not enough.
  */
 const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
+  if (!isEdotDockerRunning()) {
+    return;
+  }
+
   const composePath = Path.join(repoRoot, EDOT_DOCKER_COMPOSE_FILE);
 
   try {
@@ -172,8 +189,11 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
       log.info('[edot] Docker container stopped via compose');
       return;
     }
-  } catch {
-    // fall through to docker stop
+  } catch (err) {
+    const isTimeout = err instanceof Error && 'killed' in err;
+    if (isTimeout) {
+      log.warning('[edot] docker compose down timed out, falling back to docker stop');
+    }
   }
 
   try {
@@ -190,12 +210,51 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
 /**
  * Best-effort kill of a process group. Useful when the group leader (tracked
  * PID) has exited but children (ES, Kibana) may still be running.
+ * Returns true if any process in the group was signalled.
  */
-const killProcessGroup = (pid: number, signal: NodeJS.Signals): void => {
+const killProcessGroup = (pid: number, signal: NodeJS.Signals): boolean => {
   try {
     process.kill(-pid, signal);
+    return true;
   } catch {
-    // no remaining group members
+    return false;
+  }
+};
+
+/**
+ * Returns true if any process in the given process group is still alive.
+ */
+const isProcessGroupAlive = (pid: number): boolean => {
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Send SIGTERM to a process group, wait up to {@link timeoutMs} for all
+ * members to exit, then SIGKILL any survivors.
+ */
+const terminateProcessGroup = async (
+  pid: number,
+  log: ToolingLog,
+  label: string,
+  timeoutMs = 10_000
+): Promise<void> => {
+  if (!killProcessGroup(pid, 'SIGTERM')) {
+    return;
+  }
+
+  const deadline = Date.now() + timeoutMs;
+  while (isProcessGroupAlive(pid) && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
+  if (isProcessGroupAlive(pid)) {
+    log.warning(`[${label}] orphaned children did not stop gracefully, sending SIGKILL`);
+    killProcessGroup(pid, 'SIGKILL');
   }
 };
 
@@ -212,18 +271,17 @@ export const stopService = async (
   const entry = state[name];
 
   if (!entry) {
+    log.info(`[${name}] no tracked process`);
     if (name === 'edot') {
       stopEdotDockerContainer(repoRoot, log);
     }
-    log.info(`[${name}] no tracked process`);
     return false;
   }
 
   if (!isAlive(entry.pid)) {
     log.info(`[${name}] tracked process already exited (PID ${entry.pid})`);
 
-    // Children (ES/Kibana) may outlive the process group leader
-    killProcessGroup(entry.pid, 'SIGTERM');
+    await terminateProcessGroup(entry.pid, log, name);
 
     if (name === 'edot') {
       stopEdotDockerContainer(repoRoot, log);

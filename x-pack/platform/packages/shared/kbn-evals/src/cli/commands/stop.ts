@@ -37,6 +37,7 @@ export const stopCmd: Command<void> = {
       // Always run stopAll — Docker containers and orphaned child processes
       // can outlive the tracked PIDs recorded in services.json.
       await stopAll(repoRoot, log);
+      log.info('All eval services stopped.');
     }
   },
 };
