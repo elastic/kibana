@@ -31,6 +31,28 @@ describe('createRemoteMonitorDetailUrl', () => {
     ).toBeUndefined();
   });
 
+  it('uses the explicit kibanaUrl when the monitor metadata lacks one', () => {
+    const url = createRemoteMonitorDetailUrl({
+      monitor: { configId: 'monitor-abc', remote: { remoteName: 'remote-cluster-1' } },
+      locationId: 'us-east-1',
+      kibanaUrl: 'https://from-ping.example.com',
+    });
+    expect(url).toBe(
+      'https://from-ping.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1'
+    );
+  });
+
+  it('prefers the explicit kibanaUrl over the one on the monitor metadata', () => {
+    const url = createRemoteMonitorDetailUrl({
+      monitor: baseMonitor,
+      locationId: 'us-east-1',
+      kibanaUrl: 'https://from-ping.example.com',
+    });
+    expect(url).toBe(
+      'https://from-ping.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1'
+    );
+  });
+
   it('builds the default-space deep link without an /s/ prefix', () => {
     const url = createRemoteMonitorDetailUrl({
       monitor: baseMonitor,

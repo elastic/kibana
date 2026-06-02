@@ -132,6 +132,7 @@ describe('CcsLogsExtractionClient', () => {
       logger: mockLogger,
       fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
       transformDocument: expect.any(Function),
+      refresh: false,
     });
     const transformDocument = mockIngestEntities.mock.calls[0][0].transformDocument!;
     const doc1 = transformDocument({
