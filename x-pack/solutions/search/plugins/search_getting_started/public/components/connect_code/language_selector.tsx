@@ -34,13 +34,16 @@ export const LanguageSelector = ({
     () =>
       options.map((lang) => ({
         value: lang.id as AvailableLanguages,
-        'aria-label': i18n.translate('xpack.gettingStarted.codeLanguage.selectChangeAriaLabel', {
-          defaultMessage:
-            'Change language of code examples to {language} for every instance on this page',
-          values: {
-            language: lang.title,
-          },
-        }),
+        'aria-label': i18n.translate(
+          'xpack.searchGettingStarted.codeLanguage.selectChangeAriaLabel',
+          {
+            defaultMessage:
+              'Change language of code examples to {language} for every instance on this page',
+            values: {
+              language: lang.title,
+            },
+          }
+        ),
         'data-test-subj': `lang-option-${lang.id}`,
         inputDisplay: (
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -55,12 +58,12 @@ export const LanguageSelector = ({
     <EuiSuperSelect<AvailableLanguages>
       prepend={
         showLabel
-          ? i18n.translate('xpack.gettingStarted.codeLanguage.selectLabel', {
+          ? i18n.translate('xpack.searchGettingStarted.codeLanguage.selectLabel', {
               defaultMessage: 'Language',
             })
           : undefined
       }
-      aria-label={i18n.translate('xpack.gettingStarted.codeLanguage.selectLabel', {
+      aria-label={i18n.translate('xpack.searchGettingStarted.codeLanguage.selectLabel', {
         defaultMessage: 'Select a programming language for the code examples',
       })}
       options={languageOptions}

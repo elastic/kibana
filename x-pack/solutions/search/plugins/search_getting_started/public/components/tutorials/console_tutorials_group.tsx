@@ -79,10 +79,13 @@ export const ConsoleTutorialsGroup = () => {
           defaultMessage: 'ES|QL fundamentals',
         }),
         dataTestSubj: 'console_tutorials_esql',
-        description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlDescription', {
-          defaultMessage:
-            "Learn how to use Elastic's piped query language to simplify and speed up data investigations.",
-        }),
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.esqlDescription',
+          {
+            defaultMessage:
+              "Learn how to use Elastic's piped query language to simplify and speed up data investigations.",
+          }
+        ),
         request: consoleTutorials.esql,
         publishedAt: new Date('2025-10-31'),
       },
@@ -106,10 +109,13 @@ export const ConsoleTutorialsGroup = () => {
           defaultMessage: 'Time series data streams',
         }),
         dataTestSubj: 'console_tutorials_tsds',
-        description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsDescription', {
-          defaultMessage:
-            'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
-        }),
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.tsdsDescription',
+          {
+            defaultMessage:
+              'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+          }
+        ),
         request: consoleTutorials.timeSeriesDataStreams,
         publishedAt: new Date('2026-02-04'),
       },

@@ -93,10 +93,10 @@ export const AgentInstallSection = () => {
             <EuiPanel color="transparent" paddingSize="l">
               <AgentInstallPanel
                 icon="commandLine"
-                title={i18n.translate('xpack.gettingStarted.agentInstall.ide.title', {
+                title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
                   defaultMessage: 'Build in your IDE',
                 })}
-                description={i18n.translate('xpack.gettingStarted.agentInstall.ide.description', {
+                description={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.description', {
                   defaultMessage: 'Code with context using Elastic-certified skills.',
                 })}
               >
@@ -108,7 +108,7 @@ export const AgentInstallSection = () => {
                       color="primary"
                       fill
                     >
-                      {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
+                      {i18n.translate('xpack.searchGettingStarted.agentInstall.userLLM.cta', {
                         defaultMessage: 'Copy prompt',
                       })}
                     </EuiButton>
@@ -125,7 +125,7 @@ export const AgentInstallSection = () => {
                           color="subdued"
                           size="m"
                           title={i18n.translate(
-                            'xpack.gettingStarted.agentInstall.anthropicIcon.title',
+                            'xpack.searchGettingStarted.agentInstall.anthropicIcon.title',
                             {
                               defaultMessage: 'Anthropic Claude Code logo',
                             }
@@ -139,7 +139,7 @@ export const AgentInstallSection = () => {
                           color="subdued"
                           size="m"
                           title={i18n.translate(
-                            'xpack.gettingStarted.agentInstall.cursorIcon.title',
+                            'xpack.searchGettingStarted.agentInstall.cursorIcon.title',
                             {
                               defaultMessage: 'Cursor AI logo',
                             }
@@ -152,7 +152,7 @@ export const AgentInstallSection = () => {
                           color="subdued"
                           size="m"
                           title={i18n.translate(
-                            'xpack.gettingStarted.agentInstall.vsCodeIcon.title',
+                            'xpack.searchGettingStarted.agentInstall.vsCodeIcon.title',
                             {
                               defaultMessage: 'Visual Studio Code logo',
                             }
@@ -171,11 +171,11 @@ export const AgentInstallSection = () => {
               <EuiPanel color="transparent" paddingSize="l">
                 <AgentInstallPanel
                   icon="productAgent"
-                  title={i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.title', {
+                  title={i18n.translate('xpack.searchGettingStarted.agentInstall.agentBuilder.title', {
                     defaultMessage: 'Build with the Elastic AI Agent',
                   })}
                   description={i18n.translate(
-                    'xpack.gettingStarted.agentInstall.agentBuilder.description',
+                    'xpack.searchGettingStarted.agentInstall.agentBuilder.description',
                     {
                       defaultMessage: 'Chat directly with our built-in agentic assistant.',
                     }
@@ -186,7 +186,7 @@ export const AgentInstallSection = () => {
                     onClick={handleOpenInAgentBuilder}
                     data-test-subj="agentInstallOpenInAgentBuilder"
                   >
-                    {i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.cta', {
+                    {i18n.translate('xpack.searchGettingStarted.agentInstall.agentBuilder.cta', {
                       defaultMessage: 'Open Elastic AI Agent',
                     })}
                   </AiButton>
