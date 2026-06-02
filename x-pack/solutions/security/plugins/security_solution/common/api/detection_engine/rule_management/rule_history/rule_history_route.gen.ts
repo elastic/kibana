@@ -69,6 +69,11 @@ exists.
      * Optional event metadata that is not part of the ECS schema.
      */
     metadata: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * Present and true for the most recently recorded change (the HEAD
+     * revision). Absent on all other items.
+     */
+    last: z.boolean().optional(),
   })
 );
 export type RuleHistoryItem = z.infer<typeof RuleHistoryItem>;
@@ -104,6 +109,11 @@ export const RuleChangesHistoryResponse = lazySchema(() =>
     page: z.number().int(),
     perPage: z.number().int(),
     total: z.number().int(),
+    /**
+     * ISO-8601 timestamp of the earliest recorded change event for this rule.
+     * Absent when no history items exist.
+     */
+    tracking_started_at: z.string().optional(),
     items: z.array(RuleHistoryItem),
   })
 );
