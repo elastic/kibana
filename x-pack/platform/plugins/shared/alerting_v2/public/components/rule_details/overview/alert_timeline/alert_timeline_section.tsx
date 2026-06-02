@@ -7,15 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiSplitButton,
   EuiSuperDatePicker,
   EuiText,
   EuiTitle,
@@ -39,6 +36,7 @@ import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for
 import { paths } from '../../../../constants';
 import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
+import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -69,7 +67,6 @@ export const AlertTimelineSection: React.FC = () => {
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ALERT_TIMELINE_TIME_RANGE);
   const [refreshTick, setRefreshTick] = useState(0);
-  const [isViewAllMenuOpen, setIsViewAllMenuOpen] = useState(false);
 
   const handleTimeChange = useCallback(
     (next: OnTimeChangeProps) => {
@@ -128,9 +125,9 @@ export const AlertTimelineSection: React.FC = () => {
           from: new Date(gteMs).toISOString(),
           to: new Date(lteMs).toISOString(),
         },
-        ruleEsql: rule.evaluation?.query?.base,
+        ruleEsql: rule.evaluation.query.base,
       }),
-    [share, application.capabilities, uiSettings, gteMs, lteMs, rule.evaluation?.query?.base]
+    [share, application.capabilities, uiSettings, gteMs, lteMs, rule.evaluation.query.base]
   );
 
   const viewAllHref = useMemo(
@@ -210,69 +207,7 @@ export const AlertTimelineSection: React.FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {discoverHref ? (
-              <EuiSplitButton
-                color="text"
-                fill={false}
-                size="s"
-                data-test-subj="alertTimelineViewAllSplitButton"
-              >
-                <EuiSplitButton.ActionPrimary
-                  href={viewAllHref}
-                  data-test-subj="alertTimelineViewAllEpisodes"
-                >
-                  {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
-                    defaultMessage: 'View all episodes',
-                  })}
-                </EuiSplitButton.ActionPrimary>
-                <EuiSplitButton.ActionSecondary
-                  iconType="arrowDown"
-                  aria-label={i18n.translate('xpack.alertingV2.alertTimeline.viewAllMoreOptions', {
-                    defaultMessage: 'More view options',
-                  })}
-                  onClick={() => setIsViewAllMenuOpen((o) => !o)}
-                  data-test-subj="alertTimelineViewAllMenuButton"
-                  popoverProps={{
-                    isOpen: isViewAllMenuOpen,
-                    closePopover: () => setIsViewAllMenuOpen(false),
-                    anchorPosition: 'downRight',
-                    panelPaddingSize: 'none',
-                    children: (
-                      <EuiContextMenu
-                        initialPanelId={0}
-                        panels={[
-                          {
-                            id: 0,
-                            items: [
-                              {
-                                name: i18n.translate(
-                                  'xpack.alertingV2.alertTimeline.viewInDiscover',
-                                  { defaultMessage: 'View in Discover' }
-                                ),
-                                icon: 'discoverApp',
-                                href: discoverHref,
-                                'data-test-subj': 'alertTimelineViewInDiscover',
-                              },
-                            ],
-                          },
-                        ]}
-                      />
-                    ),
-                  }}
-                />
-              </EuiSplitButton>
-            ) : (
-              <EuiButton
-                size="s"
-                color="text"
-                href={viewAllHref}
-                data-test-subj="alertTimelineViewAllEpisodes"
-              >
-                {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
-                  defaultMessage: 'View all episodes',
-                })}
-              </EuiButton>
-            )}
+            <AlertTimelineViewAllButton viewAllHref={viewAllHref} discoverHref={discoverHref} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
