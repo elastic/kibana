@@ -22,7 +22,7 @@ apiTest.describe('Suggestions API - non time based', { tag: tags.deploymentAgnos
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
-    ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+    ({ cookieHeader } = await samlAuth.asInteractiveUser('viewer'));
     await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
     await kbnClient.importExport.load(KBN_ARCHIVE_BASIC_KIBANA);
   });
