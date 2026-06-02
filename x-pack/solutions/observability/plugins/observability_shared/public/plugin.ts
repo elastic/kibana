@@ -31,6 +31,7 @@ import {
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
+  ServiceTransactionsLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
   type InventoryLocator,
@@ -40,6 +41,7 @@ import {
   type TopNFunctionsLocator,
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
+  type ServiceTransactionsLocator,
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
@@ -79,6 +81,7 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
+    serviceTransactions: ServiceTransactionsLocator;
   };
 }
 
@@ -155,6 +158,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
+        serviceTransactions: urlService.locators.create(new ServiceTransactionsLocatorDefinition()),
       },
     };
   }
