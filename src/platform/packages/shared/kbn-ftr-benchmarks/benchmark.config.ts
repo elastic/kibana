@@ -28,7 +28,7 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    run: `TEST_BROWSER_BINARY_PATH="$(node ${CHROME_FOR_TESTING_SCRIPT})" node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/${KIBANA_BUILD_VERSION}"`,
+    run: `TEST_BROWSER_BINARY_PATH="\${TEST_BROWSER_BINARY_PATH:-$(node ${CHROME_FOR_TESTING_SCRIPT})}" node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/${KIBANA_BUILD_VERSION}"`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
