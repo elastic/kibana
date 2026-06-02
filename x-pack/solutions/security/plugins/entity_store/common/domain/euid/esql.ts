@@ -352,7 +352,11 @@ export function getEuidEsqlEvaluation(
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+    return appendTypeIdIfNeeded(
+      entityType,
+      castField(identityField.singleField),
+      mustPrependTypeId
+    );
   }
 
   const { euidRanking } = identityField;
