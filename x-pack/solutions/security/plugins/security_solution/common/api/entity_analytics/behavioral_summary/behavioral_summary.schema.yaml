@@ -23,7 +23,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetBehavioralSummaryRequestBody'
+              $ref: '#/components/schemas/BehavioralSummaryRequestBody'
       responses:
         '200':
           description: Behavioral summary retrieved successfully
@@ -34,7 +34,7 @@ paths:
 
 components:
   schemas:
-    GetBehavioralSummaryRequestBody:
+    BehavioralSummaryRequestBody:
       type: object
       properties:
         page:

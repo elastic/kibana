@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const GetBehavioralSummaryRequestBody = lazySchema(() =>
+export const BehavioralSummaryRequestBody = lazySchema(() =>
   z.object({
     /**
      * Page number (1-indexed)
@@ -47,7 +47,7 @@ export const GetBehavioralSummaryRequestBody = lazySchema(() =>
       .optional(),
   })
 );
-export type GetBehavioralSummaryRequestBody = z.infer<typeof GetBehavioralSummaryRequestBody>;
+export type BehavioralSummaryRequestBody = z.infer<typeof BehavioralSummaryRequestBody>;
 
 export const AnomalySummaryEntry = lazySchema(() =>
   z.object({
@@ -121,7 +121,7 @@ export type GetBehavioralSummaryRequestParamsInput = z.input<
   typeof GetBehavioralSummaryRequestParams
 >;
 
-export const GetBehavioralSummaryRequestBody = lazySchema(() => GetBehavioralSummaryRequestBody);
+export const GetBehavioralSummaryRequestBody = lazySchema(() => BehavioralSummaryRequestBody);
 export type GetBehavioralSummaryRequestBody = z.infer<typeof GetBehavioralSummaryRequestBody>;
 export type GetBehavioralSummaryRequestBodyInput = z.input<typeof GetBehavioralSummaryRequestBody>;
 
