@@ -3105,10 +3105,10 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /src/platform/packages/shared/kbn-connector-schemas/xmatters @elastic/security-threat-hunting
 
 # SentinelOne
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-threat-hunting
-/src/platform/packages/shared/kbn-connector-schemas/sentinelone @elastic/security-threat-hunting
-/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows @elastic/security-threat-hunting
 
 # MCP
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/mcp @elastic/workchat-eng
