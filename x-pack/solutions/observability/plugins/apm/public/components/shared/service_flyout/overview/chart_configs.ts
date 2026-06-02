@@ -30,28 +30,13 @@ interface FlyoutLensChartConfigDefinition {
   id: string;
   title: string;
   titleAction?: ReactNode;
-  /**
-   * Undefined until the APM index pattern resolves. The chart layout (panel,
-   * title, loading state) renders regardless, so the sections never appear
-   * empty while the data view is being created.
-   */
   config?: LensConfig;
 }
 
 type LensYAxis = LensSeriesLayer['yAxis'][number];
 
-/**
- * Time bucketing for the flyout charts. `TBUCKET` automatically resolves the
- * timestamp field via the Kibana timestamp filter, which Lens drives from the
- * embeddable `timeRange` prop (so no `WHERE @timestamp >= ...` is needed).
- * This mirrors the Discover traces RED charts.
- *
- * The bucket is always aliased to `timestamp` so a single x-axis field resolves
- * for every chart, including the ones that need an `EVAL`/`KEEP` afterwards.
- */
 const TIME_BUCKET_FIELD = 'timestamp';
 const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
-const UNMAPPED_FIELDS_NULLIFY = 'SET unmapped_fields="NULLIFY";';
 
 interface ServiceScope {
   serviceName: string;
@@ -90,7 +75,7 @@ function createBaseServiceQuery({
 }
 
 function printQuery(query: ComposerQuery): string {
-  return `${UNMAPPED_FIELDS_NULLIFY} ${query.print('basic')}`;
+  return `${query.print('basic')}`;
 }
 
 const seriesColor = (chartType: ChartType) => getTimeSeriesColor(chartType).currentPeriodColor;
@@ -205,7 +190,6 @@ function getLatencyChart(
     titleAction,
     indexes,
     buildQuery: (idx) => {
-      // transaction.duration.us is in microseconds; convert to milliseconds.
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
       query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
