@@ -14,7 +14,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -37,7 +36,6 @@ import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_sett
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
-
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
@@ -267,10 +265,6 @@ export const TableSection = React.memo(
 
     const accordionExtraActionGroupStats = useGroupStats({ getAttack });
 
-    const dataViewSpec = useMemo(() => {
-      return dataView.toSpec(true);
-    }, [dataView]);
-
     const emptyGroupingComponent = useMemo(
       () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
       [openSchedulesFlyout]
@@ -309,7 +303,6 @@ export const TableSection = React.memo(
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
           dataView={dataView}
-          dataViewSpec={dataViewSpec}
           defaultFilters={defaultFilters}
           defaultGroupingOptions={groupingOptions}
           from={from}
