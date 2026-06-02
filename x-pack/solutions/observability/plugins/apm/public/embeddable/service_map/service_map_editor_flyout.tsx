@@ -43,13 +43,20 @@ import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import type { ConnectionFilter } from '../../components/app/service_map/apply_service_map_visibility';
 import type { SloStatus } from '../../../common/service_inventory';
+import { type ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import {
   ALERT_STATUS_OPTIONS,
   ANOMALY_SEVERITY_OPTIONS,
   CONNECTION_FILTER_OPTIONS,
   SLO_STATUS_OPTIONS,
-  type ServiceMapOrientation,
-} from '../../components/app/service_map/service_map_options_panel';
+  getDecoratedAlertStatusOptions,
+  getDecoratedAnomalySeverityOptions,
+  getDecoratedConnectionOptions,
+  getDecoratedSloStatusOptions,
+} from '../../components/app/service_map/service_map_filter_combobox_options';
+import { useServiceMap } from '../../components/app/service_map/use_service_map';
+import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
+import { computeServiceMapFilterOptionCounts } from '../../components/app/service_map/service_map_filter_option_counts';
 
 interface KueryInputProps {
   kuery: string;
@@ -260,6 +267,45 @@ export function ServiceMapEditorFlyout({
     [environmentTerms]
   );
 
+  // Snapshot the service map data with the user's current scope (env/time/KQL/service_name)
+  // so the filter comboboxes can show `(count)` badges + disable zero-count options —
+  // matching the in-graph Options panel UX on the standalone APM page.
+  const { data: serviceMapData, status: serviceMapStatus } = useServiceMap({
+    environment,
+    kuery,
+    start,
+    end,
+    serviceName: serviceName || undefined,
+  });
+  const { nodes: nodesWithBadges } = useServiceMapBadges({
+    environment,
+    start,
+    end,
+    kuery: '',
+    nodes: serviceMapData.nodes,
+    nodesStatus: serviceMapStatus,
+  });
+  const filterOptionCounts = useMemo(
+    () => computeServiceMapFilterOptionCounts(nodesWithBadges, serviceMapData.edges),
+    [nodesWithBadges, serviceMapData.edges]
+  );
+  const connectionFilterComboBoxOptions = useMemo(
+    () => getDecoratedConnectionOptions(filterOptionCounts.connection),
+    [filterOptionCounts.connection]
+  );
+  const alertStatusComboBoxOptions = useMemo(
+    () => getDecoratedAlertStatusOptions(filterOptionCounts.alerts),
+    [filterOptionCounts.alerts]
+  );
+  const sloStatusComboBoxOptions = useMemo(
+    () => getDecoratedSloStatusOptions(filterOptionCounts.slo),
+    [filterOptionCounts.slo]
+  );
+  const anomalySeverityComboBoxOptions = useMemo(
+    () => getDecoratedAnomalySeverityOptions(filterOptionCounts.anomaly),
+    [filterOptionCounts.anomaly]
+  );
+
   const onServiceNameSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (changedOptions.length === 0) {
       setServiceName('');
@@ -427,10 +473,7 @@ export function ServiceMapEditorFlyout({
                 'xpack.apm.serviceMapEditor.dependenciesFilterPlaceholder',
                 { defaultMessage: 'Filter by dependency status' }
               )}
-              options={CONNECTION_FILTER_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-              }))}
+              options={connectionFilterComboBoxOptions}
               selectedOptions={connectionFilter.map((value) => {
                 const opt = CONNECTION_FILTER_OPTIONS.find((o) => o.value === value);
                 return { label: opt?.label ?? value, value };
@@ -458,10 +501,7 @@ export function ServiceMapEditorFlyout({
                 'xpack.apm.serviceMapEditor.alertStatusFilterPlaceholder',
                 { defaultMessage: 'Filter by alert status' }
               )}
-              options={ALERT_STATUS_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-              }))}
+              options={alertStatusComboBoxOptions}
               selectedOptions={alertStatusFilter.map((value) => {
                 const opt = ALERT_STATUS_OPTIONS.find((o) => o.value === value);
                 return { label: opt?.label ?? value, value };
@@ -487,10 +527,7 @@ export function ServiceMapEditorFlyout({
                 'xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder',
                 { defaultMessage: 'Filter by SLO status' }
               )}
-              options={SLO_STATUS_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-              }))}
+              options={sloStatusComboBoxOptions}
               selectedOptions={sloStatusFilter.map((value) => {
                 const opt = SLO_STATUS_OPTIONS.find((o) => o.value === value);
                 return { label: opt?.label ?? value, value };
@@ -516,10 +553,7 @@ export function ServiceMapEditorFlyout({
                 'xpack.apm.serviceMapEditor.anomalySeverityFilterPlaceholder',
                 { defaultMessage: 'Filter by anomaly severity' }
               )}
-              options={ANOMALY_SEVERITY_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-              }))}
+              options={anomalySeverityComboBoxOptions}
               selectedOptions={anomalySeverityFilter.map((value) => {
                 const opt = ANOMALY_SEVERITY_OPTIONS.find((o) => o.value === value);
                 return { label: opt?.label ?? value, value };

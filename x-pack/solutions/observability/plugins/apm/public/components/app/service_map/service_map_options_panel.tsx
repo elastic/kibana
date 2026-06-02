@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiComboBox,
@@ -22,129 +21,30 @@ import {
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_DELAYED,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-} from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import type { ConnectionFilter } from './apply_service_map_visibility';
 import type { ServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
+import {
+  getDecoratedAlertStatusOptions,
+  getDecoratedAnomalySeverityOptions,
+  getDecoratedConnectionOptions,
+  getDecoratedSloStatusOptions,
+} from './service_map_filter_combobox_options';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
-export const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
-  {
-    value: 'orphaned',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
-      defaultMessage: 'No dependencies',
-    }),
-  },
-  {
-    value: 'connected',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
-      defaultMessage: 'With dependencies',
-    }),
-  },
-];
-
-export const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
-  {
-    value: ALERT_STATUS_ACTIVE,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
-      defaultMessage: 'Active',
-    }),
-  },
-  {
-    value: ALERT_STATUS_RECOVERED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusRecovered', {
-      defaultMessage: 'Recovered',
-    }),
-  },
-  {
-    value: ALERT_STATUS_UNTRACKED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusUntracked', {
-      defaultMessage: 'Untracked',
-    }),
-  },
-  {
-    value: ALERT_STATUS_DELAYED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusDelayed', {
-      defaultMessage: 'Delayed',
-    }),
-  },
-];
-
-export const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
-  {
-    value: 'healthy',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: 'degrading',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloDegrading', {
-      defaultMessage: 'Degrading',
-    }),
-  },
-  {
-    value: 'violated',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloViolated', {
-      defaultMessage: 'Violated',
-    }),
-  },
-  {
-    value: 'noData',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloNoData', {
-      defaultMessage: 'No data',
-    }),
-  },
-];
-
-export const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
-  {
-    value: ML_ANOMALY_SEVERITY.CRITICAL,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
-      defaultMessage: 'Critical',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MAJOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMajor', {
-      defaultMessage: 'Major',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MINOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMinor', {
-      defaultMessage: 'Minor',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.WARNING,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityWarning', {
-      defaultMessage: 'Warning',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.LOW,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityLow', {
-      defaultMessage: 'Low',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.UNKNOWN,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityUnknown', {
-      defaultMessage: 'Unknown',
-    }),
-  },
-];
+// Static option lists and decorators live in `service_map_filter_combobox_options.tsx`
+// so the embeddable edit flyout can reuse them without a circular import.
+export {
+  ALERT_STATUS_OPTIONS,
+  ANOMALY_SEVERITY_OPTIONS,
+  CONNECTION_FILTER_OPTIONS,
+  SLO_STATUS_OPTIONS,
+} from './service_map_filter_combobox_options';
 
 export interface ServiceMapOptionsPanelToggleProps {
   isExpanded: boolean;
@@ -303,89 +203,24 @@ export function ServiceMapOptionsPanel({
   onSearchQueryChange,
   layoutControlsOnly = false,
 }: ServiceMapOptionsPanelProps) {
-  const connectionCounts = filterOptionCounts.connection;
-  const alertCounts = filterOptionCounts.alerts;
-  const sloStatusCounts = filterOptionCounts.slo;
-  const anomalySeverityCounts = filterOptionCounts.anomaly;
-
   const connectionFilterComboBoxOptions = useMemo(
-    () =>
-      CONNECTION_FILTER_OPTIONS.map((opt) => {
-        let count: number;
-        switch (opt.value) {
-          case 'orphaned':
-            count = connectionCounts.orphaned;
-            break;
-          case 'connected':
-            count = connectionCounts.connected;
-            break;
-        }
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [connectionCounts]
+    () => getDecoratedConnectionOptions(filterOptionCounts.connection),
+    [filterOptionCounts.connection]
   );
 
   const alertStatusComboBoxOptions = useMemo(
-    () =>
-      ALERT_STATUS_OPTIONS.map((opt) => {
-        const count = alertCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [alertCounts]
+    () => getDecoratedAlertStatusOptions(filterOptionCounts.alerts),
+    [filterOptionCounts.alerts]
   );
 
   const sloStatusComboBoxOptions = useMemo(
-    () =>
-      SLO_STATUS_OPTIONS.map((opt) => {
-        const count = sloStatusCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [sloStatusCounts]
+    () => getDecoratedSloStatusOptions(filterOptionCounts.slo),
+    [filterOptionCounts.slo]
   );
 
   const anomalyFilterComboBoxOptions = useMemo(
-    () =>
-      ANOMALY_SEVERITY_OPTIONS.map((opt) => {
-        const count = anomalySeverityCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [anomalySeverityCounts]
+    () => getDecoratedAnomalySeverityOptions(filterOptionCounts.anomaly),
+    [filterOptionCounts.anomaly]
   );
 
   /** Width constraint for the floating panel; height follows content. */
