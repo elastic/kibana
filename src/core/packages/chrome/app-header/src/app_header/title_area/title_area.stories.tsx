@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiPageTemplate } from '@elastic/eui';
+import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import type {
@@ -49,21 +51,6 @@ const createChromeStoryService = (): InternalChromeStart =>
     getHelpExtension$: () => new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
   } as unknown as InternalChromeStart);
 
-const playFavoriteIconBounce = (icon: Element) => {
-  icon.animate(
-    [
-      { transform: 'scale(1)' },
-      { transform: 'scale(1.28)' },
-      { transform: 'scale(0.9)' },
-      { transform: 'scale(1)' },
-    ],
-    {
-      duration: 450,
-      easing: 'cubic-bezier(0.34, 1.45, 0.64, 1)',
-    }
-  );
-};
-
 const AnimatedFavoriteButton = ({
   isFavorite,
   onToggle,
@@ -71,38 +58,32 @@ const AnimatedFavoriteButton = ({
   isFavorite: boolean;
   onToggle: (next: boolean) => void;
 }) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [showStardust, setShowStardust] = useState(false);
+  const wasFavoriteRef = useRef(isFavorite);
 
-  const handleClick = useCallback(() => {
-    onToggle(!isFavorite);
-
-    // Wait for React to swap the icon, then bounce only the glyph — not the button hit target.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const icon = buttonRef.current?.querySelector('.euiButtonIcon__icon');
-        if (icon) {
-          playFavoriteIconBounce(icon);
-        }
-      });
-    });
-  }, [isFavorite, onToggle]);
+  if (isFavorite && !wasFavoriteRef.current) {
+    setShowStardust(true);
+  } else if (!isFavorite && wasFavoriteRef.current) {
+    setShowStardust(false);
+  }
+  wasFavoriteRef.current = isFavorite;
 
   return (
-    <EuiButtonIcon
-      buttonRef={buttonRef}
-      css={css`
-        .euiButtonIcon__icon {
-          transform-origin: center;
-        }
-      `}
-      aria-label={isFavorite ? 'Remove favorite' : 'Add favorite'}
-      aria-pressed={isFavorite}
-      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
-      color="text"
-      display="empty"
-      size="xs"
-      onClick={handleClick}
-    />
+    <StardustWrapper active={showStardust}>
+      <EuiButtonIcon
+        aria-label={isFavorite ? 'Remove favorite' : 'Add favorite'}
+        aria-pressed={isFavorite}
+        iconType={isFavorite ? 'starFill' : 'star'}
+        color="text"
+        display="empty"
+        size="xs"
+        className={classNames({
+          'cm-favorite-button--active': isFavorite,
+          'cm-favorite-button--empty': !isFavorite,
+        })}
+        onClick={() => onToggle(!isFavorite)}
+      />
+    </StardustWrapper>
   );
 };
 
