@@ -29,7 +29,7 @@ spaceTest.describe(
         const { aiValueReportPage } = pageObjects;
         const isServerless = config.serverless ?? false;
 
-        await browserAuth.loginAsSecurityRole('admin');
+        await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
@@ -51,7 +51,7 @@ spaceTest.describe(
       async ({ browserAuth, pageObjects, page, kbnUrl, scoutSpace }) => {
         const { aiValueReportPage } = pageObjects;
 
-        await browserAuth.loginAsSecurityRole('admin');
+        await browserAuth.loginAsSecurityRole('soc_manager');
 
         // Navigate directly with a historical time range so no seeded data falls within it.
         // The page reads `timerange` from the URL on mount via useInitTimerangeFromUrlParam,
