@@ -149,10 +149,6 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" data-test-subj="fieldDefinitionForm">
-          <EuiTitle size="xs">
-            <h3>{i18n.FIELD_DEFINITION_SETTINGS_LABEL}</h3>
-          </EuiTitle>
-          <EuiSpacer size="m" />
           <EuiFormRow label={i18n.FIELD_DEFINITION_DESCRIPTION_LABEL} fullWidth>
             <EuiTextArea
               value={description}
