@@ -85,6 +85,14 @@ interface EntityFlyoutProps {
    * newly selected entity — see `Discover` and `streams_app` providers.
    */
   readonly onSelectEntity?: (entityName: string) => void;
+  /**
+   * Optional callback fired when the user clicks the cog icon in the
+   * flyout header. Hosts wire it to navigate to their entity-type
+   * management surface (in Streams, the "Manage entity types" page with
+   * the matching row's edit flyout pre-opened). When undefined, the cog
+   * is hidden — there is no neutral fallback to fall back to.
+   */
+  readonly onManageEntityType?: () => void;
 }
 
 type BuiltInTabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
@@ -115,17 +123,17 @@ export const EntityFlyout = ({
   entityHealth,
   onClose,
   onSelectEntity,
+  onManageEntityType,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
+  // Default tab is the leftmost one in the (possibly reordered) tab list.
+  // `'overview'` is used as a seed only; the entityName-change effect and
+  // the "missing tab" effect below both rebase to whatever `tabs[0]` is
+  // once the override is resolved, so a user who dragged e.g. Metrics to
+  // the first position will land on Metrics.
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const { agentBuilder, notifications } = useEntityFlyoutServices();
-
-  // Each hop along the PayFlow story chain should land Sofia back on the
-  // Overview tab — otherwise she'd ride the Dependencies tab forever.
-  useEffect(() => {
-    setActiveTab('overview');
-  }, [entityName]);
 
   // Browser-style back/forward history. The flyout is a controlled component
   // (parents own `entityName`), so navigating "back" round-trips through
@@ -408,6 +416,21 @@ export const EntityFlyout = ({
     }
   }, [tabs, activeTab]);
 
+  // Snap the active tab to whatever the override puts in the first slot.
+  // Fires on initial mount (`prevEntityRef` starts as `null`, so the very
+  // first render rebases off the `'overview'` seed) and on every entity
+  // swap (PayFlow story chain, Dependencies-row click, etc.). Skips the
+  // rebase when `tabs` momentarily resolves to `[]` so we don't permanently
+  // pin the entity to a stale default — the ref only advances once the
+  // rebase actually runs.
+  const prevEntityRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (prevEntityRef.current === entityName) return;
+    if (tabs.length === 0) return;
+    prevEntityRef.current = entityName;
+    setActiveTab(tabs[0].id);
+  }, [entityName, tabs]);
+
   return (
     <EuiFlyout
       ownFocus
@@ -473,26 +496,26 @@ export const EntityFlyout = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="share"
-              color="text"
-              aria-label={i18n.translate('entityCentricLabFlyout.flyout.shareAriaLabel', {
-                defaultMessage: 'Share',
-              })}
-              data-test-subj="entityCentricLabFlyoutShare"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="gear"
-              color="text"
-              aria-label={i18n.translate('entityCentricLabFlyout.flyout.settingsAriaLabel', {
-                defaultMessage: 'Settings',
-              })}
-              data-test-subj="entityCentricLabFlyoutSettings"
-            />
-          </EuiFlexItem>
+          {onManageEntityType ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('entityCentricLabFlyout.flyout.manageEntityTypeTooltip', {
+                  defaultMessage: 'Manage entity type',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="gear"
+                  color="text"
+                  onClick={onManageEntityType}
+                  aria-label={i18n.translate(
+                    'entityCentricLabFlyout.flyout.manageEntityTypeAriaLabel',
+                    { defaultMessage: 'Manage entity type' }
+                  )}
+                  data-test-subj="entityCentricLabFlyoutManageEntityType"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -531,39 +554,25 @@ export const EntityFlyout = ({
           ))}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <EuiFlexItem>
-            <EuiTabs bottomBorder={false}>
-              {tabs.map((tab) => (
-                <EuiTab
-                  key={tab.id}
-                  isSelected={tab.id === activeTab}
-                  onClick={() => setActiveTab(tab.id)}
-                  data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}
-                  append={
-                    tab.appendBadge !== undefined ? (
-                      <EuiNotificationBadge color="accent" size="s">
-                        {tab.appendBadge}
-                      </EuiNotificationBadge>
-                    ) : undefined
-                  }
-                >
-                  {tab.label}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="plus"
-              color="text"
-              aria-label={i18n.translate('entityCentricLabFlyout.flyout.addTabAriaLabel', {
-                defaultMessage: 'Add tab',
-              })}
-              data-test-subj="entityCentricLabFlyoutAddTab"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTabs bottomBorder={false}>
+          {tabs.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              isSelected={tab.id === activeTab}
+              onClick={() => setActiveTab(tab.id)}
+              data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}
+              append={
+                tab.appendBadge !== undefined ? (
+                  <EuiNotificationBadge color="accent" size="s">
+                    {tab.appendBadge}
+                  </EuiNotificationBadge>
+                ) : undefined
+              }
+            >
+              {tab.label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <TabContent

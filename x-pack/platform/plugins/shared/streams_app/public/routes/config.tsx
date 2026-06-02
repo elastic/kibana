@@ -84,6 +84,10 @@ const streamsAppRoutes = {
         params: t.partial({
           query: t.partial({
             category: t.string,
+            // Optional pre-selection: when set to a `FakeEntityType.id`,
+            // the page auto-opens the edit flyout for that row. Used by
+            // the entity flyout's cog "Manage entity type" deep-link.
+            edit: t.string,
           }),
         }),
       },

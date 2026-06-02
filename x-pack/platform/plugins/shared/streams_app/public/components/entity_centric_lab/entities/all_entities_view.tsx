@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -32,7 +32,28 @@ import { i18n } from '@kbn/i18n';
 const NO_GROW = css`
   flex-grow: 0;
 `;
-import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-lab-flyout';
+
+/**
+ * Map each {@link EntityKind} surfaced in the flyout to the
+ * `FakeEntityType.id` of the matching row in "Manage entity types". Drives
+ * the deep-link behind the cog icon in the entity flyout header. Missing
+ * kinds (e.g. inferred-only `'middleware'`, `'llm'`) fall through to the
+ * cross-category list — see `handleManageEntityType` below.
+ */
+const KIND_TO_ENTITY_TYPE_ID: Partial<Record<EntityKind, string>> = {
+  service: 'apm-service',
+  cluster: 'k8s-cluster',
+  node: 'k8s-node',
+  pod: 'k8s-pod',
+  host: 'aws-ec2',
+};
+import {
+  EntityFlyout,
+  EntityFlyoutServicesProvider,
+  entityTypeToKind,
+  inferEntityKind,
+  type EntityKind,
+} from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -142,6 +163,25 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   const selectedEntity = selectedEntityName ? entityByName.get(selectedEntityName) : undefined;
   const selectedEntityType = selectedEntity?.type;
   const selectedEntityHealth = selectedEntity?.health;
+
+  // Resolve the canonical kind for the entity currently displayed in the
+  // flyout, then map that to the `FakeEntityType.id` of the corresponding
+  // row in "Manage entity types" so the cog can deep-link to its edit
+  // form. Falls back to the cross-category list when no mapping exists
+  // (e.g. an inferred-kind entity like `'middleware'` or `'llm'` that
+  // doesn't have a mock row yet) — the user still lands on the right
+  // page, just without a pre-opened flyout.
+  const selectedEntityKind: EntityKind | undefined = selectedEntity
+    ? entityTypeToKind(selectedEntity.type) ?? inferEntityKind(selectedEntity.name)
+    : undefined;
+
+  const handleManageEntityType = useCallback(() => {
+    const editId = selectedEntityKind ? KIND_TO_ENTITY_TYPE_ID[selectedEntityKind] : undefined;
+    router.push('/manage-entity-types', {
+      path: {},
+      query: editId ? { edit: editId } : {},
+    });
+  }, [selectedEntityKind, router]);
 
   // `agentBuilder` is intentionally undefined: streams_app does not declare it
   // as a start dependency. The shared flyout hides the "Add to chat" button
@@ -295,6 +335,7 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             entityHealth={selectedEntityHealth}
             onClose={() => setSelectedEntityName(null)}
             onSelectEntity={setSelectedEntityName}
+            onManageEntityType={handleManageEntityType}
           />
         </EntityFlyoutServicesProvider>
       ) : null}

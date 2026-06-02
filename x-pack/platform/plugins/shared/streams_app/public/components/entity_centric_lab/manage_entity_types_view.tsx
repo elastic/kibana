@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -25,6 +25,7 @@ import { CreateEntityTypeFlyout } from './create_entity_type_flyout';
 import { EditEntityTypeFlyout } from './edit_entity_type_flyout';
 import type { FakeEntityType } from './fake_entity_types';
 import { FAKE_ENTITY_TYPES } from './fake_entity_types';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 
 type FlyoutState =
   | { kind: 'closed' }
@@ -32,8 +33,26 @@ type FlyoutState =
   | { kind: 'edit'; entityType: FakeEntityType };
 
 export const ManageEntityTypesView = () => {
+  const {
+    query: { edit: editIdFromQuery },
+  } = useStreamsAppParams('/manage-entity-types');
+
   const [flyout, setFlyout] = useState<FlyoutState>({ kind: 'closed' });
   const [search, setSearch] = useState('');
+
+  // Auto-open the edit flyout when the page lands with `?edit=<id>` (e.g.
+  // deep-linked from the entity flyout's cog). Tracked with a ref so the
+  // user can close the flyout without it immediately reopening from the
+  // same query value still hanging around in the URL.
+  const consumedEditIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!editIdFromQuery) return;
+    if (consumedEditIdRef.current === editIdFromQuery) return;
+    const match = FAKE_ENTITY_TYPES.find((entityType) => entityType.id === editIdFromQuery);
+    if (!match) return;
+    consumedEditIdRef.current = editIdFromQuery;
+    setFlyout({ kind: 'edit', entityType: match });
+  }, [editIdFromQuery]);
 
   const closeFlyout = () => setFlyout({ kind: 'closed' });
 
