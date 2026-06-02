@@ -233,6 +233,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -286,7 +287,7 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'rules', breadcrumbStatus: 'hidden' },
+              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },

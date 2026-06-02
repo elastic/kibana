@@ -26,15 +26,16 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     loadTestFile(require.resolve('./create_monitor_project_private_location'));
     loadTestFile(require.resolve('./create_monitor_project'));
     loadTestFile(require.resolve('./create_monitor_project_multi_space.ts'));
-    loadTestFile(require.resolve('./create_monitor_public_api_private_location'));
-    loadTestFile(require.resolve('./create_monitor_public_api'));
-    loadTestFile(require.resolve('./create_monitor'));
+    // create_monitor_public_api_private_location migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts
+    // create_monitor_public_api migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts
+    // create_monitor test suite migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor.spec.ts
+    // (create_monitor.ts is retained as a helpers-only module: addMonitorAPIHelper/omitMonitorKeys are still used by unmigrated FTR suites)
     loadTestFile(require.resolve('./create_update_delete_params'));
     loadTestFile(require.resolve('./delete_monitor_project'));
     loadTestFile(require.resolve('./delete_monitor'));
     loadTestFile(require.resolve('./edit_monitor_private_location'));
-    loadTestFile(require.resolve('./edit_monitor_public_api_private_location'));
-    loadTestFile(require.resolve('./edit_monitor_public_api'));
+    // edit_monitor_public_api_private_location migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts
+    // edit_monitor_public_api migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts
     loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./enable_default_alerting'));
     // get_filters migrated to Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts

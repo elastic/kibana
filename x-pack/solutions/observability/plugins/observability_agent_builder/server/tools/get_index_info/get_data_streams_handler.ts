@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { sortBy } from 'lodash';
 import type { ObservabilityDataSources } from '../../utils/get_observability_data_sources';
 
@@ -17,31 +18,27 @@ export interface DataStreamInfo {
   dataset: string;
 }
 
-/**
- * Extracts the dataset from a data stream name.
- * Data stream names follow the pattern: {type}-{dataset}-{namespace}
- * e.g., "metrics-system.memory-default" -> "system.memory"
- */
-function extractDataset(name: string): string {
+const STREAM_TYPES = ['logs', 'metrics', 'traces'] as const;
+
+const STREAMS_DOT_PATTERNS = STREAM_TYPES.map((type) => `${type}.*`);
+
+/** Extracts dataset from classic Fleet ({type}-{dataset}-{namespace}) or Streams dot names (logs.ecs.nginx). */
+export function extractDataset(name: string): string {
+  for (const type of STREAM_TYPES) {
+    if (name.startsWith(`${type}.`)) {
+      return name.slice(type.length + 1);
+    }
+  }
+
   const parts = name.split('-');
-  return parts.slice(1, -1).join('-');
+  if (parts.length >= 3) {
+    return parts.slice(1, -1).join('-');
+  }
+
+  return name;
 }
 
-/**
- * Discovers observability data streams in the cluster.
- * Returns a flat list of data streams with their datasets, sorted by name.
- *
- * Uses the configured observability index patterns (from getObservabilityDataSources)
- * to ensure consistency and support for CCS (Cross-Cluster Search) if configured.
- *
- * @example
- * // Returns:
- * [
- *   { name: "logs-apm.error-default", dataset: "apm.error" },
- *   { name: "metrics-system.cpu-default", dataset: "system.cpu" },
- *   { name: "traces-apm-default", dataset: "apm" }
- * ]
- */
+/** Discovers observability data streams via _resolve_index (same as platform.core.list_indices). */
 export async function getDataStreamsHandler({
   esClient,
   dataSources,
@@ -52,18 +49,21 @@ export async function getDataStreamsHandler({
   logger: Logger;
 }): Promise<DataStreamInfo[]> {
   try {
-    // Build pattern from configured observability index patterns (supports CCS)
-    const indexPatterns = [
+    const pattern = [
       ...dataSources.logIndexPatterns,
       ...dataSources.metricIndexPatterns,
       dataSources.apmIndexPatterns.transaction,
       dataSources.apmIndexPatterns.span,
+      ...STREAMS_DOT_PATTERNS,
     ].join(',');
 
-    const response = await esClient.asCurrentUser.indices.getDataStream({ name: indexPatterns });
+    const { data_streams: dataStreams } = await listSearchSources({
+      pattern,
+      esClient: esClient.asCurrentUser,
+    });
 
     return sortBy(
-      response.data_streams.map((ds) => ({ name: ds.name, dataset: extractDataset(ds.name) })),
+      dataStreams.map((ds) => ({ name: ds.name, dataset: extractDataset(ds.name) })),
       'name'
     );
   } catch (error) {

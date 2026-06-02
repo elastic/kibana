@@ -88,6 +88,10 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'management:application_connections',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'management:roles',
               breadcrumbStatus: 'hidden',
             },
@@ -126,7 +130,7 @@ export const createManagementFooterItemsTree = (
           children: [
             {
               id: 'stackRules',
-              link: 'rules',
+              link: 'management:triggersActions',
               breadcrumbStatus: 'hidden',
             },
             {

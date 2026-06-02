@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { useCompositeSloEnabled } from '../../hooks/use_composite_slo_enabled';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -54,12 +55,12 @@ export function SlosPage() {
     http: { basePath },
     serverless,
   } = useKibana().services;
-  const { ObservabilityPageTemplate, experimentalFeatures } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
   const history = useHistory();
   const location = useLocation();
-  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled ?? false;
+  const isCompositeSloEnabled = useCompositeSloEnabled();
   const isCompositePath = location.pathname === SLOS_COMPOSITE_PATH;
   const selectedTabId: TabId = isCompositePath && isCompositeSloEnabled ? 'compositeSlos' : 'slos';
 
