@@ -153,7 +153,7 @@ export const i18nStrings = {
       }),
       trainedModels: i18n.translate(
         'securitySolutionPackages.navLinks.ml.modelManagement.trainedModels',
-        { defaultMessage: 'Trained models' }
+        { defaultMessage: 'Trained Models' }
       ),
     },
     aiopsLabs: {
@@ -191,7 +191,7 @@ export const i18nStrings = {
     }),
   },
   devTools: i18n.translate('securitySolutionPackages.navLinks.devTools', {
-    defaultMessage: 'Developer tools',
+    defaultMessage: 'Developer Tools',
   }),
   management: {
     title: i18n.translate('securitySolutionPackages.navLinks.management.title', {

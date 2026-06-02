@@ -55,7 +55,7 @@ export class IngestPipelinesPlugin
     apiService.setup(http, uiMetricService);
 
     const pluginName = i18n.translate('xpack.ingestPipelines.appTitle', {
-      defaultMessage: 'Ingest pipelines',
+      defaultMessage: 'Ingest Pipelines',
     });
 
     management.sections.section.ingest.registerApp({

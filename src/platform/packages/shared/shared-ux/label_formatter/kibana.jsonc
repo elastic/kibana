@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/shared-ux-label-formatter",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "shared"
-}

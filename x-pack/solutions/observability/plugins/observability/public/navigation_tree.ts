@@ -450,7 +450,7 @@ function createNavTree({
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {
-          defaultMessage: 'Developer tools',
+          defaultMessage: 'Developer Tools',
         }),
         link: 'dev_tools',
         icon: 'code',
@@ -467,7 +467,7 @@ function createNavTree({
           {
             id: 'ingest_and_integrations',
             title: i18n.translate('xpack.observability.obltNav.ingestAndIntegrations', {
-              defaultMessage: 'Ingest and integrations',
+              defaultMessage: 'Ingest and Integrations',
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),

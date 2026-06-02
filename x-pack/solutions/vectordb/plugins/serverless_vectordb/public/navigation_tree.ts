@@ -34,7 +34,7 @@ const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessVectordb.nav.performan
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessVectordb.nav.mngt.alertsAndInsights',
   {
-    defaultMessage: 'Alerts and insights',
+    defaultMessage: 'Alerts and Insights',
   }
 );
 const ACCESS_TITLE = i18n.translate('xpack.serverlessVectordb.nav.mngt.access', {
@@ -146,7 +146,7 @@ export function createNavigationTree({
       {
         id: 'admin_and_settings',
         title: i18n.translate('xpack.serverlessVectordb.nav.adminAndSettings', {
-          defaultMessage: 'Admin and Settings',
+          defaultMessage: 'Admin and settings',
         }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
@@ -232,7 +232,7 @@ export function createNavigationTree({
           {
             id: 'settings_model_management',
             title: i18n.translate('xpack.serverlessVectordb.nav.adminAndSettings.modelManagement', {
-              defaultMessage: 'Model Management',
+              defaultMessage: 'Model management',
             }),
             children: [
               {

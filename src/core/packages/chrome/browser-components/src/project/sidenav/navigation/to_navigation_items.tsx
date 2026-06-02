@@ -19,7 +19,6 @@ import type {
   SecondaryMenuSection,
   SideNavLogo,
 } from '@kbn/ui-side-navigation/types';
-import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 import { i18n } from '@kbn/i18n';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
@@ -171,7 +170,7 @@ export const toNavigationItems = (
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
-        label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
+        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
@@ -222,7 +221,7 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title && toSentenceCase(child.title),
+              label: child.title,
               items: secondaryItems,
             };
           })
@@ -246,7 +245,7 @@ export const toNavigationItems = (
 
     return {
       id: navNode.id,
-      label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
+      label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
       iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,

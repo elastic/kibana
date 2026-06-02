@@ -34,7 +34,7 @@ const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
   {
-    defaultMessage: 'Alerts and insights',
+    defaultMessage: 'Alerts and Insights',
   }
 );
 const MACHINE_LEARNING_TITLE = i18n.translate('xpack.serverlessSearch.nav.machineLearning', {

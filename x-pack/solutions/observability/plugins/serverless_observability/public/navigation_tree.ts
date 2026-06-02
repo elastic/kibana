@@ -415,7 +415,7 @@ export const createNavigationTree = ({
       {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
-          defaultMessage: 'Developer tools',
+          defaultMessage: 'Developer Tools',
         }),
         link: 'dev_tools',
         icon: 'code',
@@ -431,7 +431,7 @@ export const createNavigationTree = ({
         children: [
           {
             title: i18n.translate('xpack.serverlessObservability.nav.ingestAndIntegrations', {
-              defaultMessage: 'Ingest and integrations',
+              defaultMessage: 'Ingest and Integrations',
               description:
                 'The title of the ingest and integrations navigation item in the serverless observability nav tree.',
             }),
@@ -526,7 +526,7 @@ export const createNavigationTree = ({
             title: i18n.translate(
               'xpack.serverlessObservability.nav.projectSettings.alertsAndInsights',
               {
-                defaultMessage: 'Alerts and insights',
+                defaultMessage: 'Alerts and Insights',
               }
             ),
             breadcrumbStatus: 'hidden',

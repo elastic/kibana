@@ -13,7 +13,9 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
     body: [
       {
         link: 'workplace_ai',
-        title: 'Workplace AI',
+        title: i18n.translate('xpack.serverlessWorkplaceAI.nav.workplaceAI', {
+          defaultMessage: 'Workplace AI',
+        }),
         renderAs: 'home',
         breadcrumbStatus: 'hidden',
       },
@@ -40,7 +42,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessWorkplaceAI.nav.devTools', {
-          defaultMessage: 'Developer tools',
+          defaultMessage: 'Developer Tools',
         }),
         link: 'dev_tools',
         icon: 'code',
@@ -78,7 +80,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           },
           {
             title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.alertsAndInsights', {
-              defaultMessage: 'Alerts and insights',
+              defaultMessage: 'Alerts and Insights',
             }),
             breadcrumbStatus: 'hidden',
             children: [
