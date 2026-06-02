@@ -7,17 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECT_VERSION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.selectVersionTitle',
+export const NOTHING_TO_COMPARE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.nothingToCompareTitle',
   {
-    defaultMessage: 'Select a version',
-  }
-);
-
-export const SELECT_VERSION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.selectVersionBody',
-  {
-    defaultMessage: 'Choose a version from the history panel on the right to see its changes.',
+    defaultMessage: 'Nothing to compare',
   }
 );
 

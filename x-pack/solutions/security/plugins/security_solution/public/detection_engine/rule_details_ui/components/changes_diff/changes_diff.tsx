@@ -73,11 +73,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
 
     return (
       <EuiPanel hasBorder data-test-subj="ruleChangesHistoryNothingSelected">
-        <EuiEmptyPrompt
-          iconType="inspect"
-          title={<h2>{i18n.SELECT_VERSION_TITLE}</h2>}
-          body={<p>{i18n.SELECT_VERSION_BODY}</p>}
-        />
+        <EuiEmptyPrompt iconType="inspect" title={<h2>{i18n.NOTHING_TO_COMPARE_TITLE}</h2>} />
       </EuiPanel>
     );
   }
