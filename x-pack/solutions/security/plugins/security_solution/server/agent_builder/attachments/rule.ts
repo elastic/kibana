@@ -15,10 +15,9 @@ import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  text: z.string(),
-  attachmentLabel: z.string().optional(),
-  // Saved-rule id — written by the browser save handler, survives agent shallow merges.
-  ruleId: z.string().optional(),
+  text: z.string().max(500_000),
+  attachmentLabel: z.string().max(1_000).optional(),
+  ruleId: z.string().max(500).optional(),
   // Per-version intent, frozen at write time — 'create' or 'update'.
   intent: z.enum(['create', 'update']).optional(),
 });
