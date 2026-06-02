@@ -154,14 +154,8 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
-      enrichSources: (sources: ESQLSourceResult[]) => {
-        console.log('### enrichSources called with', sources);
-        return this.sourceEnricherService.enrich(sources);
-      },
-      enrichViews: async (views: EsqlView[]) => {
-        console.log('### enrichViews called with', views);
-        return this.viewEnricherService.enrich(views);
-      },
+      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
+      enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
     };
 
     setKibanaServices(
