@@ -166,15 +166,14 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
-        // Freeze intent:'create' for new attachments so the button label never flips.
-        // For edits, the save handler's shallow-merged ruleId + intent persist automatically.
+        // New attachments are always 'create' intent (frozen — never flips even after saving).
+        // When updating an existing attachment, keep whatever intent was already stored so
+        // an 'update' attachment doesn't regress to 'create' after a query rewrite.
         const attachmentData: Record<string, unknown> = {
           text: JSON.stringify(result.rule),
           attachmentLabel: result.rule.name,
+          ...(!existingAttachmentId && { intent: 'create' }),
         };
-        if (!existingAttachmentId) {
-          attachmentData.intent = 'create';
-        }
         const attachmentDescription = `Rule: ${result.rule.name}`;
 
         let resultAttachmentId: string | undefined;
