@@ -75,7 +75,6 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/resizable-layout'
   - '@kbn/rule-data-utils'
-  - '@kbn/app-header'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-plugins-server'
   - '@kbn/shared-ux-button-toolbar'
@@ -152,6 +151,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/logging-mocks'
   - '@kbn/react-hooks'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
