@@ -349,6 +349,88 @@ describe('derive_change_point_cards', () => {
       ).toBeUndefined();
     });
 
+    it('returns undefined for a BY query when the row belongs to a change-point entity but is not itself a change point', () => {
+      // CHANGE_POINT ... BY host, type/pvalue in schema (no WHERE filter applied).
+      // host=web-1 has a detected change point. The result also contains non-change-point
+      // rows for the same host (other time buckets). Those rows must not return a card.
+      const table = {
+        type: 'datatable' as const,
+        columns: COLUMNS_WITH_HOST,
+        rows: [
+          // Change point row
+          {
+            host: 'web-1',
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: 'mean_shift',
+            pvalue: 0.001,
+          },
+          // Non-change-point rows for the same entity
+          {
+            host: 'web-1',
+            bucket: '2023-11-14T00:00:00.000Z',
+            avg_bytes: 10,
+            type: null,
+            pvalue: null,
+          },
+          {
+            host: 'web-1',
+            bucket: '2023-11-13T00:00:00.000Z',
+            avg_bytes: 11,
+            type: '',
+            pvalue: null,
+          },
+          {
+            host: 'web-1',
+            bucket: '2023-11-12T00:00:00.000Z',
+            avg_bytes: 12,
+          },
+        ],
+      };
+      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })!;
+      expect(cards).toHaveLength(1);
+
+      // Change point row — should match
+      expect(
+        getCardForRow(cards, {
+          host: 'web-1',
+          bucket: '2023-11-15T00:00:00.000Z',
+          avg_bytes: 14,
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })
+      ).toBe(cards[0]);
+
+      // Non-change-point rows — must not match even though the entity has a card
+      expect(
+        getCardForRow(cards, {
+          host: 'web-1',
+          bucket: '2023-11-14T00:00:00.000Z',
+          avg_bytes: 10,
+          type: null,
+          pvalue: null,
+        })
+      ).toBeUndefined();
+
+      expect(
+        getCardForRow(cards, {
+          host: 'web-1',
+          bucket: '2023-11-13T00:00:00.000Z',
+          avg_bytes: 11,
+          type: '',
+          pvalue: null,
+        })
+      ).toBeUndefined();
+
+      expect(
+        getCardForRow(cards, {
+          host: 'web-1',
+          bucket: '2023-11-12T00:00:00.000Z',
+          avg_bytes: 12,
+        })
+      ).toBeUndefined();
+    });
+
     it('matches a single-BY row to its card', () => {
       const table = {
         type: 'datatable' as const,
@@ -374,10 +456,20 @@ describe('derive_change_point_cards', () => {
       expect(cards).toHaveLength(2);
 
       expect(
-        getCardForRow(cards, { host: 'web-1', bucket: '2023-11-15T00:00:00.000Z' })?.title
+        getCardForRow(cards, {
+          host: 'web-1',
+          bucket: '2023-11-15T00:00:00.000Z',
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })?.title
       ).toBe('web-1');
       expect(
-        getCardForRow(cards, { host: 'web-2', bucket: '2023-11-16T00:00:00.000Z' })?.title
+        getCardForRow(cards, {
+          host: 'web-2',
+          bucket: '2023-11-16T00:00:00.000Z',
+          type: 'dip',
+          pvalue: 0.02,
+        })?.title
       ).toBe('web-2');
     });
 
@@ -443,11 +535,15 @@ describe('derive_change_point_cards', () => {
         host: 'web-1',
         service: 'api',
         bucket: '2023-11-15T00:00:00.000Z',
+        type: 'mean_shift',
+        pvalue: 0.001,
       });
       const webCard = getCardForRow(cards, {
         host: 'web-1',
         service: 'web',
         bucket: '2023-11-16T00:00:00.000Z',
+        type: 'dip',
+        pvalue: 0.02,
       });
 
       expect(apiCard).not.toBeUndefined();
@@ -474,9 +570,14 @@ describe('derive_change_point_cards', () => {
       expect(cards).toHaveLength(1);
 
       // Row with null host matches the card whose entity label also serializes null
-      expect(getCardForRow(cards, { host: null, bucket: '2023-11-15T00:00:00.000Z' })).toBe(
-        cards[0]
-      );
+      expect(
+        getCardForRow(cards, {
+          host: null,
+          bucket: '2023-11-15T00:00:00.000Z',
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })
+      ).toBe(cards[0]);
     });
   });
 });

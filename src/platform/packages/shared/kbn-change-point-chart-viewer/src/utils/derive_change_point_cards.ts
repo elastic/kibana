@@ -399,5 +399,20 @@ export const getCardForRow = (
   }
 
   const entityLabel = byColumns.map((col) => `${col}=${serializeCell(row[col])}`).join(', ');
-  return cards.find((c) => c.id === `cp-card-${entityLabel}`);
+  const card = cards.find((c) => c.id === `cp-card-${entityLabel}`);
+  if (!card) return undefined;
+
+  // Typed cards come from result sets where type/pvalue are present in the schema. Verify
+  // this specific row is an actual change point before showing its card. BY-mode cards that
+  // omit type/pvalue have no card-level type or pvalue, so they skip this row-level check.
+  const cardHasTypedChangePointRows =
+    card.changePointTypes.length > 0 || card.minPvalue !== undefined;
+  if (
+    cardHasTypedChangePointRows &&
+    !isChangePointTableRow(row as Record<string, unknown>, card.typeColumnId, card.pvalueColumnId)
+  ) {
+    return undefined;
+  }
+
+  return card;
 };

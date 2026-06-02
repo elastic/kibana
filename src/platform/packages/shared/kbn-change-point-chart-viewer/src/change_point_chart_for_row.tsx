@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChangePointLensChart } from './components/change_point_lens_chart';
+import { ChangePointDetailsSection } from './components/change_point_details_section';
 import { getCardForRow } from './utils/derive_change_point_cards';
 import { useChangePointCards } from './hooks/use_change_point_cards';
 import type { UnifiedChangePointGridProps } from './types';
@@ -24,10 +25,8 @@ export interface ChangePointChartForRowProps
 }
 
 /**
- * Renders the change point mini chart for a single result row.
- * Matches the row to its card by entity values and delegates rendering to
- * {@link ChangePointLensChart}. Renders an empty state when the table is not
- * yet available or no matching card can be found.
+ * Renders the change point mini chart and details for a single result row.
+ * Shows an informational message when the row has no detected change point.
  */
 export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
   fetchParams,
@@ -64,17 +63,20 @@ export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
   }
 
   return (
-    <ChangePointLensChart
-      card={card}
-      cardIndex={0}
-      valueColumn={seriesColumns.valueColumn}
-      timeColumn={seriesColumns.timeColumn}
-      services={services}
-      fetchParams={fetchParams}
-      fetch$={fetch$}
-      onBrushEnd={onBrushEnd}
-      onFilter={onFilter}
-      actions={actions}
-    />
+    <>
+      <ChangePointLensChart
+        card={card}
+        cardIndex={0}
+        valueColumn={seriesColumns.valueColumn}
+        timeColumn={seriesColumns.timeColumn}
+        services={services}
+        fetchParams={fetchParams}
+        fetch$={fetch$}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        actions={actions}
+      />
+      <ChangePointDetailsSection card={card} row={row} seriesColumns={seriesColumns} />
+    </>
   );
 };
