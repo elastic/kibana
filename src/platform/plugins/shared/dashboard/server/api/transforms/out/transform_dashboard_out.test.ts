@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { timeSliderControlSchema } from '@kbn/controls-schemas';
+
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type {
   DashboardSavedObjectAttributes,
@@ -14,16 +17,28 @@ import type {
 } from '../../../dashboard_saved_object';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformDashboardOut } from './transform_dashboard_out';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import { setStubKibanaServices } from '../../../mocks';
 
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn().mockReturnValue({ transformOut: (val: any) => val }), // pass through transform
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
+const embeddable = createEmbeddableSetupMock();
+embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
+  title: 'Time slider control',
+  getSchema: () => {
+    return timeSliderControlSchema;
   },
-}));
+  getTransforms: () => {
+    return {
+      transformOut: jest.fn().mockImplementation((val) => val),
+      schema: timeSliderControlSchema,
+    };
+  },
+});
 
 describe('transformDashboardOut', () => {
+  beforeAll(() => {
+    setStubKibanaServices();
+  });
+
   const pinnedPanelSo = {
     config: {},
     type: 'time_slider_control',
