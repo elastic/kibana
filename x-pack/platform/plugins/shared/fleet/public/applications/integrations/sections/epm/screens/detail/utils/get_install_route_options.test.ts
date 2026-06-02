@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-t;
-
 import { getInstallPkgRouteOptions } from '.';
 
 // this is always the same
