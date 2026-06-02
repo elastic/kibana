@@ -135,6 +135,40 @@ describe('TaskManagerPlugin', () => {
         'Disabling authentication for background task utilization API'
       );
     });
+
+    test('throws when capacity is auto on nodes that are not background-task-only', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        capacity: 'auto',
+      });
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      pluginInitializerContext.node.roles.ui = true;
+      pluginInitializerContext.node.roles.migrator = false;
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+
+      expect(() =>
+        taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
+      ).toThrow(
+        'TaskManager xpack.task_manager.capacity: auto is only supported on background-task-only nodes (node.roles.background_tasks=true, node.roles.ui=false, node.roles.migrator=false).'
+      );
+    });
+
+    test('allows capacity auto on background-task-only nodes', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        capacity: 'auto',
+      });
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      pluginInitializerContext.node.roles.ui = false;
+      pluginInitializerContext.node.roles.migrator = false;
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+
+      expect(() =>
+        taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
+      ).not.toThrow();
+    });
   });
 
   describe('start', () => {

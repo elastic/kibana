@@ -20,6 +20,7 @@ import type {
   CoreSetup,
   Logger,
   CoreStart,
+  OpsMetrics,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
@@ -157,6 +158,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private opsMetrics$?: Observable<OpsMetrics>;
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
@@ -183,6 +185,18 @@ export class TaskManagerPlugin
     return backgroundTasks && !migrator && !ui;
   }
 
+  private assertAutoCapacityIsAllowed() {
+    if (this.config.capacity !== 'auto') {
+      return;
+    }
+
+    if (!this.isNodeBackgroundTasksOnly()) {
+      throw new Error(
+        'TaskManager xpack.task_manager.capacity: auto is only supported on background-task-only nodes (node.roles.background_tasks=true, node.roles.ui=false, node.roles.migrator=false).'
+      );
+    }
+  }
+
   private invalidateApiKey(params: InvalidateAPIKeysParams) {
     if (this.invalidateApiKeyFn) {
       return this.invalidateApiKeyFn(params);
@@ -197,6 +211,8 @@ export class TaskManagerPlugin
     core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
     plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
+    // this.assertAutoCapacityIsAllowed();
+
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
     const clusterClientPromise = core
       .getStartServices()
@@ -208,12 +224,10 @@ export class TaskManagerPlugin
       getClusterClient: () => clusterClientPromise,
     });
 
-    core.metrics
-      .getOpsMetrics$()
-      .pipe(distinctUntilChanged())
-      .subscribe((metrics) => {
-        this.heapSizeLimit = metrics.process.memory.heap.size_limit;
-      });
+    this.opsMetrics$ = core.metrics.getOpsMetrics$().pipe(distinctUntilChanged());
+    this.opsMetrics$.subscribe((metrics) => {
+      this.heapSizeLimit = metrics.process.memory.heap.size_limit;
+    });
 
     setupSavedObjects(core.savedObjects);
 
