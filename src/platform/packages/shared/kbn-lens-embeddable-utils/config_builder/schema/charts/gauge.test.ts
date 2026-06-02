@@ -229,9 +229,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-      `"✖ Invalid input"`
-    );
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
   });
 
   it('throws on invalid operations as metric', () => {
@@ -260,9 +259,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-      `"✖ Invalid input"`
-    );
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
   });
 
   it('throws on invalid ticks value', () => {
@@ -278,9 +276,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-      `"✖ Invalid input"`
-    );
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
   });
 
   it('throws on reference-based operations for min, max, and goal', () => {

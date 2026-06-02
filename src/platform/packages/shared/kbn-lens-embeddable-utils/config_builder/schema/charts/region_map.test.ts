@@ -132,9 +132,8 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expectPrettyError(regionMapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on missing region operation', () => {
@@ -151,9 +150,8 @@ describe('Region Map Schema', () => {
           fields: ['location'],
         },
       };
-      expectPrettyError(regionMapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on missing ems join field', () => {
@@ -180,9 +178,8 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expectPrettyError(regionMapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throw when using term buckets operation in an esql configuration', () => {
@@ -201,9 +198,8 @@ describe('Region Map Schema', () => {
           limit: 5,
         },
       };
-      expectPrettyError(regionMapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

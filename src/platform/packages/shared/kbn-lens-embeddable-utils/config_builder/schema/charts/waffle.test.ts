@@ -225,7 +225,8 @@ describe('Waffle Schema', () => {
         metrics: [],
       };
 
-      expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = waffleConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at metrics"
       `);
@@ -243,7 +244,8 @@ describe('Waffle Schema', () => {
         group_by: [],
       };
 
-      expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = waffleConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at group_by"
       `);
@@ -327,7 +329,8 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
           `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
@@ -374,7 +377,8 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
           `"✖ When multiple metrics are defined, only collapsed group_by dimensions are allowed."`
         );
       });
@@ -450,9 +454,8 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
   });

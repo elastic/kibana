@@ -265,7 +265,8 @@ describe('Pie Schema', () => {
           metrics: [],
         };
 
-        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        const result = pieConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`
           "✖ Too small: expected array to have >=1 items
             → at metrics"
         `);
@@ -283,7 +284,8 @@ describe('Pie Schema', () => {
           group_by: [],
         };
 
-        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        const result = pieConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`
           "✖ Too small: expected array to have >=1 items
             → at group_by"
         `);
@@ -311,9 +313,8 @@ describe('Pie Schema', () => {
           },
         };
 
-        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = pieConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('throws on invalid label position', () => {
@@ -340,9 +341,8 @@ describe('Pie Schema', () => {
           },
         };
 
-        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = pieConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       describe('Grouping Validation', () => {
@@ -501,7 +501,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+            const result = pieConfigSchema.safeParse(input);
+            expectPrettyError(result).toMatchInlineSnapshot(
               `"✖ The number of non-collapsed group_by dimensions must not exceed 3"`
             );
           });
@@ -662,7 +663,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+            const result = pieConfigSchema.safeParse(input);
+            expectPrettyError(result).toMatchInlineSnapshot(
               `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2"`
             );
           });
@@ -710,9 +712,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-              `"✖ Invalid input"`
-            );
+            const result = pieConfigSchema.safeParse(input);
+            expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
           });
         });
       });

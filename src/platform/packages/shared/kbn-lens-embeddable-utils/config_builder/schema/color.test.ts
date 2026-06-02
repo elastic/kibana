@@ -40,7 +40,8 @@ describe('Color Schema', () => {
         it('should invalidate unconstrained step', () => {
           const step: ColorByValueStep = { color };
 
-          expectPrettyError(colorByValueStepsSchema.safeParse([step])).toMatchInlineSnapshot(`
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
             "✖ At least one of \\"gte\\", \\"lt\\", or \\"lte\\" must be provided.
               → at [0]"
           `);
@@ -49,7 +50,8 @@ describe('Color Schema', () => {
         it('should invalidate using both lt and lte (overconstrained)', () => {
           const step: ColorByValueStep = { color, lte: 50, lt: 100 };
 
-          expectPrettyError(colorByValueStepsSchema.safeParse([step])).toMatchInlineSnapshot(`
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
             "✖ Cannot provide both \\"lt\\" and \\"lte\\" for the same step.
               → at [0]"
           `);
@@ -58,7 +60,8 @@ describe('Color Schema', () => {
         it('should invalidate using inverted range - lt', () => {
           const step: ColorByValueStep = { color, gte: 100, lt: 50 };
 
-          expectPrettyError(colorByValueStepsSchema.safeParse([step])).toMatchInlineSnapshot(`
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
             "✖ Inverted range: \\"gte\\" value must be less than the \\"lt\\" value
               → at [0]"
           `);
@@ -67,7 +70,8 @@ describe('Color Schema', () => {
         it('should invalidate using inverted range - lte', () => {
           const step: ColorByValueStep = { color, gte: 100, lte: 50 };
 
-          expectPrettyError(colorByValueStepsSchema.safeParse([step])).toMatchInlineSnapshot(`
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
             "✖ Inverted range: \\"gte\\" value must be less than the \\"lte\\" value
               → at [0]"
           `);
@@ -224,9 +228,8 @@ describe('Color Schema', () => {
           palette: 'not-a-color',
         };
 
-        expectPrettyError(allColoringTypeSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
   });
@@ -390,9 +393,8 @@ describe('Color Schema', () => {
           ],
         } satisfies ColorMappingCategoricalType;
 
-        expectPrettyError(allColoringTypeSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
   });

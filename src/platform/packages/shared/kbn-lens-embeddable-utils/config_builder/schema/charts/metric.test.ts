@@ -165,9 +165,8 @@ describe('Metric Schema', () => {
           ],
         } satisfies MetricInput;
 
-        expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = metricConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('accepts percentage-based dynamic coloring with breakdown_by', () => {
@@ -363,9 +362,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on invalid styling alignment value', () => {
@@ -389,9 +387,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on invalid breakdown collapse_by value', () => {
@@ -413,9 +410,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws if metric type is missing', () => {
@@ -431,9 +427,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws for two primary metrics', () => {
@@ -455,9 +450,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws for two secondary metrics', () => {
@@ -477,9 +471,8 @@ describe('Metric Schema', () => {
         ],
       };
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws if the only metric is secondary', () => {
@@ -495,9 +488,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws if the icon name is invalid', () => {
@@ -521,9 +513,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

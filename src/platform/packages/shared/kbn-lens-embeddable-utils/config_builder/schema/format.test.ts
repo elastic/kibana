@@ -113,9 +113,8 @@ describe('Format Schemas', () => {
         from: 'ms',
       };
 
-      expectPrettyError(formatTypeSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = formatTypeSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -135,9 +134,8 @@ describe('Format Schemas', () => {
         type: 'custom' as const,
       };
 
-      expectPrettyError(formatTypeSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = formatTypeSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -169,7 +167,8 @@ describe('Format Schemas', () => {
         },
       };
 
-      expectPrettyError(formatSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = formatSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at format"
       `);

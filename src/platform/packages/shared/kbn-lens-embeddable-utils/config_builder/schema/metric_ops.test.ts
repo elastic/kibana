@@ -74,7 +74,8 @@ describe('Metric Operations Schemas', () => {
         operation: 'formula' as const,
       };
 
-      expectPrettyError(formulaOperationDefinitionSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = formulaOperationDefinitionSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at formula"
       `);
@@ -340,9 +341,8 @@ describe('Metric Operations Schemas', () => {
         field: 'value',
       };
 
-      expectPrettyError(metricOperationDefinitionSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = metricOperationDefinitionSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 });

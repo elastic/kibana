@@ -40,11 +40,10 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('requires operation and field', () => {
-      expectPrettyError(
-        bucketDateHistogramOperationSchema.safeParse({
-          operation: 'date_histogram',
-        })
-      ).toMatchInlineSnapshot(`
+      const result = bucketDateHistogramOperationSchema.safeParse({
+        operation: 'date_histogram',
+      });
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at field"
       `);
@@ -285,24 +284,22 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('enforces granularity limits', () => {
-      expectPrettyError(
-        bucketHistogramOperationSchema.safeParse({
-          operation: 'histogram',
-          field: 'price',
-          granularity: 0,
-        })
-      ).toMatchInlineSnapshot(`
+      const result1 = bucketHistogramOperationSchema.safeParse({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 0,
+      });
+      expectPrettyError(result1).toMatchInlineSnapshot(`
         "✖ Too small: expected number to be >=1
           → at granularity"
       `);
 
-      expectPrettyError(
-        bucketHistogramOperationSchema.safeParse({
-          operation: 'histogram',
-          field: 'price',
-          granularity: 8,
-        })
-      ).toMatchInlineSnapshot(`
+      const result2 = bucketHistogramOperationSchema.safeParse({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 8,
+      });
+      expectPrettyError(result2).toMatchInlineSnapshot(`
         "✖ Too big: expected number to be <=7
           → at granularity"
       `);
@@ -370,12 +367,11 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('rejects invalid operation types', () => {
-      expectPrettyError(
-        bucketOperationDefinitionSchema.safeParse({
-          operation: 'invalid_operation',
-          field: 'test',
-        })
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      const result = bucketOperationDefinitionSchema.safeParse({
+        operation: 'invalid_operation',
+        field: 'test',
+      });
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 });

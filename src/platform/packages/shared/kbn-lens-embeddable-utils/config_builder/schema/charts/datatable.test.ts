@@ -301,9 +301,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on empty metrics for non-esql', () => {
@@ -321,7 +320,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at metrics"
       `);
@@ -350,7 +350,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at rows"
       `);
@@ -372,7 +373,8 @@ describe('Datatable Schema', () => {
         split_metrics_by: [],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at split_metrics_by"
       `);
@@ -402,9 +404,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when using invalid density mode', () => {
@@ -429,9 +430,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when using invalid height type', () => {
@@ -452,9 +452,8 @@ describe('Datatable Schema', () => {
         styling: { density: { height: { header: { type: 'invalid' } } } },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when missing summary type', () => {
@@ -475,9 +474,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when using term buckets operation in an esql configuration', () => {
@@ -500,9 +498,8 @@ describe('Datatable Schema', () => {
         rows: [{ operation: 'terms', fields: ['geo.dest'], limit: 10 }],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when esql datatable has no metrics and no rows', () => {
@@ -514,7 +511,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ Datatable must have at least one column"`
       );
     });
@@ -534,7 +532,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at metrics"
       `);
@@ -555,7 +554,8 @@ describe('Datatable Schema', () => {
         rows: [],
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at rows"
       `);
@@ -604,7 +604,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
       );
     });
@@ -653,7 +654,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
       );
     });
@@ -707,7 +709,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      expectPrettyError(datatableConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
       );
     });

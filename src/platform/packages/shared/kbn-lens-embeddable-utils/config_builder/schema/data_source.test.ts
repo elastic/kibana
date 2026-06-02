@@ -35,7 +35,8 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required name for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expectPrettyError(dataViewSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = dataViewSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at ref_id"
       `);
@@ -81,7 +82,8 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required fields for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expectPrettyError(dataViewSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = dataViewSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at index_pattern"
       `);
@@ -105,7 +107,8 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expectPrettyError(esqlDataSourceSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = esqlDataSourceSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at query"
       `);
@@ -129,7 +132,8 @@ describe('DataSource Schema', () => {
         id: 'my-data-view',
       };
 
-      expectPrettyError(dataSourceSchema.shape.data_source.safeParse(input)).toMatchInlineSnapshot(`
+      const result = dataSourceSchema.shape.data_source.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid discriminator value. Expected 'data_view_reference' | 'data_view_spec'
           → at type"
       `);

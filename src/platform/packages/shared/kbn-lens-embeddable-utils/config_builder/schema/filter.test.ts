@@ -38,7 +38,8 @@ describe('Filter Schemas', () => {
         expression: 'status:active',
       };
 
-      expectPrettyError(filterSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = filterSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at language"
       `);
@@ -49,7 +50,8 @@ describe('Filter Schemas', () => {
         language: 'kql',
       };
 
-      expectPrettyError(filterSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = filterSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected string, received undefined
           → at expression"
       `);
@@ -87,7 +89,8 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expectPrettyError(filterWithLabelSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = filterWithLabelSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input: expected object, received undefined
           → at filter"
       `);
@@ -102,7 +105,8 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expectPrettyError(filterWithLabelSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = filterWithLabelSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at filter.language"
       `);

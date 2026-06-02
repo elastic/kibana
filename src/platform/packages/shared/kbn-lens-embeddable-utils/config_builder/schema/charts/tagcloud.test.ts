@@ -262,9 +262,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('throws on missing tag_by operation', () => {
@@ -276,9 +275,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('throws on invalid orientation value', () => {
@@ -298,9 +296,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('throws on invalid font size minimum', () => {
@@ -323,7 +320,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`
           "✖ Too small: expected number to be >=1
             → at styling.font_size.min"
         `);
@@ -348,7 +346,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`
           "✖ Too big: expected number to be <=120
             → at styling.font_size.max"
         `);
@@ -370,9 +369,8 @@ describe('Tagcloud Schema', () => {
             limit: 5,
           },
         };
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
       it('throws when tag_by color is not a palette mapping', () => {
@@ -396,9 +394,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expectPrettyError(tagcloudConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-          `"✖ Invalid input"`
-        );
+        const result = tagcloudConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
 

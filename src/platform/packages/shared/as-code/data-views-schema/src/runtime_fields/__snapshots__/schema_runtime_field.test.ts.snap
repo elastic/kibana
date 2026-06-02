@@ -1,30 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`given a embedded runtime field given a boolean runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a boolean runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a boolean runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a boolean runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a boolean runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a embedded runtime field given a boolean runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -35,26 +10,6 @@ exports[`given a embedded runtime field given a boolean runtime field when it ha
   → at script"
 `;
 
-exports[`given a embedded runtime field given a composite runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at fields.my_runtime_subfield.custom_description"
-`;
-
-exports[`given a embedded runtime field given a composite runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.custom_description"
-`;
-
-exports[`given a embedded runtime field given a composite runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at fields.my_runtime_subfield.custom_label"
-`;
-
-exports[`given a embedded runtime field given a composite runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.custom_label"
-`;
-
 exports[`given a embedded runtime field given a composite runtime field when fields is not a record should throw an error 1`] = `
 "✖ Invalid input: expected record, received array
   → at fields"
@@ -63,11 +18,6 @@ exports[`given a embedded runtime field given a composite runtime field when fie
 exports[`given a embedded runtime field given a composite runtime field when it does NOT have fields should throw an error 1`] = `
 "✖ Invalid input: expected record, received undefined
   → at fields"
-`;
-
-exports[`given a embedded runtime field given a composite runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.format.type"
 `;
 
 exports[`given a embedded runtime field given a composite runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -106,31 +56,6 @@ exports[`given a embedded runtime field given a composite runtime field when it 
 
 exports[`given a embedded runtime field given a composite runtime field when it has top-level field formatting settings should throw an error 1`] = `"✖ Unrecognized key: \\"format\\""`;
 
-exports[`given a embedded runtime field given a date runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a date runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a date runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a date runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a date runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a embedded runtime field given a date runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -139,31 +64,6 @@ exports[`given a embedded runtime field given a date runtime field when it has a
 exports[`given a embedded runtime field given a date runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a embedded runtime field given a double runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a double runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a double runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a double runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a double runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a embedded runtime field given a double runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -176,31 +76,6 @@ exports[`given a embedded runtime field given a double runtime field when it has
   → at script"
 `;
 
-exports[`given a embedded runtime field given a geo_point runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a geo_point runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a geo_point runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a geo_point runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a geo_point runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a embedded runtime field given a geo_point runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -209,31 +84,6 @@ exports[`given a embedded runtime field given a geo_point runtime field when it 
 exports[`given a embedded runtime field given a geo_point runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a embedded runtime field given a ip runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a ip runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a ip runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a ip runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a ip runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a embedded runtime field given a ip runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -246,31 +96,6 @@ exports[`given a embedded runtime field given a ip runtime field when it has an 
   → at script"
 `;
 
-exports[`given a embedded runtime field given a keyword runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a keyword runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a keyword runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a keyword runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a keyword runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a embedded runtime field given a keyword runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -279,31 +104,6 @@ exports[`given a embedded runtime field given a keyword runtime field when it ha
 exports[`given a embedded runtime field given a keyword runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a embedded runtime field given a long runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a long runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a embedded runtime field given a long runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a long runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a embedded runtime field given a long runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a embedded runtime field given a long runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -321,31 +121,6 @@ exports[`given a embedded runtime field given an invalid type should throw an er
   → at type"
 `;
 
-exports[`given a saved runtime field given a boolean runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a boolean runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a boolean runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a boolean runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a boolean runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a saved runtime field given a boolean runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -356,26 +131,6 @@ exports[`given a saved runtime field given a boolean runtime field when it has a
   → at script"
 `;
 
-exports[`given a saved runtime field given a composite runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at fields.my_runtime_subfield.custom_description"
-`;
-
-exports[`given a saved runtime field given a composite runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.custom_description"
-`;
-
-exports[`given a saved runtime field given a composite runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at fields.my_runtime_subfield.custom_label"
-`;
-
-exports[`given a saved runtime field given a composite runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.custom_label"
-`;
-
 exports[`given a saved runtime field given a composite runtime field when fields is not a record should throw an error 1`] = `
 "✖ Invalid input: expected record, received array
   → at fields"
@@ -384,11 +139,6 @@ exports[`given a saved runtime field given a composite runtime field when fields
 exports[`given a saved runtime field given a composite runtime field when it does NOT have fields should throw an error 1`] = `
 "✖ Invalid input: expected record, received undefined
   → at fields"
-`;
-
-exports[`given a saved runtime field given a composite runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at fields.my_runtime_subfield.format.type"
 `;
 
 exports[`given a saved runtime field given a composite runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -427,31 +177,6 @@ exports[`given a saved runtime field given a composite runtime field when it has
 
 exports[`given a saved runtime field given a composite runtime field when it has top-level field formatting settings should throw an error 1`] = `"✖ Unrecognized key: \\"format\\""`;
 
-exports[`given a saved runtime field given a date runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a date runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a date runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a date runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a date runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a saved runtime field given a date runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -460,31 +185,6 @@ exports[`given a saved runtime field given a date runtime field when it has a sc
 exports[`given a saved runtime field given a date runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a saved runtime field given a double runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a double runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a double runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a double runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a double runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a saved runtime field given a double runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -497,31 +197,6 @@ exports[`given a saved runtime field given a double runtime field when it has an
   → at script"
 `;
 
-exports[`given a saved runtime field given a geo_point runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a geo_point runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a geo_point runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a geo_point runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a geo_point runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a saved runtime field given a geo_point runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -530,31 +205,6 @@ exports[`given a saved runtime field given a geo_point runtime field when it has
 exports[`given a saved runtime field given a geo_point runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a saved runtime field given a ip runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a ip runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a ip runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a ip runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a ip runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a saved runtime field given a ip runtime field when it has a script that is not a string should throw an error 1`] = `
@@ -567,31 +217,6 @@ exports[`given a saved runtime field given a ip runtime field when it has an emp
   → at script"
 `;
 
-exports[`given a saved runtime field given a keyword runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a keyword runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a keyword runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a keyword runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a keyword runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
-`;
-
 exports[`given a saved runtime field given a keyword runtime field when it has a script that is not a string should throw an error 1`] = `
 "✖ Invalid input: expected string, received object
   → at script"
@@ -600,31 +225,6 @@ exports[`given a saved runtime field given a keyword runtime field when it has a
 exports[`given a saved runtime field given a keyword runtime field when it has an empty script should throw an error 1`] = `
 "✖ Too small: expected string to have >=1 characters
   → at script"
-`;
-
-exports[`given a saved runtime field given a long runtime field given a custom_description when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a long runtime field given a custom_description when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_description"
-`;
-
-exports[`given a saved runtime field given a long runtime field given a custom_label when it is a string when it is empty should throw an error 1`] = `
-"✖ Too small: expected string to have >=1 characters
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a long runtime field given a custom_label when it is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at custom_label"
-`;
-
-exports[`given a saved runtime field given a long runtime field when it has a format when the format is not a string should throw an error 1`] = `
-"✖ Invalid input: expected string, received number
-  → at format.type"
 `;
 
 exports[`given a saved runtime field given a long runtime field when it has a script that is not a string should throw an error 1`] = `

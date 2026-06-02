@@ -74,7 +74,8 @@ describe('Shared Schemas', () => {
         sampling: -0.1,
       };
 
-      expectPrettyError(layerSettingsSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = layerSettingsSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected number to be >=0
           → at sampling"
       `);
@@ -85,7 +86,8 @@ describe('Shared Schemas', () => {
         sampling: 1.1,
       };
 
-      expectPrettyError(layerSettingsSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = layerSettingsSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too big: expected number to be <=1
           → at sampling"
       `);
@@ -114,9 +116,8 @@ describe('Shared Schemas', () => {
     it('throws on invalid collapse by value', () => {
       const input = 'invalid';
 
-      expectPrettyError(collapseBySchema.safeParse(input)).toMatchInlineSnapshot(
-        `"✖ Invalid input"`
-      );
+      const result = collapseBySchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

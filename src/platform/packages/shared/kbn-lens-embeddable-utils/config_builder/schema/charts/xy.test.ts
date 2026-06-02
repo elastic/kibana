@@ -568,142 +568,137 @@ describe('XY', () => {
 
   describe('invalid xy charts', () => {
     it('should throw for no layers', () => {
-      expectPrettyError(
-        xyConfigSchema.safeParse({
-          type: 'xy',
-          title: `Faulty Chart`,
-          layers: [],
-        } satisfies XYConfig)
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      const result = xyConfigSchema.safeParse({
+        type: 'xy',
+        title: `Faulty Chart`,
+        layers: [],
+      } satisfies XYConfig);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should not let mix esql data_source with dsl operations', () => {
-      expectPrettyError(
-        xyConfigSchema.safeParse({
-          type: 'xy',
-          title: `Faulty Chart`,
-          layers: [
-            {
-              data_source: { type: 'esql', query: 'FROM company_index' },
-              type: 'bar',
-              ignore_global_filters: false,
-              sampling: 1,
-              x: {
-                operation: 'date_histogram',
-                field: 'order_date',
-                suggested_interval: 'auto',
-                use_original_time_range: true,
-                include_empty_rows: false,
-              },
-              y: [
-                // @ts-expect-error - mixing not allowed
-                { operation: 'count', empty_as_null: false },
-                { operation: 'average', field: 'price' },
-              ],
-
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
+      const result = xyConfigSchema.safeParse({
+        type: 'xy',
+        title: `Faulty Chart`,
+        layers: [
+          {
+            data_source: { type: 'esql', query: 'FROM company_index' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: {
+              operation: 'date_histogram',
+              field: 'order_date',
+              suggested_interval: 'auto',
+              use_original_time_range: true,
+              include_empty_rows: false,
             },
-          ],
-        } satisfies XYConfig)
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+            y: [
+              // @ts-expect-error - mixing not allowed
+              { operation: 'count', empty_as_null: false },
+              { operation: 'average', field: 'price' },
+            ],
+
+            breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
+          },
+        ],
+      } satisfies XYConfig);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should not let esql annotations', () => {
-      expectPrettyError(
-        xyConfigSchema.safeParse({
-          type: 'xy',
-          title: `Faulty Chart`,
-          layers: [
-            {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-              type: 'bar',
-              ignore_global_filters: false,
-              sampling: 1,
-              x: {
-                operation: 'date_histogram',
-                field: 'order_date',
-                suggested_interval: 'auto',
-                use_original_time_range: true,
-                include_empty_rows: false,
-              },
-              y: [{ operation: 'count', empty_as_null: false }],
+      const result = xyConfigSchema.safeParse({
+        type: 'xy',
+        title: `Faulty Chart`,
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: {
+              operation: 'date_histogram',
+              field: 'order_date',
+              suggested_interval: 'auto',
+              use_original_time_range: true,
+              include_empty_rows: false,
             },
-            {
-              type: 'annotations',
-              ignore_global_filters: false,
-              // @ts-expect-error - mixing not allowed
-              data_source: {
-                type: 'esql',
-                query:
-                  'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
-              } satisfies DataSourceTypeESQL,
-              events: [
-                {
-                  type: 'point',
-                  label: 'Event',
-                  timestamp: '2023-01-01T00:00:00Z',
-                  text: { visible: true },
-                  color: {
-                    type: 'static',
-                    color: '#ff0000',
-                  },
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            type: 'annotations',
+            ignore_global_filters: false,
+            // @ts-expect-error - mixing not allowed
+            data_source: {
+              type: 'esql',
+              query:
+                'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
+            } satisfies DataSourceTypeESQL,
+            events: [
+              {
+                type: 'point',
+                label: 'Event',
+                timestamp: '2023-01-01T00:00:00Z',
+                text: { visible: true },
+                color: {
+                  type: 'static',
+                  color: '#ff0000',
                 },
-              ],
-            },
-          ],
-        } satisfies XYConfig)
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+              },
+            ],
+          },
+        ],
+      } satisfies XYConfig);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should reject mixing ES|QL and DSL layers in one chart', () => {
-      expectPrettyError(
-        xyConfigSchema.safeParse({
-          type: 'xy',
-          title: 'Mixed mode chart',
-          layers: [
-            {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
-              type: 'bar',
-              ignore_global_filters: false,
-              sampling: 1,
-              x: {
-                operation: 'date_histogram',
-                field: 'order_date',
-                include_empty_rows: false,
-                suggested_interval: 'auto',
-                use_original_time_range: true,
-                drop_partial_intervals: false,
-              },
-              y: [{ operation: 'count', empty_as_null: false }],
+      const result = xyConfigSchema.safeParse({
+        type: 'xy',
+        title: 'Mixed mode chart',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: {
+              operation: 'date_histogram',
+              field: 'order_date',
+              include_empty_rows: false,
+              suggested_interval: 'auto',
+              use_original_time_range: true,
+              drop_partial_intervals: false,
             },
-            {
-              dataset: { type: 'esql', query: 'FROM company_index' },
-              type: 'line',
-              ignore_global_filters: false,
-              sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'value' }],
-            },
-          ],
-        } as XYConfig)
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            dataset: { type: 'esql', query: 'FROM company_index' },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: { operation: 'value', column: 'order_date' },
+            y: [{ operation: 'value', column: 'value' }],
+          },
+        ],
+      } as XYConfig);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should reject list legend layout for left positions', () => {
-      expectPrettyError(
-        xyConfigSchema.safeParse({
-          type: 'xy',
-          title: 'Invalid list legend position',
-          legend: {
-            visibility: 'visible',
-            position: 'left',
-            layout: {
-              type: 'list',
-            },
+      const result = xyConfigSchema.safeParse({
+        type: 'xy',
+        title: 'Invalid list legend position',
+        legend: {
+          visibility: 'visible',
+          position: 'left',
+          layout: {
+            type: 'list',
           },
-          layers: [minimalLayer],
-        })
-      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        },
+        layers: [minimalLayer],
+      });
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

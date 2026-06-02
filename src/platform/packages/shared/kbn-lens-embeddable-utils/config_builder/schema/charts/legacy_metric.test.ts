@@ -105,7 +105,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric"
       `);
@@ -124,7 +125,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric
         ✖ Invalid input
@@ -142,7 +144,8 @@ describe('Legacy Metric Schema', () => {
         },
       };
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric
         ✖ Invalid input
@@ -169,7 +172,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric
         ✖ Invalid input
@@ -196,7 +200,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric
         ✖ Invalid input
@@ -254,7 +259,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies Omit<LegacyMetricConfigESQL, keyof typeof defaultValues>;
 
-      expectPrettyError(legacyMetricConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
           → at metric
         ✖ Invalid discriminator value. Expected 'data_view_reference' | 'data_view_spec'

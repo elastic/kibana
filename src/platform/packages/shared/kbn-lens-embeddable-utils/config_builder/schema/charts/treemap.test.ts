@@ -232,7 +232,8 @@ describe('Treemap Schema', () => {
         metrics: [],
       };
 
-      expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = treemapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at metrics"
       `);
@@ -250,7 +251,8 @@ describe('Treemap Schema', () => {
         group_by: [],
       };
 
-      expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+      const result = treemapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Too small: expected array to have >=1 items
           → at group_by"
       `);
@@ -371,7 +373,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          const result = treemapConfigSchema.safeParse(input);
+          expectPrettyError(result).toMatchInlineSnapshot(
             `"✖ The number of non-collapsed group_by dimensions must not exceed 2"`
           );
         });
@@ -491,7 +494,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          const result = treemapConfigSchema.safeParse(input);
+          expectPrettyError(result).toMatchInlineSnapshot(
             `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1"`
           );
         });
@@ -534,9 +538,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
-            `"✖ Invalid input"`
-          );
+          const result = treemapConfigSchema.safeParse(input);
+          expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
         });
       });
     });
