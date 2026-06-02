@@ -67,6 +67,8 @@ export function ServiceMapHome() {
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
       esQuery={esQuery ?? undefined}
     />
@@ -89,6 +91,8 @@ export function ServiceMapServiceDetail() {
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       esQuery={esQuery ?? undefined}
     />
   );
@@ -99,6 +103,8 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceGroupId,
   esQuery,
 }: {
@@ -106,6 +112,9 @@ export function ServiceMap({
   kuery: string;
   start: string;
   end: string;
+  /** Raw (possibly relative) URL range — forwarded to "Add to dashboard" for dashboard time seeding. */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceGroupId?: string;
   esQuery?: { bool: BoolQuery };
 }) {
@@ -294,6 +303,8 @@ export function ServiceMap({
               kuery={kuery}
               start={start}
               end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
               serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}

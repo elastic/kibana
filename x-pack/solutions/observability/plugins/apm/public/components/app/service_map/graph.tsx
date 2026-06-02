@@ -122,6 +122,14 @@ interface GraphProps {
   onSearchQueryChange?: (next: string) => void;
   /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
   serviceGroupId?: string;
+  /**
+   * Raw (possibly relative, e.g. `now-15m`) time range from the APM URL. Used by
+   * "Add to dashboard" to seed the destination dashboard's global time so a relative
+   * range stays live instead of being frozen to absolute timestamps. Falls back to the
+   * resolved `start`/`end` when unavailable.
+   */
+  rangeFrom?: string;
+  rangeTo?: string;
 }
 
 function GraphInner({
@@ -148,6 +156,8 @@ function GraphInner({
   searchQuery: controlledSearchQuery,
   onSearchQueryChange,
   serviceGroupId,
+  rangeFrom,
+  rangeTo,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -777,6 +787,8 @@ function GraphInner({
                     kuery={kuery}
                     start={start}
                     end={end}
+                    rangeFrom={rangeFrom}
+                    rangeTo={rangeTo}
                     serviceName={serviceName}
                     serviceGroupId={serviceGroupId}
                     mapOrientation={mapOrientation}

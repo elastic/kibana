@@ -27,8 +27,16 @@ import { readInitialAppStateFromRawUrl } from './use_filter_url_sync';
 interface AddToDashboardButtonProps {
   environment: Environment;
   kuery: string;
+  /** Resolved absolute start/end — fallback for the dashboard time seed. */
   start: string;
   end: string;
+  /**
+   * Raw URL range (may be relative, e.g. `now-15m` / `now`). Preferred for seeding the
+   * destination dashboard's global time so a relative range stays live instead of being
+   * frozen to the absolute timestamps it happened to resolve to at copy time.
+   */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceName?: string;
   serviceGroupId?: string;
   mapOrientation: ServiceMapOrientation;
@@ -170,6 +178,8 @@ export function AddToDashboardButton({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceName,
   serviceGroupId,
   mapOrientation,
@@ -231,7 +241,13 @@ export function AddToDashboardButton({
         serializedState,
       };
 
-      const path = dashboardPathForId(dashboardId, { from: start, to: end });
+      // Prefer the raw URL range so a relative APM range (e.g. `now-15m`/`now`) seeds the
+      // dashboard as a live relative range instead of a frozen absolute window. Fall back
+      // to the resolved absolute start/end when the raw range isn't available.
+      const path = dashboardPathForId(dashboardId, {
+        from: rangeFrom ?? start,
+        to: rangeTo ?? end,
+      });
 
       telemetry?.reportServiceMapAddedToDashboard({
         new_dashboard: dashboardId === 'new',
@@ -261,6 +277,8 @@ export function AddToDashboardButton({
       serviceName,
       start,
       end,
+      rangeFrom,
+      rangeTo,
       environment,
       serviceGroupId,
       mapOrientation,
