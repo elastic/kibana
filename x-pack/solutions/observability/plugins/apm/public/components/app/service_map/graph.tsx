@@ -166,13 +166,21 @@ function GraphInner({
     controlledViewFilters ?? DEFAULT_SERVICE_MAP_VIEW_FILTERS
   );
   const viewFilters = controlledViewFilters ?? internalViewFilters;
+  // Keep a ref to the currently-effective view filters so function updaters always see the
+  // latest "prev" — internalViewFilters can be stale when the host drives state via
+  // `controlledViewFilters` (we never write back to internalViewFilters in that case).
+  const viewFiltersRef = useRef(viewFilters);
+  viewFiltersRef.current = viewFilters;
   const setViewFilters = useCallback(
     (updater: ServiceMapViewFilters | ((prev: ServiceMapViewFilters) => ServiceMapViewFilters)) => {
-      setInternalViewFilters((prev) => {
-        const next = typeof updater === 'function' ? updater(prev) : updater;
-        onViewFiltersChange?.(next);
-        return next;
-      });
+      const next =
+        typeof updater === 'function'
+          ? (updater as (prev: ServiceMapViewFilters) => ServiceMapViewFilters)(
+              viewFiltersRef.current
+            )
+          : updater;
+      setInternalViewFilters(next);
+      onViewFiltersChange?.(next);
     },
     [onViewFiltersChange]
   );

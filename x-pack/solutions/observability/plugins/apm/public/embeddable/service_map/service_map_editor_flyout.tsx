@@ -182,6 +182,55 @@ function getTimeRange(timeRange?: Partial<TimeRange>) {
   return { start, end };
 }
 
+/**
+ * Lazy data fetch for the flyout's filter `(count)` badges. Returns `undefined` until
+ * `enabled` flips true (typically on first combobox focus); after that, fetches the
+ * service map + badges for the current scope and computes per-filter counts.
+ *
+ * Hooks must run unconditionally, so we always call them but pass empty strings for
+ * `start`/`end` while disabled — `useFetcher` keys on those, so the inner request is
+ * skipped (useApmPluginContext returns no data when not in APM provider; useServiceMap's
+ * license/config guard handles the rest).
+ */
+function useFlyoutFilterOptionCounts({
+  enabled,
+  environment,
+  kuery,
+  start,
+  end,
+  serviceName,
+}: {
+  enabled: boolean;
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
+  serviceName: string | undefined;
+}) {
+  // Empty start/end short-circuits the fetcher (the inner API would 400 anyway).
+  const fetchStart = enabled ? start : '';
+  const fetchEnd = enabled ? end : '';
+  const { data: serviceMapData, status: serviceMapStatus } = useServiceMap({
+    environment,
+    kuery,
+    start: fetchStart,
+    end: fetchEnd,
+    serviceName: serviceName || undefined,
+  });
+  const { nodes: nodesWithBadges } = useServiceMapBadges({
+    environment,
+    start: fetchStart,
+    end: fetchEnd,
+    kuery,
+    nodes: serviceMapData.nodes,
+    nodesStatus: serviceMapStatus,
+  });
+  return useMemo(() => {
+    if (!enabled) return undefined;
+    return computeServiceMapFilterOptionCounts(nodesWithBadges, serviceMapData.edges);
+  }, [enabled, nodesWithBadges, serviceMapData.edges]);
+}
+
 export function ServiceMapEditorFlyout({
   onCancel,
   onSave,
@@ -267,43 +316,55 @@ export function ServiceMapEditorFlyout({
     [environmentTerms]
   );
 
-  // Snapshot the service map data with the user's current scope (env/time/KQL/service_name)
-  // so the filter comboboxes can show `(count)` badges + disable zero-count options —
-  // matching the in-graph Options panel UX on the standalone APM page.
-  const { data: serviceMapData, status: serviceMapStatus } = useServiceMap({
+  // Filter (count) badges + disable-zero-count UX requires a live service-map fetch scoped
+  // to the user's current env / time / KQL / service-name. To avoid kicking that fetch on
+  // every flyout open (the user may never touch the filter rows), defer until any filter
+  // combobox is focused — see `onFilterFocus` below.
+  const [filterCountsEnabled, setFilterCountsEnabled] = useState<boolean>(
+    // Already-selected filters are a strong signal the user cares about counts; pre-warm
+    // the fetch so the badges are ready by the time they open a dropdown to change one.
+    () =>
+      alertStatusFilter.length > 0 ||
+      sloStatusFilter.length > 0 ||
+      connectionFilter.length > 0 ||
+      anomalySeverityFilter.length > 0
+  );
+  const onFilterFocus = useCallback(() => setFilterCountsEnabled(true), []);
+  const filterOptionCounts = useFlyoutFilterOptionCounts({
+    enabled: filterCountsEnabled,
     environment,
     kuery,
     start,
     end,
-    serviceName: serviceName || undefined,
+    serviceName,
   });
-  const { nodes: nodesWithBadges } = useServiceMapBadges({
-    environment,
-    start,
-    end,
-    kuery: '',
-    nodes: serviceMapData.nodes,
-    nodesStatus: serviceMapStatus,
-  });
-  const filterOptionCounts = useMemo(
-    () => computeServiceMapFilterOptionCounts(nodesWithBadges, serviceMapData.edges),
-    [nodesWithBadges, serviceMapData.edges]
-  );
   const connectionFilterComboBoxOptions = useMemo(
-    () => getDecoratedConnectionOptions(filterOptionCounts.connection),
-    [filterOptionCounts.connection]
+    () =>
+      filterOptionCounts
+        ? getDecoratedConnectionOptions(filterOptionCounts.connection)
+        : CONNECTION_FILTER_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [filterOptionCounts]
   );
   const alertStatusComboBoxOptions = useMemo(
-    () => getDecoratedAlertStatusOptions(filterOptionCounts.alerts),
-    [filterOptionCounts.alerts]
+    () =>
+      filterOptionCounts
+        ? getDecoratedAlertStatusOptions(filterOptionCounts.alerts)
+        : ALERT_STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [filterOptionCounts]
   );
   const sloStatusComboBoxOptions = useMemo(
-    () => getDecoratedSloStatusOptions(filterOptionCounts.slo),
-    [filterOptionCounts.slo]
+    () =>
+      filterOptionCounts
+        ? getDecoratedSloStatusOptions(filterOptionCounts.slo)
+        : SLO_STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [filterOptionCounts]
   );
   const anomalySeverityComboBoxOptions = useMemo(
-    () => getDecoratedAnomalySeverityOptions(filterOptionCounts.anomaly),
-    [filterOptionCounts.anomaly]
+    () =>
+      filterOptionCounts
+        ? getDecoratedAnomalySeverityOptions(filterOptionCounts.anomaly)
+        : ANOMALY_SEVERITY_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label })),
+    [filterOptionCounts]
   );
 
   const onServiceNameSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -479,9 +540,10 @@ export function ServiceMapEditorFlyout({
                 return { label: opt?.label ?? value, value };
               })}
               onChange={(selected) =>
-                setConnectionFilter(selected.map((s) => (s.value ?? s.label) as ConnectionFilter))
+                setConnectionFilter(selected.map((s) => s.value as ConnectionFilter))
               }
               data-test-subj="apmServiceMapEditorConnectionFilter"
+              onFocus={onFilterFocus}
             />
           </EuiFormRow>
 
@@ -505,9 +567,10 @@ export function ServiceMapEditorFlyout({
                 return { label: opt?.label ?? value, value };
               })}
               onChange={(selected) =>
-                setAlertStatusFilter(selected.map((s) => (s.value ?? s.label) as AlertStatus))
+                setAlertStatusFilter(selected.map((s) => s.value as AlertStatus))
               }
               data-test-subj="apmServiceMapEditorAlertStatusFilter"
+              onFocus={onFilterFocus}
             />
           </EuiFormRow>
 
@@ -530,9 +593,10 @@ export function ServiceMapEditorFlyout({
                 return { label: opt?.label ?? value, value };
               })}
               onChange={(selected) =>
-                setSloStatusFilter(selected.map((s) => (s.value ?? s.label) as SloStatus))
+                setSloStatusFilter(selected.map((s) => s.value as SloStatus))
               }
               data-test-subj="apmServiceMapEditorSloStatusFilter"
+              onFocus={onFilterFocus}
             />
           </EuiFormRow>
 
@@ -557,10 +621,11 @@ export function ServiceMapEditorFlyout({
               })}
               onChange={(selected) =>
                 setAnomalySeverityFilter(
-                  selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
+                  selected.map((s) => s.value as ML_ANOMALY_SEVERITY)
                 )
               }
               data-test-subj="apmServiceMapEditorAnomalySeverityFilter"
+              onFocus={onFilterFocus}
             />
           </EuiFormRow>
 

@@ -68,10 +68,13 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
   sync_with_dashboard_filters: 'referenceEquality',
-  alert_status_filter: 'referenceEquality',
-  slo_status_filter: 'referenceEquality',
-  connection_filter: 'referenceEquality',
-  anomaly_severity_filter: 'referenceEquality',
+  // Array fields use deepEquality: the editor flyout's handleSave + the in-graph options
+  // panel both produce fresh arrays on every save, which would otherwise mark the panel
+  // dirty regardless of whether the selected values actually changed.
+  alert_status_filter: 'deepEquality',
+  slo_status_filter: 'deepEquality',
+  connection_filter: 'deepEquality',
+  anomaly_severity_filter: 'deepEquality',
   find_query: 'referenceEquality',
 };
 

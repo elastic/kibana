@@ -38,9 +38,14 @@ interface AddToDashboardButtonProps {
   controlIconCss?: SerializedStyles;
 }
 
-/** Serialize a single string value as a quoted KQL phrase. */
+/** Serialize a single string value as a quoted KQL phrase (backslashes escaped first, then quotes). */
 function quoteKqlValue(value: string): string {
-  return `"${String(value).replace(/"/g, '\\"')}"`;
+  return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+/** Build the hash path expected by the Dashboards app's incoming-embeddable handler. */
+function dashboardPathForId(dashboardId: string | null): string {
+  return dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create';
 }
 
 /** Convert a phrase / phrases filter to a KQL fragment; returns `undefined` for unsupported filter shapes. */
@@ -206,7 +211,7 @@ export function AddToDashboardButton({
         serializedState,
       };
 
-      const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+      const path = dashboardPathForId(dashboardId);
 
       telemetry?.reportServiceMapAddedToDashboard({
         new_dashboard: dashboardId === 'new',

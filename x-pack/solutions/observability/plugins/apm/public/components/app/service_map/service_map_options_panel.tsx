@@ -38,15 +38,6 @@ import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
-// Static option lists and decorators live in `service_map_filter_combobox_options.tsx`
-// so the embeddable edit flyout can reuse them without a circular import.
-export {
-  ALERT_STATUS_OPTIONS,
-  ANOMALY_SEVERITY_OPTIONS,
-  CONNECTION_FILTER_OPTIONS,
-  SLO_STATUS_OPTIONS,
-} from './service_map_filter_combobox_options';
-
 export interface ServiceMapOptionsPanelToggleProps {
   isExpanded: boolean;
   onExpandedChange: (next: boolean) => void;
@@ -302,7 +293,7 @@ export function ServiceMapOptionsPanel({
             })}
             onChange={(selected) => {
               onConnectionFilterChange(
-                selected.map((s) => (s.value ?? s.label) as ConnectionFilter)
+                selected.map((s) => s.value as ConnectionFilter)
               );
             }}
             fullWidth
@@ -326,7 +317,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onAlertStatusFilterChange(selected.map((s) => (s.value ?? s.label) as AlertStatus));
+              onAlertStatusFilterChange(selected.map((s) => s.value as AlertStatus));
             }}
             fullWidth
             compressed
@@ -349,7 +340,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onSloStatusFilterChange(selected.map((s) => (s.value ?? s.label) as SloStatus));
+              onSloStatusFilterChange(selected.map((s) => s.value as SloStatus));
             }}
             fullWidth
             compressed
@@ -373,7 +364,7 @@ export function ServiceMapOptionsPanel({
             })}
             onChange={(selected) => {
               onAnomalySeverityFilterChange(
-                selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
+                selected.map((s) => s.value as ML_ANOMALY_SEVERITY)
               );
             }}
             fullWidth

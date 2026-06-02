@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -136,7 +137,7 @@ export const ANOMALY_SEVERITY_OPTIONS: Array<{ value: ML_ANOMALY_SEVERITY; label
 interface DecoratedOption<V extends string> {
   label: string;
   value: V;
-  append: JSX.Element;
+  append: ReactElement;
   disabled: boolean;
 }
 

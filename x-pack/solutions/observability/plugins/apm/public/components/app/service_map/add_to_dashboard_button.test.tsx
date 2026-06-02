@@ -117,6 +117,29 @@ describe('capturePageFilters', () => {
     expect(result.kuery).toBeUndefined();
   });
 
+  it('escapes backslashes and double quotes inside phrase filter values', () => {
+    mockedReader.mockReturnValue(null);
+    const result = __testOnly__.capturePageFilters({
+      urlKuery: '',
+      urlServiceName: undefined,
+      filterManagerFilters: [phraseFilter('service.name', 'web\\"prod')],
+    });
+    // Backslash first, then quote — exactly two backslashes for the literal `\` and `\"` for the `"`.
+    expect(result.kuery).toBe('service.name: "web\\\\\\"prod"');
+  });
+
+  it('escapes backslashes from Controls API selections too', () => {
+    mockedReader.mockReturnValue({
+      controlSelections: { 'cloud.region': ['us\\east-1'] },
+    });
+    const result = __testOnly__.capturePageFilters({
+      urlKuery: '',
+      urlServiceName: undefined,
+      filterManagerFilters: [],
+    });
+    expect(result.kuery).toBe('cloud.region: "us\\\\east-1"');
+  });
+
   it('combines URL kuery + Controls + pills with AND', () => {
     mockedReader.mockReturnValue({
       controlSelections: { 'cloud.region': ['us-east-1'] },
