@@ -9,12 +9,7 @@
 
 import type { ParsedPart } from '@kbn/content-list-assembly';
 import { filter, type FilterContext } from './part';
-import { SortRenderer } from './sort';
-import { TagFilterRenderer } from './tags';
-import { StarredFilterRenderer } from './starred';
-import { CreatedByFilterRenderer } from './created_by';
 
-// Ensure preset resolve callbacks are registered.
 import './sort/sort';
 import './tags/tag_filter';
 import './starred/starred_filter';
@@ -67,7 +62,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(SortRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('SortRendererSuspended');
     });
 
     it('returns `undefined` for the sort preset when sorting is unavailable.', () => {
@@ -83,7 +80,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(TagFilterRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('TagFilterRendererSuspended');
     });
 
     it('returns `undefined` for the tags preset when tags are unavailable.', () => {
@@ -99,7 +98,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(StarredFilterRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('StarredFilterRendererSuspended');
     });
 
     it('returns `undefined` for the starred preset when starred is unavailable.', () => {
@@ -115,7 +116,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(CreatedByFilterRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('CreatedByFilterRendererSuspended');
     });
 
     it('returns `undefined` for the createdBy preset when user profiles are unavailable.', () => {
