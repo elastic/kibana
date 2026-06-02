@@ -108,6 +108,9 @@ const NO_DATA_RESPONSE = {
   },
 };
 
+// ES BucketHelpers throws this when top_metrics returns null (no docs); the same prefix appears in
+// two other BucketHelpers errors, but only the null-value branch fires for last_value aggs, so the
+// .includes() match below is safe.
 const LAST_VALUE_NO_DATA_ERROR_REASON =
   'buckets_path must reference either a number value or a single value numeric metric aggregation';
 
@@ -296,6 +299,7 @@ export const getData = async (
     body = await esClient.search<undefined, ResponseAggregations>(request);
   } catch (error) {
     if (isLastValueNoDataError(error)) {
+      logger.debug(`Swallowed ES bucket_script error for last_value no-data condition: ${error}`);
       return NO_DATA_RESPONSE;
     }
     throw error;
