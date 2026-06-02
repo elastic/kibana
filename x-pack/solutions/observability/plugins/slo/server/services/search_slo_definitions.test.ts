@@ -36,12 +36,12 @@ function createMockSummaryDocResponse(docs: MockSummaryDocOptions[] = []): {
             _source: {
               ...(doc.name !== undefined || doc.groupBy !== undefined
                 ? {
-                  slo: {
-                    id: doc.id || 'slo-1',
-                    ...(doc.name !== undefined && { name: doc.name }),
-                    ...(doc.groupBy !== undefined && { groupBy: doc.groupBy }),
-                  },
-                }
+                    slo: {
+                      id: doc.id || 'slo-1',
+                      ...(doc.name !== undefined && { name: doc.name }),
+                      ...(doc.groupBy !== undefined && { groupBy: doc.groupBy }),
+                    },
+                  }
                 : {}),
               ...(doc.kibanaUrl && { kibanaUrl: doc.kibanaUrl }),
             },
