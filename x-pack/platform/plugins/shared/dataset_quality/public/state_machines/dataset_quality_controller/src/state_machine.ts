@@ -185,18 +185,6 @@ const createPureDatasetQualityControllerStateMachine = (
       updateFailureStore: getPlaceholderFor(createUpdateFailureStoreActor),
     },
     guards: {
-      hasAuthorizedTypes: ({ event }) => {
-        if (!('output' in event) || typeof event.output !== 'object' || !event.output) {
-          return false;
-        }
-
-        const output = event.output as GetDataStreamsTypesPrivilegesResponse;
-
-        return (
-          'datasetTypesPrivileges' in output &&
-          extractAuthorizedDatasetTypes(output.datasetTypesPrivileges).length > 0
-        );
-      },
       checkIfActionForbidden: ({ event }) => {
         if (!('error' in event) || typeof event.error !== 'object' || event.error === null) {
           return false;
@@ -227,16 +215,10 @@ const createPureDatasetQualityControllerStateMachine = (
       initializing: {
         invoke: {
           src: 'loadDatasetTypesPrivileges',
-          onDone: [
-            {
-              target: 'main',
-              actions: ['storeAuthorizedDatasetTypes'],
-              guard: 'hasAuthorizedTypes',
-            },
-            {
-              target: 'emptyState',
-            },
-          ],
+          onDone: {
+            target: 'main',
+            actions: ['storeAuthorizedDatasetTypes'],
+          },
           onError: {
             target: 'initializationFailed',
             actions: ['notifyFetchDatasetTypesPrivilegesFailed'],
@@ -244,7 +226,6 @@ const createPureDatasetQualityControllerStateMachine = (
         },
       },
       initializationFailed: {},
-      emptyState: {},
       main: {
         type: 'parallel',
         states: {
@@ -555,10 +536,16 @@ export const createDatasetQualityControllerStateMachine = ({
 
         const authorizedDatasetTypes = extractAuthorizedDatasetTypes(output.datasetTypesPrivileges);
 
+        // Wildcard privilege checks (e.g. logs-*-*) return false for roles
+        // using ES negated regexes even when the user can read most indices.
+        // Fall back to all known types so the page still loads.
+        const effectiveTypes =
+          authorizedDatasetTypes.length > 0 ? authorizedDatasetTypes : KNOWN_TYPES;
+
         const filterTypes = context.filters.types as DataStreamType[];
 
         const validTypes = filterTypes.filter(
-          (type) => authorizedDatasetTypes.includes(type) && KNOWN_TYPES.includes(type)
+          (type) => effectiveTypes.includes(type) && KNOWN_TYPES.includes(type)
         );
 
         return {
@@ -566,7 +553,7 @@ export const createDatasetQualityControllerStateMachine = ({
             ...context.filters,
             types: validTypes,
           },
-          authorizedDatasetTypes,
+          authorizedDatasetTypes: effectiveTypes,
         };
       }),
 

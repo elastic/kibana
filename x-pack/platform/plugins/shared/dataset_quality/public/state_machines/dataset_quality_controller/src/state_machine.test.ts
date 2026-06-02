@@ -226,7 +226,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should transition to emptyState when no types are authorized', async () => {
+    it('should transition to main and fallback to all known types when no types are authorized at wildcard level', async () => {
       const { machine } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
           getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
@@ -235,9 +235,13 @@ describe('DatasetQualityControllerStateMachine', () => {
       const actor = createActor(machine);
       actor.start();
 
-      await waitForPredicate(actor, (state) => state.value === 'emptyState');
+      await waitForPredicate(
+        actor,
+        (state) => typeof state.value === 'object' && 'main' in state.value
+      );
 
-      expect(actor.getSnapshot().value).toBe('emptyState');
+      const snapshot = actor.getSnapshot();
+      expect(typeof snapshot.value === 'object' && 'main' in snapshot.value).toBe(true);
 
       actor.stop();
     });
