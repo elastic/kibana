@@ -2787,10 +2787,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.dll_hijack_detection',
+    key: 'windows.advanced.events.image_load.dll_hijack_detection',
     first_supported_version: '9.5',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.dll_hijack_detection',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.dll_hijack_detection',
       {
         defaultMessage:
           'Set to false to disable DLL search order hijacking detection. Default: true.',
