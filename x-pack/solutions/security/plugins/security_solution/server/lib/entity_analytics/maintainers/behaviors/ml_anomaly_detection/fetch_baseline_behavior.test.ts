@@ -386,7 +386,7 @@ describe('fetchBaselineBehavior', () => {
       ) as { range: { '@timestamp': { lte: number; gte: string } } };
       // lte = anomaly.timestamp + defaultBucketSpanMs (3600000)
       expect(timestampRange.range['@timestamp'].lte).toBe(1_000_000 + 3_600_000);
-      expect(timestampRange.range['@timestamp'].gte).toBe('now-90d');
+      expect(timestampRange.range['@timestamp'].gte).toBe('now-30d');
     });
 
     it('returns the original anomaly without enrichment when msearch throws', async () => {

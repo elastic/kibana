@@ -173,7 +173,7 @@ export const getAnomaliesFromDetailsIndex = async ({
       bool: {
         filter: [
           { term: { 'entity.id': entityId } },
-          ...(fromMs != null ? [{ range: { '@timestamp': { gte: fromMs } } }] : []),
+          ...(fromMs != null ? [{ range: { 'anomaly.timestamp': { gte: fromMs } } }] : []),
           ...(jobIds?.length ? [{ terms: { 'anomaly.job_id': jobIds } }] : []),
         ],
       },

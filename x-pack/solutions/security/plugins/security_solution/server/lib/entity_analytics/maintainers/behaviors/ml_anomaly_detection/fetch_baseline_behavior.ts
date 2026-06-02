@@ -253,12 +253,12 @@ const fetchRareBaselineForAnomalies = async ({
                 field: anomaly.byFieldName,
                 size: 3,
                 order: { _count: 'desc' },
-                exclude: anomaly.byFieldValue ? [anomaly.byFieldValue] : [],
+                exclude: anomaly.byFieldValue != null ? [anomaly.byFieldValue] : [],
               },
             },
             anomaly: {
               filter:
-                anomaly.byFieldName && anomaly.byFieldValue
+                anomaly.byFieldName && anomaly.byFieldValue != null
                   ? { term: { [anomaly.byFieldName]: anomaly.byFieldValue } }
                   : { match_none: {} },
             },

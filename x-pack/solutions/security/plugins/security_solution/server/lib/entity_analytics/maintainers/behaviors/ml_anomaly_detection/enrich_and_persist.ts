@@ -83,9 +83,9 @@ export const enrichAndPersistAnomalies = async ({
           over_field_value: anomaly.overFieldValue,
           partition_field_name: anomaly.partitionFieldName,
           partition_field_value: anomaly.partitionFieldValue,
-          ...(anomaly.baselineValues ? { baseline_values: anomaly.baselineValues } : {}),
-          ...(anomaly.anomalousValue ? { anomalous_value: anomaly.anomalousValue } : {}),
-          ...(anomaly.anomalousValueCount
+          ...(anomaly.baselineValues != null ? { baseline_values: anomaly.baselineValues } : {}),
+          ...(anomaly.anomalousValue != null ? { anomalous_value: anomaly.anomalousValue } : {}),
+          ...(anomaly.anomalousValueCount != null
             ? { anomalous_value_count: anomaly.anomalousValueCount }
             : {}),
         },

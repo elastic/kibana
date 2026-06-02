@@ -12,7 +12,7 @@ export const ML_AD_MAINTAINER_TIMEOUT = '10m';
 export const ML_AD_JOB_ENTITY_TYPES = ['user', 'host'] as const;
 
 // Window of anomaly records to inspect each run.
-export const ML_AD_LOOKBACK = '90d';
+export const ML_AD_LOOKBACK = '30d';
 
 // Safety check to prevent infinite loops in maintainer run
 export const MAX_ALLOWED_ITERS = 10000;

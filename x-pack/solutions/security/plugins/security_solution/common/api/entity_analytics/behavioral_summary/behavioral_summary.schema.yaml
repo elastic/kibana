@@ -19,7 +19,7 @@ paths:
             type: string
             minLength: 1
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
