@@ -56,7 +56,7 @@ import { MonitorDetailsPanel } from '../../../common/components/monitor_details_
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -172,7 +172,7 @@ function DetailFlyoutDurationChart({
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
   const dataTypesIndexPatterns = useMemo(
-    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
+    () => (remoteName ? { synthetics: getSyntheticsCcsIndex(remoteName) } : undefined),
     [remoteName]
   );
 

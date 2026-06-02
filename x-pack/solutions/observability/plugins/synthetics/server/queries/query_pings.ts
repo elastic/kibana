@@ -18,6 +18,7 @@ import type {
 } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
 import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -57,16 +58,8 @@ export async function queryPings<F>(
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
-  // For monitors that live on a remote cluster, target
-  // `${remoteName}:synthetics-*` via Cross-Cluster Search. When `remoteName`
-  // is absent we let SyntheticsEsClient use its default (local) heartbeat
-  // indices.
-  const remoteIndex = remoteName
-    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
-    : undefined;
-
   const searchBody = {
-    ...(remoteIndex ? { index: remoteIndex } : {}),
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),

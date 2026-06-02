@@ -24,7 +24,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { useSyntheticsDataView } from '../../../contexts/synthetics_data_view_context';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import type { Ping } from '../../../../../../common/runtime_types';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
@@ -32,9 +32,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(false);
 
   const remoteName = ping.remote?.remoteName;
-  const indexPattern = remoteName
-    ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`
-    : SYNTHETICS_INDEX_PATTERN;
+  const indexPattern = getSyntheticsCcsIndex(remoteName);
 
   const localDataView = useSyntheticsDataView();
   const { dataView: remoteDataView, error: remoteDataViewError } = useRemoteDataView(

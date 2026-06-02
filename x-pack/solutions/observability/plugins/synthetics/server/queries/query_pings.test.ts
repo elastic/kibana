@@ -167,7 +167,7 @@ describe('queryPings', () => {
       },
     };
 
-    it('does not override the index when remoteName is absent', async () => {
+    it('targets the local heartbeat indices when remoteName is absent', async () => {
       (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
@@ -178,7 +178,7 @@ describe('queryPings', () => {
       });
 
       const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
-      expect(searchParams.index).toBeUndefined();
+      expect(searchParams.index).toBe(mockEsClient.heartbeatIndices);
     });
 
     it('prefixes the index with remoteName when present', async () => {

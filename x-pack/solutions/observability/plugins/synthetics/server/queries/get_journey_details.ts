@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
 import { createEsParams } from '../lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
@@ -24,16 +25,10 @@ export const getJourneyDetails = async ({
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
-  // For journeys belonging to a monitor that lives on a remote cluster,
-  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
-  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
-  // its default (local) heartbeat indices.
-  const remoteIndex = remoteName
-    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
-    : undefined;
+  const index = getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices);
 
   const params = createEsParams({
-    ...(remoteIndex ? { index: remoteIndex } : {}),
+    index,
     query: {
       bool: {
         filter: [
@@ -72,7 +67,7 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
-      ...(remoteIndex ? { index: remoteIndex } : {}),
+      index,
       query: {
         bool: {
           must_not: [

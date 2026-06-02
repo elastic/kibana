@@ -6,6 +6,7 @@
  */
 
 import type { SyntheticsEsClient } from '../lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { ScreenshotBlockDoc } from '../../common/runtime_types';
 
 interface ScreenshotBlockResultType {
@@ -28,16 +29,8 @@ export const getJourneyScreenshotBlocks = async ({
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotBlockDoc[]> => {
-  // For screenshot blocks belonging to a monitor that lives on a remote
-  // cluster, target `${remoteName}:synthetics-*` via Cross-Cluster Search.
-  // When `remoteName` is absent we let SyntheticsEsClient.search fall back
-  // to its default (local) heartbeat indices.
-  const remoteIndex = remoteName
-    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
-    : undefined;
-
   const body = {
-    ...(remoteIndex ? { index: remoteIndex } : {}),
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     query: {
       bool: {
         filter: [

@@ -13,7 +13,7 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
@@ -31,9 +31,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { data, loading } = useReduxEsSearch(
     {
-      // For remote monitors the heartbeat docs live on the source cluster, so
-      // query `${remoteName}:synthetics-*` via CCS instead of the local index.
-      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
+      index: getSyntheticsCcsIndex(remoteName),
       size: 0,
       query: {
         bool: {

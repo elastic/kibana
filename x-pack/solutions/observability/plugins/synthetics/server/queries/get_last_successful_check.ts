@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SyntheticsEsClient } from '../lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { Ping } from '../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
@@ -96,16 +97,8 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  // For checks belonging to a monitor that lives on a remote cluster,
-  // target `${remoteName}:synthetics-*` via Cross-Cluster Search. When
-  // `remoteName` is absent we let SyntheticsEsClient.search fall back to
-  // its default (local) heartbeat indices.
-  const remoteIndex = remoteName
-    ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}`
-    : undefined;
-
   const { body: result } = await syntheticsEsClient.search({
-    ...(remoteIndex ? { index: remoteIndex } : {}),
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     ...lastSuccessCheckParams,
   });
 

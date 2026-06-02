@@ -12,7 +12,7 @@ import { useSelectedLocation } from './use_selected_location';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
 import type { Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -26,9 +26,7 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
   const selectedLocation = useSelectedLocation();
 
   const params = createEsQuery({
-    // For remote monitors the heartbeat docs live on the source cluster, so
-    // query `${remoteName}:synthetics-*` via CCS instead of the local index.
-    index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
+    index: getSyntheticsCcsIndex(remoteName),
     size: 0,
     track_total_hits: true,
     query: {

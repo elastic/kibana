@@ -11,6 +11,7 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../common/constants/client_defaults';
+import { getSyntheticsCcsIndex } from '../../../common/get_synthetics_indices';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 export interface MonitorSummaryStats {
@@ -44,10 +45,8 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
       remoteName?: string;
     };
 
-    const index = remoteName ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}` : undefined;
-
     const { body: result } = await syntheticsEsClient.search({
-      ...(index ? { index } : {}),
+      index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
       size: 0,
       query: {
         bool: {
