@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
 import { useRefreshCompositeSloSummaries } from '../../../hooks/use_refresh_composite_slo_summaries';
 import { useFetchCompositeHistoricalSummary } from '../../../hooks/use_fetch_composite_historical_summary';
@@ -28,7 +29,7 @@ type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 export function CompositeSloList() {
   useRefreshCompositeSloSummaries();
-  const { mutateAsync: deleteCompositeSlo } = useDeleteCompositeSlo();
+  const { mutate: deleteCompositeSlo } = useDeleteCompositeSlo();
 
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(25);
@@ -40,20 +41,13 @@ export function CompositeSloList() {
   const [sortDirection, setSortDirection] = useState<CompositeSloSortDirection>('desc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useDebounce(() => setDebouncedSearch(search), 300, [search]);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(0);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
   };
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
 
   const handleTagSelection = (options: EuiSelectableOption[]) => {
     const newTags = options.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
@@ -164,9 +158,15 @@ export function CompositeSloList() {
         <CompositeSloDeleteModal
           name={deleteConfirm.name}
           onCancel={() => setDeleteConfirm(null)}
-          onConfirm={async () => {
-            await deleteCompositeSlo({ id: deleteConfirm.id, name: deleteConfirm.name });
-            setDeleteConfirm(null);
+          onConfirm={() => {
+            deleteCompositeSlo(
+              { id: deleteConfirm.id, name: deleteConfirm.name },
+              {
+                onSettled: () => {
+                  setDeleteConfirm(null);
+                },
+              }
+            );
           }}
         />
       )}
