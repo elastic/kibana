@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -106,6 +107,9 @@ jest.mock('../../run_workflow/ui/workflow_execute_modal', () => ({
 
 jest.mock('../../../shared/ui', () => ({
   getRunTooltipContent: () => 'Run',
+  ManagedWorkflowBadge: ({ dataTestSubj = 'managedWorkflowBadge' }: { dataTestSubj?: string }) => (
+    <span data-test-subj={dataTestSubj}>{'Managed'}</span>
+  ),
   StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
   WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
 }));
@@ -287,6 +291,38 @@ describe('WorkflowList', () => {
       expect(screen.getByText('A workflow for testing')).toBeInTheDocument();
     });
 
+    it('renders the managed badge as the first tag for managed workflows', () => {
+      const workflow = createMockWorkflow({
+        managed: true,
+        definition: {
+          version: '1',
+          name: 'My Test Workflow',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          tags: ['custom', 'second'],
+        },
+      });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      const tagsCell = screen.getByTestId('workflowTags');
+      const managedBadge = within(tagsCell).getByTestId('managedWorkflowBadge');
+      const firstWorkflowTag = within(tagsCell).getByText('custom');
+
+      expect(managedBadge).toHaveTextContent('Managed');
+      expect(managedBadge.compareDocumentPosition(firstWorkflowTag)).toEqual(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
     it('shows "No description" for workflows without description', () => {
       mockUseWorkflows.mockReturnValue({
         data: createMockWorkflowListDto([createMockWorkflow({ description: '' })]),
@@ -302,6 +338,34 @@ describe('WorkflowList', () => {
       renderComponent();
       const toggle = screen.getByTestId('workflowToggleSwitch-wf-1');
       expect(toggle).toBeInTheDocument();
+    });
+
+    it('passes workflow definition when toggling enabled from the list', async () => {
+      const workflow = createMockWorkflow({
+        id: 'wf-toggle',
+        enabled: true,
+      });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
+
+      expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'wf-toggle',
+          workflow: { enabled: false },
+          workflowDefinition: workflow.definition,
+          skipRefetch: true,
+        }),
+        expect.any(Object)
+      );
     });
 
     it('renders multiple workflows', () => {

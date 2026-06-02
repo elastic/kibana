@@ -12,8 +12,7 @@ import type { Paginated } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type { CompositeSLODefinition } from '../../../domain/models';
 import type { CompositeSLORepository } from '../../../services';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 interface FindCompositeSloParams {
   spaceId: string;
@@ -106,7 +105,7 @@ async function findCompositeSlos(
   return { page, perPage, total, results };
 }
 
-export const findCompositeSLORoute = createSloServerRoute({
+export const findCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'GET /api/observability/slo_composites 2023-10-31',
   options: { access: 'public' },
   security: {
@@ -115,9 +114,7 @@ export const findCompositeSLORoute = createSloServerRoute({
     },
   },
   params: findCompositeSLOParamsSchema,
-  handler: async ({ params, logger, request, plugins, getScopedClients }) => {
-    await assertPlatinumLicense(plugins);
-
+  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
     const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
       request,
       logger,

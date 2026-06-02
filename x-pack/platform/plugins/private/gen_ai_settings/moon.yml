@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/agent-builder-browser'
   - '@kbn/zod'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

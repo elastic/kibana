@@ -51,13 +51,9 @@ import { searchSloDefinitionsRoute } from './search_slo_definitions';
 
 interface RouteRepositoryOptions {
   isServerless?: boolean;
-  isCompositeSloEnabled?: boolean;
 }
 
-export const getSloRouteRepository = ({
-  isServerless,
-  isCompositeSloEnabled,
-}: RouteRepositoryOptions = {}) => {
+export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions = {}) => {
   return {
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
@@ -93,14 +89,14 @@ export const getSloRouteRepository = ({
     ...findSLOTemplateTagsRoute,
     ...healthScanRoutes,
     ...searchSloDefinitionsRoute,
-    ...(isCompositeSloEnabled ? createCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? getCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? findCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? updateCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? deleteCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? fetchCompositeHistoricalSummaryRoute : {}),
-    ...(isCompositeSloEnabled ? batchGetCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? getCompositeSLOSuggestionsRoute : {}),
-    ...(isCompositeSloEnabled ? postCompositeSloSummaryRefreshRoute : {}),
+    ...createCompositeSLORoute,
+    ...getCompositeSLORoute,
+    ...findCompositeSLORoute,
+    ...updateCompositeSLORoute,
+    ...deleteCompositeSLORoute,
+    ...fetchCompositeHistoricalSummaryRoute,
+    ...batchGetCompositeSLORoute,
+    ...getCompositeSLOSuggestionsRoute,
+    ...postCompositeSloSummaryRefreshRoute,
   };
 };

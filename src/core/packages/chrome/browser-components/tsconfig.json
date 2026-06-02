@@ -47,5 +47,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/use-observable",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-chrome-layout",
+    "@kbn/app-header",
   ]
 }

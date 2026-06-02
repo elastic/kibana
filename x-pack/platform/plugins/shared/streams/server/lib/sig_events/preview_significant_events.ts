@@ -18,27 +18,15 @@ import {
   extractStatsGroupColumns,
   MS_PER_UNIT,
 } from '@kbn/streams-schema';
+import { getColumnIndex } from '../streams/helpers/esql';
+import {
+  ESQL_UNITS,
+  fillBucketGaps,
+  MAX_FILL_BUCKETS,
+  parseBucketSize,
+} from './helpers/fill_bucket_gaps';
 
 const PREVIEW_STATS_LIMIT = 10_000;
-
-// Short-to-long unit names for the ES|QL AST builder (Builder.expression.literal.timespan).
-// Millisecond conversions live in MS_PER_UNIT (imported from @kbn/streams-schema).
-const ESQL_UNITS: Record<string, string> = {
-  s: 'seconds',
-  m: 'minutes',
-  h: 'hours',
-  d: 'days',
-};
-
-function parseBucketSize(raw: string): { value: number; unit: string } {
-  const match = raw.match(/^(\d+)([smhd])$/);
-  // 60s (1 minute) is the smallest granularity that produces readable sparklines
-  // while remaining efficient. Invalid inputs are caught upstream by the API schema.
-  if (!match) return { value: 60, unit: 's' };
-  const value = parseInt(match[1], 10);
-  if (value < 1) return { value: 60, unit: 's' };
-  return { value, unit: match[2] };
-}
 
 function msToEsqlBucketSize(ms: number): string {
   if (ms >= MS_PER_UNIT.d && ms % MS_PER_UNIT.d === 0) return `${ms / MS_PER_UNIT.d}d`;
@@ -47,21 +35,30 @@ function msToEsqlBucketSize(ms: number): string {
   return `${Math.round(ms / MS_PER_UNIT.s)}s`;
 }
 
-function stripLimitCommand(esql: string): string {
-  let result: string;
+// Replaces any existing `LIMIT N` with the given limit value via AST surgery.
+// Falls back to a regex strip + text append only if parsing fails (malformed
+// user input). Keeps the query AST-based end-to-end alongside the rest of
+// preview composition (see `buildHistogramQuery`).
+function withLimit(esqlQuery: string, limit: number): string {
   try {
-    const { root } = Parser.parse(esql);
+    const { root } = Parser.parse(esqlQuery);
     const commandsWithoutLimit = root.commands.filter(
       (cmd) => !('name' in cmd && cmd.name === 'limit')
-    );
-    if (commandsWithoutLimit.length === root.commands.length) return esql;
-    result = BasicPrettyPrinter.print(
-      Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
+    ) as ESQLCommand[];
+    const limitCommand = Builder.command({
+      name: 'limit',
+      args: [Builder.expression.literal.integer(limit)],
+    });
+    return BasicPrettyPrinter.print(
+      Builder.expression.query([...commandsWithoutLimit, limitCommand])
     );
   } catch {
-    result = esql.replace(/\|\s*LIMIT\s+\d+/gi, '');
+    const stripped = esqlQuery
+      .replace(/\|\s*LIMIT\s+\d+/gi, '')
+      .replace(/\s*\|\s*$/, '')
+      .trim();
+    return `${stripped} | LIMIT ${limit}`;
   }
-  return result.replace(/\s*\|\s*$/, '').trim();
 }
 
 /**
@@ -130,41 +127,6 @@ function buildHistogramQuery(
   commands.push(statsCommand, changePointCommand);
 
   return BasicPrettyPrinter.print(Builder.expression.query(commands));
-}
-
-/**
- * ES|QL BUCKET does not emit empty buckets (unlike date_histogram with
- * extended_bounds). Fill the gaps so the sparkline receives a contiguous series.
- */
-const MAX_FILL_BUCKETS = 10_000;
-
-function fillBucketGaps(
-  occurrences: Array<{ date: string; count: number }>,
-  from: Date,
-  to: Date,
-  bucketSize: string
-): Array<{ date: string; count: number }> {
-  const { value, unit } = parseBucketSize(bucketSize);
-  const msPerUnit = MS_PER_UNIT[unit];
-  if (!msPerUnit) {
-    throw new Error(`Unrecognized bucket unit "${unit}" in bucket size "${bucketSize}"`);
-  }
-  const intervalMs = value * msPerUnit;
-  const existingBuckets = new Map(occurrences.map((o) => [new Date(o.date).getTime(), o.count]));
-
-  const result: Array<{ date: string; count: number }> = [];
-  let current = Math.floor(from.getTime() / intervalMs) * intervalMs;
-  const endMs = to.getTime();
-
-  while (current <= endMs && result.length < MAX_FILL_BUCKETS) {
-    result.push({
-      date: new Date(current).toISOString(),
-      count: existingBuckets.get(current) ?? 0,
-    });
-    current += intervalMs;
-  }
-
-  return result;
 }
 
 export async function previewSignificantEvents(
@@ -238,8 +200,8 @@ async function previewMatchQuery(
     drop_null_columns: true,
   });
 
-  const countIdx = response.columns.findIndex((col) => col.name === 'count');
-  const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
+  const countIdx = getColumnIndex(response, 'count');
+  const bucketIdx = getColumnIndex(response, 'bucket');
 
   if (countIdx === -1 || bucketIdx === -1) {
     return { esql: { query: esqlQuery }, change_points: { type: {} }, occurrences: [] };
@@ -250,15 +212,22 @@ async function previewMatchQuery(
     count: (row[countIdx] as number) ?? 0,
   }));
 
-  const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
-  if (occurrences.length >= MAX_FILL_BUCKETS) {
+  const { value: bsValue, unit: bsUnit } = parseBucketSize(bucketSize);
+  const intervalMs = bsValue * (MS_PER_UNIT[bsUnit] ?? 1000);
+  const { buckets: occurrences, truncated } = fillBucketGaps(
+    sparseOccurrences,
+    from,
+    to,
+    intervalMs
+  );
+  if (truncated) {
     logger?.debug(
       `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
     );
   }
 
-  const typeIdx = response.columns.findIndex((col) => col.name === 'type');
-  const pvalueIdx = response.columns.findIndex((col) => col.name === 'pvalue');
+  const typeIdx = getColumnIndex(response, 'type');
+  const pvalueIdx = getColumnIndex(response, 'pvalue');
   let changePoints: SignificantEventsPreviewResponse['change_points'] = { type: {} };
 
   if (typeIdx >= 0 && pvalueIdx >= 0) {
@@ -310,8 +279,7 @@ async function previewStatsQuery(
   const { esqlQuery, filter, from, to, bucketSize } = params;
   const { scopedClusterClient, logger } = deps;
 
-  const queryWithoutLimit = stripLimitCommand(esqlQuery);
-  const composedQuery = `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`;
+  const composedQuery = withLimit(esqlQuery, PREVIEW_STATS_LIMIT);
 
   logger?.debug(`STATS preview executing composed query: ${composedQuery}`);
 
@@ -360,6 +328,8 @@ async function previewStatsQuery(
     // edges may not align perfectly — fillBucketGaps pads to cover the range.
     const queryBucketMs = extractBucketIntervalMs(esqlQuery);
     const effectiveBucketSize = queryBucketMs ? msToEsqlBucketSize(queryBucketMs) : bucketSize;
+    const { value: effBsValue, unit: effBsUnit } = parseBucketSize(effectiveBucketSize);
+    const effectiveIntervalMs = effBsValue * (MS_PER_UNIT[effBsUnit] ?? 1000);
 
     // For multi-dimensional STATS (GROUP BY entity + bucket), multiple groups
     // firing in the same bucket are summed. The sparkline shows total firing
@@ -373,8 +343,13 @@ async function previewStatsQuery(
       date,
       count,
     }));
-    const occurrences = fillBucketGaps(sparseOccurrences, from, to, effectiveBucketSize);
-    if (occurrences.length >= MAX_FILL_BUCKETS) {
+    const { buckets: occurrences, truncated: occurrencesTruncated } = fillBucketGaps(
+      sparseOccurrences,
+      from,
+      to,
+      effectiveIntervalMs
+    );
+    if (occurrencesTruncated) {
       logger?.debug(
         `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
       );

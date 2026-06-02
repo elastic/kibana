@@ -15,6 +15,7 @@ import type {
   GapReasonType,
 } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -329,7 +330,18 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
+                    changeTracking: {
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                      metadata: {
+                        bulkCount: rules.length,
+                        originalRuleSoId: rule.id,
+                      },
+                    },
                   });
+
+                  if (!shouldDuplicateExceptions) {
+                    return createdRule;
+                  }
 
                   // we try to create exceptions after rule created, and then update rule
                   const exceptions = shouldDuplicateExceptions
@@ -348,6 +360,11 @@ export const performBulkActionRoute = (
                       params: {
                         ...duplicateRuleToCreate.params,
                         exceptionsList: exceptions,
+                      },
+                    },
+                    changeTracking: {
+                      metadata: {
+                        bulkCount: rules.length,
                       },
                     },
                     shouldIncrementRevision: () => false,

@@ -154,12 +154,13 @@ export const createRenderAttachmentRenderer = ({
           data: versionData.data,
           hidden: attachment.hidden,
           origin: attachment.origin,
+          version: versionToUse,
+          versionCount: attachment.versions.length,
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
         screenContext={screenContext}
-        version={versionToUse}
       />
     );
   };

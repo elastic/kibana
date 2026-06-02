@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-server'
   - '@kbn/spaces-plugin'

@@ -15,9 +15,19 @@ import type { FieldFormatsRegistry } from './field_formats_registry';
 /**
  * React converter options
  */
+export interface FieldFormatHighlightTags {
+  preTag: string;
+  postTag: string;
+}
+
+export interface ReactContextTypeHit {
+  highlight?: Record<string, string[]>;
+  inline_highlights?: Record<string, FieldFormatHighlightTags>;
+}
+
 export interface ReactContextTypeOptions {
   field?: { name: string };
-  hit?: { highlight?: Record<string, string[]> };
+  hit?: ReactContextTypeHit;
   skipFormattingInStringifiedJSON?: boolean;
 }
 
