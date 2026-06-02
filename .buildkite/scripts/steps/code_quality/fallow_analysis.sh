@@ -36,7 +36,7 @@ set +e
   --format json \
   --quiet \
   $SAVE_SNAPSHOT_FLAG \
-  > "$FALLOW_JSON" 2>&1
+  > "$FALLOW_JSON"
 set -e
 
 echo "--- Process results"
