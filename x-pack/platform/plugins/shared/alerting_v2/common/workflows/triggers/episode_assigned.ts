@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
-export const EPISODE_ASSIGNED_TRIGGER_ID = 'alertingV2.episodeAssigned' as const;
+export const EPISODE_ASSIGNED_TRIGGER_ID = 'alerting.episodeAssigned' as const;
 
 export const episodeAssignedPayloadSchema = z
   .object({
