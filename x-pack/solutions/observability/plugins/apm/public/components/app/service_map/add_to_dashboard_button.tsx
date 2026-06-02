@@ -15,13 +15,13 @@ import { getPhraseFilterValue, isPhraseFilter, isPhrasesFilter } from '@kbn/es-q
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { encode as encodeRison } from '@kbn/rison';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../embeddable/service_map/constants';
 import type { ServiceMapEmbeddableState } from '../../../../server/lib/embeddables/service_map_embeddable_schema';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceMapOrientation } from './service_map_options_panel';
 import type { ServiceMapViewFilters } from './apply_service_map_visibility';
-import { encode as encodeRison } from '@kbn/rison';
 import { readInitialAppStateFromRawUrl } from './use_filter_url_sync';
 
 interface AddToDashboardButtonProps {
