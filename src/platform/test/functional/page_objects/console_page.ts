@@ -663,7 +663,6 @@ export class ConsolePageObject extends FtrService {
   public async isOutputFilterButtonActive() {
     const button = await this.testSubjects.find('consoleOutputFilterButton');
     const wrapper = await button.findByXpath('..');
-    const dot = await wrapper.findAllByClassName('euiButtonEmpty__text');
     // The dot indicator is a sibling span inside the wrapper div
     const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
     return children.length > 0;

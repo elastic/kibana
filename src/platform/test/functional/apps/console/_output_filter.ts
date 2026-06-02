@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Clear the input
-      const input = await PageObjects.console.typeInFilterInput('');
+      await PageObjects.console.typeInFilterInput('');
       await PageObjects.console.submitFilter();
 
       await retry.waitFor('output to be restored', async () => {
