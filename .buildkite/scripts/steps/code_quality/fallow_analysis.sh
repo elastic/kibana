@@ -136,7 +136,7 @@ done
 
 echo "--- Post Buildkite annotation"
 
-ANNOTATION="**Code Quality** · dead code · complexity\n\n"
+ANNOTATION="**Code Quality**\n\n"
 for owner in "${FALLOW_OWNERS[@]}"; do
   count=$(extract_owner_count "$FALLOW_OUTPUT" "$owner")
   health_header=$(extract_owner_health_header "$FALLOW_OUTPUT" "$owner")
