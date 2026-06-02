@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: "visualize" geo fields smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const { common, discover, header, maps, unifiedFieldList } = getPageObjects([
