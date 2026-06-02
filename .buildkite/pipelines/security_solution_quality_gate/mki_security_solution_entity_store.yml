@@ -16,8 +16,3 @@ steps:
 
   - command: "cat .buildkite/pipelines/security_solution_quality_gate/mki_quality_gate/mki_quality_gate_entity_store.yml | buildkite-agent pipeline upload"
     label: 'Upload Serverless Release Entity Store pipeline'
-    if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-
-  - command: "cat .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_entity_store.yml | buildkite-agent pipeline upload"
-    label: 'Upload Serverless Periodic Entity Store Pipeline'
-    if: "build.env('KIBANA_MKI_QUALITY_GATE') != '1'"

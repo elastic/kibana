@@ -134,8 +134,26 @@ export const cli = () => {
         );
         log.info(`Wrote cloud_mki.json to ${SCOUT_SERVERS_ROOT}`);
 
+        const rawEnv = process.env.ENVIRONMENT ?? '';
+        const TARGET_ENV: 'qa' | 'staging' | 'prod' = (() => {
+          switch (rawEnv) {
+            case 'qa':
+              return 'qa';
+            case 'staging':
+              return 'staging';
+            case 'production-canary':
+            case 'production-noncanary':
+              return 'prod';
+            default:
+              return 'qa';
+          }
+        })();
+        log.info(
+          `Resolved quality-gate target env: ${TARGET_ENV} (from ENVIRONMENT=${rawEnv || '<unset>'})`
+        );
+
         const pwBin = path.resolve(REPO_ROOT, 'node_modules', '.bin', 'playwright');
-        const command = `${pwBin} test --config=${PW_CONFIG_PATH} --grep="@quality_gate" --project=mki`;
+        const command = `${pwBin} test --config=${PW_CONFIG_PATH} --grep="@quality_gate_${TARGET_ENV}" --project=mki`;
 
         const envVars: NodeJS.ProcessEnv = {
           ...process.env,
