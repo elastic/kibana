@@ -171,6 +171,7 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import {
   getVersionSpecificPolicies,
@@ -203,6 +204,10 @@ export async function getAgentPolicySavedObjectType() {
     ? AGENT_POLICY_SAVED_OBJECT_TYPE
     : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
 }
+
+// Above this number of agent policies, `_bumpPoliciesOrScheduleAsync` offloads the revision bump to a
+// background Task Manager task instead of blocking the request thread with the bulk Saved Objects updates.
+const BUMP_AGENT_POLICIES_ASYNC_THRESHOLD = 100;
 
 class AgentPolicyService {
   protected getLogger(...childContextPaths: string[]): Logger {
@@ -1452,6 +1457,37 @@ class AgentPolicyService {
     }
   }
 
+  // Bumps the given policies inline, or offloads to a Task Manager task above the threshold so
+  // the bulk Saved Objects updates don't block the request thread. The task re-fetches by id and
+  // bumps synchronously via `bumpAgentPoliciesByIds`.
+  private async _bumpPoliciesOrScheduleAsync(
+    internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
+    savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    if (savedObjectsResults.length <= BUMP_AGENT_POLICIES_ASYNC_THRESHOLD) {
+      return this._bumpPolicies(
+        internalSoClientWithoutSpaceExtension,
+        savedObjectsResults,
+        options
+      );
+    }
+
+    this.getLogger('_bumpPoliciesOrScheduleAsync').debug(
+      `Scheduling background task to bump revision of ${savedObjectsResults.length} agent policies`
+    );
+
+    await scheduleBumpAgentPoliciesByIdTask(
+      appContextService.getTaskManagerStart()!,
+      savedObjectsResults.map((policy) => ({
+        id: policy.id,
+        spaceId: getSpaceForAgentPolicySO(policy),
+      })),
+      options?.user
+    );
+    return { saved_objects: [] };
+  }
+
   private async _bumpPolicies(
     internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
     savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
@@ -1574,7 +1610,7 @@ class AgentPolicyService {
         }))
       );
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       [
         ...agentPoliciesUsingOutput.saved_objects,
@@ -2238,7 +2274,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options
@@ -2269,7 +2305,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options
