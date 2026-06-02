@@ -11,20 +11,15 @@ import {
   compositeTargetSchema,
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
-  compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
   compositeSloDefinitionSchema,
-  COMPOSITE_SLO_MIN_MEMBERS,
-  COMPOSITE_SLO_MAX_MEMBERS,
 } from '../../../schema/composite_slo';
 
 const createCompositeSLOBodySchema = z.object({
   name: z.string(),
   description: z.string(),
-  members: z
-    .array(compositeSloMemberSchema)
-    .min(COMPOSITE_SLO_MIN_MEMBERS)
-    .max(COMPOSITE_SLO_MAX_MEMBERS),
+  members: compositeSloMembersSchema,
   compositeMethod: compositeMethodSchema,
   timeWindow: compositeRollingTimeWindowSchema,
   budgetingMethod: compositeOccurrencesBudgetingMethodSchema,

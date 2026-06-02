@@ -36,6 +36,18 @@ const compositeSloMemberSchema = z.object({
   instanceId: z.string().optional(),
 });
 
+const compositeSloMembersSchema = z
+  .array(compositeSloMemberSchema)
+  .min(COMPOSITE_SLO_MIN_MEMBERS)
+  .max(COMPOSITE_SLO_MAX_MEMBERS)
+  .refine(
+    (members) => {
+      const keys = members.map(({ sloId, instanceId }) => `${sloId}:${instanceId ?? ''}`);
+      return new Set(keys).size === keys.length;
+    },
+    { message: 'Composite SLO members must be unique by sloId and instanceId' }
+  );
+
 const compositeMethodSchema = z.literal('weightedAverage');
 
 const compositeErrorBudgetSchema = z.object({
@@ -117,6 +129,7 @@ export {
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
   compositeErrorBudgetSchema,
   compositeStatusSchema,
