@@ -1,11 +1,11 @@
 version: "1"
-name: ".sigevents-discovery"
+name: ".significant-events-discovery"
 description: "Correlates unhandled detections into discoveries using an investigator agent and propagates rule-level resolutions."
 enabled: true
 settings:
   timeout: "20m"
   concurrency:
-    key: sigevents-discovery
+    key: significant-events-discovery
     strategy: drop
     max: 1
 tags:
@@ -444,7 +444,7 @@ steps:
     # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
     # supports template rendering for config fields.
     type: ai.agent
-    agent-id: "platform.streams.sigevents.discovery.investigator"
+    agent-id: "platform.streams.significant-events.discovery.investigator"
     connector-id: ".openai-gpt-5.2-chat_completion"
     create-conversation: true
     with:
@@ -610,9 +610,6 @@ steps:
 
   - name: snapshot_discoveries
     type: data.set
-    if: >-
-      ${{ steps.run_investigator_agent.error == null
-      and steps.run_investigator_agent.output.structured_output.discoveries != null }}
     with:
       discoveries: "${{ steps.run_investigator_agent.output.structured_output.discoveries }}"
       conversation_id: "{{ steps.run_investigator_agent.output.conversation_id }}"
@@ -807,9 +804,6 @@ steps:
 
       - name: compute_occurrence
         type: data.set
-        if: >-
-          ${{ steps.compute_create_gate.output.needs_new_discovery
-          and steps.compute_discovery_id.output.is_not_group }}
         with:
           value: "{% if steps.compute_active_event_for_slug.output.has_active_event or steps.get_older_active_same_slug.output.hits.total.value > 0 or steps.get_last_cleared_for_slug.output.hits.total.value > 0 %}recurring{% else %}first{% endif %}"
 

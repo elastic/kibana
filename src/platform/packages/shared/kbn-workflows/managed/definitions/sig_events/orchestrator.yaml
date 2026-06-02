@@ -1,5 +1,5 @@
 version: "1"
-name: ".sigevents-orchestrator"
+name: ".significant-events-orchestrator"
 description: "Sequences detection, discovery, and triage. Each workflow handles its own idle-skip logic."
 enabled: true
 tags:
@@ -10,7 +10,7 @@ tags:
 settings:
   timeout: "40m"
   concurrency:
-    key: "sigevents-orchestrator"
+    key: "significant-events-orchestrator"
     strategy: drop
     max: 1
   on-failure:
@@ -23,14 +23,14 @@ steps:
   - name: detect
     type: workflow.execute
     with:
-      workflow-id: "system-sigevents-detection"
+      workflow-id: "system-significant-events-detection"
 
   - name: discover
     type: workflow.execute
     with:
-      workflow-id: "system-sigevents-discovery"
+      workflow-id: "system-significant-events-discovery"
 
   - name: triage
     type: workflow.execute
     with:
-      workflow-id: "system-sigevents-triage"
+      workflow-id: "system-significant-events-triage"

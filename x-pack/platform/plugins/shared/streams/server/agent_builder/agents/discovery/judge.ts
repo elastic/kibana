@@ -10,7 +10,7 @@ import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-bui
 import instructions from './instructions/judge.md.text';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
 
-export const SIGEVENTS_JUDGE_AGENT_ID = 'platform.streams.sigevents.discovery.judge';
+export const SIGEVENTS_JUDGE_AGENT_ID = 'platform.streams.significant-events.discovery.judge';
 
 export const sigEventsJudgeAgent = {
   id: SIGEVENTS_JUDGE_AGENT_ID,

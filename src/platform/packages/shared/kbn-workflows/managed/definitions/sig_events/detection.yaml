@@ -1,5 +1,5 @@
 version: "1"
-name: ".sigevents-detection"
+name: ".significant-events-detection"
 description: "Detects statistically significant changes in alert firing patterns per rule using the Elasticsearch change_point aggregation."
 enabled: true
 tags:
@@ -10,7 +10,7 @@ tags:
 settings:
   timeout: "10m"
   concurrency:
-    key: sigevents-detection
+    key: significant-events-detection
     strategy: drop
     max: 1
 triggers:
@@ -201,10 +201,13 @@ steps:
           continue: true
 
       - name: compute_stale_candidate
-        if: "${{ foreach.item._source.kind == consts.KIND_DETECTION }}"
         type: data.set
         with:
-          is_not_fresh: "${{ steps.check_doc_is_fresh.error != null or steps.check_doc_is_fresh.output.count < 1 }}"
+          is_not_fresh: >-
+            ${{ foreach.item._source.kind == consts.KIND_DETECTION
+            and steps.check_doc_is_fresh.error != null
+            or foreach.item._source.kind == consts.KIND_DETECTION
+            and steps.check_doc_is_fresh.output.count < 1 }}
 
       - name: check_recent_alerts_for_stale
         if: "${{ foreach.item._source.kind == consts.KIND_DETECTION and steps.compute_stale_candidate.output.is_not_fresh }}"

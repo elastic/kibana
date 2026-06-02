@@ -10,7 +10,8 @@ import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-bui
 import instructions from './instructions/investigator.md.text';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
 
-export const SIGEVENTS_INVESTIGATOR_AGENT_ID = 'platform.streams.sigevents.discovery.investigator';
+export const SIGEVENTS_INVESTIGATOR_AGENT_ID =
+  'platform.streams.significant-events.discovery.investigator';
 
 export const sigEventsInvestigatorAgent = {
   id: SIGEVENTS_INVESTIGATOR_AGENT_ID,

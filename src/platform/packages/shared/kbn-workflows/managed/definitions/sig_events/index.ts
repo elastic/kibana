@@ -13,10 +13,10 @@ import ORCHESTRATOR_YAML from './orchestrator.yaml';
 import TRIAGE_YAML from './triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const SIGEVENTS_DETECTION_WORKFLOW_ID = 'system-sigevents-detection';
-export const SIGEVENTS_DISCOVERY_WORKFLOW_ID = 'system-sigevents-discovery';
-export const SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-sigevents-orchestrator';
-export const SIGEVENTS_TRIAGE_WORKFLOW_ID = 'system-sigevents-triage';
+export const SIGEVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
+export const SIGEVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
+export const SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
+export const SIGEVENTS_TRIAGE_WORKFLOW_ID = 'system-significant-events-triage';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.

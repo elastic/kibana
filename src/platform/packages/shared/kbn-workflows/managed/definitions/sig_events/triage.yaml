@@ -1,5 +1,5 @@
 version: "1"
-name: ".sigevents-triage"
+name: ".significant-events-triage"
 description: "Analyses unreviewed discoveries with a judge agent and creates significant events."
 enabled: true
 tags:
@@ -10,7 +10,7 @@ tags:
 settings:
   timeout: "30m"
   concurrency:
-    key: sigevents-triage
+    key: significant-events-triage
     strategy: drop
     max: 1
 triggers:
@@ -837,7 +837,7 @@ steps:
     # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
     # supports template rendering for config fields.
     type: ai.agent
-    agent-id: "platform.streams.sigevents.discovery.judge"
+    agent-id: "platform.streams.significant-events.discovery.judge"
     connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
     create-conversation: true
     with:
