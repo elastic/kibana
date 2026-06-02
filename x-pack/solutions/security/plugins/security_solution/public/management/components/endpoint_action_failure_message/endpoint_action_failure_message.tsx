@@ -62,7 +62,7 @@ const getAgentErrors = (action: MaybeImmutable<ActionDetails>, agentId?: string)
       const agentErrorInfo: AgentErrorInfo = {
         name: '',
         errors: [],
-        wasCanceled: agentState.wasCanceled ?? action.wasCanceled,
+        wasCanceled: agentState?.wasCanceled ?? action.wasCanceled,
         cancelType: endpointAgentOutput?.content?.canceled_by || '',
         cancelActionId: endpointAgentOutput?.content?.canceled_id || '',
       };

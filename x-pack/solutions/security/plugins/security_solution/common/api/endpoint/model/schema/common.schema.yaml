@@ -126,6 +126,7 @@ components:
         - failed
         - pending
         - successful
+        - canceled
 
     Statuses:
       type: array
@@ -133,7 +134,7 @@ components:
       items:
         $ref: '#/components/schemas/Status'
       minLength: 1
-      maxLength: 3
+      maxLength: 4
 
     UserIds:
       oneOf:
