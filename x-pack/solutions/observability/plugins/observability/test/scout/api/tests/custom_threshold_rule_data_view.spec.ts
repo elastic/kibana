@@ -8,10 +8,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import type { ApiClientFixture, RequestAuthFixture } from '@kbn/scout-oblt';
+import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { apiTest, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
+import { getAdminHeaders, type RuleResponse } from '../fixtures/helpers';
 
 /**
  * Ported from FTR
@@ -24,12 +25,6 @@ import { Aggregators } from '../../../../common/custom_threshold_rule/types';
  */
 
 const DATA_VIEW_ID = 'data-view-id';
-const KIBANA_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' } as const;
-
-interface RuleResponse {
-  id: string;
-  params: { noDataBehavior?: string };
-}
 
 const buildCriteria = () => [
   {
@@ -40,13 +35,6 @@ const buildCriteria = () => [
     metrics: [{ name: 'A', field: 'span.self_time.sum.us', aggType: Aggregators.AVERAGE }],
   },
 ];
-
-const getAdminHeaders = async (
-  requestAuth: RequestAuthFixture
-): Promise<Record<string, string>> => {
-  const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-  return { ...KIBANA_HEADERS, ...apiKeyHeader };
-};
 
 const createCustomThresholdRule = async (
   apiClient: ApiClientFixture,

@@ -7,7 +7,7 @@
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InfraRuleType } from '@kbn/rule-data-utils';
-import type { ApiClientFixture, RequestAuthFixture } from '@kbn/scout-oblt';
+import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { apiTest, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
@@ -15,6 +15,7 @@ import {
   installMetricThresholdDataForge,
   removeMetricThresholdDataForge,
 } from '../fixtures/data_forge';
+import { getAdminHeaders, type RuleResponse } from '../fixtures/helpers';
 import { pollUntilTrue } from '../fixtures/poll';
 
 /**
@@ -36,12 +37,6 @@ import { pollUntilTrue } from '../fixtures/poll';
 const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
 const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 const AVG_AGG_TYPE = 'avg'; // Aggregators.AVERAGE from @kbn/infra-plugin
-const KIBANA_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' } as const;
-
-interface RuleResponse {
-  id: string;
-  params: { noDataBehavior?: string };
-}
 
 const baseCriteria = [
   {
@@ -53,13 +48,6 @@ const baseCriteria = [
     metric: 'system.cpu.user.pct',
   },
 ];
-
-const getAdminHeaders = async (
-  requestAuth: RequestAuthFixture
-): Promise<Record<string, string>> => {
-  const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-  return { ...KIBANA_HEADERS, ...apiKeyHeader };
-};
 
 const createMetricThresholdRule = async (
   apiClient: ApiClientFixture,
@@ -162,6 +150,25 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
       ],
     });
     ruleId = rule.id;
+
+    // Resolve the fired alert's uuid up front so individual tests don't depend
+    // on each other's execution order for it. If a test that needs `alertId`
+    // ran before the one that produced it, the value would be `undefined`.
+    await pollUntilTrue(
+      async () => {
+        const resp = await esClient.search<Record<string, unknown>>({
+          index: METRICS_ALERTS_INDEX,
+          query: { bool: { filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }] } },
+          ignore_unavailable: true,
+        });
+        if (resp.hits.hits.length === 0) {
+          return false;
+        }
+        alertId = resp.hits.hits[0]._source?.['kibana.alert.uuid'] as string;
+        return true;
+      },
+      { timeoutMs: 120_000, intervalMs: 3_000, label: 'metric threshold alert uuid' }
+    );
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
@@ -188,7 +195,11 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
     await esClient
       .deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'infrastructure' } },
+        // Scope to this rule only (event-log docs carry `rule.id`, not
+        // `kibana.alert.rule.uuid`); a consumer-wide delete would wipe other
+        // infrastructure rules' event log on a shared parallel-CI cluster.
+        query: { term: { 'rule.id': ruleId } },
+        conflicts: 'proceed',
         ignore_unavailable: true,
       })
       .catch(() => undefined);
@@ -225,8 +236,6 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
       },
       { timeoutMs: 120_000, intervalMs: 3_000, label: 'metric threshold alert document' }
     );
-
-    alertId = source['kibana.alert.uuid'] as string;
 
     expect(source).toMatchObject({
       'kibana.alert.rule.category': 'Metric threshold',

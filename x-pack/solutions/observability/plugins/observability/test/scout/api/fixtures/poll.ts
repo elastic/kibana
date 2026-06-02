@@ -17,14 +17,20 @@ const sleep = (ms: number): Promise<void> =>
  */
 export async function pollUntilTrue(
   fn: () => Promise<boolean>,
-  options: { timeoutMs: number; intervalMs: number; label?: string }
+  options: { timeoutMs: number; intervalMs: number; label: string }
 ): Promise<void> {
   const deadline = Date.now() + options.timeoutMs;
   while (Date.now() < deadline) {
-    if (await fn()) {
-      return;
+    try {
+      if (await fn()) {
+        return;
+      }
+    } catch (e) {
+      // Surface the polling context: a raw ES 4xx / connection error otherwise
+      // propagates with no hint of which wait failed.
+      throw new Error(`[${options.label}] ${(e as Error).message}`);
     }
     await sleep(options.intervalMs);
   }
-  throw new Error(options.label ?? `pollUntilTrue timed out after ${options.timeoutMs}ms`);
+  throw new Error(`[${options.label}] timed out after ${options.timeoutMs}ms`);
 }
