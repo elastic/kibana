@@ -34,24 +34,37 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
     [history]
   );
 
+  const initialState = readEpisodesListAppStateFromUrlStorage(urlStateStorage);
+
   const [filterState, setFilterStateInternal] = useState<EpisodesFilterState>(
-    () => readEpisodesListAppStateFromUrlStorage(urlStateStorage).filterState
+    () => initialState.filterState
   );
+  const [histogramBreakdownField, setHistogramBreakdownFieldInternal] = useState<
+    string | undefined
+  >(() => initialState.histogramBreakdownField);
 
   const filterRef = useRef(filterState);
   filterRef.current = filterState;
+  const histogramBreakdownRef = useRef(histogramBreakdownField);
+  histogramBreakdownRef.current = histogramBreakdownField;
 
   useEffect(() => {
     /**
      * useState above only reads the URL on mount and filter/time updates from the user go through
-     * setFilterState / handleTimeChange.
+     * setFilterState / handleTimeChange / setHistogramBreakdownField.
      *
      * When `location.search` changes without those (e.g. browser Back/Forward), we must re-apply
      * the state here or the UI will diverge from the address bar.
      **/
-    const { filterState: fromUrl, timeRange: urlTime } =
-      readEpisodesListAppStateFromUrlStorage(urlStateStorage);
+    const {
+      filterState: fromUrl,
+      timeRange: urlTime,
+      histogramBreakdownField: histBreakdownFromUrl,
+    } = readEpisodesListAppStateFromUrlStorage(urlStateStorage);
     setFilterStateInternal((prev) => (deepEqual(prev, fromUrl) ? prev : fromUrl));
+    setHistogramBreakdownFieldInternal((prev) =>
+      prev === histBreakdownFromUrl ? prev : histBreakdownFromUrl
+    );
     if (urlTime) {
       timefilter.setTime(urlTime);
     }
@@ -65,7 +78,12 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
             ? (update as (p: EpisodesFilterState) => EpisodesFilterState)(prev)
             : update;
         const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
-        void writeEpisodesListAppStateToUrlStorage(urlStateStorage, next, tr);
+        void writeEpisodesListAppStateToUrlStorage(
+          urlStateStorage,
+          next,
+          tr,
+          histogramBreakdownRef.current
+        );
         return next;
       });
     },
@@ -75,9 +93,23 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
   const handleTimeChange = useCallback(
     (range: TimeRange) => {
       setTimeOnFilter(range);
-      void writeEpisodesListAppStateToUrlStorage(urlStateStorage, filterRef.current, range);
+      void writeEpisodesListAppStateToUrlStorage(
+        urlStateStorage,
+        filterRef.current,
+        range,
+        histogramBreakdownRef.current
+      );
     },
     [setTimeOnFilter, urlStateStorage]
+  );
+
+  const setHistogramBreakdownField = useCallback(
+    (field: string | undefined) => {
+      setHistogramBreakdownFieldInternal(field);
+      const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
+      void writeEpisodesListAppStateToUrlStorage(urlStateStorage, filterRef.current, tr, field);
+    },
+    [urlStateStorage, timefilter]
   );
 
   return {
@@ -85,5 +117,7 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
     setFilterState,
     timeRange,
     handleTimeChange,
+    histogramBreakdownField,
+    setHistogramBreakdownField,
   };
 }

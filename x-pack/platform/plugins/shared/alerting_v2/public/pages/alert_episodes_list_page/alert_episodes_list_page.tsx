@@ -50,6 +50,7 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -116,8 +117,14 @@ export const AlertEpisodesListPage = () => {
 
   useBreadcrumbs('episodes_list');
 
-  const { filterState, setFilterState, timeRange, handleTimeChange } =
-    useEpisodesListUrlState(timefilter);
+  const {
+    filterState,
+    setFilterState,
+    timeRange,
+    handleTimeChange,
+    histogramBreakdownField,
+    setHistogramBreakdownField,
+  } = useEpisodesListUrlState(timefilter);
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -343,7 +350,17 @@ export const AlertEpisodesListPage = () => {
             isLoading={isLoading}
             services={services}
           />
-          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesHistogram
+            services={services}
+            dataView={dataView}
+            filterState={filterState}
+            timeRange={timeRange}
+            onTimeRangeChange={handleTimeChange}
+            breakdownField={histogramBreakdownField}
+            onBreakdownFieldChange={setHistogramBreakdownField}
+          />
         </EuiFlexItem>
         <EuiFlexItem
           grow

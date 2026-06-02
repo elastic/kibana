@@ -29,7 +29,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
-import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import {
+  getRunTooltipContent,
+  ManagedWorkflowBadge,
+  StatusBadge,
+  WorkflowStatus,
+} from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -171,7 +176,7 @@ export const WorkflowListTable = ({
         }),
         width: '18%',
         render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowTagsCell tags={item.definition?.tags} />
+          <WorkflowTagsCell tags={item.definition?.tags} isManaged={item.managed === true} />
         ),
       },
       {
@@ -324,15 +329,20 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onExportWorkflow(item),
           },
           {
-            enabled: () => canDeleteWorkflow,
+            enabled: (item) => canDeleteWorkflow && item.managed !== true,
             type: 'icon',
             color: 'danger',
             name: i18n.translate('workflows.workflowList.delete', { defaultMessage: 'Delete' }),
             'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
-            description: i18n.translate('workflows.workflowList.delete', {
-              defaultMessage: 'Delete workflow',
-            }),
+            description: (item: WorkflowListItemDto) =>
+              item.managed === true
+                ? i18n.translate('workflows.workflowList.deleteManagedDisabled', {
+                    defaultMessage: 'Managed workflows cannot be deleted',
+                  })
+                : i18n.translate('workflows.workflowList.deleteDescription', {
+                    defaultMessage: 'Delete workflow',
+                  }),
             onClick: (item: WorkflowListItemDto) => onDeleteWorkflow(item),
           },
         ],
@@ -416,15 +426,25 @@ const overflowPopoverStyle = css`
   overflow: auto;
 `;
 
-const WorkflowTagsCell = ({ tags }: { tags: readonly string[] | undefined }) => {
+const WorkflowTagsCell = ({
+  tags,
+  isManaged,
+}: {
+  tags: readonly string[] | undefined;
+  isManaged: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  if (!tags || tags.length === 0) return null;
+  if (!isManaged && (!tags || tags.length === 0)) return null;
 
-  const visible = tags.slice(0, MAX_VISIBLE_TAGS);
-  const hidden = tags.slice(MAX_VISIBLE_TAGS);
+  const workflowTags = tags ?? [];
+  const visibleWorkflowTags = workflowTags.slice(
+    0,
+    isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
+  );
+  const hidden = workflowTags.slice(visibleWorkflowTags.length);
 
   return (
     <EuiFlexGroup
@@ -434,7 +454,12 @@ const WorkflowTagsCell = ({ tags }: { tags: readonly string[] | undefined }) => 
       css={tagsRowStyle}
       data-test-subj="workflowTags"
     >
-      {visible.map((tag) => (
+      {isManaged ? (
+        <EuiFlexItem grow={false} css={visibleTagStyle}>
+          <ManagedWorkflowBadge />
+        </EuiFlexItem>
+      ) : null}
+      {visibleWorkflowTags.map((tag) => (
         <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
           <EuiBadge color="hollow" title={tag}>
             {tag}
