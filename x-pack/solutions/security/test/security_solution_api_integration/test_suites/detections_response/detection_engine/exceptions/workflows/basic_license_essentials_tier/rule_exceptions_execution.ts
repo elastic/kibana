@@ -767,6 +767,10 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: [GEO_LAT_LON],
               ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
               index: [SYNTHETIC_INDEX],
+              // geo_point is serialized as {lat, lon} object in the list index; the
+              // waitForListItem term query uses the raw "lat,lon" string which never
+              // matches the stored object. Import uses refresh:wait_for so skip the poll.
+              testValues: [],
             });
           });
 
@@ -777,6 +781,10 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: [GEO_WKT],
               ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
               index: [SYNTHETIC_INDEX],
+              // WKT values contain spaces; waitForListItem does not URL-encode the value
+              // param, causing malformed requests. Import uses refresh:wait_for so data
+              // is already searchable when the POST returns — skip the polling step.
+              testValues: [],
             });
           });
 
@@ -787,6 +795,8 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: [CARTESIAN_WKT],
               ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
               index: [SYNTHETIC_INDEX],
+              // Same WKT space issue as geo_shape above.
+              testValues: [],
             });
           });
 
@@ -797,6 +807,10 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: ['100-100'],
               ruleQuery: `source.port: 100`,
               index: [SYNTHETIC_INDEX],
+              // Range types are serialized as {gte, lte} objects in the list index;
+              // the waitForListItem term query uses the raw dash-separated string which
+              // never matches. Import uses refresh:wait_for so skip the poll.
+              testValues: [],
             });
           });
 
@@ -807,6 +821,8 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: ['99-101'],
               ruleQuery: `source.port: 100`,
               index: [SYNTHETIC_INDEX],
+              // Same {gte, lte} object mismatch as integer_range above.
+              testValues: [],
             });
           });
 
@@ -817,6 +833,8 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: ['100-100'],
               ruleQuery: `source.port: 100`,
               index: [SYNTHETIC_INDEX],
+              // Same {gte, lte} object mismatch as integer_range above.
+              testValues: [],
             });
           });
 
@@ -827,6 +845,8 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: ['99-101'],
               ruleQuery: `source.port: 100`,
               index: [SYNTHETIC_INDEX],
+              // Same {gte, lte} object mismatch as integer_range above.
+              testValues: [],
             });
           });
 
@@ -837,6 +857,9 @@ export default ({ getService }: FtrProviderContext) => {
               listLines: ['2019-01-01T00:00:00.000Z,2021-01-01T00:00:00.000Z'],
               ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
               index: [SYNTHETIC_INDEX],
+              // date_range is serialized as {gte, lte} object; also the comma-separated
+              // string is not URL-safe in waitForListItem. Import uses refresh:wait_for.
+              testValues: [],
             });
           });
 
