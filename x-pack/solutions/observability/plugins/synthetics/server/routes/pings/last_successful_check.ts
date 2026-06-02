@@ -22,7 +22,7 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
       stepIndex: schema.number(),
       timestamp: schema.string(),
       location: schema.maybe(schema.string()),
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {

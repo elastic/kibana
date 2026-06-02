@@ -16,7 +16,7 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
   validate: {
     body: schema.object({
       hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   writeAccess: false,

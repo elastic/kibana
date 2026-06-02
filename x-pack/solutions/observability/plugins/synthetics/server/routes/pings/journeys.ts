@@ -20,7 +20,7 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
       checkGroup: schema.string(),
     }),
     query: schema.object({
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async ({

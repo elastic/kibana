@@ -19,7 +19,7 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
       stepIndex: schema.number(),
     }),
     query: schema.object({
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {
