@@ -1,9 +1,5 @@
 name: Index Dependency Usage
-
 on:
-  push:
-    branches:
-      - on-week-deps
   schedule:
     # Runs daily at 02:00 UTC
     - cron: '0 2 * * *'
