@@ -64,7 +64,7 @@ export class SamlAuthManager {
   private guardServerless(methodName: string): void {
     if (this.isServerless) {
       throw new Error(
-        `${methodName} is not supported on Serverless deployments. ` +
+        `${methodName} is not supported on Serverless projects. ` +
           `Use a native realm role (e.g. loginAs() / getApiKey()) or define a custom role ` +
           `with explicit privileges (loginWithCustomRole() / getApiKeyForCustomRole()) instead.`
       );
