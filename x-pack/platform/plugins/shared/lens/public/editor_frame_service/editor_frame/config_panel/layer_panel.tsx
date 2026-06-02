@@ -24,6 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensDatasourceId, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
