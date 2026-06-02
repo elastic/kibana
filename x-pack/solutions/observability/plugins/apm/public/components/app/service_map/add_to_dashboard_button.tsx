@@ -21,6 +21,7 @@ import type { ServiceMapEmbeddableState } from '../../../../server/lib/embeddabl
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceMapOrientation } from './service_map_options_panel';
 import type { ServiceMapViewFilters } from './apply_service_map_visibility';
+import { encode as encodeRison } from '@kbn/rison';
 import { readInitialAppStateFromRawUrl } from './use_filter_url_sync';
 
 interface AddToDashboardButtonProps {
@@ -43,9 +44,24 @@ function quoteKqlValue(value: string): string {
   return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
-/** Build the hash path expected by the Dashboards app's incoming-embeddable handler. */
-function dashboardPathForId(dashboardId: string | null): string {
-  return dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create';
+/**
+ * Build the hash path expected by the Dashboards app's incoming-embeddable handler.
+ * For a NEW dashboard we also seed the global time range (`_g.time`) from the APM view
+ * the user was looking at — matches the Lens "Save and add to dashboard" UX so the
+ * dashboard's time picker reflects the snapshot. For an EXISTING dashboard we leave
+ * the time range alone (overwriting it could clobber state the user intentionally set).
+ */
+function dashboardPathForId(
+  dashboardId: string | null,
+  timeRange?: { from: string; to: string }
+): string {
+  const isNew = !dashboardId || dashboardId === 'new';
+  const base = isNew ? '#/create' : `#/view/${dashboardId}`;
+  if (!isNew || !timeRange) {
+    return base;
+  }
+  const g = encodeRison({ time: { from: timeRange.from, to: timeRange.to } });
+  return `${base}?_g=${g}`;
 }
 
 /** Convert a phrase / phrases filter to a KQL fragment; returns `undefined` for unsupported filter shapes. */
@@ -211,7 +227,7 @@ export function AddToDashboardButton({
         serializedState,
       };
 
-      const path = dashboardPathForId(dashboardId);
+      const path = dashboardPathForId(dashboardId, { from: start, to: end });
 
       telemetry?.reportServiceMapAddedToDashboard({
         new_dashboard: dashboardId === 'new',
