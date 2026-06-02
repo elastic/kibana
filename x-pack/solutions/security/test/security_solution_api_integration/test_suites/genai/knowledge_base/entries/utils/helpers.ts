@@ -77,6 +77,15 @@ export const installTinyElser = async ({
   }
 };
 
+/**
+ * Confirms `TINY_ELSER_INFERENCE_ID` is registered AND can actually serve a sparse_embedding
+ * request. With `adaptive_allocations.min_number_of_allocations: 0` the endpoint can be registered
+ * with zero live allocations, so a `GET /_inference/{id}` check would succeed before the model is
+ * deployable. The KB index has a `semantic_text` field bound to this inference id, and indexing
+ * triggers inference synchronously, so the first `createEntry` would otherwise pay (and possibly
+ * fail) the cold-start cost. Running a dummy inference here forces allocation and proves the
+ * endpoint is warm before any test runs.
+ */
 export const waitForInferenceEndpoint = async ({
   es,
   log,
@@ -89,8 +98,11 @@ export const waitForInferenceEndpoint = async ({
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await es.inference.get({ inference_id: TINY_ELSER_INFERENCE_ID });
-      log.debug(`Inference endpoint ${TINY_ELSER_INFERENCE_ID} is ready`);
+      await es.inference.inference({
+        inference_id: TINY_ELSER_INFERENCE_ID,
+        input: 'warmup',
+      });
+      log.debug(`Inference endpoint ${TINY_ELSER_INFERENCE_ID} is warm`);
       return;
     } catch (e) {
       log.debug(
