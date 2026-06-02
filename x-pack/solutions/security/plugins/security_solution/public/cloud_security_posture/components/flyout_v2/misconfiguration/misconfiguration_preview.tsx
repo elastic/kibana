@@ -18,12 +18,12 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -103,12 +103,10 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  isPreviewMode,
   openDetailsPanel,
   passedFindings,
   failedFindings,
 }: {
-  isPreviewMode: boolean;
   passedFindings: number;
   failedFindings: number;
   openDetailsPanel: (path: EntityDetailsPath) => void;
@@ -144,7 +142,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode ? 'chevronLimitLeft' : '',
+        iconType: '',
         title: (
           <EuiTitle
             css={css`

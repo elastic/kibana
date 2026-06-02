@@ -35,7 +35,7 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
 }));
 
 jest.mock(
-  '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table',
+  '../../../../../cloud_security_posture/components/flyout_v2/csp_details/misconfiguration_findings_details_table',
   () => ({
     MisconfigurationFindingsDetailsTable: ({
       field,

@@ -20,19 +20,19 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
-} from '../../utils/build_euid_csp_preview_options';
-import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../utils/build_euid_csp_preview_options';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
-import { useUiSetting } from '../../../common/lib/kibana';
+} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import { useUiSetting } from '../../../../common/lib/kibana';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -70,12 +70,10 @@ const VulnerabilitiesCount = ({
 export const VulnerabilitiesPreview = ({
   identityFields,
   entityRecord,
-  isPreviewMode,
   openDetailsPanel,
 }: {
   identityFields: IdentityFields;
   entityRecord?: EntityStoreRecord | null;
-  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   useEffect(() => {
@@ -146,7 +144,7 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'chevronLimitLeft' : '',
+        iconType: '',
         title: (
           <EuiTitle
             css={css`
@@ -159,7 +157,7 @@ export const VulnerabilitiesPreview = ({
             />
           </EuiTitle>
         ),
-        link,
+        link: hasVulnerabilitiesFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >

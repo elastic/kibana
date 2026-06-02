@@ -16,14 +16,14 @@ import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import type {
   AlertsByStatus,
   ParsedAlertsData,
-} from '../../../overview/components/detection_response/alerts_by_status/types';
-import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
-import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../../overview/components/detection_response/alerts_by_status/types';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const AlertsCount = ({
   alertsTotal,
@@ -62,11 +62,9 @@ const AlertsCount = ({
 
 export const AlertsPreview = ({
   alertsData,
-  isPreviewMode,
   openDetailsPanel,
 }: {
   alertsData: ParsedAlertsData;
-  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -97,8 +95,6 @@ export const AlertsPreview = ({
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
-  const hasNonClosedAlerts = totalAlertsCount > 0;
-
   const goToEntityInsightTab = useCallback(
     () =>
       openDetailsPanel({
@@ -123,7 +119,7 @@ export const AlertsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
+        iconType: '',
         title: (
           <EuiText
             size="xs"

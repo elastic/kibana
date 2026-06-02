@@ -17,47 +17,56 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { get } from 'lodash/fp';
+import { get, noop } from 'lodash/fp';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
-import { ALERT_PREVIEW_BANNER } from '../../../../../flyout/document_details/preview/constants';
-import { DocumentDetailsPreviewPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useQueryInspector } from '../../../../../common/components/page/manage_query';
-import { formatRiskScore } from '../../../../common';
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { formatRiskScore } from '../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
-} from '../../../../hooks/use_risk_contributing_alerts';
-import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
-import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
+} from '../../hooks/use_risk_contributing_alerts';
+import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
-import { useRiskScore } from '../../../../api/hooks/use_risk_score';
-import type { RiskScoreState } from '../../../../api/hooks/use_risk_score';
-import { useGetWatchlists } from '../../../../api/hooks/use_get_watchlists';
-import type { EntityRiskScore, EntityType } from '../../../../../../common/search_strategy';
-import type { ESQuery } from '../../../../../../common/typed_json';
-import { buildEntityNameFilter } from '../../../../../../common/search_strategy';
-import { AssetCriticalityBadge } from '../../../asset_criticality';
-import { RiskInputsUtilityBar } from '../../components/utility_bar';
-import { ActionColumn } from '../../components/action_column';
-import { AiAssistantButton } from '../../../ai_assistant_button/ai_assistant_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
-import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
-import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
-import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
+import type { RiskScoreState } from '../../api/hooks/use_risk_score';
+import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
+import type { EntityRiskScore, EntityType } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
+import { buildEntityNameFilter } from '../../../../common/search_strategy';
+import { AssetCriticalityBadge } from '../asset_criticality';
+import { RiskInputsUtilityBar } from '../entity_details_flyout/components/utility_bar';
+import { ActionColumn } from '../entity_details_flyout/components/action_column';
+import { AiAssistantButton } from '../ai_assistant_button/ai_assistant_button';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
+import { useResolutionGroup } from '../entity_resolution/hooks/use_resolution_group';
+import { getEntityId, getEntityField, getEntityName } from '../entity_resolution/helpers';
+import { useStableExpandableFlyoutState } from '../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useKibana } from '../../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
+import { DocumentFlyoutWrapper } from '../../../flyout_v2/document/main/document_flyout_wrapper';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { RISK_INPUTS_TAB_QUERY_ID } from './constants';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -72,7 +81,6 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
-export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
 interface RiskScorePanelProps extends FlyoutPanelProps {
   params: {
@@ -282,12 +290,18 @@ const RiskInputsTabContent = <T extends EntityType>({
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
+
+  const { services } = useKibana();
+  const store = useStore();
+  const history = useHistory();
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const defaultView =
     !loadingRiskScore && !entityRiskScore && hasResolutionScore
@@ -296,18 +310,29 @@ const RiskInputsTabContent = <T extends EntityType>({
   const selectedView = userSelectedView ?? defaultView;
 
   const openAlertPreview = useCallback(
-    (id: string, indexName: string) =>
-      openPreviewPanel({
-        id: DocumentDetailsPreviewPanelKey,
-        params: {
-          id,
-          indexName,
-          scopeId,
-          isPreviewMode: true,
-          banner: ALERT_PREVIEW_BANNER,
-        },
-      }),
-    [openPreviewPanel, scopeId]
+    (id: string, indexName: string) => {
+      services.overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={id}
+              indexName={indexName}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={noop}
+            />
+          ),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        }
+      );
+    },
+    [services, store, history, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const isResolutionView =
@@ -366,18 +391,26 @@ const RiskInputsTabContent = <T extends EntityType>({
     const columns: Array<EuiBasicTableColumn<InputAlert>> = [
       {
         render: (data: InputAlert) => (
-          <EuiButtonIcon
-            iconType="expand"
-            data-test-subj={EXPAND_ALERT_TEST_ID}
-            onClick={() => openAlertPreview(data._id, data.input.index)}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
-              {
-                defaultMessage: 'Preview alert with id {id}',
-                values: { id: data._id },
-              }
-            )}
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.tooltip', {
+              defaultMessage: 'Preview alert with id {id}',
+              values: { id: data._id },
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="expand"
+              data-test-subj={EXPAND_ALERT_TEST_ID}
+              onClick={() => openAlertPreview(data._id, data.input.index)}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
+                {
+                  defaultMessage: 'Preview alert with id {id}',
+                  values: { id: data._id },
+                }
+              )}
+            />
+          </EuiToolTip>
         ),
         width: '5%',
       },

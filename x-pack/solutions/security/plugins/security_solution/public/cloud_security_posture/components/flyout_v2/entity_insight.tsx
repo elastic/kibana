@@ -15,18 +15,18 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
-} from '../utils/build_euid_csp_preview_options';
-import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
-import type { IdentityFields } from '../../flyout/document_details/shared/utils';
+} from '../../utils/build_euid_csp_preview_options';
+import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
-import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
-import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useUiSetting } from '../../common/lib/kibana';
-import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useUiSetting } from '../../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export type CloudPostureEntityIdentifier =
   | Extract<
@@ -39,13 +39,11 @@ export type CloudPostureEntityIdentifier =
 
 export const EntityInsight = <T,>({
   identityFields,
-  isPreviewMode,
   openDetailsPanel,
   entityType,
   entityRecord,
 }: {
   identityFields: IdentityFields;
-  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
@@ -92,11 +90,7 @@ export const EntityInsight = <T,>({
   if (showAlertsPreview) {
     insightContent.push(
       <>
-        <AlertsPreview
-          alertsData={filteredAlertsData}
-          isPreviewMode={isPreviewMode}
-          openDetailsPanel={openDetailsPanel}
-        />
+        <AlertsPreview alertsData={filteredAlertsData} openDetailsPanel={openDetailsPanel} />
         <EuiSpacer size="s" />
       </>
     );
@@ -105,7 +99,6 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          isPreviewMode={isPreviewMode}
           passedFindings={passedFindings}
           failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
@@ -119,7 +112,6 @@ export const EntityInsight = <T,>({
         <VulnerabilitiesPreview
           identityFields={identityFields}
           entityRecord={entityRecord}
-          isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />

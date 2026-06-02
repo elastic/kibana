@@ -51,7 +51,7 @@ import {
   LENS_VISUALIZATION_HEIGHT,
   LENS_VISUALIZATION_MIN_WIDTH,
   SUMMARY_TABLE_MIN_WIDTH,
-} from './common';
+} from '../risk_summary_flyout/common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 const FIRST_RECORD_PAGINATION = {
@@ -65,7 +65,6 @@ export interface RiskSummaryProps<T extends EntityType> {
   recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode: boolean;
   entityId?: string;
   /** Optional prefetched resolution-group risk; used when the internal risk-index lookup returns no doc. */
   prefetchedResolutionRisk?: EntityRiskScore<T>;
@@ -78,7 +77,6 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
-  isPreviewMode,
   prefetchedResolutionRisk,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
@@ -349,7 +347,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             />
           ),
           link: riskScoreData.loading ? undefined : entityTabLink,
-          iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+          iconType: undefined,
         }}
         expand={{
           expandable: false,
@@ -456,7 +454,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                 />
               ),
               link: resolutionRiskScoreData.loading ? undefined : resolutionTabLink,
-              iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+              iconType: undefined,
             }}
             expand={{
               expandable: false,
@@ -528,5 +526,5 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
 
 export const FlyoutRiskSummary = React.memo(
   FlyoutRiskSummaryComponent
-) as typeof FlyoutRiskSummaryComponent & { displayName: string }; // This is needed to male React.memo work with generic
+) as typeof FlyoutRiskSummaryComponent & { displayName: string }; // This is needed to make React.memo work with generic
 FlyoutRiskSummary.displayName = 'RiskSummary';

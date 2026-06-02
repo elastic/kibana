@@ -17,7 +17,7 @@ import {
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { AlertsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/alerts_findings_details_table';
+import { AlertsDetailsTable } from '../../../../../cloud_security_posture/components/flyout_v2/csp_details/alerts_findings_details_table';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';

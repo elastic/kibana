@@ -19,7 +19,7 @@ import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { MisconfigurationPanel } from '../../../../csp_details/misconfiguration_panel';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
+import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/flyout_v2/csp_details/misconfiguration_findings_details_table';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.misconfigurationInsights.title',

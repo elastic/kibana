@@ -7,7 +7,15 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiBasicTable,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
@@ -18,10 +26,7 @@ import {
   useVulnerabilitiesFindings,
   VULNERABILITY_FINDING,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
-import type {
-  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
-  MultiValueCellAction,
-} from '@kbn/cloud-security-posture';
+import type { MultiValueCellAction } from '@kbn/cloud-security-posture';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
@@ -43,16 +48,14 @@ import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
-import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import { useUiSetting } from '../../../common/lib/kibana';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { CloudPostureEntityIdentifier } from '../../entity_insight';
 
 type VulnerabilitySortFieldType =
   | 'score'
@@ -118,12 +121,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
+    onShowVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
     scopeId: string;
     entityId?: string;
     entityType?: string;
+    onShowVulnerability: (params: {
+      vulnerabilityId: string;
+      resourceId: string;
+      packageName: string;
+      packageVersion: string;
+      eventId: string;
+    }) => void;
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -139,8 +150,6 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       VULNERABILITY_FINDING.SEVERITY
     );
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-    const { openPreviewPanel } = useExpandableFlyoutApi();
 
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField === 'score' ? 'vulnerability.score.base' : sortField] =
@@ -322,41 +331,37 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           vulnerability: VulnerabilitiesPackage,
           finding: VulnerabilitiesFindingDetailFields
         ) => (
-          <EuiButtonIcon
-            iconType="maximize"
-            onClick={() => {
-              const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
-                id: VulnerabilityFindingsPreviewPanelKey,
-                params: {
-                  vulnerabilityId: vulnerability?.id,
-                  resourceId: finding?.resource?.id,
-                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
-                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
-                  eventId: finding?.event?.id,
-                  scopeId,
-                  isPreviewMode: true,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview vulnerability details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
-                  },
-                },
-              };
-
-              openPreviewPanel(previewPanelProps);
-            }}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonTooltip',
               {
                 defaultMessage: 'Preview vulnerability details',
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              onClick={() => {
+                const vulnerabilityId = Array.isArray(vulnerability?.id)
+                  ? vulnerability.id[0]
+                  : vulnerability?.id;
+                onShowVulnerability({
+                  vulnerabilityId: vulnerabilityId ?? '',
+                  resourceId: finding?.resource?.id ?? '',
+                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
+                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
+                  eventId: finding?.event?.id ?? '',
+                });
+              }}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+                {
+                  defaultMessage: 'Preview vulnerability details',
+                }
+              )}
+            />
+          </EuiToolTip>
         ),
       },
       {

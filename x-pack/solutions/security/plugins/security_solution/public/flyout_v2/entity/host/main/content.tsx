@@ -11,9 +11,9 @@ import type { Entity } from '../../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
-import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
+import { EntityInsight } from '../../../../cloud_security_posture/components/flyout_v2/entity_insight';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import { FlyoutRiskSummary } from '../../../../entity_analytics/components/flyout_v2/risk_summary';
 import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
@@ -53,8 +53,6 @@ export interface ContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
-  /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
-  hideHeaderIcons?: boolean;
 }
 
 /**
@@ -74,7 +72,6 @@ export const Content = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
-  hideHeaderIcons = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -101,10 +98,8 @@ export const Content = ({
               recalculatingScore={recalculatingScore}
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
-              isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
-              hideHeaderIcon={hideHeaderIcons}
             />
             <EuiHorizontalRule />
           </>
@@ -140,10 +135,8 @@ export const Content = ({
       <EntityInsight
         entityRecord={entityRecord}
         identityFields={identityFields}
-        isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
-        hideHeaderIcons={hideHeaderIcons}
       />
       <ObservedDataSection
         observedHost={observedHost}
