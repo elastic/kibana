@@ -9,29 +9,26 @@
 
 import React from 'react';
 import {
-  EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiSpacer,
   EuiTitle,
-  type DropResult,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DraggableItem } from './draggable_item';
+import { EmptyDropPlaceholder } from './empty_drop_placeholder';
+import { HIDDEN_DROPPABLE_ID } from './use_item_list';
 import type { NavigationItemInfo } from '../types';
 
 interface Props {
   items: NavigationItemInfo[];
-  onDragEnd: (result: DropResult) => void;
   toggleItemVisibility: (id: string) => void;
 }
 
-export const HiddenItemsSection = ({ items, onDragEnd, toggleItemVisibility }: Props) => {
-  if (items.length === 0) return null;
-
+export const HiddenItemsSection = ({ items, toggleItemVisibility }: Props) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -58,18 +55,24 @@ export const HiddenItemsSection = ({ items, onDragEnd, toggleItemVisibility }: P
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable droppableId="hidden-nav-items" spacing="none">
-          {items.map((item, index) => (
+      <EuiDroppable droppableId={HIDDEN_DROPPABLE_ID} spacing="none">
+        {items.length > 0 ? (
+          items.map((item, index) => (
             <DraggableItem
               key={item.id}
               item={item}
               index={index}
               toggleItemVisibility={toggleItemVisibility}
             />
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+          ))
+        ) : (
+          <EmptyDropPlaceholder
+            message={i18n.translate('navigationCustomizationComponents.emptyHiddenList', {
+              defaultMessage: 'Drag an item here to hide it under More.',
+            })}
+          />
+        )}
+      </EuiDroppable>
     </>
   );
 };

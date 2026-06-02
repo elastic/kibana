@@ -31,8 +31,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
+import { EmptyDropPlaceholder } from './empty_drop_placeholder';
 import { HiddenItemsSection } from './hidden_items_section';
-import { useItemList } from './use_item_list';
+import { useItemList, VISIBLE_DROPPABLE_ID } from './use_item_list';
 
 const modalCss = css`
   width: 576px;
@@ -65,7 +66,7 @@ export const CustomizeNavigationModal = ({
     visibleItems,
     hiddenItems,
     hasChanges,
-    createDragEndHandler,
+    handleDragEnd,
     toggleItemVisibility,
   } = useItemList(initialItems);
 
@@ -127,24 +128,28 @@ export const CustomizeNavigationModal = ({
           })}
         />
         <EuiSpacer size="m" />
-        <EuiDragDropContext onDragEnd={createDragEndHandler('visible')}>
-          <EuiDroppable droppableId="nav-items" spacing="none">
-            {visibleItems.map((item, index) => (
-              <DraggableItem
-                key={item.id}
-                item={item}
-                index={index}
-                toggleItemVisibility={toggleItemVisibility}
+        <EuiDragDropContext onDragEnd={handleDragEnd}>
+          <EuiDroppable droppableId={VISIBLE_DROPPABLE_ID} spacing="none">
+            {visibleItems.length > 0 ? (
+              visibleItems.map((item, index) => (
+                <DraggableItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  toggleItemVisibility={toggleItemVisibility}
+                />
+              ))
+            ) : (
+              <EmptyDropPlaceholder
+                message={i18n.translate('navigationCustomizationComponents.emptyVisibleList', {
+                  defaultMessage: 'Drag an item here to show it in the navigation.',
+                })}
               />
-            ))}
+            )}
           </EuiDroppable>
+          <EuiSpacer size="s" />
+          <HiddenItemsSection items={hiddenItems} toggleItemVisibility={toggleItemVisibility} />
         </EuiDragDropContext>
-        <EuiSpacer size="s" />
-        <HiddenItemsSection
-          items={hiddenItems}
-          onDragEnd={createDragEndHandler('hidden')}
-          toggleItemVisibility={toggleItemVisibility}
-        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

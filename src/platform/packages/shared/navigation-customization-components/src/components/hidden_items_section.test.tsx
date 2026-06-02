@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
+import { EuiDragDropContext } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { HiddenItemsSection } from './hidden_items_section';
 import type { NavigationItemInfo } from '../types';
 
 describe('HiddenItemsSection', () => {
-  const onDragEnd = jest.fn();
   const toggleItemVisibility = jest.fn();
 
   const hiddenItems: NavigationItemInfo[] = [
@@ -22,41 +22,31 @@ describe('HiddenItemsSection', () => {
     { id: 'item2', title: 'Item 2', hidden: true },
   ];
 
+  const renderSection = (items: NavigationItemInfo[]) =>
+    renderWithI18n(
+      <EuiDragDropContext onDragEnd={jest.fn()}>
+        <HiddenItemsSection items={items} toggleItemVisibility={toggleItemVisibility} />
+      </EuiDragDropContext>
+    );
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render the section when there are hidden items', () => {
-    renderWithI18n(
-      <HiddenItemsSection
-        items={hiddenItems}
-        onDragEnd={onDragEnd}
-        toggleItemVisibility={toggleItemVisibility}
-      />
-    );
+  it('should render the section heading', () => {
+    renderSection(hiddenItems);
     expect(screen.getByText('Hide under More')).toBeInTheDocument();
   });
 
   it('should render all hidden items', () => {
-    renderWithI18n(
-      <HiddenItemsSection
-        items={hiddenItems}
-        onDragEnd={onDragEnd}
-        toggleItemVisibility={toggleItemVisibility}
-      />
-    );
+    renderSection(hiddenItems);
     expect(screen.getByText('Item 1')).toBeInTheDocument();
     expect(screen.getByText('Item 2')).toBeInTheDocument();
   });
 
-  it('should return null when there are no hidden items', () => {
-    const { container } = renderWithI18n(
-      <HiddenItemsSection
-        items={[]}
-        onDragEnd={onDragEnd}
-        toggleItemVisibility={toggleItemVisibility}
-      />
-    );
-    expect(container.innerHTML).toBe('');
+  it('should render the section with an empty drop zone when there are no hidden items', () => {
+    renderSection([]);
+    expect(screen.getByText('Hide under More')).toBeInTheDocument();
+    expect(screen.getByTestId('customizeNavigationEmptyDropPlaceholder')).toBeInTheDocument();
   });
 });
