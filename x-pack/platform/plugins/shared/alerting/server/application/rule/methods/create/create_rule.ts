@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -55,6 +56,7 @@ export interface CreateRuleOptions {
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
+  changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
 }
 
@@ -63,7 +65,7 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+  const { data: initialData, options, changeTracking, allowMissingConnectorSecrets } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -257,8 +259,9 @@ export async function createRule<Params extends RuleParams = never>(
     ruleSOs: [createdRuleSavedObject],
     rulesClientContext: context,
     changesContext: {
-      action: RuleChangeTrackingAction.ruleCreate,
+      action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
       timestamp: createTime,
+      metadata: changeTracking?.metadata,
     },
   });
 

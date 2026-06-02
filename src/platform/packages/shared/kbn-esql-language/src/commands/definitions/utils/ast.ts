@@ -336,7 +336,7 @@ export function correctPromqlQuerySyntax(input: string): string {
   return query + getPromqlBracketsToClose(query);
 }
 
-function getPromqlBracketsToClose(text: string): string {
+export function getPromqlBracketsToClose(text: string): string {
   const esqlBrackets = getBracketsToClose(text).join('');
   const promqlBraces = getPromqlBracesToClose(text);
 

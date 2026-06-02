@@ -28,6 +28,7 @@ import {
   type eventsMappings,
 } from './data_stream';
 import { FIELD_EVENT_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { enrichFromEvidences } from '../utils';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
@@ -87,7 +88,7 @@ export class EventClient {
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
-    return runPaginatedLatestSourceEsqlQuery<SigEvent>({
+    const result = await runPaginatedLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
@@ -95,15 +96,17 @@ export class EventClient {
       where: this.buildWhere(options),
       groupBy: FIELD_DISCOVERY_SLUG,
     });
+
+    return { ...result, hits: result.hits.map(enrichFromEvidences) };
   }
 
-  async findById(eventId: string): Promise<{ hits: SigEvent[] }> {
+  async findById(id: string): Promise<{ hits: SigEvent[] }> {
     return runFindByIdEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_ID,
-      idValue: eventId,
+      idValue: id,
     });
   }
 

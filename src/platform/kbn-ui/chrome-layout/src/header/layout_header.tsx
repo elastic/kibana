@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/ui-chrome-layout-constants';
 import { styles } from './layout_header.styles';
 
 export interface LayoutHeaderProps {

@@ -260,7 +260,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     const gapRange = shouldApplyGaps ? getGapRange(defaultRangeValue) : undefined;
 
     return {
-      filter: structuredKql,
+      ...(structuredKql !== '' ? { filter: { term: structuredKql, mode: 'KQL' as const } } : {}),
       sort_field: sortingOptions.field,
       sort_order: sortingOptions.order,
       pagination,
