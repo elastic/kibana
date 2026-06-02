@@ -11,6 +11,7 @@ import type {
   SavedObjectsFullModelVersion,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
+import { expectConfigSchema } from '@kbn/config-schema-helpers';
 
 test('allows valid duration', () => {
   expect(validateDuration('1s')).toBeUndefined();
@@ -31,6 +32,7 @@ test('returns error message for invalid duration', () => {
 test('allows any cost value up to 100 characters', () => {
   const taskSchema = getLatestModelVersion()?.schemas?.create;
   expect(taskSchema).toBeDefined();
+  expectConfigSchema(taskSchema);
 
   const costs = [undefined, 'tiny', 'normal', 'large', 'extralarge', 'waaaaytoobig'];
   costs.forEach((cost) => {
@@ -42,6 +44,7 @@ test('allows any cost value up to 100 characters', () => {
 test('throws error message for cost > 100 characters', () => {
   const taskSchema = getLatestModelVersion()?.schemas?.create;
   expect(taskSchema).toBeDefined();
+  expectConfigSchema(taskSchema);
 
   const longCost = 'a'.repeat(101);
   const task = getTask({ cost: longCost });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
 import type { ObjectType } from '@kbn/config-schema';
 import type { SavedObjectsValidationSpec } from '../validation';
 
@@ -34,7 +35,7 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
   forwardCompatibility?: SavedObjectModelVersionForwardCompatibilitySchema;
   /**
    * The schema applied when creating a document of the current version
-   * Allows for validating properties using @kbn/config-schema validations
+   * Allows for validating properties using `@kbn/config-schema` or `@kbn/zod`.
    */
   create?: SavedObjectsValidationSpec;
 }
@@ -57,7 +58,7 @@ export interface SavedObjectsFullModelVersionSchemaDefinitions {
   forwardCompatibility: SavedObjectModelVersionForwardCompatibilitySchema;
   /**
    * The schema applied when creating a document of the current version
-   * Allows for validating properties using @kbn/config-schema validations
+   * Allows for validating properties using `@kbn/config-schema` or `@kbn/zod`.
    */
   create: SavedObjectsValidationSpec;
 }
@@ -66,7 +67,8 @@ export interface SavedObjectsFullModelVersionSchemaDefinitions {
  * Schema used when retrieving a document of a higher version to convert them to the older version.
  *
  * These schemas can be defined in multiple ways:
- * - A `@kbn/config-schema`'s Object schema, that will receive the document's attributes
+ * - A `@kbn/config-schema` schema, that will receive the document's attributes
+ * - A `@kbn/zod`  schema, that will receive the document's attributes
  * - An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes
  *
  * @remark These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert
@@ -101,7 +103,11 @@ export type SavedObjectModelVersionForwardCompatibilitySchema<
   | SavedObjectModelVersionForwardCompatibilityFn<InAttrs, OutAttrs>;
 
 /**
- * Object-schema (from `@kbn/config-schema`) alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
+ * Schema alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
+ *
+ * Supports:
+ * - `@kbn/zod`
+ * - `@kbn/config-schema`
  *
  * @example
  * ```ts
@@ -115,7 +121,9 @@ export type SavedObjectModelVersionForwardCompatibilitySchema<
  * ```
  * @public
  */
-export type SavedObjectModelVersionForwardCompatibilityObjectSchema = ObjectType;
+export type SavedObjectModelVersionForwardCompatibilityObjectSchema =
+  | ObjectType
+  | z.ZodType<Record<string, unknown>>;
 
 /**
  * Plain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}

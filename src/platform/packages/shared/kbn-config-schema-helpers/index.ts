@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-export { isZod } from './util';
-export { getZodSchemaStructure } from './get_schema_structure';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+export { expectConfigSchema } from './src/expect_config_schema';

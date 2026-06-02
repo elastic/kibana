@@ -7,29 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isConfigSchema, type ObjectType } from '@kbn/config-schema';
+import { isZod, z } from '@kbn/zod';
+import { isConfigSchema } from '@kbn/config-schema';
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectModelVersionForwardCompatibilitySchema,
 } from '@kbn/core-saved-objects-server';
 import { pickValuesBasedOnStructure } from '../utils';
 
-function isObjectType(
-  schema: SavedObjectModelVersionForwardCompatibilitySchema
-): schema is ObjectType {
-  return isConfigSchema(schema);
-}
-
 export type ConvertedSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
+function toAttributeObject(attributes: unknown): object {
+  if (attributes !== null && typeof attributes === 'object') {
+    return attributes;
+  }
+  return {};
+}
+
 export const convertModelVersionBackwardConversionSchema = (
-  schema: SavedObjectModelVersionForwardCompatibilitySchema
+  forwardSchema: SavedObjectModelVersionForwardCompatibilitySchema
 ): ConvertedSchema => {
-  if (isObjectType(schema)) {
+  if (isZod(forwardSchema)) {
+    const zodSchema = forwardSchema;
     return (doc) => {
-      const originalAttrs = doc.attributes as object;
+      const originalAttrs = toAttributeObject(doc.attributes);
+      const result = zodSchema.safeParse(doc.attributes);
+      if (!result.success) {
+        throw new Error(z.prettifyError(result.error));
+      }
+      const convertedAttrs = pickValuesBasedOnStructure(result.data, originalAttrs);
+      return {
+        ...doc,
+        attributes: convertedAttrs,
+      };
+    };
+  }
+
+  if (isConfigSchema(forwardSchema)) {
+    return (doc) => {
+      const originalAttrs = toAttributeObject(doc.attributes);
       // Get the validated object, with possible stripping of unknown keys
-      const validatedAttrs = schema.validate(doc.attributes);
+      const validatedAttrs = forwardSchema.validate(doc.attributes);
       // Use the validated attrs object to pick values from the original attrs.
       //
       // If we reversed this, validation conversion would be returned in the
@@ -41,13 +59,19 @@ export const convertModelVersionBackwardConversionSchema = (
         attributes: convertedAttrs,
       };
     };
-  } else {
+  }
+
+  if (typeof forwardSchema === 'function') {
     return (doc) => {
-      const attrs = schema(doc.attributes);
+      const attrs = forwardSchema(doc.attributes);
       return {
         ...doc,
         attributes: attrs,
       };
     };
   }
+
+  throw new Error(
+    'Unknown forward compatibility schema. Must be defined with `@kbn/zod` or `@kbn/config-schema`.'
+  );
 };

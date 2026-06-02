@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
 import type { ObjectType } from '@kbn/config-schema';
 
 /**
- * Allows for validating properties using @kbn/config-schema validations.
+ * Allows for validating properties using `@kbn/config-schema` or `@kbn/zod`.
  *
  * @public
  */
-export type SavedObjectsValidationSpec = ObjectType;
+export type SavedObjectsValidationSpec = ObjectType | z.ZodType<Record<string, unknown>>;
 
 /**
  * A map of {@link SavedObjectsValidationSpec | validation specs} to be used for a given type.

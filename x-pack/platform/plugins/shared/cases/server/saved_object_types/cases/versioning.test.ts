@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectConfigSchema } from '@kbn/config-schema-helpers';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createCaseSavedObjectType } from './cases';
 import {
@@ -194,7 +195,8 @@ describe('caseSavedObjectType model version transformations', () => {
         },
       }).attributes;
 
-      expect(() => createSchema!.validate(attributes)).not.toThrow();
+      expectConfigSchema(createSchema);
+      expect(() => createSchema.validate(attributes)).not.toThrow();
     });
   });
 });

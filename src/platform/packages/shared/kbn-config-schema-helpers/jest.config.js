@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-export { isZod } from './util';
-export { getZodSchemaStructure } from './get_schema_structure';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-config-schema-helpers'],
+};

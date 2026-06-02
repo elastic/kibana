@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/saved-objects/base-server-internal
 dependsOn:
   - '@kbn/logging'
+  - '@kbn/zod'
   - '@kbn/config-schema'
   - '@kbn/core-base-server-internal'
   - '@kbn/core-saved-objects-server'

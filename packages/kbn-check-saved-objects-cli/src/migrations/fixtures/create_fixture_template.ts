@@ -7,11 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getZodSchemaStructure, isZod } from '@kbn/zod';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import type { FixtureTemplate, ModelVersionSchemaProperty } from './types';
 
+function hasGetSchemaStructure(
+  value: unknown
+): value is { getSchemaStructure: () => ModelVersionSchemaProperty[] } {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  return typeof Reflect.get(value, 'getSchemaStructure') === 'function';
+}
+
 export function createFixtureTemplate(modelVersion: SavedObjectsModelVersion): FixtureTemplate {
-  const props = modelVersion.schemas!.create!.getSchemaStructure() as ModelVersionSchemaProperty[];
+  let props: ModelVersionSchemaProperty[] = [];
+  const createSchema = modelVersion.schemas!.create;
+
+  if (hasGetSchemaStructure(createSchema)) {
+    props = createSchema.getSchemaStructure();
+  } else if (isZod(createSchema)) {
+    props = getZodSchemaStructure(createSchema);
+  }
 
   // Sort props by path length to ensure parent paths are created before nested ones
   props.sort((a, b) => a.path.length - b.path.length);

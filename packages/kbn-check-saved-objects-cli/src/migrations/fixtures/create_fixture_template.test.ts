@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { createFixtureTemplate } from './create_fixture_template';
 
 function mkModelVersion(props: Array<{ path: string[]; type: any }>) {
@@ -20,6 +21,21 @@ function mkModelVersion(props: Array<{ path: string[]; type: any }>) {
 }
 
 describe('createFixtureTemplate', () => {
+  it('builds from a zod create schema via getZodSchemaStructure', () => {
+    const modelVersion = {
+      schemas: {
+        create: z.object({
+          title: z.string(),
+          meta: z.object({ author: z.string().optional() }),
+        }),
+      },
+    };
+    expect(createFixtureTemplate(modelVersion as any)).toEqual({
+      title: 'string',
+      meta: { author: 'string?' },
+    });
+  });
+
   it('creates fixture for a single root property', () => {
     const props = [{ path: ['title'], type: 'text' }];
     const modelVersion = mkModelVersion(props);

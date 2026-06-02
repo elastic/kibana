@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-export { isZod } from './util';
-export { getZodSchemaStructure } from './get_schema_structure';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+import { schema } from '@kbn/config-schema';
+import { expectConfigSchema } from './expect_config_schema';
+
+describe('expectConfigSchema', () => {
+  it('does not throw for a config schema', () => {
+    expect(() => expectConfigSchema(schema.string())).not.toThrow();
+  });
+
+  it('throws for a non-config-schema value', () => {
+    expect(() => expectConfigSchema('not a schema')).toThrow();
+  });
+});
