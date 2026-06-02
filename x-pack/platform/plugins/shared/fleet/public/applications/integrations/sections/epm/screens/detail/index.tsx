@@ -67,7 +67,6 @@ import { PermissionsError } from '../../../../layouts';
 import { wrapTitleWithDeprecated } from '../../components/utils';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
-import { useIsFirstTimeAgentUserQuery } from './hooks';
 
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -167,7 +166,6 @@ export function Detail() {
   const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
-  const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -284,9 +282,6 @@ export function Detail() {
     setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
   }, [packageInfoLatestPrereleaseData?.item.version]);
 
-  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUserQuery();
-
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
@@ -301,10 +296,7 @@ export function Detail() {
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
   const isLoading =
-    packageInfoLoading ||
-    isPermissionCheckLoading ||
-    firstTimeUserLoading ||
-    !packageInfoIsFetchedAfterMount;
+    packageInfoLoading || isPermissionCheckLoading || !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
@@ -488,21 +480,13 @@ export function Detail() {
         integration ?? undefined
       );
 
-      const isAgentlessByDefault =
-        agentlessStatus.isAgentless &&
-        (isOnlyAgentlessIntegration(packageInfo ?? undefined, integration ?? undefined) ||
-          agentlessStatus.isDefaultDeploymentMode);
-
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
-        isCloud,
-        isFirstTimeAgentUser,
         pkgkey,
         prerelease,
         isAgentlessIntegration: agentlessStatus.isAgentless,
-        isAgentlessByDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -533,8 +517,6 @@ export function Detail() {
       hash,
       agentPolicyIdFromContext,
       integration,
-      isCloud,
-      isFirstTimeAgentUser,
       pkgkey,
       prerelease,
       getAgentlessStatusForPackage,
