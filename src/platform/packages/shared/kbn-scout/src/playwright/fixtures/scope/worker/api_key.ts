@@ -73,9 +73,9 @@ export interface RequestAuthFixture {
    * created in Elasticsearch.
    *
    * @example
-   * const { apiKeyHeader } = await requestAuth.getApiKeyForBuiltinRole('kibana_admin');
+   * const { apiKeyHeader } = await requestAuth.getApiKeyForBuiltInRole('kibana_admin');
    */
-  getApiKeyForBuiltinRole: (roleName: string) => Promise<RoleApiCredentials>;
+  getApiKeyForBuiltInRole: (roleName: string) => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -216,10 +216,10 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         );
       };
 
-      const getApiKeyForBuiltinRole = async (roleName: string): Promise<RoleApiCredentials> => {
-        // Use fetchBuiltinRoleDescriptor (not setBuiltinRole) — the API key embeds
+      const getApiKeyForBuiltInRole = async (roleName: string): Promise<RoleApiCredentials> => {
+        // Use fetchBuiltInRoleDescriptor (not setBuiltInRole) — the API key embeds
         // the descriptor inline so no ES role needs to be created.
-        const descriptor = await samlAuth.fetchBuiltinRoleDescriptor(roleName);
+        const descriptor = await samlAuth.fetchBuiltInRoleDescriptor(roleName);
         return createApiKeyWithAdminCredentials(roleName, { [roleName]: descriptor });
       };
 
@@ -229,7 +229,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         getApiKeyForAdmin,
         getApiKeyForViewer,
         getApiKeyForPrivilegedUser,
-        getApiKeyForBuiltinRole,
+        getApiKeyForBuiltInRole,
       });
 
       // Invalidate all API Keys after tests

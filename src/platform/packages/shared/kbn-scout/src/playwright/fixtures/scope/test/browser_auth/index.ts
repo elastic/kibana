@@ -54,12 +54,12 @@ export interface BrowserAuthFixture {
    *
    * @example
    * test('kibana_admin cannot see CCR link', async ({ browserAuth, page }) => {
-   *   await browserAuth.loginWithBuiltinRole('kibana_admin');
+   *   await browserAuth.loginWithBuiltInRole('kibana_admin');
    *   await page.goto('/app/management');
    *   await expect(page.locator('[data-test-subj="cross_cluster_replication"]')).toBeHidden();
    * });
    */
-  loginWithBuiltinRole: (roleName: string) => Promise<void>;
+  loginWithBuiltInRole: (roleName: string) => Promise<void>;
 }
 
 /**
@@ -95,8 +95,8 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       return loginAs(samlAuth.customRoleName);
     };
 
-    const loginWithBuiltinRole = async (roleName: string) => {
-      await samlAuth.setBuiltinRole(roleName);
+    const loginWithBuiltInRole = async (roleName: string) => {
+      await samlAuth.setBuiltInRole(roleName);
       return loginAs(samlAuth.customRoleName);
     };
 
@@ -114,7 +114,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       loginAsPrivilegedUser,
       loginAs,
       loginWithCustomRole,
-      loginWithBuiltinRole,
+      loginWithBuiltInRole,
     });
   },
 });

@@ -89,10 +89,10 @@ export class SamlAuthManager {
 
   /**
    * Provisions the worker's custom role slot with the privileges of a named ES role.
-   * Use for SAML-based login (`loginWithBuiltinRole`).
+   * Use for SAML-based login (`loginWithBuiltInRole`).
    */
-  async setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
-    this.guardServerless(`setBuiltinRole('${roleName}')`);
+  async setBuiltInRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+    this.guardServerless(`setBuiltInRole('${roleName}')`);
     const roleData = await this.getEsRoleData(roleName);
     // Strip non-privilege fields before creating the ES role.
     // metadata / transient_metadata are ES bookkeeping; description is a
@@ -112,8 +112,8 @@ export class SamlAuthManager {
    * Fetches a named ES role's privileges filtered to API-key-safe fields.
    * Does not create a role in ES — use for inline API key descriptors.
    */
-  async fetchBuiltinRoleDescriptor(roleName: string): Promise<ElasticsearchRoleDescriptor> {
-    this.guardServerless(`fetchBuiltinRoleDescriptor('${roleName}')`);
+  async fetchBuiltInRoleDescriptor(roleName: string): Promise<ElasticsearchRoleDescriptor> {
+    this.guardServerless(`fetchBuiltInRoleDescriptor('${roleName}')`);
     const roleData = await this.getEsRoleData(roleName);
     // Allow-list: only keep fields the API key role_descriptors endpoint accepts.
     // This is more forward-compatible than stripping individual known-bad fields.

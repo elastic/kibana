@@ -12,16 +12,16 @@ import { expect } from '../../../../../api';
 
 apiTest.describe(`Built-in ES roles`, { tag: tags.stateful.classic }, () => {
   apiTest(
-    `setBuiltinRole should throw when the role does not exist in Elasticsearch`,
+    `setBuiltInRole should throw when the role does not exist in Elasticsearch`,
     async ({ samlAuth }) => {
-      await expect(samlAuth.setBuiltinRole('this_role_does_not_exist_scout_test')).rejects.toThrow(
+      await expect(samlAuth.setBuiltInRole('this_role_does_not_exist_scout_test')).rejects.toThrow(
         `Role 'this_role_does_not_exist_scout_test' not found in Elasticsearch`
       );
     }
   );
 
   apiTest(
-    `setBuiltinRole should throw when called on a Serverless project`,
+    `setBuiltInRole should throw when called on a Serverless project`,
     {
       tag: [
         ...tags.serverless.search,
@@ -34,16 +34,16 @@ apiTest.describe(`Built-in ES roles`, { tag: tags.stateful.classic }, () => {
         !config.serverless,
         'Only validates the Serverless guard on Serverless projects'
       );
-      await expect(samlAuth.setBuiltinRole('kibana_admin')).rejects.toThrow(
-        `setBuiltinRole('kibana_admin') is not supported on Serverless projects`
+      await expect(samlAuth.setBuiltInRole('kibana_admin')).rejects.toThrow(
+        `setBuiltInRole('kibana_admin') is not supported on Serverless projects`
       );
     }
   );
 
   apiTest(
-    `setBuiltinRole should provision the custom role slot and return the descriptor`,
+    `setBuiltInRole should provision the custom role slot and return the descriptor`,
     async ({ samlAuth }) => {
-      const descriptor = await samlAuth.setBuiltinRole('kibana_admin');
+      const descriptor = await samlAuth.setBuiltInRole('kibana_admin');
       expect(descriptor).toBeDefined();
       const credentials = await samlAuth.asInteractiveUser(samlAuth.customRoleName);
       expect(credentials.cookieValue).toBeDefined();
@@ -51,9 +51,9 @@ apiTest.describe(`Built-in ES roles`, { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    `getApiKeyForBuiltinRole should create an API key scoped to a built-in ES role`,
+    `getApiKeyForBuiltInRole should create an API key scoped to a built-in ES role`,
     async ({ requestAuth }) => {
-      const { apiKey, apiKeyHeader } = await requestAuth.getApiKeyForBuiltinRole('kibana_admin');
+      const { apiKey, apiKeyHeader } = await requestAuth.getApiKeyForBuiltInRole('kibana_admin');
       expect(apiKey.id).toBeDefined();
       expect(apiKey.name).toBeDefined();
       expect(apiKeyHeader.Authorization).toMatch(/^ApiKey /);

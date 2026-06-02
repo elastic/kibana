@@ -65,13 +65,13 @@ export interface SamlAuth {
    *
    * @param roleName - The name of the role to look up in Elasticsearch.
    */
-  setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor>;
+  setBuiltInRole(roleName: string): Promise<ElasticsearchRoleDescriptor>;
   /**
    * Fetches the privilege descriptor of a named ES role filtered to fields
    * accepted by the API key `role_descriptors` endpoint. Does **not** create
    * a role in Elasticsearch — use this when building an inline API key.
    */
-  fetchBuiltinRoleDescriptor(roleName: string): Promise<ElasticsearchRoleDescriptor>;
+  fetchBuiltInRoleDescriptor(roleName: string): Promise<ElasticsearchRoleDescriptor>;
   /**
    * Generates a SAML session cookie for an interactive user with the specified role.
    *
@@ -169,8 +169,8 @@ export const samlAuthFixture = coreWorkerFixtures.extend<{}, { samlAuth: SamlAut
         session: manager.session,
         customRoleName: manager.customRoleName,
         setCustomRole: (role) => manager.setCustomRole(role),
-        setBuiltinRole: (roleName) => manager.setBuiltinRole(roleName),
-        fetchBuiltinRoleDescriptor: (roleName) => manager.fetchBuiltinRoleDescriptor(roleName),
+        setBuiltInRole: (roleName) => manager.setBuiltInRole(roleName),
+        fetchBuiltInRoleDescriptor: (roleName) => manager.fetchBuiltInRoleDescriptor(roleName),
         asInteractiveUser: (role) => manager.asInteractiveUser(role),
       });
       await manager.cleanup();
