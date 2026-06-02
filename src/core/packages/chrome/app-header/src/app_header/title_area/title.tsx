@@ -100,7 +100,9 @@ const useTitleStyles = () => {
 
       &::after {
         border: ${euiTheme.border.width.thin} solid transparent;
-        transition: border-color ${euiTheme.animation.fast} ease;
+        transition:
+          border-color ${euiTheme.animation.fast} ease,
+          border-width ${euiTheme.animation.fast} ease;
       }
     `;
 
@@ -109,14 +111,8 @@ const useTitleStyles = () => {
       cursor: text;
       appearance: none;
 
-      &:hover::before,
-      &:focus::before {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      }
-
-      &:hover::after,
-      &:focus::after {
-        border-color: ${euiTheme.colors.borderBasePlain};
+      &:hover::before {
+        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
       }
 
       &:focus {
@@ -136,12 +132,14 @@ const useTitleStyles = () => {
     const editingTitleFrame = css`
       ${titleFrame};
 
-      &::before {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      &::after {
+        border-width: ${euiTheme.border.width.thin};
+        border-color: ${euiTheme.components.forms.border};
       }
 
-      &::after {
-        border-color: ${euiTheme.colors.borderBasePlain};
+      &:focus-within::after {
+        border-width: ${euiTheme.border.width.thick};
+        border-color: ${euiTheme.components.forms.borderFocused};
       }
     `;
 
@@ -154,8 +152,9 @@ const useTitleStyles = () => {
     `;
 
     const invalidTitleFrame = css`
-      &::after {
-        border-color: ${euiTheme.colors.danger};
+      &:not(:focus-within)::after {
+        border-width: ${euiTheme.border.width.thin};
+        border-color: ${euiTheme.components.forms.borderInvalid};
       }
     `;
 
@@ -236,6 +235,10 @@ const useTitleStyles = () => {
       }
     `;
 
+    const editingStatusIcon = css`
+      background: none;
+    `;
+
     // Applied only when there is no back button, so a lone title lines up with where the
     // text sits when a back button precedes it.
     const titleOffsetStyle = css`
@@ -251,6 +254,7 @@ const useTitleStyles = () => {
       readModeTrigger,
       input,
       statusIcon,
+      editingStatusIcon,
       titleSizer,
       titleText,
       placeholderText,
@@ -272,7 +276,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
     const [error, setError] = useState<string | undefined>();
     const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const titleRef = useRef<HTMLButtonElement>(null);
     // Marks that an edit was resolved by an explicit action (Enter/Escape) so the trailing
     // blur from unmounting the focused input does not re-enter save().
     const resolvingRef = useRef(false);
@@ -298,12 +301,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
       });
     }, [isEditing]);
 
-    const returnFocusToTitle = () => {
-      requestAnimationFrame(() => {
-        titleRef.current?.focus();
-      });
-    };
-
     const startEditing = () => {
       if (!editable) {
         return;
@@ -315,7 +312,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
       setIsEditing(true);
     };
 
-    const save = async (restoreFocus = true) => {
+    const save = async () => {
       if (!onSave || isSaving) {
         return;
       }
@@ -327,9 +324,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
         resolvingRef.current = true;
         setError(undefined);
         setIsEditing(false);
-        if (restoreFocus) {
-          returnFocusToTitle();
-        }
         return;
       }
 
@@ -359,9 +353,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
       resolvingRef.current = true;
       setError(undefined);
       setIsEditing(false);
-      if (restoreFocus) {
-        returnFocusToTitle();
-      }
     };
 
     const cancel = () => {
@@ -369,7 +360,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
       setDraft(text);
       setError(undefined);
       setIsEditing(false);
-      returnFocusToTitle();
     };
 
     const displayText = text || placeholder || '';
@@ -433,7 +423,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                     if (resolvingRef.current) {
                       return;
                     }
-                    void save(false);
+                    void save();
                   }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
@@ -455,7 +445,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                   </EuiScreenReaderOnly>
                 )}
                 {(isSaving || error) && (
-                  <span css={styles.statusIcon}>
+                  <span css={[styles.statusIcon, styles.editingStatusIcon]}>
                     {isSaving ? (
                       <EuiLoadingSpinner size="m" />
                     ) : (
@@ -469,7 +459,6 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
               // aria-hidden), so the heading reads as the title itself; editability is
               // conveyed via the screen-reader instructions referenced below.
               <button
-                ref={titleRef}
                 type="button"
                 css={styles.readModeTrigger}
                 aria-describedby={instructionsId}

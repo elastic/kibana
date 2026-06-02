@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
@@ -31,6 +31,8 @@ interface AppHeaderEditableTitleStoryProps {
   readOnly?: boolean;
   /** Delay `onSave` so the inline saving spinner is exercised. */
   asyncSave?: boolean;
+  /** Initial favorite state for the star toggle. */
+  initialFavorite?: boolean;
 }
 
 const createChromeStoryService = (): InternalChromeStart =>
@@ -47,6 +49,63 @@ const createChromeStoryService = (): InternalChromeStart =>
     getHelpExtension$: () => new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
   } as unknown as InternalChromeStart);
 
+const playFavoriteIconBounce = (icon: Element) => {
+  icon.animate(
+    [
+      { transform: 'scale(1)' },
+      { transform: 'scale(1.28)' },
+      { transform: 'scale(0.9)' },
+      { transform: 'scale(1)' },
+    ],
+    {
+      duration: 450,
+      easing: 'cubic-bezier(0.34, 1.45, 0.64, 1)',
+    }
+  );
+};
+
+const AnimatedFavoriteButton = ({
+  isFavorite,
+  onToggle,
+}: {
+  isFavorite: boolean;
+  onToggle: (next: boolean) => void;
+}) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback(() => {
+    onToggle(!isFavorite);
+
+    // Wait for React to swap the icon, then bounce only the glyph — not the button hit target.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const icon = buttonRef.current?.querySelector('.euiButtonIcon__icon');
+        if (icon) {
+          playFavoriteIconBounce(icon);
+        }
+      });
+    });
+  }, [isFavorite, onToggle]);
+
+  return (
+    <EuiButtonIcon
+      buttonRef={buttonRef}
+      css={css`
+        .euiButtonIcon__icon {
+          transform-origin: center;
+        }
+      `}
+      aria-label={isFavorite ? 'Remove favorite' : 'Add favorite'}
+      aria-pressed={isFavorite}
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      color="text"
+      display="empty"
+      size="xs"
+      onClick={handleClick}
+    />
+  );
+};
+
 // Single source of truth: every story renders the title inside the full app header
 // (back navigation, badges, metadata, favorite) so its alignment and spacing are shown
 // in the context it actually ships in. Args toggle the title's state.
@@ -57,8 +116,10 @@ const HeaderWithTitle = ({
   placeholder,
   readOnly,
   asyncSave,
+  initialFavorite = false,
 }: AppHeaderEditableTitleStoryProps) => {
   const [title, setTitle] = useState(initialTitle);
+  const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const chrome = useMemo(() => createChromeStoryService(), []);
 
   const editableTitle = {
@@ -98,10 +159,12 @@ const HeaderWithTitle = ({
             { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
           ]}
           favorite={
-            <EuiButtonIcon
-              aria-label="Favorite"
-              iconType="starEmpty"
-              onClick={action('favorite')}
+            <AnimatedFavoriteButton
+              isFavorite={isFavorite}
+              onToggle={(next) => {
+                action('favorite')(next);
+                setIsFavorite(next);
+              }}
             />
           }
           sticky={false}
@@ -174,5 +237,12 @@ export const ReadOnly: Story = {
   args: {
     initialTitle: 'System Shells via Services',
     readOnly: true,
+  },
+};
+
+export const Favorited: Story = {
+  args: {
+    initialTitle: 'System Shells via Services',
+    initialFavorite: true,
   },
 };
