@@ -7,13 +7,31 @@
 
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from './comment';
+import { getDashboardAttachmentType } from './dashboard';
+import { getDiscoverSessionAttachmentType } from './discover_session';
 import { getFileAttachmentType } from './file';
+import { getMapAttachmentType } from './map';
 import { getVisualizationAttachmentType } from './lens';
 import { getStackAlertAttachmentType } from './alert';
 
-export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
+export interface RegisterInternalAttachmentsOptions {
+  hasDashboard?: boolean;
+  hasMaps?: boolean;
+}
+
+export const registerInternalAttachments = (
+  unifiedRegistry: UnifiedAttachmentTypeRegistry,
+  { hasDashboard = false, hasMaps = false }: RegisterInternalAttachmentsOptions = {}
+) => {
   unifiedRegistry.register(getFileAttachmentType());
   unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
   unifiedRegistry.register(getStackAlertAttachmentType());
+  unifiedRegistry.register(getDiscoverSessionAttachmentType());
+  if (hasDashboard) {
+    unifiedRegistry.register(getDashboardAttachmentType());
+  }
+  if (hasMaps) {
+    unifiedRegistry.register(getMapAttachmentType());
+  }
 };

@@ -10,6 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 
 import { CaseViewAttachButton } from './case_view_attach_button';
+import { basicCase } from '../../../containers/mock';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -81,25 +82,25 @@ describe('CaseViewAttachButton', () => {
   });
 
   it('renders the attach button', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(<CaseViewAttachButton caseData={basicCase} />);
     expect(await screen.findByTestId('case-view-attach-button')).toBeInTheDocument();
   });
 
   it('opens the popover with the upload-file menu item', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(<CaseViewAttachButton caseData={basicCase} />);
     await user.click(await screen.findByTestId('case-view-attach-button'));
     expect(await screen.findByTestId('case-view-attach-menu-file')).toBeInTheDocument();
   });
 
   it('opens the upload file modal when File is selected', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(<CaseViewAttachButton caseData={basicCase} />);
     await user.click(await screen.findByTestId('case-view-attach-button'));
     await user.click(await screen.findByTestId('case-view-attach-menu-file'));
     await screen.findByTestId('upload-file-modal-mock');
   });
 
   it('does not render without `createComment` permission', () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />, {
+    renderWithTestingProviders(<CaseViewAttachButton caseData={basicCase} />, {
       wrapperProps: {
         permissions: buildCasesPermissions({ createComment: false }),
       },

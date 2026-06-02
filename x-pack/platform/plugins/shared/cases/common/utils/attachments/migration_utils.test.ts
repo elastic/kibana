@@ -6,11 +6,14 @@
  */
 
 import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
   LEGACY_ACTIONS_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -147,6 +150,25 @@ describe('migration_utils', () => {
 
     it('is false for unrelated persistable subtype ids', () => {
       expect(isPersistableType('.test')).toBe(false);
+    });
+  });
+
+  describe('isUnifiedOnlyAttachmentType', () => {
+    it('is true for unified types with no legacy equivalent', () => {
+      expect(isUnifiedOnlyAttachmentType(DASHBOARD_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(MAP_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(DISCOVER_SESSION_ATTACHMENT_TYPE)).toBe(true);
+    });
+
+    it('is false for unified types that map back to a legacy type', () => {
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(LENS_ATTACHMENT_TYPE)).toBe(false);
+    });
+
+    it('is false for legacy and unknown types', () => {
+      expect(isUnifiedOnlyAttachmentType(AttachmentType.user)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType('something-custom')).toBe(false);
     });
   });
 });

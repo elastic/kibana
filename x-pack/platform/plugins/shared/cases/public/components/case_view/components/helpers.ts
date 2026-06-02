@@ -20,6 +20,7 @@ import {
   isUnifiedAlertAttachment,
   isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
+import { getSavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/helpers';
 
 export const getAttachmentItemCount = (comment: AttachmentUIV2): number => {
   if (isAlertAttachment(comment)) {
@@ -68,6 +69,23 @@ const filterLegacyEventCommentByIds = (
   };
 };
 
+/**
+ * SO-typed unified reference attachments (dashboard, map, discoverSession)
+ * filter on title (cached in `metadata.title` at attach time) as well as the
+ * foreign SO id, case-insensitively — matching the experience the user gets
+ * when typing into the modal search.
+ */
+const filterSavedObjectCommentBySearchTerm = (
+  comment: AttachmentUIV2,
+  attributes: NonNullable<ReturnType<typeof getSavedObjectAttachmentAttributes>>,
+  searchTerm: string
+): AttachmentUIV2 | null => {
+  const term = searchTerm.toLowerCase();
+  const title = (attributes.title ?? '').toLowerCase();
+  const id = attributes.attachmentId.toLowerCase();
+  return title.includes(term) || id.includes(term) ? comment : null;
+};
+
 const filterUnifiedCommentById = (
   comment: UnifiedReferenceAttachmentPayload,
   searchTerm: string
@@ -99,6 +117,10 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         }
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
+        }
+        const savedObjectAttributes = getSavedObjectAttachmentAttributes(comment);
+        if (savedObjectAttributes) {
+          return filterSavedObjectCommentBySearchTerm(comment, savedObjectAttributes, searchTerm);
         }
         if (isUnifiedEventAttachment(comment) || isUnifiedAlertAttachment(comment)) {
           return filterUnifiedCommentById(comment, searchTerm);
