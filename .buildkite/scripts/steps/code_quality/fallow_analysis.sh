@@ -54,7 +54,7 @@ extract_health_table() {
 
 # Extract grade and score from the "● Per-owner health" table row for an owner.
 # Table format: "  @elastic/owner  score  grade  files  hot  p90"
-# Returns e.g. "(grade: F, score: 9.9)"
+# Returns e.g. "F 9.9"
 extract_owner_health_header() {
   local output="$1"
   local owner="$2"
@@ -62,9 +62,19 @@ extract_owner_health_header() {
     -v owner="${owner}" \
     '/^● Per-owner health/{in_health=1; next}
      in_health && $1 == owner {
-       print "(grade: " $3 ", score: " $2 ")"
+       print $3 " " $2
        exit
      }'
+}
+
+# Returns an emoji for a grade letter (A=🟢 B=🟡 C=🟠 D/F=🔴)
+grade_emoji() {
+  case "${1:0:1}" in
+    A) echo "🟢" ;;
+    B) echo "🟡" ;;
+    C) echo "🟠" ;;
+    *)  echo "🔴" ;;
+  esac
 }
 
 
@@ -138,7 +148,10 @@ for owner in "${FALLOW_OWNERS[@]}"; do
     line+=" no dead code"
   fi
   if [ -n "$health_header" ]; then
-    line+=" · health ${health_header}"
+    grade=$(echo "$health_header" | awk '{print $1}')
+    score=$(echo "$health_header" | awk '{print $2}')
+    emoji=$(grade_emoji "$grade")
+    line+=" · complexity ${emoji} ${grade} (${score}/100)"
   fi
   ANNOTATION+="${line}\n"
 done
