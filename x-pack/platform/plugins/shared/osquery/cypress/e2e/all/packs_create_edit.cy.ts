@@ -192,22 +192,16 @@ describe(
         cy.contains('Create pack');
         const queries = {
           Query1: {
-            interval: 3600,
-            timeout: 601,
             query: 'select * from uptime;',
             removed: true,
             snapshot: false,
           },
           Query2: {
-            interval: 3600,
-            timeout: 602,
             query: 'select * from uptime;',
             removed: false,
             snapshot: false,
           },
           Query3: {
-            interval: 3600,
-            timeout: 603,
             query: 'select * from uptime;',
           },
         };
@@ -265,7 +259,6 @@ describe(
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
-        cy.getBySel('osquery-interval-field').click().clear().type('5');
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.get(TABLE_ROWS).contains(savedQueryName);
