@@ -17,6 +17,7 @@ import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -295,10 +296,20 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
     });
 
+    // Intercept warnings from pagination request
+    const adapter = params.inspectorAdapters.requests;
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      params.services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
+
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords,
-      interceptedWarnings: undefined,
+      interceptedWarnings,
       pagination: nextPageResult.pagination,
     });
   } catch (error) {
