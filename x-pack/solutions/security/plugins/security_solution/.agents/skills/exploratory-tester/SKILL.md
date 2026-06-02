@@ -32,6 +32,7 @@ Flows:
     entry: <path or description>
     expected: <correct outcome>
     timeout: <minutes>
+    isolate: false    # optional — parallel mode only; default true (own space per flow)
 Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
@@ -63,6 +64,8 @@ Execute in order — read each file before starting it:
 | `templates/finding-format.md` | Finding entry format and level rules |
 | `templates/report-format.md` | report.md structure |
 | `scripts/create-noise-index.sh` | Creates non-ECS test data — executed by Phase 1 |
+| `scripts/create-flow-spaces.py` | Creates one Kibana space per parallel flow — executed by Phase 1 |
+| `scripts/delete-flow-spaces.py` | Deletes per-flow spaces created by this session — executed by Phase 3 |
 | `scripts/check-dom-anomalies.js` | DOM anomaly detector — pasted into `browser_evaluate` after each action |
 | `scripts/classify-console.js` | Console classifier — pasted into `browser_evaluate` with messages array injected |
 | `scripts/dedup-network.js` | Network duplicate detector — pasted into `browser_evaluate` with requests array injected |

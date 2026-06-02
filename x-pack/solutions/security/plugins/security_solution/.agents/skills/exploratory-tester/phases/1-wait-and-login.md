@@ -70,6 +70,16 @@ curl -s -u "<username>:<password>" -X POST "<environment.url>/api/spaces/space" 
 ```
 `409 Conflict` → space already exists, reuse silently. Any other error → add to `skipped_setup`, update `space_id` to `"default"` in `config.json`.
 
+**Per-flow isolated spaces (parallel mode only):**
+
+If `config.json → mode` is `"parallel"`, run after the base space is ready:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-flow-spaces.py
+```
+This creates `exploratory-testing-flow-<N>` for each flow where `isolate: true` (the default) and updates `flows[N].space_id` in `config.json`. Flows with `isolate: false` share the base space.
+
+> **What isolation covers:** Kibana saved objects — timelines, cases, rules, dashboards — are space-scoped and will not interfere between parallel flows. Elasticsearch indices (`.alerts-security.alerts-*`, raw document indices) are **shared across spaces**. Flows that mutate alert status (marking open/closed/acknowledged) can still interfere. For those flows, use **serial mode** instead of parallel.
+
 **Connectors** (if required by Setup):
 ```bash
 curl -s -u elastic:changeme -X POST http://localhost:5620/s/exploratory-testing/api/actions/connector \

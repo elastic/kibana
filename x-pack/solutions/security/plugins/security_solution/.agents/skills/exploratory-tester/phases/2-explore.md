@@ -49,7 +49,8 @@ config.json path: .exploratory-session/config.json
 findings file path: .exploratory-session/findings-flow-<N>.md
 knowledge file path: x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
 
-Read config.json for environment details, resolved_role, space_id, test_user, area, and known_open_bugs.
+Read config.json for environment details, resolved_role, test_user, area, and known_open_bugs.
+Use flow.space_id (NOT environment.space_id) as your Kibana space for all navigation.
 Read the knowledge file if it exists — use it to recognise known non-bugs.
 Run the Explore Loop. Write all findings to findings-flow-<N>.md.
 Do NOT write to the knowledge file.
@@ -160,7 +161,7 @@ Consult in order — stop when you have enough to proceed:
 
 ### Navigation
 
-All navigation must stay within the test space (`/s/<space_id>/`). Verify the URL after every navigation.
+All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In parallel mode each flow has its own space; in single mode this equals `environment.space_id`. Verify the URL after every navigation.
 
 1. If `entry` starts with `/app/` → `<environment.url>/s/<space_id><entry>`
 2. If `entry` starts with `/s/` → `<environment.url><entry>` as-is

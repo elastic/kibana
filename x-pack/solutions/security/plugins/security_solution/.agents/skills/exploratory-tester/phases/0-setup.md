@@ -176,7 +176,9 @@ Write `.exploratory-session/config.json`:
       "entry": "<entry path or null>",
       "expected": "<expected outcome or null>",
       "timeout_minutes": 4,
-      "source": "<specified | agent>"
+      "source": "<specified | agent>",
+      "isolate": true,
+      "space_id": null
     }
   ],
   "setup": {
@@ -187,6 +189,11 @@ Write `.exploratory-session/config.json`:
   "specs": "<URL or file path provided in Specs: field, or null if not provided>",
   "specs_fallback": "https://www.elastic.co/docs/solutions/security",
   "session_timeout_minutes": 90,
+  "credentials": {
+    "username": "<admin username — elastic or user-provided>",
+    "password": "<admin password>"
+  },
+  "created_flow_spaces": [],
   "skipped_setup": [],
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],

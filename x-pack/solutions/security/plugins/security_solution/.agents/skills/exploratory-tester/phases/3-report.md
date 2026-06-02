@@ -74,3 +74,15 @@ Commit the knowledge file:
 git add x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
 git commit -m "knowledge(exploratory-tester): update <area_slug> after session on $(date -u +%Y-%m-%d)"
 ```
+
+---
+
+## Step 3e — Clean up per-flow spaces (parallel mode only)
+
+After committing the knowledge file, delete the Kibana spaces created by this session:
+
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/delete-flow-spaces.py
+```
+
+This only deletes spaces listed in `config.json → created_flow_spaces` — spaces that already existed before this session are never touched. If a deletion fails, the script prints the space IDs for manual cleanup via **Kibana > Stack Management > Spaces**.
