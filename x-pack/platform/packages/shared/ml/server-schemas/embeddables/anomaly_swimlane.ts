@@ -14,7 +14,7 @@ import {
 const baseProps = {
   ...serializedTitlesSchema.getPropSchemas(),
   ...serializedTimeRangeSchema.getPropSchemas(),
-  job_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
+  job_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
     minSize: 1,
     maxSize: 10000,
     meta: { description: 'Anomaly detection job IDs whose results are shown in the swim lane.' },
@@ -40,6 +40,7 @@ const anomalySwimLaneViewBySchema = schema.object({
   swimlane_type: schema.literal('viewBy'),
   view_by: schema.string({
     minLength: 1,
+    maxLength: 1000,
     meta: { description: 'Field name used to split anomalies into a view-by swim lane.' },
   }),
 });
