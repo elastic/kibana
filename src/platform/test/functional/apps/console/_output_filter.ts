@@ -27,6 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.enterText('GET /_search?pretty');
       await PageObjects.console.clickPlay();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      // Ensure the filter row is collapsed before each test so toggle state is predictable
+      if (await PageObjects.console.isOutputFilterRowVisible()) {
+        await PageObjects.console.clickOutputFilterButton();
+      }
     });
 
     it('clicking Filter response expands the filter row', async () => {
