@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
   const resourceRoutes = ruleMigrationResourcesRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Rule migration resources upsert API', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Rule migration resources upsert API', () => {
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
       await es.indices.delete({ index: LOOKUP_INDEX_NAME, ignore_unavailable: true });
