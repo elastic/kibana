@@ -12,7 +12,11 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
-import { getTestRunWorkflowYaml, getWorkflowWithLoopYaml } from '../../fixtures/workflows';
+import {
+  getTestRunEventTabWorkflowYaml,
+  getTestRunWorkflowYaml,
+  getWorkflowWithLoopYaml,
+} from '../../fixtures/workflows';
 import { getWorkflowWithEventInputYaml } from '../../fixtures/workflows/console_workflows';
 
 test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic] }, () => {
@@ -56,7 +60,9 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     const workflowName = 'Test Workflow Event Tab From Editor';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getTestRunEventTabWorkflowYaml(workflowName)
+    );
     await pageObjects.workflowEditor.saveWorkflow();
 
     await pageObjects.workflowEditor.clickRunButton();
