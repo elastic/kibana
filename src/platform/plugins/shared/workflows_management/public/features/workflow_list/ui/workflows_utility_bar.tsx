@@ -99,6 +99,12 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiPopover
+                        aria-label={i18n.translate(
+                          'workflows.utilityBar.bulkActionsPopoverAriaLabel',
+                          {
+                            defaultMessage: 'Bulk actions',
+                          }
+                        )}
                         isOpen={isPopoverOpen}
                         closePopover={closePopover}
                         panelPaddingSize="none"
