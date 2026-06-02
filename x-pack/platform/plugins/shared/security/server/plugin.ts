@@ -255,7 +255,7 @@ export class SecurityPlugin
     const serverBaseUrl = `${protocol}://${hostname}:${port}`;
 
     this.kibanaServerURL =
-      core.http.basePath.publicBaseUrl ?? config.mcp?.oauth2?.metadata?.resource ?? serverBaseUrl;
+      core.http.basePath.publicBaseUrl ?? serverBaseUrl;
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
