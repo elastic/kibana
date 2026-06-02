@@ -33,6 +33,7 @@
     "@kbn/esql-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/resizable-layout",
-    "@kbn/search-errors"
+    "@kbn/search-errors",
+    "@kbn/search-response-warnings"
   ]
 }
