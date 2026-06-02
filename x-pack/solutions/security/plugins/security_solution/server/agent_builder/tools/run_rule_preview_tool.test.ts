@@ -118,8 +118,8 @@ describe('runRulePreviewTool', () => {
     await tool.handler(
       {
         rule: { query: 'FROM logs-* | LIMIT 10', interval: '5m' },
-        timeframeStart: 'now-1h',
-        timeframeEnd: 'now',
+        timeframeStart: '2024-01-01T00:00:00.000Z',
+        timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
       },
       context
@@ -149,8 +149,8 @@ describe('runRulePreviewTool', () => {
     const result = await tool.handler(
       {
         rule: validRule,
-        timeframeStart: 'now-1h',
-        timeframeEnd: 'now',
+        timeframeStart: '2024-01-01T00:00:00.000Z',
+        timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
       },
       context
@@ -167,7 +167,7 @@ describe('runRulePreviewTool', () => {
         body: expect.objectContaining({
           type: 'esql',
           query: 'FROM logs-* | LIMIT 10',
-          // ~1h / 5m interval => 12 invocations
+          // 1h / 5m interval => 12 invocations
           invocationCount: 12,
         }),
       })
