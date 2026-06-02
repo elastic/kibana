@@ -26,7 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./multiple_data_views'));
     loadTestFile(require.resolve('./_log_stream_embeddable'));
-    loadTestFile(require.resolve('./_esql_embeddable'));
     loadTestFile(require.resolve('./_new_panel_embeddable'));
     loadTestFile(require.resolve('./_save_session_to_dashboard'));
   });

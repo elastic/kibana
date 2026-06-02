@@ -32,6 +32,7 @@ import { shouldShowVar, getVarsControlledByVarGroups } from '../../../services/v
 import type { VarGroupSelection } from '../../../services/var_group_helpers';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
+import { PackagePolicyConditionField } from './package_policy_condition_field';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { VarGroupSelector } from './var_group_selector';
 
@@ -103,6 +104,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  showConditionField?: boolean;
   varGroups?: RegistryVarGroup[];
   varGroupSelections?: VarGroupSelection;
   onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
@@ -118,6 +120,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    showConditionField = false,
     varGroups,
     varGroupSelections = {},
     onVarGroupSelectionChange,
@@ -329,7 +332,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
               },
               sections
             )}
-            {allAdvancedVars.length ? (
+            {allAdvancedVars.length || showConditionField ? (
               <Fragment>
                 <EuiFlexItem>
                   {/* Wrapper div to prevent button from going full width */}
@@ -360,6 +363,19 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                     ) : null}
                   </EuiFlexGroup>
                 </EuiFlexItem>
+                {isShowingAdvanced && showConditionField ? (
+                  <EuiFlexItem>
+                    <PackagePolicyConditionField
+                      value={packagePolicyInput.condition ?? ''}
+                      onChange={(v) => updatePackagePolicyInput({ condition: v })}
+                      isInvalid={
+                        Boolean(forceShowErrors) && Boolean(inputValidationResults.condition)
+                      }
+                      errors={inputValidationResults.condition ?? null}
+                      dataTestSubj="packagePolicyInputConditionInput"
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
                       const { name: varName, type: varType } = varDef;

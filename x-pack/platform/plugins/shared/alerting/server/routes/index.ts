@@ -17,7 +17,7 @@ import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute } from './rule/apis/get/external/get_rule_route';
 import { getInternalRuleRoute } from './rule/apis/get/internal/get_internal_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
-import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
+import { deleteRuleRoute, internalDeleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
@@ -128,6 +128,7 @@ export function defineRoutes(opts: RouteOptions) {
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
+  internalDeleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);

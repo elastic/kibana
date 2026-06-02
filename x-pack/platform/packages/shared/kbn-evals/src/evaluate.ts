@@ -9,13 +9,6 @@ import { hostname as osHostname } from 'os';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
-import {
-  DATASET_UUID_NAMESPACE,
-  EVALS_DATASET_UPSERT_URL,
-  EVALS_DATASET_URL,
-  GetEvaluationDatasetResponse,
-} from '@kbn/evals-common';
-import { v5 as uuidv5 } from 'uuid';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
@@ -23,22 +16,13 @@ import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
-import {
-  getEvaluationsKbnClient,
-  checkEvaluationsPluginEnabled,
-} from './utils/evaluations_kbn_client';
+import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import {
-  mapToEvaluationScoreDocuments,
-  exportEvaluations,
-  buildSingleScoreDocument,
-} from './utils/report_model_score';
 import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
@@ -48,10 +32,12 @@ import {
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
+import { EvalsClient } from './utils/evals_client';
+import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
+import { buildIngestRequest } from './utils/build_ingest_request';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
-  EvaluationDatasetWithId,
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
@@ -105,34 +91,34 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  evaluationsKbnClient: [
+  evalsClient: [
     async ({ kbnClient, log }, use) => {
-      await use(getEvaluationsKbnClient({ kbnClient, log }));
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
+      await evalsClient.assertPluginEnabled();
+      await use(evalsClient);
     },
     { scope: 'worker' },
   ],
-  evaluationsPluginEnabled: [
-    async ({ evaluationsKbnClient, log }, use) => {
-      await use(await checkEvaluationsPluginEnabled({ kbnClient: evaluationsKbnClient, log }));
+  workerExecutionId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
     },
     { scope: 'worker' },
   ],
-  workerRunId: [
+  workerExperimentId: [
     async ({}, use) => {
       await use({ current: undefined as string | undefined });
     },
     { scope: 'worker' },
   ],
   fetch: [
-    async ({ kbnClient, log, workerRunId }, use) => {
-      // Add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client).
-      // workerRunId.current is set by executorClient after connector resolution so
-      // inference requests carry the per-model run ID in OTel baggage.
+    async ({ kbnClient, log, workerExecutionId, workerExperimentId }, use) => {
       const fetch = httpHandlerFromKbnClient({
         kbnClient,
         log,
-        getRunId: () => workerRunId.current,
+        getExecutionId: () => workerExecutionId.current,
+        getExperimentId: () => workerExperimentId.current,
       });
       await use(fetch);
     },
@@ -249,14 +235,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
-        evaluationsKbnClient,
-        evaluationsPluginEnabled,
-        workerRunId,
+        evalsClient,
         connector,
         evaluationConnector,
         repetitions,
-        evaluationsEsClient,
         reportModelScore,
+        workerExecutionId,
+        workerExperimentId,
       },
       use
     ) => {
@@ -284,122 +269,75 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
+      const suiteId = process.env.EVAL_SUITE_ID;
+      const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+      const baseExecutionId = process.env.TEST_RUN_ID;
+      const executionId =
+        baseExecutionId && model.id ? `${baseExecutionId}::${model.id}` : baseExecutionId;
 
-      const baseRunId = process.env.TEST_RUN_ID;
-      if (!baseRunId) {
-        throw new Error('runId must be provided via TEST_RUN_ID environment variable');
-      }
+      workerExecutionId.current = executionId;
 
-      const currentRunId = `${baseRunId}-${connector.id}`;
-      log.info(`Run ID for this worker: ${currentRunId}`);
-
-      workerRunId.current = currentRunId;
-
-      const shouldPreflightExport =
-        process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
-        Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
-      if (shouldPreflightExport) {
-        try {
-          log.info('Running evaluations Elasticsearch export preflight');
-          await scoreRepository.preflightExport();
-        } catch (error) {
-          throw new Error('Evaluation results export preflight failed', { cause: error });
-        }
-      }
-
-      const upsertDataset = evaluationsPluginEnabled
-        ? async (dataset: EvaluationDataset) => {
-            await evaluationsKbnClient.request({
-              path: EVALS_DATASET_UPSERT_URL,
-              method: 'POST',
-              body: {
-                name: dataset.name,
-                description: dataset.description,
-                examples: dataset.examples.map(toDatasetRouteExample),
-              },
-              retries: 0,
-            });
-          }
-        : undefined;
-
-      const getDatasetByName = evaluationsPluginEnabled
-        ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
-            const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
-            const response = await evaluationsKbnClient.request({
-              path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
-              method: 'GET',
-              retries: 0,
-            });
-            const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
-
-            return {
-              id: datasetResponse.id,
-              name: datasetResponse.name,
-              description: datasetResponse.description,
-              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                id,
-                input,
-                output,
-                metadata,
-              })),
-            };
-          }
-        : undefined;
-
-      const incrementalGitMetadata = getGitMetadata();
-      const incrementalHostName = osHostname();
+      const gitMetadata = getGitMetadata();
+      const hostName = osHostname();
 
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        runId: currentRunId,
+        executionId,
         repetitions,
-        upsertDataset,
-        getDatasetByName,
-        onEvaluationComplete: async (event) => {
-          const document = buildSingleScoreDocument({
-            event,
-            taskModel: model,
-            evaluatorModel,
-            runId: currentRunId,
-            totalRepetitions: repetitions,
-            timestamp: new Date().toISOString(),
-            gitMetadata: incrementalGitMetadata,
-            hostName: incrementalHostName,
+        upsertDataset: async (dataset: EvaluationDataset) => {
+          await evalsClient.upsertDataset({
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
           });
-          await scoreRepository.indexSingleScore(document);
+        },
+        getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
+        onExperimentStart: async ({ experimentId }) => {
+          workerExperimentId.current = experimentId;
+        },
+        onEvaluationComplete: async (event) => {
+          try {
+            const ingestRequests = buildIngestRequest({
+              taskModel: model,
+              evaluatorModel,
+              repetitions,
+              hostName,
+              gitMetadata,
+              suiteId,
+              executionId,
+              buildkiteMetadata,
+              source: { kind: 'event', event },
+              log,
+            });
+            const results = await Promise.all(
+              ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
+            );
+            for (const result of results) {
+              if (result.failed.length > 0) {
+                log.warning(
+                  `Score ingest partially failed for example ${event.exampleId}: ${result.failed
+                    .map((f) => f.reason)
+                    .join(', ')}`
+                );
+              }
+            }
+          } catch (error) {
+            log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
+          }
         },
       });
 
       await use(executorClient);
 
-      const experiments = await executorClient.getRanExperiments();
-      const documents = await mapToEvaluationScoreDocuments({
-        experiments,
-        taskModel: model,
-        evaluatorModel,
-        runId: currentRunId,
-        totalRepetitions: repetitions,
-      });
-
-      try {
-        await exportEvaluations(documents, scoreRepository, log);
-      } catch (error) {
-        log.error(
-          new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
-            { cause: error }
-          )
-        );
-        throw error;
+      const datasetRunResults = await executorClient.getDatasetRunResults();
+      for (const result of datasetRunResults) {
+        await reportModelScore(evalsClient, result.id, log, {
+          taskModelId: model.id,
+          suiteId,
+        });
       }
-
-      await reportModelScore(scoreRepository, currentRunId, log, {
-        taskModelId: model.id,
-        suiteId: process.env.EVAL_SUITE_ID,
-      });
     },
     {
       scope: 'worker',
@@ -472,21 +410,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           })
         : esClient;
       await use(traceEsClient);
-    },
-    { scope: 'worker' },
-  ],
-  evaluationsEsClient: [
-    async ({ esClient }, use) => {
-      const esUrl = process.env.EVALUATIONS_ES_URL;
-      const apiKey = process.env.EVALUATIONS_ES_API_KEY;
-      const evaluationsEsClient = esUrl
-        ? createEsClientForTesting({
-            esUrl,
-            isCloud: isElasticCloudEsUrl(esUrl),
-            ...(apiKey ? { auth: { apiKey } } : {}),
-          })
-        : esClient;
-      await use(evaluationsEsClient);
     },
     { scope: 'worker' },
   ],
