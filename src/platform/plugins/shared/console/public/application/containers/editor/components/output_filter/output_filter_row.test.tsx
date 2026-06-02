@@ -98,10 +98,10 @@ describe('OutputFilterRow', () => {
       expect(screen.getByTestId('invertFilter')).toBeInTheDocument();
     });
 
-    it('clicking invert match calls setInvertMatch', async () => {
+    it('clicking invert match updates draft state — setInvertMatch not called until Apply', async () => {
       renderComponent();
       await userEvent.click(screen.getByTestId('invertFilter'));
-      expect(mockSetInvertMatch).toHaveBeenCalledWith(true);
+      expect(mockSetInvertMatch).not.toHaveBeenCalled();
     });
   });
 

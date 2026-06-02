@@ -94,7 +94,6 @@ export const OutputFilterRow = () => {
 
   const handleInvertMatchChange = (checked: boolean) => {
     setDraftInvertMatch(checked);
-    setInvertMatch(checked);
   };
 
   return (

@@ -647,12 +647,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isOutputFilterRowVisible() {
-    return await this.testSubjects.exists('filterJq');
+    return (
+      (await this.testSubjects.exists('filterJq')) ||
+      (await this.testSubjects.exists('filterRegex'))
+    );
   }
 
   public async typeInFilterInput(text: string) {
-    const input = await this.testSubjects.find('filterJq');
-    await input.clearValue();
+    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const input = await this.testSubjects.find(testSubj);
+    await input.clearValueWithKeyboard();
     await input.type(text);
   }
 

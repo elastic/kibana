@@ -28,7 +28,7 @@ export function applyResponseFilter({ text, contentType, state }: ApplyResponseF
     try {
       const parsed = JSON.parse(text);
       const result = executeScript(parsed, state.expression);
-      return JSON.stringify(result, null, 2);
+      return JSON.stringify(result, null, 2) ?? text;
     } catch {
       return text;
     }

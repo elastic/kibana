@@ -190,7 +190,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   }, [readOnlySettings, data, value, statusCodeClassNames]);
 
   const displayValue = useMemo(() => {
-    if (data?.length === 1 && filterState.expression) {
+    if (data?.length === 1 && data[0].response.statusCode === 200 && filterState.expression) {
       return applyResponseFilter({
         text: value,
         contentType: data[0].response.contentType,
