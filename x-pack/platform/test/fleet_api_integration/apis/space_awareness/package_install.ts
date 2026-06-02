@@ -353,5 +353,163 @@ export default function (providerContext: FtrProviderContext) {
         expect(err?.message).to.match(/400 "Bad Request"/);
       });
     });
+
+    describe('multispace upgrade correctness', () => {
+      describe('with package installed in default space and kibana assets installed in an additional space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+          await apiClient.installPackageKibanaAssets(
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
+            TEST_SPACE_1
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should preserve additional_spaces_installed_kibana refs after reinstall from primary space', async () => {
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain(TEST_SPACE_1);
+          expect(additionalSpaceKeys).not.to.contain('default');
+
+          const dashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
+            TEST_SPACE_1
+          ]?.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
+          expect(dashboard).not.eql(undefined);
+        });
+      });
+
+      describe('with package installed in default space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should route refs to additional_spaces_installed_kibana when installing from a non-primary space', async () => {
+          await apiClient.installPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+              force: true,
+            },
+            TEST_SPACE_1
+          );
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
+
+          const primaryDashboard = res.item.installationInfo!.installed_kibana.find(
+            (asset) =>
+              asset.id === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519' &&
+              asset.type === 'dashboard'
+          );
+          expect(primaryDashboard).not.eql(undefined);
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain(TEST_SPACE_1);
+        });
+      });
+
+      describe('with package installed in a non-default space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+              force: true,
+            },
+            TEST_SPACE_1
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should route refs to additional_spaces_installed_kibana when reinstalling from a non-primary space', async () => {
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql(TEST_SPACE_1);
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain('default');
+          expect(additionalSpaceKeys).not.to.contain(TEST_SPACE_1);
+
+          const dashboard =
+            res.item.installationInfo!.additional_spaces_installed_kibana?.default?.find(
+              (asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519'
+            );
+          expect(dashboard).not.eql(undefined);
+        });
+      });
+    });
   });
 }

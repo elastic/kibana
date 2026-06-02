@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isWellKnownWorkflowTriggerSource, WORKFLOW_EVENTS_VALUES_SET } from '@kbn/workflows';
+import {
+  isTriggerType,
+  isWellKnownWorkflowTriggerSource,
+  WORKFLOW_EVENTS_VALUES_SET,
+} from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
@@ -123,6 +127,11 @@ export interface WorkflowTelemetryMetadata {
    */
   triggerCount: number;
   /**
+   * Whether the workflow defines at least one extension (non-built-in) trigger type,
+   * i.e. event-driven triggers that emit to `.workflows-events`.
+   */
+  hasCustomEventTrigger: boolean;
+  /**
    * Whether at least one trigger config includes an on.condition value.
    * The condition text is never emitted, only presence/absence.
    */
@@ -192,6 +201,7 @@ export function extractWorkflowMetadata(
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasCustomEventTrigger: false,
     hasTriggerConditions: false,
     hasTriggerWorkflowEventsIgnore: false,
     hasTriggerWorkflowEventsAllow: false,
@@ -256,6 +266,14 @@ export function extractWorkflowMetadata(
       triggers.filter((trigger) => trigger?.type).map((trigger) => trigger.type as string)
     ),
   ];
+  const hasCustomEventTrigger = triggers.some((trigger) => {
+    if (trigger == null || typeof trigger !== 'object' || !('type' in trigger)) {
+      return false;
+    }
+    const triggerType = (trigger as { type: unknown }).type;
+    return typeof triggerType === 'string' && !isTriggerType(triggerType);
+  });
+
   const hasTriggerConditions = triggers.some((trigger) => {
     if (trigger == null || typeof trigger !== 'object') {
       return false;
@@ -310,6 +328,7 @@ export function extractWorkflowMetadata(
     inputCount,
     constCount,
     triggerCount: triggers.length,
+    hasCustomEventTrigger,
     hasTriggerConditions,
     hasTriggerWorkflowEventsIgnore,
     hasTriggerWorkflowEventsAllow,

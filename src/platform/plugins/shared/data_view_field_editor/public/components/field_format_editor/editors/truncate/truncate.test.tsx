@@ -20,7 +20,7 @@ const fieldType = 'string';
 
 const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => ({ fieldLength: 10 })),
-  reactConvert: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
+  convertToReact: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
 });
 
 const formatParams = {
