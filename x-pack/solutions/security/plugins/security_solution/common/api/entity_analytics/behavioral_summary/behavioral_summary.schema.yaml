@@ -18,6 +18,7 @@ paths:
           schema:
             type: string
             minLength: 1
+            maxLength: 1000
       requestBody:
         required: true
         content:
@@ -55,8 +56,10 @@ components:
           description: Start time as epoch milliseconds; only anomalies at or after this timestamp are returned
         jobIds:
           type: array
+          maxItems: 200
           items:
             type: string
+            maxLength: 150
           description: Filter results to the specified ML job IDs; returns all jobs when omitted
         sort:
           type: array
@@ -93,51 +96,66 @@ components:
       properties:
         jobId:
           type: string
+          maxLength: 150
         jobName:
           type: string
+          maxLength: 1000
           nullable: true
           description: Human-readable display name for the ML job (from custom_settings.security_app_display_name)
         threatTactics:
           type: array
+          maxItems: 100
           items:
             type: string
+            maxLength: 150
           description: MITRE ATT&CK tactic names associated with this job
         threatTechniques:
           type: array
+          maxItems: 100
           items:
             type: string
+            maxLength: 150
           description: MITRE ATT&CK technique names associated with this job
         detectorIndex:
           type: number
         detectorFunction:
           type: string
+          maxLength: 50
           description: ML detector function (e.g. rare, high_count, time_of_day)
         fieldName:
           type: string
+          maxLength: 100
           nullable: true
           description: The field the detector analyses (ML field_name)
         byFieldName:
           type: string
+          maxLength: 100
           nullable: true
         byFieldValue:
           type: string
+          maxLength: 100
           nullable: true
         overFieldName:
           type: string
+          maxLength: 100
           nullable: true
         overFieldValue:
           type: string
+          maxLength: 100
           nullable: true
         partitionFieldName:
           type: string
+          maxLength: 100
           nullable: true
         partitionFieldValue:
           type: string
+          maxLength: 100
           nullable: true
         recordScore:
           type: number
         timestamp:
           type: string
+          maxLength: 100
           description: ISO-8601 timestamp of the anomaly bucket
         actual:
           type: array
@@ -149,11 +167,14 @@ components:
             type: number
         baselineValues:
           type: array
+          maxItems: 100
           items:
             type: string
+            maxLength: 200
           description: Baseline distribution values for the anomaly bucket
         anomalousValue:
           type: string
+          maxLength: 200
           description: The anomalous value observed by the detector
         anomalousValueCount:
           type: number
@@ -167,8 +188,10 @@ components:
       properties:
         entityId:
           type: string
+          maxLength: 200
         entityType:
           type: string
+          maxLength: 100
         anomalies:
           type: array
           items:

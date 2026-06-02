@@ -33,7 +33,7 @@ export const BehavioralSummaryRequestBody = lazySchema(() =>
     /**
      * Filter results to the specified ML job IDs; returns all jobs when omitted
      */
-    jobIds: z.array(z.string()).optional(),
+    jobIds: z.array(z.string().max(150)).max(200).optional(),
     /**
      * Sort criteria applied in order.
      */
@@ -51,49 +51,49 @@ export type BehavioralSummaryRequestBody = z.infer<typeof BehavioralSummaryReque
 
 export const AnomalySummaryEntry = lazySchema(() =>
   z.object({
-    jobId: z.string(),
+    jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job (from custom_settings.security_app_display_name)
      */
-    jobName: z.string().nullable().optional(),
+    jobName: z.string().max(1000).nullable().optional(),
     /**
      * MITRE ATT&CK tactic names associated with this job
      */
-    threatTactics: z.array(z.string()).optional(),
+    threatTactics: z.array(z.string().max(150)).max(100).optional(),
     /**
      * MITRE ATT&CK technique names associated with this job
      */
-    threatTechniques: z.array(z.string()).optional(),
+    threatTechniques: z.array(z.string().max(150)).max(100).optional(),
     detectorIndex: z.number(),
     /**
      * ML detector function (e.g. rare, high_count, time_of_day)
      */
-    detectorFunction: z.string(),
+    detectorFunction: z.string().max(50),
     /**
      * The field the detector analyses (ML field_name)
      */
-    fieldName: z.string().nullable(),
-    byFieldName: z.string().nullable(),
-    byFieldValue: z.string().nullable(),
-    overFieldName: z.string().nullable(),
-    overFieldValue: z.string().nullable(),
-    partitionFieldName: z.string().nullable(),
-    partitionFieldValue: z.string().nullable(),
+    fieldName: z.string().max(100).nullable(),
+    byFieldName: z.string().max(100).nullable(),
+    byFieldValue: z.string().max(100).nullable(),
+    overFieldName: z.string().max(100).nullable(),
+    overFieldValue: z.string().max(100).nullable(),
+    partitionFieldName: z.string().max(100).nullable(),
+    partitionFieldValue: z.string().max(100).nullable(),
     recordScore: z.number(),
     /**
      * ISO-8601 timestamp of the anomaly bucket
      */
-    timestamp: z.string(),
+    timestamp: z.string().max(100),
     actual: z.array(z.number()),
     typical: z.array(z.number()),
     /**
      * Baseline distribution values for the anomaly bucket
      */
-    baselineValues: z.array(z.string()),
+    baselineValues: z.array(z.string().max(200)).max(100),
     /**
      * The anomalous value observed by the detector
      */
-    anomalousValue: z.string().optional(),
+    anomalousValue: z.string().max(200).optional(),
     /**
      * Count of anomalous events in the bucket
      */
@@ -104,8 +104,8 @@ export type AnomalySummaryEntry = z.infer<typeof AnomalySummaryEntry>;
 
 export const BehavioralSummaryResponse = lazySchema(() =>
   z.object({
-    entityId: z.string(),
-    entityType: z.string().optional(),
+    entityId: z.string().max(200),
+    entityType: z.string().max(100).optional(),
     anomalies: z.array(AnomalySummaryEntry),
   })
 );
@@ -113,7 +113,7 @@ export type BehavioralSummaryResponse = z.infer<typeof BehavioralSummaryResponse
 
 export const GetBehavioralSummaryRequestParams = lazySchema(() =>
   z.object({
-    entity_id: z.string().min(1),
+    entity_id: z.string().min(1).max(1000),
   })
 );
 export type GetBehavioralSummaryRequestParams = z.infer<typeof GetBehavioralSummaryRequestParams>;
