@@ -64,11 +64,11 @@ const ControlledModal = ({
 };
 
 export default {
-  title: 'Navigation Customization',
+  title: 'Navigation Customization/Modal',
   parameters: { layout: 'centered' },
 } satisfies Meta;
 
 export const ModalWithCallout: StoryObj = {
-  name: 'Modal — with space callout',
+  name: 'with space callout',
   render: () => <ControlledModal items={BASE_ITEMS} isCalloutDismissed={false} />,
 };

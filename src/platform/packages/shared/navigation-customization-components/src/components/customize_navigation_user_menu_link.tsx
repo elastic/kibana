@@ -35,9 +35,6 @@ export const CustomizeNavigationUserMenuLink = ({ closePopover, onClick }: Props
         onClick();
       }}
       data-test-subj="customizeNavigationUserMenuLink"
-      css={css`
-        min-inline-size: 22em;
-      `}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -45,7 +42,12 @@ export const CustomizeNavigationUserMenuLink = ({ closePopover, onClick }: Props
             defaultMessage: 'Customize navigation',
           })}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            line-height: 0;
+          `}
+        >
           <EuiBetaBadge
             css={css`
               background-color: ${euiTheme.colors.backgroundFilledPrimary};
