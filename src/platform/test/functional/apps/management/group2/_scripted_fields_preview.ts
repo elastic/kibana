@@ -29,17 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('logstash-*');
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      // createIndexPattern lands on the data view detail page; open the scripted field form directly.
       await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(SCRIPTED_FIELD_NAME);
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.navigateToDataViews();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
