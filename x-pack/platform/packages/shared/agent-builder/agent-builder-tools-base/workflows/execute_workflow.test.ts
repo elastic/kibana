@@ -13,14 +13,17 @@ import { executeWorkflow } from './execute_workflow';
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 const mockSetAttribute = jest.fn();
+const mockSpanFactory = jest.fn((_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
+  fn({ setAttribute: mockSetAttribute })
+);
 
 jest.mock('@kbn/inference-tracing', () => ({
-  withActiveInferenceSpan: (_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
-    fn({ setAttribute: mockSetAttribute }),
+  withActiveInferenceSpan: (...args: unknown[]) =>
+    (mockSpanFactory as unknown as (...a: unknown[]) => unknown)(...args),
   ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
 }));
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+jest.mock('./get_execution_state', () => ({
   toWorkflowExecutionState: jest.fn((execution) => ({
     execution_id: execution.id,
     status: execution.status,
@@ -61,7 +64,7 @@ describe('executeWorkflow', () => {
     jest.clearAllMocks();
   });
 
-  it('forwards metadata to executeWorkflow when provided', async () => {
+  it('forwards metadata to executeWorkflow when provided (saved workflow)', async () => {
     const result = await executeWorkflow({
       workflowId: 'wf-1',
       workflowParams: {},
@@ -137,5 +140,59 @@ describe('executeWorkflow', () => {
 
     expect(result.success).toBe(false);
     expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalled();
+  });
+
+  it('forwards inline yaml and omits workflow id from span attributes when not provided', async () => {
+    const result = await executeWorkflow({
+      yaml: 'version: "1"\nname: foo\ntriggers:\n  - type: manual\nsteps: []\n',
+      workflowParams: { foo: 'bar' },
+      request,
+      spaceId: 'default',
+      workflowApi: mockWorkflowApi,
+    });
+
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yaml: 'version: "1"\nname: foo\ntriggers:\n  - type: manual\nsteps: []\n',
+        workflowId: undefined,
+        name: undefined,
+        inputs: { foo: 'bar' },
+      })
+    );
+    expect(mockSpanFactory).toHaveBeenCalledWith(
+      'Workflow: ephemeral',
+      expect.objectContaining({
+        attributes: expect.not.objectContaining({ 'elastic.workflow.id': expect.anything() }),
+      }),
+      expect.any(Function)
+    );
+  });
+
+  it('forwards inline yaml with explicit workflowId and includes it in span attributes', async () => {
+    await executeWorkflow({
+      yaml: 'version: "1"\nname: foo\ntriggers:\n  - type: manual\nsteps: []\n',
+      workflowId: 'preview-id',
+      name: 'preview',
+      workflowParams: {},
+      request,
+      spaceId: 'default',
+      workflowApi: mockWorkflowApi,
+    });
+
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yaml: 'version: "1"\nname: foo\ntriggers:\n  - type: manual\nsteps: []\n',
+        workflowId: 'preview-id',
+        name: 'preview',
+      })
+    );
+    expect(mockSpanFactory).toHaveBeenCalledWith(
+      'Workflow: preview-id',
+      expect.objectContaining({
+        attributes: expect.objectContaining({ 'elastic.workflow.id': 'preview-id' }),
+      }),
+      expect.any(Function)
+    );
   });
 });
