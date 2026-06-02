@@ -251,6 +251,14 @@
         "eis/openai-gpt-5.2",
         "eis/openai-gpt-5.4"
       ]
+    },
+    {
+      "id": "security-alert-triage",
+      "name": "Security Alert Triage",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
+      "tags": ["security", "alert-triage"],
+      "ciLabels": ["evals:security-alert-triage"]
     }
   ]
 }

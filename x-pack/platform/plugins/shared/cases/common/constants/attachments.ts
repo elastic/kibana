@@ -108,6 +108,8 @@ export const PERSISTABLE_ATTACHMENT_TYPES = new Set<string>(
  */
 export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
   [LEGACY_USER_TYPE]: COMMENT_ATTACHMENT_TYPE,
+  // Note: `actions` is folded into `security.endpoint`
+  [LEGACY_ACTIONS_TYPE]: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } as const;
 
 /**
