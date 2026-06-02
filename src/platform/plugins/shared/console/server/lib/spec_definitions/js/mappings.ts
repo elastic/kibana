@@ -41,7 +41,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
         default: '',
       },
       dynamic_date_formats: ['yyyy-MM-dd'],
-      dynamic: {__one_of: ['true', 'false', 'strict', 'runtime']},
+      dynamic: { __one_of: ['true', 'false', 'strict', 'runtime'] },
       dynamic_templates: DynamicTemplateSettings,
       date_detection: BOOLEAN,
       numeric_detection: BOOLEAN,
@@ -69,7 +69,6 @@ const DenseVectorIndexOptions = {
   ef_construction: 100,
   confidence_interval: 0,
 };
-
 
 const FieldMappingOptions = {
   type: {
@@ -293,17 +292,11 @@ const FieldMappingOptions = {
   dims: 3,
 };
 
-const DynamicTemplateMatchTypes = [{
-  __one_of: [
-    'string',
-    'object',
-    'long',
-    'double',
-    'boolean',
-    'date',
-    'binary',
-  ],
-}]
+const DynamicTemplateMatchTypes = [
+  {
+    __one_of: ['string', 'object', 'long', 'double', 'boolean', 'date', 'binary'],
+  },
+];
 
 const DynamicTemplateSettings = [
   {
@@ -316,5 +309,5 @@ const DynamicTemplateSettings = [
       unmatch: '',
       unmatch_mapping_type: DynamicTemplateMatchTypes,
     },
-  }
-]
+  },
+];
