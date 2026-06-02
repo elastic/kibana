@@ -17,6 +17,7 @@ import styled from 'styled-components';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
+import { useHasRuleChangeHistory } from '../../../../rule_management/api/hooks/use_has_rule_change_history';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
@@ -105,11 +106,16 @@ const RuleActionsOverflowComponent = ({
 
   const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
 
+  const { hasHistory } = useHasRuleChangeHistory({
+    ruleId: rule?.id ?? '',
+    enabled: isRuleChangesHistoryEnabled && rule != null,
+  });
+
   const actions = useMemo(
     () =>
       rule != null
         ? [
-            ...(isRuleChangesHistoryEnabled
+            ...(isRuleChangesHistoryEnabled && hasHistory
               ? [
                   <EuiContextMenuItem
                     key={i18nActions.RULE_CHANGES_HISTORY}
@@ -273,6 +279,7 @@ const RuleActionsOverflowComponent = ({
     [
       rule,
       isRuleChangesHistoryEnabled,
+      hasHistory,
       canDuplicateRuleWithActions,
       canEditRules,
       canReadRules,
