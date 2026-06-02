@@ -17,6 +17,7 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import type { AdditionalContext } from '../utils';
+import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import type { MissingGroupsRecord } from './check_missing_group';
@@ -115,6 +116,17 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             bucketKey: missingGroup.bucketKey,
           };
         }
+      }
+
+      // When getData returns the global '*' no-data entry (e.g. 0 composite buckets) and
+      // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
+      // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
+      const keys = Object.keys(currentValues);
+      if (
+        keys.includes(UNGROUPED_FACTORY_KEY) &&
+        keys.some((k) => k !== UNGROUPED_FACTORY_KEY)
+      ) {
+        delete currentValues[UNGROUPED_FACTORY_KEY];
       }
 
       const evaluations: Record<string, Evaluation> = {};

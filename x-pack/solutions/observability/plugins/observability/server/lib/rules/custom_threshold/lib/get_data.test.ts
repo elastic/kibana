@@ -60,7 +60,7 @@ const esQueryConfig = {
   ignoreFilterIfFieldNotInIndex: false,
 };
 
-const logger = {} as Logger;
+const logger = { debug: jest.fn() } as unknown as Logger;
 
 const expectedNoDataResponse = {
   [UNGROUPED_FACTORY_KEY]: {
