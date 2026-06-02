@@ -10,14 +10,11 @@ import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
-import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('./map_config');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../containers/fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('./index_patterns_missing_prompt', () => ({
@@ -111,200 +108,60 @@ describe('EmbeddedMapComponent', () => {
     jest.clearAllMocks();
   });
 
-  describe('newDataViewPickerEnabled disabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    });
-
-    test('renders', async () => {
-      const { getByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(getByTestId('EmbeddedMapComponent')).toBeInTheDocument();
-      });
-    });
-
-    test('renders Map', async () => {
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(getByTestId('MapPanel')).toBeInTheDocument();
-        expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
-      });
-    });
-
-    test('renders IndexPatternsMissingPrompt', async () => {
-      const state = {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [],
-        },
-      };
-      const store = createMockStore(state);
-
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={store}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(queryByTestId('MapPanel')).not.toBeInTheDocument();
-        expect(getByTestId('IndexPatternsMissingPrompt')).toBeInTheDocument();
-      });
-    });
-
-    test('map hidden on close', async () => {
-      mockGetStorage.mockReturnValue(false);
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-
-      expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
-      getByTestId('false-toggle-network-map').click();
-
-      await waitFor(() => {
-        expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
-        expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
-      });
-    });
-
-    test('map visible on open', async () => {
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-
-      expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
-      getByTestId('true-toggle-network-map').click();
-
-      await waitFor(() => {
-        expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
-        expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
-      });
-    });
-
-    test('On mount, selects existing Kibana data views that match any selected index pattern', async () => {
-      const state = {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [filebeatDataView],
-        },
-      };
-      const store = createMockStore(state);
-      render(
-        <TestProviders store={store}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
-        expect(dataViewArg).toEqual([filebeatDataView]);
-      });
-    });
-
-    test('On rerender with new selected patterns, selects existing Kibana data views that match any selected index pattern', async () => {
-      const state = {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [filebeatDataView],
-        },
-      };
-      const store = createMockStore(state);
-      const { rerender } = render(
-        <TestProviders store={store}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
-        expect(dataViewArg).toEqual([filebeatDataView]);
-      });
-      rerender(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
-        const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][1];
-        expect(dataViewArg).toEqual([filebeatDataView, packetbeatDataView]);
-      });
+  test('renders', async () => {
+    const { getByTestId } = render(
+      <TestProviders store={defaultMockStore}>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(getByTestId('EmbeddedMapComponent')).toBeInTheDocument();
     });
   });
 
-  describe('newDataViewPickerEnabled enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  test('renders Map', async () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders store={defaultMockStore}>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('MapPanel')).toBeInTheDocument();
+      expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
     });
+  });
 
-    test('renders', async () => {
-      const { getByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(getByTestId('EmbeddedMapComponent')).toBeInTheDocument();
-      });
-    });
+  test('map hidden on close', async () => {
+    mockGetStorage.mockReturnValue(false);
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders store={defaultMockStore}>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
 
-    test('renders Map', async () => {
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
+    expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
+    getByTestId('false-toggle-network-map').click();
 
-      await waitFor(() => {
-        expect(getByTestId('MapPanel')).toBeInTheDocument();
-        expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
-      });
-    });
-
-    test('map hidden on close', async () => {
-      mockGetStorage.mockReturnValue(false);
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-
-      expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
-      getByTestId('false-toggle-network-map').click();
-
-      await waitFor(() => {
-        expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
-        expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
-      });
-    });
-
-    test('map visible on open', async () => {
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders store={defaultMockStore}>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
-
+    await waitFor(() => {
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
       expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
-      getByTestId('true-toggle-network-map').click();
+    });
+  });
 
-      await waitFor(() => {
-        expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
-        expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
-      });
+  test('map visible on open', async () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders store={defaultMockStore}>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
+    getByTestId('true-toggle-network-map').click();
+
+    await waitFor(() => {
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
+      expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
     });
   });
 });

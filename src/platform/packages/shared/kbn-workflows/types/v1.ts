@@ -64,6 +64,13 @@ export const ExecutionTypeValues = Object.values(ExecutionType);
 export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
 export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
 export type WorkflowExecutionSortOrder = 'asc' | 'desc';
+export const WorkflowExecutionCollapseFields = [
+  'concurrencyGroupKey',
+  'status',
+  'executedBy',
+  'triggeredBy',
+] as const;
+export type WorkflowExecutionCollapseField = (typeof WorkflowExecutionCollapseFields)[number];
 
 /**
  * An interface representing the state of a step scope during workflow execution.
@@ -104,6 +111,7 @@ export interface EsWorkflowExecution {
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -194,6 +202,21 @@ export interface EsWorkflowStepExecution {
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
+
+  /**
+   * Optional Human-In-The-Loop audit envelope, populated only by
+   * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
+   * every property inside it are optional and MUST be treated as such
+   * by readers — the engine itself remains field-agnostic.
+   */
+  hitl?: {
+    /** Server-resolved username (or API-key principal) that submitted the response. */
+    respondedBy?: string;
+    /** ISO-8601 timestamp the response was recorded server-side. */
+    respondedAt?: string;
+    /** Free-form channel slug identifying the surface that submitted the response. */
+    channel?: string;
+  };
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -268,6 +291,7 @@ export const EsWorkflowSchema = z.object({
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
+  managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -382,6 +406,7 @@ export interface WorkflowDetailDto {
   managedBy?: string | null;
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -428,8 +453,10 @@ export interface WorkflowExecutionEngineModel
     | 'managed'
     | 'managedBy'
     | 'originManagedWorkflowId'
+    | 'managedVersion'
   > {
   isTestRun?: boolean;
+  isEphemeral?: boolean;
   spaceId?: string;
 }
 
@@ -766,6 +793,7 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  managed?: 'all' | 'managed' | 'unmanaged';
 }
 
 export interface RequestOptions {

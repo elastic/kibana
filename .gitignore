@@ -1,4 +1,5 @@
 .aws-config.json
+.bk.yaml
 .signing-config.json
 .ackrc
 /.es
@@ -30,6 +31,10 @@ target
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build

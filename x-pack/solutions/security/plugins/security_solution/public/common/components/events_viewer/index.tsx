@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* TODO: (new data view picker) remove this after new picker is enabled */
-
 import { css } from '@emotion/react';
 import type { SubsetDataTableModel, TableId } from '@kbn/securitysolution-data-table';
 import {
@@ -48,7 +46,6 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
@@ -64,8 +61,6 @@ import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
 import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
@@ -82,7 +77,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  sourcererScope: PageScope;
+  pageScope: PageScope;
   start: string;
   tableId: TableId;
   topRightMenuOptions?: React.ReactNode;
@@ -107,7 +102,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   renderCellValue,
   rowRenderers,
   setSelected,
-  sourcererScope,
+  pageScope,
   start,
   tableId,
   topRightMenuOptions,
@@ -141,43 +136,21 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 
   const { uiSettings, data } = useKibana().services;
 
-  const {
-    browserFields: oldBrowserFields,
-    dataViewId: oldDataViewId,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
-    loading: oldIsLoadingIndexPattern,
-  } = useSourcererDataView(sourcererScope);
-  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(sourcererScope);
-
-  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const isLoadingIndexPattern = newDataViewPickerEnabled
-    ? status !== 'ready'
-    : oldIsLoadingIndexPattern;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
-  const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-
+  const { dataView, status } = useDataView(pageScope);
+  const selectedPatterns = useSelectedPatterns(pageScope);
+  const browserFields = useBrowserFields(pageScope);
+  const isLoadingIndexPattern = status !== 'ready';
+  const dataViewId = dataView.id ?? null;
+  const selectedDataViewId = dataView.id;
   const runtimeMappings = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
-      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
-  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
-
-  const experimentalGetFieldSpec = useCallback(
+    return (dataView.getRuntimeMappings() as RunTimeMappings) ?? {};
+  }, [dataView]);
+  const getFieldSpec = useCallback(
     (fieldName: string) => {
-      return experimentalDataView.fields?.getByName(fieldName)?.toSpec();
+      return dataView.fields?.getByName(fieldName)?.toSpec();
     },
-    [experimentalDataView.fields]
+    [dataView.fields]
   );
-  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -220,7 +193,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
-    sourcererScope,
+    sourcererScope: pageScope,
     editorActionsRef,
     upsertColumn: useCallback(
       (column: ColumnHeaderOptions, index: number) =>
@@ -244,22 +217,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [
-      esQueryConfig,
-      browserFields,
-      globalFilters,
-      start,
-      oldSourcererDataView,
-      experimentalDataView,
-      query,
-      end,
-    ]
+    [esQueryConfig, browserFields, globalFilters, start, dataView, query, end]
   );
 
   const canQueryTimeline = useMemo(
