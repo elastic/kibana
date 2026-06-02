@@ -1,6 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "ignoreDependencies": ["@kbn/*"],
+  "ignorePatterns": [
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/*.stories.*",
+    "**/__mocks__/**"
+  ],
   "rules": {
     "unresolved-imports": "off"
   }
