@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -17,13 +18,13 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/t
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { EventAnnotationListingPageServices } from './get_table_list';
+import type { EventAnnotationListingPageServices } from './components/annotation_listing_page';
+import { ANNOTATION_GROUPS_TAB_TITLE } from './components/use_navigate_to_lens';
 
 export interface EventAnnotationListingStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -61,11 +62,8 @@ export class EventAnnotationListingPlugin
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
-    const tabTitle = i18n.translate('eventAnnotationListing.listingViewTitle', {
-      defaultMessage: 'Annotation groups',
-    });
     const annotationGroupsTabConfig = {
-      title: tabTitle,
+      title: ANNOTATION_GROUPS_TAB_TITLE,
       id: 'annotations',
       getTableList: async (props: TableListTabParentProps) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -96,8 +94,8 @@ export class EventAnnotationListingPlugin
           },
         };
 
-        const { getTableList } = await import('./get_table_list');
-        return getTableList(props, services);
+        const { EventAnnotationListingPage } = await import('./components/annotation_listing_page');
+        return <EventAnnotationListingPage services={services} parentProps={props} />;
       },
     };
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);

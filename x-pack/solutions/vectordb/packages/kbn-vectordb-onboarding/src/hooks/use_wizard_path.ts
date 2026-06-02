@@ -6,7 +6,7 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import type { VectorPath } from './snippets';
+import type { VectorPath } from '../onboarding/types';
 
 const isVectorPath = (value: string): value is VectorPath =>
   value === 'have-vectors' || value === 'generate-vectors';
