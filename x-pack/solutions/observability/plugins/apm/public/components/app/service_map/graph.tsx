@@ -627,11 +627,13 @@ function GraphInner({
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
-                <ServiceMapOptionsPanelToggle
-                  isExpanded={panelExpanded}
-                  onExpandedChange={setPanelExpanded}
-                  hasActiveControls={hasActiveControls}
-                />
+                {!isEmbedded && (
+                  <ServiceMapOptionsPanelToggle
+                    isExpanded={panelExpanded}
+                    onExpandedChange={setPanelExpanded}
+                    hasActiveControls={hasActiveControls}
+                  />
+                )}
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -725,7 +727,7 @@ function GraphInner({
                   <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
-              {panelExpanded && (
+              {!isEmbedded && panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}

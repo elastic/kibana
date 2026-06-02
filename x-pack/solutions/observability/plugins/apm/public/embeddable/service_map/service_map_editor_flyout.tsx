@@ -535,7 +535,7 @@ export function ServiceMapEditorFlyout({
 
           <EuiFormRow
             label={i18n.translate('xpack.apm.serviceMapEditor.orientationLabel', {
-              defaultMessage: 'Layout',
+              defaultMessage: 'Presentation',
             })}
             fullWidth
           >
@@ -543,7 +543,7 @@ export function ServiceMapEditorFlyout({
               isFullWidth
               buttonSize="compressed"
               legend={i18n.translate('xpack.apm.serviceMapEditor.orientationLegend', {
-                defaultMessage: 'Service map layout',
+                defaultMessage: 'Service map presentation',
               })}
               idSelected={mapOrientation}
               onChange={(id) => setMapOrientation(id as ServiceMapOrientation)}
