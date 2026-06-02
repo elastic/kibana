@@ -12,6 +12,11 @@ import type {
   AppHeaderBadge as CoreAppHeaderBadge,
   AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
+  AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
+  AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
+  AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
   AppHeaderTab as CoreAppHeaderTab,
 } from '@kbn/core-chrome-browser';
 
@@ -20,6 +25,11 @@ export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
+export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
+export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
+export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;
+export type AppHeaderMetadataItems = CoreAppHeaderMetadataItems;
+export type AppHeaderMetadataTextItem = CoreAppHeaderMetadataTextItem;
 export type AppHeaderTab = CoreAppHeaderTab;
 
 export type AppHeaderPadding =
