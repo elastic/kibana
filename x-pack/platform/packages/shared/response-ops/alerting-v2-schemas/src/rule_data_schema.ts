@@ -401,6 +401,13 @@ export const findRulesResponseSchema = z
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
+/** Query parameters for the rule tags API. */
+export const ruleTagsParamsSchema = z.object({
+  filter: z.string().optional().describe('The filter to apply when aggregating rule tags.'),
+});
+
+export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
+
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = z
   .object({
