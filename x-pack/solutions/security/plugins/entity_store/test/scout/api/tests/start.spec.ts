@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
-import { apiTest, tags } from '@kbn/scout-security';
-import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { apiTest } from '@kbn/scout-security';
+import { PUBLIC_HEADERS, ENTITY_STORE_TAGS, QG_QA, QG_STAGING } from '../fixtures/constants';
 import {
   getStatus,
   installAllEntityTypes,
@@ -21,7 +21,7 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
 
-apiTest.describe('Entity Store Start API tests', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
+apiTest.describe('Entity Store Start API tests', { tag: [...ENTITY_STORE_TAGS, ...QG_QA, ...QG_STAGING] }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {

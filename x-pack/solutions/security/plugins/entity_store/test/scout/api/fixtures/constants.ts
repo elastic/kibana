@@ -72,6 +72,9 @@ export const ENTITY_STORE_ROUTES = {
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
+export const QG_QA = tags.qualityGate.qa;
+export const QG_STAGING = tags.qualityGate.staging;
+
 export const UPDATES_INDEX = getEntityIndexPattern({
   schemaVersion: ENTITY_SCHEMA_VERSION_V2,
   dataset: ENTITY_UPDATES,

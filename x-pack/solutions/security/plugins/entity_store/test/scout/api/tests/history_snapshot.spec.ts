@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   PUBLIC_HEADERS,
@@ -13,6 +13,8 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
+  QG_QA,
+  QG_STAGING,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
@@ -21,7 +23,7 @@ import {
   normalizeKeywordList,
 } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store History Snapshot', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
+apiTest.describe('Entity Store History Snapshot', { tag: [...ENTITY_STORE_TAGS, ...QG_QA, ...QG_STAGING] }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
