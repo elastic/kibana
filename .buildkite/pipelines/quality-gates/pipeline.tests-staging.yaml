@@ -24,6 +24,14 @@ steps:
         RETRY_TESTS_ON_FAIL: 'true'
       message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)'
 
+  - label: ':bug::shield: Entity Store v2 Scout quality gate (${ENVIRONMENT})'
+    trigger: bk-kibana-serverless-secsol-qg-entity-store # https://buildkite.com/elastic/kibana-serverless-security-solution-quality-gate-entity-store
+    soft_fail: true # Remove when tests stabilize
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)'
+
   - label: ':rocket: Fleet synthetic monitor to check the long standing project'
     trigger: 'serverless-quality-gates'
     build:

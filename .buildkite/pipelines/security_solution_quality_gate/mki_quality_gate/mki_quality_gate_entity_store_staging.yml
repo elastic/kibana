@@ -1,7 +1,9 @@
 steps:
-  - label: 'Scout MKI - Entity Store quality gate tests'
+  - label: 'Scout MKI - Entity Store Staging quality gate tests'
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/scout/mki_security_solution_entity_store_scout.sh
-    key: scout_entity_store_mki
+    key: scout_entity_store_mki_staging
+    env:
+      ENVIRONMENT: staging
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

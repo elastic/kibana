@@ -14,5 +14,10 @@ steps:
         - exit_status: "*"
           limit: 1
 
-  - command: "cat .buildkite/pipelines/security_solution_quality_gate/mki_quality_gate/mki_quality_gate_entity_store.yml | buildkite-agent pipeline upload"
-    label: 'Upload Serverless Release Entity Store pipeline'
+  - command: "cat .buildkite/pipelines/security_solution_quality_gate/mki_quality_gate/mki_quality_gate_entity_store_qa.yml | buildkite-agent pipeline upload"
+    label: 'Upload Serverless Release Entity Store pipeline (QA)'
+    if: "build.env('ENVIRONMENT') == 'qa'"
+
+  - command: "cat .buildkite/pipelines/security_solution_quality_gate/mki_quality_gate/mki_quality_gate_entity_store_staging.yml | buildkite-agent pipeline upload"
+    label: 'Upload Serverless Release Entity Store pipeline (Staging)'
+    if: "build.env('ENVIRONMENT') == 'staging'"
