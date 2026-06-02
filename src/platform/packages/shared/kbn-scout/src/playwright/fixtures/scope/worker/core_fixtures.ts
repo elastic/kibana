@@ -9,23 +9,14 @@
 
 import { test as base } from '@playwright/test';
 import type { KbnClient } from '@kbn/kbn-client';
-import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  KibanaUrl,
-  ElasticsearchRoleDescriptor,
-  KibanaRole,
-} from '../../../../common/services';
+import type { KibanaUrl } from '../../../../common/services';
 import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
-  createSamlSessionManager,
   createScoutConfig,
   ScoutLogger,
-  createElasticsearchCustomRole,
-  createCustomRole,
-  isElasticsearchRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
@@ -47,52 +38,12 @@ export interface RoleSessionCredentials {
   cookieHeader: CookieHeader;
 }
 
-export interface SamlAuth {
-  session: SamlSessionManager;
-  customRoleName: string;
-  setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
-
-  /**
-   * Generates a SAML session cookie for an interactive user with the specified role.
-   *
-   * This method is ideal for testing internal APIs that are typically accessed via the UI.
-   * It authenticates as an interactive user and returns session credentials including cookie
-   * headers that can be used in API requests.
-   *
-   * @param role - Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or
-   *               a custom role descriptor with specific permissions (Kibana or Elasticsearch)
-   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
-   *
-   * @example
-   * // Using a built-in role
-   * const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-   * const response = await apiClient.get('internal/endpoint', {
-   *   headers: { ...cookieHeader }
-   * });
-   *
-   * @example
-   * // Using a custom role descriptor
-   * const customRole = {
-   *   kibana: [{ base: ['read'], spaces: ['*'] }],
-   *   elasticsearch: { indices: [{ names: ['logs-*'], privileges: ['read'] }] }
-   * };
-   * const { cookieHeader } = await samlAuth.asInteractiveUser(customRole);
-   * const response = await apiClient.get('internal/endpoint', {
-   *   headers: { ...cookieHeader }
-   * });
-   */
-  asInteractiveUser(
-    role: string | KibanaRole | ElasticsearchRoleDescriptor
-  ): Promise<RoleSessionCredentials>;
-}
-
-export interface CoreWorkerFixtures {
+export interface BaseWorkerFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;
-  samlAuth: SamlAuth;
   /**
    * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
    * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
@@ -114,8 +65,11 @@ export interface CoreWorkerFixtures {
  * scoped resources for each Playwright worker, ensuring that tests have consistent
  * and isolated access to critical services such as logging, configuration, and
  * clients for interacting with Kibana and Elasticsearch.
+ *
+ * Note: `samlAuth` is added by the `samlAuthFixture` in `./saml_auth/index.ts`, which
+ * extends this base. The combined fixture (with samlAuth) is what `worker/index.ts` exports.
  */
-export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
+export const coreWorkerFixtures = base.extend<{}, BaseWorkerFixtures>({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
   // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
