@@ -283,7 +283,14 @@ export const RULE_OVERVIEW_KIND_SIGNAL = i18n.translate(
 export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alerting',
   {
-    defaultMessage: 'Alerting',
+    defaultMessage: 'Alert',
+  }
+);
+
+export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
+  {
+    defaultMessage: 'Mode can be changed in the rule edit form',
   }
 );
 

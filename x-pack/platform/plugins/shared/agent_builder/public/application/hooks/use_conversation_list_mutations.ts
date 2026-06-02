@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -17,10 +17,12 @@ import { appPaths } from '../utils/app_paths';
 
 interface UseConversationListMutationsParams {
   routeConversationId: string | undefined;
+  agentId: string;
 }
 
 export const useConversationListMutations = ({
   routeConversationId,
+  agentId,
 }: UseConversationListMutationsParams) => {
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
@@ -62,8 +64,50 @@ export const useConversationListMutations = ({
     [conversationsService, queryClient]
   );
 
+  const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
+
+  const updateReadStatus = useCallback(
+    (conversationId: string, read: boolean) => {
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(conversationId),
+        (current) => {
+          if (!current) return current;
+          return produce(current, (draft) => {
+            draft.read = read;
+          });
+        }
+      );
+
+      queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
+        if (!current) return current;
+        return produce(current, (draft) => {
+          const conv = draft.find((c) => c.id === conversationId);
+          if (conv) {
+            conv.read = read;
+          }
+        });
+      });
+
+      conversationsService.updateReadStatus({ conversationId, read }).catch(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        queryClient.invalidateQueries({ queryKey: listQueryKey });
+      });
+    },
+    [conversationsService, queryClient, listQueryKey]
+  );
+
+  const markAsRead = useCallback(
+    (conversationId: string) => updateReadStatus(conversationId, true),
+    [updateReadStatus]
+  );
+
+  const markAsUnread = useCallback(
+    (conversationId: string) => updateReadStatus(conversationId, false),
+    [updateReadStatus]
+  );
+
   return useMemo(
-    () => ({ deleteConversation, renameConversation }),
-    [deleteConversation, renameConversation]
+    () => ({ deleteConversation, renameConversation, markAsRead, markAsUnread }),
+    [deleteConversation, renameConversation, markAsRead, markAsUnread]
   );
 };
