@@ -70,6 +70,57 @@ export type DatatableColumnResult = DatatableColumnArgs & {
   type: typeof LENS_DATATABLE_COLUMN;
 };
 
+/**
+ * Cell decoration mode for a datatable column.
+ * Formerly surfaced in the editor as "Color by value"; now "Cell decoration".
+ *
+ * The stored value `'cell'` is surfaced in the editor as "Background".
+ */
+export type ColumnCellDecorationMode = 'none' | 'cell' | 'text' | 'badge' | 'progress';
+
+/**
+ * Fill style for a value-driven cell decoration.
+ *
+ * Generic (not progress-specific) so other decorations can adopt the same
+ * single/solid/gradient model in the future.
+ * - `single`: one fixed color for the whole fill.
+ * - `solid`: one palette-resolved color, derived from the cell value.
+ * - `gradient`: the palette gradient revealed inside the filled extent.
+ */
+export type DecorationFillMode = 'single' | 'solid' | 'gradient';
+
+/**
+ * Value range that drives a decoration's domain.
+ * - `auto`: derive the domain from the loaded column values.
+ * - `custom`: use an explicit `[min, max]` domain (supports a negative `min`).
+ *
+ * For `single` fills this range is the source of truth. For `solid`/`gradient`
+ * fills the range is kept in sync with the palette color bounds
+ * (`palette.params.rangeMin`/`rangeMax`).
+ */
+export interface DecorationValueRange {
+  mode: 'auto' | 'custom';
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Reusable fill configuration for a value-driven cell decoration.
+ *
+ * Consumed today by the `progress` decoration; shaped so a future decoration
+ * (e.g. a gradient cell background) can reuse it without a new type.
+ */
+export interface DecorationFillConfig {
+  fillMode: DecorationFillMode;
+  /** Fill color for the `single` style. Ignored for `solid`/`gradient`. */
+  color?: string;
+  /**
+   * Value range driving the domain. For `solid`/`gradient` the custom bounds
+   * mirror `palette.params.rangeMin`/`rangeMax`; for `single` they live here.
+   */
+  valueRange?: DecorationValueRange;
+}
+
 export interface ColumnState {
   columnId: string;
   width?: number;
@@ -87,7 +138,10 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
   // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
-  colorMode?: 'none' | 'cell' | 'text' | 'badge';
+  colorMode?: ColumnCellDecorationMode;
+  // Fill configuration for value-driven decorations (currently the "progress"
+  // cell decoration for numeric data). Generic so other decorations can reuse it.
+  fillStyle?: DecorationFillConfig;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

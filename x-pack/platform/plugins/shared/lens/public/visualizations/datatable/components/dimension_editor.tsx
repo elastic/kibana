@@ -28,7 +28,13 @@ import { getAccessorType } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment, getDataBoundsForAccessor, getColorByValuePalette } from '../utils';
+import {
+  getColumnAlignment,
+  getDataBoundsForAccessor,
+  getColorByValuePalette,
+  getDefaultFillConfig,
+} from '../utils';
+import { ProgressBarControls } from './progress_bar_controls';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
@@ -49,7 +55,7 @@ const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMo
     id: `${idPrefix}cell`,
     value: 'cell',
     label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-      defaultMessage: 'Cell',
+      defaultMessage: 'Background',
     }),
     'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
   },
@@ -70,6 +76,15 @@ const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMo
     'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
   },
 ];
+
+const progressBarColorModeOption: EuiComboBoxOptionOption<ColumnType['colorMode']> = {
+  id: `${idPrefix}progress`,
+  value: 'progress',
+  label: i18n.translate('xpack.lens.table.dynamicColoring.progress', {
+    defaultMessage: 'Progress bar',
+  }),
+  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_progress',
+};
 
 function updateColumn(
   state: DatatableVisualizationState,
@@ -129,14 +144,24 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
-  const currentAlignment = getColumnAlignment(column, isNumeric);
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
+  const isProgressMode = currentColorMode === 'progress';
+  // "Progress bar" is a numeric-only decoration; "Center" alignment is unsupported for it.
+  const disableCenterAlignment = isProgressMode;
+  const currentAlignment = getColumnAlignment(column, isNumeric);
+  const effectiveAlignment =
+    disableCenterAlignment && currentAlignment === 'center' ? 'right' : currentAlignment;
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
+  // Progress bar is offered only for numeric columns (not terms-colored buckets).
+  const colorModeOptions =
+    isNumeric && !showColorByTerms
+      ? [...dynamicColorModeOptions, progressBarColorModeOption]
+      : dynamicColorModeOptions;
+
   const selectedDynamicColorModeOption =
-    dynamicColorModeOptions.find((option) => option.value === currentColorMode) ??
-    dynamicColorModeOptions[0];
+    colorModeOptions.find((option) => option.value === currentColorMode) ?? colorModeOptions[0];
 
   const currentMinMax =
     getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
@@ -190,6 +215,12 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               label: i18n.translate('xpack.lens.table.alignment.center', {
                 defaultMessage: 'Center',
               }),
+              isDisabled: disableCenterAlignment,
+              toolTipContent: disableCenterAlignment
+                ? i18n.translate('xpack.lens.table.alignment.center.progressDisabledTooltip', {
+                    defaultMessage: `Center alignment isn't supported with progress bars.`,
+                  })
+                : undefined,
               'data-test-subj': 'lnsDatatable_alignment_groups_center',
             },
             {
@@ -200,7 +231,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               'data-test-subj': 'lnsDatatable_alignment_groups_right',
             },
           ]}
-          idSelected={`${idPrefix}${currentAlignment}`}
+          idSelected={`${idPrefix}${effectiveAlignment}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as ColumnType['alignment'];
             updateColumnState(accessor, { alignment: newMode });
@@ -213,7 +244,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-              defaultMessage: 'Color by value',
+              defaultMessage: 'Cell decoration',
             })}
           >
             <EuiComboBox
@@ -221,11 +252,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               compressed
               isClearable={false}
               aria-label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-                defaultMessage: 'Color by value',
+                defaultMessage: 'Cell decoration',
               })}
               data-test-subj="lnsDatatable_dynamicColoring_groups"
               singleSelection={{ asPlainText: true }}
-              options={dynamicColorModeOptions}
+              options={colorModeOptions}
               selectedOptions={[selectedDynamicColorModeOption]}
               onChange={(choices) => {
                 const newMode = choices[0]?.value;
@@ -248,6 +279,20 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                   }
                 }
 
+                if (newMode === 'progress') {
+                  // Seed the fill config (new layers only) and force a non-center
+                  // alignment for legibility. Persisted configs are left untouched.
+                  if (!column?.fillStyle) {
+                    params.fillStyle = getDefaultFillConfig(newMode);
+                  }
+                  if (currentAlignment === 'center') {
+                    params.alignment = 'right';
+                  }
+                } else if (currentColorMode === 'progress') {
+                  // Leaving progress mode: drop progress-only configuration.
+                  params.fillStyle = undefined;
+                }
+
                 // clear up when switching to no coloring
                 if (newMode === 'none') {
                   params.palette = undefined;
@@ -259,7 +304,19 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           </EuiFormRow>
 
           {hasDynamicColoring &&
-            (showColorByTerms ? (
+            (isProgressMode ? (
+              <ProgressBarControls
+                column={column}
+                fillStyle={column.fillStyle ?? getDefaultFillConfig('progress')}
+                dataBounds={currentMinMax}
+                palette={activePalette}
+                paletteService={props.paletteService}
+                panelRef={props.panelRef}
+                isInlineEditing={isInlineEditing}
+                formatter={formatter}
+                onUpdate={(newColumn) => updateColumnState(accessor, newColumn)}
+              />
+            ) : showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
                 colorMapping={

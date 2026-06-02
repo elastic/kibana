@@ -44,6 +44,8 @@ describe('data table dimension editor', () => {
 
   const getDynamicColoringLabel = (colorMode: ColumnState['colorMode']) => {
     const normalizedColorMode = colorMode ?? 'none';
+    // The stored value 'cell' is surfaced in the editor as "Background".
+    if (normalizedColorMode === 'cell') return 'Background';
     return normalizedColorMode.charAt(0).toUpperCase() + normalizedColorMode.slice(1);
   };
 
@@ -236,7 +238,7 @@ describe('data table dimension editor', () => {
   it('should set the coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    await btnGroups.colorMode.select('Cell');
+    await btnGroups.colorMode.select('Background');
     await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -419,6 +421,167 @@ describe('data table dimension editor', () => {
       } else {
         expect(hiddenSwitch).toBeInTheDocument();
       }
+    });
+  });
+
+  describe('progress bar', () => {
+    it('offers the "Progress bar" decoration for numeric, non-bucketed columns', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      renderTableDimensionEditor();
+
+      await btnGroups.colorMode.select('Progress bar');
+      await act(async () => jest.advanceTimersByTime(256));
+
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [expect.objectContaining({ colorMode: 'progress' })],
+        })
+      );
+    });
+
+    it('does not offer "Progress bar" for bucketed (terms) columns', async () => {
+      mockFirstColumn({ isBucketed: true, dataType: 'string' });
+      renderTableDimensionEditor();
+
+      await btnGroups.colorMode.select('Progress bar');
+      await act(async () => jest.advanceTimersByTime(256));
+
+      // No "progress" colorMode should ever be produced for a terms column.
+      const calls = (props.setState as jest.Mock).mock.calls;
+      const producedProgress = calls.some(([next]) =>
+        next?.columns?.some((c: ColumnState) => c.colorMode === 'progress')
+      );
+      expect(producedProgress).toBe(false);
+    });
+
+    it('seeds a default progress config and forces non-center alignment when selected', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].alignment = 'center';
+      renderTableDimensionEditor();
+
+      await btnGroups.colorMode.select('Progress bar');
+      await act(async () => jest.advanceTimersByTime(256));
+
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [
+            expect.objectContaining({
+              colorMode: 'progress',
+              alignment: 'right',
+              fillStyle: expect.objectContaining({ fillMode: 'single' }),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('disables the Center alignment option in progress mode', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = { fillMode: 'single' };
+      renderTableDimensionEditor();
+
+      const centerButton = screen.getByTestId('lnsDatatable_alignment_groups_center');
+      expect(centerButton).toBeDisabled();
+    });
+
+    it('renders progress bar controls (Bar color + Value range) in progress mode', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = { fillMode: 'single' };
+      renderTableDimensionEditor();
+
+      expect(screen.getByTestId('lnsDatatable_progressBar_barColor')).toBeInTheDocument();
+      expect(screen.getByTestId('lnsDatatable_progressBar_valueRange')).toBeInTheDocument();
+      // Single bar color exposes the EuiColorPicker, labeled "Color".
+      expect(screen.getByLabelText('Color')).toBeInTheDocument();
+    });
+
+    it('hides the dual range slider for an auto value range', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = { fillMode: 'single', valueRange: { mode: 'auto' } };
+      renderTableDimensionEditor();
+
+      // The `inputWithPopover` dual range exposes two number inputs; none are
+      // rendered while the range is auto.
+      expect(screen.queryAllByRole('spinbutton')).toHaveLength(0);
+    });
+
+    it('shows the dual range slider only when value range is custom', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: 0, max: 10 },
+      };
+      renderTableDimensionEditor();
+
+      // EUI's `inputWithPopover` dual range renders the bounds as two number
+      // inputs (the test-subj does not forward to a single queryable node), so
+      // assert on the rendered min/max spinbuttons instead.
+      const spinbuttons = screen.getAllByRole('spinbutton');
+      expect(spinbuttons).toHaveLength(2);
+      spinbuttons.forEach((input) => {
+        // Regression guard for the ±Infinity continuity bug: every bound the
+        // slider receives must be finite.
+        expect(Number.isFinite(Number(input.getAttribute('min')))).toBe(true);
+        expect(Number.isFinite(Number(input.getAttribute('max')))).toBe(true);
+      });
+    });
+
+    it('gives the custom range slider headroom below the current min so it can be pulled down', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: 0, max: 10 },
+      };
+      renderTableDimensionEditor();
+
+      // The number inputs carry the slider bounds; the lower bound must extend
+      // below the current min (0) so a custom min below 0 is selectable.
+      const [minInput] = screen.getAllByRole('spinbutton');
+      expect(Number(minInput.getAttribute('min'))).toBeLessThan(0);
+    });
+
+    it('renders a finite custom range slider for a solid fill with open-ended palette bounds', () => {
+      // Regression: default by-value palettes store open-ended continuities as
+      // ±Infinity on the palette params. A solid fill with a custom range read
+      // those directly and crashed / produced NaN slider inputs.
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = { fillMode: 'solid', valueRange: { mode: 'custom' } };
+      state.columns[0].palette = {
+        type: 'palette',
+        name: 'custom',
+        params: { rangeMin: Number.NEGATIVE_INFINITY, rangeMax: Number.POSITIVE_INFINITY },
+      };
+      renderTableDimensionEditor();
+
+      const spinbuttons = screen.getAllByRole('spinbutton');
+      expect(spinbuttons).toHaveLength(2);
+      spinbuttons.forEach((input) => {
+        expect(Number.isFinite(Number(input.getAttribute('min')))).toBe(true);
+        expect(Number.isFinite(Number(input.getAttribute('max')))).toBe(true);
+        expect(input.getAttribute('value')).not.toBe('');
+      });
+    });
+
+    it('drops progress config when switching away from progress mode', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = { fillMode: 'single' };
+      renderTableDimensionEditor();
+
+      await btnGroups.colorMode.select('Background');
+      await act(async () => jest.advanceTimersByTime(256));
+
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [expect.objectContaining({ colorMode: 'cell', fillStyle: undefined })],
+        })
+      );
     });
   });
 });

@@ -88,7 +88,20 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
  * When it already has a colorMapping, keep it and just drop the value-based palette.
  */
 function reconcileCategoricalColumn(column: ColumnState): ColumnState {
-  const { palette, colorMapping } = column;
+  const { palette, colorMapping, colorMode, fillStyle } = column;
+
+  // Progress bars are numeric-only; if the column became categorical, drop the
+  // progress decoration and fall back to a categorical color mapping.
+  if (colorMode === 'progress' || fillStyle != null) {
+    return {
+      ...column,
+      colorMode: 'cell',
+      fillStyle: undefined,
+      palette: undefined,
+      colorMapping: colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG,
+    };
+  }
+
   const hasValueBasedPalette = hasPaletteStops(palette);
   const needsTransition = hasValueBasedPalette || (palette != null && colorMapping != null);
   if (!needsTransition) return column;
@@ -221,8 +234,8 @@ export const getDatatableVisualization = ({
 
     // Normalize column color configuration when the underlying column type changes
     const columns = state.columns.map((column) => {
-      const { columnId, palette, colorMapping } = column;
-      const hasColorConfig = palette != null || colorMapping != null;
+      const { columnId, palette, colorMapping, fillStyle } = column;
+      const hasColorConfig = palette != null || colorMapping != null || fillStyle != null;
       if (!hasColorConfig) return column;
 
       const { isNumeric, isCategory: isCategorical } = getAccessorType(datasource, columnId);
@@ -692,6 +705,10 @@ export const getDatatableVisualization = ({
                       .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
+              fillStyle:
+                canColor && column.colorMode === 'progress' && column.fillStyle
+                  ? JSON.stringify(column.fillStyle)
+                  : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
               summaryLabel: hasNoSummaryRow
                 ? undefined
@@ -883,7 +900,10 @@ export const getDatatableVisualization = ({
     const normalizedColumns = state.columns.map((column) => {
       const { colorMode, palette, colorMapping } = column;
 
-      if (!colorMode || colorMode === 'none') {
+      // 'progress' owns its own palette/range lifecycle (the solid/gradient range
+      // mirrors palette params), so it is excluded from the color-mismatch auto-fix
+      // to avoid rewriting the palette out from under the bar domain.
+      if (!colorMode || colorMode === 'none' || colorMode === 'progress') {
         return column;
       }
 

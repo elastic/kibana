@@ -1271,6 +1271,26 @@ describe('Datatable Visualization', () => {
         expect(result.columns[0].colorMapping).toEqual(defaultColorMapping);
       });
 
+      it('drops a progress decoration when the column becomes categorical', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'progress',
+              fillStyle: { fillMode: 'single', color: '#abc', valueRange: { mode: 'auto' } },
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0].fillStyle).toBeUndefined();
+        expect(result.columns[0].colorMode).toBe('cell');
+        expect(result.columns[0].colorMapping).toEqual(DEFAULT_COLOR_MAPPING_CONFIG);
+      });
+
       it('strips colorMapping and computes value-based palette for numeric column with colorMapping but no palette', () => {
         mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
 
