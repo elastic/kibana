@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
 import { useRefreshCompositeSloSummaries } from '../../../hooks/use_refresh_composite_slo_summaries';
 import { useFetchCompositeHistoricalSummary } from '../../../hooks/use_fetch_composite_historical_summary';
@@ -42,12 +42,12 @@ export function CompositeSloList() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleSearchChange = useCallback((value: string) => {
+  const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(0);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
-  }, []);
+  };
 
   useEffect(() => {
     return () => {
@@ -55,18 +55,18 @@ export function CompositeSloList() {
     };
   }, []);
 
-  const handleTagSelection = useCallback((options: EuiSelectableOption[]) => {
+  const handleTagSelection = (options: EuiSelectableOption[]) => {
     const newTags = options.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
     setSelectedTags(newTags);
     setPage(0);
-  }, []);
+  };
 
-  const handleStatusChange = useCallback((statuses: string[]) => {
+  const handleStatusChange = (statuses: string[]) => {
     setSelectedStatuses(statuses);
     setPage(0);
-  }, []);
+  };
 
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     setSearch('');
     setDebouncedSearch('');
     setSortBy('createdAt');
@@ -74,7 +74,7 @@ export function CompositeSloList() {
     setSelectedTags([]);
     setSelectedStatuses([]);
     setPage(0);
-  }, []);
+  };
 
   const tagsParam = selectedTags.length > 0 ? selectedTags.join(',') : undefined;
   const statusParam = selectedStatuses.length > 0 ? selectedStatuses.join(',') : undefined;
@@ -93,29 +93,23 @@ export function CompositeSloList() {
   const total = data?.total ?? 0;
 
   const { suggestions } = useFetchCompositeSloSuggestions();
-  const availableTags = useMemo(
-    () => suggestions?.tags?.map((t) => t.label).sort() ?? [],
-    [suggestions]
-  );
+  const availableTags = suggestions?.tags?.map((t) => t.label).sort() ?? [];
 
   const hasActiveFilters =
     debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
 
-  const compositeIds = useMemo(
-    () => data?.results?.map((item: CompositeSLOItem) => item.id) ?? [],
-    [data?.results]
-  );
+  const compositeIds = data?.results?.map((item: CompositeSLOItem) => item.id) ?? [];
   const { detailsById, isLoading: isDetailsLoading } = useFetchCompositeSloDetails(compositeIds);
   const { historicalSummaryById, isLoading: isHistoricalLoading } =
     useFetchCompositeHistoricalSummary(compositeIds);
 
-  const handleSortChange = useCallback(
-    (newSortBy: CompositeSloSortBy, newDirection: CompositeSloSortDirection) => {
-      setSortBy(newSortBy);
-      setSortDirection(newDirection);
-    },
-    []
-  );
+  const handleSortChange = (
+    newSortBy: CompositeSloSortBy,
+    newDirection: CompositeSloSortDirection
+  ) => {
+    setSortBy(newSortBy);
+    setSortDirection(newDirection);
+  };
 
   if (isError) {
     return (
