@@ -40,11 +40,15 @@ const SORT_FIELDS = [
   'risk_score',
 ] as const;
 
+const MAX_STRING_LENGTH = 10_000;
+const MAX_TAG_LENGTH = 1000;
+
 export const findRulesSchema = z
   .object({
     searchTerm: z
       .string()
       .min(1)
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
         'Free-text search across rule name, index patterns, and MITRE tactic/technique fields. ' +
@@ -65,23 +69,25 @@ export const findRulesSchema = z
       .optional()
       .describe('Rule types to include (OR). E.g. ["query", "eql"].'),
     tags: z
-      .array(z.string().min(1))
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
       .optional()
       .describe(
         'Exact tag values to include (OR). Discover values first via `security.discover_rule_tags`.'
       ),
     excludeTags: z
-      .array(z.string().min(1))
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
       .optional()
       .describe('Exclude rules with any of these tags.'),
     mitreTechnique: z
       .string()
       .regex(/^T\d{4}(\.\d{3})?$/i)
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
     mitreTactic: z
       .string()
       .min(1)
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
         'MITRE tactic, either ID (e.g. "TA0001") or display name (e.g. "Initial Access"). ' +
@@ -91,6 +97,7 @@ export const findRulesSchema = z
     ruleId: z
       .string()
       .min(1)
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
         'Detection rule signature ID. Use after aggregating alerts by `kibana.alert.rule.rule_id`.'
