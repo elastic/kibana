@@ -113,12 +113,8 @@ describe('useDeleteFileAttachment', () => {
   });
 
   describe('optimistic file stats update', () => {
-    let queryClient: QueryClient;
+    const queryClient = createTestQueryClient();
     const statsKey = casesQueriesKeys.caseFileStats(basicCaseId, { searchTerm: undefined });
-
-    beforeEach(() => {
-      queryClient = createTestQueryClient();
-    });
 
     const getWrapper =
       (qc: QueryClient): React.FC<{ children: React.ReactNode }> =>

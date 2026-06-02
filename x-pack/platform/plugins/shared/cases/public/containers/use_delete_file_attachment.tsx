@@ -27,11 +27,11 @@ export const useDeleteFileAttachment = () => {
     ({ caseId, fileId }: MutationArgs) => deleteFileAttachments({ caseId, fileIds: [fileId] }),
     {
       mutationKey: casesMutationsKeys.deleteFileAttachment,
+      // Optimistically decrement the file count so the UI (e.g. the files
+      // accordion) updates immediately instead of waiting for the server
+      // round-trip + cache invalidation, which caused flaky FTR timeouts.
       onMutate: async ({ caseId }) => {
-        // caseFileStats(id, params) = [...case(id), 'files', 'stats', params]
-        // Drop the trailing `params` segment to get a prefix that matches all
-        // file-stats queries for this case regardless of search term.
-        const statsKey = casesQueriesKeys.caseFileStats(caseId).slice(0, -1);
+        const statsKey = casesQueriesKeys.caseFileStatsAll(caseId);
 
         await queryClient.cancelQueries(statsKey);
 
