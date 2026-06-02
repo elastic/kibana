@@ -11,16 +11,16 @@ import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
-import { useRefreshCompositeSloSummaries } from '../../../hooks/use_refresh_composite_slo_summaries';
-import { useFetchCompositeHistoricalSummary } from '../../../hooks/use_fetch_composite_historical_summary';
-import { useFetchCompositeSloDetails } from '../../../hooks/use_fetch_composite_slo_details';
+import { useDeleteCompositeSlo } from '../../../../hooks/use_delete_composite_slo';
+import { useRefreshCompositeSloSummaries } from '../../../../hooks/use_refresh_composite_slo_summaries';
+import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
+import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import {
   useFetchCompositeSloList,
   type CompositeSloSortBy,
   type CompositeSloSortDirection,
-} from '../../../hooks/use_fetch_composite_slo_list';
-import { useFetchCompositeSloSuggestions } from '../../../hooks/use_fetch_composite_slo_suggestions';
+} from '../../../../hooks/use_fetch_composite_slo_list';
+import { useFetchCompositeSloSuggestions } from '../../../../hooks/use_fetch_composite_slo_suggestions';
 import { CompositeSloDeleteModal } from './composite_slo_delete_modal';
 import { CompositeSloTable } from './composite_slo_table';
 import { CompositeSloToolbar } from './composite_slo_toolbar';

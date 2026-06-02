@@ -33,22 +33,22 @@ import type {
 } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useMemo, useState } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { displayStatus } from '../../../components/slo/slo_badges/slo_status_badge';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { displayStatus } from '../../../../components/slo/slo_badges/slo_status_badge';
 import type {
   CompositeSloSortBy,
   CompositeSloSortDirection,
-} from '../../../hooks/use_fetch_composite_slo_list';
-import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { useKibana } from '../../../hooks/use_kibana';
-import { usePermissions } from '../../../hooks/use_permissions';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+} from '../../../../hooks/use_fetch_composite_slo_list';
+import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
   SloBurnRateWindowColumnHeader,
   type SloBurnRateWindow,
-} from './common/slo_burn_rate_window_column_header';
+} from '../common/slo_burn_rate_window_column_header';
 import { CompositeSloMembersTable } from './composite_slo_members_table';
-import { SloSparkline } from './slo_sparkline';
+import { SloSparkline } from '../slo_sparkline';
 
 type CompositeSLOItem = CompositeSLODefinitionResponse;
 

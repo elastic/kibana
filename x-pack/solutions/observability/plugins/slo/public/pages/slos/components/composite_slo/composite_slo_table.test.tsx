@@ -10,17 +10,17 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CompositeSLODefinitionResponse, CompositeSLOSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { ActiveAlerts } from '../../../hooks/active_alerts';
-import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { useKibana } from '../../../hooks/use_kibana';
-import { usePermissions } from '../../../hooks/use_permissions';
-import { render } from '../../../utils/test_helper';
+import { ActiveAlerts } from '../../../../hooks/active_alerts';
+import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import { render } from '../../../../utils/test_helper';
 import { CompositeSloTable } from './composite_slo_table';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_permissions');
-jest.mock('../../../hooks/use_fetch_active_alerts');
-jest.mock('./slo_sparkline', () => ({
+jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../hooks/use_permissions');
+jest.mock('../../../../hooks/use_fetch_active_alerts');
+jest.mock('../slo_sparkline', () => ({
   SloSparkline: () => <div data-test-subj="sloSparkline" />,
 }));
 

@@ -11,14 +11,16 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   SloBurnRateWindowColumnHeader,
   type SloBurnRateWindow,
-} from './common/slo_burn_rate_window_column_header';
+} from '../common/slo_burn_rate_window_column_header';
 import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
-const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
+const SLODetailsFlyout = lazy(
+  () => import('../../../slo_details/shared_flyout/slo_details_flyout')
+);
 
 function getMemberBurnRateValue(
   item: CompositeSLOMemberSummary,
