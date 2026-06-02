@@ -118,7 +118,7 @@ security.create_detection_rule({
   attachment_id: "<attachment id from step 1>"
 })
 \`\`\`
-- \`existing_rule\` and \`attachment_id\` MUST be provided together.
+- Always provide both \`existing_rule\` and \`attachment_id\` together. Omitting \`existing_rule\` will regenerate the rule from scratch and lose non-query fields like severity and tags.
 - The tool preserves non-query fields (severity, tags, schedule, etc.) and updates the attachment in place.
 4. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
 

@@ -38,22 +38,18 @@ const createDetectionRuleSchema = z
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved as the base. Must be provided together with attachment_id.'
+        'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved. Requires attachment_id to be provided as well.'
       ),
     attachment_id: z
       .string()
       .optional()
       .describe(
-        'ID of the existing rule attachment to update. Must be provided together with existing_rule — causes the tool to update the attachment in place rather than create a new one.'
+        'ID of the existing rule attachment to update in place. Should be provided together with existing_rule so non-query fields are preserved; if omitted, the rule regenerates from scratch.'
       ),
   })
   .refine((val) => !val.existing_rule || val.attachment_id !== undefined, {
     message: 'attachment_id is required when existing_rule is provided',
     path: ['attachment_id'],
-  })
-  .refine((val) => !val.attachment_id || val.existing_rule !== undefined, {
-    message: 'existing_rule is required when attachment_id is provided',
-    path: ['existing_rule'],
   });
 
 export function createDetectionRuleTool(
