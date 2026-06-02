@@ -6,7 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type CoreStart,
+  type ElasticsearchClient,
+  type KibanaRequest,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -25,13 +30,13 @@ import {
 } from '../../tasks/entity_maintainers/execution';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import type {
-  EntityMaintainerTaskMethodContext,
   EntityMaintainerState,
   EntityMaintainerStatus,
 } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
+import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 
 interface TaskSnapshot {
   runs: number;
@@ -59,8 +64,14 @@ interface EntityMaintainersClientDeps {
   licensing: LicensingPluginStart;
 }
 
-interface SyncExecutionContext extends EntityMaintainerTaskMethodContext {
+interface SyncExecutionContext {
   taskId: string;
+  status: EntityMaintainerStatus;
+  abortController: AbortController;
+  logger: Logger;
+  fakeRequest: KibanaRequest;
+  esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
 }
 
 export class EntityMaintainersClient {
@@ -187,12 +198,19 @@ export class EntityMaintainersClient {
         initialState,
       });
 
+      const telemetryClient = createMaintainerTelemetryClient({
+        id,
+        namespace: this.namespace,
+        analytics: this.analytics,
+      });
+
       const result = await runEntityMaintainerTask({
         ...executionContext,
         id,
         run,
         setup,
         analytics: this.analytics,
+        telemetryClient,
       });
 
       await persistMaintainerState({

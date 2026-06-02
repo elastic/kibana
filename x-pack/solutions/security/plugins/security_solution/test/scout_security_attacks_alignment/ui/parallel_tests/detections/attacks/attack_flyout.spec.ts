@@ -29,6 +29,7 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
 
       await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+      await detectionsAttackDiscoveryPage.collapseKpisSection();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeAttached();
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
