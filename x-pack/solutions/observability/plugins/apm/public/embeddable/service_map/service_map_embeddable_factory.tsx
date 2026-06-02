@@ -12,7 +12,6 @@ import type {
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesUnifiedSearch,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
   initializeStateManager,
@@ -82,26 +81,10 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   find_query: 'referenceEquality',
 };
 
-/**
- * Published on the panel API so the "Service map filter settings" context-menu action can
- * read + write whether the panel follows the dashboard's filters. `false` (default) = panel
- * uses only its own captured filters.
- */
-export interface HasSyncWithDashboardFilters {
-  syncWithDashboardFilters$: PublishingSubject<boolean | undefined>;
-  setSyncWithDashboardFilters: (next: boolean | undefined) => void;
-}
-
-export const apiHasSyncWithDashboardFilters = (api: unknown): api is HasSyncWithDashboardFilters =>
-  Boolean(
-    api && typeof (api as HasSyncWithDashboardFilters).setSyncWithDashboardFilters === 'function'
-  );
-
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
-  PublishesUnifiedSearch &
-  HasSyncWithDashboardFilters & {
+  PublishesUnifiedSearch & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
     canEditUnifiedSearch: () => boolean;
   };
@@ -220,9 +203,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         blockingError$,
         filters$,
         query$,
-        // Exposed so the "Service map filter settings" panel-menu action can read + toggle it.
-        syncWithDashboardFilters$: customStateManager.api.syncWithDashboardFilters$,
-        setSyncWithDashboardFilters: customStateManager.api.setSyncWithDashboardFilters,
         canEditUnifiedSearch: () => true,
         getTypeDisplayName: () => 'configuration',
         isEditingEnabled: () => true,
@@ -251,9 +231,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
                       customStateManager.api.setMapOrientation(newState.map_orientation);
-                      // `sync_with_dashboard_filters` is intentionally NOT set here — it's owned by the
-                      // "Service map filter settings" panel-menu action, so editing data fields
-                      // (env / service / KQL / view filters / orientation) never resets it.
+                      customStateManager.api.setSyncWithDashboardFilters(
+                        newState.sync_with_dashboard_filters
+                      );
                       // View filters live in the edit flyout per product direction: the
                       // in-graph options panel only renders layout controls in dashboard panels.
                       customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);

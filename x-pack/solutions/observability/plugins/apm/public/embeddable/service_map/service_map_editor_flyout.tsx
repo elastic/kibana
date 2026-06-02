@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSkeletonText,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -246,6 +247,9 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
+    initialState?.sync_with_dashboard_filters ?? false
+  );
   const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
     initialState?.alert_status_filter ?? []
   );
@@ -392,9 +396,7 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
-      // `sync_with_dashboard_filters` is owned by the "Service map filter settings" panel-menu
-      // action, not this data-editing flyout — intentionally not set here so editing other
-      // fields never resets it.
+      sync_with_dashboard_filters: syncWithDashboardFilters,
       // Empty arrays drop to undefined so they're omitted from the saved object payload.
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
@@ -407,6 +409,7 @@ export function ServiceMapEditorFlyout({
     environment,
     kuery,
     serviceName,
+    syncWithDashboardFilters,
     alertStatusFilter,
     sloStatusFilter,
     connectionFilter,
@@ -651,6 +654,23 @@ export function ServiceMapEditorFlyout({
                 },
               ]}
               data-test-subj="apmServiceMapEditorOrientation"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {
+              defaultMessage:
+                "When on, the panel also responds to the dashboard's global filters / KQL / Controls. When off, the panel uses only its own filters.",
+            })}
+            fullWidth
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersLabel', {
+                defaultMessage: 'Sync with dashboard filters',
+              })}
+              checked={syncWithDashboardFilters}
+              onChange={(e) => setSyncWithDashboardFilters(e.target.checked)}
+              data-test-subj="apmServiceMapEditorSyncFiltersToggle"
             />
           </EuiFormRow>
         </EuiForm>

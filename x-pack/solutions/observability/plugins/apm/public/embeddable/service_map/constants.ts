@@ -9,6 +9,3 @@ export { APM_SERVICE_MAP_EMBEDDABLE } from '../../../common/embeddable/service_m
 
 /** Used to register the "Add APM Service Map" option in the dashboard Add panel flyout */
 export const ADD_APM_SERVICE_MAP_PANEL_ACTION_ID = 'ADD_APM_SERVICE_MAP_PANEL_ACTION';
-
-/** Panel context-menu action that opens the service map filter-settings flyout. */
-export const APM_SERVICE_MAP_SETTINGS_ACTION_ID = 'APM_SERVICE_MAP_SETTINGS_ACTION';
