@@ -7,10 +7,9 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiBadge,
+  EuiBasicTable,
   EuiButtonIcon,
-  type CriteriaWithPagination,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,27 +18,28 @@ import {
   EuiSkeletonText,
   EuiText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type {
   CompositeSLODefinitionResponse,
   CompositeSLOSummaryResponse,
   HistoricalSummaryResponse,
 } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useCallback, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { displayStatus } from '../../../../components/slo/slo_badges/slo_status_badge';
+import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import type {
   CompositeSloSortBy,
   CompositeSloSortDirection,
 } from '../../../../hooks/use_fetch_composite_slo_list';
-import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
@@ -47,8 +47,8 @@ import {
   SloBurnRateWindowColumnHeader,
   type SloBurnRateWindow,
 } from '../common/slo_burn_rate_window_column_header';
-import { CompositeSloMembersTable } from './composite_slo_members_table';
 import { SloSparkline } from '../slo_sparkline';
+import { CompositeSloMembersTable } from './composite_slo_members_table';
 
 type CompositeSLOItem = CompositeSLODefinitionResponse;
 

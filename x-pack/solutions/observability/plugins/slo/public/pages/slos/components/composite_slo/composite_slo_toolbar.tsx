@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 interface CompositeSloToolbarProps {
   search: string;
@@ -75,50 +75,39 @@ export function CompositeSloToolbar({
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
 
-  const tagOptions: EuiSelectableOption[] = useMemo(
-    () =>
-      availableTags.map((tag) => ({
-        label: tag,
-        checked: selectedTags.includes(tag) ? 'on' : undefined,
-      })),
-    [availableTags, selectedTags]
-  );
+  const tagOptions: EuiSelectableOption[] = availableTags.map((tag) => ({
+    label: tag,
+    checked: selectedTags.includes(tag) ? 'on' : undefined,
+  }));
 
-  const statusOptions: EuiSelectableOption[] = useMemo(
-    () =>
-      STATUS_OPTIONS.map(({ value, label }) => ({
-        key: value,
-        label,
-        checked: selectedStatuses.includes(value) ? 'on' : undefined,
-      })),
-    [selectedStatuses]
-  );
+  const statusOptions: EuiSelectableOption[] = STATUS_OPTIONS.map(({ value, label }) => ({
+    key: value,
+    label,
+    checked: selectedStatuses.includes(value) ? 'on' : undefined,
+  }));
 
-  const handleStatusChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const newStatuses = options
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as string);
-      onStatusChange?.(newStatuses);
-    },
-    [onStatusChange]
-  );
+  const handleStatusChange = (options: EuiSelectableOption[]) => {
+    const newStatuses = options
+      .filter((opt) => opt.checked === 'on')
+      .map((opt) => opt.key as string);
+    onStatusChange?.(newStatuses);
+  };
 
-  const handleToggleTagPopover = useCallback(() => {
+  const handleToggleTagPopover = () => {
     setIsTagPopoverOpen((prev) => !prev);
-  }, []);
+  };
 
-  const handleCloseTagPopover = useCallback(() => {
+  const handleCloseTagPopover = () => {
     setIsTagPopoverOpen(false);
-  }, []);
+  };
 
-  const handleToggleStatusPopover = useCallback(() => {
+  const handleToggleStatusPopover = () => {
     setIsStatusPopoverOpen((prev) => !prev);
-  }, []);
+  };
 
-  const handleCloseStatusPopover = useCallback(() => {
+  const handleCloseStatusPopover = () => {
     setIsStatusPopoverOpen(false);
-  }, []);
+  };
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
