@@ -33,6 +33,10 @@ import type {
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import type {
+  IDslPaginatedSearchOptions,
+  IDslPaginatedSearchParams,
+} from '@kbn/search-types/src/search_methods_types';
+import type {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
@@ -86,6 +90,8 @@ export class SearchMethodsService implements ISearchMethods {
       {
         getRequestBody: (req) => (req.params?.body ?? {}) as Record<string, unknown>,
         getStats: getResponseInspectorStats,
+        // this is here to support the esdsl expression function. evaluate for removal if that expression function is ever abandoned
+        getRequestMetadata: options?.getRequestMetadata,
       }
     );
     return {
@@ -98,8 +104,8 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   async dslPaginated(
-    params: IDslSearchParams,
-    _options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+    params: IDslPaginatedSearchParams,
+    _options?: IDslPaginatedSearchOptions
   ): Promise<IDslPaginatedSearchResult> {
     const options = {
       ..._options,
@@ -176,6 +182,7 @@ export class SearchMethodsService implements ISearchMethods {
     inspectorCallbacks?: {
       getRequestBody: (request: T) => Record<string, unknown>;
       getStats?: (rawResponse: any) => RequestStatistics;
+      getRequestMetadata?: () => RequestStatistics;
     }
   ): Promise<any> {
     const requestResponder = inspector?.adapter?.start(inspector.title, {
@@ -187,6 +194,10 @@ export class SearchMethodsService implements ISearchMethods {
     // Log request body if inspector is active and callback provided
     if (requestResponder && inspectorCallbacks) {
       requestResponder.json(inspectorCallbacks.getRequestBody(request));
+      // Log request metadata before executing search
+      if (inspectorCallbacks.getRequestMetadata) {
+        requestResponder.stats(inspectorCallbacks.getRequestMetadata());
+      }
     }
 
     try {

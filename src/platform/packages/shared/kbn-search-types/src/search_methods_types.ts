@@ -12,7 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 import type { SanitizedConnectionRequestParams } from './types';
 
 /**
@@ -117,11 +117,19 @@ export interface IDslSearchOptions extends IBaseSearchOptions {
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
+
+  /**
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   */
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
 
-export type IDslPaginatedSearchOptions = Omit<IDslSearchOptions, 'trackTotalHits'>;
+export type IDslPaginatedSearchOptions = Omit<
+  IDslSearchOptions,
+  'trackTotalHits' | 'getRequestMetadata'
+>;
 
 /**
  * Pagination helpers for DSL search results
