@@ -6,15 +6,29 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import {
+  ruleCreatedTriggerCommonDefinition,
+  ruleDeletedTriggerCommonDefinition,
+  ruleDisabledTriggerCommonDefinition,
+  ruleEnabledTriggerCommonDefinition,
+  ruleUpdatedTriggerCommonDefinition,
+} from '../../../common/workflows/triggers';
 import { ALERT_ACTION_WORKFLOW_TRIGGERS } from '../events/alert_action_workflow_subscriber/triggers';
+
+const RULE_WORKFLOW_TRIGGER_DEFINITIONS = [
+  ruleCreatedTriggerCommonDefinition,
+  ruleUpdatedTriggerCommonDefinition,
+  ruleDeletedTriggerCommonDefinition,
+  ruleEnabledTriggerCommonDefinition,
+  ruleDisabledTriggerCommonDefinition,
+];
 
 /**
  * Registers all alerting-v2 server-side workflow trigger definitions.
  *
- * Walks {@link ALERT_ACTION_WORKFLOW_TRIGGERS}, the same catalog the
- * `AlertActionWorkflowSubscriber` walks at dispatch time, so the
- * registered schema, the trigger id, and the runtime payload mapping
- * cannot drift across the codebase.
+ * Alert-action triggers are registered from {@link ALERT_ACTION_WORKFLOW_TRIGGERS},
+ * the same catalog the `AlertActionWorkflowSubscriber` walks at dispatch time.
+ * Rule lifecycle triggers are registered from {@link RULE_WORKFLOW_TRIGGER_DEFINITIONS}.
  *
  * Call once during plugin setup.
  */
@@ -23,5 +37,9 @@ export function registerTriggerDefinitions(
 ): void {
   for (const trigger of ALERT_ACTION_WORKFLOW_TRIGGERS) {
     workflowsExtensions.registerTriggerDefinition(trigger.definition);
+  }
+
+  for (const definition of RULE_WORKFLOW_TRIGGER_DEFINITIONS) {
+    workflowsExtensions.registerTriggerDefinition(definition);
   }
 }

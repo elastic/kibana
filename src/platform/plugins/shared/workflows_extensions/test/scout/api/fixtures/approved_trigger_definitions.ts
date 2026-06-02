@@ -28,8 +28,28 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
-    id: 'alertingV2.episodeAssigned',
+    id: 'alerting.episodeAssigned',
     schemaHash: 'fce48752c788e4620a70cf8d33040117c7a46c78508a5cf98c5c0fa93f631ad0',
+  },
+  {
+    id: 'alerting.ruleCreated',
+    schemaHash: '0e48f9a1ccdd8738fba8e71e9349d7c5254ee11db6a2eb928f528a81cc2cac5f',
+  },
+  {
+    id: 'alerting.ruleDeleted',
+    schemaHash: '0e48f9a1ccdd8738fba8e71e9349d7c5254ee11db6a2eb928f528a81cc2cac5f',
+  },
+  {
+    id: 'alerting.ruleDisabled',
+    schemaHash: '0e48f9a1ccdd8738fba8e71e9349d7c5254ee11db6a2eb928f528a81cc2cac5f',
+  },
+  {
+    id: 'alerting.ruleEnabled',
+    schemaHash: '0e48f9a1ccdd8738fba8e71e9349d7c5254ee11db6a2eb928f528a81cc2cac5f',
+  },
+  {
+    id: 'alerting.ruleUpdated',
+    schemaHash: '0e48f9a1ccdd8738fba8e71e9349d7c5254ee11db6a2eb928f528a81cc2cac5f',
   },
   {
     id: 'cases.caseCreated',

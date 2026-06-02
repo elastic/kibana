@@ -26,7 +26,9 @@ import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import type { WorkflowServiceContract } from '../services/workflow_service/workflow_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
+import { createRuleWorkflowEmitter } from '../workflow_extensions/rule_workflow_emitter';
 import { buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
@@ -82,6 +84,7 @@ interface RulesClientParams {
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
     actionPolicyClient: ActionPolicyClient;
+    workflowService: WorkflowServiceContract;
   };
   options: {
     spaceId: string;
@@ -94,6 +97,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
   private readonly actionPolicyClient: ActionPolicyClient;
+  private readonly workflowEmitter: ReturnType<typeof createRuleWorkflowEmitter>;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -102,6 +106,11 @@ export class RulesClient {
     this.taskManager = services.taskManager;
     this.userService = services.userService;
     this.actionPolicyClient = services.actionPolicyClient;
+    this.workflowEmitter = createRuleWorkflowEmitter(
+      services.workflowService,
+      services.request,
+      options.spaceId
+    );
     this.spaceId = options.spaceId;
   }
 
@@ -233,7 +242,9 @@ export class RulesClient {
       throw e;
     }
 
-    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    await this.workflowEmitter.emitCreated(rule);
+    return rule;
   }
 
   @withApm
@@ -275,7 +286,9 @@ export class RulesClient {
       version: options?.version ?? existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    await this.workflowEmitter.emitAfterUpdate(parsed, existingAttrs, rule);
+    return rule;
   }
 
   @withApm
@@ -317,12 +330,8 @@ export class RulesClient {
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
-        details: { rule_id: id },
-      });
-    }
+    const { attrs, version } = await this.getExistingRule(id);
+    const deletedRule = transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
@@ -333,6 +342,8 @@ export class RulesClient {
       type: 'single_rule',
       ruleId: id,
     });
+
+    await this.workflowEmitter.emitDeleted([deletedRule]);
   }
 
   @withApm
@@ -343,6 +354,10 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
@@ -363,7 +378,9 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    await this.workflowEmitter.emitEnabled([rule]);
+    return rule;
   }
 
   @withApm
@@ -374,6 +391,10 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (!existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
@@ -391,7 +412,9 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    await this.workflowEmitter.emitDisabled([rule]);
+    return rule;
   }
 
   @withApm
@@ -510,6 +533,18 @@ export class RulesClient {
       return { rules: [], errors: [] };
     }
 
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+    const rulesBeforeDelete = new Map<string, RuleResponse>();
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        continue;
+      }
+      rulesBeforeDelete.set(
+        doc.id,
+        transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version)
+      );
+    }
+
     // Remove associated task manager tasks (best-effort)
     const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
     try {
@@ -519,6 +554,7 @@ export class RulesClient {
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const deletedRules: RuleResponse[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push({
@@ -528,8 +564,15 @@ export class RulesClient {
             statusCode: result.error.statusCode,
           },
         });
+        continue;
+      }
+      const rule = rulesBeforeDelete.get(result.id);
+      if (rule) {
+        deletedRules.push(rule);
       }
     }
+
+    await this.workflowEmitter.emitDeleted(deletedRules);
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -632,6 +675,11 @@ export class RulesClient {
           // Task scheduling failure is non-fatal for bulk operations
         }
       }
+
+      const enabledRules = itemsToUpdate
+        .filter((item) => !errors.some((e) => e.id === item.id))
+        .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+      await this.workflowEmitter.emitEnabled(enabledRules);
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -720,6 +768,11 @@ export class RulesClient {
       }
     }
 
+    const disabledRules = itemsToUpdate
+      .filter((item) => !errors.some((e) => e.id === item.id))
+      .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+    await this.workflowEmitter.emitDisabled(disabledRules);
+
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
@@ -768,9 +821,8 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return {
-      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion),
-      created: false,
-    };
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    await this.workflowEmitter.emitUpdated(rule);
+    return { rule, created: false };
   }
 }

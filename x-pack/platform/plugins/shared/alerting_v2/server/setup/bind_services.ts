@@ -93,6 +93,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
           actionPolicyClient: get(ActionPolicyClient),
+          workflowService: get(WorkflowServiceToken),
         },
         options: {
           spaceId: get(RequestSpaceIdToken),
