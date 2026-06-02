@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import deepmerge from 'deepmerge';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { useHostDetails } from '../../../../../explore/hosts/containers/hosts/details';
@@ -16,15 +16,15 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import type { HostItem } from '../../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import type { InspectResponse } from '../../../../types';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import type { InspectResponse } from '../../../../../types';
 import type {
   EntityFromStoreResult,
   EntityStoreRecord,
-} from '../../shared/hooks/use_entity_from_store';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { isActiveTimeline } from '../../../../helpers';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+} from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { ObservedEntityData } from '../../../../../flyout/entity_details/shared/components/observed_entity/types';
+import { isActiveTimeline } from '../../../../../helpers';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 
 export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
