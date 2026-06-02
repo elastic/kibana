@@ -43,7 +43,10 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * EUI's action cells ship `flex-wrap: wrap` on desktop, which without
  * intervention would let the icons stack vertically when the column squeezes.
  * `cssActionsCellNoWrap` (in `content_list_table.tsx`) pins the cell's flex
- * container to `flex-wrap: nowrap` so the column's `min-width: 'max-content'`
+ * container to `flex-wrap: nowrap` — keyed on EUI's
+ * `td.euiTableRowCell--hasActions` so the rule actually matches body cells,
+ * not just the header (which is the only `<td>`/`<th>` that receives the
+ * column's `data-test-subj`) — so the column's `min-width: 'max-content'`
  * floor resolves to the full icon-row width and the auto table-layout
  * algorithm can't shrink the column past that point.
  *

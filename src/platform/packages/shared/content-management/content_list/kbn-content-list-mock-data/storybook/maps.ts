@@ -24,9 +24,22 @@ export interface MapMockItem extends UserContentCommonSchema {
 }
 
 /**
- * Mock map items
+ * Mock map items.
+ *
+ * Tuned to span the name-cell permutation matrix (short/long title ×
+ * empty/short/long description × no/few/many tags) so the Maps stories
+ * exercise both narrow-viewport column-stack and ≥ 2560px wrap-on-overflow
+ * layouts without a dedicated fixture. The matrix uses `t{s,m,l}` for
+ * title length, `d{0,s,l}` for description length, and `g{0,f,m}` for tag
+ * count.
+ *
+ * Pinned IDs preserved for story call-sites:
+ *
+ * - `map-001` — initial favorite (see `services.ts`).
  */
 export const MOCK_MAPS: MapMockItem[] = [
+  // ts-ds-gm — sparse-but-favorited (short title, short description, many
+  // tags). At wide viewports this row packs onto a single line.
   {
     id: 'map-001',
     type: 'map',
@@ -36,11 +49,19 @@ export const MOCK_MAPS: MapMockItem[] = [
     createdBy: 'u_665722084_cloud',
     managed: false,
     attributes: {
-      title: 'eCommerce Orders by Location',
-      description: 'Geographic distribution of eCommerce orders',
+      title: 'Orders',
+      description: 'Orders by storefront region.',
     },
-    references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
+    references: [
+      { type: 'tag', id: 'tag-production', name: 'Production' },
+      { type: 'tag', id: 'tag-important', name: 'Important' },
+      { type: 'tag', id: 'tag-security', name: 'Security' },
+      { type: 'tag', id: 'tag-development', name: 'Development' },
+      { type: 'tag', id: 'fleet-managed-default', name: 'Managed' },
+    ],
   },
+  // tl-dl-gf — prototypical rich row. At wide viewports the long title
+  // sits on its own line and the description wraps below.
   {
     id: 'map-002',
     type: 'map',
@@ -50,11 +71,14 @@ export const MOCK_MAPS: MapMockItem[] = [
     createdBy: 'u_jane_doe',
     managed: false,
     attributes: {
-      title: 'Flight Routes Visualization',
-      description: 'Interactive map of flight routes and destinations',
+      title: 'Flight Routes — Carrier, Aircraft Type, Arrival Punctuality & Seasonal Demand',
+      description:
+        'Interactive map of mock flight routes for ES-Air, Logstash Airways, and Kibana Airlines with overlays for carrier, aircraft type, on-time performance, and seasonal demand variance — designed for the Network Planning team during quarterly route reviews. Includes a great-circle layer for scheduled corridors, a heatmap of cancellation-cause attribution at the destination airport, and a per-route load-factor choropleth that crossfilters with the codeshare partner picker in the legend. Time slider snaps to the quarterly review window by default; tooltips link out to the originating flight log, the maintenance backlog for the assigned tail number, and the slot-allocation sheet for both endpoints.',
     },
     references: [{ type: 'tag', id: 'tag-development', name: 'Development' }],
   },
+  // ts-dl-gf — short title + long description; description wraps within
+  // its cell while the short title and few tags stay inline.
   {
     id: 'map-003',
     type: 'map',
@@ -64,14 +88,17 @@ export const MOCK_MAPS: MapMockItem[] = [
     createdBy: 'u_admin_local',
     managed: false,
     attributes: {
-      title: 'Web Traffic by Country',
-      description: 'Heatmap of website visitors by geographic location',
+      title: 'Traffic',
+      description:
+        'Heatmap of elastic.co visitors aggregated by geographic location with drill-downs by country, region, and acquisition channel; refreshed daily and intended for the Growth and Marketing teams. The base layer is a clustered hexbin of session origins enriched with the regional sales-territory overlay so marketing campaigns can be scoped to a specific GTM motion. A second layer plots inbound link sources (search, social, partner referral, organic docs) and animates intra-day cadence so the team can spot campaign blasts that briefly distort the underlying organic baseline. Click-through on any cell opens the matching pre-filtered Lens dashboard.',
     },
     references: [
       { type: 'tag', id: 'tag-production', name: 'Production' },
       { type: 'tag', id: 'tag-important', name: 'Important' },
     ],
   },
+  // tl-ds-g0 — managed long-title row with a short description and no
+  // tags. Wide viewports surface the long title alone on its line.
   {
     id: 'map-004',
     type: 'map',
@@ -80,11 +107,13 @@ export const MOCK_MAPS: MapMockItem[] = [
     createdBy: 'u_john_smith',
     managed: true,
     attributes: {
-      title: 'Infrastructure Locations',
-      description: 'Data center and server locations worldwide',
+      title: 'Infrastructure Locations — Cross-Region Data Centers, Edge POPs & On-Call Coverage',
+      description: 'Per-site rollups.',
     },
     references: [],
   },
+  // ts-d0-g0 — most-sparse row: title only, nothing else. At wide
+  // viewports the cell renders a single inline element.
   {
     id: 'map-005',
     type: 'map',
@@ -94,9 +123,8 @@ export const MOCK_MAPS: MapMockItem[] = [
     createdBy: 'u_analyst_1',
     managed: false,
     attributes: {
-      title: 'Security Threats Heatmap',
-      description: 'Geographic distribution of detected security threats',
+      title: 'Threats',
     },
-    references: [{ type: 'tag', id: 'tag-security', name: 'Security' }],
+    references: [],
   },
 ];
