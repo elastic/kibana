@@ -80,8 +80,14 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   }, [alert]);
 
   const flyoutOptions = useMemo(() => {
+    const transactionTypeField = alert.fields[TRANSACTION_TYPE];
+
+    const rawTransactionType = Array.isArray(transactionTypeField)
+      ? transactionTypeField[0]
+      : transactionTypeField;
+
     const initialTransactionType =
-      alert.fields[TRANSACTION_TYPE] != null ? alert.fields[TRANSACTION_TYPE] : undefined;
+      rawTransactionType != null ? String(rawTransactionType) : undefined;
 
     return {
       kuery: '',

@@ -51,6 +51,7 @@ export function ServiceFlyoutHeader({
           <EuiLink
             href={serviceOverviewHref}
             target="_blank"
+            rel="noopener noreferrer"
             external={false}
             data-test-subj="serviceFlyoutTitleLink"
           >

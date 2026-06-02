@@ -26,7 +26,6 @@ import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetch
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { clearCache } from '../../../../services/rest/call_api';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
 
@@ -119,10 +118,7 @@ export function ServiceFlyoutQueryControls({
             onTimeChange={({ start: nextRangeFrom, end: nextRangeTo }) => {
               onRangeChange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
             }}
-            onRefresh={() => {
-              clearCache();
-              onRefresh();
-            }}
+            onRefresh={onRefresh}
             showUpdateButton
             updateButtonProps={{ fill: false }}
             commonlyUsedRanges={commonlyUsedRanges}

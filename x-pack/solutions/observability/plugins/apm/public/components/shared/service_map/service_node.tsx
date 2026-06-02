@@ -209,7 +209,7 @@ export const ServiceNode = memo(
                   >
                     <AlertsBadge
                       count={data.alertsCount ?? 0}
-                      serviceName={data.label}
+                      serviceName={data.id}
                       data-test-subj="serviceMapNodeAlertsBadge"
                       {...(navigateToAlertsTab ? { onClick: navigateToAlertsTab } : {})}
                     />
