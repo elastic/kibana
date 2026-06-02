@@ -22,7 +22,7 @@ export const getPingsRouteQuerySchema = schema.object({
   pageIndex: schema.maybe(schema.number()),
   sort: schema.maybe(schema.string()),
   status: schema.maybe(schema.string()),
-  remoteName: schema.maybe(schema.string()),
+  remoteName: schema.maybe(schema.string({ maxLength: 256 })),
 });
 
 type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;

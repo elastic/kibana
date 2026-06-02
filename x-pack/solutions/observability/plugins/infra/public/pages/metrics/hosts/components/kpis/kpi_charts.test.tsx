@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KpiCharts } from './kpi_charts';
+import { getMetricDataAvailability, KpiCharts } from './kpi_charts';
 import * as useUnifiedSearchHooks from '../../hooks/use_unified_search';
 import * as useHostCountHooks from '../../hooks/use_host_count';
 import * as useAfterLoadedStateHooks from '../../hooks/use_after_loaded_state';
@@ -25,7 +25,7 @@ jest.mock('../../hooks/use_after_loaded_state');
 jest.mock('../../../../../hooks/use_reload_request_time');
 jest.mock('../../../../../containers/metrics_source');
 jest.mock('../../../../../components/asset_details', () => ({
-  HostKpiCharts: ({ error, loading, hasData }: any) => {
+  HostKpiCharts: ({ error, loading, hasData, metricDataAvailability }: any) => {
     // Real component logic: if (!loading && (!hasData || error)) show ChartPlaceholder
     // Otherwise show Kpi charts
     if (!loading && (!hasData || error)) {
@@ -40,7 +40,14 @@ jest.mock('../../../../../components/asset_details', () => ({
         </>
       );
     }
-    return <div data-test-subj="hostKpiCharts">HostKpiCharts</div>;
+    return (
+      <div data-test-subj="hostKpiCharts">
+        HostKpiCharts
+        <span data-test-subj="hostKpiMetricDataAvailability">
+          {JSON.stringify(metricDataAvailability)}
+        </span>
+      </div>
+    );
   },
 }));
 
@@ -191,6 +198,96 @@ describe('KpiCharts', () => {
 
       expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
       expect(screen.queryByText('No results found')).not.toBeInTheDocument();
+    });
+
+    it('should mark KPIs without backing metric data as unavailable', () => {
+      mockUseHostsViewContext.mockReturnValue({
+        hostNodes: [
+          {
+            name: 'host-1',
+            metrics: [
+              { name: 'cpuV2', value: null },
+              { name: 'normalizedLoad1m', value: 0 },
+              { name: 'memory', value: null },
+              { name: 'diskSpaceUsage', value: null },
+            ],
+            metadata: [],
+            hasSystemMetrics: false,
+          },
+        ],
+        loading: false,
+        error: undefined,
+      });
+
+      renderKpiCharts();
+
+      expect(screen.getByTestId('hostKpiMetricDataAvailability')).toHaveTextContent(
+        JSON.stringify({
+          cpuUsage: false,
+          normalizedLoad1m: true,
+          memoryUsage: false,
+          diskUsage: false,
+        })
+      );
+    });
+  });
+
+  describe('getMetricDataAvailability', () => {
+    it('preserves zero values as available metric data', () => {
+      expect(
+        getMetricDataAvailability([
+          {
+            name: 'host-1',
+            metrics: [
+              { name: 'cpuV2', value: 0 },
+              { name: 'normalizedLoad1m', value: null },
+              { name: 'memory', value: null },
+              { name: 'diskSpaceUsage', value: null },
+            ],
+            metadata: [],
+            hasSystemMetrics: true,
+          },
+        ])
+      ).toEqual({
+        cpuUsage: true,
+        normalizedLoad1m: false,
+        memoryUsage: false,
+        diskUsage: false,
+      });
+    });
+
+    it('marks a KPI as available when any selected host has that metric', () => {
+      expect(
+        getMetricDataAvailability([
+          {
+            name: 'host-with-cpu',
+            metrics: [
+              { name: 'cpuV2', value: 0.5 },
+              { name: 'normalizedLoad1m', value: 1 },
+              { name: 'memory', value: 0.75 },
+              { name: 'diskSpaceUsage', value: 0.25 },
+            ],
+            metadata: [],
+            hasSystemMetrics: true,
+          },
+          {
+            name: 'host-without-cpu',
+            metrics: [
+              { name: 'cpuV2', value: null },
+              { name: 'normalizedLoad1m', value: 1 },
+              { name: 'memory', value: 0.75 },
+              { name: 'diskSpaceUsage', value: 0.25 },
+            ],
+            metadata: [],
+            hasSystemMetrics: true,
+          },
+        ])
+      ).toEqual({
+        cpuUsage: true,
+        normalizedLoad1m: true,
+        memoryUsage: true,
+        diskUsage: true,
+      });
     });
   });
 });

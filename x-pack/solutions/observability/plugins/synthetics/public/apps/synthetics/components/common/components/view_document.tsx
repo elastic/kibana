@@ -12,6 +12,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { MouseEvent } from 'react';
@@ -53,16 +54,17 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
 
   return (
     <>
-      <EuiButtonIcon
-        data-test-subj="syntheticsViewDocumentButton"
-        iconType="inspect"
-        title={INSPECT_DOCUMENT(formattedTimestamp)}
-        aria-label={INSPECT_DOCUMENT(formattedTimestamp)}
-        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
-          evt.stopPropagation();
-          setIsFlyoutVisible(true);
-        }}
-      />
+      <EuiToolTip content={INSPECT_DOCUMENT(formattedTimestamp)} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj="syntheticsViewDocumentButton"
+          iconType="inspect"
+          aria-label={INSPECT_DOCUMENT(formattedTimestamp)}
+          onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+            evt.stopPropagation();
+            setIsFlyoutVisible(true);
+          }}
+        />
+      </EuiToolTip>
       {isFlyoutVisible && (
         <EuiFlyout
           onClose={() => setIsFlyoutVisible(false)}
