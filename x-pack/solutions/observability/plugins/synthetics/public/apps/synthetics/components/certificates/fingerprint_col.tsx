@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiText, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Cert } from '../../../../../common/runtime_types';
-import { COPY_FINGERPRINT } from './translations';
+import {
+  COPY_FINGERPRINT,
+  FINGERPRINT_NOT_AVAILABLE,
+  FINGERPRINT_NOT_AVAILABLE_TOOLTIP,
+} from './translations';
 
 const StyledSpan = styled.span`
   margin-right: 8px;
@@ -30,22 +34,33 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
           {(copy) => (
-            <EuiButtonIcon
-              data-test-subj="syntheticsShaComponentButton"
-              aria-label={COPY_FINGERPRINT}
-              onClick={copy}
-              iconType="copy"
-              title={COPY_FINGERPRINT}
-            />
+            <EuiToolTip content={COPY_FINGERPRINT} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="syntheticsShaComponentButton"
+                aria-label={COPY_FINGERPRINT}
+                onClick={copy}
+                iconType="copy"
+              />
+            </EuiToolTip>
           )}
         </EuiCopy>
       </StyledSpan>
     );
   };
+  if (!cert?.sha1 && !cert?.sha256) {
+    return (
+      <EuiToolTip content={FINGERPRINT_NOT_AVAILABLE_TOOLTIP}>
+        <EuiText size="s" color="subdued" data-test-subj="certFingerprintNotAvailable">
+          {FINGERPRINT_NOT_AVAILABLE}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
+
   return (
     <span>
-      <ShaComponent text="SHA 1" val={cert?.sha1?.toUpperCase() ?? ''} />
-      <ShaComponent text="SHA 256" val={cert?.sha256?.toUpperCase() ?? ''} />
+      {cert?.sha1 && <ShaComponent text="SHA 1" val={cert.sha1.toUpperCase()} />}
+      {cert?.sha256 && <ShaComponent text="SHA 256" val={cert.sha256.toUpperCase()} />}
     </span>
   );
 };
