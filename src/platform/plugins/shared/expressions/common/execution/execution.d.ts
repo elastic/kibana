@@ -1,7 +1,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
-import { Observable } from 'rxjs';
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { Observable } from 'rxjs';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Executor } from '../executor';
 import type { ExecutionContainer } from './container';
@@ -9,7 +9,7 @@ import type { ExpressionValueError } from '../expression_types/specs/error';
 import type { ExpressionAstArgument, ExpressionAstExpression, ExpressionAstFunction, ExpressionAstNode } from '../ast';
 import type { DefaultInspectorAdapters, ExecutionContext } from './types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
-import { ExecutionContract } from './execution_contract';
+import type { ExecutionContract } from './execution_contract';
 import type { ExpressionExecutionParams } from '../service';
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> = ReturnType<Function> extends ObservableLike<unknown> ? UnwrapObservable<ReturnType<Function>> : Awaited<ReturnType<Function>>;
 export interface FunctionCacheItem {

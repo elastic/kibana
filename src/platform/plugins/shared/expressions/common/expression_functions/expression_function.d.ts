@@ -1,7 +1,7 @@
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { MigrateFunctionsObject, GetMigrationFunctionObjectFn, PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { AnyExpressionFunctionDefinition } from './types';
-import { ExpressionFunctionParameter } from './expression_function_parameter';
+import type { ExpressionFunctionParameter } from './expression_function_parameter';
 import type { ExpressionValue } from '../expression_types/types';
 import type { ExpressionAstFunction } from '../ast';
 export declare class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {

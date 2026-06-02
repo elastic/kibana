@@ -1,4 +1,4 @@
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 export declare abstract class NumeralFormat extends FieldFormat {

@@ -12,4 +12,4 @@ export class Fn {
     context: any;
     accepts: (type: any) => boolean;
 }
-import { Arg } from './arg';
+import type { Arg } from './arg';

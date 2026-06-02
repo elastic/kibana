@@ -1,5 +1,5 @@
 import type { Ast, AstWithMeta } from './ast';
-import { parse } from './grammar.peggy';
+import type { parse } from './grammar.peggy';
 interface Options {
     startRule?: string;
 }

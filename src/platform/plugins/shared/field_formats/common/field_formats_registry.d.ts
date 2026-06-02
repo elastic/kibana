@@ -1,6 +1,6 @@
 import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldFormatsGetConfigFn, FieldFormatConfig, FieldFormatInstanceType, FieldFormatId, FieldFormatMetaParams, FormatFactory, FieldFormatParams } from './types';
-import { FieldFormat } from './field_format';
+import type { FieldFormat } from './field_format';
 export declare class FieldFormatsRegistry {
     protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType>;
     protected defaultMap: Record<string, FieldFormatConfig>;
