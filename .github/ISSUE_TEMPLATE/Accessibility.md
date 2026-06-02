@@ -2,7 +2,7 @@
 name: Accessibility Issue
 about: Report an issue to improve keyboard navigation, screen reader support, and overall accessibility.
 labels: Project:Accessibility
-title: '(Accessibility)'
+title: (Accessibility)
 ---
 
 <!--
