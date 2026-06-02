@@ -18,6 +18,7 @@ import {
   processDeprecated,
   processDiscontinued,
 } from './utils';
+import { convertSingleValueEnumToConst } from './enum';
 import type { IContext } from '../context';
 
 const {
@@ -35,6 +36,7 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
     schema.maxLength = schema[META_FIELD_X_OAS_MAX_LENGTH] as number;
     deleteField(schema, META_FIELD_X_OAS_MAX_LENGTH);
   }
+  convertSingleValueEnumToConst(schema);
 };
 
 export const processStream = (schema: OpenAPIV3.SchemaObject): void => {

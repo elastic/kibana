@@ -31,7 +31,7 @@ export const sharedOas = {
     title: 'test',
     version: '99.99.99',
   },
-  openapi: '3.0.0',
+  openapi: '3.1.1',
   paths: {
     '/bar': {
       get: {
@@ -56,7 +56,7 @@ export const sharedOas = {
                     type: 'string',
                   },
                   literalType: {
-                    enum: ['literallythis'],
+                    const: 'literallythis',
                     type: 'string',
                   },
                   maybeNumber: {
@@ -179,7 +179,7 @@ export const sharedOas = {
                     type: 'string',
                   },
                   literalType: {
-                    enum: ['literallythis'],
+                    const: 'literallythis',
                     type: 'string',
                   },
                   maybeNumber: {
@@ -303,7 +303,7 @@ export const sharedOas = {
                     type: 'string',
                   },
                   literalType: {
-                    enum: ['literallythis'],
+                    const: 'literallythis',
                     type: 'string',
                   },
                   maybeNumber: {

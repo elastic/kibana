@@ -101,7 +101,7 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
           entry.$ref
         }.
 
-        Each non-default branch must declare "${propertyName}" as a single-string enum (from schema.literal) so the OAS generator can build discriminator.mapping.
+        Each non-default branch must declare "${propertyName}" as a single-string const (from schema.literal) so the OAS generator can build discriminator.mapping.
 
         Debug details: ${JSON.stringify(sharedSchema.properties?.[propertyName])}.`
       );

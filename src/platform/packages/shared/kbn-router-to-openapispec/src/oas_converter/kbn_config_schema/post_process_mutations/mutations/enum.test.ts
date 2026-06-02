@@ -18,6 +18,21 @@ describe('processEnum', () => {
       expected: {},
     },
     {
+      name: 'converts single-value enum to const for schema.literal output',
+      input: {
+        anyOf: [
+          {
+            type: 'string',
+            enum: ['literallythis'],
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        const: 'literallythis',
+      },
+    },
+    {
       name: 'converts anyOf to enum if all items are enum and of the same type',
       input: {
         anyOf: [

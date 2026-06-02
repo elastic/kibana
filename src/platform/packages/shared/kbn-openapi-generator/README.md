@@ -9,7 +9,7 @@ To start with code generation you should have OpenAPI specification describing y
 OpenAPI specification should be in YAML format and have `.schema.yaml` extension. Here's a simple example of OpenAPI specification:
 
 ```yaml
-openapi: 3.0.0
+openapi: 3.1.1
 info:
   title: Install Prebuilt Rules API endpoint
   version: 2023-10-31
@@ -174,7 +174,7 @@ It is common to have shared types that are used in multiple API operations. To a
 Here's an example of the schema that references common components:
 
 ```yaml
-openapi: 3.0.0
+openapi: 3.1.1
 info:
   title: Delete Rule API endpoint
   version: 2023-10-31

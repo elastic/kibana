@@ -11,9 +11,9 @@ import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from '../create_oas_document';
 
 describe('OpenAPI Bundler - different OAS versions', () => {
-  it('DOES NOT bundle specs with different OpenAPI versions', async () => {
+  it('DOES NOT bundle specs with different OpenAPI minor versions', async () => {
     const spec1 = createOASDocument({
-      openapi: '3.0.3',
+      openapi: '3.1.1',
       paths: {
         '/api/some_api': {
           get: {
@@ -34,7 +34,7 @@ describe('OpenAPI Bundler - different OAS versions', () => {
       },
     });
     const spec2 = createOASDocument({
-      openapi: '3.1.0',
+      openapi: '3.2.0',
       paths: {
         '/api/some_api': {
           put: {

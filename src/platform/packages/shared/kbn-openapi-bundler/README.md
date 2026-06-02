@@ -20,7 +20,7 @@ This packages provides tooling for manipulating OpenAPI endpoint specifications.
 
 ## Getting started with OpenAPI bundling
 
-To let this package help you with bundling your OpenAPI specifications you should have OpenAPI specification describing your API endpoint request and response schemas along with common types used in your API. Refer [@kbn/openapi-generator](../kbn-openapi-generator/README.md) and [OpenAPI 3.0.3](https://swagger.io/specification/v3/) (support for [OpenAPI 3.1.0](https://swagger.io/specification/) is planned to be added later) for more details.
+To let this package help you with bundling your OpenAPI specifications you should have OpenAPI specification describing your API endpoint request and response schemas along with common types used in your API. Refer [@kbn/openapi-generator](../kbn-openapi-generator/README.md) and [OpenAPI 3.1.0](https://swagger.io/specification/) for more details.
 
 Following the recommendations provided in `@kbn/openapi-generator` you should have OpenAPI specs defined under a common folder something like `my-plugin/common/api`.
 
@@ -90,7 +90,7 @@ Here's an example how your source schemas can look like and the expected result
 - `example1.schema.yaml`
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -112,7 +112,7 @@ paths:
 - `example2.schema.yaml`
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -136,7 +136,7 @@ And the result bundle generated in `target/openapi/my_bundle_name_2023_10_31.bun
 will look like
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: 'My Domain API bundle'
   description: 'My description'
@@ -169,7 +169,7 @@ components:
 
 ## Getting started with OpenAPI merger
 
-To let this package help you with merging OpenAPI specifications you should have valid OpenAPI specifications version `3.0.x`. OpenAPI `3.1` is not supported currently.
+To let this package help you with merging OpenAPI specifications you should have valid OpenAPI specifications version `3.1.x`. Source specs using OpenAPI `3.0.x` are normalized to `3.1.1` in the merged output.
 
 Currently package supports only programmatic API. As the next step you need to create a JavaScript script file like below
 
@@ -262,7 +262,7 @@ having `ess` label like `x-labels: [ess]` and `x-labels: [ess, serverless, somet
 An example source spec looks like the following
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -320,7 +320,7 @@ After running the above script the bundler will produce the following bundles
 - `target/openapi/serverless/my_bundle_name_2023_10_31.bundled.schema.yaml`
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Bundled OpenAPI specs
   version: '2023-10-31'
@@ -344,7 +344,7 @@ components:
 - `target/openapi/ess/my_bundle_name_2023_10_31.bundled.schema.yaml`
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Bundled OpenAPI specs
   version: '2023-10-31'
@@ -387,7 +387,7 @@ When bundler encounters a node with `x-internal: true` it doesn't include this n
 The following spec defines an API endpoint `/api/path/to/endpoint` accepting `GET` and `POST` requests. It has `x-internal: true` defined in `post` section meaning it won't be included in the target spec.
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -418,7 +418,7 @@ paths:
 The result bundle will look like
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Bundled OpenAPI specs
   version: '2023-10-31'
@@ -438,7 +438,7 @@ paths:
 `x-internal: true` can also be defined next to a reference.
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -474,7 +474,7 @@ components:
 The result bundle will look like
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Bundled OpenAPI specs
   version: '2023-10-31'
@@ -681,7 +681,7 @@ Marks reference nodes to be inlined when bundled.
 The following spec defines an API endpoint `/api/path/to/endpoint` accepting `POST` request. It has `x-inline: true` specified in `post` section meaning reference `#/components/schemas/MyPostEndpointResponse` will be inlined in the target spec.
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: My endpoint
   version: '2023-10-31'
@@ -708,7 +708,7 @@ components:
 The result bundle will look like
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Bundled OpenAPI specs
   version: '2023-10-31'
@@ -762,7 +762,7 @@ const ROOT = resolve(__dirname, '../../../../..');
 It will produce a document containing the specified tag assigned to all operations like below
 
 ```yaml
-openapi: 3.0.3
+openapi: 3.1.1
 info: ...
 servers: ...
 paths:
