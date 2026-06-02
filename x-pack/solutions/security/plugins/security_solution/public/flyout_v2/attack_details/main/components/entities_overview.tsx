@@ -6,13 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
