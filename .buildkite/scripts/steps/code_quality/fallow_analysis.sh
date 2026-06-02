@@ -52,17 +52,17 @@ extract_health_table() {
   printf '%s\n' "$output" | awk '/^● Per-owner health/{found=1} found{print}'
 }
 
-# Extract health score summary from the per-owner health section header line,
-# e.g. "@elastic/search-kibana (score: B, 72/100)" → "(score: B, 72/100)"
+# Extract grade and score from the "● Per-owner health" table row for an owner.
+# Table format: "  @elastic/owner  score  grade  files  hot  p90"
+# Returns e.g. "(grade: F, score: 9.9)"
 extract_owner_health_header() {
   local output="$1"
   local owner="$2"
   printf '%s\n' "$output" | awk \
     -v owner="${owner}" \
     '/^● Per-owner health/{in_health=1; next}
-     in_health && $0 ~ ("^" owner "[ (]") {
-       match($0, /\([^)]+\)/)
-       if (RSTART) print substr($0, RSTART, RLENGTH)
+     in_health && $1 == owner {
+       print "(grade: " $3 ", score: " $2 ")"
        exit
      }'
 }
