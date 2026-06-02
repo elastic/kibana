@@ -37,10 +37,8 @@ export const useShowManagedWorkflowsSetting = (): boolean => {
     services: { settings, uiSettings },
   } = useKibana<WorkflowsUiSettingsServices>();
   const uiSettingsClient = settings?.client ?? uiSettings;
-  const observable = uiSettingsClient?.get$<boolean>(
-    WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
-    false
-  ) ?? EMPTY;
+  const observable =
+    uiSettingsClient?.get$<boolean>(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, false) ?? EMPTY;
   const defaultValue =
     uiSettingsClient?.get<boolean>(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, false) ?? false;
 
