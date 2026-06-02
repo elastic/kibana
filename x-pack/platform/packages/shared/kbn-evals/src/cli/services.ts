@@ -14,7 +14,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
-const EDOT_DOCKER_COMPOSE_FILE = 'data/edot_collector/docker-compose.yaml';
 export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
 
 export type ServiceName = 'edot' | 'scout';
@@ -178,7 +177,7 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
     return;
   }
 
-  const composePath = Path.join(repoRoot, EDOT_DOCKER_COMPOSE_FILE);
+  const composePath = Path.join(repoRoot, 'data/edot_collector/docker-compose.yaml');
 
   try {
     if (!Fs.existsSync(composePath)) {
@@ -208,8 +207,8 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
       timeout: 15_000,
     });
     log.info('[edot] Docker container stopped');
-  } catch {
-    // container not running or docker unavailable
+  } catch (err) {
+    log.warning(`[edot] docker stop failed (${err instanceof Error ? err.message : err})`);
   }
 };
 
