@@ -11,9 +11,15 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
-const KIBANA_BUILD_VERSION = `kibana-${kibanaPackageJson.version}-SNAPSHOT-linux-${
-  process.arch === 'arm64' ? 'aarch64' : 'x86_64'
-}`;
+function getBuildPlatform() {
+  if (process.platform === 'win32') {
+    return `windows-${process.arch === 'arm64' ? 'arm64' : 'x86_64'}`;
+  }
+
+  return `${process.platform}-${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}`;
+}
+
+const KIBANA_BUILD_VERSION = `kibana-${kibanaPackageJson.version}-SNAPSHOT-${getBuildPlatform()}`;
 
 function createBenchmark(name: string, config: string) {
   return {
