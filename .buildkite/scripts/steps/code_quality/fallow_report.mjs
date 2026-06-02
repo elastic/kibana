@@ -64,11 +64,28 @@ function percentile(arr, p) {
   return sorted[Math.max(0, idx)];
 }
 
-function gradeFromMaintainability(avg) {
-  if (avg >= 85) return 'A';
-  if (avg >= 70) return 'B';
-  if (avg >= 55) return 'C';
-  if (avg >= 40) return 'D';
+function computeComplexityScore(fileScores, complexityFindings, hotspots) {
+  if (!fileScores.length) return 0;
+
+  const base = fileScores.reduce((s, f) => s + f.maintainability_index, 0) / fileScores.length;
+
+  const totalFiles = fileScores.length;
+  const criticalCount = complexityFindings.filter((f) => f.severity === 'critical').length;
+  const cyclomatics = complexityFindings.map((f) => f.cyclomatic);
+  const p90 = percentile(cyclomatics, 90);
+
+  const penaltyCritical = Math.min((criticalCount / totalFiles) * 100, 20);
+  const penaltyP90 = p90 > 15 ? Math.min((p90 - 15) * 0.5, 15) : 0;
+  const penaltyHotspots = Math.min((hotspots.length / totalFiles) * 100, 15);
+
+  return Math.max(0, base - penaltyCritical - penaltyP90 - penaltyHotspots);
+}
+
+function gradeFromScore(score) {
+  if (score >= 85) return 'A';
+  if (score >= 70) return 'B';
+  if (score >= 55) return 'C';
+  if (score >= 40) return 'D';
   return 'F';
 }
 
@@ -165,15 +182,12 @@ lines.push('--- Per-owner summary');
 lines.push('  owner                          grade  score   files  hotspots  critical');
 for (const owner of filteredOwners) {
   const d = ownerData.get(owner);
-  const avgMaint =
-    d.fileScores.length > 0
-      ? d.fileScores.reduce((s, f) => s + f.maintainability_index, 0) / d.fileScores.length
-      : 0;
-  const grade = gradeFromMaintainability(avgMaint);
+  const score = computeComplexityScore(d.fileScores, d.complexityFindings, d.hotspots);
+  const grade = gradeFromScore(score);
   const critical = d.complexityFindings.filter((f) => f.severity === 'critical').length;
   const name = `@${owner}`;
   lines.push(
-    `  ${name.padEnd(32)} ${grade.padEnd(6)} ${avgMaint.toFixed(1).padStart(5)}   ${String(
+    `  ${name.padEnd(32)} ${grade.padEnd(6)} ${score.toFixed(1).padStart(5)}   ${String(
       d.fileScores.length
     ).padStart(5)}  ${String(d.hotspots.length).padStart(8)}  ${String(critical).padStart(8)}`
   );
@@ -188,11 +202,8 @@ for (const owner of filteredOwners) {
   const critical = d.complexityFindings.filter((f) => f.severity === 'critical');
   const cyclomatics = d.complexityFindings.map((f) => f.cyclomatic);
   const p90 = percentile(cyclomatics, 90);
-  const avgMaint =
-    d.fileScores.length > 0
-      ? d.fileScores.reduce((s, f) => s + f.maintainability_index, 0) / d.fileScores.length
-      : 0;
-  const grade = gradeFromMaintainability(avgMaint);
+  const score = computeComplexityScore(d.fileScores, d.complexityFindings, d.hotspots);
+  const grade = gradeFromScore(score);
   const emoji = gradeEmoji(grade);
 
   lines.push(`\n--- @${owner}`);
@@ -228,7 +239,7 @@ for (const owner of filteredOwners) {
   }
 
   // Complexity
-  lines.push(`\nComplexity: ${emoji} ${grade} (${avgMaint.toFixed(1)}/100)`);
+  lines.push(`\nComplexity: ${emoji} ${grade} (${score.toFixed(1)}/100)`);
   lines.push(`  P90 cyclomatic: ${p90}`);
   lines.push(`  Hotspots: ${d.hotspots.length}`);
   if (critical.length > 0) {
@@ -246,7 +257,7 @@ for (const owner of filteredOwners) {
 
   // Annotation
   annotationLines.push(
-    `- **${teamShort}**: ${emoji} ${grade} (${avgMaint.toFixed(
+    `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(
       1
     )}/100) · ${totalDeadCode} dead code · ${critical.length} critical functions`
   );
