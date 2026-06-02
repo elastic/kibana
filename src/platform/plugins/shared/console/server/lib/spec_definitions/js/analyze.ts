@@ -126,15 +126,15 @@ const ANALYZER_TYPES = [
 ] as const;
 
 export const CHAR_FILTER_FIELD = {
-  __any_of: [...CHAR_FILTER_TYPES, { type: { __one_of: [...CHAR_FILTER_TYPES] } } ],
+  __any_of: [...CHAR_FILTER_TYPES, { type: { __one_of: [...CHAR_FILTER_TYPES] } }],
 };
 
 export const TOKEN_FILTER_FIELD = {
-  __any_of: [...TOKEN_FILTER_TYPES, { type: { __one_of: [...TOKEN_FILTER_TYPES] } } ],
+  __any_of: [...TOKEN_FILTER_TYPES, { type: { __one_of: [...TOKEN_FILTER_TYPES] } }],
 };
 
 export const TOKENIZER_FIELD = {
-  __one_of: [...TOKENIZER_TYPES, { type: { __one_of: [...TOKENIZER_TYPES] } } ],
+  __one_of: [...TOKENIZER_TYPES, { type: { __one_of: [...TOKENIZER_TYPES] } }],
 };
 
 export const analyze = (specService: SpecDefinitionsService) => {
