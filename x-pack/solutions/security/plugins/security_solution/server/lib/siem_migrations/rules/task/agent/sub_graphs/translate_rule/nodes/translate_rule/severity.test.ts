@@ -10,6 +10,7 @@ import type { OriginalRule } from '../../../../../../../../../../common/siem_mig
 import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
+  mapMicrosoftSentinelSeverityToElasticSeverity,
   mapSplunkSeverityToElasticSeverity,
 } from './severity';
 
@@ -21,6 +22,16 @@ const defaultSplunkRule: OriginalRule = {
   query: 'source="tutorialdata.zip:*"',
   query_language: 'spl',
   severity: '3',
+};
+
+const defaultSentinelRule: OriginalRule = {
+  id: 'some_sentinel_id',
+  vendor: 'microsoft-sentinel',
+  title: 'Sample Sentinel Alert',
+  description: '',
+  query: 'SigninLogs | where ResultType != 0',
+  query_language: 'kql',
+  severity: 'medium',
 };
 
 describe('tests', () => {
@@ -42,6 +53,15 @@ describe('tests', () => {
               query_language: 'not_spl',
             })
           ).toEqual(21);
+        });
+      });
+    });
+
+    describe('microsoft-sentinel', () => {
+      describe('when there is a vendor match', () => {
+        it('should return the correct risk score', async () => {
+          const riskScore = await getElasticRiskScoreFromOriginalRule(defaultSentinelRule);
+          expect(riskScore).toEqual(47);
         });
       });
     });
@@ -94,6 +114,45 @@ describe('tests', () => {
     });
   });
 
+  describe('mapMicrosoftSentinelSeverityToElasticSeverity', () => {
+    describe('when there is a match', () => {
+      const tests = [
+        {
+          input: 'High',
+          expected: 'high',
+        },
+        {
+          input: 'Medium',
+          expected: 'medium',
+        },
+        {
+          input: 'Low',
+          expected: 'low',
+        },
+        {
+          input: 'Informational',
+          expected: 'low',
+        },
+      ];
+
+      tests.forEach((test) => {
+        it(`should map severity ${test.input} to ${test.expected}`, () => {
+          expect(mapMicrosoftSentinelSeverityToElasticSeverity(test.input)).toEqual(test.expected);
+        });
+      });
+    });
+
+    describe('when there is no match', () => {
+      it('should return default severity when there is no match', () => {
+        expect(mapMicrosoftSentinelSeverityToElasticSeverity('an_invalid_severity')).toEqual('low');
+      });
+
+      it('should return default severity when there is no severity', () => {
+        expect(mapMicrosoftSentinelSeverityToElasticSeverity()).toEqual('low');
+      });
+    });
+  });
+
   describe('getElasticSeverityFromOriginalRule', () => {
     describe('splunk', () => {
       describe('when there is a vendor match', () => {
@@ -117,6 +176,25 @@ describe('tests', () => {
           expect(
             await getElasticSeverityFromOriginalRule({
               ...defaultSplunkRule,
+              severity: undefined,
+            })
+          ).toBe('low');
+        });
+      });
+    });
+
+    describe('microsoft-sentinel', () => {
+      describe('when there is a vendor match', () => {
+        it('should call the correct function with the correct severity', async () => {
+          expect(await getElasticSeverityFromOriginalRule(defaultSentinelRule)).toBe('medium');
+        });
+      });
+
+      describe('when there is no severity', () => {
+        it('should return default severity', async () => {
+          expect(
+            await getElasticSeverityFromOriginalRule({
+              ...defaultSentinelRule,
               severity: undefined,
             })
           ).toBe('low');
