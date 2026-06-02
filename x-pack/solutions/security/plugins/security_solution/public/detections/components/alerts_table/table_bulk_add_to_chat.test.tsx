@@ -57,14 +57,6 @@ jest.mock('../../../common/containers/use_global_time', () => ({
     deleteQuery: jest.fn(),
   })),
 }));
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({
-    browserFields: {},
-    sourcererDataView: { runtimeFieldMap: {} },
-    loading: false,
-    indicesExist: true,
-  })),
-}));
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(() => false),
 }));
