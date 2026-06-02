@@ -98,7 +98,12 @@ describe('applyResponseFilter', () => {
       const result = applyResponseFilter({
         text,
         contentType: JSON_CONTENT_TYPE,
-        state: { expression: 'blah invalid |||', mode: 'jq', invertMatch: false, isExpanded: false },
+        state: {
+          expression: 'blah invalid |||',
+          mode: 'jq',
+          invertMatch: false,
+          isExpanded: false,
+        },
       });
       expect(result).toBe(text);
     });
