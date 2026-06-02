@@ -1,59 +1,59 @@
 {
-  "sha1": "f4abf73f5fa75288d557b337db88ec4c042dbfb1",
+  "sha1": "66761d06b729ce79e0303ce4f6322c3d712de186",
   "tests": [
     {
       "id": "a2f48a1fc624600-de44ded9a5ab9e8",
       "title": "Stack Monitoring feature controls monitoringAppContainer renders in the default space",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 7
       }
     },
     {
       "id": "a2f48a1fc624600-3fb081e3c1e9c12",
       "title": "Stack Monitoring feature controls monitoringAppContainer renders in a space where monitoring is enabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 7
       }
     },
     {
       "id": "a2f48a1fc624600-2dd2c926cb7294d",
       "title": "Stack Monitoring feature controls navigating to /app/monitoring returns 404 in a space where monitoring is disabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 7
       }
     },
     {
       "id": "a2f48a1fc624600-272df3d90242eb3",
       "title": "Stack Monitoring feature controls Kibana base:all user does NOT see the Stack Monitoring sidebar link",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 7
       }
     }
