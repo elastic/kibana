@@ -179,6 +179,7 @@ export {
   carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -288,3 +289,4 @@ export {
   type OAuthClientConnectionsSummary,
   OAuthClientType,
 } from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

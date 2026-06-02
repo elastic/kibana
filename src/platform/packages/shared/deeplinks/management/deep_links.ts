@@ -40,6 +40,7 @@ export type ManagementId =
   | 'securityAiAssistantManagement'
   | 'observabilityAiAssistantManagement'
   | 'api_keys'
+  | 'application_connections'
   | 'cases'
   | 'cross_cluster_replication'
   | 'dataViews'
