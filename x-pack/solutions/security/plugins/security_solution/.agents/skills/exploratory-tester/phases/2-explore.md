@@ -101,10 +101,14 @@ After each action, run the three detectors below **in sequence**. Each detector 
 
 **Detector A — DOM state** (`browser_evaluate`)
 
-Paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
+First, wait for the page to settle after the action:
+- If you know a specific element should appear, use `browser_wait_for` targeting it.
+- Otherwise, allow ~3 seconds before running the detector.
+
+Then paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
 - `level1[]` items → Level 1 finding
 - `level2[]` items → Level 2 finding
-- `level3[]` items → Level 3 observation
+- `level3[spinner_present]` → **Level 3 normally**; but if the spinner has been visible for **more than 10 seconds** since the action was triggered → escalate to **Level 2**: "Loading indicator unresolved after 10 seconds"
 
 ---
 

@@ -144,8 +144,11 @@ gh issue list --repo elastic/kibana --state closed \
 
 ```bash
 mkdir -p .exploratory-session
-date -u +"%Y-%m-%dT%H:%M:%SZ"   # capture session_started_at
+SESSION_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+echo "session_started_at: $SESSION_STARTED_AT"
 ```
+
+Use the value of `$SESSION_STARTED_AT` for the `session_started_at` field below. **Never leave it as a placeholder** — the Phase 2 session cap check will crash with a parse error if the field is missing or malformed.
 
 If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
 
@@ -198,7 +201,7 @@ Write `.exploratory-session/config.json`:
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],
   "recently_closed_bugs": [{ "number": 0, "title": "", "closedAt": "" }],
-  "session_started_at": "<ISO timestamp>"
+  "session_started_at": "<value of $SESSION_STARTED_AT captured above>"
 }
 ```
 

@@ -8,7 +8,12 @@ Enumerate which findings files exist:
 ```bash
 ls .exploratory-session/findings-flow-*.md 2>/dev/null | sort -V
 ```
-Read each file in that list, then write `.exploratory-session/report.md` using the template:
+Read each file in that list. Before writing the report, **deduplicate across flows**:
+- Group findings by the combination of `type` + first 100 characters of `current_behavior`.
+- For groups with identical entries from 2+ different flows, keep one entry and append: `"Also seen in flows: <N>, <M>"` to the Evidence section.
+- Only the deduplicated set appears in the Level 1/2/3 sections of the report — duplicates inflate severity and obscure the real scope.
+
+Then write `.exploratory-session/report.md` using the template:
 ```
 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/report-format.md
 ```

@@ -105,8 +105,24 @@ bash x-pack/solutions/security/plugins/security_solution/.agents/skills/explorat
   --password changeme
 ```
 
-The script automatically falls back from `logs-exploratory.noise` to `exploratory-noise` if the `logs-*` name is reserved by a data stream template (common on serverless). The alias used is printed as `NOISE_INDEX_ALIAS=<alias>`.
-On success: set `"noise_index": "logs-exploratory.noise"` in `config.json`. On failure: add to `skipped_setup` — noise-index testing skipped for this session.
+The script automatically falls back from `logs-exploratory.noise` to `exploratory-noise` if the `logs-*` name is reserved by a data stream template (common on serverless). Capture the alias from the output and write it to `config.json`:
+
+```bash
+NOISE_INDEX_ALIAS=$(
+  bash x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-noise-index.sh \
+    --es-url "$ES_URL" --api-key "$APIKEY" \
+  | grep '^NOISE_INDEX_ALIAS=' | cut -d= -f2
+)
+python3 -c "
+import json
+cfg = json.load(open('.exploratory-session/config.json'))
+cfg['noise_index'] = '$NOISE_INDEX_ALIAS'
+json.dump(cfg, open('.exploratory-session/config.json', 'w'), indent=2)
+print('noise_index set to:', '$NOISE_INDEX_ALIAS')
+"
+```
+
+On failure (empty `NOISE_INDEX_ALIAS` or non-zero exit): add `{ "step": "noise-index", "reason": "<error>" }` to `skipped_setup` — noise-index testing skipped for this session.
 
 > **Why:** Real customer data often has non-ECS field types and missing fields. Features that work with clean data can silently break on this class of data.
 
