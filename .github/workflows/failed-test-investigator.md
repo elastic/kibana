@@ -94,10 +94,6 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
-  add-labels:
-    allowed: [ai:auto-flaky-fix]
-    max: 1
-    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -130,16 +126,7 @@ Set `classification` based on where the evidence points:
 
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
 
-## Assign label `ai:auto-flaky-fix` in specific cases
-
-Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all** of these conditions hold:
-
-- The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
-- The test failed in the `kibana-on-merge` pipeline
-- `classification` is `test-design`, `test-environment`, or `application`
-- A concrete fix has been identified.
-
-No other side-effects beyond posting the comment and updating the label.
+No other side-effects beyond posting the comment.
 
 ## Fix proposal
 
@@ -164,31 +151,56 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure. **Use `####` for all subsections** (e.g., `#### Proposed Fix`, `#### Root Cause`).
+Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure.
 
-Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value. Do not also mention why the `ai:auto-flaky-fix` isn't added.
+Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-### 1. The TL;DR (Required)
+The comment has two parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else. **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Start with a clear heading, essential metadata, and a brief summary of the failure, followed by a horizontal rule.
+### 1. Visible header (required)
+
+Three things in order, with a blank line between each:
 
 ```
-## {Classification}: {One-line description of what broke}
+#### [{classification}] {One-line description of what broke}
 
-## **Classification:** {type} | **Confidence:** {level} | **Introduced by:** {commit/PR if known}
+**Confidence:** {level} | **Introduced by:** {commit/PR if known — omit this segment entirely if unknown}
 
 **Summary:** One or two sentences explaining the exact failure point.
 ```
 
-### 2. Proposed fix (required)
+### 2. Collapsible investigation (required)
 
-Provide the most direct path to resolution immediately after the summary.
+Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order:
+
+```
+<details>
+<summary>Investigation details</summary>
+
+#### Proposed fix
+
+{content — see guidance below}
+
+#### Root cause & evidence
+
+{content — see guidance below}
+
+#### Additional context
+
+{content — optional, omit the whole section if there is nothing high-signal to add}
+
+</details>
+```
+
+#### Proposed fix (required)
+
+Provide the most direct path to resolution.
 
 - **Single file:** lead directly with the suggested code diff or specific action.
 - **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
 - **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
 
-### 3. Root Cause & Evidence (required)
+#### Root cause & evidence (required)
 
 Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
 
@@ -196,7 +208,7 @@ Explain _why_ the failure occurred, citing specific evidence. Choose the format 
 - Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
 - Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
 
-### 4. Additional context (optional)
+#### Additional context (optional)
 
 Include the following only if they provide high-value, actionable signal:
 
