@@ -166,10 +166,7 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
 
         // The initial tab plus every rapidly-opened tab should be present.
-        const tabs = page.testSubj
-          .locator('unifiedTabs_tabsBar')
-          .locator('[data-test-subj^="unifiedTabs_selectTabBtn_"]');
-        await expect(tabs).toHaveCount(newTabCount + 1);
+        await expect(discover.getTabs()).toHaveCount(newTabCount + 1);
 
         // navigateToTabByIndex asserts each tab becomes active and finishes loading.
         for (let i = newTabCount - 1; i > 0; i--) {

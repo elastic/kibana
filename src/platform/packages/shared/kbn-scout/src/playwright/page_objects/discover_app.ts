@@ -23,6 +23,17 @@ export interface DiscoverGotoOptions {
   queryMode?: DiscoverQueryMode;
 }
 
+export interface DataViewOptions {
+  /** Data view title; `*` is appended automatically by the editor. */
+  name: string;
+  /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
+  adHoc?: boolean;
+  /** Whether the data view has a timestamp field; when false, "no time filter" is selected. */
+  hasTimeField?: boolean;
+  /** Optionally override the default timestamp field (only applies when `hasTimeField` is true). */
+  changeTimestampField?: string;
+}
+
 /**
  * Test-subject prefixes used by the Unified Tabs component.
  */
@@ -113,27 +124,23 @@ export class DiscoverApp {
    * view editor flyout, so the created data view has no time field.
    */
   async selectNoTimeFieldInDataViewEditor() {
-    const timestampField = new EuiComboBoxWrapper(this.page, 'timestampField');
-    await timestampField.selectSingleOption("--- I don't want to use the time filter ---");
+    await this.setTimestampFieldInDataViewEditor("--- I don't want to use the time filter ---");
   }
 
   /**
-   * Creates and saves a new data view from the Discover search bar data-view
-   * switcher (classic mode only). The editor appends `*` to the title
-   * automatically. When `hasTimeField` is false, the "no time filter" option is
-   * selected; when true, the editor's default time field selection is kept.
+   * Selects an option in the open data view editor's timestamp field combo box.
    */
-  async createDataViewFromSearchBar({
-    name,
-    hasTimeField = false,
-  }: {
-    name: string;
-    hasTimeField?: boolean;
-  }) {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    await dataViewSwitch.click();
-    await this.page.testSubj.click('dataview-create-new');
+  private async setTimestampFieldInDataViewEditor(value: string) {
+    const timestampField = new EuiComboBoxWrapper(this.page, 'timestampField');
+    await timestampField.selectSingleOption(value);
+  }
 
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    hasTimeField = false,
+    changeTimestampField,
+  }: DataViewOptions) {
     const editor = new DataViewEditorPage(this.page);
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
@@ -141,10 +148,61 @@ export class DiscoverApp {
 
     if (!hasTimeField) {
       await this.selectNoTimeFieldInDataViewEditor();
+    } else if (changeTimestampField) {
+      await this.setTimestampFieldInDataViewEditor(changeTimestampField);
     }
 
-    await editor.save();
+    if (adHoc) {
+      await this.page.testSubj.click('exploreIndexPatternButton');
+      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
+    } else {
+      await editor.save();
+    }
+
     await this.waitUntilTabIsLoaded();
+  }
+
+  /**
+   * Creates a new data view from the Discover "no data views" empty state by
+   * clicking its create button. The editor appends `*` to the title
+   * automatically.
+   */
+  async createDataViewFromPrompt(options: DataViewOptions) {
+    await this.page.testSubj.click('createDataViewButton');
+    await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  /**
+   * Creates a new data view from the Discover search bar data-view switcher
+   * (classic mode only). The editor appends `*` to the title automatically.
+   */
+  async createDataViewFromSearchBar(options: DataViewOptions) {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await dataViewSwitch.click();
+    await this.page.testSubj.click('dataview-create-new');
+    await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  /** Locator for the unified-tabs tab bar (present when a data view is active). */
+  getTabsBar(): Locator {
+    return this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
+  }
+
+  /** Locator matching every tab button in the unified tab bar. */
+  getTabs(): Locator {
+    return this.getTabsBar().locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`
+    );
+  }
+
+  /** Locator for the Discover "no data views" empty-state prompt. */
+  getNoDataViewsPrompt(): Locator {
+    return this.page.testSubj.locator('noDataViewsPrompt');
+  }
+
+  /** Number of rendered rows in the Discover document grid. */
+  async getDocTableRowCount(): Promise<number> {
+    return this.page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]').count();
   }
 
   private async clickAppMenuItem(
@@ -639,10 +697,7 @@ export class DiscoverApp {
    * bar and waits for it to become active and finish loading.
    */
   async navigateToTabByIndex(index: number) {
-    const tabs = await this.page.testSubj
-      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
-      .locator(`[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`)
-      .all();
+    const tabs = await this.getTabs().all();
 
     // Fail fast with a clear message instead of letting an out-of-range index
     // resolve to nothing and time out on the click below.
@@ -661,11 +716,7 @@ export class DiscoverApp {
    * tabs bar.
    */
   private get activeTabLocator(): Locator {
-    return this.page.testSubj
-      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
-      .locator(
-        `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]`
-      );
+    return this.getTabs().and(this.page.locator('[aria-selected="true"]'));
   }
 
   /**
