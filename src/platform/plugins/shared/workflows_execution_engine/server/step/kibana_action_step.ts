@@ -314,6 +314,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
           path: requestConfig.path,
           body: requestConfig.body,
           query: requestConfig.query,
+          headers: requestConfig.headers,
         }
       );
       return response.body;
