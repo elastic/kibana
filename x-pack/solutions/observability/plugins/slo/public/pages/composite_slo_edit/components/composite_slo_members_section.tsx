@@ -135,7 +135,7 @@ export function CompositeSloMembersSection() {
         {fields.length > 0 && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" color="subdued">
                   <strong>
@@ -221,7 +221,7 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
         <EuiText size="s" style={{ paddingTop: 8 }}>
           {sloName}
