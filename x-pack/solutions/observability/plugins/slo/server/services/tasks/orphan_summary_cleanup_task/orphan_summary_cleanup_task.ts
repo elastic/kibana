@@ -18,6 +18,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
+import { cleanupOrphanTransforms } from './cleanup_orphan_transforms';
 
 export const TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -125,24 +126,46 @@ export class OrphanSummaryCleanupTask {
 
     this.logger.debug(`Task started with previous state: ${JSON.stringify(taskInstance.state)}`);
 
-    const params = this.parseTaskInstanceState(taskInstance);
+    const { summaryParams, transformParams } = this.parseTaskInstanceState(taskInstance);
 
     try {
-      const result = await cleanupOrphanSummaries(params, {
+      const summaryResult = await cleanupOrphanSummaries(summaryParams, {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
         abortController,
       });
 
-      if (result.aborted) {
-        this.logger.debug(`Task aborted, will start from last state next run`);
+      if (summaryResult.aborted) {
+        this.logger.debug(`Summary cleanup aborted, will resume on next run`);
         return {
-          state: result.nextState,
+          state: {
+            summary: summaryResult.nextState,
+            transform: transformParams,
+          },
+        };
+      }
+
+      this.logger.debug(`Summary cleanup completed, starting transform cleanup`);
+
+      const transformResult = await cleanupOrphanTransforms(transformParams, {
+        esClient,
+        soClient: internalSoClient,
+        logger: this.logger,
+        abortController,
+      });
+
+      if (transformResult.aborted) {
+        this.logger.debug(`Transform cleanup aborted, will resume on next run`);
+        return {
+          state: {
+            transform: transformResult.nextState,
+          },
         };
       }
 
       this.logger.debug(`Task completed successfully`);
+      return { state: {} };
     } catch (err) {
       this.logger.debug(`Error: ${err}`);
     }
@@ -150,9 +173,14 @@ export class OrphanSummaryCleanupTask {
 
   private parseTaskInstanceState(taskInstance: ConcreteTaskInstance) {
     const state = taskInstance.state || {};
+    // Accept legacy `{ searchAfter }` state from earlier task versions.
+    const legacySearchAfter = state.searchAfter;
+    const summary = state.summary ?? (legacySearchAfter ? { searchAfter: legacySearchAfter } : {});
+    const transform = state.transform ?? {};
 
     return {
-      searchAfter: state.searchAfter,
+      summaryParams: { searchAfter: summary.searchAfter },
+      transformParams: { from: transform.from },
     };
   }
 }

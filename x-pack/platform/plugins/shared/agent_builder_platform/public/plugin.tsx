@@ -36,6 +36,7 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentUiDefinitions({
       attachments: agentBuilder.attachments,
       locators: share.url.locators,
+      core: coreStart,
     });
 
     return {};

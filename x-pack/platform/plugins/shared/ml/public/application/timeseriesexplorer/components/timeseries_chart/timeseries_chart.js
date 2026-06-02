@@ -405,7 +405,7 @@ class TimeseriesChartIntl extends Component {
       .append('text')
       .text((d) => {
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(d, 'text');
+          return fieldFormat.convertToText(d);
         } else {
           return focusYScale.tickFormat()(d);
         }
@@ -714,7 +714,7 @@ class TimeseriesChartIntl extends Component {
       (focusForecastData !== undefined && focusForecastData.length > 0)
     ) {
       if (this.fieldFormat !== undefined) {
-        this.focusYAxis.tickFormat((d) => this.fieldFormat.convert(d, 'text'));
+        this.focusYAxis.tickFormat((d) => this.fieldFormat.convertToText(d));
       } else {
         // Use default tick formatter.
         this.focusYAxis.tickFormat(null);

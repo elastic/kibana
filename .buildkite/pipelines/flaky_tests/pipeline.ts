@@ -34,11 +34,8 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
-// Each scoutConfig now fans out to one Buildkite step per (arch, domain) mode,
-// so a single entry can multiply into many jobs. Cap per-entry runs to keep the
-// total job budget under control and to give users a clear, fast failure when
-// they request too many repetitions for a single config.
-const MAX_SCOUT_COUNT_PER_CONFIG = 50;
+// 50 runs is enough to confirm a test is no longer flaky;
+const MAX_COUNT_PER_CONFIG = 50;
 
 // Scout discovery target for the flaky-setup step. We read the branch name
 // from `package.json` (set when forking a release branch).
@@ -88,6 +85,13 @@ function getTestSuitesFromJson(json: string) {
         fail(`testSuite.ftrConfig must be a string`);
       }
 
+      if (count > MAX_COUNT_PER_CONFIG) {
+        fail(
+          `testSuite.count for ftrConfig '${ftrConfig}' is ${count}; ` +
+            `max allowed is ${MAX_COUNT_PER_CONFIG}. Lower the count or split the run.`
+        );
+      }
+
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
@@ -102,10 +106,10 @@ function getTestSuitesFromJson(json: string) {
         fail(`testSuite.scoutConfig must be a string`);
       }
 
-      if (count > MAX_SCOUT_COUNT_PER_CONFIG) {
+      if (count > MAX_COUNT_PER_CONFIG) {
         fail(
           `testSuite.count for scoutConfig '${scoutConfig}' is ${count}; ` +
-            `max allowed is ${MAX_SCOUT_COUNT_PER_CONFIG}. ` +
+            `max allowed is ${MAX_COUNT_PER_CONFIG}. ` +
             `Each Scout request fans out to one job per (arch x domain) mode, ` +
             `so high counts multiply quickly. Lower the count or split the run.`
         );
@@ -123,6 +127,14 @@ function getTestSuitesFromJson(json: string) {
     if (typeof key !== 'string') {
       fail(`testSuite.key must be a string`);
     }
+
+    if (count > MAX_COUNT_PER_CONFIG) {
+      fail(
+        `testSuite.count for group '${key}' is ${count}; ` +
+          `max allowed is ${MAX_COUNT_PER_CONFIG}. Lower the count or split the run.`
+      );
+    }
+
     testSuites.push({
       type: 'group',
       key,

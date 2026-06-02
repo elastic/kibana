@@ -75,7 +75,7 @@ import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
+import { getIndicatorAttachment } from './cases/attachments/indicator';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
@@ -290,7 +290,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getIndicatorAttachment());
     cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases.attachmentFramework.registerUnified(getEventType());
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
@@ -332,13 +332,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    // Enable CPS picker only for individual dashboard views (not the listing page).
-    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\/[^?]+/.test(location)
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
-    );
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, () => ProjectRoutingAccess.READONLY);
 
     return this.contract.getStartContract(core);
   }

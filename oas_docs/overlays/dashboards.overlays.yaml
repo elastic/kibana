@@ -385,7 +385,7 @@ actions:
                       updated_at: '2026-04-13T10:00:00.000Z'
                       version: WzEwMiwxXQ==
       x-codeSamples:
-        - lang: cURL
+        - lang: cURL_simple
           label: Create a dashboard (simple) - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/dashboards" \
@@ -494,7 +494,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_simple
           label: Create a dashboard (simple) - Console
           source: |
             POST kbn:/api/dashboards
@@ -599,7 +599,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_Sections
           label: Create a dashboard (with sections and controls) - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/dashboards" \
@@ -768,7 +768,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_sections
           label: Create a dashboard (with sections and controls) - Console
           source: |
             POST kbn:/api/dashboards

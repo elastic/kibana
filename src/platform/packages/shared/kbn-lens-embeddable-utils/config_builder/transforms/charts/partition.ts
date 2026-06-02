@@ -232,6 +232,34 @@ function convertAPILegendDisplayOption(
   return { legendDisplay: legend?.visibility === 'visible' ? 'show' : 'hide', ...legendOptions };
 }
 
+/**
+ * Waffle is the only partition chart that supports showing/hiding metric values in the legend.
+ * Internally, Lens uses `legendStats` (empty array = hidden, ['value'] = shown).
+ * The API schema represents this as `legend.values: ['absolute']` (shown) or omitted (hidden).
+ */
+function convertWaffleLegendValuesToState(
+  values: NonNullable<WaffleConfig['legend']>['values']
+): LensPartitionLayerState['legendStats'] {
+  if (values?.includes('absolute')) {
+    return ['value'];
+  }
+  return [];
+}
+
+/**
+ * Converts internal `legendStats` back to the API `legend.values` field for waffle charts.
+ * When `legendStats` is undefined (legacy saved objects), values are shown by default
+ * (matching the rendering behavior in `getLegendStats`), so we emit `['absolute']`.
+ */
+function convertLegendStatsToWaffleAPIValues(
+  legendStats: LensPartitionLayerState['legendStats']
+): NonNullable<WaffleConfig['legend']>['values'] {
+  if (legendStats === undefined || legendStats.includes('value')) {
+    return ['absolute'];
+  }
+  return undefined;
+}
+
 function convertAPIStaticColorToLensState(config: PartitionConfig) {
   if (isAPIMosaicChartLayer(config)) {
     return undefined;
@@ -381,6 +409,7 @@ function buildVisualizationState(
           ...sharedState,
           ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
+          legendStats: convertWaffleLegendValuesToState(config.legend?.values),
         },
       ],
     };
@@ -468,6 +497,9 @@ function fromLensStateToSharedPartitionAPI(
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: legendSizeCompat.toAPI(layerState.legendSize),
+    values: isStateWaffleChart(visualization)
+      ? convertLegendStatsToWaffleAPIValues(layerState.legendStats)
+      : undefined,
   });
 
   return stripUndefined({

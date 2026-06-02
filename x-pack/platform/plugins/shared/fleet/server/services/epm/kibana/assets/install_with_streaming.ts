@@ -19,6 +19,8 @@ import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
+import { indexPatternTypes } from '../index_pattern/install';
+
 import type { ArchiveAsset } from './install';
 import {
   KibanaSavedObjectTypeMapping,
@@ -79,6 +81,13 @@ export async function installKibanaAssetsWithStreaming({
     if (
       soType === KibanaSavedObjectType.sloTemplate &&
       !appContextService.getExperimentalFeatures().enableSloTemplates
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
     ) {
       return;
     }

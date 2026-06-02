@@ -52,9 +52,7 @@ interface CompiledRule {
  * with ^ and $ to match Renovate's own anchoring behaviour and avoid substring
  * false-positives (e.g. "cypress" matching "cypress-axe").
  */
-export function buildRenovateMatcher(
-  renovatePath?: string
-): (dep: string) => RenovateMatch {
+export function buildRenovateMatcher(renovatePath?: string): (dep: string) => RenovateMatch {
   const configPath = renovatePath ?? nodePath.join(REPO_ROOT, 'renovate.json');
   let config: RenovateConfig = {};
   try {

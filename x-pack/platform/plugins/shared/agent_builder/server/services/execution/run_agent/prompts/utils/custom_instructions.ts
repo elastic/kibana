@@ -27,7 +27,7 @@ export const structuredOutputDescription = (outputSchema?: Record<string, unknow
 
   return `## STRUCTURED OUTPUT
 
-The user has requested a structured response following a specific schema. While you are **NOT** responsible for formatting the final output (the answering agent will handle that), you should use this schema to guide your research:
+The user has requested a structured response following a specific schema. While you are **NOT** responsible for formatting the final output (a dedicated agent will handle that from your action history and response), you should use this schema to guide your research:
 
 - **Identify required data points**: Each field in the schema represents information the user expects. Ensure your research covers these areas.
 - **Prioritize schema-relevant findings**: Focus on gathering information that directly maps to the schema fields.

@@ -13,6 +13,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
   PAGE_SIZE_ESQL_VARIABLE,
+  HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
 
 export interface AlertEpisode {
@@ -24,6 +25,8 @@ export interface AlertEpisode {
   first_timestamp: string;
   last_timestamp: string;
   duration: number;
+  /** ISO timestamp of the first event where episode.status === 'active'. */
+  triggered_at?: string;
   last_ack_action?: 'ack' | 'unack';
   last_assignee_uid?: string | null;
   last_snooze_action?: 'snooze' | 'unsnooze';
@@ -50,6 +53,7 @@ export const ALERT_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'triggered_at',
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
@@ -97,7 +101,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -137,13 +141,29 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  if (filterState.status) {
+    query.where`effective_status == ${filterState.status}`;
+  }
+  if (filterState.ruleId) {
+    query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.tags?.length) {
+    addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+};
+
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
  * then narrows to episode rows and derives `effective_status`.
  */
-export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
+export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`;
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
@@ -174,6 +194,7 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
  * is available for `assigneeUid` filtering.
  */
 export const buildEpisodesQuery = (
+  spaceId: string,
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
@@ -181,25 +202,40 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
-  if (filterState?.status) {
-    query.where`effective_status == ${filterState.status}`;
-  }
-
-  if (filterState?.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-
-  if (filterState?.tags?.length) {
-    addTagsFilter(query, filterState.tags);
-  }
-
-  if (filterState?.assigneeUid) {
-    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  if (filterState) {
+    applyFilterState(query, filterState);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
   );
+};
+
+/**
+ * Builds a lightweight ESQL query for histogram data.
+ * Returns only the fields needed for overlap counting; no SORT.
+ * Time range is applied by the caller via executeEsqlQuery's input.timeRange.
+ */
+export const buildEpisodesHistogramQuery = (
+  spaceId: string,
+  filterState?: EpisodesFilterState,
+  breakdownField?: string
+): ComposerQuery => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  const keepFields: string[] = [
+    'first_timestamp',
+    'last_timestamp',
+    'episode.status',
+    'effective_status',
+  ];
+  if (breakdownField) keepFields.push(breakdownField);
+
+  return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

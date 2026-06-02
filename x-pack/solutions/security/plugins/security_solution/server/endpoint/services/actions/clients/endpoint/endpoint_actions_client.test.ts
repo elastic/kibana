@@ -456,6 +456,16 @@ describe('EndpointActionsClient', () => {
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
     'should dispatch a fleet action request calling %s() method',
     async (methodName) => {
+      if (methodName === 'cancel') {
+        getActionDetailsByIdMock.mockResolvedValue(
+          new EndpointActionGenerator('seed').generateActionDetails({
+            agents: ['1-2-3'],
+            isCompleted: false,
+            command: 'memory-dump',
+          })
+        );
+      }
+
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
       let expectedParams = responseActionMethods[methodName].parameters;
@@ -664,6 +674,7 @@ describe('EndpointActionsClient', () => {
         agents: ['1-2-3'],
         agentType: 'endpoint',
         isCompleted: false,
+        command: 'memory-dump',
       });
 
       getActionDetailsByIdMock.mockResolvedValue(actionToBeCanceledDetails);
@@ -729,6 +740,19 @@ describe('EndpointActionsClient', () => {
           })
         )
       ).rejects.toThrow('Endpoint [1-2-3] is not associated with action [action-123]');
+    });
+
+    it('should throw error if response action command is not cancelable', async () => {
+      actionToBeCanceledDetails.command = 'cancel';
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('[cancel] response action cannot be canceled.');
     });
   });
 

@@ -12,7 +12,8 @@ import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
 } from '../queries/related_episodes_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchSameGroupEpisodesQuery } from './use_fetch_same_group_episodes_query';
 
 jest.mock('../apis/fetch_related_episodes');
@@ -25,6 +26,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 describe('useFetchSameGroupEpisodesQuery', () => {
   const mockToastDanger = jest.fn();
   const mockExpressions = {} as ExpressionsStart;
+  const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,7 +44,7 @@ describe('useFetchSameGroupEpisodesQuery', () => {
           excludeEpisodeId: 'e1',
           pageSize: 5,
           groupHash: undefined,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -59,7 +61,7 @@ describe('useFetchSameGroupEpisodesQuery', () => {
     const excludeEpisodeId = 'ep-current';
     const groupHash = 'gh-1';
     const pageSize = 5;
-    const sameGroupQuery = buildRelatedBaseQuery(ruleId, excludeEpisodeId);
+    const sameGroupQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, ruleId, excludeEpisodeId);
     sameGroupQuery.where`group_hash == ${groupHash}`;
     const expectedQuery = finishRelatedEpisodesQuery(sameGroupQuery).print('basic');
 
@@ -70,7 +72,7 @@ describe('useFetchSameGroupEpisodesQuery', () => {
           excludeEpisodeId,
           pageSize,
           groupHash,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }

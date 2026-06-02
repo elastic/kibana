@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
@@ -40,6 +41,9 @@ const serviceMapRoute = createApmServerRoute({
         serviceName: t.string,
         serviceGroup: t.string,
         kuery: kueryRt.props.kuery,
+        // JSON-serialised ES query produced by buildEsQuery() on the client.
+        // Carries filter-bar pills + Controls API selections already merged.
+        esQuery: jsonRt,
       }),
       environmentRt,
       rangeRt,
@@ -63,7 +67,7 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
+      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery, esQuery },
     } = params;
 
     const {
@@ -104,6 +108,7 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
+      esQuery: esQuery as { bool: BoolQuery } | undefined,
     });
   },
 });

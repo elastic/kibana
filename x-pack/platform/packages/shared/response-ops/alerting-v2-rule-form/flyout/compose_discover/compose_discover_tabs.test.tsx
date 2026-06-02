@@ -62,7 +62,7 @@ describe('ComposeDiscoverTabs', () => {
       <ComposeDiscoverTabs
         {...defaultProps}
         activeTab="recovery"
-        tabConfig={{ type: 'base-recovery' }}
+        tabs={['recovery']}
         onAlertEditorMount={onAlertEditorMount}
         onRecoveryEditorMount={onRecoveryEditorMount}
       />
@@ -79,7 +79,7 @@ describe('ComposeDiscoverTabs', () => {
       <ComposeDiscoverTabs
         {...defaultProps}
         activeTab="alert"
-        tabConfig={{ type: 'base-alert' }}
+        tabs={['base', 'alert']}
         onAlertEditorMount={jest.fn()}
         onRecoveryEditorMount={jest.fn()}
       />

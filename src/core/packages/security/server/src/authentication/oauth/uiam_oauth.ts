@@ -47,6 +47,7 @@ export interface UiamOAuthConnectionResponse {
   revocation?: string;
   revocation_reason?: string;
   scopes?: string[];
+  user_id?: string;
 }
 
 export interface CreateUiamOAuthClientParams {

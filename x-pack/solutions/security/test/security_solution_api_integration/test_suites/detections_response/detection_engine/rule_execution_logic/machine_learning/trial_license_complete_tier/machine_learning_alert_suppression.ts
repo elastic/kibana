@@ -1100,7 +1100,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with enrichments', () => {
+      describe('@skipInServerlessMKI with enrichments', () => {
         before(async () => {
           await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
           await esArchiver.load(

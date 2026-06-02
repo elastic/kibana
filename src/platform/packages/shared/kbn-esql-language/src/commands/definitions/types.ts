@@ -185,6 +185,7 @@ export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
+  tsdbCompatible?: boolean;
   name: string;
   alias?: string[];
   description: string;
@@ -202,6 +203,7 @@ export interface FunctionFilterPredicates {
   returnTypes?: string[];
   ignored?: string[];
   allowed?: string[];
+  isTimeseriesSource?: boolean;
 }
 
 // PromQL Function Definition Types
@@ -489,6 +491,10 @@ export interface ValidationErrors {
   mmrOnFieldWrongType: {
     message: string;
     type: { type: string };
+  };
+  tsdbIncompatibleFunction: {
+    message: string;
+    type: { fnName: string };
   };
 }
 

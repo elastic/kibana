@@ -44,6 +44,8 @@ viewer:
         - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
+        - '.entity_analytics.entity-leads*'
+        - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -129,6 +131,7 @@ editor:
         - 'entities-latest-*'
       privileges:
         - 'read'
+        - 'view_index_metadata'
         - 'write'
       allow_restricted_indices: false
     - names:
@@ -282,7 +285,6 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -291,8 +293,10 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
@@ -338,9 +342,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -364,7 +370,6 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -432,8 +437,10 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -457,7 +464,6 @@ threat_intelligence_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
       privileges:
@@ -507,9 +513,11 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -538,7 +546,6 @@ rule_author:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -790,6 +797,7 @@ platform_engineer:
         - 'entities-latest-*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - '.ml-anomalies-*'
@@ -863,7 +871,6 @@ endpoint_operations_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -882,8 +889,10 @@ endpoint_operations_analyst:
         - maintenance
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
@@ -956,7 +965,6 @@ endpoint_policy_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -964,8 +972,10 @@ endpoint_policy_manager:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*

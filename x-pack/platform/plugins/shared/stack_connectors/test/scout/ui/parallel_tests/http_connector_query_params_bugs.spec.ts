@@ -44,7 +44,7 @@ test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.cl
     pageObjects,
   }) => {
     await pageObjects.connectorFlyout.gotoConnectorsList();
-    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(connectorId);
     await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
     const toggle = pageObjects.connectorFlyout.queryParamsToggle;
@@ -63,7 +63,7 @@ test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.cl
     pageObjects,
   }) => {
     await pageObjects.connectorFlyout.gotoConnectorsList();
-    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(connectorId);
     await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
     const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
@@ -81,7 +81,7 @@ test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.cl
 
   test('Bug 3: clicking delete should remove the param, not reorder', async ({ pageObjects }) => {
     await pageObjects.connectorFlyout.gotoConnectorsList();
-    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(connectorId);
     await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
     const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;

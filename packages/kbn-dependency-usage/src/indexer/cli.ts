@@ -158,9 +158,7 @@ yargs(process.argv.slice(2))
 
       try {
         // 1. Resolve paths from --group or --paths
-        const searchPaths = argv.group
-          ? resolveGroupPaths(argv.group)
-          : (argv.paths as string[]);
+        const searchPaths = argv.group ? resolveGroupPaths(argv.group) : (argv.paths as string[]);
 
         // 2. Optionally set up the ES index template
         if (!opts.dryRun && argv['setup-template']) {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ListrError } from 'listr2';
 import { RULE_IDS, type SavedObjectsCheckFinding } from './types';
 import { isSavedObjectsCheckError } from './error';
 
@@ -22,11 +23,18 @@ export class FindingsCollector {
    * `SavedObjectsCheckError` instances surface their structured payload(s);
    * everything else falls back to a generic-rule finding so coverage stays
    * at 100% while validators are migrated incrementally.
+   *
+   * Note: Listr2 wraps every task error in a `ListrError` whose `.error`
+   * property holds the original thrown value. We unwrap one level before
+   * the `SavedObjectsCheckError` check so that structured findings are not
+   * silently downgraded to the generic fallback.
    */
   ingestErrors(errors: ReadonlyArray<unknown>): void {
     for (const err of errors) {
-      if (isSavedObjectsCheckError(err)) {
-        this.findings.push(...err.findings);
+      const unwrappedError = err instanceof ListrError ? err.error : err;
+
+      if (isSavedObjectsCheckError(unwrappedError)) {
+        this.findings.push(...unwrappedError.findings);
         continue;
       }
 

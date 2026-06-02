@@ -350,7 +350,6 @@ export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   CaseMetricsFeature.ALERTS_COUNT,
   CaseMetricsFeature.ALERTS_USERS,
   CaseMetricsFeature.ALERTS_HOSTS,
-  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
   CaseMetricsFeature.CONNECTORS,
 ];
 
@@ -369,12 +368,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     users: {
       total: 1,
       values: [{ name: 'Jon', count: 12 }],
-    },
-  },
-  actions: {
-    isolateHost: {
-      isolate: { total: 5 },
-      unisolate: { total: 3 },
     },
   },
   connectors: { total: 1 },

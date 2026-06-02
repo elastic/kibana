@@ -9,10 +9,16 @@
 
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
-import type { ExecutionStatus, ExecutionType, WorkflowExecutionSortField } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+} from '@kbn/workflows';
 import {
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
@@ -97,13 +103,29 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               ),
               finishedAfter: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter executions finished at or after this timestamp.' },
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering executions by finishedAt (inclusive when parsed).',
+                  },
                 })
               ),
               finishedBefore: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter executions finished at or before this timestamp.' },
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).',
+                  },
                 })
+              ),
+              collapse: schema.maybe(
+                schema.oneOf(
+                  WorkflowExecutionCollapseFields.map((field) => schema.literal(field)) as [
+                    Type<WorkflowExecutionCollapseField>
+                  ],
+                  {
+                    meta: { description: 'Field to collapse execution results by.' },
+                  }
+                )
               ),
               sortField: schema.maybe(
                 schema.oneOf(
@@ -128,6 +150,22 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              startedAfter: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering executions by startedAt (inclusive when parsed).',
+                  },
+                })
+              ),
+              startedBefore: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -150,8 +188,11 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             page: request.query.page,
             size: request.query.size,
             omitStepRuns: request.query.omitStepRuns,
+            startedAfter: request.query.startedAfter,
+            startedBefore: request.query.startedBefore,
             finishedAfter: request.query.finishedAfter,
             finishedBefore: request.query.finishedBefore,
+            collapse: request.query.collapse,
             sortField: request.query.sortField,
             sortOrder: request.query.sortOrder,
           };

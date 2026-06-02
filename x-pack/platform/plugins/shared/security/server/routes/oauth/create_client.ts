@@ -6,12 +6,14 @@
  */
 
 import { createClientBodySchema } from './schemas';
+import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
   router,
+  config,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
@@ -31,26 +33,40 @@ export function defineCreateOAuthClientRoute({
         access: 'internal',
       },
     },
-    createLicensedRouteHandler(async (context, request, response) => {
-      try {
-        const { oauth } = getAuthenticationService();
-        if (!oauth) {
-          return response.notFound({
-            body: { message: 'OAuth management is not available: UIAM is not configured' },
-          });
-        }
+    withOAuthManagementGate(
+      createLicensedRouteHandler(async (context, request, response) => {
+        try {
+          const { oauth } = getAuthenticationService();
+          if (!oauth) {
+            return response.notFound({
+              body: { message: 'OAuth management is not available: UIAM is not configured' },
+            });
+          }
 
-        const result = await oauth.createClient(request, request.body);
-        if (!result) {
-          return response.notFound({
-            body: { message: 'OAuth management is not available: security features are disabled' },
-          });
-        }
+          const resource = config.mcp?.oauth2?.metadata?.resource;
+          if (!resource) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: MCP protected resource metadata is not configured',
+              },
+            });
+          }
 
-        return response.ok({ body: result });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
-      }
-    })
+          const result = await oauth.createClient(request, { ...request.body, resource });
+          if (!result) {
+            return response.notFound({
+              body: {
+                message: 'OAuth management is not available: security features are disabled',
+              },
+            });
+          }
+
+          return response.ok({ body: result });
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
+        }
+      })
+    )
   );
 }
