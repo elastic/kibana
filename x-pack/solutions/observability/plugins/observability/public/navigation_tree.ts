@@ -354,7 +354,7 @@ function createNavTree({
           {
             id: 'category-aiops_labs',
             title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps Labs',
+              defaultMessage: 'AIOps labs',
             }),
             breadcrumbStatus: 'hidden',
             children: [
@@ -627,7 +627,7 @@ function createNavTree({
           {
             id: 'management_model_management',
             title: i18n.translate('xpack.observability.obltNav.modelManagement', {
-              defaultMessage: 'Model Management',
+              defaultMessage: 'Model management',
             }),
             children: [
               { link: 'management:elastic_inference_service' },

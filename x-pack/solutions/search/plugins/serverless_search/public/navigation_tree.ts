@@ -221,7 +221,7 @@ export function createNavigationTree({
       {
         id: 'admin_and_settings',
         title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings', {
-          defaultMessage: 'Admin and Settings',
+          defaultMessage: 'Admin and settings',
         }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
@@ -315,7 +315,7 @@ export function createNavigationTree({
           {
             id: 'settings_model_management',
             title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
-              defaultMessage: 'Model Management',
+              defaultMessage: 'Model management',
             }),
             children: [
               {

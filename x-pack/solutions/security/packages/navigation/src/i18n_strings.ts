@@ -176,7 +176,7 @@ export const i18nStrings = {
   },
   modelManagement: {
     title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
-      defaultMessage: 'Model Management',
+      defaultMessage: 'Model management',
     }),
   },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
@@ -200,7 +200,7 @@ export const i18nStrings = {
   },
   projectSettings: {
     title: i18n.translate('securitySolutionPackages.navLinks.projectSettings.title', {
-      defaultMessage: 'Project Settings',
+      defaultMessage: 'Project settings',
     }),
   },
   stackManagement: {
@@ -305,7 +305,7 @@ export const i18nStrings = {
     },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
-      { defaultMessage: 'Admin and Settings' }
+      { defaultMessage: 'Admin and settings' }
     ),
     organization: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.organization', {
