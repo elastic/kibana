@@ -99,22 +99,27 @@ describe('ServiceFlyoutFooter', () => {
 
     openActionsMenu();
 
-    expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')).toHaveAttribute(
-      'href',
-      '/app/discover/traces'
-    );
-    expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover')).toHaveAttribute(
-      'href',
-      '/app/discover/logs'
-    );
-    expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts')).toHaveAttribute(
-      'href',
-      '/app/apm/alerts'
-    );
-    expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openSlos')).toHaveAttribute(
-      'href',
-      '/app/slos'
-    );
+    const tracesAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover');
+    expect(tracesAction).toHaveAttribute('href', '/app/discover/traces');
+    expect(tracesAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(tracesAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
+    expect(tracesAction).toHaveAttribute('data-ebt-detail', 'traces');
+
+    const logsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover');
+    expect(logsAction).toHaveAttribute('href', '/app/discover/logs');
+    expect(logsAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(logsAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
+    expect(logsAction).toHaveAttribute('data-ebt-detail', 'logs');
+
+    const alertsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts');
+    expect(alertsAction).toHaveAttribute('href', '/app/apm/alerts');
+    expect(alertsAction).toHaveAttribute('data-ebt-action', 'viewAlerts');
+    expect(alertsAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
+
+    const slosAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openSlos');
+    expect(slosAction).toHaveAttribute('href', '/app/slos');
+    expect(slosAction).toHaveAttribute('data-ebt-action', 'viewSlos');
+    expect(slosAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
   });
 
   it('renders the Alerts and SLOs group labels', () => {

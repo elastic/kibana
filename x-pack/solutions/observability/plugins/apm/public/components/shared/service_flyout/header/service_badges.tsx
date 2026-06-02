@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
@@ -15,6 +16,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
 import { useServiceLinks } from '../hooks/use_service_links';
 
@@ -81,6 +83,10 @@ export function ServiceBadges({
             count={alertsCount}
             serviceName={service.id}
             data-test-subj="serviceFlyoutAlertsBadge"
+            ebt={{
+              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+            }}
             onClick={(event) => {
               event.preventDefault();
               navigateToUrl(alertsHref);
@@ -96,6 +102,10 @@ export function ServiceBadges({
             serviceName={service.id}
             {...(slosHref
               ? {
+                  ebt: {
+                    action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+                    element: SERVICE_FLYOUT_EBT_ELEMENTS.SLO_BADGE,
+                  },
                   onClick: (event) => {
                     event.preventDefault();
                     navigateToUrl(slosHref);

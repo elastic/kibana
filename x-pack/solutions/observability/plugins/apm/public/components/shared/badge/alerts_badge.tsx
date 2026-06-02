@@ -9,6 +9,8 @@ import type { MouseEventHandler } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 
 const DEFAULT_DATA_TEST_SUBJ = 'apmAlertsBadge';
@@ -55,6 +57,8 @@ export interface AlertsBadgeProps {
   onClick?: MouseEventHandler<HTMLButtonElement>;
   /** When true, no `EuiToolTip` is rendered (e.g. display-only service map nodes). */
   hideTooltip?: boolean;
+  /** EBT click attributes; only applied when `onClick` is provided. */
+  ebt?: EbtClickAttrs;
   'data-test-subj'?: string;
 }
 
@@ -74,9 +78,11 @@ export function AlertsBadge({
   serviceName,
   onClick,
   hideTooltip = false,
+  ebt,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: AlertsBadgeProps) {
   const ariaLabel = getAriaLabel(count, serviceName);
+  const ebtProps = onClick && ebt ? getEbtProps(ebt) : {};
 
   const badge = onClick ? (
     <EuiBadge
@@ -88,6 +94,7 @@ export function AlertsBadge({
       tabIndex={0}
       role="button"
       css={clickableBadgeStyles}
+      {...ebtProps}
     >
       {count}
     </EuiBadge>

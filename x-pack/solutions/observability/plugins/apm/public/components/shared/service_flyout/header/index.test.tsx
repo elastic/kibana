@@ -70,10 +70,10 @@ describe('ServiceFlyoutHeader', () => {
   it('renders the overview title link and the service badges', () => {
     renderHeader();
 
-    expect(screen.getByTestId('serviceFlyoutTitleLink')).toHaveAttribute(
-      'href',
-      '/app/apm/overview-href'
-    );
+    const titleLink = screen.getByTestId('serviceFlyoutTitleLink');
+    expect(titleLink).toHaveAttribute('href', '/app/apm/overview-href');
+    expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
+    expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
   });
 

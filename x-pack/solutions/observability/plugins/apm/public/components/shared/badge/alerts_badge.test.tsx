@@ -55,4 +55,28 @@ describe('AlertsBadge', () => {
     const badge = screen.getByTestId('apmAlertsBadge');
     expect(badge.closest('span[tabindex="0"]')).toBeNull();
   });
+
+  it('sets data-ebt-* attributes when ebt is provided with onClick', () => {
+    renderBadge({
+      count: 1,
+      serviceName: 'svc',
+      onClick: jest.fn(),
+      ebt: { action: 'viewAlerts', element: 'serviceFlyoutAlertsBadge' },
+    });
+
+    const badge = screen.getByTestId('apmAlertsBadge');
+    expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
+    expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
+  });
+
+  it('does not set data-ebt-* attributes when ebt is provided without onClick', () => {
+    renderBadge({
+      count: 1,
+      serviceName: 'svc',
+      ebt: { action: 'viewAlerts', element: 'serviceFlyoutAlertsBadge' },
+    });
+
+    const badge = screen.getByTestId('apmAlertsBadge');
+    expect(badge).not.toHaveAttribute('data-ebt-action');
+  });
 });

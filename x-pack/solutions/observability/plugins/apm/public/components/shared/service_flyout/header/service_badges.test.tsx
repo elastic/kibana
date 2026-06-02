@@ -95,6 +95,9 @@ describe('ServiceBadges', () => {
       const badge = screen.getByTestId('serviceFlyoutAlertsBadge');
       expect(badge).toHaveTextContent('3');
 
+      expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
+      expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
+
       fireEvent.click(badge);
       expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/apm/alerts-href');
     });
@@ -116,6 +119,8 @@ describe('ServiceBadges', () => {
 
       const badge = screen.getByTestId('apmSloBadge');
       expect(badge).toHaveAttribute('data-slo-status', 'violated');
+      expect(badge).toHaveAttribute('data-ebt-action', 'viewSlos');
+      expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutSloBadge');
 
       fireEvent.click(badge);
       expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/slos/slos-href');

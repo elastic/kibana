@@ -6,12 +6,14 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { Environment } from '../../../../../common/environment_rt';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceLinks } from '../hooks/use_service_links';
 
 interface ServiceFlyoutFooterProps {
@@ -69,6 +71,11 @@ export function ServiceFlyoutFooter({
                   defaultMessage: 'Open traces in Discover',
                 }),
                 href: tracesDiscoverHref,
+                ebt: {
+                  action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                  element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+                  detail: 'traces',
+                },
               }
             : undefined,
           logsDiscoverHref
@@ -78,6 +85,11 @@ export function ServiceFlyoutFooter({
                   defaultMessage: 'Open logs in Discover',
                 }),
                 href: logsDiscoverHref,
+                ebt: {
+                  action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                  element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+                  detail: 'logs',
+                },
               }
             : undefined,
         ].filter((action): action is NonNullable<typeof action> => Boolean(action)),
@@ -97,6 +109,10 @@ export function ServiceFlyoutFooter({
               defaultMessage: 'Open in Alerts',
             }),
             href: alertsHref,
+            ebt: {
+              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+            },
           },
         ],
       });
@@ -115,6 +131,10 @@ export function ServiceFlyoutFooter({
               defaultMessage: 'Open in SLOs',
             }),
             href: slosHref,
+            ebt: {
+              action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+            },
           },
         ],
       });

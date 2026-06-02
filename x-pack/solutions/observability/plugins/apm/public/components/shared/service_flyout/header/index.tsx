@@ -6,9 +6,11 @@
  */
 
 import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
 import { useServiceLinks } from '../hooks/use_service_links';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
@@ -54,6 +56,10 @@ export function ServiceFlyoutHeader({
             rel="noopener noreferrer"
             external={false}
             data-test-subj="serviceFlyoutTitleLink"
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.TITLE,
+            })}
           >
             {title}
           </EuiLink>
