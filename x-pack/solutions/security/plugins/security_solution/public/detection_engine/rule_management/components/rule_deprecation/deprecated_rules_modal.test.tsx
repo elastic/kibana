@@ -11,8 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { useKibana } from '../../../../common/lib/kibana';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../common/constants';
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 
@@ -101,45 +99,6 @@ describe('DeprecatedRulesModal', () => {
       // The confirm modal should be dismissed and no deletion should have been triggered
       expect(screen.queryByTestId('deprecated-rules-delete-confirm-modal')).not.toBeInTheDocument();
       expect(mockExecuteBulkAction).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Delete all chunking', () => {
-    const openAndConfirmDeleteAll = async () => {
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('deprecated-rules-modal-delete-all'));
-      });
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-    };
-
-    it('sends a single request when rule count is within the API limit', async () => {
-      render(<DeprecatedRulesModal rules={MOCK_RULES} isLoading={false} onClose={mockOnClose} />);
-      await openAndConfirmDeleteAll();
-
-      expect(mockExecuteBulkAction).toHaveBeenCalledTimes(1);
-      expect(mockExecuteBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: BulkActionTypeEnum.delete,
-          ids: MOCK_RULES.map((r) => r.id),
-        })
-      );
-    });
-
-    it('splits into multiple requests when rule count exceeds the API limit', async () => {
-      // Generate one more rule than the per-request limit to force chunking.
-      const manyRules: DeprecatedRuleForReview[] = Array.from(
-        { length: RULES_TABLE_MAX_PAGE_SIZE + 1 },
-        (_, i) => ({ id: `rule-so-id-${i}`, rule_id: `rule-rule-id-${i}`, name: `Rule ${i}` })
-      );
-
-      render(<DeprecatedRulesModal rules={manyRules} isLoading={false} onClose={mockOnClose} />);
-      await openAndConfirmDeleteAll();
-
-      expect(mockExecuteBulkAction).toHaveBeenCalledTimes(2);
-      expect(mockExecuteBulkAction.mock.calls[0][0].ids).toHaveLength(RULES_TABLE_MAX_PAGE_SIZE);
-      expect(mockExecuteBulkAction.mock.calls[1][0].ids).toHaveLength(1);
     });
   });
 });

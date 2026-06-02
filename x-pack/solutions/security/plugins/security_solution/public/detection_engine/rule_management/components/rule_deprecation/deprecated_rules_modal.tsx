@@ -27,7 +27,6 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDeprecationEventTypes } from '../../../../common/lib/telemetry/events/rule_deprecation/types';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../common/constants';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
 import { RuleLink } from '../../../rule_management_ui/components/rules_table/use_columns';
@@ -55,15 +54,10 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
       count: rules.length,
     });
     hideConfirm();
-    // The bulk-action API rejects payloads exceeding RULES_TABLE_MAX_PAGE_SIZE ids,
-    // so send deletes in sequential batches to handle more deprecated rules than the limit.
-    const allIds = rules.map((rule) => rule.id);
-    for (let i = 0; i < allIds.length; i += RULES_TABLE_MAX_PAGE_SIZE) {
-      await executeBulkAction({
-        type: BulkActionTypeEnum.delete,
-        ids: allIds.slice(i, i + RULES_TABLE_MAX_PAGE_SIZE),
-      });
-    }
+    await executeBulkAction({
+      type: BulkActionTypeEnum.delete,
+      ids: rules.map((rule) => rule.id),
+    });
     onClose();
   }, [executeBulkAction, rules, onClose, hideConfirm, telemetry]);
 

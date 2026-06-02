@@ -15,7 +15,6 @@ import { useTimedDismissal } from '../../../../common/hooks/use_timed_dismissal'
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDeprecationEventTypes } from '../../../../common/lib/telemetry/events/rule_deprecation/types';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../common/constants';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
@@ -79,15 +78,10 @@ export const useDeprecatedRulesTableCallout = () => {
       count: data.rules.length,
     });
     hideConfirm();
-    // The bulk-action API rejects payloads exceeding RULES_TABLE_MAX_PAGE_SIZE ids,
-    // so send deletes in sequential batches to handle more deprecated rules than the limit.
-    const allIds = data.rules.map((rule) => rule.id);
-    for (let i = 0; i < allIds.length; i += RULES_TABLE_MAX_PAGE_SIZE) {
-      await executeBulkAction({
-        type: BulkActionTypeEnum.delete,
-        ids: allIds.slice(i, i + RULES_TABLE_MAX_PAGE_SIZE),
-      });
-    }
+    await executeBulkAction({
+      type: BulkActionTypeEnum.delete,
+      ids: data.rules.map((rule) => rule.id),
+    });
   }, [data?.rules, executeBulkAction, hideConfirm, telemetry]);
 
   if (!isCalloutVisible || !data) {

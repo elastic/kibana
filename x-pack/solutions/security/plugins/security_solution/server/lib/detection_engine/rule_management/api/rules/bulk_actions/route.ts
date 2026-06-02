@@ -25,7 +25,6 @@ import {
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  RULES_TABLE_MAX_PAGE_SIZE,
   EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -67,9 +66,12 @@ interface ValidationError {
 const validateBulkAction = (
   body: PerformRulesBulkActionRequestBody
 ): ValidationError | undefined => {
-  if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+  // Mirror the query-path limits: edit has a lower cap due to heavier per-rule work.
+  const maxIds =
+    body.action === BulkActionTypeEnum.edit ? MAX_RULES_TO_BULK_EDIT : MAX_RULES_TO_PROCESS_TOTAL;
+  if (body?.ids && body.ids.length > maxIds) {
     return {
-      body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+      body: `More than ${maxIds} ids sent for bulk action.`,
       statusCode: 400,
     };
   }
