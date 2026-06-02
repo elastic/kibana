@@ -11,7 +11,7 @@ import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { Sparkline } from '.';
-import type { Coordinate } from './utils';
+import type { SparklinePoint } from './utils';
 
 export default {
   title: 'shared/Sparkline',
@@ -23,7 +23,7 @@ const palette = euiPaletteColorBlind({ rotations: 2 });
 const now = Date.now();
 const minute = 60 * 1000;
 
-function makeSeries(fn: (i: number) => number | null): Coordinate[] {
+function makeSeries(fn: (i: number) => number | null): SparklinePoint[] {
   return Array.from({ length: 20 }, (_, i) => ({
     x: now - (20 - i) * minute,
     y: fn(i),
