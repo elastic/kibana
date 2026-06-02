@@ -26,6 +26,10 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
   searchRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).searchMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           query: searchRequestQuerySchema,

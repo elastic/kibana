@@ -30,6 +30,10 @@ If no item exists with the specified ID, a new one is created.`,
   updateRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).updateMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({
