@@ -35,6 +35,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
@@ -583,6 +584,10 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
     return this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
+    return this.workflowsService.getRegisteredCustomTriggerDefinitions();
   }
 
   public async getWorkflowJsonSchema(

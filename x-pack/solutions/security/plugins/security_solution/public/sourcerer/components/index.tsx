@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSuperSelect,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -58,6 +59,7 @@ interface SourcererPopoverProps {
   setMissingPatterns: (missingPatterns: string[]) => void;
   setDataViewId: (dataViewId: string | null) => void;
   scopeId: PageScope;
+  popoverTitleId: string;
   children: React.ReactNode;
 }
 
@@ -81,6 +83,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
     setMissingPatterns,
     setDataViewId,
     scopeId,
+    popoverTitleId,
     children,
   }) => {
     if (!showSourcerer) {
@@ -111,6 +114,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
           isOpen={isPopoverOpen}
           ownFocus
           repositionOnScroll
+          aria-labelledby={popoverTitleId}
         >
           <>{children}</>
         </EuiPopover>
@@ -126,6 +130,7 @@ SourcererPopover.displayName = 'SourcererPopover';
  */
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
+  const sourcererTitleId = useGeneratedHtmlId();
   const isDetectionsSourcerer = scopeId === PageScope.alerts;
   const isTimelineSourcerer = scopeId === PageScope.timeline;
   const isDefaultSourcerer = scopeId === PageScope.default;
@@ -377,9 +382,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       setMissingPatterns={setMissingPatterns}
       setDataViewId={setDataViewId}
       scopeId={scopeId}
+      popoverTitleId={sourcererTitleId}
     >
       <PopoverContent>
-        <EuiPopoverTitle data-test-subj="sourcerer-title">
+        <EuiPopoverTitle id={sourcererTitleId} data-test-subj="sourcerer-title">
           <>{i18n.SELECT_DATA_VIEW}</>
         </EuiPopoverTitle>
         <SourcererCallout

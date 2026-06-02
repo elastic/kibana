@@ -108,7 +108,6 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -838,6 +837,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
+        "ajv",
         "ajv-draft-04",
         "ajv-formats"
       ],
@@ -1932,7 +1932,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
         "magic-bytes.js",
         "minimist",

@@ -1143,6 +1143,64 @@ steps:
       );
     });
 
+    it('does not schedule triggers when workflow is disabled', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: `
+name: disabled scheduled workflow
+enabled: false
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule triggers when workflow is invalid', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: 'name: invalid workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
     it('should create workflow with custom ID when provided', async () => {
       const mockRequest = {
         auth: {
@@ -1793,6 +1851,41 @@ steps:
       await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
 
       expect(mockTaskScheduler.scheduleWorkflowTask).toHaveBeenCalled();
+    });
+
+    it('does not schedule triggers when workflow is disabled', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: disabled scheduled workflow
+enabled: false
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
     });
 
     it('should log warning when trigger scheduling fails without affecting result', async () => {
