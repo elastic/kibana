@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+
 import { getRouteConfig } from '../get_route_config';
+import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
 import { logRequest } from '../log_request';
 
@@ -61,7 +63,12 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          await deleteDashboard(ctx, req.params.id);
+          const result = await deleteDashboard(ctx, req.params.id);
+          try {
+            await trackDeleteDashboardAction(result, req);
+          } catch (e) {
+            // if tracking throws, just swallow the error; no need to surface it
+          }
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             const message = `A dashboard with ID [${req.params.id}] was not found.`;
