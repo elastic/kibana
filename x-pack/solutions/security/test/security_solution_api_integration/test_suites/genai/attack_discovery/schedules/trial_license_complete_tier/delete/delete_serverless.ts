@@ -7,7 +7,11 @@
 
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+} from '@kbn/elastic-assistant-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
@@ -49,8 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
       const roles = [
         'viewer',
         'editor',
-        ROLES.t1_analyst,
-        ROLES.t2_analyst,
         ROLES.t3_analyst,
         ROLES.rule_author,
         ROLES.soc_manager,
@@ -80,6 +82,39 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
+      // These roles have `securitySolutionAttackDiscovery: minimal_all`, which grants read-only
+      // Attack Discovery access without the schedule management privilege, so they cannot delete
+      // schedules (mirroring their read-only Rule privileges).
+      const minimalAllRoles = ['viewer', ROLES.t1_analyst, ROLES.t2_analyst];
+
+      minimalAllRoles.forEach((role) => {
+        it(`should not be able to delete a schedule with the "${role}" role`, async () => {
+          const testAgent = await utils.createSuperTest(role);
+
+          const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+          const result = await apis.delete({
+            id: createdSchedule.id,
+            kibanaSpace: kibanaSpace1,
+            expectedHttpCode: 403,
+          });
+
+          expect(result).toEqual(
+            getMissingAssistantKibanaPrivilegesError({
+              routeDetails: `DELETE ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, {
+                id: createdSchedule.id,
+              })}`,
+            })
+          );
+
+          await checkIfScheduleExists({
+            getService,
+            id: createdSchedule.id,
+            kibanaSpace: kibanaSpace1,
+          });
+        });
+      });
+
       it('should not be able to delete a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
