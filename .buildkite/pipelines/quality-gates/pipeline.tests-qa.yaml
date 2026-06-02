@@ -22,14 +22,6 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
       message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)'
 
-  - label: ':bug::shield: Entity Store v2 Scout quality gate (${ENVIRONMENT})'
-    trigger: bk-kibana-serverless-secsol-qg-entity-store # https://buildkite.com/elastic/kibana-serverless-security-solution-quality-gate-entity-store
-    soft_fail: true # Remove when tests stabilize
-    build:
-      env:
-        ENVIRONMENT: ${ENVIRONMENT}
-      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)'
-
   - label: ':ship: Fleet serverless smoke tests for ${ENVIRONMENT}'
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
     soft_fail: true
