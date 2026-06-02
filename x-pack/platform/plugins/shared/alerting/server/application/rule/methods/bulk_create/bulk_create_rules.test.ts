@@ -909,16 +909,35 @@ describe('bulkCreateRules', () => {
       expect(result.errors.some((e) => e.message.includes('SO down'))).toBe(true);
     });
 
-    test('true: does NOT trigger on Phase-B1/B2/B3 demotion errors (only on SO failures)', async () => {
-      // Batch 1: schedule limit trips on the enabled rule (Phase B2), SO succeeds.
-      // Batch 2: should still execute.
+    test('true + Phase B1 api-key-mint failure: aborts batch (no SO write, key cleanup runs, no further batches)', async () => {
+      rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('keys disabled'));
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a', enabled: true }) },
+          { data: baseRule({ name: 'b' }) },
+          { data: baseRule({ name: 'c' }) },
+        ],
+        batchSize: 1,
+        exitEarlyOnError: true,
+      });
+
+      // Batch 1 (the enabled rule) produces a B1 demotion error → strict aborts before SO write.
+      // Batches 2 and 3 are skipped entirely.
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(result.successfulIds).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual(
+        expect.objectContaining({ disabledReason: 'api_key_creation_failed' })
+      );
+    });
+
+    test('true + Phase B2 schedule-limit overflow: aborts batch (no SO write, key invalidation runs, no further batches)', async () => {
       (validateScheduleLimit as jest.Mock).mockResolvedValueOnce({
         interval: 100,
         intervalAvailable: 50,
       });
-      unsecuredSavedObjectsClient.bulkCreate
-        .mockResolvedValueOnce(buildBulkResponse([{ id: 'mock-id-1' }]))
-        .mockResolvedValueOnce(buildBulkResponse([{ id: 'mock-id-2' }]));
 
       const result = await rulesClient.bulkCreateRules({
         rules: [
@@ -929,9 +948,60 @@ describe('bulkCreateRules', () => {
         exitEarlyOnError: true,
       });
 
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(result.successfulIds).toEqual(['mock-id-1', 'mock-id-2']);
-      expect(result.errors.some((e) => e.disabledReason === 'schedule_limit_exceeded')).toBe(true);
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
+      expect(result.successfulIds).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual(
+        expect.objectContaining({ disabledReason: 'schedule_limit_exceeded' })
+      );
+    });
+
+    test('true + Phase B3 whole-call TM throw: aborts batch (no SO write, key invalidation runs, no further batches)', async () => {
+      taskManager.bulkSchedule.mockRejectedValueOnce(new Error('cluster unavailable'));
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a', enabled: true }) },
+          { data: baseRule({ name: 'b' }) },
+        ],
+        batchSize: 1,
+        exitEarlyOnError: true,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
+      expect(result.successfulIds).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual(
+        expect.objectContaining({ disabledReason: 'task_schedule_failed' })
+      );
+    });
+
+    test('true + Phase B3 silent per-task drop: aborts batch and removes the partially scheduled tasks', async () => {
+      taskManager.bulkSchedule.mockImplementationOnce(async (tasks) => [tasks[0]] as never);
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'kept', enabled: true }) },
+          { data: baseRule({ name: 'dropped', enabled: true }) },
+          { data: baseRule({ name: 'next-batch' }) },
+        ],
+        batchSize: 2,
+        exitEarlyOnError: true,
+      });
+
+      // Batch 1 schedules `kept` but loses `dropped` → strict aborts and cleans up the
+      // task that did schedule. Batch 2 is skipped.
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['mock-id-1']);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
+      expect(result.successfulIds).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual(
+        expect.objectContaining({ disabledReason: 'task_validation_failed' })
+      );
     });
   });
 

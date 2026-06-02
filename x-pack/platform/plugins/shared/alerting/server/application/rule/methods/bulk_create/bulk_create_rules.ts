@@ -104,30 +104,26 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     `bulkCreateRules: ${total} input(s), ${validated.length} validated after preValidate, ${totalBatches}x batches of ${batchSize}.`
   );
 
-  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-    const start = batchIndex * batchSize;
+  // Phase B: per-batch ES writes.
+  for (let i = 0; i < totalBatches; i++) {
+    const start = i * batchSize;
     const batch = validated.slice(start, start + batchSize);
 
-    // Phase B: per-batch ES writes.
     const result = await runBatch<Params>({
       context,
       username,
       actionsClient,
       batch,
       changeTracking,
+      strict: exitEarlyOnError,
     });
 
     successfulIds.push(...result.successfulIds);
     errors.push(...result.errors);
 
-    if (exitEarlyOnError && result.soFailureOccurred) {
+    if (exitEarlyOnError && result.errors.length > 0) {
       logger.warn(
-        `bulkCreateRules: exiting early on SO failure at batch ${
-          batchIndex + 1
-        }/${totalBatches}. ` +
-          `${successfulIds.length} rule(s) created, ${
-            validated.length - start - batch.length
-          } rule(s) skipped.`
+        `bulkCreateRules: exiting early at batch ${i + 1}/${totalBatches}.`
       );
       break;
     }
@@ -259,6 +255,7 @@ interface RunBatchArgs<Params extends RuleParams> {
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   batch: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
   changeTracking?: RuleChangeTracking;
+  strict?: boolean;
 }
 
 async function runBatch<Params extends RuleParams>({
@@ -267,6 +264,7 @@ async function runBatch<Params extends RuleParams>({
   actionsClient,
   batch,
   changeTracking,
+  strict = false,
 }: RunBatchArgs<Params>): Promise<BatchResult> {
   const { logger } = context;
 
@@ -298,10 +296,16 @@ async function runBatch<Params extends RuleParams>({
     )
   );
 
+  if (strict && errors.length > 0) {
+    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
+    await flushKeysToInvalidate(keysToInvalidate, context);
+    return { successfulIds: [], errors };
+  }
+
   // No survivors? Flush any keys created and return.
   if (preparedRules.size === 0) {
     await flushKeysToInvalidate(keysToInvalidate, context);
-    return { successfulIds: [], errors, soFailureOccurred: false };
+    return { successfulIds: [], errors };
   }
 
   // Phase B2: check schedule-limit on the enabled subset; demote on overflow.
@@ -336,6 +340,12 @@ async function runBatch<Params extends RuleParams>({
         username,
       });
     }
+  }
+
+  if (strict && errors.length > 0) {
+    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
+    await flushKeysToInvalidate(keysToInvalidate, context);
+    return { successfulIds: [], errors };
   }
 
   // Phase B3: schedule tasks for the surviving enabled subset.
@@ -396,6 +406,15 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
+  if (strict && errors.length > 0) {
+    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
+    if (newlyScheduledTaskIds.size > 0) {
+      await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
+    }
+    await flushKeysToInvalidate(keysToInvalidate, context);
+    return { successfulIds: [], errors };
+  }
+
   // Audit per-rule CREATE event before persistence (mirrors createRuleSavedObject).
   for (const prepared of preparedRules.values()) {
     context.auditLogger?.log(
@@ -447,18 +466,16 @@ async function runBatch<Params extends RuleParams>({
       status: error.output?.statusCode,
       rule: { id: 'n/a', name: 'n/a' },
     });
-    return { successfulIds: [], errors, soFailureOccurred: true };
+    return { successfulIds: [], errors };
   }
 
   // Phase B4 per-row outcomes.
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
-  let perRowFailureOccurred = false;
 
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
-      perRowFailureOccurred = true;
       errors.push({
         message: so.error.message ?? 'n/a',
         status: so.error.statusCode,
@@ -525,9 +542,5 @@ async function runBatch<Params extends RuleParams>({
     });
   }
 
-  return {
-    successfulIds: batchSuccessfulIds,
-    errors,
-    soFailureOccurred: perRowFailureOccurred,
-  };
+  return { successfulIds: batchSuccessfulIds, errors };
 }

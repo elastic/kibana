@@ -51,7 +51,7 @@ export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   rules: Array<BulkCreateRulesItem<Params>>;
   /** Per-batch size; clamped to [1, MAX_BULK_CREATE_BATCH_SIZE], defaults to DEFAULT_BULK_CREATE_BATCH_SIZE. Total is bounded by MAX_RULES_NUMBER_FOR_BULK_OPERATION (callers should enforce request-level limits). */
   batchSize?: number;
-  /** If true, stop further batches on SO-level failure (whole-call throw or any per-row SO error). Phase 1/2/3 demotions never halt the loop. Defaults to false. */
+  /** If true, stop on the first error of any kind. Defaults to false. */
   exitEarlyOnError?: boolean;
   /** Rule change tracking context. `action` defaults to `RuleChangeTrackingAction.ruleCreate`; consumers can override. */
   changeTracking?: RuleChangeTracking;
@@ -77,6 +77,4 @@ export interface BulkCreateRulesResult {
 export interface BatchResult {
   successfulIds: string[];
   errors: BulkCreateOperationError[];
-  /** True if SO bulkCreate threw or any per-row SO error was returned; drives the exitEarlyOnError short-circuit. */
-  soFailureOccurred: boolean;
 }
