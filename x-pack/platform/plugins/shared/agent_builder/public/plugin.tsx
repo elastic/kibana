@@ -20,7 +20,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { internalApiPath } from '../common/constants';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -271,17 +270,6 @@ export class AgentBuilderPlugin
       </React.Suspense>
     );
 
-    const syncOverviewDashboard = () => {
-      void core.http
-        // eslint-disable-next-line @kbn/eslint/no_unsafe_dynamic_http_path
-        .post(`${internalApiPath}/dashboard/_sync`)
-        .catch((error) => {
-          this.logger
-            .get('dashboard')
-            .warn(`Failed to sync overview dashboard: ${(error as Error).message}`);
-        });
-    };
-
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
@@ -289,7 +277,6 @@ export class AgentBuilderPlugin
         this.appUpdater$.next(() => ({
           deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
         }));
-        syncOverviewDashboard();
       });
 
     const agentBuilderService: AgentBuilderPluginStart = {

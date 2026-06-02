@@ -59,6 +59,7 @@ interface SavedDashboardSection {
 const isDashboardSection = (widget: DashboardWidget): widget is DashboardSectionAsset =>
   'panels' in widget;
 
+// transform the options to the saved dashboard options
 const transformOptionsIn = (options: typeof overviewDashboard.options): string => {
   const apiToSavedObjectOptionsKeys = {
     hide_panel_titles: 'hidePanelTitles',
@@ -79,6 +80,7 @@ const transformOptionsIn = (options: typeof overviewDashboard.options): string =
   return JSON.stringify(savedObjectOptions);
 };
 
+// transform the lens visualization panel config to the saved dashboard panel config
 function transformVisPanelConfig(
   builder: LensConfigBuilder,
   config: Record<string, unknown>
@@ -108,9 +110,11 @@ function transformVisPanelConfig(
   };
 }
 
+// return true if the panel is a lens visualization panel
 const isLensVisualizationPanel = (panel: DashboardPanelAsset) =>
   panel.type === LENS_EMBEDDABLE_TYPE || panel.type === 'vis';
 
+// transform the panel to the saved dashboard panel
 function transformPanel(
   panel: DashboardPanelAsset,
   builder: LensConfigBuilder,
@@ -137,6 +141,7 @@ function transformPanel(
   };
 }
 
+// build the panels for the dashboard
 function buildOverviewDashboardPanels(): {
   panels: SavedDashboardPanel[];
   sections: SavedDashboardSection[];
@@ -164,22 +169,26 @@ function buildOverviewDashboardPanels(): {
   return { panels, sections };
 }
 
-/**
- * Creates or overwrites the plugin-owned managed Agent Builder overview dashboard.
- * Idempotent: uses a stable id with overwrite. Re-run upgrades the dashboard when
- * {@link AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION} increases.
- */
+// return the id of the dashboard in the given space
+function overviewDashboardId(spaceId: string): string {
+  return `${AGENT_BUILDER_OVERVIEW_DASHBOARD_ID}-${spaceId}`;
+}
+
+// install the dashboard in the given space
 async function installAgentBuilderOverviewDashboard(
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  client: SavedObjectsClientContract,
+  logger: Logger,
+  spaceId: string,
+  namespace: string | undefined
 ): Promise<void> {
+  const dashboardId = overviewDashboardId(spaceId);
   logger.debug(
-    `Installing Agent Builder overview dashboard (${AGENT_BUILDER_OVERVIEW_DASHBOARD_ID}, definition v${AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION})...`
+    `Installing Agent Builder overview dashboard (${dashboardId}, definition v${AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION}) in space "${spaceId}"...`
   );
 
   const { panels, sections } = buildOverviewDashboardPanels();
 
-  await savedObjectsClient.create(
+  await client.create(
     'dashboard',
     {
       kibanaSavedObjectMeta: {
@@ -193,7 +202,7 @@ async function installAgentBuilderOverviewDashboard(
       optionsJSON: transformOptionsIn(overviewDashboard.options),
       panelsJSON: JSON.stringify(panels).replaceAll(
         AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
-        'default'
+        spaceId
       ),
       ...(sections.length > 0 && { sections }),
       timeRestore: false,
@@ -201,55 +210,110 @@ async function installAgentBuilderOverviewDashboard(
       version: AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION,
     },
     {
-      id: AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
+      id: dashboardId,
       references: [],
       overwrite: true,
       managed: true,
+      namespace,
       coreMigrationVersion: AGENT_BUILDER_DASHBOARD_CORE_MIGRATION_VERSION,
       typeMigrationVersion: AGENT_BUILDER_DASHBOARD_TYPE_MIGRATION_VERSION,
       refresh: false,
     }
   );
 
-  logger.debug('Agent Builder overview dashboard installed');
+  logger.debug(`Agent Builder overview dashboard installed in space "${spaceId}"`);
 }
 
-/**
- * Removes the plugin-owned managed Agent Builder overview dashboard.
- */
+// remove the dashboard from the given space
 async function removeAgentBuilderOverviewDashboard(
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  client: SavedObjectsClientContract,
+  logger: Logger,
+  spaceId: string,
+  namespace: string | undefined
 ): Promise<void> {
   try {
-    await savedObjectsClient.delete('dashboard', AGENT_BUILDER_OVERVIEW_DASHBOARD_ID);
-    logger.debug('Agent Builder overview dashboard removed');
+    await client.delete('dashboard', overviewDashboardId(spaceId), { namespace });
+    logger.debug(`Agent Builder overview dashboard removed from space "${spaceId}"`);
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      logger.debug('Agent Builder overview dashboard already absent');
+      logger.debug(`Agent Builder overview dashboard already absent in space "${spaceId}"`);
       return;
     }
     throw error;
   }
 }
 
-/**
- * Installs or removes the managed overview dashboard based on the experimental-features
- * uiSetting. Called at server startup and whenever the setting is toggled.
- */
+// return true if the experimental features are enabled for the given space
+async function isExperimentalFeaturesEnabledForSpace(
+  client: SavedObjectsClientContract,
+  kibanaVersion: string,
+  namespace: string | undefined
+): Promise<boolean> {
+  const configId = kibanaVersion.replace(/-.*$/, '');
+  try {
+    const configSO = await client.get<Record<string, unknown>>('config', configId, { namespace });
+    return configSO.attributes[AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID] === true;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+// return the version of the dashboard in the given space
+async function getInstalledDashboardVersion(
+  client: SavedObjectsClientContract,
+  spaceId: string,
+  namespace: string | undefined
+): Promise<number | null> {
+  try {
+    const existing = await client.get<{ version?: number }>(
+      'dashboard',
+      overviewDashboardId(spaceId),
+      { namespace }
+    );
+    return typeof existing.attributes.version === 'number' ? existing.attributes.version : null;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+// sync the dashboard for all spaces
 export async function syncAgentBuilderOverviewDashboard(
-  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
+  coreStart: Pick<CoreStart, 'savedObjects'>,
+  kibanaVersion: string,
   logger: Logger
 ): Promise<void> {
-  const internalClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(internalClient);
-  const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
+  const client = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
-  if (experimentalFeaturesEnabled) {
-    await installAgentBuilderOverviewDashboard(internalClient, logger);
-  } else {
-    await removeAgentBuilderOverviewDashboard(internalClient, logger);
+  // `space` is a hidden SO type and must be explicitly allowlisted.
+  const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
+  const { saved_objects: spaceObjects } = await spaceRepo.find({
+    type: 'space',
+    perPage: 1000,
+    page: 1,
+  });
+  const spaceIds = ['default', ...spaceObjects.map((s) => s.id).filter((id) => id !== 'default')];
+
+  for (const spaceId of spaceIds) {
+    const namespace = spaceId === 'default' ? undefined : spaceId;
+
+    const enabled = await isExperimentalFeaturesEnabledForSpace(client, kibanaVersion, namespace);
+    if (enabled) {
+      const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
+      if (installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION) {
+        logger.debug(
+          `Agent Builder overview dashboard is up to date in space "${spaceId}", skipping`
+        );
+        continue;
+      }
+      await installAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
+    } else {
+      await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
+    }
   }
 }
