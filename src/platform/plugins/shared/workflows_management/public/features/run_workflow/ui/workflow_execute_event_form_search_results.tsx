@@ -31,6 +31,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
+import { WorkflowExecuteEventFormEmptyState } from './workflow_execute_event_form_empty_state';
 import { formatTriggerEventQueryError } from './workflow_execute_event_query_errors';
 
 export interface WorkflowExecuteEventFormSearchResultsProps {
@@ -60,6 +61,9 @@ export interface WorkflowExecuteEventFormSearchResultsProps {
   totalHits: number;
   onFetchMoreRecords: (() => void) | undefined;
   onDataGridFullScreenChange: (isFullScreen: boolean) => void;
+  showNoEventsEmptyState: boolean;
+  isDefaultTriggerScope: boolean;
+  onOpenManualTab?: () => void;
 }
 
 export const WorkflowExecuteEventFormSearchResults = memo(
@@ -90,6 +94,9 @@ export const WorkflowExecuteEventFormSearchResults = memo(
     totalHits,
     onFetchMoreRecords,
     onDataGridFullScreenChange,
+    showNoEventsEmptyState,
+    isDefaultTriggerScope,
+    onOpenManualTab,
   }: WorkflowExecuteEventFormSearchResultsProps): React.JSX.Element {
     return (
       <>
@@ -213,47 +220,54 @@ export const WorkflowExecuteEventFormSearchResults = memo(
             )}
             {dataView ? (
               <>
-                <div
-                  css={css({
-                    flex: 1,
-                    minHeight: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                  })}
-                >
-                  <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
-                    <UnifiedDataTable
-                      ariaLabelledBy="workflowTriggerEventsTable"
-                      columns={visibleTableColumns}
-                      columnsMeta={columnsMeta}
-                      rows={dataTableRows}
-                      dataView={dataView}
-                      loadingState={tableLoadingState}
-                      sampleSizeState={rowsLength}
-                      services={unifiedDataTableServices}
-                      onSetColumns={handleUnifiedDataTableSetColumns}
-                      showTimeCol={showTimeColumn}
-                      sort={sort}
-                      onSort={handleSortChange}
-                      isSortEnabled={true}
-                      isPaginationEnabled={true}
-                      paginationMode="infinite"
-                      totalHits={totalHits}
-                      onFetchMoreRecords={onFetchMoreRecords}
-                      dataGridDensityState={DataGridDensity.NORMAL}
-                      isPlainRecord={true}
-                      showFullScreenButton={true}
-                      showKeyboardShortcuts={false}
-                      enableInTableSearch={true}
-                      controlColumnIds={[SELECT_ROW]}
-                      customGridColumnsConfiguration={customGridColumnsConfiguration}
-                      renderCustomToolbar={renderCustomToolbar}
-                      renderCellPopover={renderCellPopover}
-                      externalCustomRenderers={externalCustomRenderers}
-                      onFullScreenChange={onDataGridFullScreenChange}
-                    />
-                  </CellActionsProvider>
-                </div>
+                {showNoEventsEmptyState ? (
+                  <WorkflowExecuteEventFormEmptyState
+                    isDefaultTriggerScope={isDefaultTriggerScope}
+                    onOpenManualTab={onOpenManualTab}
+                  />
+                ) : (
+                  <div
+                    css={css({
+                      flex: 1,
+                      minHeight: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                    })}
+                  >
+                    <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
+                      <UnifiedDataTable
+                        ariaLabelledBy="workflowTriggerEventsTable"
+                        columns={visibleTableColumns}
+                        columnsMeta={columnsMeta}
+                        rows={dataTableRows}
+                        dataView={dataView}
+                        loadingState={tableLoadingState}
+                        sampleSizeState={rowsLength}
+                        services={unifiedDataTableServices}
+                        onSetColumns={handleUnifiedDataTableSetColumns}
+                        showTimeCol={showTimeColumn}
+                        sort={sort}
+                        onSort={handleSortChange}
+                        isSortEnabled={true}
+                        isPaginationEnabled={true}
+                        paginationMode="infinite"
+                        totalHits={totalHits}
+                        onFetchMoreRecords={onFetchMoreRecords}
+                        dataGridDensityState={DataGridDensity.NORMAL}
+                        isPlainRecord={true}
+                        showFullScreenButton={true}
+                        showKeyboardShortcuts={false}
+                        enableInTableSearch={true}
+                        controlColumnIds={[SELECT_ROW]}
+                        customGridColumnsConfiguration={customGridColumnsConfiguration}
+                        renderCustomToolbar={renderCustomToolbar}
+                        renderCellPopover={renderCellPopover}
+                        externalCustomRenderers={externalCustomRenderers}
+                        onFullScreenChange={onDataGridFullScreenChange}
+                      />
+                    </CellActionsProvider>
+                  </div>
+                )}
               </>
             ) : null}
           </div>

@@ -11,10 +11,11 @@ import {
   COMMENT_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
+import { postCaseReq, postCommentActionsReq, postCommentUserReq } from '../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -146,6 +147,62 @@ export default ({ getService }: FtrProviderContext): void => {
         const ids = bulkResult.attachments.map((a: { id: string }) => a.id);
         expect(ids).to.contain(legacyId);
         expect(ids).to.contain(unifiedId);
+      });
+
+      it('bulk get retrieves a unified `security.endpoint` alongside a legacy `actions` row from both SO indices', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // Unified `security.endpoint` lands on cases-attachments.
+        const unifiedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+            attachmentId: 'mixed-endpoint-1',
+            owner: 'securitySolutionFixture',
+            data: { content: 'isolated via unified payload' },
+            metadata: {
+              command: 'isolate',
+              targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
+            },
+          } as AttachmentRequestV2,
+        });
+        const unifiedId = unifiedCase.comments![0].id;
+
+        // Legacy `actions` is folded to `security.endpoint` on write (also lands on
+        // cases-attachments), exercising the asymmetric retirement path alongside
+        // the direct unified write.
+        const actionsCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+        });
+        const actionsId = actionsCase.comments!.find((c) => c.id !== unifiedId)!.id;
+
+        const bulkResult = await bulkGetAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [unifiedId, actionsId],
+        });
+
+        expect(bulkResult.attachments.length).to.be(2);
+        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`
+        const byId = new Map<string, { type: string; attachmentId?: string }>(
+          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
+            a.id,
+            a,
+          ])
+        );
+
+        const unifiedProjected = byId.get(unifiedId)!;
+        expect(unifiedProjected.type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(unifiedProjected.attachmentId).to.be('mixed-endpoint-1');
+
+        // The actions-origin row carries the synthetic sentinel `attachmentId` so
+        // its origin stays discoverable to log readers and downstream consumers.
+        const actionsProjected = byId.get(actionsId)!;
+        expect(actionsProjected.type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(actionsProjected.attachmentId).to.be('legacy-actions');
       });
 
       it('bulk get retrieves osquery alongside a legacy user comment from both SO indices', async () => {

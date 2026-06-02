@@ -8,6 +8,11 @@
  */
 
 import { createIndexes } from './create_indexes';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+} from './mappings';
 
 jest.mock('./create_index', () => ({
   createIndexWithMappings: jest.fn().mockResolvedValue(undefined),
@@ -25,18 +30,21 @@ describe('createIndexes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates both execution and step execution indexes', async () => {
+  it('creates both workflow indices via createOrUpdateIndex', async () => {
     await createIndexes({ esClient, logger });
 
+    // The bootstrap path uses `createOrUpdateIndex` for both indices
+    // so additive mapping changes flow into already-deployed clusters
+    // via `putMapping`. `createIndexWithMappings` is reused internally
+    // for the cold-install branch, not invoked directly from here.
+    expect(createOrUpdateIndex).toHaveBeenCalledTimes(2);
+    expect(createIndexWithMappings).not.toHaveBeenCalled();
+
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexName: '.workflows-executions',
-      })
+      expect.objectContaining({ indexName: WORKFLOWS_EXECUTIONS_INDEX })
     );
-    expect(createIndexWithMappings).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexName: '.workflows-step-executions',
-      })
+    expect(createOrUpdateIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX })
     );
   });
 
@@ -44,8 +52,21 @@ describe('createIndexes', () => {
     await createIndexes({ esClient, logger });
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
-    expect(createIndexWithMappings).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient, logger })
+    expect(createOrUpdateIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
+  });
+
+  it('forwards WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS to the step-executions index unchanged', async () => {
+    await createIndexes({ esClient, logger });
+
+    const stepCall = createOrUpdateIndex.mock.calls.find(
+      ([arg]: [{ indexName: string }]) => arg.indexName === WORKFLOWS_STEP_EXECUTIONS_INDEX
     );
+    expect(stepCall).toBeDefined();
+    const [{ mappings }] = stepCall;
+    // The mapping object reaches `createOrUpdateIndex` by reference,
+    // making `WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS` the single
+    // source of truth for the index. Detailed shape assertions live
+    // alongside that constant in `mappings.test.ts`.
+    expect(mappings).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS);
   });
 });
