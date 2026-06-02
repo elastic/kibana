@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
@@ -56,7 +56,10 @@ import {
 } from '../../components/app/service_map/service_map_filter_combobox_options';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
-import { computeServiceMapFilterOptionCounts } from '../../components/app/service_map/service_map_filter_option_counts';
+import {
+  computeServiceMapFilterOptionCounts,
+  type ServiceMapFilterOptionCounts,
+} from '../../components/app/service_map/service_map_filter_option_counts';
 
 interface KueryInputProps {
   kuery: string;
@@ -183,52 +186,50 @@ function getTimeRange(timeRange?: Partial<TimeRange>) {
 }
 
 /**
- * Lazy data fetch for the flyout's filter `(count)` badges. Returns `undefined` until
- * `enabled` flips true (typically on first combobox focus); after that, fetches the
- * service map + badges for the current scope and computes per-filter counts.
- *
- * Hooks must run unconditionally, so we always call them but pass empty strings for
- * `start`/`end` while disabled — `useFetcher` keys on those, so the inner request is
- * skipped (useApmPluginContext returns no data when not in APM provider; useServiceMap's
- * license/config guard handles the rest).
+ * Hidden helper component that drives the lazy service-map + badges fetch for the
+ * flyout's filter `(count)` badges. Mounted on first filter-combobox focus so the
+ * fetch only fires when the user actually opens a filter dropdown; unmounting it
+ * cancels the inner subscriptions. `useServiceMap` itself has no `enabled` flag,
+ * so the cleanest skip is to not mount the hook chain at all.
  */
-function useFlyoutFilterOptionCounts({
-  enabled,
+function FlyoutFilterOptionCountsResolver({
   environment,
   kuery,
   start,
   end,
   serviceName,
+  onResolve,
 }: {
-  enabled: boolean;
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceName: string | undefined;
+  onResolve: (counts: ServiceMapFilterOptionCounts) => void;
 }) {
-  // Empty start/end short-circuits the fetcher (the inner API would 400 anyway).
-  const fetchStart = enabled ? start : '';
-  const fetchEnd = enabled ? end : '';
   const { data: serviceMapData, status: serviceMapStatus } = useServiceMap({
     environment,
     kuery,
-    start: fetchStart,
-    end: fetchEnd,
+    start,
+    end,
     serviceName: serviceName || undefined,
   });
   const { nodes: nodesWithBadges } = useServiceMapBadges({
     environment,
-    start: fetchStart,
-    end: fetchEnd,
+    start,
+    end,
     kuery,
     nodes: serviceMapData.nodes,
     nodesStatus: serviceMapStatus,
   });
-  return useMemo(() => {
-    if (!enabled) return undefined;
-    return computeServiceMapFilterOptionCounts(nodesWithBadges, serviceMapData.edges);
-  }, [enabled, nodesWithBadges, serviceMapData.edges]);
+  const counts = useMemo(
+    () => computeServiceMapFilterOptionCounts(nodesWithBadges, serviceMapData.edges),
+    [nodesWithBadges, serviceMapData.edges]
+  );
+  useEffect(() => {
+    onResolve(counts);
+  }, [counts, onResolve]);
+  return null;
 }
 
 export function ServiceMapEditorFlyout({
@@ -316,10 +317,10 @@ export function ServiceMapEditorFlyout({
     [environmentTerms]
   );
 
-  // Filter (count) badges + disable-zero-count UX requires a live service-map fetch scoped
-  // to the user's current env / time / KQL / service-name. To avoid kicking that fetch on
-  // every flyout open (the user may never touch the filter rows), defer until any filter
-  // combobox is focused — see `onFilterFocus` below.
+  // Filter (count) badges + disable-zero-count UX requires a live service-map fetch
+  // scoped to the user's current env / time / KQL / service-name. To avoid kicking that
+  // fetch on every flyout open (the user may never touch the filter rows), only mount
+  // the resolver after the user focuses any filter combobox — see `onFilterFocus`.
   const [filterCountsEnabled, setFilterCountsEnabled] = useState<boolean>(
     // Already-selected filters are a strong signal the user cares about counts; pre-warm
     // the fetch so the badges are ready by the time they open a dropdown to change one.
@@ -330,14 +331,9 @@ export function ServiceMapEditorFlyout({
       anomalySeverityFilter.length > 0
   );
   const onFilterFocus = useCallback(() => setFilterCountsEnabled(true), []);
-  const filterOptionCounts = useFlyoutFilterOptionCounts({
-    enabled: filterCountsEnabled,
-    environment,
-    kuery,
-    start,
-    end,
-    serviceName,
-  });
+  const [filterOptionCounts, setFilterOptionCounts] = useState<
+    ServiceMapFilterOptionCounts | undefined
+  >(undefined);
   const connectionFilterComboBoxOptions = useMemo(
     () =>
       filterOptionCounts
@@ -682,6 +678,16 @@ export function ServiceMapEditorFlyout({
             />
           </EuiFormRow>
         </EuiForm>
+        {filterCountsEnabled && (
+          <FlyoutFilterOptionCountsResolver
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            serviceName={serviceName}
+            onResolve={setFilterOptionCounts}
+          />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
