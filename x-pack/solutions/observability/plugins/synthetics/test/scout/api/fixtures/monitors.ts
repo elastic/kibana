@@ -149,10 +149,11 @@ export async function saveMonitorInternal(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   monitor: Record<string, unknown>,
-  opts: { spaceId?: string; statusCode?: number } = {}
+  opts: { spaceId?: string; savedObjectType?: string; statusCode?: number } = {}
 ) {
-  const { spaceId, statusCode = 200 } = opts;
-  const res = await apiClient.post(`${monitorsPath(spaceId)}?internal=true`, {
+  const { spaceId, savedObjectType, statusCode = 200 } = opts;
+  const query = `?internal=true${savedObjectType ? `&savedObjectType=${savedObjectType}` : ''}`;
+  const res = await apiClient.post(`${monitorsPath(spaceId)}${query}`, {
     headers: withPublicApiVersion(headers),
     body: monitor,
     responseType: 'json',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
 
@@ -37,7 +38,7 @@ export interface SyntheticsPrivateLocationApi {
     testFleetPolicyIds: string[],
     spaceId?: string | string[]
   ): Promise<ScoutPrivateLocation[]>;
-  addTestPrivateLocation(spaceId?: string): Promise<ScoutPrivateLocation>;
+  addTestPrivateLocation(spaceId?: string | string[]): Promise<ScoutPrivateLocation>;
   getSharedPrivateLocation(): Promise<ScoutPrivateLocation>;
   resetSharedPrivateLocation(): void;
   cleanUpPrivateLocationsAndPolicies(): Promise<void>;
@@ -138,10 +139,11 @@ export function createSyntheticsPrivateLocationApi(
   };
 
   const addTestPrivateLocation = async (
-    spaceId: string = 'default'
+    spaceId: string | string[] = 'default'
   ): Promise<ScoutPrivateLocation> => {
     await installSyntheticsPackage();
-    const { id: policyId } = await addFleetPolicy(`Scout test policy ${Date.now()}`, [spaceId]);
+    const spaceIds = Array.isArray(spaceId) ? spaceId : [spaceId];
+    const { id: policyId } = await addFleetPolicy(`Scout test policy ${uuidv4()}`, spaceIds);
     const [location] = await setTestLocations([policyId], spaceId);
     return location;
   };
