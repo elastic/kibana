@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRound, UserIdAndName } from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isHumanNoteRound } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
@@ -29,6 +29,7 @@ interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
   rawRound: ConversationRound;
+  author?: UserIdAndName;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
   allRounds: ConversationRound[];
@@ -71,6 +72,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
+  author,
   conversationAttachments,
   conversationId,
   allRounds,
@@ -154,6 +156,29 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
+
+  if (isHumanNoteRound(rawRound)) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        aria-label={labels.container}
+        css={roundContainerStyles}
+      >
+        <EuiFlexItem grow={false}>
+          <RoundInput
+            input={input.message}
+            author={author}
+            attachmentRefs={input.attachment_refs}
+            conversationAttachments={conversationAttachments}
+            fallbackAttachments={input.attachments}
+          />
+        </EuiFlexItem>
+        {isCurrentRound && <EuiSpacer size="l" />}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -165,6 +190,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <RoundInput
           input={input.message}
+          author={author}
           attachmentRefs={input.attachment_refs}
           conversationAttachments={conversationAttachments}
           fallbackAttachments={input.attachments}

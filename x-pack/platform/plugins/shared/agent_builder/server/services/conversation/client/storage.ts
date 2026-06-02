@@ -10,7 +10,12 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { ConversationInternalState, TimelineEvent } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationChatMode,
+  TemplateSnapshot,
+} from '@kbn/agent-builder-common/chat/conversation_metadata';
+import type { ConversationMode } from '@kbn/agent-builder-common/chat/collaboration';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -30,7 +35,12 @@ const storageSettings = {
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       template_id: types.keyword({}),
+      template_snapshot: types.object({ dynamic: false, properties: {} }),
+      /** Denormalized from template_snapshot for list queries (collaborative ⇒ team-visible). */
+      chat_mode: types.keyword({}),
       custom_fields: types.object({ dynamic: true, properties: {} }),
+      events: types.object({ dynamic: true, properties: {} }),
+      conversation_mode: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -47,7 +57,12 @@ export interface ConversationProperties {
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
   template_id?: string;
+  template_snapshot?: TemplateSnapshot;
+  /** Denormalized from template_snapshot.chat_mode for list queries. */
+  chat_mode?: ConversationChatMode;
   custom_fields?: Record<string, unknown>;
+  events?: TimelineEvent[];
+  conversation_mode?: ConversationMode;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

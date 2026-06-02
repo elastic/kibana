@@ -12,7 +12,9 @@ import type {
   DeleteConversationResponse,
   RenameConversationResponse,
   PatchConversationResponse,
+  AppendConversationMessageResponse,
 } from '../../../common/http_api/conversations';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
@@ -67,6 +69,26 @@ export class ConversationsService {
       `${internalApiPath}/conversations/${conversationId}`,
       {
         body: JSON.stringify(update),
+      }
+    );
+  }
+
+  async appendMessage({
+    conversationId,
+    message,
+    attachmentRefs,
+  }: {
+    conversationId: string;
+    message: string;
+    attachmentRefs?: AttachmentVersionRef[];
+  }) {
+    return await this.http.post<AppendConversationMessageResponse>(
+      `${publicApiPath}/conversations/${conversationId}/messages`,
+      {
+        body: JSON.stringify({
+          message,
+          ...(attachmentRefs !== undefined && { attachment_refs: attachmentRefs }),
+        }),
       }
     );
   }

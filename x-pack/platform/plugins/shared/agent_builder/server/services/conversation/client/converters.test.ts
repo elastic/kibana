@@ -6,7 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, TimelineEventType, isUserMessageEvent } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
@@ -565,6 +565,49 @@ describe('conversation model converters', () => {
       expect(serialized.template_id).toBe('incident-triage-v2');
       expect(serialized.custom_fields).toEqual({ severity: 'high', status: 'open' });
     });
+
+    it('round-trips group events with per-message authors', () => {
+      const conversation: Conversation = {
+        ...conversationBase(),
+        conversation_mode: 'group',
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { id: 'user-a', username: 'analyst_a' },
+            message: 'seeing lateral movement',
+          },
+          {
+            id: 'msg-2',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { id: 'user-b', username: 'analyst_b' },
+            message: 'checking hosts',
+          },
+        ],
+        rounds: [],
+      };
+
+      const serialized = toEs(conversation, 'space');
+      const restored = fromEs({
+        _id: 'conv-1',
+        _source: serialized,
+      } as ConversationDocument);
+
+      expect(restored.conversation_mode).toBe('group');
+      expect(restored.events).toHaveLength(2);
+      const first = restored.events![0];
+      const second = restored.events![1];
+      expect(isUserMessageEvent(first)).toBe(true);
+      expect(isUserMessageEvent(second)).toBe(true);
+      if (isUserMessageEvent(first)) {
+        expect(first.user.username).toBe('analyst_a');
+      }
+      if (isUserMessageEvent(second)) {
+        expect(second.user.username).toBe('analyst_b');
+      }
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -621,6 +664,14 @@ describe('conversation model converters', () => {
 
       expect(serialized.template_id).toBe('incident-triage-v2');
       expect(serialized.custom_fields).toEqual({ severity: 'medium' });
+      expect(serialized.chat_mode).toBe('collaborative');
+      expect(serialized.template_snapshot).toEqual({
+        template_id: 'incident-triage-v2',
+        profile: 'incident',
+        captured_at: creationDate,
+        chat_mode: 'collaborative',
+        write_privileges: ['write_incident_investigation'],
+      });
     });
   });
 });

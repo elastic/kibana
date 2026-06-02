@@ -217,7 +217,19 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       } else {
         throw new Error('Message is required');
       }
-      setIsResponseLoading(true);
+
+      const isCollaborativeConversation =
+        conversation?.template_snapshot?.chat_mode === 'collaborative' ||
+        conversation?.conversation_mode === 'group';
+      const invokesAgent =
+        isRegenerate ||
+        !message ||
+        !isCollaborativeConversation ||
+        message.includes('@agent');
+
+      if (invokesAgent) {
+        setIsResponseLoading(true);
+      }
     },
     onSettled: () => {
       conversationActions.invalidateConversation();

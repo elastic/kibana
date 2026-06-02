@@ -20,6 +20,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolResultType,
+  timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -36,6 +37,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
+import { resolveTemplateSnapshotOnCreate } from './conversation_access';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -45,14 +47,40 @@ export type Document = Pick<
 const convertMetadataFromEs = (source: ConversationProperties) => {
   return {
     ...(source.template_id !== undefined && { template_id: source.template_id }),
+    ...(source.template_snapshot !== undefined && {
+      template_snapshot: source.template_snapshot,
+    }),
     ...(source.custom_fields !== undefined && { custom_fields: source.custom_fields }),
   };
 };
 
 const convertMetadataToEs = (conversation: Conversation): Partial<ConversationProperties> => {
+  const chatMode = conversation.template_snapshot?.chat_mode;
+
   return {
     ...(conversation.template_id !== undefined && { template_id: conversation.template_id }),
+    ...(conversation.template_snapshot !== undefined && {
+      template_snapshot: conversation.template_snapshot,
+    }),
+    ...(chatMode !== undefined && { chat_mode: chatMode }),
     ...(conversation.custom_fields !== undefined && { custom_fields: conversation.custom_fields }),
+  };
+};
+
+const convertCollaborationFromEs = (source: ConversationProperties) => {
+  return {
+    ...(source.conversation_mode !== undefined && { conversation_mode: source.conversation_mode }),
+    ...(source.events !== undefined && source.events.length > 0 && { events: source.events }),
+  };
+};
+
+const convertCollaborationToEs = (conversation: Conversation): Partial<ConversationProperties> => {
+  return {
+    ...(conversation.conversation_mode !== undefined && {
+      conversation_mode: conversation.conversation_mode,
+    }),
+    ...(conversation.events !== undefined &&
+      conversation.events.length > 0 && { events: conversation.events }),
   };
 };
 
@@ -72,6 +100,7 @@ const convertBaseFromEs = (document: Document) => {
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     ...convertMetadataFromEs(document._source),
+    ...convertCollaborationFromEs(document._source),
   };
 };
 
@@ -170,12 +199,45 @@ function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
+  const collaboration = convertCollaborationFromEs(document._source!);
+
+  // Group / events-first: derive rounds for legacy execution paths
+  if (collaboration.events && collaboration.events.length > 0) {
+    const deserializedRounds = deserializeStepResults(
+      timelineEventsToRounds(collaboration.events)
+    );
+    return buildConversationFromRounds({
+      base,
+      deserializedRounds,
+      source: document._source!,
+      collaboration,
+    });
+  }
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
   const deserializedRounds = deserializeStepResults(rawRounds);
 
-  const existingAttachments = document._source!.attachments;
+  return buildConversationFromRounds({
+    base,
+    deserializedRounds,
+    source: document._source!,
+    collaboration,
+  });
+};
+
+const buildConversationFromRounds = ({
+  base,
+  deserializedRounds,
+  source,
+  collaboration,
+}: {
+  base: ReturnType<typeof convertBaseFromEs>;
+  deserializedRounds: ConversationRound[];
+  source: ConversationProperties;
+  collaboration: ReturnType<typeof convertCollaborationFromEs>;
+}) => {
+  const existingAttachments = source.attachments;
   const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
   const attachmentsForRefs =
     existingAttachments && existingAttachments.length > 0
@@ -194,25 +256,28 @@ export const fromEs = (document: Document): Conversation => {
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
+      ...collaboration,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
-      ...(document._source!.state && { state: document._source!.state }),
+      ...(source.state && { state: source.state }),
     };
   }
 
   if (hasLegacyRoundAttachments) {
     return {
       ...base,
+      ...collaboration,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-      ...(document._source!.state && { state: document._source!.state }),
+      ...(source.state && { state: source.state }),
     };
   }
 
   return {
     ...base,
+    ...collaboration,
     rounds: roundsWithRefs,
-    ...(document._source!.state && { state: document._source!.state }),
+    ...(source.state && { state: source.state }),
   };
 };
 
@@ -235,6 +300,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     ...convertMetadataToEs(conversation),
+    ...convertCollaborationToEs(conversation),
   };
 };
 
@@ -270,6 +336,15 @@ export const createRequestToEs = ({
   creationDate: Date;
   space: string;
 }): ConversationProperties => {
+  const templateSnapshot = resolveTemplateSnapshotOnCreate({
+    conversation,
+    creationDate,
+  });
+  const conversationWithSnapshot = {
+    ...conversation,
+    ...(templateSnapshot !== undefined && { template_snapshot: templateSnapshot }),
+  };
+
   return {
     agent_id: conversation.agent_id,
     user_id: currentUser.id,
@@ -281,6 +356,7 @@ export const createRequestToEs = ({
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
-    ...convertMetadataToEs(conversation),
+    ...convertMetadataToEs(conversationWithSnapshot as Conversation),
+    ...convertCollaborationToEs(conversationWithSnapshot as Conversation),
   };
 };

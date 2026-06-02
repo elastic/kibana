@@ -18,6 +18,7 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
 } from './types';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
@@ -29,12 +30,28 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { createUserMessageEvent } from './append_message';
+import {
+  canDeleteConversation,
+  hasReadAccess,
+  hasWriteAccess,
+} from './conversation_access';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
+  appendMessage({
+    conversationId,
+    message,
+    attachment_refs,
+  }: {
+    conversationId: string;
+    message: string;
+    attachment_refs?: AttachmentVersionRef[];
+  }): Promise<Conversation>;
+  getCurrentUser(): UserIdAndName;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
 }
@@ -76,6 +93,11 @@ class ConversationClientImpl implements ConversationClient {
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
 
+    const ownerShouldClauses = [
+      { term: { user_name: this.user.username } },
+      ...(this.user.id ? [{ term: { user_id: this.user.id } }] : []),
+    ];
+
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
@@ -87,16 +109,21 @@ class ConversationClientImpl implements ConversationClient {
         'created_at',
         'updated_at',
         'template_id',
+        'template_snapshot',
+        'chat_mode',
       ],
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space)],
-          must: [
-            {
-              term: { user_name: this.user.username },
-            },
+          filter: [
+            createSpaceDslFilter(this.space),
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
+          should: [
+            ...ownerShouldClauses,
+            { term: { chat_mode: 'collaborative' } },
+            { term: { conversation_mode: 'group' } },
+          ],
+          minimum_should_match: 1,
         },
       },
     });
@@ -110,7 +137,7 @@ class ConversationClientImpl implements ConversationClient {
       throw createConversationNotFoundError({ conversationId });
     }
 
-    if (!hasAccess({ conversation: document, user: this.user })) {
+    if (!hasReadAccess({ source: document._source!, user: this.user })) {
       throw createConversationNotFoundError({ conversationId });
     }
 
@@ -122,7 +149,7 @@ class ConversationClientImpl implements ConversationClient {
     if (!document) {
       return false;
     }
-    return hasAccess({ conversation: document, user: this.user });
+    return hasReadAccess({ source: document._source!, user: this.user });
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -144,6 +171,42 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(id);
   }
 
+  getCurrentUser(): UserIdAndName {
+    return this.user;
+  }
+
+  async appendMessage({
+    conversationId,
+    message,
+    attachment_refs,
+  }: {
+    conversationId: string;
+    message: string;
+    attachment_refs?: AttachmentVersionRef[];
+  }): Promise<Conversation> {
+    const document = await this._get(conversationId);
+    if (!document?._source) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    if (!hasWriteAccess({ source: document._source, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    const conversation = fromEs(document);
+    const userEvent = createUserMessageEvent({
+      message,
+      user: this.user,
+      attachment_refs,
+    });
+    const events = [...(conversation.events ?? []), userEvent];
+
+    return this.update({
+      id: conversationId,
+      events,
+    });
+  }
+
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
     const { id: conversationId } = conversationUpdate;
     const now = new Date();
@@ -152,7 +215,7 @@ class ConversationClientImpl implements ConversationClient {
       throw createConversationNotFoundError({ conversationId });
     }
 
-    if (!hasAccess({ conversation: document, user: this.user })) {
+    if (!hasWriteAccess({ source: document._source!, user: this.user })) {
       throw createConversationNotFoundError({ conversationId });
     }
 
@@ -182,7 +245,7 @@ class ConversationClientImpl implements ConversationClient {
       throw createConversationNotFoundError({ conversationId });
     }
 
-    if (!hasAccess({ conversation: document, user: this.user })) {
+    if (!canDeleteConversation({ source: document._source!, user: this.user })) {
       throw createConversationNotFoundError({ conversationId });
     }
 
@@ -208,16 +271,3 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 }
-
-const hasAccess = ({
-  conversation,
-  user,
-}: {
-  conversation: Pick<Document, '_source'>;
-  user: UserIdAndName;
-}) => {
-  if (user.id && conversation._source!.user_id === user.id) {
-    return true;
-  }
-  return conversation._source!.user_name === user.username;
-};

@@ -34,6 +34,8 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
       | 'state'
       | 'template_id'
       | 'custom_fields'
+      | 'events'
+      | 'conversation_mode'
     >
   >;
 

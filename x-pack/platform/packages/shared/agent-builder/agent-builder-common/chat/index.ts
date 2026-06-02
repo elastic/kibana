@@ -34,8 +34,11 @@ export {
   isReasoningStep,
   isCompactionStep,
 } from './conversation';
+export type { ConversationMode, ConversationCollaborationFields } from './collaboration';
 export type {
   ConversationTemplateProfile,
+  ConversationChatMode,
+  ConversationTemplateDefinition,
   TemplateSnapshot,
   ConversationMetadataFields,
   ConversationMetadataUpdate,
@@ -112,7 +115,11 @@ export {
 export {
   roundsToTimelineEvents,
   timelineEventsToRounds,
+  timelineEventsToRoundEntries,
+  isHumanNoteRound,
+  type ConversationRoundEntry,
   conversationToTimelineConversation,
+  resolveConversationEvents,
   timelineConversationToConversation,
   agentExecutionEventToRound,
 } from './timeline_converters';

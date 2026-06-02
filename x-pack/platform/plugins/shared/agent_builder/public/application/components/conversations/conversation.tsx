@@ -33,6 +33,7 @@ import {
   conversationElementPaddingStyles,
   conversationElementWidthStyles,
   fullWidthAndHeightStyles,
+  templateDetailElementWidthStyles,
 } from './conversation.styles';
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
@@ -48,8 +49,18 @@ import { useConversationContext } from '../../context/conversation/conversation_
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
 
-export const Conversation: React.FC<{}> = () => {
+export type ConversationLayoutVariant = 'default' | 'detail';
+
+interface ConversationProps {
+  layoutVariant?: ConversationLayoutVariant;
+}
+
+export const Conversation: React.FC<ConversationProps> = ({ layoutVariant = 'default' }) => {
   const { euiTheme } = useEuiTheme();
+  const isDetailLayout = layoutVariant === 'detail';
+  const widthStyles = isDetailLayout
+    ? templateDetailElementWidthStyles
+    : conversationElementWidthStyles;
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
@@ -161,26 +172,27 @@ export const Conversation: React.FC<{}> = () => {
   return (
     <CanvasProvider>
       <RoundsScreenReaderStatus lastRound={lastRound} />
-      <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
+      <EuiFlexGroup
+        direction="column"
+        alignItems={isDetailLayout ? 'stretch' : 'center'}
+        css={containerStyles}
+        gutterSize="s"
+      >
         <EuiFlexItem grow={true} css={scrollWrapperStyles}>
           <EuiFlexGroup
             direction="column"
-            alignItems="center"
+            alignItems={isDetailLayout ? 'stretch' : 'center'}
             ref={scrollContainerRef}
             css={scrollableStyles}
           >
-            <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
+            <EuiFlexItem css={[widthStyles, conversationElementPaddingStyles]}>
               <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
         </EuiFlexItem>
         <EuiFlexItem
-          css={[
-            conversationElementWidthStyles,
-            conversationElementPaddingStyles,
-            inputPaddingStyles,
-          ]}
+          css={[widthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
           grow={false}
         >
           {!dismissStaleAttachments && (

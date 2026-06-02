@@ -10,17 +10,17 @@ import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Conversation } from './conversation';
-import { ConversationHeader } from './conversation_header/conversation_header';
+import { ConversationDetailShell } from './detail/conversation_detail_shell';
+import { shouldShowTemplateDetailShell } from './detail/template_conversation_utils';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import {
   SendMessageProvider,
   useSendMessage,
 } from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+import { ConversationHeader } from './conversation_header/conversation_header';
+import { useConversation, useConversationId, useHasPersistedConversation } from '../../hooks/use_conversation';
 
-// Clears error state on every navigation. Rendered inside SendMessageProvider (for context access)
-// and inside the Router (for useLocation access), so it's intentionally placed in the routed view
-// only — the embeddable/sidebar context has no navigation and doesn't need this behavior.
 const LocationErrorClearer: React.FC<{}> = () => {
   const { key: locationKey } = useLocation();
   const { removeError } = useSendMessage();
@@ -30,8 +30,16 @@ const LocationErrorClearer: React.FC<{}> = () => {
   return null;
 };
 
-export const AgentBuilderConversationsView: React.FC<{}> = () => {
+const ConversationPageContent: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const conversationId = useConversationId();
+  const hasPersistedConversation = useHasPersistedConversation();
+  const { conversation, isLoading, isFetched } = useConversation();
+
+  const showTemplateDetailShell =
+    hasPersistedConversation &&
+    Boolean(conversationId) &&
+    (isLoading || shouldShowTemplateDetailShell(conversation));
 
   const containerStyles = css`
     display: flex;
@@ -58,18 +66,43 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
   `;
 
+  const templateDetailContentStyles = css`
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  `;
+
+  if (showTemplateDetailShell) {
+    return (
+      <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+        <div css={templateDetailContentStyles}>
+          {isFetched || conversation ? (
+            <ConversationDetailShell />
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+      <div css={headerStyles}>
+        <ConversationHeader />
+      </div>
+      <div css={contentStyles}>
+        <Conversation />
+      </div>
+    </div>
+  );
+};
+
+export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
         <LocationErrorClearer />
-        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-          <div css={headerStyles}>
-            <ConversationHeader />
-          </div>
-          <div css={contentStyles}>
-            <Conversation />
-          </div>
-        </div>
+        <ConversationPageContent />
       </SendMessageProvider>
     </RoutedConversationsProvider>
   );

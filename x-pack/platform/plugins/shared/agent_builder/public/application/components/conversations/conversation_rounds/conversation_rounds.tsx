@@ -8,7 +8,7 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
+import { useConversation, useConversationRoundEntries } from '../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAttachmentLifecycle } from '../../../hooks/use_attachment_lifecycle';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -24,7 +24,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   scrollContainerHeight,
 }) => {
   const { conversation } = useConversation();
-  const conversationRounds = useConversationRounds();
+  const conversationRoundEntries = useConversationRoundEntries();
   const { attachmentsService } = useAgentBuilderServices();
   const { conversationActions } = useConversationContext();
 
@@ -44,8 +44,8 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
         defaultMessage: 'Conversation messages',
       })}
     >
-      {conversationRounds.map((round, index) => {
-        const isCurrentRound = index === conversationRounds.length - 1;
+      {conversationRoundEntries.map(({ round, author }, index) => {
+        const isCurrentRound = index === conversationRoundEntries.length - 1;
 
         return (
           <RoundLayout
@@ -53,9 +53,10 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
             scrollContainerHeight={scrollContainerHeight}
             isCurrentRound={isCurrentRound}
             rawRound={round}
+            author={author}
             conversationId={conversation?.id}
             conversationAttachments={conversation?.attachments}
-            allRounds={conversationRounds}
+            allRounds={conversationRoundEntries.map(({ round: r }) => r)}
             roundIndex={index}
           />
         );

@@ -9,6 +9,10 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  timelineEventsToRoundEntries,
+  type ConversationRoundEntry,
+} from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
@@ -125,23 +129,29 @@ export const useConversationTitle = () => {
 };
 
 export const useConversationRounds = () => {
+  return useConversationRoundEntries().map(({ round }) => round);
+};
+
+export const useConversationRoundEntries = (): ConversationRoundEntry[] => {
   const { conversation } = useConversation();
   const { pendingMessage, error, errorSteps } = useSendMessage();
 
-  const conversationRounds = useMemo(() => {
-    const rounds = conversation?.rounds ?? [];
+  return useMemo(() => {
+    let entries: ConversationRoundEntry[] =
+      conversation?.events && conversation.events.length > 0
+        ? timelineEventsToRoundEntries(conversation.events)
+        : (conversation?.rounds ?? []).map((round) => ({ round }));
+
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
         roundId: '',
         steps: errorSteps,
       });
-      return [...rounds, pendingRound];
+      entries = [...entries, { round: pendingRound }];
     }
-    return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
-
-  return conversationRounds;
+    return entries;
+  }, [conversation?.events, conversation?.rounds, error, errorSteps, pendingMessage]);
 };
 
 // Returns a flattened list of all steps across all rounds.

@@ -23,6 +23,7 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import {
   useAgentId,
+  useConversation,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
@@ -120,6 +121,12 @@ const enabledPlaceholder = i18n.translate(
     defaultMessage: 'Ask anything',
   }
 );
+const collaborativePlaceholder = i18n.translate(
+  'xpack.agentBuilder.conversationInput.textArea.collaborativePlaceholder',
+  {
+    defaultMessage: 'Add a note for the team, or type @agent to invoke the agent',
+  }
+);
 
 const getMessageEditorAriaLabel = ({
   isNewConversation,
@@ -149,6 +156,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
+  const { conversation } = useConversation();
+
+  const isCollaborativeConversation =
+    conversation?.template_snapshot?.chat_mode === 'collaborative' ||
+    conversation?.conversation_mode === 'group';
 
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
@@ -167,7 +179,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isSubmitDisabled =
     messageEditorController.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted
+    ? disabledPlaceholder(agentId)
+    : isCollaborativeConversation
+      ? collaborativePlaceholder
+      : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;

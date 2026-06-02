@@ -22,6 +22,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -31,10 +32,16 @@ const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
     defaultMessage: 'User input',
   }),
+  author: (name: string) =>
+    i18n.translate('xpack.agentBuilder.round.authorLabel', {
+      defaultMessage: '{name}',
+      values: { name },
+    }),
 };
 
 interface RoundInputProps {
   input: string;
+  author?: UserIdAndName;
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
@@ -42,6 +49,7 @@ interface RoundInputProps {
 
 export const RoundInput = ({
   input,
+  author,
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
@@ -74,6 +82,13 @@ export const RoundInput = ({
         aria-label={labels.userMessage}
       >
         <EuiFlexGroup direction="column" gutterSize="s">
+          {author && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {labels.author(author.username)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiText size="m">
               <CommandBadgeText text={input} />

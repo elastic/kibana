@@ -33,8 +33,12 @@ import {
   createConversation$,
   resolveServices,
   convertErrors,
+  appendHumanMessage$,
+  updateCollaborativeConversation$,
+  shouldInvokeAgentForMessage,
   type ConversationWithOperation,
 } from './utils';
+import { isCollaborativeConversation } from '../conversation/client/conversation_access';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
@@ -117,6 +121,34 @@ export const handleAgentExecution = async ({
     storeConversation && conversation.operation === 'CREATE'
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
+
+  // Collaborative investigation: append-only when message does not invoke @agent
+  if (
+    storeConversation &&
+    conversation.operation === 'UPDATE' &&
+    isCollaborativeConversation(conversation) &&
+    !shouldInvokeAgentForMessage(nextInput.message ?? '')
+  ) {
+    const appendOnly$ = appendHumanMessage$({
+      conversationClient,
+      conversationId: conversation.id,
+      message: nextInput.message ?? '',
+      attachment_refs: nextInput.attachment_refs,
+    });
+
+    return merge(conversationIdEvent$, appendOnly$).pipe(
+      handleCancellation(abortSignal),
+      convertErrors({
+        agentId,
+        logger,
+        analyticsService,
+        trackingService,
+        modelProvider: getConnectorProvider(chatModel.getConnector()),
+        conversationId: conversation.id,
+        executionId: execution.executionId,
+      })
+    );
+  }
 
   // Execute agent
   const agentEvents$ = executeAgent$({
@@ -328,6 +360,17 @@ const buildPersistenceEvents = ({
       conversationId: conversationId || conversation.id,
       title$,
       roundCompletedEvents$,
+    });
+  }
+
+  if (isCollaborativeConversation(conversation)) {
+    return updateCollaborativeConversation$({
+      conversation,
+      conversationClient,
+      title$,
+      roundCompletedEvents$,
+      currentUser: conversationClient.getCurrentUser(),
+      action,
     });
   }
 

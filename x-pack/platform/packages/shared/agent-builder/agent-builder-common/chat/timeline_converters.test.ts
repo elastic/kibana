@@ -10,7 +10,10 @@ import { ConversationRoundStatus, TimelineEventType } from '.';
 import {
   roundsToTimelineEvents,
   timelineEventsToRounds,
+  timelineEventsToRoundEntries,
+  isHumanNoteRound,
   conversationToTimelineConversation,
+  resolveConversationEvents,
   timelineConversationToConversation,
   agentExecutionEventToRound,
 } from './timeline_converters';
@@ -136,6 +139,43 @@ describe('timeline_converters', () => {
     });
   });
 
+  describe('timelineEventsToRoundEntries', () => {
+    it('creates orphan human-note entry when no agent execution follows', () => {
+      const analystA = { id: 'user-a', username: 'analyst_a' };
+      const events = [
+        {
+          id: 'msg-1',
+          timestamp: '2024-01-01T00:00:00.000Z',
+          type: TimelineEventType.user_message,
+          user: analystA,
+          message: 'triage note',
+        },
+      ] as const;
+
+      const entries = timelineEventsToRoundEntries([...events]);
+
+      expect(entries).toHaveLength(1);
+      expect(entries[0].author).toEqual(analystA);
+      expect(isHumanNoteRound(entries[0].round)).toBe(true);
+      expect(entries[0].round.input.message).toBe('triage note');
+    });
+
+    it('pairs user message author with agent execution round', () => {
+      const analystB = { id: 'user-b', username: 'analyst_b' };
+      const events = roundsToTimelineEvents(
+        [createTestRound({ input: { message: '@agent summarize' } })],
+        analystB,
+        testAgentId
+      );
+
+      const entries = timelineEventsToRoundEntries(events);
+
+      expect(entries).toHaveLength(1);
+      expect(entries[0].author).toEqual(analystB);
+      expect(isHumanNoteRound(entries[0].round)).toBe(false);
+    });
+  });
+
   describe('conversationToTimelineConversation', () => {
     it('converts a conversation to TimelineConversation', () => {
       const conversation: Conversation = {
@@ -151,9 +191,66 @@ describe('timeline_converters', () => {
       const exec = conversationToTimelineConversation(conversation);
 
       expect(exec.id).toBe('conv-1');
-      expect(exec.timeline).toHaveLength(2);
-      expect(exec.timeline[0].type).toBe('user_message');
-      expect(exec.timeline[1].type).toBe('agent_execution');
+      expect(exec.events).toHaveLength(2);
+      expect(exec.events[0].type).toBe('user_message');
+      expect(exec.events[1].type).toBe('agent_execution');
+    });
+
+    it('prefers persisted events over rounds when present', () => {
+      const analystB = { id: 'user-b', username: 'analyst_b' };
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: testAgentId,
+        user: testUser,
+        title: 'test',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+        rounds: [createTestRound()],
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: '2024-01-01T00:00:00.000Z',
+            type: TimelineEventType.user_message,
+            user: analystB,
+            message: 'from persisted events',
+          },
+        ],
+      };
+
+      const exec = conversationToTimelineConversation(conversation);
+
+      expect(exec.events).toHaveLength(1);
+      expect((exec.events[0] as UserMessageEvent).message).toBe('from persisted events');
+      expect((exec.events[0] as UserMessageEvent).user.username).toBe('analyst_b');
+    });
+  });
+
+  describe('resolveConversationEvents', () => {
+    it('prefers persisted events on a rounds-based Conversation', () => {
+      const analystB = { id: 'user-b', username: 'analyst_b' };
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: testAgentId,
+        user: testUser,
+        title: 'test',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+        rounds: [createTestRound()],
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: '2024-01-01T00:00:00.000Z',
+            type: TimelineEventType.user_message,
+            user: analystB,
+            message: 'from persisted events',
+          },
+        ],
+      };
+
+      const events = resolveConversationEvents(conversation);
+
+      expect(events).toHaveLength(1);
+      expect((events[0] as UserMessageEvent).user.username).toBe('analyst_b');
     });
   });
 

@@ -19,12 +19,39 @@ export type ConversationTemplateProfile =
 /**
  * Immutable snapshot of the {@link ConversationTemplate} at conversation create time.
  * **B2:** persisted on the conversation when create-from-template ships; not in B0.
+ *
+ * @see docs/agent_builder_option_b_access_model.md
  */
 export interface TemplateSnapshot {
   template_id: string;
   /** e.g. incident, hunt, observability — see {@link ConversationTemplateProfile}. */
   profile?: ConversationTemplateProfile | string;
   captured_at: string;
+  /**
+   * Chat behavior at create time. **`collaborative`** ⇒ team-visible in the Kibana space
+   * (list/get for any privileged user in that space) plus multi-user append / `@agent` gate.
+   */
+  chat_mode?: ConversationChatMode;
+  /** Privilege names required to append — enforced at request time, copied for audit/UI. */
+  write_privileges?: string[];
+}
+
+/** Chat behavior for investigation templates (see access model doc). */
+export type ConversationChatMode = 'single' | 'collaborative';
+
+/**
+ * Template definition (B2). Privilege fields gate create/list and conversation access scope.
+ *
+ * @see docs/agent_builder_option_b_access_model.md
+ */
+export interface ConversationTemplateDefinition {
+  id: string;
+  profile: ConversationTemplateProfile;
+  /** Privileges required to see/use this template in create flows. */
+  required_privileges?: string[];
+  write_privileges?: string[];
+  /** `collaborative` investigations are team-visible in the space. */
+  chat_mode: ConversationChatMode;
 }
 
 /**
@@ -37,13 +64,15 @@ export interface TemplateSnapshot {
  * Pinned evidence and cross-thread links use VersionedAttachment extensions
  * (`pinned`, new attachment types) — not a separate metadata array.
  *
- * Chat activity uses #259692 `TimelineEvent[]` / `TimelineConversation.timeline`
+ * Chat activity uses #259692 `TimelineEvent[]` on {@link Conversation.events}.
  * — not fields on this interface.
  *
  * @see docs/agent_builder_option_b_259692_integration.md
  */
 export interface ConversationMetadataFields {
   template_id?: string;
+  /** Immutable template config at create time (B2 / B5.2). */
+  template_snapshot?: TemplateSnapshot;
   custom_fields?: Record<string, unknown>;
 }
 

@@ -12,7 +12,9 @@ import { getHandlerWrapper } from './wrap_handler';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
+  AppendConversationMessageResponse,
 } from '../../common/http_api/conversations';
+import { isUserMessageEvent } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 
@@ -119,6 +121,82 @@ export function registerConversationRoutes({
 
         return response.ok({
           body: conversation,
+        });
+      })
+    );
+
+  // Append human message without invoking the agent (collaborative investigations)
+  router.versioned
+    .post({
+      path: `${publicApiPath}/conversations/{conversation_id}/messages`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Append a human message',
+      description:
+        'Append a human message to a conversation without invoking the agent. Use for collaborative investigations; include @agent in the message text to invoke the agent via converse instead.',
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+        availability: {
+          since: '9.2.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+            }),
+            body: schema.object({
+              message: schema.string({
+                meta: { description: 'The human message to append.' },
+              }),
+              attachment_refs: schema.maybe(
+                schema.arrayOf(
+                  schema.object({
+                    attachment_id: schema.string(),
+                    version: schema.number(),
+                  })
+                )
+              ),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+        const { message, attachment_refs: attachmentRefs } = request.body;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const updated = await client.appendMessage({
+          conversationId,
+          message,
+          attachment_refs: attachmentRefs,
+        });
+
+        const userMessageEvent = [...(updated.events ?? [])]
+          .reverse()
+          .find(isUserMessageEvent);
+
+        if (!userMessageEvent) {
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to append message event' },
+          });
+        }
+
+        return response.ok<AppendConversationMessageResponse>({
+          body: {
+            conversation_id: updated.id,
+            event: userMessageEvent,
+          },
         });
       })
     );

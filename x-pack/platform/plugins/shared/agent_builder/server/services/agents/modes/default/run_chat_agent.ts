@@ -17,10 +17,9 @@ import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/ag
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
-  roundsToTimelineEvents,
+  resolveConversationEvents,
   getLastExecutionEvent,
 } from '@kbn/agent-builder-common';
-import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -105,12 +104,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
   } = context;
 
-  // Convert to timeline events at entry — the canonical format for the pipeline
-  const timelineEvents = conversation
-    ? isTimelineConversation(conversation)
-      ? conversation.timeline
-      : roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id)
-    : [];
+  // Resolve chat events at entry — canonical format for the pipeline
+  const timelineEvents = conversation ? resolveConversationEvents(conversation) : [];
 
   ensureValidInput({ input: nextInput, timelineEvents, action });
 

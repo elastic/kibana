@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRounds, UserMessageEvent } from '@kbn/agent-builder-common';
 
 export interface ListConversationsResponse {
   results: ConversationWithoutRounds[];
@@ -26,4 +26,14 @@ export interface PatchConversationResponse {
   title?: string;
   template_id?: string;
   custom_fields?: Record<string, unknown>;
+}
+
+export interface AppendConversationMessageRequest {
+  message: string;
+  attachment_refs?: Array<{ attachment_id: string; version: number }>;
+}
+
+export interface AppendConversationMessageResponse {
+  conversation_id: string;
+  event: UserMessageEvent;
 }

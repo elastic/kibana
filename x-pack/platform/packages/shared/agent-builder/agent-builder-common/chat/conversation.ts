@@ -17,6 +17,7 @@ import type { PromptRequest, PromptResponse, PromptStorageState } from '../agent
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
 import type { ConversationMetadataFields } from './conversation_metadata';
+import type { ConversationCollaborationFields } from './collaboration';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -266,7 +267,7 @@ export interface RoundModelUsageStats {
 /**
  * Main structure representing a conversation with an agent.
  */
-export interface Conversation extends ConversationMetadataFields {
+export interface Conversation extends ConversationMetadataFields, ConversationCollaborationFields {
   /** unique id for this conversation */
   id: string;
   /** id of the agent this conversation is bound to */
@@ -399,18 +400,18 @@ export const getLastExecutionEvent = (events: TimelineEvent[]): AgentExecutionEv
 };
 
 /**
- * Timeline-based conversation format. Replaces the rounds-based model
- * as the canonical internal representation.
+ * Event-stream conversation format for agent execution.
+ * Same `events` field as persisted on {@link Conversation}; omits legacy `rounds`.
  */
-export type TimelineConversation = Omit<Conversation, 'rounds'> & {
-  /** Ordered list of timeline events */
-  timeline: TimelineEvent[];
+export type TimelineConversation = Omit<Conversation, 'rounds' | 'events'> & {
+  /** Ordered chat events — canonical for execution and persistence */
+  events: TimelineEvent[];
 };
 
 export const isTimelineConversation = (
   conversation: Conversation | TimelineConversation
 ): conversation is TimelineConversation => {
-  return 'timeline' in conversation;
+  return !('rounds' in conversation);
 };
 // Compaction summary types
 
