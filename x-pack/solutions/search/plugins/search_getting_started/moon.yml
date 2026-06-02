@@ -45,6 +45,10 @@ dependsOn:
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod

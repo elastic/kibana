@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
+import type { ReactNode } from 'react';
 
 const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   return lazyObject({
@@ -122,6 +123,12 @@ const createStartContractMock = () => {
       globalSearch: lazyObject({
         set: jest.fn(),
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      }),
+      contextSwitcher: lazyObject({
+        set: jest.fn((content?: ReactNode) => {
+          new BehaviorSubject<ReactNode>(null).next(content ?? null);
+        }),
+        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
       }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),

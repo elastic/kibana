@@ -27,6 +27,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 import semverGt from 'semver/functions/gt';
 
 import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -3578,15 +3579,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
   const isAgentless = packagePolicy.supports_agentless === true;
-  const throwDisabled = () => {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.packagePolicyConditionFeatureDisabled', {
-        defaultMessage: '`condition` is not supported because the conditions feature is disabled.',
-      })
-    );
-  };
   const throwAgentless = () => {
     throw new PackagePolicyValidationError(
       i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
@@ -3604,20 +3597,17 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   };
 
   if (packagePolicy.condition) {
-    if (!enableIntegrationConditions) throwDisabled();
     if (isAgentless) throwAgentless();
   }
 
   for (const input of packagePolicy.inputs) {
     const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
     if (input.condition) {
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
     for (const stream of input.streams) {
       if (!stream.condition) continue;
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
@@ -3626,7 +3616,10 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
   validateConditionPlacement(packagePolicy);
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, {
+    safeLoadYaml: parse,
+    conditionValidator: validateAgentConditionExpression,
+  });
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => {
@@ -4374,7 +4367,10 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, {
+    safeLoadYaml: parse,
+    conditionValidator: validateAgentConditionExpression,
+  });
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

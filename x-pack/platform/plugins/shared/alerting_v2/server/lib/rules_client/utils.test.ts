@@ -276,6 +276,20 @@ describe('utils', () => {
 
       expect(result.metadata.builder_type).toBeUndefined();
     });
+
+    it('includes the version when provided', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs, 'WzNEW=');
+      expect(result.version).toBe('WzNEW=');
+    });
+
+    it('omits the version when not provided', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.version).toBeUndefined();
+    });
   });
 
   describe('assertImmutableUnchanged', () => {

@@ -8,7 +8,11 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { collectEsqlRegionsFromLookup } from './extract_esql_region';
+import {
+  collectEsqlRegionsFromLookup,
+  findEsqlRegionContainingCursor,
+  findEsqlStepRegions,
+} from './extract_esql_region';
 import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 function regionsFromText(text: string) {
@@ -86,5 +90,85 @@ describe('collectEsqlRegionsFromLookup', () => {
       message: "elasticsearch.esql.query is documented here"
 `;
     expect(regionsFromText(text)).toHaveLength(0);
+  });
+});
+
+describe('findEsqlStepRegions', () => {
+  it('returns the same regions as collectEsqlRegionsFromLookup for the same workflow text', () => {
+    const text = `steps:
+  - name: esql_a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | LIMIT 10
+  - name: esql_b
+    type: elasticsearch.esql.query
+    with:
+      query: "FROM events | KEEP id"
+`;
+    const fromLookup = regionsFromText(text);
+    const fromFind = findEsqlStepRegions(text);
+
+    expect(fromFind).toHaveLength(fromLookup.length);
+    for (let i = 0; i < fromLookup.length; i++) {
+      expect(fromFind[i]).toEqual(fromLookup[i]);
+    }
+  });
+});
+
+describe('findEsqlRegionContainingCursor', () => {
+  it('resolves the region when the cursor sits in trailing whitespace after the trimmed body', () => {
+    const text = `steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*   `;
+    const cursor = text.length;
+    const region = findEsqlRegionContainingCursor(text, cursor);
+    expect(region).not.toBeNull();
+    expect(region!.esql).toBe('        FROM logs-*');
+    expect(cursor).toBeGreaterThan(region!.contentEndInFile);
+  });
+
+  it('uses a provided path hint to avoid re-resolving the path', () => {
+    const text = `steps:
+  - id: a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*`;
+    const cursor = text.indexOf('logs-*') + 'logs-*'.length;
+
+    // Hint points at the `with.query` scalar; tryEsqlRegionFromPath should succeed.
+    const hint = ['steps', 0, 'with', 'query'];
+    const region = findEsqlRegionContainingCursor(text, cursor, hint);
+    expect(region).not.toBeNull();
+    expect(region!.esql.includes('FROM logs-*')).toBe(true);
+  });
+
+  it('falls back safely when the path hint is stale', () => {
+    const text = `steps:
+  - id: a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*`;
+    const cursor = text.indexOf('FROM logs-*') + 'FROM'.length;
+
+    // Stale hint points at a non-existent step index; must not throw and should still find the region.
+    const staleHint = ['steps', 99, 'with', 'query'];
+    const region = findEsqlRegionContainingCursor(text, cursor, staleHint);
+    expect(region).not.toBeNull();
+  });
+
+  it('returns null when the cursor is outside the query scalar', () => {
+    const text = `steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs
+    name: "after"`;
+    const nameOffset = text.indexOf('after');
+    expect(findEsqlRegionContainingCursor(text, nameOffset)).toBeNull();
   });
 });
