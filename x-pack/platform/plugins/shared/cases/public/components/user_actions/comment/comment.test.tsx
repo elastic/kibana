@@ -21,11 +21,9 @@ import {
   getEventUserAction,
   getExternalReferenceAttachment,
   getExternalReferenceUserAction,
-  getHostIsolationUserAction,
   getMultipleAlertsUserAction,
   getPersistableStateUserAction,
   getUserAction,
-  hostIsolationComment,
   persistableStateAttachment,
 } from '../../../containers/mock';
 import { TestProviders, renderWithTestingProviders } from '../../../common/mock';
@@ -610,54 +608,6 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('added an event')).toBeInTheDocument();
-    });
-  });
-
-  describe('Host isolation action', () => {
-    it('renders correctly an action', async () => {
-      const userAction = getHostIsolationUserAction();
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [hostIsolationComment()],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
-      expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
-      expect(screen.getByText('host1')).toBeInTheDocument();
-      expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
-    });
-
-    it('shows the correct username', async () => {
-      const createdBy = { profileUid: userProfiles[0].uid };
-      const userAction = getHostIsolationUserAction({
-        createdBy,
-      });
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [hostIsolationComment({ createdBy })],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(
-        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
-      ).toBeInTheDocument();
-      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
     });
   });
 

@@ -6,27 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 import { TestProviders } from '../../common/mock';
 
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({
-    indicesExist: true,
-    loading: false,
-    sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-  })),
-}));
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
-    if (flag === 'newDataViewPickerEnabled') return false;
     if (flag === 'entityStoreDisabled') return false;
     return false;
   }),
@@ -38,12 +29,7 @@ jest.mock('../../data_view_manager/hooks/use_data_view_spec', () => ({
   })),
 }));
 
-jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({
-    dataView: { matchedIndices: ['index-2'] },
-    status: 'ready',
-  })),
-}));
+jest.mock('../../data_view_manager/hooks/use_data_view');
 
 jest.mock('../hooks/use_enabled_entity_types', () => ({
   useEntityAnalyticsTypes: jest.fn(() => ['host', 'user']),
@@ -79,14 +65,11 @@ describe('EntityAnalyticsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: { matchedIndices: ['index-2'] },
+      status: 'ready',
     });
-
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
-      if (flag === 'newDataViewPickerEnabled') return false;
       if (flag === 'entityStoreDisabled') return false;
       return false;
     });
@@ -130,11 +113,10 @@ describe('EntityAnalyticsPage', () => {
     expect(screen.getByText('Entity analytics')).toBeInTheDocument();
   });
 
-  it('renders loading spinner when sourcerer is loading', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      loading: true,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
+  it('renders loading spinner when data view is loading', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: { matchedIndices: ['index-2'] },
+      status: 'loading',
     });
 
     render(
@@ -166,10 +148,9 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('renders EmptyPrompt when indices do not exist', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: { matchedIndices: [] },
+      status: 'loading',
     });
 
     render(
@@ -184,10 +165,9 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('skips EmptyPrompt and renders main content when onSkip is called', async () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: { matchedIndices: [] },
+      status: 'ready',
     });
 
     render(
