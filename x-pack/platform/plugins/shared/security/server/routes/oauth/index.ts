@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defineBulkRevokeOAuthConnectionsRoute } from './bulk_revoke_connections';
 import { defineCreateOAuthClientRoute } from './create_client';
 import { defineGetOAuthClientRoute } from './get_client';
 import { defineGetOAuthConnectionRoute } from './get_connection';
@@ -26,4 +27,5 @@ export function defineOAuthRoutes(params: RouteDefinitionParams) {
   defineListOAuthConnectionsRoute(params);
   defineUpdateOAuthConnectionRoute(params);
   defineRevokeOAuthConnectionRoute(params);
+  defineBulkRevokeOAuthConnectionsRoute(params);
 }

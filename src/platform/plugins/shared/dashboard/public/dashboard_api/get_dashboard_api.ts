@@ -34,6 +34,7 @@ import type {
   DashboardInternalApi,
   DashboardSaveEvent,
   DashboardUser,
+  UserActivity,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -68,6 +69,7 @@ export function getDashboardApi({
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
+  const userActivity$ = new Subject<UserActivity>();
 
   const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
 
@@ -117,6 +119,7 @@ export function getDashboardApi({
     settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
+    userActivity$,
     creationOptions
   );
   const filtersManager = initializeFiltersManager(
@@ -296,6 +299,7 @@ export function getDashboardApi({
     uuid: v4(),
     createdBy: readResult?.meta?.created_by,
     user,
+    userActivity$,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
