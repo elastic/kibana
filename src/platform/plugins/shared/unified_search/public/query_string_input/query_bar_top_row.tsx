@@ -811,13 +811,13 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
-        // TODO: rename `autoRefreshOnlyDisabled` and tighten the surrounding
-        // comments — kept verbose here for the CI-green pass.
-        // Visualize-style consumers signal "no time filter applicable" via
-        // `showAutoRefreshOnly` (true) + `showDatePicker` (false). The legacy
-        // picker honoured this by rendering an auto-refresh-only readOnly UI;
-        // the new picker has no equivalent prop, so disable it explicitly here
-        // to keep the time-filter-off semantics consistent.
+        // Visualize-style consumers request auto-refresh-only mode via
+        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
+        // read-only date display while still letting users operate the auto-refresh
+        // controls. The new picker has no read-only mode, so we disable it here —
+        // but that also removes access to auto-refresh, a temporary regression.
+        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
+        // operable, and use it instead of `disabled` for this case.
         const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
         const pickerDisabled =
           Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
