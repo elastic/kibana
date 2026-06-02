@@ -2305,10 +2305,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.13.0.tgz#b9c079532257b7d4c46e3004ecb7b1f78f00a6b9"
   integrity sha512-Itl7zn88GEYRAqfmuRzViNy03nVHkIVLAvtjIC0b3lhjBnJgUbEG8ImfdYUExMiGraFE+2/k6v/Z8LbWXxO+JA==
 
-"@elastic/esql@4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.2.1.tgz#8d4daf445ee4d3b4f13b8f1832a4671b59e89460"
-  integrity sha512-ldljDlofs2Okp/WtnkofyNSedZNXXF6Rga1DSKwimu1PoM58EF87fLr4l9UfNfa9Ca4Mcli7OYpcl0oMtMYjEA==
+"@elastic/esql@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.3.0.tgz#a0e334df971512c480925c153a5940f2c534e867"
+  integrity sha512-8y0OnR23IxZk43LiR3TTXNonUkPlj/4MMM7y3En6deNt8tj4Bhm2gpG5idg3MCgnmEwXVGbWiizesDLpLq6kdQ==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -6251,6 +6251,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-settings-types@link:src/core/packages/user-settings/types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-browser-internal@link:src/core/packages/user-storage/browser-internal":
   version "0.0.0"
   uid ""
@@ -6924,6 +6928,10 @@
   uid ""
 
 "@kbn/evals-suite-security-ai-rules@link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-security-alert-triage@link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage":
   version "0.0.0"
   uid ""
 
@@ -17419,12 +17427,12 @@ axe-core@~4.11.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
   integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
-axios@1.15.2:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.15.2.tgz#eb8fb6d30349abace6ade5b4cb4d9e8a0dc23e5b"
-  integrity sha512-wLrXxPtcrPTsNlJmKjkPnNPK2Ihe0hn0wGSaTEiHRPxwjvJwT3hKmXF4dpqxmPO9SoNb2FsYXj/xEo0gHN+D5A==
+axios@1.16.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.16.0.tgz#f8e5dd931cef2a5f8c32216d5784eda2f8750eb7"
+  integrity sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==
   dependencies:
-    follow-redirects "^1.15.11"
+    follow-redirects "^1.16.0"
     form-data "^4.0.5"
     proxy-from-env "^2.1.0"
 
@@ -22799,7 +22807,7 @@ focus-lock@^0.11.6:
   dependencies:
     tslib "^2.0.3"
 
-follow-redirects@^1.0.0, follow-redirects@^1.15.11, follow-redirects@^1.16.0:
+follow-redirects@^1.0.0, follow-redirects@^1.16.0:
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.16.0.tgz#28474a159d3b9d11ef62050a14ed60e4df6d61bc"
   integrity sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==
