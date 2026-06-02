@@ -179,6 +179,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.discover.saveSearch('large export');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         const { text: csvFileOrderId } = await getReport({ timeout: 80 * 1000 });
         expectSnapshot(csvFileOrderId.slice(0, 5000)).toMatch();
         expectSnapshot(csvFileOrderId.slice(-5000)).toMatch();
