@@ -251,8 +251,11 @@ export class SecurityPlugin
       this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
     }
 
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
     this.kibanaServerURL =
-      core.http.basePath.publicBaseUrl ?? config.mcp?.oauth2?.metadata?.resource;
+      core.http.basePath.publicBaseUrl ?? config.mcp?.oauth2?.metadata?.resource ?? serverBaseUrl;
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
