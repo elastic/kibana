@@ -58,7 +58,7 @@ const SORTABLE_FIELDS: Record<string, CompositeSloSortBy> = {
   updatedAt: 'updatedAt',
 };
 
-interface CompositeSloTableProps {
+interface Props {
   results: CompositeSLOItem[];
   total: number;
   page: number;
@@ -90,7 +90,7 @@ export function CompositeSloTable({
   onPerPageChange,
   onSortChange,
   onDelete,
-}: CompositeSloTableProps) {
+}: Props) {
   const {
     uiSettings,
     application: { navigateToUrl, navigateToApp },
