@@ -20,10 +20,3 @@ export const CLOSE_VERSION_HISTORY = i18n.translate(
     defaultMessage: 'Close version history',
   }
 );
-
-export const NO_VISIBLE_CHANGES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.noVisibleChangesTitle',
-  {
-    defaultMessage: 'No visible field changes',
-  }
-);

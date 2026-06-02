@@ -101,7 +101,7 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
         />
       );
 
-    default:
+    default: {
       const isPrebuiltRule = item.rule.rule_source.type === 'external';
 
       return (
@@ -114,6 +114,7 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
           isCurrent={isCurrent}
         />
       );
+    }
   }
 });
 

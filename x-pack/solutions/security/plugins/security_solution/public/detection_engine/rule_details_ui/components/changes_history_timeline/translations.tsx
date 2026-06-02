@@ -9,8 +9,6 @@ import React from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { DATE_DISPLAY_FORMAT } from './constants';
 
 export const FIELD_CHANGES_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.fieldChangesLabel',
@@ -46,9 +44,6 @@ export const N_CHANGES = (count: number): string =>
     defaultMessage: '{count, plural, one {# change} other {# changes}}',
     values: { count },
   });
-
-export const REVISION_BADGE_PREFIX = 'R';
-export const VERSION_BADGE_PREFIX = 'V';
 
 export const ACTION_LABEL_ENABLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelEnabled',
@@ -125,18 +120,6 @@ export const SYSTEM_USER_LABEL = i18n.translate(
   {
     defaultMessage: 'System',
   }
-);
-
-interface TrackingStartedOnProps {
-  date: Date;
-}
-
-export const TRACKING_STARTED_ON = ({ date }: TrackingStartedOnProps): JSX.Element => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.trackingStartedOn"
-    defaultMessage="On {date} History started"
-    values={{ date: <PreferenceFormattedDate value={date} dateFormat={DATE_DISPLAY_FORMAT} /> }}
-  />
 );
 
 export const EMPTY_PROMPT_TITLE = i18n.translate(

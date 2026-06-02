@@ -8,7 +8,9 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { DATE_DISPLAY_FORMAT } from './constants';
 
 interface TrackingStartedFooterProps {
   startedAt: Date;
@@ -33,7 +35,15 @@ export const TrackingStartedFooter = memo(function TrackingStartedFooter({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <i18n.TRACKING_STARTED_ON date={startedAt} />
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.trackingStartedOn"
+              defaultMessage="History started on {date}"
+              values={{
+                date: (
+                  <PreferenceFormattedDate value={startedAt} dateFormat={DATE_DISPLAY_FORMAT} />
+                ),
+              }}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

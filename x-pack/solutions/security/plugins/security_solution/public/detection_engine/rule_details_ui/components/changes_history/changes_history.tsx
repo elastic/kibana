@@ -53,9 +53,11 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
-  const changeHistoryStartedAt = data?.pages[0].tracking_started_at
-    ? new Date(data?.pages[0].tracking_started_at)
-    : undefined;
+  const trackingStartedAt = data?.pages[0]?.tracking_started_at;
+  const changeHistoryStartedAt = useMemo(
+    () => (trackingStartedAt ? new Date(trackingStartedAt) : undefined),
+    [trackingStartedAt]
+  );
 
   const styles = useMemo(
     () => ({
@@ -85,7 +87,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
             minSize="200px"
             css={styles.leftPanelContentCss}
           >
-            <RuleChangesDiff item={selectedItem} isLoading={isLoading || isFetching} />
+            <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
           </EuiResizablePanel>
           <EuiResizableButton />
           <EuiResizablePanel

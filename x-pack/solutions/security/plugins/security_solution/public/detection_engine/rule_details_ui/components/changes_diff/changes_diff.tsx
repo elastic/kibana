@@ -27,13 +27,9 @@ interface ChangesPanelProps {
 }
 
 export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Element {
-  const numOfChangedFields = useMemo(
-    () => (item ? extractChangedFieldNames(item).length : 0),
-    [item]
-  );
-  const { oldSource, newSource } = useMemo(() => {
+  const { oldSource, newSource, numOfChangedFields } = useMemo(() => {
     if (!item) {
-      return { oldSource: '', newSource: '' };
+      return { oldSource: '', newSource: '', numOfChangedFields: 0 };
     }
 
     const after = filterAndSort(item.rule);
@@ -41,21 +37,23 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     // old_values is null for create/install actions — there is no previous state.
     // In that case show the full rule as a pure insertion.
     if (!item.old_values) {
-      return { oldSource: '', newSource: JSON.stringify(after, null, 2) };
+      return { oldSource: '', newSource: JSON.stringify(after, null, 2), numOfChangedFields: 0 };
     }
 
-    if (numOfChangedFields === 0) {
-      return { oldSource: '', newSource: '' };
+    const changedFields = extractChangedFieldNames(item);
+
+    if (changedFields.length === 0) {
+      return { oldSource: '', newSource: '', numOfChangedFields: 0 };
     }
 
-    const oldValues = item.old_values ?? {};
-    const before = filterAndSort(reconstructBefore(after, oldValues));
+    const before = filterAndSort(reconstructBefore(after, item.old_values));
 
     return {
       oldSource: JSON.stringify(before, null, 2),
       newSource: JSON.stringify(after, null, 2),
+      numOfChangedFields: changedFields.length,
     };
-  }, [item, numOfChangedFields]);
+  }, [item]);
 
   if (!item) {
     if (isLoading) {

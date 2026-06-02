@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,6 +43,15 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   const username = item.user?.name ?? i18n.SYSTEM_USER_LABEL;
   const changedFields = useMemo(() => extractChangedFieldNames(item), [item]);
   const isActive = useMemo(() => DIFFABLE_CHANGE_ACTIONS.includes(item.action), [item.action]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
 
   const date = useMemo(
     () => (
@@ -63,9 +72,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
     <EuiPanel
       hasBorder
       color={selected ? 'primary' : isActive ? undefined : 'subdued'}
-      role="button"
-      tabIndex={0}
+      role={isActive ? 'button' : undefined}
+      tabIndex={isActive ? 0 : undefined}
       onClick={isActive ? onClick : undefined}
+      onKeyDown={isActive ? handleKeyDown : undefined}
       data-test-subj={`ruleChangeHistoryItem-${item.id}`}
       css={css`
         margin-bottom: ${euiTheme.size.m};

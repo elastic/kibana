@@ -29,9 +29,11 @@ export const getHistoryForRule = async ({
   page = DEFAULT_PAGE,
   perPage = DEFAULT_PER_PAGE,
 }: GetHistoryForRuleArgs): Promise<RuleChangesHistoryResponse> => {
-  // Run both queries concurrently:
+  // Run queries concurrently:
   // - main: the requested page (newest-first, +1 extra for old_values computation)
-  // - oldest: single item ascending by timestamp to get tracking_started_at
+  // - oldest: single item ascending by timestamp to get tracking_started_at (page 1 only —
+  //   the oldest item never changes, so subsequent pages skip this query)
+  // - newest: single item descending to identify the HEAD revision for the `last` flag
   const [result, oldestResult, newestResult] = await Promise.all([
     rulesClient.getHistory({
       module: 'security',
@@ -39,13 +41,15 @@ export const getHistoryForRule = async ({
       from: (page - 1) * perPage,
       size: perPage + 1,
     }),
-    rulesClient.getHistory({
-      module: 'security',
-      ruleId,
-      from: 0,
-      size: 1,
-      sort: [{ '@timestamp': { order: 'asc' } }],
-    }),
+    page === 1
+      ? rulesClient.getHistory({
+          module: 'security',
+          ruleId,
+          from: 0,
+          size: 1,
+          sort: [{ '@timestamp': { order: 'asc' } }],
+        })
+      : Promise.resolve(undefined),
     rulesClient.getHistory({
       module: 'security',
       ruleId,
@@ -70,7 +74,7 @@ export const getHistoryForRule = async ({
     page,
     perPage,
     total: result.total,
-    tracking_started_at: oldestResult.items[0]?.['@timestamp'],
+    tracking_started_at: oldestResult?.items[0]?.['@timestamp'],
     items: resultItems,
   };
 };

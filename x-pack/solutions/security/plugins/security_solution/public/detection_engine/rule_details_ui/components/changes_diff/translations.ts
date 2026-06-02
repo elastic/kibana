@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VERSION_HISTORY_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.versionHistoryTitle',
-  {
-    defaultMessage: 'Version history',
-  }
-);
-
-export const CLOSE_VERSION_HISTORY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.closeVersionHistory',
-  {
-    defaultMessage: 'Close version history',
-  }
-);
-
 export const SELECT_VERSION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleChangesHistory.selectVersionTitle',
   {
