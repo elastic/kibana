@@ -1344,6 +1344,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/sec
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1915,14 +1916,12 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 
 # Actionable Observability (formerly Observability UX Management) team
 
-/src/platform/test/api_integration/apis/suggestions  @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_api_integration @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/slo/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_functional @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/security/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
@@ -3267,7 +3266,6 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_anal
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
