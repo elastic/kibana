@@ -19,7 +19,7 @@ import { getPhraseFilterValue, isPhraseFilter, isPhrasesFilter } from '@kbn/es-q
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../embeddable/service_map/constants';
 import type { ServiceMapEmbeddableState } from '../../../../server/lib/embeddables/service_map_embeddable_schema';
 import type { Environment } from '../../../../common/environment_rt';
@@ -142,6 +142,9 @@ function capturePageFilters({
   };
 }
 
+/** Internal — exposed for unit tests of the pure filter-projection logic. */
+export const __testOnly__ = { capturePageFilters };
+
 export function AddToDashboardButton({
   environment,
   kuery,
@@ -153,9 +156,10 @@ export function AddToDashboardButton({
   viewFilters,
   searchQuery,
 }: AddToDashboardButtonProps) {
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const embeddable = services?.embeddable;
   const filterManager = services?.data?.query?.filterManager;
+  const telemetry = services?.telemetry;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -206,6 +210,18 @@ export function AddToDashboardButton({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
+      telemetry?.reportServiceMapAddedToDashboard({
+        new_dashboard: dashboardId === 'new',
+        has_service_name: Boolean(capturedServiceName),
+        has_kuery: Boolean(capturedKuery),
+        view_filter_count:
+          (serializedState.alert_status_filter?.length ?? 0) +
+          (serializedState.slo_status_filter?.length ?? 0) +
+          (serializedState.connection_filter?.length ?? 0) +
+          (serializedState.anomaly_severity_filter?.length ?? 0),
+        sync_with_dashboard_filters: serializedState.sync_with_dashboard_filters ?? false,
+      });
+
       stateTransfer.navigateToWithEmbeddablePackages<ServiceMapEmbeddableState>('dashboards', {
         state: [packageState],
         path,
@@ -213,6 +229,7 @@ export function AddToDashboardButton({
     },
     [
       embeddable,
+      telemetry,
       filterManager,
       kuery,
       serviceName,
@@ -283,7 +300,7 @@ export function AddToDashboardButton({
           />
         }
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isModalOpen && (
         <SavedObjectSaveModalDashboard
