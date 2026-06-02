@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -161,7 +156,6 @@ export function AddToDashboardButton({
   const filterManager = services?.data?.query?.filterManager;
   const telemetry = services?.telemetry;
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSave: SaveModalDashboardProps['onSave'] = useCallback(
     async ({ dashboardId, newTitle, newDescription }) => {
@@ -257,51 +251,23 @@ export function AddToDashboardButton({
     defaultMessage: 'Service map',
   });
 
-  const menuLabel = i18n.translate('xpack.apm.serviceMap.panelActions.menuLabel', {
-    defaultMessage: 'More actions',
+  const buttonLabel = i18n.translate('xpack.apm.serviceMap.copyToDashboardMenuItem', {
+    defaultMessage: 'Copy to dashboard',
   });
-
-  const menuItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="copyToDashboard"
-        icon="addToDashboard"
-        onClick={() => {
-          setIsMenuOpen(false);
-          setIsModalOpen(true);
-        }}
-        data-test-subj="apmServiceMapCopyToDashboardMenuItem"
-      >
-        {i18n.translate('xpack.apm.serviceMap.copyToDashboardMenuItem', {
-          defaultMessage: 'Copy to dashboard',
-        })}
-      </EuiContextMenuItem>,
-    ],
-    []
-  );
 
   return (
     <>
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        isOpen={isMenuOpen}
-        closePopover={() => setIsMenuOpen(false)}
-        button={
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            color="text"
-            display="base"
-            size="s"
-            aria-label={menuLabel}
-            title={menuLabel}
-            onClick={() => setIsMenuOpen((open) => !open)}
-            data-test-subj="apmServiceMapPanelActionsButton"
-          />
-        }
-      >
-        <EuiContextMenuPanel items={menuItems} />
-      </EuiPopover>
+      <EuiToolTip content={buttonLabel} disableScreenReaderOutput position="top">
+        <EuiButtonIcon
+          iconType="addToDashboard"
+          color="text"
+          size="s"
+          iconSize="m"
+          aria-label={buttonLabel}
+          onClick={() => setIsModalOpen(true)}
+          data-test-subj="apmServiceMapCopyToDashboardButton"
+        />
+      </EuiToolTip>
       {isModalOpen && (
         <SavedObjectSaveModalDashboard
           objectType={objectType}
