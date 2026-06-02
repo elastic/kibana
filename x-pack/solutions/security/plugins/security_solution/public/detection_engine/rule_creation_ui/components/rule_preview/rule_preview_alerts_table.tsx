@@ -104,7 +104,7 @@ const RulePreviewAlertsTableComponent: React.FC<RulePreviewAlertsTableProps> = (
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
-          sourcererScope={PageScope.alerts}
+          pageScope={PageScope.alerts}
           indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
           bulkActions={false}
         />

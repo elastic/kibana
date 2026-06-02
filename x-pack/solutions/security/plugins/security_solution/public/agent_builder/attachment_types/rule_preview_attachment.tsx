@@ -34,10 +34,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { SecurityAppStore, State } from '../../common/store/types';
 import type { StartServices } from '../../types';
-import { PageScope } from '../../data_view_manager/constants';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { SecuritySolutionFlyout } from '../../flyout';
 import { RulePreviewAlertsTable } from '../../detection_engine/rule_creation_ui/components/rule_preview/rule_preview_alerts_table';
@@ -200,21 +197,14 @@ export const getRulePreviewMetadata = (
 };
 
 const RulePreviewAttachmentDataViewBootstrap = () => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const initDataViewManager = useInitDataViewManager();
   const sharedStatus = useSelector((state: State) => state.dataViewManager.shared.status);
 
-  useInitSourcerer(PageScope.alerts);
-
   useEffect(() => {
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     if (sharedStatus === 'pristine' || sharedStatus === 'error') {
       initDataViewManager([]);
     }
-  }, [initDataViewManager, newDataViewPickerEnabled, sharedStatus]);
+  }, [initDataViewManager, sharedStatus]);
 
   return null;
 };

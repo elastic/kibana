@@ -13,6 +13,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { RulePreviewAlertsTable } from './rule_preview_alerts_table';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import type { EventsViewerProps } from '../../../../common/components/events_viewer';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_full_screen', () => ({
@@ -25,9 +26,9 @@ jest.mock('../../../../common/hooks/use_license', () => ({
   })),
 }));
 
-const mockStatefulEventsViewer = jest.fn(() => null);
+const mockStatefulEventsViewer = jest.fn((_props: EventsViewerProps) => null);
 jest.mock('../../../../common/components/events_viewer', () => ({
-  StatefulEventsViewer: (props: unknown) => mockStatefulEventsViewer(props),
+  StatefulEventsViewer: (props: EventsViewerProps) => mockStatefulEventsViewer(props),
 }));
 
 jest.mock(
@@ -104,8 +105,8 @@ describe('RulePreviewAlertsTable', () => {
 
     const { pageFilters } = mockStatefulEventsViewer.mock.calls[0][0];
     expect(pageFilters).toHaveLength(1);
-    expect(pageFilters[0].meta.key).toBe('kibana.alert.rule.uuid');
-    expect(pageFilters[0].meta.params.query).toBe('test-preview-id');
+    expect(pageFilters![0].meta.key).toBe('kibana.alert.rule.uuid');
+    expect((pageFilters![0].meta.params as { query: string }).query).toBe('test-preview-id');
   });
 
   it('scopes indexNames to the preview index for the given spaceId', () => {
