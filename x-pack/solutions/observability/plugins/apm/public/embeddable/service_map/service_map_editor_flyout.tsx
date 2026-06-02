@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,6 +48,7 @@ import {
   ANOMALY_SEVERITY_OPTIONS,
   CONNECTION_FILTER_OPTIONS,
   SLO_STATUS_OPTIONS,
+  type ServiceMapOrientation,
 } from '../../components/app/service_map/service_map_options_panel';
 
 interface KueryInputProps {
@@ -205,6 +207,9 @@ export function ServiceMapEditorFlyout({
   const [anomalySeverityFilter, setAnomalySeverityFilter] = useState<ML_ANOMALY_SEVERITY[]>(
     (initialState?.anomaly_severity_filter as ML_ANOMALY_SEVERITY[] | undefined) ?? []
   );
+  const [mapOrientation, setMapOrientation] = useState<ServiceMapOrientation>(
+    initialState?.map_orientation ?? 'horizontal'
+  );
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -294,6 +299,7 @@ export function ServiceMapEditorFlyout({
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
       connection_filter: connectionFilter.length ? connectionFilter : undefined,
       anomaly_severity_filter: anomalySeverityFilter.length ? anomalySeverityFilter : undefined,
+      map_orientation: mapOrientation,
     };
     onSave(state);
   }, [
@@ -305,6 +311,7 @@ export function ServiceMapEditorFlyout({
     sloStatusFilter,
     connectionFilter,
     anomalySeverityFilter,
+    mapOrientation,
     onSave,
   ]);
 
@@ -523,6 +530,42 @@ export function ServiceMapEditorFlyout({
                 )
               }
               data-test-subj="apmServiceMapEditorAnomalySeverityFilter"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.orientationLabel', {
+              defaultMessage: 'Layout',
+            })}
+            fullWidth
+          >
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="compressed"
+              legend={i18n.translate('xpack.apm.serviceMapEditor.orientationLegend', {
+                defaultMessage: 'Service map layout',
+              })}
+              idSelected={mapOrientation}
+              onChange={(id) => setMapOrientation(id as ServiceMapOrientation)}
+              options={[
+                {
+                  id: 'horizontal',
+                  label: i18n.translate('xpack.apm.serviceMapEditor.orientationHorizontal', {
+                    defaultMessage: 'Horizontal',
+                  }),
+                  iconType: 'arrowRight',
+                  'data-test-subj': 'apmServiceMapEditorOrientationHorizontal',
+                },
+                {
+                  id: 'vertical',
+                  label: i18n.translate('xpack.apm.serviceMapEditor.orientationVertical', {
+                    defaultMessage: 'Vertical',
+                  }),
+                  iconType: 'arrowDown',
+                  'data-test-subj': 'apmServiceMapEditorOrientationVertical',
+                },
+              ]}
+              data-test-subj="apmServiceMapEditorOrientation"
             />
           </EuiFormRow>
 

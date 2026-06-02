@@ -221,8 +221,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       }
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
-                      // map_orientation is managed via the in-panel options toggle, not the
-                      // editor flyout; leave the persisted value untouched.
+                      customStateManager.api.setMapOrientation(newState.map_orientation);
                       customStateManager.api.setSyncWithDashboardFilters(
                         newState.sync_with_dashboard_filters
                       );

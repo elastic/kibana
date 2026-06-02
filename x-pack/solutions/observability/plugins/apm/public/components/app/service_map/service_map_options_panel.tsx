@@ -435,14 +435,14 @@ export function ServiceMapOptionsPanel({
       grow={false}
       css={panelSizingCss}
     >
-      <ServiceMapFindInPage
-        nodes={nodes}
-        searchQuery={searchQuery}
-        onSearchQueryChange={onSearchQueryChange}
-      />
-
       {!layoutControlsOnly && (
         <>
+          <ServiceMapFindInPage
+            nodes={nodes}
+            searchQuery={searchQuery}
+            onSearchQueryChange={onSearchQueryChange}
+          />
+
           <EuiHorizontalRule margin="m" />
 
           <EuiText size="xs">
