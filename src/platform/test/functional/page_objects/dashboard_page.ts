@@ -475,7 +475,9 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
-  public async clickCreatePopoverItem(itemTestSubj: 'createVisualizationButton' | 'createAnnotationButton') {
+  public async clickCreatePopoverItem(
+    itemTestSubj: 'createVisualizationButton' | 'createAnnotationButton'
+  ) {
     await this.testSubjects.click('dashboardListingCreateButton-secondary-button');
     await this.testSubjects.click(itemTestSubj);
   }
