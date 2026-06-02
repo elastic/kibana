@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -34,11 +34,10 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
-import type { RiskSeverity, HostItem } from '../../../../../common/search_strategy';
+import type { HostItem, RiskSeverity } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -53,7 +52,6 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions as DocumentDetailsCellActions } from '../../shared/components/cell_actions';
 import { CellActions as AttackDetailsCellActions } from '../../../attack_details/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -90,7 +88,6 @@ import { useNavigateToHostDetails } from '../../../entity_details/host_right/hoo
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
@@ -102,7 +99,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
+import { type IdentityFields, mergeLegacyIdentityWhenStoreEntityMissing } from '../../shared/utils';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -160,21 +157,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+  const selectedPatterns = useSelectedPatterns();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
