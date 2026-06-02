@@ -425,6 +425,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   ]);
 
   const tabsBarContainerCss = css`
+    width: 100%;
+    min-width: 0;
     background-color: ${euiTheme.colors.lightestShade};
   `;
 

@@ -115,6 +115,7 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
+      overflow: hidden;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       ${paddingBlock &&
       css`
@@ -128,6 +129,7 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1;
       min-width: 0;
+      overflow: hidden;
     `;
 
     const titleGroup = css`
@@ -137,6 +139,10 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
+      ${hasPrimaryContent &&
+      css`
+        max-width: min(40%, 360px);
+      `}
     `;
 
     const titleClusterSpacer = css`
@@ -147,8 +153,13 @@ const useHeaderStyles = (
     const titleAppend = css`
       display: flex;
       align-items: center;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-width: 0;
+      overflow: hidden;
+    `;
+
+    const trailingSlot = css`
+      flex-shrink: 0;
     `;
 
     const tabsRow = css`
@@ -173,6 +184,7 @@ const useHeaderStyles = (
       titleGroup,
       titleClusterSpacer,
       titleAppend,
+      trailingSlot,
       titleActionsReveal,
       tabsRow,
     };
@@ -200,7 +212,7 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
             {hasTitleAppend && <div css={styles.titleAppend}>{titleAppend}</div>}
             <div css={styles.titleClusterSpacer} aria-hidden />
           </div>
-          {trailing}
+          {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
         {tabs && (
           <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
