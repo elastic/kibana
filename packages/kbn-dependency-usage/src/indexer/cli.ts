@@ -182,7 +182,7 @@ yargs(process.argv.slice(2))
         // 4. Discover all packages under the resolved search paths, then
         //    cruise each package individually, accumulating docs and flushing
         //    a single bulk request to ES every `batchSize` packages.
-        const packages = searchPaths.flatMap(discoverPackages);
+        const packages = searchPaths.flatMap((p) => discoverPackages(p));
         if (packages.length === 0) {
           console.error(chalk.red('No packages found under the given paths.'));
           process.exit(1);

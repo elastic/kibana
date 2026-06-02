@@ -59,7 +59,7 @@ function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
  * `maxDepth` limits how many grouping levels we'll traverse (default 3) to
  * avoid accidentally walking deep trees that don't follow the expected structure.
  */
-export function discoverPackages(searchPath: string, maxDepth = 3): string[] {
+export function discoverPackages(searchPath: string, maxDepth: number = 3): string[] {
   function walk(relPath: string, depth: number): string[] {
     const abs = nodePath.join(REPO_ROOT, relPath);
     if (!existsSync(abs)) return [];
