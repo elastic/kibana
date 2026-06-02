@@ -3,12 +3,14 @@
 # Exit on any error
 set -e
 
-# Default output directory
-OUTPUT_DIR="../../../console/packaging/target"
+# Resolve paths relative to this script's location so the script works
+# regardless of the caller's working directory.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KIBANA_ROOT="$(cd "$SCRIPT_DIR/../../../../../../.." && pwd)"
+CONSOLE_PACKAGING_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Set directory variables
-KIBANA_ROOT="../../../../../../.."
-CONSOLE_PACKAGING_DIR="$(pwd)"
+# Default output directory
+OUTPUT_DIR="$CONSOLE_PACKAGING_DIR/target"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
