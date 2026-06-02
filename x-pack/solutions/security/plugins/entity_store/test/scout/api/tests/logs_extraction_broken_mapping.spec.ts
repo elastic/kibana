@@ -352,7 +352,6 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       { name: BROKEN_MAPPING_DATA_STREAM },
       { ignore: [400] }
     );
-
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
