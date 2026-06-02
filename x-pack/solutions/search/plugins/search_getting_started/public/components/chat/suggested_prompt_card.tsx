@@ -27,7 +27,7 @@ export const SuggestedPromptCard = ({ prompt, onClick }: SuggestedPromptCardProp
       data-test-subj={`searchGettingStartedSuggestedPrompt-${prompt.id}`}
       aria-label={prompt.prompt}
     >
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiIcon type="sparkles" size="m" aria-hidden={true} color="subdued" />
         </EuiFlexItem>
