@@ -43,9 +43,24 @@ describe('buildDisplayOptions', () => {
   };
 
   it('shows Add step + Commands sections when no search is active', () => {
-    const result = buildDisplayOptions(base);
+    const result = buildDisplayOptions({ ...base, options: [makeAction('a', 'A')] });
     expect(groupLabels(result)).toEqual(['Add step', 'Commands']);
-    expect(dataKinds(result)).toEqual(['command', 'command']);
+    expect(dataKinds(result)).toEqual(['action', 'command', 'command']);
+  });
+
+  it('hides Add step section when no actions match the search', () => {
+    const result = buildDisplayOptions({ ...base, options: [], searchTerm: 'zzz' });
+    expect(groupLabels(result)).not.toContain('Add step');
+  });
+
+  it('hides Add step section in Steps: mode when no actions match', () => {
+    const result = buildDisplayOptions({
+      ...base,
+      options: [],
+      searchTerm: `${STEPS_PREFIX}zzz`,
+    });
+    expect(groupLabels(result)).not.toContain('Add step');
+    expect(result).toHaveLength(0);
   });
 
   it('returns action items directly when inside a sub-group', () => {
