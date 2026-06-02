@@ -34,7 +34,6 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
-import { getESQLResults } from '@kbn/esql-utils';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -130,7 +129,6 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const {
     services: { data },
   } = useKibanaContextForPlugin();
-  const search = data.search.search;
   const { metricsView } = useMetricsDataViewContext();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const isReady = useHostsPageReady();
@@ -182,10 +180,13 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     // `useFetcher` skips the initial double-fire. See `useHostsPageReady`.
     if (!isReady || !esqlQuery) return;
     return (async () => {
-      const { response } = await getESQLResults({ esqlQuery, search, filter });
-      return parseKpiRow(response);
+      // Typed `data.search.esql` (search-methods service) over the raw
+      // `esql_async` strategy: it natively accepts the DSL `filter` and
+      // returns the same column/value `rawResponse` shape.
+      const { rawResponse } = await data.search.esql({ query: esqlQuery, filter });
+      return parseKpiRow(rawResponse as unknown as ESQLSearchResponse);
     })();
-  }, [isReady, esqlQuery, filter, search]);
+  }, [isReady, esqlQuery, filter, data.search]);
 
   const loading = isPending(status);
   const hasMarkedKpiReadyRef = useRef(false);
