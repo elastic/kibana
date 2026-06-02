@@ -16,6 +16,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -274,6 +275,9 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     const nextPageResult = await pagination.nextPage({
       abortSignal: abortController.signal,
       executionContext: { description: 'fetch more documents' },
+      inspectorTitle: i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+        defaultMessage: 'More documents',
+      }),
     });
 
     if (!nextPageResult) {
