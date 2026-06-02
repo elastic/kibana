@@ -4,8 +4,7 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 
 **Entry points:**
 
-- **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference.
-  )
+- **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
 - **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
 
@@ -55,7 +54,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### EIS connector setup
 
-`start` auto-detects missing connectors and walks you through EIS model discovery (Vault auth, model selection, connector generation). To run setup separately and discover connectors use across terminals:
+`start` auto-detects missing connectors and walks you through EIS model discovery (Vault auth, model selection, connector generation). To run setup separately and discover connectors to use across terminals:
 
 ```bash
 node scripts/evals init

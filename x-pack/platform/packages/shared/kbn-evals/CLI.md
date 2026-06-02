@@ -48,7 +48,7 @@ The main command. Starts EDOT + Scout as background daemons, enables EIS CCM if 
 When no `--profile` is specified and stdin is a TTY, `start` prompts you to choose an infrastructure target:
 
 ```
-? How do you want to run evals?
+? How do you want to run evals and export results and traces?
   > Local (localhost ES/Kibana)
     Golden cluster (uses Vault -- no config file needed)
     Custom (create a config file with your own URLs)
@@ -79,7 +79,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                             |
 | `--datasets-profile <name>`      |           | Override dataset settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)            |
-| `--export-profile <name>`        |           | Override export settings (sets `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, `TRACING_EXPORTERS`) |
+| `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)                       |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                        |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                                      |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                                         |
@@ -233,4 +233,4 @@ node scripts/evals start --suite agent-builder --grep "product documentation" --
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
 ```
 
-**View traces locally:** EDOT exports traces to your local ES (from `kibana.dev.yml`). Open your local Kibana at `http://localhost:5601` to view APM traces and LLM spans.
+**View traces locally:** EDOT exports traces to the cluster configured by your profile's tracing settings. Open your local Kibana at `http://localhost:5601` to view APM traces and LLM spans.

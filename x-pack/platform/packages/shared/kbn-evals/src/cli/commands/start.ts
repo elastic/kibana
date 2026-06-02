@@ -402,12 +402,11 @@ export const startCmd: Command<void> = {
       rerunArgs.push('--model', projects.join(','));
     }
 
-    const passedProfile = flagsReader.string('profile');
+    if (profile) {
+      rerunArgs.push('--profile', profile);
+    }
     const passedDatasetsProfile = flagsReader.string('datasets-profile');
     const passedExportProfile = flagsReader.string('export-profile');
-    if (passedProfile) {
-      rerunArgs.push('--profile', passedProfile);
-    }
     if (passedDatasetsProfile) {
       rerunArgs.push('--datasets-profile', passedDatasetsProfile);
     }

@@ -182,7 +182,6 @@ export const runConfigInit = async (
   log.info('');
 
   const urlFields = [
-    { jsonPath: 'evaluationsEs.url', label: 'Evaluations ES URL' },
     { jsonPath: 'evaluationsKbn.url', label: 'Evaluations Kibana URL' },
     { jsonPath: 'tracingEs.url', label: 'Tracing ES URL' },
   ];
@@ -215,7 +214,6 @@ export const runConfigInit = async (
   log.info('');
 
   const apiKeyFields = [
-    { jsonPath: 'evaluationsEs.apiKey', label: 'Evaluations ES API key' },
     { jsonPath: 'evaluationsKbn.apiKey', label: 'Evaluations Kibana API key' },
     { jsonPath: 'tracingEs.apiKey', label: 'Tracing ES API key' },
     {
