@@ -6,7 +6,8 @@
       "node",
       "cheerio",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "@kbn/ambient-ftr-types",
+      "@kbn/core-user-settings-types"
     ],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
@@ -175,5 +176,7 @@
     "@kbn/product-doc-common",
     "@kbn/alerting-v2-episodes-ui",
     "@kbn/inbox-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-user-profile-common",
   ]
 }

@@ -29,12 +29,6 @@ export const sourcererScope = createSelector(
   }
 );
 
-export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading, {
-  memoizeOptions: {
-    maxSize: SOURCERER_SCOPE_MAX_SIZE,
-  },
-});
-
 export const sourcererScopeSelectedDataViewId = createSelector(
   sourcererScope,
   (scope) => scope.selectedDataViewId,
@@ -45,29 +39,9 @@ export const sourcererScopeSelectedDataViewId = createSelector(
   }
 );
 
-export const sourcererScopeSelectedPatterns = createSelector(
-  sourcererScope,
-  (scope) => scope.selectedPatterns,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
 export const sourcererScopeMissingPatterns = createSelector(
   sourcererScope,
   (scope) => scope.missingPatterns,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
-export const kibanaDataViews = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.kibanaDataViews,
   {
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
@@ -88,16 +62,6 @@ export const defaultDataView = createSelector(
 export const signalIndexName = createSelector(
   selectSourcerer,
   (sourcerer) => sourcerer.signalIndexName,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
-export const signalIndexMappingOutdated = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.signalIndexMappingOutdated,
   {
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,

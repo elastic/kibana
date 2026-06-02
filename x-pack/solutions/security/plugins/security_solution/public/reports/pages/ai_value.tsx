@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useRef, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
@@ -15,13 +15,12 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueReport } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { useKibana } from '../../common/lib/kibana';
@@ -48,15 +47,12 @@ import {
 const BaseComponent = () => {
   const exportContext = useAIValueExportContext();
   const isExportMode = exportContext?.isExportMode === true;
-  const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const timerange = useDeepEqualSelector(inputsSelectors.valueReportTimeRangeSelector);
   const { from, to } = timerange;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
 
-  // covers pristine and loading states
-  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
+  const isSourcererLoading = status !== 'ready';
 
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
@@ -112,6 +108,23 @@ const BaseComponent = () => {
 
   if (!hasSocManagementCapability) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+  }
+
+  if (status === 'pristine') {
+    return <PageLoader />;
+  }
+
+  if (status === 'error') {
+    return (
+      <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="error"
+          title={<h2>{i18n.AI_VALUE_LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.AI_VALUE_LOAD_ERROR_BODY}</p>}
+        />
+      </SecuritySolutionPageWrapper>
+    );
   }
 
   return (

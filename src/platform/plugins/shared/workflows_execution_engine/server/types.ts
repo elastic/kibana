@@ -22,6 +22,10 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
+} from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
@@ -48,6 +52,9 @@ export interface TriggerEventsContract {
   isEnabled: boolean;
   isLogEventsEnabled: boolean;
   maxEventChainDepth: number;
+  searchTriggerEventLog: (
+    params: SearchTriggerEventLogParams
+  ) => Promise<SearchTriggerEventLogResult>;
 }
 
 export interface WorkflowsExecutionEnginePluginStart {

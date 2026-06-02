@@ -10,8 +10,6 @@ import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AIValue } from './ai_value';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useHasSecurityCapability } from '../../helper_hooks';
@@ -23,14 +21,6 @@ import { SuperDatePicker } from '../../common/components/super_date_picker';
 
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
   useSyncTimerangeUrlParam: jest.fn(),
-}));
-
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(),
 }));
 
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
@@ -79,12 +69,6 @@ jest.mock('../../common/components/no_privileges', () => ({
 const mockUseDeepEqualSelector = useDeepEqualSelector as jest.MockedFunction<
   typeof useDeepEqualSelector
 >;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
-  typeof useIsExperimentalFeatureEnabled
->;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
   typeof useAlertsPrivileges
 >;
@@ -98,15 +82,6 @@ const mockUseDownloadAIValueReport = useDownloadAIValueReport as jest.MockedFunc
   typeof useDownloadAIValueReport
 >;
 const mockSuperDatePicker = SuperDatePicker as jest.MockedFunction<typeof SuperDatePicker>;
-
-const sourcererDataView = {
-  loading: false,
-  browserFields: {},
-  dataViewId: 'test-id',
-  indicesExist: true,
-  selectedPatterns: [],
-  sourcererDataView: {} as Record<string, unknown>,
-};
 
 const renderAIValue = () =>
   render(
@@ -122,8 +97,6 @@ describe('AIValue', () => {
       from: '2023-01-01T00:00:00.000Z',
       to: '2023-01-31T23:59:59.999Z',
     });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseSourcererDataView.mockReturnValue(sourcererDataView);
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: true,
       hasIndexUpdateDelete: false,
@@ -137,7 +110,12 @@ describe('AIValue', () => {
       hasIndexWrite: false,
       hasIndexMaintenance: false,
     });
-    mockUseDataView.mockReturnValue({ status: 'ready', dataView: {} as never });
+    mockUseDataView.mockReturnValue({
+      status: 'ready',
+      dataView: {
+        hasMatchedIndices: jest.fn(),
+      } as never,
+    });
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAIValueExportContext.mockReturnValue({ isExportMode: false });
     mockUseDownloadAIValueReport.mockReturnValue({
@@ -185,17 +163,7 @@ describe('AIValue', () => {
   describe('isSourcererLoading derivation', () => {
     const getLoadingProp = () => mockAIValueReport.mock.calls.at(-1)?.[0].isSourcererLoading;
 
-    it('uses the old sourcerer loading state when the new data view picker is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      mockUseSourcererDataView.mockReturnValue({ ...sourcererDataView, loading: true });
-
-      renderAIValue();
-
-      expect(getLoadingProp()).toBe(true);
-    });
-
-    it('treats any non-ready data view status as loading when the new data view picker is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    it('treats any non-ready data view status as loading', () => {
       mockUseDataView.mockReturnValue({ status: 'loading', dataView: {} as never });
 
       renderAIValue();
@@ -203,8 +171,7 @@ describe('AIValue', () => {
       expect(getLoadingProp()).toBe(true);
     });
 
-    it('reports not loading when the new data view picker is enabled and status is ready', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    it('reports not loading when data view picker has status ready', () => {
       mockUseDataView.mockReturnValue({ status: 'ready', dataView: {} as never });
 
       renderAIValue();
@@ -215,14 +182,6 @@ describe('AIValue', () => {
 
   describe('date picker disabled state', () => {
     const getDisabledProp = () => mockSuperDatePicker.mock.calls.at(-1)?.[0].disabled;
-
-    it('disables the date picker while sourcerer is loading', () => {
-      mockUseSourcererDataView.mockReturnValue({ ...sourcererDataView, loading: true });
-
-      renderAIValue();
-
-      expect(getDisabledProp()).toBe(true);
-    });
 
     it('disables the date picker initially while report data loading state is unknown', () => {
       renderAIValue();
