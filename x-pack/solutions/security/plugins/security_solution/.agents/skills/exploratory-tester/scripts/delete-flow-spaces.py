@@ -32,16 +32,22 @@ if not spaces_to_delete:
 
 url      = cfg['environment']['url']
 creds    = cfg.get('credentials', {})
+api_key  = creds.get('api_key')
 username = creds.get('username', 'elastic')
 password = creds.get('password', 'changeme')
+
+if api_key:
+    auth_args = ['-H', f'Authorization: ApiKey {api_key}']
+else:
+    auth_args = ['-u', f'{username}:{password}']
 
 errors = []
 
 for sid in spaces_to_delete:
     result = subprocess.run(
-        ['curl', '-s', '-w', '\n%{http_code}',
-         '-u', f'{username}:{password}',
-         '-X', 'DELETE', f'{url}/api/spaces/space/{sid}',
+        ['curl', '-s', '-w', '\n%{http_code}']
+        + auth_args +
+        ['-X', 'DELETE', f'{url}/api/spaces/space/{sid}',
          '-H', 'kbn-xsrf: true'],
         capture_output=True, text=True
     )

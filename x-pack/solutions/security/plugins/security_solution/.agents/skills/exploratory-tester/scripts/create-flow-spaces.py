@@ -35,8 +35,15 @@ if cfg.get('mode') != 'parallel':
 url      = cfg['environment']['url']
 base_sid = cfg['environment'].get('space_id', 'exploratory-testing')
 creds    = cfg.get('credentials', {})
+api_key  = creds.get('api_key')
 username = creds.get('username', 'elastic')
 password = creds.get('password', 'changeme')
+
+# Build auth args for curl: API key takes precedence over basic auth
+if api_key:
+    auth_args = ['-H', f'Authorization: ApiKey {api_key}']
+else:
+    auth_args = ['-u', f'{username}:{password}']
 
 created = []
 errors  = []
@@ -51,9 +58,9 @@ for i, flow in enumerate(cfg['flows'], 1):
     body = json.dumps({'id': sid, 'name': f'Exploratory Testing — Flow {i}', 'color': '#DD0A73'})
 
     result = subprocess.run(
-        ['curl', '-s', '-w', '\n%{http_code}',
-         '-u', f'{username}:{password}',
-         '-X', 'POST', f'{url}/api/spaces/space',
+        ['curl', '-s', '-w', '\n%{http_code}']
+        + auth_args +
+        ['-X', 'POST', f'{url}/api/spaces/space',
          '-H', 'kbn-xsrf: true',
          '-H', 'Content-Type: application/json',
          '-d', body],
