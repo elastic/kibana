@@ -72,6 +72,8 @@ export const rowToDocument = (
   return doc;
 };
 
+// The union type "EsqlTable | EsqlQueryResponse" is needed in this file to support both the UI test query funtionality and the server side execution of the rule.
+// The UI uses the data plugin to fetch results and while the server side execution calls the esClient directly.
 export const getEsqlQueryHits = async (
   table: EsqlTable | EsqlQueryResponse,
   query: string,
