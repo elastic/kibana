@@ -83,9 +83,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
 | \`rule.name\` | The rule's display name |
-| \`rule.description\` | The rule's description |
 | \`rule.tags\` | The rule's tags array |
-| \`rule.enabled\` | Whether the rule is enabled |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
 ### Grouping Modes
@@ -265,7 +263,7 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
 3. **\`set_matcher\`** — set a KQL query to filter which alert episodes trigger this policy. Set to \`null\` for a catch-all that matches all episodes. Available matcher fields:
    - \`episode_id\`, \`episode_status\` (inactive | pending | active | recovering)
    - \`group_hash\`, \`last_event_timestamp\`
-   - \`rule.id\`, \`rule.name\`, \`rule.description\`, \`rule.tags\`, \`rule.enabled\`
+   - \`rule.id\`, \`rule.name\`, \`rule.tags\`
    - \`data.*\` (rule-specific fields)
 4. **\`set_grouping\`** — set \`groupingMode\` and optionally \`groupBy\` fields:
    - \`per_episode\` (default): one notification per alert episode lifecycle.
