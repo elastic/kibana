@@ -2,14 +2,17 @@
 
 set -euo pipefail
 
-.buildkite/scripts/bootstrap.sh
-
 source "$(dirname "$0")/wait_for_pr_merge.sh"
 
 branch_to_merge_into="${OVERRIDE_BRANCH:-$BRANCH}"
 
 git fetch origin $branch_to_merge_into
 git checkout -B "$branch_to_merge_into" "origin/$branch_to_merge_into"
+
+# Re-source after the checkout so the Node version matches the branches .node-version
+source .buildkite/scripts/common/setup_node.sh
+
+.buildkite/scripts/bootstrap.sh
 
 old_version=""
 store_old_version() {
@@ -70,7 +73,9 @@ store_old_version
 
 update_package_json_version
 
-update_initial_app_data
+if [[ "$branch_to_merge_into" != "8.19" ]]; then
+  update_initial_app_data
+fi
 
 update_kibana_migrator_utils
 
@@ -86,6 +91,12 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 head_branch="bump-versions-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
 git add package.json x-pack/package.json x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts src/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts src/core/server/integration_tests/saved_objects/migrations/archives src/core/server/integration_tests/saved_objects/migrations/group1/__snapshots__/v2_migration.test.ts.snap
+
+if git diff --cached --quiet; then
+  echo "No changes to commit — skipping PR creation"
+  exit 0
+fi
+
 git commit -m "[version bump] Bump version to ${NEW_VERSION}"
 git push origin "$head_branch"
 

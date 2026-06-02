@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT, KPI_METRICS } from '../constants';
 
 type PreferredSchema = 'ecs' | 'semconv' | null;
 
@@ -78,7 +78,11 @@ export class HostsPage {
     await this.searchBar.clear();
     await this.searchBar.fill(query);
     await this.querySubmitButton.click();
-    await this.waitForTableToLoad();
+    await Promise.race([
+      this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT }),
+      this.errorCallout.waitFor({ timeout: EXTENDED_TIMEOUT }),
+      this.tableNoData.waitFor({ timeout: EXTENDED_TIMEOUT }),
+    ]);
   }
 
   public async goToPage({
@@ -96,6 +100,27 @@ export class HostsPage {
     const schemaPart =
       preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
     const risonState = `(dateRange:(from:'${from}',to:'${to}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
+    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
+    if (!skipLoadWait) {
+      await this.waitForTableToLoad();
+    }
+  }
+
+  public async goToPageWithRelativeRange({
+    rangeFrom,
+    rangeTo,
+    preferredSchema = null,
+    skipLoadWait = false,
+  }: {
+    rangeFrom: string;
+    rangeTo: string;
+    preferredSchema?: PreferredSchema;
+    skipLoadWait?: boolean;
+  }) {
+    const baseUrl = this.kbnUrl.app('metrics');
+    const schemaPart =
+      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
+    const risonState = `(dateRange:(from:'${rangeFrom}',to:'${rangeTo}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
     await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
@@ -278,6 +303,61 @@ export class HostsPage {
     await this.logsTab.click();
   }
 
+  // Alerts tab
+
+  public async visitAlertsTab() {
+    await this.alertsTab.scrollIntoViewIfNeeded();
+    await this.alertsTab.click();
+    await this.page
+      .getByTestId('hostsView-alerts')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async getAlertsCount(): Promise<string> {
+    await this.alertsTabCountBadge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    return (await this.alertsTabCountBadge.textContent()) ?? '0';
+  }
+
+  public async setAlertStatusFilter(status?: 'active' | 'recovered' | 'untracked'): Promise<void> {
+    const testIds: Record<string, string> = {
+      active: 'hostsView-alert-status-filter-active-button',
+      recovered: 'hostsView-alert-status-filter-recovered-button',
+      untracked: 'hostsView-alert-status-filter-untracked-button',
+      all: 'hostsView-alert-status-filter-show-all-button',
+    };
+    const testId = status ? testIds[status] : testIds.all;
+    const button = this.page.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+    await this.waitForAlertsTableToLoad();
+  }
+
+  public getAlertsTable(): Locator {
+    return this.page.getByTestId('alertsTableIsLoaded');
+  }
+
+  public getAlertsTableRows(): Locator {
+    return this.getAlertsTable().locator('.euiDataGridRow');
+  }
+
+  public getAlertsTableCells(): Locator {
+    return this.getAlertsTable().locator('[data-test-subj="dataGridRowCell"]');
+  }
+
+  public async getAlertsTableRowCount(): Promise<number> {
+    const rows = this.getAlertsTableRows();
+    await this.page.waitForFunction(
+      (selector) => document.querySelectorAll(selector).length > 0,
+      '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
+      { timeout: EXTENDED_TIMEOUT }
+    );
+    return rows.count();
+  }
+
+  public async waitForAlertsTableToLoad(): Promise<void> {
+    await this.getAlertsTable().waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
   // Pagination
 
   public async changePageSize(pageSize: number) {
@@ -323,5 +403,21 @@ export class HostsPage {
     await option.waitFor();
     await option.click();
     await this.waitForTableToLoad();
+  }
+
+  public async clickRefresh() {
+    await this.querySubmitButton.click();
+    await this.waitForTableToLoad();
+  }
+
+  public async getKPIValuesSnapshot(timeout?: number): Promise<Record<string, string | null>> {
+    await this.waitForKPILoadingToFinish(timeout);
+    const snapshot: Record<string, string | null> = {};
+    for (const metric of KPI_METRICS) {
+      const locator = this.getHostKPIChartValueLocator(metric);
+      const count = await locator.count();
+      snapshot[metric] = count > 0 ? await locator.getAttribute('title') : null;
+    }
+    return snapshot;
   }
 }

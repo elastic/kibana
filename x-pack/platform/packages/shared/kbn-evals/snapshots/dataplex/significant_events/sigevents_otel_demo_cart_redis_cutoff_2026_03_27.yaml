@@ -1,0 +1,10 @@
+elastic-observability.global.es-snapshot-dataset:
+  data:
+    gcs_path: 'gs://significant-events-datasets/2026-03-27/otel-demo/cart-redis-cutoff'
+    description: 'SigEvents OTel Demo cart-redis-cutoff failure scenario — cart service loses Valkey/Redis connectivity causing cart crash (Application is shutting down), ECONNREFUSED errors in frontend, and failed checkout operations.'
+    es_version: '9.4.0-SNAPSHOT'
+    indices: 'logs*,sigevents-streams-features-cart-redis-cutoff'
+    timestamp_range: '2026-03-27'
+    source: 'OTel Demo (opentelemetry-demo) cart-redis-cutoff scenario captured via scripts/capture_otel_demo_snapshots'
+    team: 'obs-sig-events'
+    deprecated: ''

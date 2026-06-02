@@ -15,7 +15,6 @@ import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
-import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
@@ -26,8 +25,6 @@ interface InlineAttachmentWithActionsProps {
   isSidebar: boolean;
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
-  /** Version number of the attachment being rendered, used for canvas preview comparison */
-  version?: number;
   /**
    * Shared preview state for header actions/badges.
    */
@@ -43,21 +40,20 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   isSidebar,
   conversationId,
   screenContext,
-  version,
   previewBadgeState,
 }) => {
   const {
     openCanvas: openCanvasContext,
+    closeCanvas,
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version);
-  }, [openCanvasContext, attachment, isSidebar, version]);
+    openCanvasContext(attachment, isSidebar);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -69,14 +65,11 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   );
 
   const openSidebarConversation = useCallback(() => {
-    if (conversationId) {
-      updatePersistedConversationId(conversationId);
-    }
-    openSidebarConversationInternal();
-  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -134,6 +127,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   return (
     <EuiSplitPanel.Outer
@@ -145,9 +139,13 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       `}
     >
       <AttachmentHeader
+        icon={header?.icon}
         title={title}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
+        onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.(

@@ -39,7 +39,10 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
       iconType: 'cross',
       iconSide: 'right',
       onClick: () => removeId(id),
-      onClickAriaLabel: 'Remove id',
+      onClickAriaLabel: i18n.translate('xpack.ml.jobSelector.removeBadgeAriaLabel', {
+        defaultMessage: 'Remove {id}',
+        values: { id },
+      }),
     };
   }
 

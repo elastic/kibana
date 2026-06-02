@@ -62,7 +62,17 @@ export interface TableProps {
  */
 export const Table = memo(({ dataView, id, onLoaded, packages, query }: TableProps) => {
   const {
-    services: { application, cases, data, fieldFormats, http, licensing, notifications, settings },
+    services: {
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    },
   } = useKibana();
   const services = useMemo(
     () => ({
@@ -70,15 +80,16 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
   );
 
-  const browserFields = useBrowserFields(PageScope.alerts, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts);
 
   const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
 

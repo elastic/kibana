@@ -140,6 +140,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       http,
       licensing,
       notifications,
+      rendering,
       uiSettings,
       settings,
     },
@@ -150,12 +151,13 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
   );
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
@@ -173,9 +175,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     [globalFilters, groupingFilters, timeRangeFilter]
   );
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-  const browserFields = useBrowserFields(PageScope.alerts, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
@@ -184,7 +184,6 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     const combinedQuery = combineQueries({
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
-      dataViewSpec,
       dataView,
       browserFields,
       filters,
@@ -202,7 +201,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     } catch {
       return { bool: {} };
     }
-  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
+  }, [browserFields, dataView, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(
     () => <AdditionalToolbarControls dataView={dataView} />,

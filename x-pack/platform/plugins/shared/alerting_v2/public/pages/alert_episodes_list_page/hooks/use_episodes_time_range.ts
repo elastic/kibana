@@ -8,12 +8,11 @@
 import { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 
-type Timefilter = DataPublicPluginStart['query']['timefilter']['timefilter'];
-type InputTimeRange = Parameters<Timefilter['setTime']>[0];
+type InputTimeRange = Parameters<TimefilterContract['setTime']>[0];
 
-export const useEpisodesTimeRange = (timefilter: Timefilter) => {
+export const useEpisodesTimeRange = (timefilter: TimefilterContract) => {
   const timeRange$ = useMemo(
     () => timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
     [timefilter]

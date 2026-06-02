@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,10 +36,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
@@ -78,8 +76,6 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
     text: option,
   }));
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
@@ -275,7 +271,6 @@ export const AnomalyTimeline: FC = () => {
 
       panels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -451,19 +446,29 @@ export const AnomalyTimeline: FC = () => {
               css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
             >
               <EuiPopover
+                aria-label={i18n.translate('xpack.ml.explorer.swimlane.actionsPopoverAriaLabel', {
+                  defaultMessage: 'Anomaly swim lane actions menu',
+                })}
                 button={
-                  <EuiButtonIcon
-                    size="s"
-                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.explorer.swimlaneActions', {
                       defaultMessage: 'Actions',
                     })}
-                    color="text"
-                    display="base"
-                    isSelected={isMenuOpen}
-                    iconType="boxesVertical"
-                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                    data-test-subj="mlAnomalyTimelinePanelMenu"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      size="s"
+                      aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                        defaultMessage: 'Actions',
+                      })}
+                      color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                      data-test-subj="mlAnomalyTimelinePanelMenu"
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isMenuOpen}
                 closePopover={setIsMenuOpen.bind(null, false)}

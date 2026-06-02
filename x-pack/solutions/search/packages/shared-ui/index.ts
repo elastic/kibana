@@ -10,4 +10,5 @@ export * from './src/kibana_version';
 export * from './src/form_info_field/form_info_field';
 export * from './src/search_empty_prompt';
 export * from './src/constants';
+export * from './src/trial_usage_badge';
 export type * from './src/types';

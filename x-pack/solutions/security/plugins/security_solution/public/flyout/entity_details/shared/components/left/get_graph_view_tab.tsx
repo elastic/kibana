@@ -25,7 +25,7 @@ export const getGraphViewTab = ({ entityId, scopeId }: GetGraphViewTabParams) =>
     name: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.entityDetails.userDetails.graphView.tabLabel"
-        defaultMessage="Graph View"
+        defaultMessage="Visualizations"
       />
     ),
     content: <GraphViewTab entityId={entityId} scopeId={scopeId} />,

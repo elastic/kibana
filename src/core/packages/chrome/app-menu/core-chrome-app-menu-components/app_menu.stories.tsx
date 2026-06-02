@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
@@ -387,5 +387,110 @@ export const DashboardEditModeWithStaticItems: Story = {
   args: {
     config: dashboardEditModeConfig,
     staticItems: staticItem,
+  },
+};
+
+const InteractiveSwitchWrapper = (props: AppMenuWrapperProps) => {
+  const [checked, setChecked] = useState(false);
+  const configWithSwitch: AppMenuConfig = {
+    ...props.config,
+    switch: {
+      id: 'switch',
+      label: 'Enabled',
+      labelProps: {},
+      checked,
+      onChange: (value) => {
+        setChecked(value);
+        action('switch-toggled')(value);
+      },
+      'data-test-subj': 'switch',
+    },
+  };
+
+  return <AppMenuWrapper {...props} config={configWithSwitch} />;
+};
+
+export const StandaloneSwitch: Story = {
+  name: 'Switch - standalone',
+  render: (args) => <InteractiveSwitchWrapper {...args} />,
+  args: {
+    config: {},
+  },
+};
+
+export const SwitchWithItems: Story = {
+  name: 'Switch with items and primary action',
+  render: (args) => <InteractiveSwitchWrapper {...args} />,
+  args: {
+    config: {
+      items: [
+        {
+          id: 'manualRun',
+          order: 1,
+          label: 'Manual run',
+          run: action('manual-run-clicked'),
+          iconType: 'play',
+          testId: 'manualRunButton',
+        },
+        {
+          id: 'settings',
+          order: 2,
+          label: 'Settings',
+          run: action('settings-clicked'),
+          iconType: 'gear',
+          testId: 'settingsButton',
+          overflow: true,
+        },
+      ],
+      primaryActionItem: {
+        run: action('edit-clicked'),
+        id: 'edit',
+        label: 'Edit',
+        testId: 'editButton',
+        iconType: 'controls',
+      },
+    },
+  },
+};
+
+export const PrimaryActionWithPopover: Story = {
+  name: 'Primary action with popover',
+  args: {
+    staticItems: staticItem,
+    config: {
+      primaryActionItem: {
+        id: 'create',
+        label: 'Create',
+        testId: 'createPopoverButton',
+        iconType: 'plus',
+        popoverWidth: 120,
+        items: [
+          {
+            run: () => action('create-dashboard-clicked'),
+            id: 'createDashboard',
+            order: 1,
+            label: 'Dashboard',
+            iconType: 'productDashboard',
+            testId: 'createDashboardButton',
+          },
+          {
+            run: () => action('create-visualization-clicked'),
+            id: 'createVisualization',
+            order: 2,
+            label: 'Visualization',
+            iconType: 'chartBarVertical',
+            testId: 'createVisualizationButton',
+          },
+          {
+            run: () => action('create-annotation-clicked'),
+            id: 'createAnnotation',
+            order: 3,
+            label: 'Annotation',
+            iconType: 'flag',
+            testId: 'createAnnotationButton',
+          },
+        ],
+      },
+    },
   },
 };

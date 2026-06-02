@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { GetCompositeSLOSuggestions } from '../../../services/get_composite_slo_suggestions';
-import { createSloServerRoute } from '../../create_slo_server_route';
-import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+import { GetCompositeSLOSuggestions } from '../../../services/composites/get_composite_slo_suggestions';
+import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
-export const getCompositeSLOSuggestionsRoute = createSloServerRoute({
+export const getCompositeSLOSuggestionsRoute = createCompositeSloServerRoute({
   endpoint: 'GET /internal/observability/slo_composites/suggestions',
   options: { access: 'internal' },
   security: {
@@ -17,8 +16,7 @@ export const getCompositeSLOSuggestionsRoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  handler: async ({ request, logger, plugins, getScopedClients }) => {
-    await assertPlatinumLicense(plugins);
+  handler: async ({ context, request, logger, plugins, getScopedClients }) => {
     const { soClient } = await getScopedClients({ request, logger });
 
     const service = new GetCompositeSLOSuggestions(soClient);

@@ -88,22 +88,6 @@ const caseData: CaseUI = {
 
 const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  ruleDetailsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  showAlertDetails: jest.fn(),
-  useFetchAlertData: () => [
-    false,
-    {
-      'alert-id-1': '1234',
-      'alert-id-2': '1234',
-    },
-  ],
 };
 
 const userActivityQueryParams = {

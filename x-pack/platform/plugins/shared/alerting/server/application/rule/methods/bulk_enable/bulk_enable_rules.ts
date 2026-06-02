@@ -20,6 +20,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -48,6 +49,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -109,7 +111,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     action: 'ENABLE',
     logger: context.logger,
     bulkOperation: (filterKueryNode: KueryNode | null) =>
-      bulkEnableRulesWithOCC(context, { filter: filterKueryNode }),
+      bulkEnableRulesWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
     filter: kueryNodeFilterWithAuth,
   });
 
@@ -133,7 +135,6 @@ export const bulkEnableRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -156,7 +157,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
 
 const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -348,6 +349,7 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
+  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -362,6 +364,16 @@ const bulkEnableRulesWithOCC = async (
         },
       })
   );
+
+  await logRuleChanges({
+    ruleSOs: result.saved_objects,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: bulkEnableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping
   const ruleIdsFailedToEnable: Record<string, boolean> = {};

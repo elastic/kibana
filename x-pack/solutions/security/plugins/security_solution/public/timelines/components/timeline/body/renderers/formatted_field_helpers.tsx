@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elasti
 import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import styled from 'styled-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -30,13 +29,9 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { RuleDetails } from '../../../../../flyout_v2/rule';
+import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-
-const EventModuleFlexItem = styled(EuiFlexItem)`
-  width: 100%;
-`;
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -249,7 +244,7 @@ export const renderEventModule = ({
         endpointRefUrl != null && !isEmpty(endpointRefUrl) ? 'flexStart' : 'spaceBetween'
       }
     >
-      <EventModuleFlexItem>{content}</EventModuleFlexItem>
+      <EuiFlexItem css={{ width: '100%' }}>{content}</EuiFlexItem>
       {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip

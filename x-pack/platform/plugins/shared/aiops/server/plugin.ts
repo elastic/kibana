@@ -20,6 +20,8 @@ import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { changePointChartEmbeddableStateSchema } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import { logRateAnalysisEmbeddableStateSchema } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { isActiveLicense } from './lib/license';
 import type {
   AiopsLicense,
@@ -85,6 +87,7 @@ export class AiopsPlugin
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
       title: 'Change point detection chart',
+      getSchema: () => changePointChartEmbeddableStateSchema,
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
@@ -101,6 +104,7 @@ export class AiopsPlugin
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
       title: 'Log rate analysis',
+      getSchema: () => logRateAnalysisEmbeddableStateSchema,
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,

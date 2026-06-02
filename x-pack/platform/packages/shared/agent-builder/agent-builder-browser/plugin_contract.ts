@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import type { ComponentType } from 'react';
+import type {
+  AttachmentInput,
+  ConversationAttachment,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
@@ -71,7 +76,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
 
   /**
    * Browser API tools that the agent can use to interact with the page.
@@ -92,6 +97,18 @@ export interface EmbeddableConversationProps {
    * ```
    */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+/**
+ * Props accepted by the publicly exposed `EmbeddableConversation` component.
+ *
+ * Inline embedders typically only need to pass `EmbeddableConversationProps`.
+ * `onClose` and `ariaLabelledBy` are optional — sensible defaults are provided
+ * by the plugin when omitted.
+ */
+export interface PublicEmbeddableConversationProps extends EmbeddableConversationProps {
+  onClose?: () => void;
+  ariaLabelledBy?: string;
 }
 
 /**
@@ -195,4 +212,10 @@ export interface AgentBuilderPluginStart {
     attachmentId: string,
     origin: string
   ) => Promise<UpdateOriginResponse>;
+  /**
+   * Inline-embeddable conversation component, pre-bound to the plugin's
+   * internal services. Render this anywhere in the app to host a fully
+   * functional agent_builder chat without the sidebar chrome.
+   */
+  EmbeddableConversation: ComponentType<PublicEmbeddableConversationProps>;
 }

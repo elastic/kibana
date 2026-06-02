@@ -16,6 +16,7 @@ import {
   type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
@@ -26,6 +27,7 @@ import type {
   AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
+  AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
@@ -119,11 +121,13 @@ export const getAppMenuItems = ({
 };
 
 export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
-  sortByOrder(staticItems ?? []).map(({ separator, ...item }, index) => ({
+  sortByOrder(staticItems ?? []).map(({ separator, ...item }) => ({
     ...item,
     overflow: true,
-    ...(index === 0 ? { separator: 'above' as const } : {}),
   }));
+
+export const hasNonGlobalStaticItems = (staticItems?: Array<{ global?: boolean }>): boolean =>
+  !!staticItems?.some((item) => !item.global);
 
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
@@ -278,12 +282,43 @@ export const getPopoverActionItems = ({
 };
 
 /**
+ * Generate switch items for the popover menu. The switch is rendered as the very last item
+ * with a separator above it.
+ */
+export const getPopoverSwitchItems = ({
+  switchConfig,
+}: {
+  switchConfig: AppMenuSwitch;
+}): EuiContextMenuPanelItemDescriptor[] => {
+  const separator = createSeparatorItem('switch-separator');
+
+  return [
+    separator,
+    {
+      key: `switch-${switchConfig.id}`,
+      renderItem: () => (
+        <EuiSwitch
+          id={switchConfig.id}
+          label={switchConfig.label}
+          labelProps={switchConfig.labelProps}
+          checked={switchConfig.checked}
+          onChange={(e) => switchConfig.onChange(e.target.checked)}
+          compressed
+          data-test-subj={switchConfig['data-test-subj'] ?? 'app-menu-switch'}
+        />
+      ),
+    },
+  ];
+};
+
+/**
  * Recursively generate EUI context menu panels from the provided menu items.
  */
 export const getPopoverPanels = ({
   items,
   staticItems,
   primaryActionItem,
+  switchConfig,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
   rootPopoverTestId,
@@ -294,6 +329,7 @@ export const getPopoverPanels = ({
   items: AppMenuPopoverItem[];
   staticItems?: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
+  switchConfig?: AppMenuSwitch;
   startPanelId?: number;
   rootPanelWidth?: number;
   rootPopoverTestId?: string;
@@ -303,6 +339,7 @@ export const getPopoverPanels = ({
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem);
+  const hasSwitchItem = Boolean(switchConfig);
   let currentPanelId = startPanelId;
 
   const processItems = ({
@@ -398,10 +435,13 @@ export const getPopoverPanels = ({
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
     if (staticPanel && mainPanel) {
-      mainPanel.items = [
-        ...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]),
-        ...(staticPanel.items as EuiContextMenuPanelItemDescriptor[]),
-      ];
+      const mainItems = mainPanel.items as EuiContextMenuPanelItemDescriptor[];
+      const staticPanelItems = staticPanel.items as EuiContextMenuPanelItemDescriptor[];
+
+      // Only add a separator between regular and static items
+      const separator = mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
+
+      mainPanel.items = [...mainItems, ...separator, ...staticPanelItems];
       panels.splice(panels.indexOf(staticPanel), 1);
     }
   }
@@ -410,19 +450,23 @@ export const getPopoverPanels = ({
    * Action items are only added to the main panel and only in lower breakpoints (below "m").
    * They should not be available to be added via config.
    */
+  const mainPanel = panels.find((panel) => panel.id === startPanelId);
+
+  if (!mainPanel) return panels;
+
   if (hasActionItems) {
-    const mainPanel = panels.find((panel) => panel.id === startPanelId);
-
-    if (!mainPanel) return panels;
-
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
       onCloseOverflowButton: onClose,
     });
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
+  }
 
-    return panels;
+  if (hasSwitchItem && switchConfig) {
+    const switchItems = getPopoverSwitchItems({ switchConfig });
+
+    mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...switchItems];
   }
 
   return panels;

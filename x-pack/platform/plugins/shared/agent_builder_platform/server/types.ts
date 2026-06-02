@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentContextLayerPluginSetup,
@@ -17,7 +16,6 @@ import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
-  workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   agentContextLayer: AgentContextLayerPluginSetup;
   actions: ActionsPluginSetup;

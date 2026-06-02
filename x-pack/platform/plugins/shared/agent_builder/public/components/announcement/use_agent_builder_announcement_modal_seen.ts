@@ -9,6 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { firstValueFrom, take } from 'rxjs';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 
+const ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY = 'kibana.agentBuilderAnnouncementModalSeen';
+
 function parseSeenMap(json: string | undefined): Record<string, boolean> {
   if (!json) {
     return {};
@@ -35,6 +37,15 @@ function legacyMapHasAnyDismissed(map: Record<string, boolean>): boolean {
 export async function getAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
 ): Promise<boolean> {
+  // localStorage fallback for environments where user profile updates are unavailable (e.g. reverse proxy auth)
+  try {
+    if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
+      return true;
+    }
+  } catch {
+    // ignore storage access errors
+  }
+
   const enabled = await firstValueFrom(userProfile.getEnabled$().pipe(take(1)));
   if (!enabled) {
     return true;
@@ -64,6 +75,13 @@ export async function getAnnouncementModalSeen(
 export async function setAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
 ): Promise<void> {
+  try {
+    if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
+      return;
+    }
+  } catch {
+    // ignore storage access errors
+  }
   const enabled = await firstValueFrom(userProfile.getEnabled$().pipe(take(1)));
   if (!enabled) {
     return;
@@ -85,7 +103,12 @@ export async function setAnnouncementModalSeen(
       },
     });
   } catch {
-    // No browser fallback; UI still hides via local isDismissed on the controller.
+    // Fall back to localStorage when user profile updates are unavailable (e.g., reverse proxy auth).
+    try {
+      localStorage.setItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY, 'true');
+    } catch {
+      // ignore storage access errors
+    }
   }
 }
 

@@ -13,6 +13,7 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
 export { PLUGIN } from './plugin';
+export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';
 export { gapStatus, gapFillStatus } from './gap_status';
 export type { GapStatus, GapFillStatus } from './gap_status';
 export { gapReasonType, DEFAULT_EXCLUDED_GAP_REASONS } from './gap_reason';

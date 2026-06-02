@@ -108,6 +108,9 @@ import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
+import { registerEmbeddables } from './embeddable/register_embeddables';
+import { registerServiceMapAttachment } from './agent_builder/attachment_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -461,24 +464,38 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'service-groups-list',
           title: serviceGroupsTitle,
           path: '/service-groups',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'traces',
           title: tracesTitle,
           path: '/traces',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        {
+          id: 'service-map',
+          title: serviceMapTitle,
+          path: '/service-map',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'settings',
+          title: apmSettingsTitle,
+          path: '/settings',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
@@ -510,20 +527,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    import('./components/alerting/rule_types/register_apm_rule_types').then(
-      ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
-      }
-    );
-    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
-      registerEmbeddables({
-        coreSetup: core,
-        pluginsSetup: plugins,
-        config,
-        kibanaEnvironment,
-        observabilityRuleTypeRegistry,
-        telemetry,
-      });
+    registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
+    });
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
@@ -550,9 +568,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       setApmInternalServices({});
     }
     if (plugins.agentBuilder) {
-      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
-        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
-      });
+      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
