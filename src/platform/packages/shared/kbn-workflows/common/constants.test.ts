@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOWS_UI_SETTING_ID, WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from './constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from './constants';
 
 describe('Workflow Feature Flag Constants', () => {
   it('should export the correct UI setting ID', () => {

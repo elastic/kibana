@@ -8,11 +8,11 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflows } from '@kbn/workflows-ui';
+import { useShowManagedWorkflowsSetting, useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsPage } from '.';
 import { TestWrapper } from '../../shared/test_utils/test_wrapper';
 
@@ -26,6 +26,7 @@ jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
+    useShowManagedWorkflowsSetting: jest.fn(),
     useWorkflows: jest.fn(),
   };
 });
@@ -49,6 +50,9 @@ jest.mock('../../features/workflow_list', () => ({
 }));
 
 const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
+const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jest.MockedFunction<
+  typeof useShowManagedWorkflowsSetting
+>;
 
 const emptyWorkflowsResult = {
   data: { results: [], total: 0 },
@@ -91,6 +95,7 @@ describe('WorkflowsPage authorization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
   });
 
   it.each([
@@ -142,4 +147,36 @@ describe('WorkflowsPage authorization', () => {
       }
     }
   );
+
+  it('hides the managed filter when the setting is disabled', () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
+  });
+
+  it('uses the managed filter when the setting is enabled', async () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
+    fireEvent.click(screen.getByText('True'));
+
+    await waitFor(() => {
+      expect(mockUseWorkflows).toHaveBeenLastCalledWith(
+        expect.objectContaining({ managed: 'managed' })
+      );
+    });
+  });
 });

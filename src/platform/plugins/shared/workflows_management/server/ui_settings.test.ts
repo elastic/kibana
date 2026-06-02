@@ -34,7 +34,7 @@ describe('Workflows Management UI Settings', () => {
           value: true,
           readonly: false,
           requiresPageReload: true,
-          category: expect.any(Array),
+          category: ['workflows'],
         },
         [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: {
           description: expect.any(String),
@@ -42,7 +42,7 @@ describe('Workflows Management UI Settings', () => {
           schema: expect.any(Object),
           value: false,
           readonly: false,
-          category: expect.any(Array),
+          category: ['workflows'],
         },
       })
     );

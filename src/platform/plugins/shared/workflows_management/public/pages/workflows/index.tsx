@@ -19,10 +19,15 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  useShowManagedWorkflowsSetting,
+  useWorkflows,
+  useWorkflowsCapabilities,
+} from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
@@ -35,8 +40,24 @@ import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
 
+const MANAGED_FILTER_OPTIONS = [
+  {
+    label: i18n.translate('workflows.management.managedFilter.trueOptionLabel', {
+      defaultMessage: 'True',
+    }),
+    key: 'managed',
+  },
+  {
+    label: i18n.translate('workflows.management.managedFilter.falseOptionLabel', {
+      defaultMessage: 'False',
+    }),
+    key: 'unmanaged',
+  },
+];
+
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
+  const showManagedWorkflowsFilter = useShowManagedWorkflowsSetting();
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
@@ -46,15 +67,22 @@ export function WorkflowsPage() {
   const [filters, setFilters] = useState<Partial<WorkflowsSearchParams>>({});
 
   // Derive search from URL params + local filters
-  const search = useMemo(() => {
+  const search = useMemo<WorkflowsSearchParams>(() => {
     const params = new URLSearchParams(location.search);
-    return {
+    const nextSearch = {
       size: Number(params.get('size')) || WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
       page: Number(params.get('page')) || 1,
       query: params.get('query') || '',
       ...filters, // merge in filters from state
     };
-  }, [location.search, filters]);
+
+    if (!showManagedWorkflowsFilter) {
+      const { managed, ...searchWithoutManaged } = nextSearch;
+      return searchWithoutManaged;
+    }
+
+    return nextSearch;
+  }, [location.search, filters, showManagedWorkflowsFilter]);
 
   // Update search: sync query/page/size to URL, keep filters in state
   const setSearch = useCallback(
@@ -216,6 +244,29 @@ export function WorkflowsPage() {
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>
+              {showManagedWorkflowsFilter ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFilterGroup>
+                    <WorkflowsFilterPopover
+                      filter="managed"
+                      title={i18n.translate('workflows.management.managedFilter.title', {
+                        defaultMessage: 'Managed',
+                      })}
+                      values={MANAGED_FILTER_OPTIONS}
+                      selectedValues={
+                        search.managed === 'managed' || search.managed === 'unmanaged'
+                          ? [search.managed]
+                          : []
+                      }
+                      singleSelection
+                      onSelectedValuesChanged={(newValues) => {
+                        const [managed] = newValues as WorkflowsSearchParams['managed'][];
+                        setSearch({ ...search, managed });
+                      }}
+                    />
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
           </>

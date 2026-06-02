@@ -50,7 +50,7 @@ export const registerUISettings = (
       value: true,
       readonly: false,
       requiresPageReload: true,
-      category: ['general'],
+      category: ['workflows'],
     },
     [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: {
       description: i18n.translate(
