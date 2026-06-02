@@ -16,10 +16,8 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
-  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
@@ -36,14 +34,12 @@ const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new AttachmentService({
       log: mockLogger,
-      persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
     });
@@ -235,7 +231,6 @@ describe('AttachmentService', () => {
     it('when enabled, create writes to CASE_ATTACHMENT_SAVED_OBJECT with unified attributes', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -270,6 +265,69 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, unified file create round-trips: extracts `attachmentId` to refs on write and re-injects it on the response', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      const fileMetadata = {
+        files: [
+          {
+            name: 'screenshot',
+            extension: 'png',
+            mimeType: 'image/png',
+            created: '2024-01-01T00:00:00.000Z',
+          },
+        ],
+        soType: 'file' as const,
+      };
+
+      const fileAttrs = {
+        type: 'file' as const,
+        attachmentId: 'file-id-1',
+        metadata: fileMetadata,
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      // SO-client `create` is what the production extractor would have written:
+      // `attachmentId` left on attributes AND mirrored into references.
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: '1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        attributes: fileAttrs,
+        references: [{ id: 'file-id-1', name: 'attachmentId', type: 'file' }],
+      });
+
+      const result = await serviceWithFlagOn.create({
+        attributes: fileAttrs,
+        references: [],
+        id: '1',
+      });
+
+      const writeCall = unsecuredSavedObjectsClient.create.mock.calls[0];
+      expect(writeCall[0]).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+      const writtenRefs =
+        (writeCall[2] as { references?: Array<{ name: string }> }).references ?? [];
+      expect(writtenRefs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'file-id-1', name: 'attachmentId', type: 'file' }),
+        ])
+      );
+
+      // Response shape preserves the unified `attachmentId` for downstream callers.
+      expect(result.attributes).toEqual(
+        expect.objectContaining({ type: 'file', attachmentId: 'file-id-1' })
+      );
+    });
+
     it('when disabled, create writes to CASE_COMMENT_SAVED_OBJECT with legacy attributes', async () => {
       unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
 
@@ -289,7 +347,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkCreate writes to CASE_ATTACHMENT_SAVED_OBJECT', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -326,6 +383,85 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+      const pushedAt = '2024-01-02T00:00:00.000Z';
+      const pushedBy = { username: 'pusher', full_name: null, email: null };
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: { ...unifiedAttrs, pushed_at: pushedAt, pushed_by: pushedBy },
+            references: [],
+            version: 'v2',
+          },
+        ],
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: true,
+        })
+      ).resolves.not.toThrow();
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            attributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { type: 'comment', data: { content: 'hello' } },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid attributes: expected owner when transforming attachment patch"`
+      );
+    });
+
     it('when disabled, bulkCreate writes to CASE_COMMENT_SAVED_OBJECT', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [createUserAttachment()],
@@ -341,12 +477,160 @@ describe('AttachmentService', () => {
         expect.any(Object)
       );
     });
+
+    // Regression: when a unified-shape payload (e.g. `security.endpoint`) is
+    // written via the legacy `cases-comments` storage, the persisted SO must be
+    // byte-for-byte equivalent to a pre-migration legacy attachment — i.e. no
+    // orphan `attachmentId: null`, `metadata: null`, or `data: null` keys
+    // leaking from the unified shape into the legacy `_source`.
+    describe('byte-for-byte legacy storage equivalence', () => {
+      const unifiedEndpointAttrs = {
+        type: 'security.endpoint',
+        attachmentId: 'sec-endpoint-1',
+        // Post-lift wire shape: analyst comment lives on `data.content`, metadata
+        // carries only the machine-derived facts (`command`, `targets`). The legacy
+        // round-trip lowers `data.content` back into `externalReferenceMetadata.comment`.
+        data: { content: 'isolated by op' },
+        metadata: {
+          command: 'isolate',
+          targets: [
+            {
+              endpointId: 'endpoint-1',
+              hostname: 'host-1',
+              agentType: 'endpoint' as const,
+            },
+          ],
+        },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      const expectNoUnifiedOrphans = (persistedAttributes: unknown): void => {
+        expect(persistedAttributes).not.toHaveProperty('attachmentId');
+        expect(persistedAttributes).not.toHaveProperty('metadata');
+        expect(persistedAttributes).not.toHaveProperty('data');
+      };
+
+      it('create strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          id: '1',
+          type: CASE_COMMENT_SAVED_OBJECT,
+          attributes: { ...createUserAttachment().attributes },
+          references: [],
+        });
+
+        await service.create({
+          attributes: unifiedEndpointAttrs,
+          references: [],
+          id: '1',
+        });
+
+        const [soType, persistedAttributes] = unsecuredSavedObjectsClient.create.mock.calls[0];
+        expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedAttributes);
+        // Sanity: the payload was actually converted to legacy externalReference shape.
+        expect(persistedAttributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('bulkCreate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createUserAttachment()],
+        });
+
+        await service.bulkCreate({
+          attachments: [{ attributes: unifiedEndpointAttrs, references: [], id: '1' }],
+          refresh: false,
+        });
+
+        const persistedSos = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+        expect(persistedSos).toHaveLength(1);
+        expect(persistedSos[0].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedSos[0].attributes);
+        expect(persistedSos[0].attributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('update strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        // `update` first resolves the SO type via `resolveAttachmentSavedObjectType`,
+        // which probes `cases-attachments` then falls back to `cases-comments`.
+        // Simulate the legacy-only state: 404 on the unified type, hit on the legacy type.
+        unsecuredSavedObjectsClient.get.mockImplementation((type: string) => {
+          if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
+            return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
+          }
+          return Promise.resolve(createUserAttachment());
+        });
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment());
+
+        await service.update({
+          savedObjectId: '1',
+          updatedAttributes: unifiedEndpointAttrs,
+          options: { references: [] },
+        });
+
+        const [soType, , persistedAttributes] = unsecuredSavedObjectsClient.update.mock.calls[0];
+        expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedAttributes);
+        expect(persistedAttributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('bulkUpdate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createUserAttachment()],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: '1',
+              updatedAttributes: unifiedEndpointAttrs,
+              options: { references: [] },
+            },
+          ],
+        });
+
+        const persistedSos = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0];
+        expect(persistedSos).toHaveLength(1);
+        expect(persistedSos[0].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedSos[0].attributes);
+        expect(persistedSos[0].attributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+    });
   });
 
   describe('update', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -479,7 +763,7 @@ describe('AttachmentService', () => {
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -665,7 +949,6 @@ describe('AttachmentService', () => {
     it('uses a single paginated find call when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -708,7 +991,6 @@ describe('AttachmentService', () => {
     it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -728,7 +1010,6 @@ describe('AttachmentService', () => {
     it('transforms unified comment find results to legacy output', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -902,6 +1183,35 @@ describe('AttachmentService', () => {
       });
 
       expect(res).toBe(total);
+    });
+
+    it('when enabled, sums legacy + unified counts and excludes `file` from the unified type filter', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(2).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
+        )
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(3).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
+        );
+
+      const res = await serviceWithFlagOn.countPersistableStateAndExternalReferenceAttachments({
+        caseId: 'test-id',
+      });
+
+      expect(res).toBe(5);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      const unifiedCallArgs = unsecuredSavedObjectsClient.find.mock.calls[1][0];
+      expect(unifiedCallArgs.type).toBe('cases-attachments');
+
+      const filterAsString = JSON.stringify(unifiedCallArgs.filter);
+      expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
   });
 });

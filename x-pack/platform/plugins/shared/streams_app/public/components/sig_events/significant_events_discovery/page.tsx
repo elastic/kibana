@@ -5,37 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useIsMutating } from '@kbn/react-query';
+import React, { useCallback, useMemo } from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
-import { FeedbackButton } from '../../feedback_button';
+import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { FeaturesTable } from './components/features_table/features_table';
+import {
+  KnowledgeIndicatorsTable,
+  KiGenerationProvider,
+} from './components/knowledge_indicators_table';
+import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
+import { MemoryTab } from './components/memory/tab';
+import { DetectionsTab } from './components/detections_tab';
+import { DiscoveriesTab } from './components/discoveries_tab';
+import { SigEventsTab } from './components/sig_events_tab';
 
 const discoveryTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
+  'insights',
+  'detections',
+  'discoveries',
   'significant_events',
+  'memory',
   'settings',
 ] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
@@ -50,14 +55,28 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
+  const {
+    core: {
+      application: { getUrlForApp },
+      notifications: { toasts },
+    },
+  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
-  const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
 
-  const isPromotingQueries = useIsMutating({ mutationKey: ['promoteAll'] }) > 0;
+  const onOnboardingFailed = useCallback(
+    (error: string) => {
+      toasts.addError(getFormattedError(new Error(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
+    },
+    [toasts]
+  );
+
+  const { isMemoryEnabled } = useDiscoverySettings();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -69,6 +88,90 @@ export function SignificantEventsDiscoveryPage() {
       },
     ];
   }, []);
+
+  const tabs = useMemo(() => {
+    const baseTabs = [
+      {
+        id: 'streams',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
+          defaultMessage: 'Streams',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
+        isSelected: tab === 'streams',
+      },
+      {
+        id: 'knowledge_indicators',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
+          defaultMessage: 'Knowledge Indicators',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
+        isSelected: tab === 'knowledge_indicators',
+      },
+      {
+        id: 'queries',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+          defaultMessage: 'Rules',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
+        isSelected: tab === 'queries',
+      },
+
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.detectionsTab', {
+          defaultMessage: 'Detections',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'detections' } }),
+        isSelected: tab === 'detections',
+      },
+      {
+        id: 'discoveries',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.discoveriesTab', {
+          defaultMessage: 'Discoveries',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'discoveries' } }),
+        isSelected: tab === 'discoveries',
+      },
+      {
+        id: 'significant_events',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
+          defaultMessage: 'Significant Events',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
+        isSelected: tab === 'significant_events',
+      },
+      {
+        id: 'insights',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
+          defaultMessage: 'Insights',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
+        isSelected: tab === 'insights',
+      },
+    ];
+
+    if (isMemoryEnabled) {
+      baseTabs.push({
+        id: 'memory',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+          defaultMessage: 'Memory',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+        isSelected: tab === 'memory',
+      });
+    }
+
+    baseTabs.push({
+      id: 'settings',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+      isSelected: tab === 'settings',
+    });
+
+    return baseTabs;
+  }, [tab, router, isMemoryEnabled]);
 
   if (significantEventsDiscovery === undefined) {
     // Waiting to load license
@@ -83,53 +186,9 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
-  const tabs = [
-    {
-      id: 'streams',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
-        defaultMessage: 'Streams',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
-      isSelected: tab === 'streams',
-    },
-    {
-      id: 'knowledge_indicators',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
-        defaultMessage: 'Knowledge Indicators',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
-      isSelected: tab === 'knowledge_indicators',
-    },
-    {
-      id: 'queries',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-        defaultMessage: 'Rules',
-      }),
-      append: isPromotingQueries ? (
-        <EuiLoadingSpinner />
-      ) : unbackedQueriesCount > 0 ? (
-        <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-      ) : undefined,
-      href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
-      isSelected: tab === 'queries',
-    },
-    {
-      id: 'significant_events',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
-        defaultMessage: 'Significant Events',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
-      isSelected: tab === 'significant_events',
-    },
-    {
-      id: 'settings',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
-        defaultMessage: 'Settings',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
-      isSelected: tab === 'settings',
-    },
-  ];
+  if (tab === 'memory' && !isMemoryEnabled) {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
+  }
 
   return (
     <>
@@ -152,18 +211,34 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <FeedbackButton />
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={getUrlForApp('observability', { path: '/nightshift' })}
+                iconType="moon"
+                size="s"
+              >
+                {i18n.translate('xpack.streams.significantEventsDiscovery.nightshiftButtonLabel', {
+                  defaultMessage: 'Nightshift',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         tabs={tabs}
       />
-      <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'knowledge_indicators' && <FeaturesTable />}
-        {tab === 'queries' && <QueriesTable />}
-        {tab === 'significant_events' && <InsightsTab />}
-        {tab === 'settings' && <SettingsTab />}
-      </StreamsAppPageTemplate.Body>
+      <KiGenerationProvider onFailed={onOnboardingFailed}>
+        <StreamsAppPageTemplate.Body grow>
+          {tab === 'streams' && <StreamsView />}
+          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+          {tab === 'queries' && <QueriesTable />}
+          {tab === 'insights' && <InsightsTab />}
+          {tab === 'detections' && <DetectionsTab />}
+          {tab === 'discoveries' && <DiscoveriesTab />}
+          {tab === 'significant_events' && <SigEventsTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+          {tab === 'settings' && <SettingsTab />}
+        </StreamsAppPageTemplate.Body>
+      </KiGenerationProvider>
     </>
   );
 }

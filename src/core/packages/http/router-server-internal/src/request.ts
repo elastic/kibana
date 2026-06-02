@@ -154,6 +154,8 @@ export class CoreKibanaRequest<
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: string;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -182,11 +184,14 @@ export class CoreKibanaRequest<
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
+    this.spaceId = appState?.spaceId ?? 'default';
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
+    this.headers = isRealReq
+      ? (deepFreeze({ ...request.headers }) as unknown as Headers)
+      : (request.headers as unknown as Headers);
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
     // set to false if elasticInternalOrigin is explicitly set to false

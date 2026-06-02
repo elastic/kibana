@@ -63,11 +63,13 @@ if (showHelp) {
         --skip-generic-folders               {dim Skip building package, plugins, etc from source}
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}
         --skip-node-download                 {dim Reuse existing downloads of node.js}
+        --skip-serverless                    {dim Don't build serverless platforms or docker images}
         --skip-os-packages                   {dim Don't produce rpm/deb/docker packages}
         --verbose,-v                         {dim Turn on verbose logging}
         --version-qualifier                  {dim Suffix version with a qualifier}
         --with-example-plugins               {dim Pass to include example plugins in the build output}
         --with-test-plugins                  {dim Pass to include test plugins in the build output}
+        --tar-zstd                           {dim Create kibana.tar.zst archives instead of tar.gz}
     `) + '\n'
   );
   process.exit(1);

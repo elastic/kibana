@@ -22,13 +22,13 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -63,6 +63,7 @@ import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager'
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
+import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
 /**
@@ -183,7 +184,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
           await Promise.all([
@@ -245,6 +246,10 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    if (plugins.agentBuilder) {
+      registerEsqlResultsAttachmentUi(plugins.agentBuilder);
+    }
+
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
 
     plugins.uiActions.addTriggerActionAsync(
@@ -434,7 +439,7 @@ export class DiscoverPlugin
       });
     };
 
-    plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
+    plugins.embeddable.registerAddFromLibraryType<DiscoverSessionAttributes>({
       onAdd: async (container, savedObject) => {
         const { addPanelFromLibrary } = await getEmbeddableServices();
         await addPanelFromLibrary(container, savedObject);
@@ -446,7 +451,7 @@ export class DiscoverPlugin
       getIconForSavedObject: () => 'discoverApp',
     });
 
-    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesForEmbeddable(),
@@ -460,19 +465,22 @@ export class DiscoverPlugin
     });
 
     // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
-    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
-      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
-        await Promise.all([
-          getStartServices(),
-          getDiscoverServicesForEmbeddable(),
-          getEmbeddableServices(),
-        ]);
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      LEGACY_LOG_STREAM_EMBEDDABLE,
+      async () => {
+        const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+          await Promise.all([
+            getStartServices(),
+            getDiscoverServicesForEmbeddable(),
+            getEmbeddableServices(),
+          ]);
 
-      return getLegacyLogStreamEmbeddableFactory({
-        startServices,
-        discoverServices,
-      });
-    });
+        return getLegacyLogStreamEmbeddableFactory({
+          startServices,
+          discoverServices,
+        });
+      }
+    );
 
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,

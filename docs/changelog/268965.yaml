@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268965
+issues:
+- https://github.com/elastic/kibana/issues/222215
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Dashboards and visualizations
+title: "Improve dashboard panel validation and compatibility"
+description: "Adds schema registration for dashboard embeddables to improve panel validation and ensure compatibility across Kibana versions."

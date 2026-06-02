@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inbox-plugin",
+  "owner": ["@elastic/security-genai-research-and-development"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "inbox",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "inbox"],
+    "requiredPlugins": ["features"],
+    "optionalPlugins": ["spaces"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

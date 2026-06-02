@@ -26,6 +26,7 @@ interface ButtonsFooterProps {
   hideActionButton?: boolean;
   isActionDisabled?: boolean;
   isActionLoading?: boolean;
+  isCancelDisabled?: boolean;
 }
 export const ButtonsFooter = React.memo<ButtonsFooterProps>(
   ({
@@ -37,6 +38,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
     hideActionButton = false,
     isActionDisabled = false,
     isActionLoading = false,
+    isCancelDisabled = false,
   }) => {
     return (
       <KibanaPageTemplate.BottomBar paddingSize="m" position="fixed" css={bottomBarCss}>
@@ -60,6 +62,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                       <EuiButtonEmpty
                         color="text"
                         onClick={onCancel}
+                        isDisabled={isCancelDisabled}
                         data-test-subj="buttonsFooter-cancelButton"
                       >
                         {cancelButtonText || (

@@ -12,24 +12,28 @@ import fs from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
 import YAML, { LineCounter } from 'yaml';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
+import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
-import { validateCustomProperties } from './validate_custom_properties';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 
 const WARMUP_ITERATIONS = 5;
+
+const stubEsqlCallbacks: ESQLCallbacks = {};
 
 interface BenchmarkConfig {
   iterations: number;
@@ -142,13 +146,8 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
       validateIfConditions(workflowLookup, lineCounter);
     }, iterations);
 
-    timings.collectAllCustomPropertyItems = benchmarkSync(() => {
-      collectAllCustomPropertyItems(
-        workflowLookup,
-        lineCounter,
-        (stepType: string, scope: 'config' | 'input', key: string) =>
-          getPropertyHandler(stepType, scope, key)
-      );
+    timings.collectAllStepPropertyItems = benchmarkSync(() => {
+      collectAllStepPropertyItems(workflowLookup, lineCounter, getPropertyHandler);
     }, iterations);
   }
 
@@ -229,17 +228,12 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
     if (workflowLookup && lc) {
       start = performance.now();
-      const customPropertyItems = collectAllCustomPropertyItems(
-        workflowLookup,
-        lc,
-        (stepType: string, scope: 'config' | 'input', key: string) =>
-          getPropertyHandler(stepType, scope, key)
-      );
-      record('collectAllCustomPropertyItems', performance.now() - start);
+      const stepPropertyItems = collectAllStepPropertyItems(workflowLookup, lc, getPropertyHandler);
+      record('collectAllStepPropertyItems', performance.now() - start);
 
       start = performance.now();
-      await validateCustomProperties(customPropertyItems);
-      record('validateCustomProperties', performance.now() - start);
+      await validateStepProperties(stepPropertyItems);
+      record('validateStepProperties', performance.now() - start);
 
       start = performance.now();
       validateWorkflowInputs(workflowLookup, null, lc);
@@ -248,6 +242,10 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
       start = performance.now();
       validateIfConditions(workflowLookup, lc);
       record('validateIfConditions', performance.now() - start);
+
+      start = performance.now();
+      await validateEsqlSteps(workflowLookup, lc, model, stubEsqlCallbacks);
+      record('validateEsqlSteps', performance.now() - start);
     }
 
     if (workflowGraph && workflowDefinition) {
@@ -295,7 +293,8 @@ const SUITES = [
 ] as const;
 
 for (const suite of SUITES) {
-  describe(`YAML validation performance: ${suite.name}`, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/261389
+  describe.skip(`YAML validation performance: ${suite.name}`, () => {
     let yamlContent: string;
 
     beforeAll(() => {

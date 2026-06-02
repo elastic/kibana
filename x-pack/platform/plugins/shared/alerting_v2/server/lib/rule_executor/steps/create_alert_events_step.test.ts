@@ -43,6 +43,7 @@ describe('CreateAlertEventsStep', () => {
       status: 'breached',
       source: 'internal',
       type: 'signal',
+      space_id: 'default',
     });
 
     expect(result.state.alertEventsBatch?.[1]).toEqual({
@@ -54,6 +55,7 @@ describe('CreateAlertEventsStep', () => {
       status: 'breached',
       source: 'internal',
       type: 'signal',
+      space_id: 'default',
     });
   });
 

@@ -25,6 +25,24 @@ export const createConditionScript = (threshold: number[], comparator: COMPARATO
       },
     };
   }
+  if (comparator === COMPARATORS.BETWEEN_INCLUSIVE && threshold.length === 2) {
+    return {
+      source: `params.value >= params.threshold0 && params.value <= params.threshold1 ? 1 : 0`,
+      params: {
+        threshold0: threshold[0],
+        threshold1: threshold[1],
+      },
+    };
+  }
+  if (comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE && threshold.length === 2) {
+    return {
+      source: `params.value >= params.threshold0 && params.value <= params.threshold1 ? 0 : 1`,
+      params: {
+        threshold0: threshold[0],
+        threshold1: threshold[1],
+      },
+    };
+  }
   return {
     source: `params.value ${comparator} params.threshold ? 1 : 0`,
     params: {

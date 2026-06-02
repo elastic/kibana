@@ -91,7 +91,7 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
   },
   [fieldConstants.TRACE_ID_FIELD]: {
     title: fieldLabels.TRACE_ID_LABEL,
-    formatter: (value: unknown, formattedValue: string) => (
+    formatter: (value, formattedValue) => (
       <HighlightField value={value as string} formattedValue={formattedValue} />
     ),
   },

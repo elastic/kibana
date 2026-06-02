@@ -11,6 +11,8 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   CompactionStep,
+  BackgroundAgentCompleteStep,
+  TodosStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -36,6 +38,8 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
       | 'custom_fields'
       | 'events'
       | 'conversation_mode'
+      | 'status'
+      | 'read'
     >
   >;
 
@@ -64,7 +68,9 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 export type PersistentConversationRoundStep =
   | PersistentToolCallStep
   | ReasoningStep
-  | CompactionStep;
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

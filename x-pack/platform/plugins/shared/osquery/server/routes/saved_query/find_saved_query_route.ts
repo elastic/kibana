@@ -7,7 +7,6 @@
 
 import type { IRouter } from '@kbn/core/server';
 
-import { omit } from 'lodash';
 import { escapeQuotes, escapeKuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -22,6 +21,7 @@ import { convertECSMappingToObject } from '../utils';
 import { getInstalledSavedQueriesMap } from './utils';
 import type { FindSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
 import { findSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryResponseSchema } from './response_schemas';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +43,11 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               typeof findSavedQueryRequestQuerySchema,
               FindSavedQueryRequestQuerySchema
             >(findSavedQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findSavedQueryResponseSchema,
+            },
           },
         },
       },
@@ -73,8 +78,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             const searchTerm = escapeKuery(request.query.search.trim());
             if (searchTerm) {
               const searchFilter = [
-                `${savedQuerySavedObjectType}.attributes.id: ${searchTerm}*`,
-                `${savedQuerySavedObjectType}.attributes.description: ${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.id: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.description: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.query: *${searchTerm}*`,
               ].join(' OR ');
               filters.push(`(${searchFilter})`);
             }
@@ -157,7 +163,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
           return response.ok({
             body: {
-              ...omit(savedQueries, 'saved_objects'),
+              page: savedQueries.page,
+              per_page: savedQueries.per_page,
+              total: savedQueries.total,
               data: savedObjects,
             },
           });

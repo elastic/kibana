@@ -111,6 +111,8 @@ class ConversationClientImpl implements ConversationClient {
         'template_id',
         'template_snapshot',
         'chat_mode',
+        'status',
+        'read',
       ],
       query: {
         bool: {

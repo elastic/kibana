@@ -6,7 +6,7 @@
  */
 
 import type { Node } from 'unist';
-import type { Parent } from 'mdast';
+import type { Code, Parent } from 'mdast';
 
 export const customCodeBlockLanguagePlugin = () => {
   const visitor = (node: Node) => {
@@ -17,15 +17,17 @@ export const customCodeBlockLanguagePlugin = () => {
       });
     }
 
-    if (
-      node.type === 'code' &&
-      (node.lang === 'eql' ||
-        node.lang === 'esql' ||
-        node.lang === 'kql' ||
-        node.lang === 'dsl' ||
-        node.lang === 'json')
-    ) {
-      node.type = 'customCodeBlock';
+    if (node.type === 'code') {
+      const codeNode = node as Code;
+      if (
+        codeNode.lang === 'eql' ||
+        codeNode.lang === 'esql' ||
+        codeNode.lang === 'kql' ||
+        codeNode.lang === 'dsl' ||
+        codeNode.lang === 'json'
+      ) {
+        node.type = 'customCodeBlock';
+      }
     }
   };
 

@@ -80,7 +80,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   describe('when rangeFrom is missing', () => {
-    it('returns isDateRangeSet as false and redirect fills the default rangeFrom', () => {
+    it('fills default rangeFrom and keeps rangeTo when resolved range is valid', () => {
       setLocation('?rangeTo=now%2B30m&otherParam=foo');
 
       const { result } = renderHook(() => useDateRangeRedirect());
@@ -97,7 +97,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   describe('when rangeTo is missing', () => {
-    it('returns isDateRangeSet as false and redirect fills the default rangeTo', () => {
+    it('fills default rangeTo and keeps rangeFrom when resolved range is valid', () => {
       setLocation('?rangeFrom=now-30m&otherParam=foo');
 
       const { result } = renderHook(() => useDateRangeRedirect());
@@ -131,7 +131,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   describe('when rangeFrom is invalid', () => {
-    it('returns isDateRangeSet as false and redirect replaces rangeFrom with default', () => {
+    it('fills default rangeFrom and keeps rangeTo when resolved range is valid', () => {
       setLocation('?rangeFrom=invalid_date&rangeTo=now%2B30m');
 
       const { result } = renderHook(() => useDateRangeRedirect());
@@ -147,7 +147,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   describe('when rangeTo is invalid', () => {
-    it('returns isDateRangeSet as false and redirect replaces rangeTo with default', () => {
+    it('fills default rangeTo and keeps rangeFrom when resolved range is valid', () => {
       setLocation('?rangeFrom=now-30m&rangeTo=invalid_date');
 
       const { result } = renderHook(() => useDateRangeRedirect());
@@ -176,6 +176,124 @@ describe('useDateRangeRedirect', () => {
       expect(search.rangeFrom).toBe('now-15m');
       expect(search.rangeTo).toBe('now');
       expect(search.otherParam).toBe('foo');
+    });
+  });
+
+  describe('when rangeFrom resolves to after rangeTo (inverted range)', () => {
+    it('returns isDateRangeSet as false and redirect replaces both with defaults', () => {
+      setLocation('?rangeFrom=now-11m&rangeTo=2020-01-01T00:00:00.000Z');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      expect(result.current.isDateRangeSet).toBe(false);
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now');
+    });
+
+    it('replaces both dates even when both are individually valid', () => {
+      setLocation('?rangeFrom=now&rangeTo=now-1h');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      expect(result.current.isDateRangeSet).toBe(false);
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now');
+    });
+  });
+
+  describe('when filling a default still produces a valid range', () => {
+    it('keeps rangeTo and fills default rangeFrom when rangeFrom is missing', () => {
+      setLocation('?rangeTo=now-5m');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now-5m');
+    });
+
+    it('keeps rangeFrom and fills default rangeTo when rangeTo is missing', () => {
+      setLocation('?rangeFrom=now-1h');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-1h');
+      expect(search.rangeTo).toBe('now');
+    });
+
+    it('keeps rangeTo and fills default rangeFrom when rangeFrom is invalid', () => {
+      setLocation('?rangeFrom=not-a-date&rangeTo=now-2m');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now-2m');
+    });
+
+    it('keeps rangeFrom and fills default rangeTo when rangeTo is invalid', () => {
+      setLocation('?rangeFrom=now-3h&rangeTo=banana');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-3h');
+      expect(search.rangeTo).toBe('now');
+    });
+  });
+
+  describe('when filling a default still produces an invalid range', () => {
+    it('resets both when rangeFrom is missing and rangeTo is before the default rangeFrom', () => {
+      setLocation('?rangeTo=now-20m');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now');
+    });
+
+    it('resets both when rangeFrom is invalid and rangeTo is before the default rangeFrom', () => {
+      setLocation('?rangeFrom=garbage&rangeTo=now-20m');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now');
+    });
+
+    it('resets both when rangeFrom is invalid and rangeTo is between default from and default to', () => {
+      setLocation('?rangeFrom=garbage&rangeTo=now-10m');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now-10m');
     });
   });
 

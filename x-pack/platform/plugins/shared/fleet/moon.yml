@@ -124,6 +124,11 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
   - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
+  - '@kbn/charts-theme'
+  - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
 tags:
   - plugin
   - prod

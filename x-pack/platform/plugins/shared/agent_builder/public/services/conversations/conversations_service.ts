@@ -10,6 +10,7 @@ import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
+  MarkReadConversationResponse,
   RenameConversationResponse,
   PatchConversationResponse,
   AppendConversationMessageResponse,
@@ -90,6 +91,19 @@ export class ConversationsService {
           ...(attachmentRefs !== undefined && { attachment_refs: attachmentRefs }),
         }),
       }
+    );
+  }
+
+  async updateReadStatus({
+    conversationId,
+    read,
+  }: {
+    conversationId: string;
+    read: boolean;
+  }): Promise<MarkReadConversationResponse> {
+    return await this.http.post<MarkReadConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_mark_read`,
+      { body: JSON.stringify({ read }) }
     );
   }
 }

@@ -131,8 +131,13 @@ const mockOptions = {
   isServerless: false,
 };
 
+const mockTimeRange = { start: Date.now() - 60000, end: Date.now() };
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  return jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+  return jest
+    .requireMock('./lib/evaluate_rule')
+    .evaluateRule.mockImplementation(() =>
+      response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
+    );
 };
 
 const mockLibs: any = {
@@ -395,6 +400,38 @@ describe('The custom threshold alert type', () => {
         expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
         setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected on both boundaries with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [1.0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [1.0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1.0], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1.0]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('does not alert on both boundaries with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1.0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1.0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1.0], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1.0]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
       test('reports expected values to the action context', async () => {
@@ -1131,6 +1168,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1],
           'kibana.alert.group': [
             {
@@ -1155,6 +1193,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [3],
           'kibana.alert.group': [
             {
@@ -1419,6 +1458,7 @@ describe('The custom threshold alert type', () => {
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
           'kibana.alert.evaluation.threshold': [1, 3],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
           'kibana.alert.group': [
             {
@@ -1730,6 +1770,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
 
@@ -1791,6 +1833,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
@@ -3246,6 +3290,22 @@ describe('The custom threshold alert type', () => {
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
       test('reports expected values to the action context', async () => {
         setResults(COMPARATORS.GREATER_THAN, [0.75], true);
         await execute(COMPARATORS.GREATER_THAN, [0.75]);
@@ -4004,6 +4064,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1],
           'kibana.alert.group': [
             {
@@ -4028,6 +4089,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [3],
           'kibana.alert.group': [
             {
@@ -4292,6 +4354,7 @@ describe('The custom threshold alert type', () => {
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
           'kibana.alert.evaluation.threshold': [1, 3],
+          'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
           'kibana.alert.group': [
             {
@@ -5025,6 +5088,22 @@ describe('The custom threshold alert type', () => {
         expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
         setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
       test('reports expected values to the action context', async () => {

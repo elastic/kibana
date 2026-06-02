@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
 import type { MMRegExp } from 'minimatch';
 import { minimatch } from 'minimatch';
@@ -42,6 +42,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -439,7 +440,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -653,7 +654,7 @@ export const getPackageUsageStats = async ({
 
   const filter = normalizeKuery(
     packagePolicySavedObjectType,
-    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
+    `${packagePolicySavedObjectType}.package.name: ${pkgName} AND NOT ${packagePolicySavedObjectType}.latest_revision: false`
   );
   const agentPolicyCount = new Set<string>();
   // using saved Objects client directly, instead of the `list()` method of `package_policy` service
@@ -709,9 +710,11 @@ export async function getPackageDependencies(
   );
 }
 
-interface PackageResponse {
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -767,6 +770,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -786,6 +793,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 

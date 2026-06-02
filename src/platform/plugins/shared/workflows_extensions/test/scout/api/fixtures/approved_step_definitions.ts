@@ -26,19 +26,19 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
+    handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
   },
   {
     id: 'ai.classify',
-    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+    handlerHash: '0dcc5fb63038d1cb5fe73dd7ae7744d3eb3dda9d95d7e1dd860e587926177553',
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
+    handlerHash: '3b7be086fd3479a81113a1d1f0bcc37e3e7f008e8fa5eaa2c905bf4b4a3b5ca6',
   },
   {
     id: 'ai.summarize',
-    handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
+    handlerHash: 'f4337c9b87598cd32c2b4a78494f4f015c655873b65f6e4ca981104ea432a2b0',
   },
   {
     id: 'data.aggregate',
@@ -62,7 +62,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+    handlerHash: '2eda52d265fc8683f625974f6909a5e0fb5ad6ee1eadd4ee89737ac5c8b4c8e1',
   },
   {
     id: 'data.parseJson',
@@ -83,6 +83,14 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
+  },
+  {
+    id: 'security.buildAlertEntityGraph',
+    handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
+  },
+  {
+    id: 'security.renderAlertNarrative',
+    handlerHash: '1719b8db582f3695a5bac6df5434285f101ebf4fa032702613f28dd33d978988',
   },
   {
     id: 'cases.addAlerts',
@@ -122,7 +130,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.deleteCases',
-    handlerHash: 'a18a2e1090962d85c945b12e16d13b53d21d08ad1dde449194f5e735d3cd7946',
+    handlerHash: '4fcd80128a7d6abe2da1645deae2823e4912271a49c0c9ba3e4121112ad0cd34',
   },
   {
     id: 'cases.deleteObservable',
@@ -130,15 +138,15 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.findCases',
-    handlerHash: '61ec2695a6ddba397c05b3845e9dbd3c66f9b299ed8568b8f4e7f3c187ff1c73',
+    handlerHash: 'e787e07fa01ca1f3f1ea070faeb78cd50447d1e02184aedcb2dd0d49aa9c6816',
   },
   {
     id: 'cases.findSimilarCases',
-    handlerHash: '647032606a8724390063eb7f093e84360b65ff6e44eecaa74222d7c557dfde02',
+    handlerHash: 'bc0f49aff3be36fbea2f169aa9bdd082b2cee5240af16b2f54ee9b931dee8412',
   },
   {
     id: 'cases.getAllAttachments',
-    handlerHash: '457c9c81535a0207aade08cf2bcc9f7a354f5760307da976ae8faca2d43338ee',
+    handlerHash: '32dc3d6f6e918e1cd89b6864bf275bfee7eb6de81e8eb3434d6b8e2c5b9af9b1',
   },
   {
     id: 'cases.getCase',
@@ -146,11 +154,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.getCases',
-    handlerHash: 'f5bb45aa044adfd07898a0ecd172f49d3d7580ca75a6c7fe5261487c6c6ae9e3',
+    handlerHash: 'f101c5ddc9e9f52611453c186a5ca1d33019e0ce4823c18c244deb7351928680',
   },
   {
     id: 'cases.getCasesByAlertId',
-    handlerHash: 'e2b50fd7bbbb6122db65f3a52ed78a4c24cb10304abf3927c69288ebb0f75fa7',
+    handlerHash: '0066f40a84dad03c0d745e43f342b72cc42a2d4ac3207533a9f7fe0695d79b78',
   },
   {
     id: 'cases.setCategory',
@@ -186,7 +194,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.updateCases',
-    handlerHash: '3ae63ce68db19a0ac7a7e6ccaba5807269c4ec035c37acf204713ae100048932',
+    handlerHash: 'd5b3622761a1c9a654a26b50f3f3f74c2d784d4ba8267dd21667d2014c94141b',
   },
   {
     id: 'cases.updateObservable',

@@ -106,6 +106,8 @@ const dateRangeSchema = t.type({
   to: dateType,
 });
 
+export type SLOStatus = t.TypeOf<typeof statusSchema>;
+
 export {
   ALL_VALUE,
   SLO_STATUS,

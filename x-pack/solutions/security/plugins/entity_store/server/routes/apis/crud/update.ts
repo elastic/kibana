@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -13,17 +14,21 @@ import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../..
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError, EntityNotFoundError } from '../../../domain/errors';
+import {
+  BadCRUDRequestError,
+  EntityNotFoundError,
+  EntityStoreNotInstalledError,
+} from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z
-  .object({
-    entityType: z.enum(ALL_ENTITY_TYPES),
-  })
-  .required();
+const paramsSchema = z.object({
+  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to update.'),
+});
 
 const querySchema = z.object({
-  force: BooleanFromString.optional().default(false),
+  force: BooleanFromString.optional()
+    .default(false)
+    .describe('When true, allows updating protected fields.'),
 });
 
 export function registerCRUDUpdate(router: EntityStorePluginRouter) {
@@ -31,6 +36,12 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.CRUD_UPDATE,
       access: 'public',
+      summary: 'Update an entity',
+      description:
+        'Update an existing entity record in the Entity Store. By default only certain fields can be updated. Set the `force` query parameter to `true` to update protected fields.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -48,6 +59,9 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
             query: buildRouteValidationWithZod(querySchema),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_update.yaml'),
+        },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
@@ -58,6 +72,9 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
         try {
           await crudClient.updateEntity(req.params.entityType, req.body, req.query.force);
         } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }

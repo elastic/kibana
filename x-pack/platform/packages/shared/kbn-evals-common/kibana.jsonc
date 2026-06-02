@@ -3,7 +3,7 @@
   "id": "@kbn/evals-common",
   "owner": [
     "@elastic/obs-ai-team",
-    "@elastic/security-generative-ai"
+    "@elastic/security-genai-research-and-development"
   ],
   "group": "platform",
   "visibility": "shared"

@@ -11,7 +11,7 @@ import {
   ONBOARDING_SIEM_MIGRATIONS_LIST,
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
 } from '../../../../screens/siem_migrations';
-import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { deleteConnectors, suppressGlobalAnnouncements } from '../../../../tasks/api_calls/common';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanDashboardsMigrationData } from '../../../../tasks/api_calls/siem_migrations';
 import { visit } from '../../../../tasks/navigation';
@@ -106,6 +106,8 @@ describe(
         },
         { interval: 500, timeout: 12000 }
       );
+      // esArchiver reloads clear persisted global UI settings; re-apply before first paint.
+      suppressGlobalAnnouncements();
       visit(`${GET_STARTED_URL}/siem_migrations`);
     });
 

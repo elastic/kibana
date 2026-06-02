@@ -37,3 +37,8 @@ export interface AppendConversationMessageResponse {
   conversation_id: string;
   event: UserMessageEvent;
 }
+
+export interface MarkReadConversationResponse {
+  id: string;
+  read: boolean;
+}

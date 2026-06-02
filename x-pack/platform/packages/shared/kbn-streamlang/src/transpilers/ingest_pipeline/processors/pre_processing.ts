@@ -15,6 +15,7 @@ import type { StreamlangProcessorDefinition } from '../../../../types/processors
 export const processorFieldRenames: Record<string, Record<string, string>> = {
   grok: { from: 'field', where: 'if' },
   dissect: { from: 'field', where: 'if' },
+  uri_parts: { from: 'field', to: 'target_field', where: 'if' },
   date: { from: 'field', to: 'target_field', where: 'if' },
   drop_document: { where: 'if' },
   math: { where: 'if' },
@@ -36,6 +37,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   network_direction: { where: 'if' },
   json_extract: { where: 'if' },
   enrich: { to: 'target_field', where: 'if' },
+  registered_domain: { where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 

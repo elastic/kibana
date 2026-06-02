@@ -10,7 +10,7 @@ import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/ap
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -20,6 +20,7 @@ import {
   ResolutionUpdateError,
   SelfLinkError,
 } from '../errors';
+import type { RefreshOption } from '../../infra/elasticsearch/resolution';
 import {
   searchEntitiesByIds,
   searchByResolvedToField,
@@ -54,6 +55,21 @@ export interface ResolutionGroup {
   group_size: number;
 }
 
+/** Options controlling how the underlying bulk write behaves. */
+export interface ResolutionWriteOptions {
+  /**
+   * When true, the bulk write blocks until the next index refresh fires
+   * (typically <1s) so a subsequent read of the affected docs is guaranteed
+   * to see the write. Default: false (fire-and-forget; reads may be stale
+   * for ~1s).
+   *
+   * Set to true from interactive request handlers (UI routes) where the
+   * caller will immediately refetch. Leave false for background tasks and
+   * bulk imports.
+   */
+  awaitVisibility?: boolean;
+}
+
 interface FetchedEntities {
   sources: Map<string, Record<string, unknown>>;
   docIds: Map<string, string>;
@@ -75,8 +91,14 @@ export class ResolutionClient {
    * Validates chain prevention (can't link an alias) and has-aliases prevention
    * (can't link an entity that has aliases pointing to it).
    */
-  public async linkEntities(targetId: string, rawEntityIds: string[]): Promise<LinkResult> {
-    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+  public async linkEntities(
+    targetId: string,
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions = {}
+  ): Promise<LinkResult> {
+    const { awaitVisibility = false } = options;
+    const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
+    const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate entity_ids
     const entityIds = [...new Set(rawEntityIds)];
@@ -133,7 +155,7 @@ export class ResolutionClient {
       docId: docIds.get(entityId)!,
       doc: { [RESOLVED_TO_FIELD]: targetId },
     }));
-    const linkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
+    const linkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates, refresh });
 
     this.throwOnBulkErrors(linkResult, `linking entities to '${targetId}'`);
 
@@ -144,8 +166,13 @@ export class ResolutionClient {
    * Unlinks alias entities by removing their resolved_to field.
    * Unlinked entities become standalone.
    */
-  public async unlinkEntities(rawEntityIds: string[]): Promise<UnlinkResult> {
-    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+  public async unlinkEntities(
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions = {}
+  ): Promise<UnlinkResult> {
+    const { awaitVisibility = false } = options;
+    const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
+    const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate and fetch all entities
     const entityIds = [...new Set(rawEntityIds)];
@@ -176,7 +203,7 @@ export class ResolutionClient {
       docId: docIds.get(entityId)!,
       doc: { [RESOLVED_TO_FIELD]: null },
     }));
-    const unlinkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
+    const unlinkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates, refresh });
 
     this.throwOnBulkErrors(unlinkResult, 'unlinking entities');
 
@@ -188,7 +215,7 @@ export class ResolutionClient {
    * Standalone entities return as the target with empty aliases.
    */
   public async getResolutionGroup(entityId: string): Promise<ResolutionGroup> {
-    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Fetch the requested entity
     const { sources } = await this.fetchAndValidateEntities([entityId]);
@@ -284,7 +311,7 @@ export class ResolutionClient {
    * Throws EntitiesNotFoundError if any IDs are missing.
    */
   private async fetchAndValidateEntities(entityIds: string[]): Promise<FetchedEntities> {
-    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const index = getLatestEntitiesIndexName(this.namespace);
     const response = await searchEntitiesByIds(this.esClient, {
       index,
       entityIdField: ENTITY_ID_FIELD,
@@ -317,7 +344,7 @@ export class ResolutionClient {
    * Returns a map from entity ID → list of alias entity IDs.
    */
   private async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
-    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const index = getLatestEntitiesIndexName(this.namespace);
     const response = await searchByResolvedToField(this.esClient, {
       index,
       resolvedToField: RESOLVED_TO_FIELD,

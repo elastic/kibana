@@ -25,6 +25,7 @@
       "cloudConnect",
       "console",
       "serverless",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact",

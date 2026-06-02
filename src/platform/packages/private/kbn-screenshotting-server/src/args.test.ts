@@ -16,12 +16,13 @@ import { args } from './args';
 describe('headless webgl arm mac workaround', () => {
   const originalPlatform = process.platform;
   afterEach(() => {
+    jest.restoreAllMocks();
     Object.defineProperty(process, 'platform', {
       value: originalPlatform,
     });
   });
 
-  const simulateEnv = (platform: string, arch: string) => {
+  const simulateEnv = (platform: string, arch: ReturnType<typeof os.arch>) => {
     Object.defineProperty(process, 'platform', { value: platform });
     jest.spyOn(os, 'arch').mockReturnValue(arch);
   };
@@ -34,6 +35,7 @@ describe('headless webgl arm mac workaround', () => {
       proxy: { enabled: false },
     });
     expect(flags.includes(`--disable-gpu`)).toBe(true);
+    expect(flags.includes(`--enable-gpu`)).toBe(false);
   });
 
   test("doesn't disable gpu when on an arm mac, adds --enable-gpu", () => {

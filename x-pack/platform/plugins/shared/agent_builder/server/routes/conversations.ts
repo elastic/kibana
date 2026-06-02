@@ -35,7 +35,7 @@ export function registerConversationRoutes({
       access: 'public',
       summary: 'List conversations',
       description:
-        'List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.',
+        'List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
@@ -88,7 +88,7 @@ export function registerConversationRoutes({
       access: 'public',
       summary: 'Get conversation by ID',
       description:
-        'Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.',
+        'Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
@@ -210,7 +210,8 @@ export function registerConversationRoutes({
       },
       access: 'public',
       summary: 'Delete conversation by ID',
-      description: 'Delete a conversation by ID. This action cannot be undone.',
+      description:
+        'Delete a conversation by ID. This action cannot be undone. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {

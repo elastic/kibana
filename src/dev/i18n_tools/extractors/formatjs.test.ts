@@ -276,6 +276,32 @@ describe('formatJS Runner', () => {
         `[Error: Error parsing file template_literal_var.ts: Error: Template literals with variable substitution is not supported. please pass variables via the 'values' object instead. Message  \`value passed into literal directly (e: \${e.message})\`]`
       );
     });
+
+    it('parses destructured standalone translate() calls', async () => {
+      const { extractedMessages } = await formatJsFixtureRunner('destructured_translate.ts');
+      expect(extractedMessages).toMatchInlineSnapshot(`
+        Map {
+          "destructured.with_value" => Object {
+            "defaultMessage": "Hello {name}!",
+            "end": -1,
+            "file": "destructured_translate.ts",
+            "hasValuesObject": true,
+            "id": "destructured.with_value",
+            "start": -1,
+            "valuesKeys": Array [
+              "name",
+            ],
+          },
+          "destructured.basic" => Object {
+            "defaultMessage": "Standalone translate is parsed!",
+            "end": -1,
+            "file": "destructured_translate.ts",
+            "id": "destructured.basic",
+            "start": -1,
+          },
+        }
+      `);
+    });
   });
 
   describe('extraction inside react components', () => {

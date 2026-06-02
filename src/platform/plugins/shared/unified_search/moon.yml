@@ -53,10 +53,11 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/esql-types'
   - '@kbn/background-search'
-  - '@kbn/split-button'
   - '@kbn/cps'
   - '@kbn/css-utils'
   - '@kbn/kql'
+  - '@kbn/date-range-picker'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -67,6 +68,7 @@ fileGroups:
   src:
     - public/**/*
     - public/**/*.json
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

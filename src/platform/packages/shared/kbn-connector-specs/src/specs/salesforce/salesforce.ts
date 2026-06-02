@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 const SALESFORCE_API_VERSION = 'v66.0';
 
@@ -86,14 +86,17 @@ export const SalesforceConnector: ConnectorSpec = {
 
   actions: {
     query: {
-      input: z.object({
-        soql: z
-          .string()
-          .describe(
-            'SOQL query. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl from response for more.'
-          ),
-        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
-      }),
+      isTool: true,
+      input: lazySchema(() =>
+        z.object({
+          soql: z
+            .string()
+            .describe(
+              'SOQL query. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl from response for more.'
+            ),
+          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { soql: string; nextRecordsUrl?: string };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
@@ -111,16 +114,21 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     get_record: {
-      input: z.object({
-        sobjectName: z
-          .string()
-          .describe(
-            'SObject API name (standard or custom, e.g. Account, Contact, MyObject__c). Must match the object that owns the record.'
-          ),
-        recordId: z
-          .string()
-          .describe('Record Id (15- or 18-char). Get from query, list_records, or search results.'),
-      }),
+      isTool: true,
+      input: lazySchema(() =>
+        z.object({
+          sobjectName: z
+            .string()
+            .describe(
+              'SObject API name (standard or custom, e.g. Account, Contact, MyObject__c). Must match the object that owns the record.'
+            ),
+          recordId: z
+            .string()
+            .describe(
+              'Record Id (15- or 18-char). Get from query, list_records, or search results.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string; recordId: string };
         validateSobjectName(typedInput.sobjectName);
@@ -136,14 +144,17 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     list_records: {
-      input: z.object({
-        sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
-        limit: z
-          .number()
-          .default(10)
-          .describe('Max records to return (1-2000). Prefer 10-20 to keep context small.'),
-        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
-      }),
+      isTool: true,
+      input: lazySchema(() =>
+        z.object({
+          sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
+          limit: z
+            .number()
+            .default(10)
+            .describe('Max records to return (1-2000). Prefer 10-20 to keep context small.'),
+          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           sobjectName: string;
@@ -168,19 +179,22 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     search: {
-      input: z.object({
-        searchTerm: z
-          .string()
-          .describe(
-            'Search phrase for SOSL full-text search (e.g. "Acme Corp" or "Q4 renewal"). Only searches objects listed in returning; not all text fields are indexed; results capped at ~2000. Prefer query (SOQL) for structured filtering; use search for broad text discovery.'
-          ),
-        returning: z
-          .string()
-          .describe(
-            'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down. Custom objects require "Allow Search" enabled. Use describe to discover object names.'
-          ),
-        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
-      }),
+      isTool: true,
+      input: lazySchema(() =>
+        z.object({
+          searchTerm: z
+            .string()
+            .describe(
+              'Search phrase for SOSL full-text search (e.g. "Acme Corp" or "Q4 renewal"). Only searches objects listed in returning; not all text fields are indexed; results capped at ~2000. Prefer query (SOQL) for structured filtering; use search for broad text discovery.'
+            ),
+          returning: z
+            .string()
+            .describe(
+              'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down. Custom objects require "Allow Search" enabled. Use describe to discover object names.'
+            ),
+          nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           searchTerm: string;
@@ -205,13 +219,16 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     describe: {
-      input: z.object({
-        sobjectName: z
-          .string()
-          .describe(
-            'SObject API name. Use before query or search to discover field names, relationships, and picklist values. Common standard objects you can describe without prior discovery: Account (companies/orgs), Contact (people linked to Account), Opportunity (sales deals with stage/amount/close date), Case (support tickets), Lead (unqualified prospects), Task (action items/follow-ups), ContentVersion (file/attachment versions; use with ContentDocumentLink for downloads). Custom objects always end with __c (e.g. MyObject__c).'
-          ),
-      }),
+      isTool: true,
+      input: lazySchema(() =>
+        z.object({
+          sobjectName: z
+            .string()
+            .describe(
+              'SObject API name. Use before query or search to discover field names, relationships, and picklist values. Common standard objects you can describe without prior discovery: Account (companies/orgs), Contact (people linked to Account), Opportunity (sales deals with stage/amount/close date), Case (support tickets), Lead (unqualified prospects), Task (action items/follow-ups), ContentVersion (file/attachment versions; use with ContentDocumentLink for downloads). Custom objects always end with __c (e.g. MyObject__c).'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string };
         validateSobjectName(typedInput.sobjectName);
@@ -229,13 +246,15 @@ export const SalesforceConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Download a file from Salesforce by its ContentVersion Id. Returns the file as base64-encoded data with its content type. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). Use SOQL on ContentDocumentLink and ContentVersion to discover file Ids first.',
-      input: z.object({
-        contentVersionId: z
-          .string()
-          .describe(
-            'ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink. Returns base64-encoded file content and content-type.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          contentVersionId: z
+            .string()
+            .describe(
+              'ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink. Returns base64-encoded file content and content-type.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { contentVersionId: string };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);

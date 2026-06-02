@@ -60,7 +60,12 @@ import type {
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
-import { isLegacyAttachmentRequest } from '../../common/utils/attachments';
+import {
+  isEventAttachmentType,
+  isAlertAttachmentType,
+  getIndexFromMetadata,
+  toStringArray,
+} from '../../common/utils/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -172,18 +177,33 @@ export const flattenAttachmentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment: AttachmentRequestV2
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
+  if ('alertId' in comment) {
     return {
       ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
+  if ('eventId' in comment) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
+  if ('attachmentId' in comment) {
+    const metadataIndex = getIndexFromMetadata(comment.metadata);
+    return {
+      ids: toStringArray(comment.attachmentId),
+      indices: toStringArray(metadataIndex),
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 
@@ -196,7 +216,7 @@ export const getIDsAndIndicesAsArrays = (
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
 const getAndValidateAlertInfoFromComment = (comment: AttachmentRequestV2): AlertInfo[] => {
-  if (!isLegacyAttachmentRequest(comment) || !isCommentRequestTypeAlert(comment)) {
+  if (!isAlertAttachmentType(comment.type)) {
     return [];
   }
 
@@ -305,7 +325,7 @@ export function createAlertUpdateStatusRequest({
   status,
   closingReason,
 }: {
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
   status: CaseStatuses;
   closingReason?: string;
 }): UpdateAlertStatusRequest[] {
@@ -315,15 +335,18 @@ export function createAlertUpdateStatusRequest({
 /**
  * Counts the total alert IDs within a single comment.
  */
-export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributesV2>) => {
   let totalAlerts = 0;
-  if (comment.attributes.type === AttachmentType.alert) {
-    if (Array.isArray(comment.attributes.alertId)) {
-      totalAlerts += comment.attributes.alertId.length;
-    } else {
-      totalAlerts++;
-    }
+  const { type } = comment.attributes;
+
+  if (type === AttachmentType.alert && 'alertId' in comment.attributes) {
+    const { alertId } = comment.attributes;
+    totalAlerts += Array.isArray(alertId) ? alertId.length : 1;
+  } else if (isAlertAttachmentType(type) && 'attachmentId' in comment.attributes) {
+    const { attachmentId } = comment.attributes as { attachmentId: string | string[] };
+    totalAlerts += Array.isArray(attachmentId) ? attachmentId.length : 1;
   }
+
   return totalAlerts;
 };
 
@@ -375,10 +398,17 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    const attrs = current.attributes;
+    if (!isEventAttachmentType(attrs.type)) {
+      return sum;
     }
-
+    if ('attachmentId' in attrs && attrs.attachmentId != null) {
+      const id = attrs.attachmentId;
+      return sum + (Array.isArray(id) ? id.length : 1);
+    }
+    if ('eventId' in attrs && attrs.eventId != null) {
+      return sum + [attrs.eventId].flat().length;
+    }
     return sum;
   }, 0);
 };

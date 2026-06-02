@@ -33,8 +33,8 @@ dependsOn:
   - '@kbn/react-env'
   - '@kbn/react-kibana-context-env'
   - '@kbn/core-chrome-layout-constants'
-  - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/ui-side-navigation'
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'
@@ -46,6 +46,9 @@ dependsOn:
   - '@kbn/shared-ux-label-formatter'
   - '@kbn/test-jest-helpers'
   - '@kbn/use-observable'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/ui-chrome-layout'
+  - '@kbn/app-header'
 tags:
   - shared-browser
   - package

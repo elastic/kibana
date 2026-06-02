@@ -87,7 +87,7 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
         })}
       >
         <div className="kbnSuggestionItem__type">
-          <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+          <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
         </div>
         <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
           {props.suggestion.text}

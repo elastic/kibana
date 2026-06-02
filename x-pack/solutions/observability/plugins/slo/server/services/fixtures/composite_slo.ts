@@ -7,12 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { CompositeSLODefinition } from '../../domain/models';
-import { Duration, DurationUnit } from '../../domain/models';
 
 export const createCompositeSlo = (
   overrides: Partial<CompositeSLODefinition> = {}
 ): CompositeSLODefinition => {
-  const now = new Date('2024-01-01T00:00:00.000Z');
+  const now = new Date('2024-01-01T00:00:00.000Z').toISOString();
   return {
     id: uuidv4(),
     name: 'Test Composite SLO',
@@ -22,7 +21,7 @@ export const createCompositeSlo = (
       { sloId: uuidv4(), weight: 2 },
     ],
     compositeMethod: 'weightedAverage',
-    timeWindow: { duration: new Duration(30, DurationUnit.Day), type: 'rolling' },
+    timeWindow: { duration: '30d', type: 'rolling' },
     budgetingMethod: 'occurrences',
     objective: { target: 0.99 },
     tags: ['test'],

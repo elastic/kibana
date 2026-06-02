@@ -53,6 +53,11 @@ describe('GetSLO', () => {
           oneHourBurnRate: 0,
           oneDayBurnRate: 0,
         },
+        burnRateWindows: [
+          { name: '5m', burnRate: 0, sli: 0.9999 },
+          { name: '1h', burnRate: 0, sli: 0.9999 },
+          { name: '1d', burnRate: 0, sli: 0.9999 },
+        ],
       });
 
       const result = await getSLO.execute(slo.id, 'default');

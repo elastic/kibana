@@ -12,27 +12,48 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
+import { isSignificantEventsMemoryEnabled } from '../../../../lib/memory/is_significant_events_memory_enabled';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
+import {
+  getSignificantEventsResponse,
+  previewSignificantEventsRequest,
+} from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { MemoryServiceImpl } from '../../../../lib/memory';
+import { createMemoryDiscoveryTools } from '../../../../lib/sig_events/memory_discovery_tools';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
+// Date, without breaking the OpenAPI generator.
+// Descriptions must be on the inner z.string() so they propagate to OAS parameters.
+const makeDateFromString = (description: string) =>
+  z
+    .string()
+    .describe(description)
+    .transform((input) => new Date(input));
 
 const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    query: z.object({
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
+    }),
     body: z.object({
       query: z.object({
         esql: z.object({
@@ -49,6 +70,22 @@ const previewSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              previewSignificantEvents: { value: previewSignificantEventsRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Significant event preview results.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -60,6 +97,7 @@ const previewSignificantEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<SignificantEventsPreviewResponse> => {
     const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -84,6 +122,7 @@ const previewSignificantEventsRoute = createServerRoute({
       },
       {
         scopedClusterClient,
+        logger,
       }
     );
   },
@@ -92,11 +131,14 @@ const previewSignificantEventsRoute = createServerRoute({
 const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
-      from: dateFromString,
-      to: dateFromString,
-      bucketSize: z.string(),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
         .optional()
@@ -113,6 +155,27 @@ const readStreamSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Significant events for the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                significantEvents: { value: getSignificantEventsResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -125,16 +188,27 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      streamsClient,
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -143,6 +217,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
@@ -155,7 +230,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
       connectorId: z
         .string()
@@ -163,8 +238,8 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString,
-      to: dateFromString,
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       sampleDocsSize: z
         .number()
         .optional()
@@ -181,6 +256,20 @@ const generateSignificantEventsRoute = createServerRoute({
       since: '9.2.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Generated significant event query definitions.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -201,7 +290,8 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
-      featureClient,
+      getFeatureClient,
+      getQueryClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -214,28 +304,40 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
-      inferenceClient.getConnectorById(connectorId),
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+    const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
+    const memoryTools = useMemory
+      ? createMemoryDiscoveryTools({
+          memoryService: new MemoryServiceImpl({
+            logger: logger.get('memory'),
+            esClient: scopedClusterClient.asCurrentUser,
+          }),
+        })
+      : undefined;
+
+    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        getFeatureClient(),
+        getQueryClient(),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
         {
           definition,
           connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
           systemPrompt: significantEventsPromptOverride,
         },
         {
           inferenceClient,
           featureClient,
+          queryClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,
+          memoryTools,
         }
       )
     ).pipe(

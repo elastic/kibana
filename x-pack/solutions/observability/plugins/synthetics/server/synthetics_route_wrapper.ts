@@ -14,6 +14,9 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { getSyntheticsIndices } from './services/get_synthetics_indices';
+import { isCCSEnabled } from './lib/remote_result_utils';
+import { DefaultSyntheticsMultiSpaceSettingsRepository } from './services/synthetics_multi_space_settings_repository';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -46,6 +49,24 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
 
+      let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
+      if (isCCSEnabled(server)) {
+        try {
+          const multiSpaceSettingsRepository = new DefaultSyntheticsMultiSpaceSettingsRepository(
+            savedObjectsClient
+          );
+          const settings = await multiSpaceSettingsRepository.get();
+          const ccsSettings = {
+            useAllRemoteClusters: settings.useAllRemoteClusters ?? false,
+            selectedRemoteClusters: settings.selectedRemoteClusters ?? [],
+          };
+          const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
+          heartbeatIndices = indices;
+        } catch (e) {
+          server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
+        }
+      }
+
       const syntheticsEsClient = new SyntheticsEsClient(
         savedObjectsClient,
         esClient.asCurrentUser,
@@ -53,7 +74,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           request,
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          heartbeatIndices,
         }
       );
 

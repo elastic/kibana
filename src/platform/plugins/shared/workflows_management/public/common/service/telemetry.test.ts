@@ -36,6 +36,9 @@ import {
 
 const extractWorkflowMetadataMock = jest.mocked(extractWorkflowMetadata);
 const extractStepInfoFromWorkflowYamlMock = jest.mocked(extractStepInfoFromWorkflowYaml);
+const { extractWorkflowMetadata: extractWorkflowMetadataActual } = jest.requireActual(
+  '../lib/telemetry/utils/extract_workflow_metadata'
+) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
 
 const createMockTelemetryClient = (): TelemetryServiceClient => ({
   reportEvent: jest.fn(),
@@ -129,6 +132,10 @@ describe('WorkflowsBaseTelemetry', () => {
           hasDescription: false,
           tagCount: 0,
           constCount: 0,
+          hasTriggerConditions: false,
+          hasTriggerWorkflowEventsIgnore: false,
+          hasTriggerWorkflowEventsAllow: false,
+          hasTriggerWorkflowEventsAvoidLoop: false,
         })
       );
     });
@@ -197,19 +204,8 @@ describe('WorkflowsBaseTelemetry', () => {
 
     it('includes concurrency fields when present in metadata', () => {
       extractWorkflowMetadataMock.mockReturnValueOnce({
-        enabled: false,
-        stepCount: 0,
-        connectorTypes: [],
-        stepTypes: [],
-        stepTypeCounts: {},
-        triggerTypes: [],
-        inputCount: 0,
-        constCount: 0,
-        triggerCount: 0,
-        hasTriggerConditions: false,
+        ...extractWorkflowMetadataActual(null),
         settingsUsed: ['concurrency'],
-        hasDescription: false,
-        tagCount: 0,
         concurrencyMax: 10,
         concurrencyStrategy: 'drop',
       });
@@ -363,6 +359,52 @@ describe('WorkflowsBaseTelemetry', () => {
         expect.objectContaining({
           isBulkAction: true,
           bulkActionCount: 5,
+        })
+      );
+    });
+
+    it('includes hasCustomEventTrigger on enable/disable when workflowDefinition is provided', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        workflowDefinition: {
+          triggers: [{ type: 'scheduled' }, { type: 'cases.created' }],
+        } as Partial<WorkflowYaml>,
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          hasCustomEventTrigger: true,
+          origin: 'workflow_list',
+        })
+      );
+    });
+
+    it('does not report hasCustomEventTrigger true on enable/disable when workflowDefinition is omitted', () => {
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        origin: 'workflow_list',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          enabled: true,
+          origin: 'workflow_list',
+        })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.not.objectContaining({
+          hasCustomEventTrigger: true,
         })
       );
     });
@@ -781,7 +823,8 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 2,
         editorType: 'both',
         origin: 'workflow_detail',
-        triggerTab: 'alert',
+        triggerTab: 'event',
+        hasCustomEventTrigger: true,
       });
 
       expect(mockClient.reportEvent).toHaveBeenCalledWith(
@@ -793,7 +836,8 @@ describe('WorkflowsBaseTelemetry', () => {
           inputCount: 2,
           editorType: 'both',
           origin: 'workflow_detail',
-          triggerTab: 'alert',
+          triggerTab: 'event',
+          hasCustomEventTrigger: true,
           result: 'success',
         })
       );
@@ -1184,6 +1228,45 @@ describe('WorkflowsBaseTelemetry', () => {
       const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedPrivileges', () => {
+    it('reports access denied due to missing read privileges', () => {
+      telemetry.reportWorkflowAccessDeniedPrivileges();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedLicense', () => {
+    it('reports access denied due to license', () => {
+      telemetry.reportWorkflowAccessDeniedLicense();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedLicense,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedServerlessTier', () => {
+    it('reports access denied due to serverless tier with required products', () => {
+      telemetry.reportWorkflowAccessDeniedServerlessTier();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+        })
+      );
     });
   });
 

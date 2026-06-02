@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { load } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -33,6 +32,7 @@ import {
   EuiCode,
   useGeneratedHtmlId,
   EuiPanel,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -50,6 +50,7 @@ import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import type { Output, FleetProxy } from '../../../../types';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
+import { useYaml } from '../../../../../../services';
 
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
@@ -77,8 +78,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   proxies,
 }) => {
   useBreadcrumbs('settings');
+  const yaml = useYaml();
   const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
+  const parseFn = yaml?.parse;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
   const isServerless = !!cloud?.isServerlessEnabled;
@@ -112,14 +115,23 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
 
-  // Remote ES output not yet supported in serverless
-  const isStateful = !cloud?.isServerlessEnabled;
+  const yamlConfigValue = inputs.additionalYamlConfigInput.value;
+  const presetValue = inputs.presetInput.value;
+  const setPresetValue = inputs.presetInput.setValue;
+  useEffect(() => {
+    if (
+      yaml &&
+      supportsPresets &&
+      outputYmlIncludesReservedPerformanceKey(yamlConfigValue, yaml.parse) &&
+      presetValue !== 'custom'
+    ) {
+      setPresetValue('custom');
+    }
+  }, [yaml, supportsPresets, yamlConfigValue, presetValue, setPresetValue]);
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isStateful
-      ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
-      : []),
+    { value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' },
     { value: outputType.Logstash, text: 'Logstash' },
     { value: outputType.Kafka, text: 'Kafka' },
   ];
@@ -184,30 +196,22 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       return null;
     }
 
-    const generateWarningMessage = () => {
-      switch (inputs.typeInput.value) {
-        default:
-        case outputType.Elasticsearch:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
-            defaultMessage:
-              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
-          });
-        case outputType.RemoteElasticsearch:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout', {
-            defaultMessage:
-              'Remote Elasticsearch output does not support connectivity to a serverless project.',
-          });
+    const warningMessage = i18n.translate(
+      'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
+      {
+        defaultMessage:
+          'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
       }
-    };
+    );
     return (
       <>
-        {!isServerless ? (
+        {isESOutput && !isServerless ? (
           <>
             <EuiSpacer size="xs" />
             <EuiCallOut
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
-              title={generateWarningMessage()}
+              title={warningMessage}
               iconType="warning"
               color="warning"
               size="s"
@@ -453,10 +457,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}
                   disabled={
                     inputs.presetInput.props.disabled ||
-                    outputYmlIncludesReservedPerformanceKey(
-                      inputs.additionalYamlConfigInput.value,
-                      load
-                    )
+                    (!!parseFn &&
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value,
+                        parseFn
+                      ))
                   }
                   options={[
                     { value: 'balanced', text: 'Balanced' },
@@ -510,9 +515,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
           {supportsPresets &&
+            !!parseFn &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
-              load
+              parseFn
             ) && (
               <>
                 <EuiSpacer size="s" />
@@ -563,7 +569,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <YamlCodeEditorWithPlaceholder
                 value={inputs.additionalYamlConfigInput.value}
                 onChange={(value) => {
-                  if (outputYmlIncludesReservedPerformanceKey(value, load)) {
+                  if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
                     inputs.presetInput.setValue('custom');
                   }
 
@@ -599,6 +605,31 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 paddingSize="none"
               >
                 <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
+                  <EuiFormRow fullWidth>
+                    <EuiSwitch
+                      label={
+                        <>
+                          <FormattedMessage
+                            id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
+                            defaultMessage="Use exporter configuration without translating with beatsauth extension"
+                          />{' '}
+                          <EuiIconTip
+                            type="question"
+                            color="subdued"
+                            content={
+                              <FormattedMessage
+                                id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthTooltip"
+                                defaultMessage="When enabled, the exporter will only include the host and any advanced exporter parameters specified below, giving you complete control over the exporter configuration."
+                              />
+                            }
+                          />
+                        </>
+                      }
+                      {...inputs.otelDisableBeatsauthInput.props}
+                      data-test-subj="settingsOutputsFlyout.otelDisableBeatsauthToggle"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
                   <EuiFormRow
                     fullWidth
                     label={

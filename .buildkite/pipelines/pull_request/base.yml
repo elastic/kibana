@@ -1,3 +1,6 @@
+env:
+  KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
@@ -7,7 +10,26 @@ steps:
       zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    # [rspack-transition] Original condition (restore when legacy optimizer is removed):
+    # if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  # [rspack-transition] Verify the Rspack optimizer can build all bundles
+  # successfully. Skipped when ci:build-with-rspack-optimizer is set because
+  # the main Build Kibana Distribution step already uses Rspack.
+  - command: .buildkite/scripts/steps/verify_rspack_build.sh
+    label: 'Verify Rspack Optimizer Build'
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:build-with-rspack-optimizer/"
+    agents:
+      machineType: n2d-standard-8
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 200
+    key: verify_rspack_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -49,9 +71,10 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2d-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -65,9 +88,10 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n2d-standard-32
+      machineType: n4-standard-32
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
@@ -81,9 +105,10 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_oxlint.sh
     label: 'Linting (with oxlint)'
     agents:
-      machineType: n2d-standard-16
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting_with_oxlint
     timeout_in_minutes: 60
@@ -114,14 +139,17 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c3d-standard-8-lssd
+      machineType: c4-standard-8-lssd
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      RESTORE_ARCHIVE: 'true'
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -150,12 +178,12 @@ steps:
       machineType: n2d-standard-8
     key: build_scout_tests
     timeout_in_minutes: 20
-    depends_on:
-      - build
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS: 300
+      SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES: 5
+      SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES: 20
       SELECTIVE_TESTING_ENABLED: 'true'
     retry:
       automatic:
@@ -170,21 +198,18 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - build_api_docs
+      - report_package_metrics
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
-    label: 'Build API Docs'
+  - command: .buildkite/scripts/steps/report_package_metrics.sh
+    label: 'Report Package Metrics'
     agents:
-      machineType: n2-highmem-4
-      preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
-    key: build_api_docs
-    timeout_in_minutes: 60
+      machineType: n2-standard-2
+    key: report_package_metrics
+    timeout_in_minutes: 15
     retry:
       automatic:
         - exit_status: '-1'

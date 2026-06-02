@@ -358,7 +358,14 @@ const getAvailableProcessors: (
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
           defaultMessage="Evaluate {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
           values={{
-            expressionNote: <strong>arithmetic or logical expressions</strong>,
+            expressionNote: (
+              <strong>
+                {i18n.translate(
+                  'xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel',
+                  { defaultMessage: 'arithmetic or logical expressions' }
+                )}
+              </strong>
+            ),
             example: (
               <>
                 <EuiCode>bytes / duration </EuiCode>
@@ -661,6 +668,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  registered_domain: {
+    type: 'registered_domain' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.registeredDomainInputDisplay',
+      {
+        defaultMessage: 'Registered domain',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.registeredDomainHelpText"
+          defaultMessage="Extracts the {registeredDomainLink}, sub-domain, and top-level domain from a fully qualified domain name (FQDN)."
+          values={{
+            registeredDomainLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRegisteredDomainLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.registeredDomain}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.registeredDomainLinkLabel', {
+                  defaultMessage: 'registered domain',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -694,6 +732,7 @@ const PROCESSOR_GROUP_MAP: Record<
   grok: 'extract',
   dissect: 'extract',
   json_extract: 'extract',
+  uri_parts: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
@@ -712,6 +751,7 @@ const PROCESSOR_GROUP_MAP: Record<
   concat: 'set',
   network_direction: 'set',
   enrich: 'set',
+  registered_domain: 'extract',
 };
 
 const getProcessorDescription =

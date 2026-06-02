@@ -8,7 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
@@ -38,21 +38,30 @@ jest.mock('./full_screen_waterfall_tour_step', () => ({
 }));
 
 jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
-  ContentFrameworkSection: ({ children, ...rest }: any) => (
-    <div data-test-subj="contentFrameworkSection" {...rest}>
+  ContentFrameworkSection: ({ children, actions }: any) => (
+    <div data-test-subj="contentFrameworkSection">
+      {actions?.map((action: any, i: number) => (
+        <button key={i} data-test-subj={action.dataTestSubj} onClick={action.onClick}>
+          {action.label}
+        </button>
+      ))}
       {children}
     </div>
   ),
 }));
 
 const mockFullScreenWaterfall = jest.fn(
-  ({ activeFlyoutType, docId }: Pick<FullScreenWaterfallProps, 'activeFlyoutType' | 'docId'>) => (
+  ({
+    activeFlyoutType,
+    docId,
+    onExitFullScreen,
+  }: Pick<FullScreenWaterfallProps, 'activeFlyoutType' | 'docId' | 'onExitFullScreen'>) => (
     <div
       data-test-subj="fullScreenWaterfall"
       data-active-flyout-type={activeFlyoutType ?? ''}
       data-doc-id={docId ?? ''}
     >
-      FullScreenWaterfall
+      <button data-test-subj="exitFullScreen" onClick={onExitFullScreen as any} />
     </div>
   )
 );
@@ -95,11 +104,6 @@ describe('TraceWaterfall', () => {
                   ),
                 };
               }
-              if (id === 'observability-full-trace-waterfall') {
-                return {
-                  render: () => <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>,
-                };
-              }
               return undefined;
             },
           },
@@ -130,6 +134,36 @@ describe('TraceWaterfall', () => {
     expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
   });
 
+  describe('opening and closing', () => {
+    it('opens FullScreenWaterfall when the waterfall area is clicked', () => {
+      render(<TraceWaterfall {...defaultProps} />);
+
+      expect(screen.queryByTestId('fullScreenWaterfall')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('unifiedDocViewerTraceSummaryTraceWaterfallClickArea'));
+      expect(screen.getByTestId('fullScreenWaterfall')).toBeInTheDocument();
+    });
+
+    it('opens FullScreenWaterfall when the expand button is clicked', () => {
+      render(<TraceWaterfall {...defaultProps} />);
+
+      expect(screen.queryByTestId('fullScreenWaterfall')).not.toBeInTheDocument();
+      fireEvent.click(
+        screen.getByTestId('unifiedDocViewerObservabilityTracesTraceFullScreenButton')
+      );
+      expect(screen.getByTestId('fullScreenWaterfall')).toBeInTheDocument();
+    });
+
+    it('closes FullScreenWaterfall when exit is triggered', () => {
+      render(<TraceWaterfall {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('unifiedDocViewerTraceSummaryTraceWaterfallClickArea'));
+      expect(screen.getByTestId('fullScreenWaterfall')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('exitFullScreen'));
+      expect(screen.queryByTestId('fullScreenWaterfall')).not.toBeInTheDocument();
+    });
+  });
+
   describe('stale-state prevention', () => {
     it('renders the full-screen waterfall when initialState has a matching restoredTraceId', async () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
@@ -146,7 +180,7 @@ describe('TraceWaterfall', () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
         restoredTraceId: 'trace-OTHER',
         showFullScreenWaterfall: true,
-        activeFlyoutType: 'spanDetailFlyout',
+        activeFlyoutType: 'span',
         activeDocId: 'span-1',
       };
 
@@ -158,7 +192,7 @@ describe('TraceWaterfall', () => {
     it('preserves legacy restored state when initialState has no restoredTraceId', async () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
         showFullScreenWaterfall: true,
-        activeFlyoutType: 'spanDetailFlyout',
+        activeFlyoutType: 'span',
         activeDocId: 'transaction-doc-1',
       };
 
@@ -167,7 +201,7 @@ describe('TraceWaterfall', () => {
       expect(await screen.findByTestId('fullScreenWaterfall')).toBeInTheDocument();
       expect(screen.getByTestId('fullScreenWaterfall')).toHaveAttribute(
         'data-active-flyout-type',
-        'spanDetailFlyout'
+        'span'
       );
       expect(screen.getByTestId('fullScreenWaterfall')).toHaveAttribute(
         'data-doc-id',

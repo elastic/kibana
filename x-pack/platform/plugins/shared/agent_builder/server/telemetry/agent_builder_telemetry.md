@@ -36,6 +36,38 @@ pipeline. They include:
   - What it is: Total number of custom agents created.
   - How we count: ES `count` on the agents system index.
 
+### skills
+- `skills.total`
+  - What it is: Total number of persisted skills (custom + plugin-bundled).
+  - How we count: ES `hits.total` on the skills system index.
+- `skills.custom`
+  - What it is: Number of user-created custom skills.
+  - How we count: ES filter aggregation on skills without a `plugin_id` field.
+- `skills.plugin`
+  - What it is: Number of plugin-bundled skills.
+  - How we count: ES filter aggregation on skills with a `plugin_id` field.
+
+### plugins
+- `plugins.total`
+  - What it is: Total number of installed plugins.
+  - How we count: ES `count` on the plugins system index.
+
+### skill_invocations
+- `skill_invocations.total`
+  - What it is: Total skill invocations across all origins.
+  - How we count: Sum of per-origin usage counters (see usage counters section).
+- `skill_invocations.by_origin.builtin|custom|plugin`
+  - What it is: Skill invocations grouped by origin.
+  - How we count: Individual usage counters per origin.
+
+### plugin_imports
+- `plugin_imports.total`
+  - What it is: Total plugin imports across all source types.
+  - How we count: Sum of per-source usage counters (see usage counters section).
+- `plugin_imports.by_source.url|upload`
+  - What it is: Plugin imports grouped by source type.
+  - How we count: Individual usage counters per source type.
+
 ### conversations
 
 All-time conversation metrics (no date filter).
@@ -154,6 +186,167 @@ only over conversations created in the last day.
   - What it is: Error counts grouped by normalized error type/code.
   - How we count: Usage counters prefixed with `agent_builder_error_by_type_`.
 
+## EBT (Event-Based Telemetry) events
+
+The Agent Builder emits server-side EBT events via `AnalyticsService`. All IDs that could
+contain user-generated content are normalized before reporting (SHA-256 prefix hashing) to
+protect privacy. Built-in identifiers are kept as-is.
+
+### `agent_builder_agent_created`
+
+Fired when a custom agent is created.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | keyword | yes | Normalized agent ID. |
+| `tool_ids` | keyword[] | yes | Deduplicated, normalized tool IDs included in the agent's tool selection. |
+
+### `agent_builder_agent_updated`
+
+Fired when a custom agent is updated.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | keyword | yes | Normalized agent ID. |
+| `tool_ids` | keyword[] | yes | Deduplicated, normalized tool IDs after the update. |
+
+### `agent_builder_tool_created`
+
+Fired when a custom tool is created.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tool_id` | keyword | yes | Normalized tool ID. |
+| `tool_type` | keyword | yes | Tool type (e.g. `esql`, `index_search`, `workflow`). |
+
+### `agent_builder_round_complete`
+
+Fired at the end of each successful conversation round.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | keyword | yes | Normalized agent ID. |
+| `attachments` | keyword[] | no | Attachment types (e.g. `file`, `screenshot`), if any. |
+| `conversation_id` | keyword | no | Conversation ID. |
+| `execution_id` | keyword | no | Agent execution ID. |
+| `input_tokens` | integer | yes | Input tokens consumed in this round. |
+| `llm_calls` | integer | yes | Number of LLM calls made during the round. |
+| `message_length` | integer | yes | Character length of the user's input message. |
+| `model` | keyword | no | LLM model identifier. |
+| `model_provider` | keyword | no | LLM provider identifier. |
+| `output_tokens` | integer | yes | Output tokens produced in this round. |
+| `round_id` | keyword | yes | Unique round identifier. |
+| `round_status` | keyword | yes | Final status of the round. |
+| `response_length` | integer | yes | Character length of the assistant's response. |
+| `round_number` | integer | yes | 1-based round index within the conversation. |
+| `started_at` | keyword | yes | ISO timestamp when the round started. |
+| `time_to_first_token` | integer | yes | Milliseconds to first token. |
+| `time_to_last_token` | integer | yes | Milliseconds to last token (end-to-end latency). |
+| `tool_calls` | integer | yes | Total number of tool-call steps in this round. |
+| `tool_call_errors` | integer | yes | Number of tool calls where all results were errors. |
+| `tools_invoked` | keyword[] | yes | Normalized tool IDs invoked (may contain duplicates for per-tool counts). |
+
+### `agent_builder_round_error`
+
+Fired when a round fails with an unrecoverable error.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | keyword | yes | Normalized agent ID. |
+| `conversation_id` | keyword | no | Conversation ID. |
+| `execution_id` | keyword | no | Agent execution ID. |
+| `round_id` | keyword | no | Round ID, if available. |
+| `model_provider` | keyword | no | LLM provider identifier. |
+| `error_type` | keyword | yes | Sanitized/normalized error type or code. |
+| `error_message` | keyword | yes | Error message (truncated to 500 chars). |
+
+### `agent_builder_tool_call_success`
+
+Fired after a tool call completes successfully.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tool_id` | keyword | yes | Normalized tool ID. |
+| `tool_call_id` | keyword | yes | Unique tool call identifier. |
+| `source` | keyword | yes | Origin of the tool call (e.g. `default_agent`, `custom_agent`, `mcp`). |
+| `agent_id` | keyword | no | Normalized agent ID. |
+| `conversation_id` | keyword | no | Conversation ID. |
+| `execution_id` | keyword | no | Agent execution ID. |
+| `model` | keyword | no | LLM model that requested the tool call. |
+| `result_types` | keyword[] | yes | Types of result entries returned by the tool. |
+| `duration_ms` | integer | yes | Tool execution time in milliseconds. |
+
+### `agent_builder_tool_call_error`
+
+Fired when a tool call fails.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tool_id` | keyword | yes | Normalized tool ID. |
+| `tool_call_id` | keyword | yes | Unique tool call identifier. |
+| `source` | keyword | yes | Origin of the tool call. |
+| `agent_id` | keyword | no | Normalized agent ID. |
+| `conversation_id` | keyword | no | Conversation ID. |
+| `execution_id` | keyword | no | Agent execution ID. |
+| `model` | keyword | no | LLM model that requested the tool call. |
+| `error_type` | keyword | yes | Sanitized/normalized error type or code. |
+| `error_message` | keyword | yes | Error message (truncated to 500 chars). |
+| `duration_ms` | integer | yes | Tool execution time in milliseconds. |
+
+### Skill CRUD events
+
+These three events share the same schema. They fire on skill create/update/delete via the
+public API or during plugin import.
+
+| Event type | Constant |
+|------------|----------|
+| `agent_builder_skill_created` | `AGENT_BUILDER_EVENT_TYPES.SkillCreated` |
+| `agent_builder_skill_updated` | `AGENT_BUILDER_EVENT_TYPES.SkillUpdated` |
+| `agent_builder_skill_deleted` | `AGENT_BUILDER_EVENT_TYPES.SkillDeleted` |
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `skill_id` | keyword | yes | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | no | `custom` (direct API) or `plugin` (plugin-bundled). |
+
+### `agent_builder_skill_invoked`
+
+Fired when the agent reads a skill file and its tools are dynamically loaded into the tool
+manager (`loadSkillToolsAfterRead` hook).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `skill_id` | keyword | yes | Normalized skill ID. Built-ins keep original ID; custom → `custom-<hash>`; plugin → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | yes | `builtin`, `custom`, or `plugin`. |
+| `solution_area` | keyword | yes | `security`, `observability`, `search`, `platform`, `custom`, `plugin`, or `unknown`. Derived from `basePath` for built-ins. |
+| `plugin_id` | keyword | no | Normalized plugin ID (`custom-<hash>`). Present when `origin` is `plugin`. |
+| `agent_id` | keyword | no | Normalized agent ID from the run context. |
+| `conversation_id` | keyword | no | Conversation ID. |
+| `execution_id` | keyword | no | Agent execution ID. |
+| `tool_count` | integer | yes | Number of tools (inline + registry) registered by this skill load. |
+
+### `agent_builder_plugin_imported`
+
+Fired after a successful plugin install (URL or file upload).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `plugin_id` | keyword | yes | Normalized plugin ID (`custom-<hash>`). Falls back to `unknown` if empty. |
+| `source_type` | keyword | yes | `url` or `upload`. |
+| `skill_count` | integer | yes | Number of skills bundled with the imported plugin. |
+
+### ID normalization scheme
+
+| Entity | Built-in | Custom | Plugin-backed |
+|--------|----------|--------|---------------|
+| Agent ID | original ID | `custom-<sha256[0:16]>` | — |
+| Tool ID | original ID | `custom-<sha256[0:16]>` | — |
+| Skill ID | original ID (readonly) | `custom-<sha256[0:16]>` | `plugin-<plugin_sha256[0:16]>-<skill_sha256[0:16]>` |
+| Plugin ID | — | — | `custom-<sha256[0:16]>` |
+
+All hashes use SHA-256 truncated to the first 16 hex characters. Implementation is in
+`telemetry/utils.ts`.
+
 ## Usage counters
 
 All usage counters are stored under the domain `agent_builder` using the Usage Counters
@@ -195,6 +388,20 @@ period configured by Kibana (defaults to several days).
 - `agent_builder_rounds_21-50`
 - `agent_builder_rounds_51+`
   - Count of conversation rounds bucketed by current round number.
+
+### Skill invocation counters
+- `agent_builder_skill_invocation_builtin`
+  - Count of skill invocations from built-in skills.
+- `agent_builder_skill_invocation_custom`
+  - Count of skill invocations from user-created skills.
+- `agent_builder_skill_invocation_plugin`
+  - Count of skill invocations from plugin-bundled skills.
+
+### Plugin import counters
+- `agent_builder_plugin_import_url`
+  - Count of plugins imported via URL.
+- `agent_builder_plugin_import_upload`
+  - Count of plugins imported via file upload.
 
 ### Query-to-result time counters
 - `agent_builder_query_to_result_time_<1s`

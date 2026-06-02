@@ -14,8 +14,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 import type {
   ActionDetails,
@@ -28,6 +29,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -53,6 +55,11 @@ export const findLiveQueryRoute = (
               typeof findLiveQueryRequestQuerySchema,
               FindLiveQueryRequestQuerySchema
             >(findLiveQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findLiveQueryResponseSchema,
+            },
           },
         },
       },
@@ -91,6 +98,25 @@ export const findLiveQueryRoute = (
               const [coreStartServices] = await osqueryContext.getStartServices();
               const esClient = coreStartServices.elasticsearch.client.asInternalUser;
               const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+              let integrationNamespaces: string[] | undefined;
+
+              if (osqueryContext?.service?.getIntegrationNamespaces) {
+                const logger = osqueryContext.logFactory.get('find_live_query');
+                const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+                  osqueryContext,
+                  request
+                );
+                const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                  [OSQUERY_INTEGRATION_NAME],
+                  spaceScopedClient,
+                  logger
+                );
+                const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+                integrationNamespaces =
+                  osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+                logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+              }
 
               const allActionIds: string[] = [];
               for (const item of items) {
@@ -107,7 +133,7 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 esClient,
                 allActionIds,
-                spaceId,
+                integrationNamespaces ?? [spaceId],
                 ccsEnabled
               );
 

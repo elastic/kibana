@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -18,5 +19,7 @@
   "kbn_references": [
     "@kbn/agent-builder-common",
     "@kbn/zod",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }

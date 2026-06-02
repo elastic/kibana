@@ -13,15 +13,17 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 
 interface ToolDetailPanelProps {
   toolId: string;
@@ -45,7 +47,7 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       isLoading={isLoading}
       isEmpty={!tool}
       title={tool?.id ?? toolId}
-      showAutoIcon={isAutoIncluded}
+      isReadOnly={isReadOnly}
       headerContent={
         <EuiText
           size="xs"
@@ -76,23 +78,10 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
         onConfirm: onRemove,
       }}
     >
-      <div
-        css={css`
-          padding: ${euiTheme.size.l};
-        `}
-      >
-        <EuiTitle size="xxxs">
-          <h4>{labels.agentTools.toolDetailDescriptionLabel}</h4>
-        </EuiTitle>
-        <EuiText
-          size="s"
-          css={css`
-            margin-top: ${euiTheme.size.s};
-          `}
-        >
-          {tool?.description || '\u2014'}
-        </EuiText>
-      </div>
+      <RenderMarkdownReadOnly
+        content={tool?.description ?? ''}
+        label={labels.agentTools.toolDetailDescriptionLabel}
+      />
     </DetailPanelLayout>
   );
 };
@@ -134,13 +123,32 @@ const ToolHeaderActions = ({
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiLink href={editInLibraryUrl} target="_blank" external>
+          <EuiLink
+            href={editInLibraryUrl}
+            target="_blank"
+            external
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
+          >
             {labels.agentTools.editInLibraryLink}
           </EuiLink>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+        <EuiButtonEmpty
+          iconType="cross"
+          size="xs"
+          color="danger"
+          onClick={openConfirmRemove}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
+        >
           {labels.agentTools.removeToolButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>

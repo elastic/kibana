@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import {
   mapFormValuesToRuleRequest,
@@ -118,7 +119,11 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 3, pending_timeframe: '10m' });
+      expect(result.state_transition).toEqual({
+        pending_count: 3,
+        pending_timeframe: '10m',
+        recovering_count: 0,
+      });
     });
 
     it('maps state_transition with only pending count (no timeframe)', () => {
@@ -132,7 +137,7 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 5 });
+      expect(result.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
       expect(result.state_transition).not.toHaveProperty('pending_timeframe');
     });
 
@@ -148,7 +153,7 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toBeUndefined();
     });
 
-    it('returns undefined state_transition for alert kind when stateTransition is empty', () => {
+    it('emits pending_count: 0 and recovering_count: 0 for alert kind when both modes are immediate', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
@@ -157,15 +162,26 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toBeUndefined();
+      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
 
-    it('omits pending fields when alert delay mode is immediate even if pendingCount is stale', () => {
+    it('emits pending_count: 0 and recovering_count: 0 for alert kind when stateTransition is undefined', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+    });
+
+    it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
         stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: {
           pendingCount: 2,
           pendingTimeframe: null,
@@ -175,6 +191,7 @@ describe('rule_request_mappers', () => {
       };
 
       expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
+        pending_count: 0,
         recovering_count: 3,
       });
     });
@@ -191,6 +208,7 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.state_transition).toEqual({
+        pending_count: 0,
         recovering_count: 4,
         recovering_timeframe: '15m',
       });
@@ -201,13 +219,13 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 3 },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ recovering_count: 3 });
+      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 3 });
       expect(result.state_transition).not.toHaveProperty('recovering_timeframe');
     });
 
@@ -251,9 +269,9 @@ describe('rule_request_mappers', () => {
         name: 'My Rule',
         description: 'A description',
         owner: 'owner',
-        tags: [],
       });
       expect(result.metadata).not.toHaveProperty('enabled');
+      expect(result.metadata).not.toHaveProperty('tags');
     });
 
     it('passes artifacts through to API request', () => {
@@ -267,12 +285,15 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
 
-    it('replaces existing runbook artifact value while preserving artifact id', () => {
+    it('merges split artifact fields into API request', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'existing-runbook-id', type: 'runbook', value: '  Existing runbook  ' },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        runbookArtifacts: [
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        ],
+        dashboardArtifacts: [
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
         ],
       };
 
@@ -280,7 +301,25 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'existing-runbook-id', type: 'runbook', value: 'Existing runbook' },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ]);
+    });
+
+    it('replaces existing runbook artifact value while preserving artifact id', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Existing runbook  ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Existing runbook' },
       ]);
     });
 
@@ -289,7 +328,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: 'runbook', value: '   ' },
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' },
         ],
       };
 
@@ -301,7 +340,7 @@ describe('rule_request_mappers', () => {
     it('omits artifacts when only runbook artifact is empty', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: 'runbook-id', type: 'runbook', value: '   ' }],
+        artifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -331,7 +370,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
         ],
       };
 
@@ -339,14 +378,14 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
       ]);
     });
 
     it('creates runbook artifact id when runbook artifact id is empty', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: '', type: 'runbook', value: 'Runbook with missing id' }],
+        artifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook with missing id' }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -354,8 +393,55 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toHaveLength(1);
       expect(result.artifacts?.[0]).toEqual({
         id: expect.stringMatching(/^runbook-\d+-[a-z0-9]+$/),
-        type: 'runbook',
+        type: RUNBOOK_ARTIFACT_TYPE,
         value: 'Runbook with missing id',
+      });
+    });
+
+    it('trims dashboard artifact value while preserving artifact id', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ]);
+    });
+
+    it('removes empty dashboard artifact and keeps other artifacts', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '   ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    });
+
+    it('creates dashboard artifact id when dashboard artifact id is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toHaveLength(1);
+      expect(result.artifacts?.[0]).toEqual({
+        id: expect.stringMatching(/^dashboard-\d+-[a-z0-9]+$/),
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dashboard-123',
       });
     });
   });
@@ -435,7 +521,11 @@ describe('rule_request_mappers', () => {
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
       expect(result.recovery_policy).toEqual({ type: 'no_breach' });
-      expect(result.state_transition).toEqual({ pending_count: 2, pending_timeframe: '5m' });
+      expect(result.state_transition).toEqual({
+        pending_count: 2,
+        pending_timeframe: '5m',
+        recovering_count: 0,
+      });
     });
 
     it('nullifies empty grouping fields instead of leaving as undefined', () => {
@@ -679,20 +769,42 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
-    it('maps artifacts when present', () => {
+    it('treats pending_count: 0 and recovering_count: 0 as immediate mode', () => {
+      const rule = {
+        ...baseRuleResponse,
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.stateTransition).toEqual({
+        pendingCount: 0,
+        pendingTimeframe: null,
+        recoveringCount: 0,
+        recoveringTimeframe: null,
+      });
+      expect(result.stateTransitionAlertDelayMode).toBe('immediate');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
+
+    it('splits artifacts by field ownership when present', () => {
       const rule = {
         ...baseRuleResponse,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+          { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
         ],
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.runbookArtifacts).toEqual([
         { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+      ]);
+      expect(result.dashboardArtifacts).toEqual([
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
       ]);
     });
 
@@ -723,6 +835,8 @@ describe('rule_request_mappers', () => {
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
         stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,
         artifacts: formValues.artifacts,
+        runbookArtifacts: formValues.runbookArtifacts,
+        dashboardArtifacts: formValues.dashboardArtifacts,
       };
 
       const createPayload = mapFormValuesToCreateRequest(completeFormValues);
@@ -738,6 +852,7 @@ describe('rule_request_mappers', () => {
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });

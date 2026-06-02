@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
@@ -210,8 +210,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
-      secondaryButtonIcon: 'chevronSingleDown',
-      notifcationIndicatorTooltipContent: 'You have unsaved changes',
+      notificationIndicatorTooltipContent: 'You have unsaved changes',
       showNotificationIndicator: true,
       items: [
         {
@@ -242,5 +241,256 @@ export const DashboardEditModeConfig: Story = {
   name: 'Dashboard edit mode',
   args: {
     config: dashboardEditModeConfig,
+  },
+};
+
+const standaloneForcedOverflowConfig: AppMenuConfig = {
+  items: [
+    {
+      run: action('only-overflow-item-clicked'),
+      id: 'standaloneOverflowItem',
+      order: 1,
+      overflow: true,
+      label: 'Overflow item',
+      testId: 'standaloneOverflowItemButton',
+      iconType: 'gear',
+    },
+  ],
+};
+
+export const StandaloneForcedOverflow: Story = {
+  name: 'Forced overflow',
+  args: {
+    config: standaloneForcedOverflowConfig,
+  },
+};
+
+const overflowAndOrderingConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item6',
+      order: 6,
+      label: 'Item 6 (order 6)',
+      run: action('item-6-clicked'),
+      iconType: 'gear',
+      testId: 'item6Button',
+    },
+    {
+      id: 'item1ForcedOverflow',
+      order: 1,
+      overflow: true,
+      label: 'Item 1 forced overflow (order 1)',
+      run: action('item-1-forced-overflow-clicked'),
+      iconType: 'gear',
+      testId: 'item1ForcedOverflowButton',
+    },
+    {
+      id: 'item4',
+      order: 4,
+      label: 'Item 4 (order 4)',
+      run: action('item-4-clicked'),
+      iconType: 'gear',
+      testId: 'item4Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2 (order 2)',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item5',
+      order: 5,
+      label: 'Item 5 (order 5)',
+      run: action('item-5-clicked'),
+      iconType: 'gear',
+      testId: 'item5Button',
+      separator: 'below',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3 (order 3)',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
+export const OverflowAndOrdering: Story = {
+  name: 'Overflow and ordering',
+  args: {
+    config: overflowAndOrderingConfig,
+  },
+};
+
+const staticItem: AppMenuWrapperProps['staticItems'] = [
+  {
+    id: 'feedback',
+    order: 1,
+    label: 'Feedback',
+    run: action('feedback-clicked'),
+    iconType: 'comment',
+    testId: 'feedbackButton',
+  },
+];
+
+const threeItemsWithStaticItemConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item1',
+      order: 1,
+      label: 'Item 1',
+      run: action('item-1-clicked'),
+      iconType: 'gear',
+      testId: 'item1Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
+export const StandaloneStaticItem: Story = {
+  name: 'Static items - standalone',
+  args: {
+    staticItems: staticItem,
+  },
+};
+
+export const StaticItemWithConfig: Story = {
+  name: 'Static items with config',
+  args: {
+    config: threeItemsWithStaticItemConfig,
+    staticItems: staticItem,
+  },
+};
+
+export const DashboardEditModeWithStaticItems: Story = {
+  name: 'Dashboard edit mode with static items',
+  args: {
+    config: dashboardEditModeConfig,
+    staticItems: staticItem,
+  },
+};
+
+const InteractiveSwitchWrapper = (props: AppMenuWrapperProps) => {
+  const [checked, setChecked] = useState(false);
+  const configWithSwitch: AppMenuConfig = {
+    ...props.config,
+    switch: {
+      id: 'switch',
+      label: 'Enabled',
+      labelProps: {},
+      checked,
+      onChange: (value) => {
+        setChecked(value);
+        action('switch-toggled')(value);
+      },
+      'data-test-subj': 'switch',
+    },
+  };
+
+  return <AppMenuWrapper {...props} config={configWithSwitch} />;
+};
+
+export const StandaloneSwitch: Story = {
+  name: 'Switch - standalone',
+  render: (args) => <InteractiveSwitchWrapper {...args} />,
+  args: {
+    config: {},
+  },
+};
+
+export const SwitchWithItems: Story = {
+  name: 'Switch with items and primary action',
+  render: (args) => <InteractiveSwitchWrapper {...args} />,
+  args: {
+    config: {
+      items: [
+        {
+          id: 'manualRun',
+          order: 1,
+          label: 'Manual run',
+          run: action('manual-run-clicked'),
+          iconType: 'play',
+          testId: 'manualRunButton',
+        },
+        {
+          id: 'settings',
+          order: 2,
+          label: 'Settings',
+          run: action('settings-clicked'),
+          iconType: 'gear',
+          testId: 'settingsButton',
+          overflow: true,
+        },
+      ],
+      primaryActionItem: {
+        run: action('edit-clicked'),
+        id: 'edit',
+        label: 'Edit',
+        testId: 'editButton',
+        iconType: 'controls',
+      },
+    },
+  },
+};
+
+export const PrimaryActionWithPopover: Story = {
+  name: 'Primary action with popover',
+  args: {
+    staticItems: staticItem,
+    config: {
+      primaryActionItem: {
+        id: 'create',
+        label: 'Create',
+        testId: 'createPopoverButton',
+        iconType: 'plus',
+        popoverWidth: 120,
+        items: [
+          {
+            run: () => action('create-dashboard-clicked'),
+            id: 'createDashboard',
+            order: 1,
+            label: 'Dashboard',
+            iconType: 'productDashboard',
+            testId: 'createDashboardButton',
+          },
+          {
+            run: () => action('create-visualization-clicked'),
+            id: 'createVisualization',
+            order: 2,
+            label: 'Visualization',
+            iconType: 'chartBarVertical',
+            testId: 'createVisualizationButton',
+          },
+          {
+            run: () => action('create-annotation-clicked'),
+            id: 'createAnnotation',
+            order: 3,
+            label: 'Annotation',
+            iconType: 'flag',
+            testId: 'createAnnotationButton',
+          },
+        ],
+      },
+    },
   },
 };

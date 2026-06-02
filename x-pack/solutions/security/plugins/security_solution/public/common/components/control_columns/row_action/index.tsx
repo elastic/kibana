@@ -12,8 +12,9 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
+import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/main/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -134,7 +135,11 @@ const RowActionComponent = ({
             />
           ),
         }),
-        { ...defaultFlyoutProperties }
+        {
+          ...defaultFlyoutProperties,
+          historyKey: documentFlyoutHistoryKey,
+          session: 'start',
+        }
       );
     } else {
       openFlyout({

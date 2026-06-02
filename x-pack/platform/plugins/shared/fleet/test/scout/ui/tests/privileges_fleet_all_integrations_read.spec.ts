@@ -11,8 +11,7 @@ import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { getFleetAllIntegrationsReadRole } from '../fixtures/services/privileges';
 
-// Failing: See https://github.com/elastic/kibana/issues/260143
-test.describe.skip(
+test.describe(
   'When the user has All privilege for Fleet but Read for integrations',
   { tag: tags.stateful.classic },
   () => {

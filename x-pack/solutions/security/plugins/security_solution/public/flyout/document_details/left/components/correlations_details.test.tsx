@@ -12,20 +12,27 @@ import { CorrelationsDetails } from './correlations_details';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import type { CorrelationsDetailsProps } from '../../../../flyout_v2/correlations';
+import type { CorrelationsDetailsProps } from '../../../../flyout_v2/document/tools/correlations';
 
 jest.mock('@kbn/expandable-flyout');
 
-jest.mock('../../../../flyout_v2/correlations', () => ({
-  CorrelationsDetails: ({ scopeId, isRulePreview, onShowAttack }: CorrelationsDetailsProps) => (
-    <div
-      data-test-subj="correlationsDetailsV2Mock"
-      data-scope-id={scopeId}
-      data-is-rule-preview={String(isRulePreview)}
-      data-has-on-show-attack={String(typeof onShowAttack === 'function')}
-    />
-  ),
-}));
+jest.mock(
+  '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view',
+  () => ({
+    CorrelationsDetailsView: ({
+      scopeId,
+      isRulePreview,
+      onShowAttack,
+    }: CorrelationsDetailsProps) => (
+      <div
+        data-test-subj="correlationsDetailsV2Mock"
+        data-scope-id={scopeId}
+        data-is-rule-preview={String(isRulePreview)}
+        data-has-on-show-attack={String(typeof onShowAttack === 'function')}
+      />
+    ),
+  })
+);
 
 const renderCorrelationDetails = () =>
   render(
@@ -38,6 +45,7 @@ const renderCorrelationDetails = () =>
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       openPreviewPanel: jest.fn(),
     } as unknown as ReturnType<typeof useExpandableFlyoutApi>);

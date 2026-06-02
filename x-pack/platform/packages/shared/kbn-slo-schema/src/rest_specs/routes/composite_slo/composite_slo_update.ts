@@ -4,41 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import {
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
-  targetSchema,
-} from '../../../schema';
-import { sloIdSchema, tagsSchema } from '../../../schema/slo';
-import {
+  compositeSloIdSchema,
+  compositeTagsSchema,
+  compositeTargetSchema,
+  compositeOccurrencesBudgetingMethodSchema,
+  compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
   compositeMethodSchema,
   compositeSloDefinitionSchema,
+  COMPOSITE_SLO_MIN_MEMBERS,
+  COMPOSITE_SLO_MAX_MEMBERS,
 } from '../../../schema/composite_slo';
 
-const updateCompositeSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
+const updateCompositeSLOParamsSchema = z.object({
+  path: z.object({
+    id: compositeSloIdSchema,
   }),
-  body: t.partial({
-    name: t.string,
-    description: t.string,
-    members: t.array(compositeSloMemberSchema),
-    compositeMethod: compositeMethodSchema,
-    timeWindow: rollingTimeWindowSchema,
-    budgetingMethod: occurrencesBudgetingMethodSchema,
-    objective: targetSchema,
-    tags: tagsSchema,
-    enabled: t.boolean,
+  body: z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    members: z
+      .array(compositeSloMemberSchema)
+      .min(COMPOSITE_SLO_MIN_MEMBERS)
+      .max(COMPOSITE_SLO_MAX_MEMBERS)
+      .optional(),
+    compositeMethod: compositeMethodSchema.optional(),
+    timeWindow: compositeRollingTimeWindowSchema.optional(),
+    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+    objective: compositeTargetSchema.optional(),
+    tags: compositeTagsSchema.optional(),
+    enabled: z.boolean().optional(),
   }),
 });
 
 const updateCompositeSLOResponseSchema = compositeSloDefinitionSchema;
 
-type UpdateCompositeSLOInput = t.OutputOf<typeof updateCompositeSLOParamsSchema.props.body>;
-type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.props.body>;
-type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOParamsSchema.shape.body>;
+type UpdateCompositeSLOResponse = z.infer<typeof updateCompositeSLOResponseSchema>;
 
 export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
-export type { UpdateCompositeSLOInput, UpdateCompositeSLOParams, UpdateCompositeSLOResponse };
+export type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse };

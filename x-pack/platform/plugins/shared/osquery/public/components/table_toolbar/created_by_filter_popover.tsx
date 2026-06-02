@@ -32,6 +32,10 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
 
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
 
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
+
 interface CreatedByFilterPopoverProps {
   /** Unique usernames of users who created saved objects */
   users: string[];
@@ -135,6 +139,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={CREATED_BY_LABEL}
     >
       <EuiSelectable
         searchable
@@ -148,6 +153,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
         noMatchesMessage={i18n.translate('xpack.osquery.tableToolbar.noUsersMatch', {
           defaultMessage: 'No users match search',
         })}
+        listProps={LIST_PROPS}
       >
         {(list, search) => (
           <div style={POPOVER_CONTENT_STYLE}>

@@ -536,7 +536,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');

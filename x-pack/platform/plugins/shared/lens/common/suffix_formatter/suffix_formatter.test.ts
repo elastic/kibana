@@ -11,7 +11,7 @@ import { getSuffixFormatter } from '.';
 describe('suffix formatter', () => {
   it('should call nested formatter and apply suffix', () => {
     const convertMock = jest.fn((x) => x);
-    const formatFactory = jest.fn(() => ({ convert: convertMock }));
+    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     const nestedParams = { abc: 123 };
     const formatterInstance = new SuffixFormatter({
@@ -20,7 +20,7 @@ describe('suffix formatter', () => {
       params: nestedParams,
     });
 
-    const result = formatterInstance.convert(12345);
+    const result = formatterInstance.convertToText(12345);
 
     expect(result).toEqual('12345/h');
     expect(convertMock).toHaveBeenCalledWith(12345);
@@ -29,7 +29,7 @@ describe('suffix formatter', () => {
 
   it('should not add suffix to empty strings', () => {
     const convertMock = jest.fn((x) => '');
-    const formatFactory = jest.fn(() => ({ convert: convertMock }));
+    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     const nestedParams = { abc: 123 };
     const formatterInstance = new SuffixFormatter({
@@ -38,14 +38,14 @@ describe('suffix formatter', () => {
       params: nestedParams,
     });
 
-    const result = formatterInstance.convert(12345);
+    const result = formatterInstance.convertToText(12345);
 
     expect(result).toEqual('');
   });
 
   it('should be a hidden formatter', () => {
     const convertMock = jest.fn((x) => '');
-    const formatFactory = jest.fn(() => ({ convert: convertMock }));
+    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     expect(SuffixFormatter.hidden).toBe(true);
   });

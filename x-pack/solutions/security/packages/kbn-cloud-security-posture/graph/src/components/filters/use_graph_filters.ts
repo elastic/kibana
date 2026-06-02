@@ -43,6 +43,7 @@ export const useGraphFilters = (
   searchFilters: Filter[];
   setSearchFilters: (filters: Filter[]) => void;
   entityIdsForApi: Array<{ id: string; isOrigin: boolean }> | undefined;
+  pinnedEuids: string[];
 } => {
   // Get or create the FilterStore for this scopeId
   const store = useMemo(() => getOrCreateFilterStore(scopeId), [scopeId]);
@@ -101,6 +102,26 @@ export const useGraphFilters = (
     [store]
   );
 
+  // Subscribe function for useSyncExternalStore (pinned EUIDs)
+  const subscribeToPinnedEuids = useCallback(
+    (onStoreChange: () => void) => {
+      const subscription = store.subscribeToPinnedEuids(onStoreChange);
+      return () => subscription.unsubscribe();
+    },
+    [store]
+  );
+
+  // Snapshot function for useSyncExternalStore (pinned EUIDs)
+  const getPinnedEuidsSnapshot = useCallback(() => store.getPinnedEuids(), [store]);
+
+  const pinnedEuidsSet = useSyncExternalStore(
+    subscribeToPinnedEuids,
+    getPinnedEuidsSnapshot,
+    getPinnedEuidsSnapshot
+  );
+
+  const pinnedEuids = useMemo(() => Array.from(pinnedEuidsSet), [pinnedEuidsSet]);
+
   // Convert expandedEntityIds Set to API format
   const entityIdsForApi = useMemo(() => {
     if (expandedEntityIds.size === 0) return initialEntityIds;
@@ -119,5 +140,6 @@ export const useGraphFilters = (
     searchFilters,
     setSearchFilters,
     entityIdsForApi,
+    pinnedEuids,
   };
 };

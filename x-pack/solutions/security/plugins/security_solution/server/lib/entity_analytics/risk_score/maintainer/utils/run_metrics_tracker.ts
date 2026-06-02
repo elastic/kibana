@@ -12,10 +12,6 @@ export interface RunMetrics {
   scoresWrittenResolution: number;
   scoresWrittenResetToZero: number;
   pagesProcessed: number;
-  deferToPhase2Count: number;
-  notInStoreCount: number;
-  lookupDocsUpserted: number;
-  lookupDocsDeleted: number;
   lookupPrunedDocs: number;
 }
 
@@ -24,10 +20,6 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'scoresWrittenResolution',
   'scoresWrittenResetToZero',
   'pagesProcessed',
-  'deferToPhase2Count',
-  'notInStoreCount',
-  'lookupDocsUpserted',
-  'lookupDocsDeleted',
   'lookupPrunedDocs',
 ];
 
@@ -36,10 +28,6 @@ const emptyMetrics = (): RunMetrics => ({
   scoresWrittenResolution: 0,
   scoresWrittenResetToZero: 0,
   pagesProcessed: 0,
-  deferToPhase2Count: 0,
-  notInStoreCount: 0,
-  lookupDocsUpserted: 0,
-  lookupDocsDeleted: 0,
   lookupPrunedDocs: 0,
 });
 
@@ -74,18 +62,10 @@ export const createRunMetricsTracker = () => {
       summary: {
         scoresWritten: number;
         pagesProcessed: number;
-        deferToPhase2Count: number;
-        notInStoreCount: number;
-        lookupDocsUpserted: number;
-        lookupDocsDeleted: number;
       }
     ) => {
       target.scoresWrittenBase = summary.scoresWritten;
       target.pagesProcessed = summary.pagesProcessed;
-      target.deferToPhase2Count = summary.deferToPhase2Count;
-      target.notInStoreCount = summary.notInStoreCount;
-      target.lookupDocsUpserted = summary.lookupDocsUpserted;
-      target.lookupDocsDeleted = summary.lookupDocsDeleted;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {

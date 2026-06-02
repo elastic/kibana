@@ -78,6 +78,7 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
+// oauth authz code and client credentials with client secret
 export interface OAuthGetTokenOpts {
   authType: 'oauth';
   tokenUrl: string;
@@ -86,6 +87,16 @@ export interface OAuthGetTokenOpts {
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
+}
+
+export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
+  authType: 'oauth_client_credentials_private_key_jwt';
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
 }
 
 export interface EarsGetTokenOpts {
@@ -94,7 +105,10 @@ export interface EarsGetTokenOpts {
   scope?: string;
 }
 
-export type GetTokenOpts = OAuthGetTokenOpts | EarsGetTokenOpts;
+export type GetTokenOpts =
+  | OAuthGetTokenOpts
+  | OAuthClientCredsPrivateKeyJWTGetTokenOpts
+  | EarsGetTokenOpts;
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
@@ -198,6 +212,12 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   description?: string;
   actionGroup?: string;
   supportsStreaming?: boolean;
+  /**
+   * HTTP response header that advertises response size for this action.
+   * The generated executor reads this header from Axios errors when the Actions
+   * response-size limit is exceeded. Defaults to `content-length`.
+   */
+  responseSizeHeader?: string;
 }
 
 export interface ActionContext {
@@ -247,6 +267,7 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     meta?: Record<string, Record<string, unknown>>;

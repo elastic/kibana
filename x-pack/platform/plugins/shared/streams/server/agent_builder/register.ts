@@ -5,24 +5,68 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { GetScopedClients } from '../routes/types';
 import type { StreamsServer } from '../types';
+import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
+import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamExplorationSkill } from './skills/stream_exploration_skill';
+import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { registerAgentBuilderSkills } from './skills/register_skills';
 
-export const registerStreamsAgentBuilder = ({
+export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
+  isMemoryEnabled,
+  streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
+  isMemoryEnabled: () => Promise<boolean>;
+  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  agentBuilder.skills.register(streamExplorationSkill);
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+
+  const getMemoryService = () =>
+    new MemoryServiceImpl({
+      logger: logger.get('memory'),
+      esClient: server.core.elasticsearch.client.asInternalUser,
+    });
+
+  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
+  // This avoids exposing the skill to the agent when memory is not configured.
+  let memorySkillRegistered = false;
+
+  const ensureMemorySkillRegistered = () => {
+    if (memorySkillRegistered) {
+      return;
+    }
+    memorySkillRegistered = true;
+    agentBuilder.skills.register(
+      createSigEventsMemorySkill({
+        getMemoryService,
+        getSecurity: () => server.core.security,
+      })
+    );
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
+    );
+  };
+
+  if (await isMemoryEnabled()) {
+    ensureMemorySkillRegistered();
+  }
+
+  return {
+    ensureMemorySkillRegistered,
+  };
 };

@@ -35,16 +35,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { pagePathGetters } from '../../../constants';
-import type { CloudConnectorVars, AccountType } from '../../../../common/types';
+import type {
+  CloudConnectorVar,
+  CloudConnectorVars,
+  AccountType,
+  GcpCloudConnectorVars,
+} from '../../../../common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
 import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
+import { GCP_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
+  isGcpCloudConnectorVars,
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
@@ -122,8 +129,19 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const identifier = useMemo(() => {
     if (isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
       return cloudConnectorVars.role_arn?.value || '';
-    } else if (isAzureCloudConnectorVars(cloudConnectorVars, provider)) {
+    }
+    if (isAzureCloudConnectorVars(cloudConnectorVars, provider)) {
       return cloudConnectorVars.azure_credentials_cloud_connector_id?.value || '';
+    }
+    if (isGcpCloudConnectorVars(cloudConnectorVars, provider)) {
+      const gcpVars = cloudConnectorVars as GcpCloudConnectorVars & {
+        [GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT]?: CloudConnectorVar;
+      };
+      return (
+        gcpVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT]?.value ||
+        gcpVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT]?.value ||
+        ''
+      );
     }
     return '';
   }, [cloudConnectorVars, provider]);
@@ -133,9 +151,21 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.roleArnLabel', {
           defaultMessage: 'Role ARN',
         })
+      : provider === 'gcp'
+      ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.gcpServiceAccountEmailLabel', {
+          defaultMessage: 'Service Account Email',
+        })
       : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.cloudConnectorIdLabel', {
           defaultMessage: 'Federated Identity ID',
         });
+
+  const copyIdentifierLabel = i18n.translate(
+    'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
+    {
+      defaultMessage: 'Copy {label}',
+      values: { label: identifierLabel },
+    }
+  );
 
   const handleSaveName = () => {
     if (editedName && editedName !== cloudConnectorName) {
@@ -271,21 +301,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={identifier}>
                 {(copy) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copy"
-                    aria-label={i18n.translate(
-                      'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
-                      {
-                        defaultMessage: 'Copy {label}',
-                        values: { label: identifierLabel },
+                  <EuiToolTip content={copyIdentifierLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copy"
+                      aria-label={copyIdentifierLabel}
+                      size="xs"
+                      data-test-subj={
+                        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
                       }
-                    )}
-                    size="xs"
-                    data-test-subj={
-                      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
-                    }
-                  />
+                    />
+                  </EuiToolTip>
                 )}
               </EuiCopy>
             </EuiFlexItem>

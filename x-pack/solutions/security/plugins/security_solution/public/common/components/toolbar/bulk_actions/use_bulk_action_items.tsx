@@ -41,6 +41,7 @@ export interface BulkActionsProps {
   customBulkActions?: CustomBulkActionProp[];
   data?: TimelineItem[];
   closePopover?: () => void;
+  showRunWorkflowActions?: boolean;
 }
 
 export const useBulkActionItems = ({
@@ -55,6 +56,7 @@ export const useBulkActionItems = ({
   customBulkActions,
   data,
   closePopover,
+  showRunWorkflowActions = true,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -103,7 +105,7 @@ export const useBulkActionItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
       if (onUpdateFailure) {
         onUpdateFailure(newStatus, error);
       }
@@ -245,12 +247,17 @@ export const useBulkActionItems = ({
         }, [])
       : [];
 
-    return [...actionItems, ...additionalItems, ...runWorkflowMenuItem];
+    return [
+      ...actionItems,
+      ...additionalItems,
+      ...(showRunWorkflowActions ? runWorkflowMenuItem : []),
+    ];
   }, [
     showAlertStatusActions,
     hasAlertsUpdate,
     customBulkActions,
     runWorkflowMenuItem,
+    showRunWorkflowActions,
     currentStatus,
     closePopover,
     onClickUpdate,
@@ -272,9 +279,9 @@ export const useBulkActionItems = ({
             }),
           };
         }),
-        ...runDocumentWorkflowPanel,
+        ...(showRunWorkflowActions ? runDocumentWorkflowPanel : []),
       ] as EuiContextMenuPanelDescriptor[],
-    [alertClosingReasonPanels, runDocumentWorkflowPanel]
+    [alertClosingReasonPanels, runDocumentWorkflowPanel, showRunWorkflowActions]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

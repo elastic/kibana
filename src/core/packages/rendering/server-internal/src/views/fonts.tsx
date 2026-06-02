@@ -14,6 +14,7 @@ import type { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
+  optimizeFontLoading?: boolean;
 }
 
 type FontFaceWeightValue = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
@@ -219,7 +220,7 @@ const getRoboto = (url: string): FontFace => {
   };
 };
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts: FunctionComponent<Props> = ({ url, optimizeFontLoading }) => {
   const elasticUINumericFont = getElasticUINumeric(url);
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
@@ -244,7 +245,9 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
                 `font-family: '${family}';`,
                 `font-style: ${style};`,
                 `font-weight: ${weight};`,
-                ...(display ? [`font-display: ${display};`] : []),
+                // font-display: swap renders text immediately with a fallback font
+                // while the webfont downloads, eliminating flash of invisible text (FOIT).
+                ...(optimizeFontLoading ? [`font-display: ${display ?? 'swap'};`] : []),
                 `src: ${src};`,
                 ...(unicodeRange ? [`unicode-range: ${unicodeRange};`] : []),
               ];

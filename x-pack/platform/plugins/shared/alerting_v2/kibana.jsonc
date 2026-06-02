@@ -21,14 +21,20 @@
       "security",
       "encryptedSavedObjects",
       "workflowsManagement",
+      "workflowsExtensions",
       "expressions",
       "uiActions",
       "fieldFormats",
       "charts",
       "management",
-      "kibanaUtils"
+      "kibanaUtils",
+      "share",
+      "unifiedDocViewer",
+      "maintenanceWindows",
+      "eventLog",
+      "triggersActionsUi"
     ],
-    "optionalPlugins": ["usageCollection"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
     "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }

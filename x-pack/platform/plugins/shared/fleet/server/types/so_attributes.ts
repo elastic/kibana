@@ -47,6 +47,10 @@ import type {
   AccountType,
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
+import type {
+  CloudOnboardingDeploymentMechanism,
+  CloudOnboardingDeploymentStatus,
+} from '../../common/types/models/cloud_onboarding_deployment';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -103,7 +107,7 @@ export interface AgentSOAttributes {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -171,6 +175,7 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
+  condition?: string;
 }
 
 export interface OutputSoBaseAttributes {
@@ -184,6 +189,7 @@ export interface OutputSoBaseAttributes {
   is_preconfigured?: boolean;
   config_yaml?: string | null;
   otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
@@ -335,4 +341,33 @@ export interface CloudConnectorSOAttributes {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+}
+
+export interface CloudOnboardingDeploymentSOAttributes {
+  /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
+  provider: CloudProvider;
+  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
+  connectorId: string;
+  /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
+  mechanisms: CloudOnboardingDeploymentMechanism[];
+  /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
+  deploymentId?: string;
+  /** Human-readable deployment name. For AWS: the CloudFormation stack name. */
+  deploymentName?: string;
+  /** All service IDs (e.g. 'cloudtrail', 'elb_logs') covered across all mechanisms in this deployment. */
+  services: string[];
+  /** Lifecycle status: pending → deploying → succeeded | failed. */
+  status: CloudOnboardingDeploymentStatus;
+  /** Error detail when status is 'failed'. */
+  statusMessage?: string;
+  /** Number of deploy attempts — incremented on each retry. */
+  attemptCount: number;
+  /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
+  serviceVars?: Record<string, Array<Record<string, unknown>>>;
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
+  packagePolicyIds?: string[];
+  /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */
+  agentPolicyId?: string;
+  /** Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend after key creation; used to identify the key for rotation/revocation. No package policy exists for push services. */
+  apiKeyId?: string;
 }

@@ -125,7 +125,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
   const previousSearchQuery = useRef(searchQuery);
-
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
   );
@@ -432,7 +431,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {showLogRateAnalysisResultsTable && groupResults && foundGroups && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
+          <EuiText size="xs">{groupResultsHelpMessage}</EuiText>
         </>
       )}
       <EuiSpacer size="s" />

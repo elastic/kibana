@@ -14,44 +14,61 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ProtectionUpdatesNoteResponse } from '../model/schema/common.gen';
 
+export const CreateUpdateProtectionUpdatesNoteRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The package policy ID to create or update the protection updates note for.
+     */
+    package_policy_id: z.string(),
+  })
+);
 export type CreateUpdateProtectionUpdatesNoteRequestParams = z.infer<
   typeof CreateUpdateProtectionUpdatesNoteRequestParams
 >;
-export const CreateUpdateProtectionUpdatesNoteRequestParams = z.object({
-  package_policy_id: z.string(),
-});
 export type CreateUpdateProtectionUpdatesNoteRequestParamsInput = z.input<
   typeof CreateUpdateProtectionUpdatesNoteRequestParams
 >;
 
+export const CreateUpdateProtectionUpdatesNoteRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The note content.
+     */
+    note: z.string().optional(),
+  })
+);
 export type CreateUpdateProtectionUpdatesNoteRequestBody = z.infer<
   typeof CreateUpdateProtectionUpdatesNoteRequestBody
 >;
-export const CreateUpdateProtectionUpdatesNoteRequestBody = z.object({
-  note: z.string().optional(),
-});
 export type CreateUpdateProtectionUpdatesNoteRequestBodyInput = z.input<
   typeof CreateUpdateProtectionUpdatesNoteRequestBody
 >;
 
+export const CreateUpdateProtectionUpdatesNoteResponse = lazySchema(
+  () => ProtectionUpdatesNoteResponse
+);
 export type CreateUpdateProtectionUpdatesNoteResponse = z.infer<
   typeof CreateUpdateProtectionUpdatesNoteResponse
 >;
-export const CreateUpdateProtectionUpdatesNoteResponse = ProtectionUpdatesNoteResponse;
 
+export const GetProtectionUpdatesNoteRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The package policy ID to retrieve the protection updates note for.
+     */
+    package_policy_id: z.string(),
+  })
+);
 export type GetProtectionUpdatesNoteRequestParams = z.infer<
   typeof GetProtectionUpdatesNoteRequestParams
 >;
-export const GetProtectionUpdatesNoteRequestParams = z.object({
-  package_policy_id: z.string(),
-});
 export type GetProtectionUpdatesNoteRequestParamsInput = z.input<
   typeof GetProtectionUpdatesNoteRequestParams
 >;
 
+export const GetProtectionUpdatesNoteResponse = lazySchema(() => ProtectionUpdatesNoteResponse);
 export type GetProtectionUpdatesNoteResponse = z.infer<typeof GetProtectionUpdatesNoteResponse>;
-export const GetProtectionUpdatesNoteResponse = ProtectionUpdatesNoteResponse;

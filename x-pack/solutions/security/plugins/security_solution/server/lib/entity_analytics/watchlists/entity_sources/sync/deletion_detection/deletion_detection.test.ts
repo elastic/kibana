@@ -158,6 +158,50 @@ describe('DeletionDetectionService', () => {
       );
     });
 
+    it('scopes the query to the page range when range is provided', async () => {
+      const service = createService();
+      await service.deletionDetection(indexSource, ['euid-1'], emptyWatchlistsByEuid, {
+        gt: 'host:z',
+        lte: 'user:b',
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { term: { 'labels.source_ids': 'source-idx' } },
+                { term: { 'watchlist.id': watchlist.id } },
+                { range: { 'entity.id': { gt: 'host:z', lte: 'user:b' } } },
+              ],
+              must_not: [{ terms: { 'entity.id': ['euid-1'] } }],
+            },
+          },
+        })
+      );
+    });
+
+    it('omits lte from range for the tail pass', async () => {
+      const service = createService();
+      await service.deletionDetection(indexSource, [], emptyWatchlistsByEuid, {
+        gt: 'user:z',
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { term: { 'labels.source_ids': 'source-idx' } },
+                { term: { 'watchlist.id': watchlist.id } },
+                { range: { 'entity.id': { gt: 'user:z' } } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
     it('does not check detectNewFullSync for index sources', async () => {
       const service = createService();
       await service.deletionDetection(indexSource, ['euid-1'], emptyWatchlistsByEuid);

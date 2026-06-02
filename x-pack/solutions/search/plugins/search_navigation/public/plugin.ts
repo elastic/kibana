@@ -12,7 +12,7 @@ import type {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { firstValueFrom, type Subscription } from 'rxjs';
+import { type Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
@@ -27,7 +27,6 @@ import type {
   ClassicNavItem,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
-  AppPluginSetupDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
 import { SearchIndexManagementLocatorDefinition } from './locator';
@@ -47,20 +46,7 @@ export class SearchNavigationPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: AppPluginSetupDependencies): SearchNavigationPluginSetup {
-    const indexManagementLocator = plugins.share.url.locators.get<IndexManagementLocatorParams>(
-      INDEX_MANAGEMENT_LOCATOR_ID
-    );
-    const getChromeStyle = async (): Promise<'classic' | 'project' | undefined> => {
-      const [coreStart] = await core.getStartServices();
-      return firstValueFrom(coreStart.chrome.getChromeStyle$());
-    };
-    plugins.share.url.locators.create(
-      new SearchIndexManagementLocatorDefinition({
-        getChromeStyle,
-        indexManagementLocator: indexManagementLocator ?? undefined,
-      })
-    );
+  public setup(_core: CoreSetup): SearchNavigationPluginSetup {
     return {};
   }
 
@@ -70,6 +56,22 @@ export class SearchNavigationPlugin
     this.chromeSub = core.chrome.getChromeStyle$().subscribe((value) => {
       this.currentChromeStyle = value;
     });
+
+    const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+      core.application.capabilities.index_management;
+    if (monitor || manageEnrich || monitorEnrich || manageIndexTemplates) {
+      const indexManagementLocator =
+        this.pluginsStart.share.url.locators.get<IndexManagementLocatorParams>(
+          INDEX_MANAGEMENT_LOCATOR_ID
+        );
+      const getChromeStyle = (): 'classic' | 'project' | undefined => this.currentChromeStyle;
+      this.pluginsStart.share.url.locators.create(
+        new SearchIndexManagementLocatorDefinition({
+          getChromeStyle,
+          indexManagementLocator: indexManagementLocator ?? undefined,
+        })
+      );
+    }
 
     // Async loads classic nav items on start
     import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
@@ -133,12 +135,18 @@ export class SearchNavigationPlugin
     if (forClassicChromeStyle === true && this.currentChromeStyle !== 'classic') return;
 
     if (this.pluginsStart?.serverless) {
+      // Serverless: use the serverless plugin's breadcrumb API
       this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
-    } else {
-      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
-      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, {
-        project: { value: breadcrumbs, absolute: true },
+    } else if (this.currentChromeStyle === 'project') {
+      // Project chrome (solution spaces): the navigation tree provides the base path.
+      // Breadcrumbs are appended to the nav-tree-generated path.
+      this.coreStart?.chrome.setBreadcrumbs([], {
+        project: { value: breadcrumbs },
       });
+    } else {
+      // Classic chrome: prepend the Elasticsearch home breadcrumb
+      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
+      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs);
     }
   }
 

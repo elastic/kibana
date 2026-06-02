@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useQueryClient } from '@kbn/react-query';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
-import {
-  bulkUpdateEntities,
-  FF_ENABLE_ENTITY_STORE_V2,
-  useEntityStoreEuidApi,
-} from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
@@ -42,13 +39,8 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
-import type { Entity } from '../../../../common/api/entity_analytics';
+import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import {
-  applyEntityStoreSearchCachePatch,
-  useEntityFromStore,
-  type EntityStoreRecord,
-} from '../shared/hooks/use_entity_from_store';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
@@ -89,18 +81,17 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
+export const HostPanel = memo(function HostPanel({
   contextID,
   scopeId,
   isPreviewMode = false,
   hostName,
   entityId,
-}: HostPanelProps) => {
-  const { http, uiSettings } = useKibana().services;
-  const queryClient = useQueryClient();
+}: HostPanelProps) {
+  const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -159,6 +150,10 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
+    onSuccess: calculateEntityRiskScore,
+  });
+
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
       entityStoreV2Enabled,
@@ -177,6 +172,7 @@ export const HostPanel = ({
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.host,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -192,6 +188,8 @@ export const HostPanel = ({
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
   );
+
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
 
   const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedHost.entityRecord != null;
 
@@ -226,33 +224,12 @@ export const HostPanel = ({
       ? !!getRiskFromEntityRecord(observedHost.entityRecord)
       : !!hostRiskData?.host?.risk;
 
-  const handleSaveAssetCriticalityViaEntityStore = useCallback(
-    async (updatedRecord: Entity) => {
-      await bulkUpdateEntities(http, {
-        entityType: 'host',
-        body: updatedRecord as Record<string, unknown>,
-        force: true,
-      });
-      applyEntityStoreSearchCachePatch(queryClient, 'host', updatedRecord as EntityStoreRecord);
-      calculateEntityRiskScore();
-    },
-    [http, queryClient, calculateEntityRiskScore]
-  );
-
   const onCriticalitySave =
-    entityFromStoreResult.entityRecord && observedHost.entityRecord
-      ? (level: CriticalityLevelWithUnassigned) => {
-          const record = observedHost.entityRecord;
-          if (!record) return;
-          const updated = {
-            ...record,
-            asset: {
-              ...record.asset,
-              criticality: level === 'unassigned' ? undefined : level,
-            },
-          };
-          handleSaveAssetCriticalityViaEntityStore(updated);
-        }
+    !!assetCriticalityPrivileges.data?.has_write_permissions &&
+    entityFromStoreResult.entityRecord &&
+    observedHost.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, observedHost.entityRecord)
       : undefined;
 
   const entityStoreEntityId = entityStoreV2Enabled
@@ -375,6 +352,6 @@ export const HostPanel = ({
       )}
     </>
   );
-};
+});
 
 HostPanel.displayName = 'HostPanel';

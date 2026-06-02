@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 
@@ -12,14 +12,12 @@ import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
-import type { NormalizationOptions } from '../../../components/normalization_menu';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
 import { FramesSummary } from '../../../components/frames_summary';
 import { AsyncStatus } from '../../../hooks/use_async';
 
@@ -105,13 +103,6 @@ export function DifferentialFlameGraphsView() {
   const baselineTime = 1;
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
-  const normalizationOptions: NormalizationOptions = {
-    baselineScale: baseline,
-    baselineTime,
-    comparisonScale: comparison,
-    comparisonTime,
-  };
-
   const { data } = state;
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
@@ -142,12 +133,6 @@ export function DifferentialFlameGraphsView() {
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
-          <DifferentialFlameGraphSearchPanel
-            comparisonMode={comparisonMode}
-            normalizationMode={normalizationMode}
-            normalizationOptions={normalizationOptions}
-          />
-          <EuiSpacer />
           <FramesSummary
             isLoading={state.status === AsyncStatus.Loading}
             baseValue={

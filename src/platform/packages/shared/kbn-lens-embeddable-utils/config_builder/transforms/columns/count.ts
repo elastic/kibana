@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CountIndexPatternColumn } from '@kbn/lens-common';
+import { LENS_DOCUMENT_FIELD_NAME, type CountIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCountMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
@@ -21,7 +21,7 @@ export const fromCountAPItoLensState = (
 
   return {
     operationType: 'count',
-    sourceField: field || '___records___',
+    sourceField: field || LENS_DOCUMENT_FIELD_NAME,
     ...getLensStateMetricSharedProps(options),
     params: {
       emptyAsNull: empty_as_null,
@@ -35,7 +35,7 @@ export const fromCountLensStateToAPI = (
 ): LensApiCountMetricOperation => {
   return {
     operation: 'count',
-    ...(options.sourceField !== '___records___' ? { field: options.sourceField } : {}),
+    ...(options.sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: options.sourceField } : {}),
     empty_as_null: Boolean(options.params?.emptyAsNull),
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),

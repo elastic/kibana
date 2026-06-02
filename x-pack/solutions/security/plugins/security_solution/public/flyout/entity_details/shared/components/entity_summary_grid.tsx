@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCopy,
   EuiFlexGrid,
@@ -19,7 +18,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from '../../../../../common/api/entity_analytics';
@@ -29,10 +27,16 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
+
+const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
+  { defaultMessage: 'Additional watchlists' }
+);
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
-  criticalityLevel?: CriticalityLevelWithUnassigned;
+  criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
 }
 
@@ -62,31 +66,52 @@ export const EntitySummaryGrid = memo(
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
               <EuiFlexItem className="eui-textTruncate">
                 <EuiToolTip content={entityId}>
-                  <EuiText size="s" className="eui-textTruncate">
+                  <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
                     {entityId ?? getEmptyTagValue()}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
               {entityId && (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem
+                  grow={false}
+                  // setting height to 0 and overflow to visible to avoid the button from pushing the text down
+                  // translateY(-50%) is used on EuiCopy to center the button vertically
+                  css={css`
+                    height: 0;
+                    overflow: visible;
+                    align-self: center;
+                  `}
+                >
                   <EuiToolTip
                     content={i18n.translate(
                       'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                       { defaultMessage: 'Copy to clipboard' }
                     )}
+                    disableScreenReaderOutput
                   >
                     <EuiCopy textToCopy={entityId}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                             { defaultMessage: 'Copy to clipboard' }
                           )}
-                          onClick={copy}
-                          iconSize="s"
-                          color="text"
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
+                              { defaultMessage: 'Copy to clipboard' }
+                            )}
+                            onClick={copy}
+                            iconSize="s"
+                            color="text"
+                            css={css`
+                              transform: translateY(-50%);
+                            `}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiToolTip>
@@ -100,7 +125,10 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Data source' }
             )}
           >
-            <EuiText size="s">{entityRecord.entity?.source ?? getEmptyTagValue()}</EuiText>
+            <EntitySourceValue
+              values={toEntitySourceArray(entityRecord.entity?.source)}
+              textSize="xs"
+            />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -143,8 +171,15 @@ export const EntitySummaryGrid = memo(
 EntitySummaryGrid.displayName = 'EntitySummaryGrid';
 
 const SummaryPanel = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
-  <EuiPanel hasBorder paddingSize="m" style={{ minWidth: 0 }}>
-    <EuiText size="s">
+  <EuiPanel
+    hasBorder
+    paddingSize="s"
+    css={css`
+      min-width: 0;
+      padding: 8px 12px 10px;
+    `}
+  >
+    <EuiText size="xs">
       <strong>{label}</strong>
     </EuiText>
     <EuiSpacer size="xs" />
@@ -159,7 +194,7 @@ const AssetCriticalityCell = memo(
     canEdit,
     onOpenModal,
   }: {
-    criticalityLevel?: CriticalityLevelWithUnassigned;
+    criticalityLevel?: CriticalityLevelWithUnassigned | null;
     canEdit: boolean;
     onOpenModal: () => void;
   }) => (
@@ -177,7 +212,7 @@ const AssetCriticalityCell = memo(
       onClick={canEdit ? onOpenModal : undefined}
     >
       <EuiFlexItem grow={false}>
-        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} />
+        <AssetCriticalityBadge criticalityLevel={criticalityLevel ?? 'unassigned'} textSize="xs" />
       </EuiFlexItem>
       {canEdit && (
         <EuiFlexItem grow={false}>
@@ -202,35 +237,24 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
     return map;
   }, [watchlistsData]);
 
-  const resolvedNames = useMemo(() => {
+  const resolvedNames = useMemo<string[]>(() => {
     if (watchlistIds.length === 0) return [];
-    return watchlistIds.map((id) => watchlistNamesById.get(id) ?? getWatchlistName(id));
+    return watchlistIds
+      .map((id) => {
+        const watchlistName = watchlistNamesById.get(id) ?? getWatchlistName(id);
+        // If all we have is the ID, the watchlist has likely been deleted
+        return watchlistName !== id ? watchlistName : undefined;
+      })
+      .filter((name): name is string => name !== undefined);
   }, [watchlistIds, watchlistNamesById]);
 
-  if (resolvedNames.length === 0) {
-    return <EuiText size="s">{getEmptyTagValue()}</EuiText>;
-  }
-
-  const firstName = resolvedNames[0];
-  const moreCount = resolvedNames.length - 1;
-
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{firstName}</EuiText>
-      </EuiFlexItem>
-      {moreCount > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" flush="left">
-            {`+${moreCount} `}
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
-              defaultMessage="More"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <TruncatedBadgeList
+      values={resolvedNames}
+      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
+      data-test-subj="entityWatchlistsCell"
+      textSize="xs"
+    />
   );
 });
 WatchlistsCell.displayName = 'WatchlistsCell';

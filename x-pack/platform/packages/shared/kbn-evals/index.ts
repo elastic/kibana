@@ -26,7 +26,7 @@ export * as cli from './src/cli';
 
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
-export type { EvaluationCriterion } from './src/evaluators/criteria';
+export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,
@@ -34,8 +34,12 @@ export type {
   ExperimentTask,
   Evaluator,
   EvaluationResult,
-  RanExperiment,
+  DatasetRunResult,
   EvalsExecutorClient,
+  EvaluationCompleteEvent,
+  OnEvaluationComplete,
+  ExperimentStartEvent,
+  OnExperimentStart,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
@@ -70,12 +74,14 @@ export type {
 } from './src/utils/reporting/report_table';
 export { createTable } from './src/utils/reporting/report_table';
 export {
-  EvaluationScoreRepository,
-  type EvaluationScoreDocument,
+  EvalsClient,
   type EvaluatorStats,
-  type RunStats,
-} from './src/utils/score_repository';
-export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
+  type ExperimentStats,
+  type UpsertDatasetInput,
+  type DatasetWithId,
+} from './src/utils/evals_client';
+export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
+export { buildIngestRequest } from './src/utils/build_ingest_request';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 /**
@@ -121,6 +127,8 @@ export {
   createScopeViolationEvaluator,
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
+
+export { deleteConnectorById, getConnectorIdAsUuid } from './src/utils/create_connector_fixture';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

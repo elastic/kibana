@@ -79,8 +79,10 @@ export const MOCK_EUI_THEME = {
     mediumShade: '#98A2B3',
     primaryText: '#0077CC',
     textPrimary: '#1a1c21',
+    textSubdued: '#69707D',
     emptyShade: '#fff',
     backgroundBasePlain: '#fff',
+    backgroundBaseHighlighted: '#F6F9FC',
     textParagraph: '#343741',
     text: '#343741',
     lightShade: '#D3DAE6',
@@ -102,6 +104,7 @@ export const MOCK_EUI_THEME = {
 export const MOCK_EUI_THEME_FOR_USE_THEME = {
   colors: MOCK_EUI_THEME.colors,
   size: {
+    base: '16px',
     xxs: '2px',
     xs: '4px',
     s: '8px',
@@ -113,7 +116,7 @@ export const MOCK_EUI_THEME_FOR_USE_THEME = {
     radius: { small: '4px', medium: '6px' },
     width: { thin: '1px', thick: '2px' },
   },
-  levels: { content: 1000, header: 2000, menu: 2000 },
+  levels: { content: 1000, header: 2000, menu: 2000, flyout: 1000 },
   shadows: { s: '0 1px 2px rgba(0,0,0,0.1)' },
   font: { family: '"Inter", sans-serif' },
   animation: { fast: '150ms' },

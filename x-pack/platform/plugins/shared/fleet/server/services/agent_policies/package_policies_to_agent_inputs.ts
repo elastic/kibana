@@ -24,7 +24,6 @@ import type {
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 import {
-  DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
   FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
@@ -35,10 +34,22 @@ import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '..
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { FleetError, PackagePolicyValidationError } from '../../errors';
-import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
+import {
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  getInputEffectiveName,
+} from '../../../common/services';
+
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
+};
+
+const combineConditions = (conditions: Array<string | undefined>): string | undefined => {
+  const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
+  if (filtered.length === 0) return undefined;
+  if (filtered.length === 1) return filtered[0];
+  return filtered.map((c) => `(${c})`).join(' and ');
 };
 
 export function getInputId(
@@ -52,7 +63,7 @@ export function getInputId(
 
   return useSimplifiedId
     ? packagePolicyId || 'default'
-    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+    : `${getInputEffectiveName(input)}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
       }`;
 }
@@ -70,10 +81,21 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
+  const isAgentless = packagePolicy.supports_agentless === true;
+
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
       return;
     }
+
+    const integrationLevelCondition =
+      !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
+        ? packagePolicy.condition
+        : undefined;
+
+    const inputStreams = getFullInputStreams(input, {
+      userIntegrationCondition: integrationLevelCondition,
+    });
 
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
@@ -87,7 +109,7 @@ export const storedPackagePolicyToAgentInputs = (
       },
       use_output: packagePolicy.output_id || agentPolicyOutputId,
       package_policy_id: packagePolicy.id,
-      ...getFullInputStreams(input),
+      ...inputStreams,
     };
 
     // Guard: undefined data_stream.type is only valid for inputs that allow dynamic signal types.
@@ -158,21 +180,48 @@ export const mergeInputsOverrides = (
   return fullInput;
 };
 
+export interface GetFullInputStreamsOptions {
+  /** Force-include disabled streams (used for template-inputs previews). */
+  allStreamEnabled?: boolean;
+  /** Map of stream ids <destinationId, originalId>. */
+  streamsOriginalIdsMap?: Map<string, string>;
+  /** Pre-gated by the caller; layered onto the input-level condition. */
+  userIntegrationCondition?: string;
+}
+
 export const getFullInputStreams = (
   input: PackagePolicyInput,
-  allStreamEnabled: boolean = false,
-  streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
+  {
+    allStreamEnabled = false,
+    streamsOriginalIdsMap,
+    userIntegrationCondition,
+  }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
+  const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
+  const inputCondition = combineConditions([
+    userIntegrationCondition,
+    compiledInputCondition,
+    input.condition,
+  ]);
+
   return {
-    ...(input.compiled_input || {}),
+    ...compiledInputRest,
+    ...(inputCondition !== undefined ? { condition: inputCondition } : {}),
     ...(input.streams.length
       ? {
           streams: input.streams
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
               const streamId = stream.id;
-              const { data_stream: compiledDataStream, ...compiledStream } =
-                stream.compiled_stream ?? {};
+              const {
+                data_stream: compiledDataStream,
+                condition: compiledStreamCondition,
+                ...compiledStream
+              } = stream.compiled_stream ?? {};
+              const streamCondition = combineConditions([
+                compiledStreamCondition,
+                stream.condition,
+              ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
                 data_stream: {
@@ -180,6 +229,7 @@ export const getFullInputStreams = (
                   ...compiledDataStream,
                 },
                 ...compiledStream,
+                ...(streamCondition !== undefined ? { condition: streamCondition } : {}),
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                   acc[key] = value;
                   return acc;
@@ -194,13 +244,11 @@ export const getFullInputStreams = (
               }
 
               if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
-                if (datasetVar) {
-                  fullStream.data_stream = {
-                    ...fullStream.data_stream,
-                    dataset: datasetVar,
-                  };
-                }
+                // Replace policy output dataset verbatim (no .otel append); EPM templates use registry dataset + isOtelInputType separately.
+                fullStream.data_stream = {
+                  ...fullStream.data_stream,
+                  dataset: getEffectiveOtelStreamDataset(stream),
+                };
 
                 const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
                 if (useAPMVar !== undefined) {
@@ -262,10 +310,10 @@ export const storedPackagePoliciesToAgentInputs = async (
       : undefined;
 
     const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
-    const addFields =
-      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
-        ? globalDataTagsToAddFields(filteredGlobalDataTags)
-        : undefined;
+    const packagePolicyTags =
+      filterGlobalDataTags(packagePolicy.global_data_tags ?? [], packageInfo) ?? [];
+    const allTags = [...(filteredGlobalDataTags ?? []), ...packagePolicyTags];
+    const addFields = allTags.length > 0 ? globalDataTagsToAddFields(allTags) : undefined;
 
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions

@@ -12,6 +12,23 @@ export const labels = {
     optional: i18n.translate('xpack.agentBuilder.common.optional', {
       defaultMessage: 'Optional',
     }),
+    markdownViewModeLegend: i18n.translate('xpack.agentBuilder.common.markdownViewModeLegend', {
+      defaultMessage: 'Markdown view mode',
+    }),
+    markdownViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.common.markdownViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    markdownViewRawLabel: i18n.translate('xpack.agentBuilder.common.markdownViewRawLabel', {
+      defaultMessage: 'Raw',
+    }),
+  },
+  customizeLandingEmptyState: {
+    learnMore: i18n.translate('xpack.agentBuilder.customizeLandingEmptyState.learnMore', {
+      defaultMessage: 'Learn more',
+    }),
   },
   conversations: {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
@@ -26,10 +43,34 @@ export const labels = {
   },
   tools: {
     // Landing page
+    libraryTitle: i18n.translate('xpack.agentBuilder.tools.libraryTitle', {
+      defaultMessage: 'Tools library',
+    }),
     title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
     newToolButton: i18n.translate('xpack.agentBuilder.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
+    mcpServerConnectionButton: i18n.translate(
+      'xpack.agentBuilder.tools.mcpServerConnectionButton',
+      {
+        defaultMessage: 'Manage MCP',
+      }
+    ),
+    copyMcpServerUrlButton: i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
+      defaultMessage: 'Copy MCP Server URL',
+    }),
+    bulkImportMcpToolsButton: i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
+      defaultMessage: 'Bulk import MCP tools',
+    }),
+    manageMcpClientsButton: i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
+      defaultMessage: 'Manage MCP clients (OAuth)',
+    }),
+    aboutMcpServerDocumentationButton: i18n.translate(
+      'xpack.agentBuilder.tools.aboutMcpServerDocumentationButton',
+      {
+        defaultMessage: 'Documentation',
+      }
+    ),
     newToolTitle: i18n.translate('xpack.agentBuilder.tools.newToolTitle', {
       defaultMessage: 'Create a new tool',
     }),
@@ -73,7 +114,18 @@ export const labels = {
     // Table columns and labels
     toolIdLabel: i18n.translate('xpack.agentBuilder.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.agentBuilder.tools.tagsLabel', { defaultMessage: 'Labels' }),
+    experimentalLabel: i18n.translate('xpack.agentBuilder.tools.experimentalLabel', {
+      defaultMessage: 'Experimental',
+    }),
     toolsLabel: i18n.translate('xpack.agentBuilder.tools.toolsLabel', { defaultMessage: 'Tools' }),
+    selectToolColumnHeader: i18n.translate('xpack.agentBuilder.tools.selectToolColumnHeader', {
+      defaultMessage: 'Select tool',
+    }),
+    selectToolCheckboxAriaLabel: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.selectToolCheckboxAriaLabel', {
+        defaultMessage: 'Select tool {toolId}',
+        values: { toolId },
+      }),
 
     // Tool types
     esqlLabel: i18n.translate('xpack.agentBuilder.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
@@ -489,8 +541,296 @@ export const labels = {
         }
       ),
     },
+    mcpClients: {
+      title: i18n.translate('xpack.agentBuilder.mcpClients.title', {
+        defaultMessage: 'MCP clients (OAuth)',
+      }),
+      description: i18n.translate('xpack.agentBuilder.mcpClients.description', {
+        defaultMessage:
+          'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+      }),
+      breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
+        defaultMessage: 'MCP clients',
+      }),
+      addMcpClientButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
+        {
+          defaultMessage: 'Add MCP client',
+        }
+      ),
+      manageApplicationConnectionsButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.manageApplicationConnectionsButtonLabel',
+        {
+          defaultMessage: 'Manage application connections',
+        }
+      ),
+      searchMcpClientsPlaceholder: i18n.translate(
+        'xpack.agentBuilder.mcpClients.searchMcpClientsPlaceholder',
+        {
+          defaultMessage: 'Search',
+        }
+      ),
+      listMcpClientsErrorMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.listMcpClientsErrorMessage',
+        {
+          defaultMessage: 'Failed to fetch MCP clients',
+        }
+      ),
+      noMcpClientsFoundMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsFoundMessage',
+        {
+          defaultMessage: 'No MCP clients found.',
+        }
+      ),
+      noMcpClientsPromptTitle: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptTitle',
+        {
+          defaultMessage: 'No MCP clients (OAuth)',
+        }
+      ),
+      noMcpClientsPromptBody: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptBody',
+        {
+          defaultMessage: 'Get started with MCP clients (OAuth).',
+        }
+      ),
+      noItemsPromptLearnMoreLinkLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noItemsPromptLearnMoreLinkLabel',
+        {
+          defaultMessage: 'Learn more',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
+      connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
+        defaultMessage: 'Connections',
+      }),
+      status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
+        defaultMessage: 'Status',
+      }),
+      actionsColumnLabel: i18n.translate('xpack.agentBuilder.mcpClients.actions', {
+        defaultMessage: 'Actions',
+      }),
+      statusFilter: i18n.translate('xpack.agentBuilder.mcpClients.statusFilter', {
+        defaultMessage: 'Status',
+      }),
+      mcpClientsLabel: i18n.translate('xpack.agentBuilder.mcpClients.mcpClientsLabel', {
+        defaultMessage: 'MCP clients',
+      }),
+      addMcpClientOAuthButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.addMcpClientOAuthButtonLabel',
+        {
+          defaultMessage: 'Add MCP client (OAuth)',
+        }
+      ),
+      actions: {
+        ariaLabel: i18n.translate('xpack.agentBuilder.mcpClients.actions.ariaLabel', {
+          defaultMessage: 'Actions',
+        }),
+        revoke: i18n.translate('xpack.agentBuilder.mcpClients.actions.revoke', {
+          defaultMessage: 'Revoke',
+        }),
+      },
+      form: {
+        pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
+          defaultMessage: 'Create MCP client (OAuth)',
+        }),
+        pageDescription: i18n.translate('xpack.agentBuilder.mcpClients.form.pageDescription', {
+          defaultMessage:
+            'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+        }),
+        createBreadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.form.createBreadcrumb', {
+          defaultMessage: 'Create MCP client',
+        }),
+        createButton: i18n.translate('xpack.agentBuilder.mcpClients.form.createButton', {
+          defaultMessage: 'Create client',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.form.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        nameLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.nameLabel', {
+          defaultMessage: 'Name',
+        }),
+        namePlaceholder: i18n.translate('xpack.agentBuilder.mcpClients.form.namePlaceholder', {
+          defaultMessage: 'Enter a client name (e.g. Log Analysis Agent)',
+        }),
+        logoLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.logoLabel', {
+          defaultMessage: 'Client logo (optional)',
+        }),
+        selectLogoPlaceholder: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.selectLogoPlaceholder',
+          {
+            defaultMessage: 'Select logo',
+          }
+        ),
+        defaultLogoBadge: i18n.translate('xpack.agentBuilder.mcpClients.form.defaultLogoBadge', {
+          defaultMessage: 'Default',
+        }),
+        uploadLogoPrompt: i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoPrompt', {
+          defaultMessage: 'Drag and drop or click to upload',
+        }),
+        uploadLogoHelp: (maxSize: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoHelp', {
+            defaultMessage: 'PNG, JPEG, or GIF. Max {maxSize}. Recommended size: 48x48.',
+            values: { maxSize },
+          }),
+        uploadLogoInvalidType: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.uploadLogoInvalidType',
+          {
+            defaultMessage: 'Logo must be a PNG, JPEG, or GIF.',
+          }
+        ),
+        uploadLogoTooLarge: (maxSize: string, actualSize: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoTooLarge', {
+            defaultMessage: 'Logo must be {maxSize} or smaller. Selected file is {actualSize}.',
+            values: { maxSize, actualSize },
+          }),
+        uploadLogoReadError: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.uploadLogoReadError',
+          {
+            defaultMessage: 'Could not read the selected file. Please try again.',
+          }
+        ),
+        logoUploadPreview: i18n.translate('xpack.agentBuilder.mcpClients.form.logoUploadPreview', {
+          defaultMessage: 'Selected logo: ',
+        }),
+        detailsSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.detailsSectionTitle',
+          {
+            defaultMessage: 'MCP details',
+          }
+        ),
+        redirectSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectSectionTitle',
+          {
+            defaultMessage: 'Redirect URI type',
+          }
+        ),
+        redirectTypeLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectTypeLabel', {
+          defaultMessage: 'Redirect URI type',
+        }),
+        redirectLocal: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectLocal', {
+          defaultMessage: 'Local',
+        }),
+        redirectLocalDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectLocalDescription',
+          {
+            defaultMessage: 'For applications running on your local machine.',
+          }
+        ),
+        redirectRemote: i18n.translate('xpack.agentBuilder.mcpClients.form.redirectRemote', {
+          defaultMessage: 'Remote',
+        }),
+        redirectRemoteDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.redirectRemoteDescription',
+          {
+            defaultMessage: 'For hosted or cloud-based applications.',
+          }
+        ),
+        localUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.localUrlsLabel', {
+          defaultMessage: 'Local URLs',
+        }),
+        localUrlsHelpText: i18n.translate('xpack.agentBuilder.mcpClients.form.localUrlsHelpText', {
+          defaultMessage: 'For common local agent (Claude Desktop, Cursor etc) you can use:',
+        }),
+        remoteUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.remoteUrlsLabel', {
+          defaultMessage: 'Remote URL',
+        }),
+        remoteUrlsHelpText: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.remoteUrlsHelpText',
+          {
+            defaultMessage: 'Only HTTPS URLs are allowed.',
+          }
+        ),
+        addLocalUrl: i18n.translate('xpack.agentBuilder.mcpClients.form.addLocalUrl', {
+          defaultMessage: 'Add local URL',
+        }),
+        addRemoteUrl: i18n.translate('xpack.agentBuilder.mcpClients.form.addRemoteUrl', {
+          defaultMessage: 'Add remote URL',
+        }),
+        removeUriAriaLabel: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.removeUriAriaLabel',
+          {
+            defaultMessage: 'Remove URL',
+          }
+        ),
+        credentialsSectionTitle: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.credentialsSectionTitle',
+          {
+            defaultMessage: 'Client credentials',
+          }
+        ),
+        credentialsSectionDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.credentialsSectionDescription',
+          {
+            defaultMessage:
+              'Client ID and server URL will be generated automatically when you create the client.',
+          }
+        ),
+        confidentialLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.confidentialLabel', {
+          defaultMessage: 'Generate confidential MCP client (optional)',
+        }),
+        confidentialDescription: i18n.translate(
+          'xpack.agentBuilder.mcpClients.form.confidentialDescription',
+          {
+            defaultMessage:
+              'Make your MCP client confidential by generating a client secret. This is recommended for improved security.',
+          }
+        ),
+        createSuccessToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.createSuccessToast', {
+            defaultMessage: 'MCP client "{name}" created successfully',
+            values: { name },
+          }),
+        createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
+          defaultMessage: 'Failed to create MCP client',
+        }),
+      },
+      revoke: {
+        title: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.title', {
+            defaultMessage: 'Revoke {name}?',
+            values: { name },
+          }),
+        warningTitle: i18n.translate('xpack.agentBuilder.mcpClients.revoke.warningTitle', {
+          defaultMessage: 'Warning',
+        }),
+        confirmLabel: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.confirmLabel', {
+            defaultMessage: 'To confirm, type {name}',
+            values: { name },
+          }),
+        confirmPlaceholder: i18n.translate(
+          'xpack.agentBuilder.mcpClients.revoke.confirmPlaceholder',
+          {
+            defaultMessage: 'MCP client name',
+          }
+        ),
+        revokeButton: i18n.translate('xpack.agentBuilder.mcpClients.revoke.revokeButton', {
+          defaultMessage: 'Revoke',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.revoke.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        successToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.revoke.successToast', {
+            defaultMessage: 'MCP client "{name}" revoked successfully',
+            values: { name },
+          }),
+        errorToast: i18n.translate('xpack.agentBuilder.mcpClients.revoke.errorToast', {
+          defaultMessage: 'Failed to revoke MCP client',
+        }),
+      },
+    },
   },
+  byAuthor: (author: string) =>
+    i18n.translate('xpack.agentBuilder.byAuthor', {
+      defaultMessage: 'By {author}',
+      values: { author },
+    }),
   skills: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.skills.libraryTitle', {
+      defaultMessage: 'Skills library',
+    }),
     title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
     newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
       defaultMessage: 'New skill',
@@ -797,12 +1137,6 @@ export const labels = {
         defaultMessage: 'Search available skills',
       }
     ),
-    availableSkillsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentSkills.availableSkillsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available skill} other {Available skills}}',
-        values: { showing, total },
-      }),
     addButtonLabel: i18n.translate('xpack.agentBuilder.agentSkills.addButtonLabel', {
       defaultMessage: 'Add',
     }),
@@ -889,24 +1223,6 @@ export const labels = {
         defaultMessage: 'Instructions',
       }
     ),
-    instructionsViewModeLegend: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
-      {
-        defaultMessage: 'Instructions view mode',
-      }
-    ),
-    instructionsViewRenderedLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
-      {
-        defaultMessage: 'Rendered',
-      }
-    ),
-    instructionsViewRawLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
-      {
-        defaultMessage: 'Raw',
-      }
-    ),
     noSkillSelectedMessage: i18n.translate(
       'xpack.agentBuilder.agentSkills.noSkillSelectedMessage',
       {
@@ -979,6 +1295,21 @@ export const labels = {
     ),
     manageAllSkills: i18n.translate('xpack.agentBuilder.agentSkills.manageAllSkillsLink', {
       defaultMessage: 'Manage all skills',
+    }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateTitle', {
+      defaultMessage: 'No skills added yet',
+    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentSkills.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about skills.',
+      }
+    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateAddButton', {
+      defaultMessage: 'Add skills',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateFooter', {
+      defaultMessage: 'Skills are free - no additional credits used. Remove anytime.',
     }),
   },
   agentPlugins: {
@@ -1090,12 +1421,6 @@ export const labels = {
         defaultMessage: 'Search available plugins',
       }
     ),
-    availablePluginsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentPlugins.availablePluginsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available plugin} other {Available plugins}}',
-        values: { showing, total },
-      }),
     noAvailablePluginsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentPlugins.noAvailablePluginsMatchMessage',
       {
@@ -1114,8 +1439,14 @@ export const labels = {
         values: { source },
       }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
-      defaultMessage: 'ID',
+      defaultMessage: 'Plugin ID',
     }),
+    pluginDetailIdCopyLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailIdCopyLabel',
+      {
+        defaultMessage: 'Copy plugin ID',
+      }
+    ),
     pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
       defaultMessage: 'Name',
     }),
@@ -1128,7 +1459,7 @@ export const labels = {
     pluginDetailSkillsLabel: i18n.translate(
       'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
       {
-        defaultMessage: 'Skills',
+        defaultMessage: 'Skills included',
       }
     ),
     pluginDetailAuthorLabel: i18n.translate(
@@ -1141,6 +1472,12 @@ export const labels = {
       'xpack.agentBuilder.agentPlugins.pluginDetailSourceLabel',
       {
         defaultMessage: 'Source',
+      }
+    ),
+    pluginDetailInstructionsLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailInstructionsLabel',
+      {
+        defaultMessage: 'Instructions',
       }
     ),
     installPluginFlyoutTitle: i18n.translate(
@@ -1189,6 +1526,84 @@ export const labels = {
     manageAllPlugins: i18n.translate('xpack.agentBuilder.agentPlugins.manageAllSkillsLink', {
       defaultMessage: 'Manage all plugins',
     }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateTitle', {
+      defaultMessage: 'No plugins added yet',
+    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about plugins.',
+      }
+    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateAddButton', {
+      defaultMessage: 'Add plugins',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateFooter', {
+      defaultMessage: 'Plugins are free - no additional credits used. Remove anytime.',
+    }),
+  },
+  agentConnectors: {
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateTitle', {
+      defaultMessage: 'No connectors assigned yet',
+    }),
+    emptyStateDescription: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.emptyStateDescription',
+      {
+        defaultMessage:
+          'Connectors let your agent reach into external systems like Slack, Jira, and PagerDuty, so responses are grounded in real data from your environment.',
+      }
+    ),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.emptyStateLearnMoreSuffix',
+      { defaultMessage: ' about connectors.' }
+    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateAddButton', {
+      defaultMessage: 'Add connector',
+    }),
+    emptyStateManageAll: i18n.translate('xpack.agentBuilder.agentConnectors.emptyStateManageAll', {
+      defaultMessage: 'Manage all connectors',
+    }),
+    addConnectorFromLibraryTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.title',
+      { defaultMessage: 'Add connector' }
+    ),
+    manageConnectorLibraryLink: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.manageLink',
+      { defaultMessage: 'Manage connector library' }
+    ),
+    searchAvailableConnectorsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.searchPlaceholder',
+      { defaultMessage: 'Search connectors' }
+    ),
+    noAvailableConnectorsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.noMatchMessage',
+      { defaultMessage: 'No connectors match your search.' }
+    ),
+    noAvailableConnectorsMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.library.noItemsMessage',
+      { defaultMessage: 'No connectors available.' }
+    ),
+    removeConnectorButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeButton',
+      { defaultMessage: 'Remove' }
+    ),
+    removeConnectorConfirmTitle: (name: string) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.removeConfirmTitle', {
+        defaultMessage: 'Remove {name}',
+        values: { name },
+      }),
+    removeConnectorConfirmBody: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeConfirmBody',
+      { defaultMessage: 'This connector will no longer be available to this agent.' }
+    ),
+    removeConnectorConfirmButton: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeConfirmButton',
+      { defaultMessage: 'Remove' }
+    ),
+    removeConnectorCancelButton: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.removeCancelButton',
+      { defaultMessage: 'Cancel' }
+    ),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
@@ -1280,11 +1695,6 @@ export const labels = {
         defaultMessage: 'Search available tools',
       }
     ),
-    availableToolsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentTools.availableToolsSummary', {
-        defaultMessage: 'Showing {showing} of {total} {total, plural, one {Tool} other {Tools}}',
-        values: { showing, total },
-      }),
     noAvailableToolsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentTools.noAvailableToolsMatchMessage',
       {
@@ -1356,8 +1766,26 @@ export const labels = {
     manageAllTools: i18n.translate('xpack.agentBuilder.agentTools.manageAllToolsLink', {
       defaultMessage: 'Manage all tools',
     }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentTools.emptyStateTitle', {
+      defaultMessage: 'No tools added yet',
+    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentTools.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about tools.',
+      }
+    ),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentTools.emptyStateAddButton', {
+      defaultMessage: 'Add tools',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentTools.emptyStateFooter', {
+      defaultMessage: 'Tools are free - no additional credits used. Remove anytime.',
+    }),
   },
   plugins: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.plugins.libraryTitle', {
+      defaultMessage: 'Plugins library',
+    }),
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
     pluginsTableCaption: (pluginsCount: number) =>
       i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
@@ -1581,6 +2009,9 @@ export const labels = {
       }),
   },
   connectors: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.connectors.libraryTitle', {
+      defaultMessage: 'Connectors library',
+    }),
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
@@ -1612,6 +2043,16 @@ export const labels = {
       'xpack.agentBuilder.connectors.status.notAuthorizedTooltip',
       {
         defaultMessage: 'Click to authorize via OAuth',
+      }
+    ),
+    statusEarsDisabled: i18n.translate('xpack.agentBuilder.connectors.status.earsDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+    statusEarsDisabledTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
+      {
+        defaultMessage:
+          'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
       }
     ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {
@@ -1759,6 +2200,28 @@ export const labels = {
         defaultMessage: 'Clear selection',
       }
     ),
+    assignButtonLabel: i18n.translate('xpack.agentBuilder.connectors.assignButtonLabel', {
+      defaultMessage: 'Assign',
+    }),
+    chooseConnectorPlaceholder: i18n.translate(
+      'xpack.agentBuilder.connectors.chooseConnectorPlaceholder',
+      { defaultMessage: 'Choose a connector' }
+    ),
+    addExistingConnectorFlyoutTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.addExistingConnectorFlyoutTitle',
+      { defaultMessage: 'Add existing connector' }
+    ),
+    cancelButtonLabel: i18n.translate('xpack.agentBuilder.connectors.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+    assignConnectorSuccessToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorSuccessToast',
+      { defaultMessage: 'Connector added' }
+    ),
+    assignConnectorErrorToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorErrorToast',
+      { defaultMessage: 'Failed to add connector' }
+    ),
 
     // Delete modal
     deleteConnectorTitle: (name: string) =>
@@ -1824,6 +2287,39 @@ export const labels = {
         defaultMessage: 'Unable to delete {count, plural, one {# connector} other {# connectors}}',
         values: { count },
       }),
+
+    // Agent connectors page
+    manageAllLink: i18n.translate('xpack.agentBuilder.agentConnectors.manageAllLink', {
+      defaultMessage: 'Manage all connectors',
+    }),
+    addConnectorPopoverLabel: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.addConnectorPopoverLabel',
+      { defaultMessage: 'Add connector options' }
+    ),
+    addConnectorButton: i18n.translate('xpack.agentBuilder.agentConnectors.addConnectorButton', {
+      defaultMessage: 'Add connector',
+    }),
+    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.fromLibraryMenuItem', {
+      defaultMessage: 'From library',
+    }),
+    createNewMenuItem: i18n.translate('xpack.agentBuilder.agentConnectors.createNewMenuItem', {
+      defaultMessage: 'Create new connector',
+    }),
+    searchPlaceholder: i18n.translate('xpack.agentBuilder.agentConnectors.searchPlaceholder', {
+      defaultMessage: 'Search active connectors',
+    }),
+    noMatchMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noMatchMessage', {
+      defaultMessage: 'No connectors match your search.',
+    }),
+    noConnectorsAssignedMessage: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.noConnectorsAssignedMessage',
+      {
+        defaultMessage: 'No connectors assigned yet.',
+      }
+    ),
+    noSelectionMessage: i18n.translate('xpack.agentBuilder.agentConnectors.noSelectionMessage', {
+      defaultMessage: 'Select a connector to view details',
+    }),
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
@@ -1873,6 +2369,12 @@ export const labels = {
     editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
       defaultMessage: 'Edit agent settings',
     }),
+    readMore: i18n.translate('xpack.agentBuilder.overview.description.readMore', {
+      defaultMessage: 'Read more',
+    }),
+    readLess: i18n.translate('xpack.agentBuilder.overview.description.readLess', {
+      defaultMessage: 'Read less',
+    }),
     capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
       defaultMessage: 'Capabilities',
     }),
@@ -1919,6 +2421,25 @@ export const labels = {
       defaultMessage: 'Add a plugin',
     }),
     customizePlugins: i18n.translate('xpack.agentBuilder.overview.capabilities.customizePlugins', {
+      defaultMessage: 'Customize',
+    }),
+    toolsCapabilityLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.tools', {
+        defaultMessage: '{count, plural, one {Tool} other {Tools}}',
+        values: { count },
+      }),
+    toolsDescription: i18n.translate('xpack.agentBuilder.overview.capabilities.toolsDescription', {
+      defaultMessage:
+        'Expose callable functions and integrations your agent can use while responding.',
+    }),
+    toolsOnboardingDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.toolsOnboardingDescription',
+      {
+        defaultMessage:
+          'Give your agent ways to act. Tools let it search data, run workflows, and reach connected services instead of answering from memory alone.',
+      }
+    ),
+    customizeTools: i18n.translate('xpack.agentBuilder.overview.capabilities.customizeTools', {
       defaultMessage: 'Customize',
     }),
     connectorsDescription: i18n.translate(
@@ -1978,6 +2499,9 @@ export const labels = {
         defaultMessage: 'Save instructions',
       }
     ),
+    createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
+      defaultMessage: 'Elastic',
+    }),
     byAuthor: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.byAuthor', {
         defaultMessage: 'By {author}',
@@ -2015,7 +2539,7 @@ export const labels = {
         defaultMessage: 'Custom instructions',
       }
     ),
-    customInstructionsOnboardingText: i18n.translate(
+    customInstructionsSubtitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.instructionsOnboardingText',
       {
         defaultMessage: 'Shape how the agent responds to questions and tasks.',

@@ -8,6 +8,83 @@
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 
 describe('buildResolutionModifierEntity', () => {
+  it('returns null criticality when all members have null criticality', () => {
+    const result = buildResolutionModifierEntity({
+      score: {
+        resolution_target_id: 'user:target-1',
+        alert_count: 1,
+        score: 50,
+        normalized_score: 40,
+        risk_inputs: [],
+        related_entities: [
+          {
+            entity_id: 'user:alias-1',
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        ],
+      },
+      memberEntities: new Map([
+        [
+          'user:target-1',
+          {
+            entity: { id: 'user:target-1', attributes: {} },
+            asset: { criticality: null },
+          },
+        ],
+        [
+          'user:alias-1',
+          {
+            entity: { id: 'user:alias-1', attributes: {} },
+            asset: { criticality: null },
+          },
+        ],
+      ]),
+    });
+
+    expect(result.asset?.criticality).toBeNull();
+  });
+
+  it('ignores missing members and still picks up criticality from present ones', () => {
+    const result = buildResolutionModifierEntity({
+      score: {
+        resolution_target_id: 'user:target-1',
+        alert_count: 1,
+        score: 50,
+        normalized_score: 40,
+        risk_inputs: [],
+        related_entities: [
+          {
+            entity_id: 'user:alias-missing',
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+          {
+            entity_id: 'user:alias-1',
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        ],
+      },
+      memberEntities: new Map([
+        [
+          'user:target-1',
+          {
+            entity: { id: 'user:target-1', attributes: {} },
+            asset: { criticality: null },
+          },
+        ],
+        [
+          'user:alias-1',
+          {
+            entity: { id: 'user:alias-1', attributes: {} },
+            asset: { criticality: 'medium_impact' },
+          },
+        ],
+        // 'user:alias-missing' is intentionally absent from the map
+      ]),
+    });
+
+    expect(result.asset?.criticality).toBe('medium_impact');
+  });
+
   it('uses max criticality and unions watchlists across group members', () => {
     const result = buildResolutionModifierEntity({
       score: {

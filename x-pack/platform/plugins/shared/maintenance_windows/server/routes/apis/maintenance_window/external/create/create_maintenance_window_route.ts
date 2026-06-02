@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -21,6 +22,9 @@ import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenan
 import { getDurationInMilliseconds } from '../../../../../lib/transforms/custom_to_rrule/util';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 import { transformCreateBodyV1 } from './transform_create_body';
+
+const createMaintenanceWindowExamples = () =>
+  path.join(__dirname, 'create_maintenance_window_examples.yaml');
 
 export const createMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -55,6 +59,7 @@ export const createMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Create a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: createMaintenanceWindowExamples,
         availability: {
           since: '9.1.0',
           stability: 'stable',

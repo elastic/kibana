@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
@@ -21,7 +22,7 @@ import { getRowItemsWithActions } from '../../../../../common/components/tables/
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { WatchlistTableItemType } from './types';
 
-const COLUMN_WIDTHS = { actions: '5%', watchlist_name: '15%' };
+const COLUMN_WIDTHS = { actions: '8em', watchlist_name: '24em' };
 
 const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
   field: 'name',
@@ -101,16 +102,26 @@ const WatchlistsActionsMenu = ({
   const togglePopover = useCallback(() => setIsOpen((value) => !value), []);
 
   const button = (
-    <EuiButtonIcon
-      iconType="boxesHorizontal"
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
         {
           defaultMessage: 'Watchlist actions',
         }
       )}
-      onClick={togglePopover}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesHorizontal"
+        aria-label={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
+          {
+            defaultMessage: 'Watchlist actions',
+          }
+        )}
+        onClick={togglePopover}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -126,6 +137,7 @@ const WatchlistsActionsMenu = ({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
+            disabled={record.managed === true}
             data-test-subj="watchlistsManagementTableActionDelete"
             onClick={() => {
               onDelete(record);
@@ -152,18 +164,28 @@ const WatchlistsActionsCell = ({
   onEdit: (record: WatchlistTableItemType) => void;
   onDelete: (record: WatchlistTableItemType) => void;
 }) => (
-  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+  <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="pencil"
-        onClick={() => onEdit(record)}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.actions.editButton.ariaLabel',
           {
             defaultMessage: 'Edit watchlist',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="pencil"
+          onClick={() => onEdit(record)}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.actions.editButton.ariaLabel',
+            {
+              defaultMessage: 'Edit watchlist',
+            }
+          )}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <WatchlistsActionsMenu record={record} onDelete={onDelete} />
@@ -190,12 +212,20 @@ const getActionsColumn = (
 export const buildWatchlistsManagementTableColumns = (
   euiTheme: EuiThemeComputed,
   onEdit: (record: WatchlistTableItemType) => void,
-  onDelete: (record: WatchlistTableItemType) => void
-): Array<EuiBasicTableColumn<WatchlistTableItemType>> => [
-  getWatchlistColumn(),
-  getNumberOfEntitiesColumn(),
-  getRiskScoreWeightingColumn(),
-  getSourceColumn(),
-  getLastUpdatedColumn(),
-  getActionsColumn(onEdit, onDelete),
-];
+  onDelete: (record: WatchlistTableItemType) => void,
+  canWrite: boolean = true
+): Array<EuiBasicTableColumn<WatchlistTableItemType>> => {
+  const columns: Array<EuiBasicTableColumn<WatchlistTableItemType>> = [
+    getWatchlistColumn(),
+    getNumberOfEntitiesColumn(),
+    getRiskScoreWeightingColumn(),
+    getSourceColumn(),
+    getLastUpdatedColumn(),
+  ];
+
+  if (canWrite) {
+    columns.push(getActionsColumn(onEdit, onDelete));
+  }
+
+  return columns;
+};

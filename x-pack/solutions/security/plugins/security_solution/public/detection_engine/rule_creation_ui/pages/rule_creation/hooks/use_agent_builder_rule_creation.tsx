@@ -17,6 +17,7 @@ import type {
   RuleCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getStepsData } from '../../../../common/helpers';
+import { RuleCreationEventTypes } from '../../../../../common/lib/telemetry/types';
 import type { FormHook } from '../../../../../shared_imports';
 import type {
   DefineStepRule,
@@ -80,7 +81,7 @@ export const useAgentBuilderRuleCreation = ({
   onAiCreatedRuleAppliedRef,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
-  const { agentBuilder, aiRuleCreation } = services;
+  const { agentBuilder, aiRuleCreation, telemetry } = services;
   const { addSuccess } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
@@ -113,6 +114,14 @@ export const useAgentBuilderRuleCreation = ({
     (rule: RuleResponse) => {
       const stepsData = getStepsData({ rule: { ...ruleDefaultMetadataFields, ...rule } });
 
+      const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
+      aiRuleCreation.incrementApplyCount();
+      telemetry.reportEvent(RuleCreationEventTypes.AiAppliedToForm, {
+        ruleType: rule.type,
+        sessionId: session.sessionId,
+        durationSinceSessionStartMs: Date.now() - session.startTimestamp,
+      });
+
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
       defineStepForm.updateFieldValues(stepsData.defineRuleData);
@@ -140,6 +149,7 @@ export const useAgentBuilderRuleCreation = ({
       actionsStepForm,
       addSuccess,
       aiRuleCreation,
+      telemetry,
       onAiCreatedRuleAppliedRef,
     ]
   );

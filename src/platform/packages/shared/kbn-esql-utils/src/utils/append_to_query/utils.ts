@@ -6,11 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isColumn, isStringLiteral } from '@elastic/esql';
+import { isColumn, isInlineCast, isLiteral, isStringLiteral } from '@elastic/esql';
 import type {
   BinaryExpressionComparisonOperator,
+  ESQLAstItem,
   ESQLColumn,
   ESQLFunction,
+  ESQLLiteral,
   ESQLStringLiteral,
 } from '@elastic/esql/types';
 
@@ -107,4 +109,63 @@ export function extractMatchFunctionDetails(matchFunction: ESQLFunction): {
   }
 
   return null;
+}
+
+/**
+ * MV_CONTAINS can receive bare literals/lists or inline-cast values, so unwrap casts
+ * and keep only the literal or list node used for value extraction
+ */
+function getMvContainsValueNode(valueArg: ESQLAstItem | undefined) {
+  if (!valueArg || Array.isArray(valueArg)) {
+    return null;
+  }
+
+  const unwrappedValueArg = isInlineCast(valueArg) ? valueArg.value : valueArg;
+  if (Array.isArray(unwrappedValueArg)) {
+    return null;
+  }
+
+  if (unwrappedValueArg.type === 'list') {
+    return unwrappedValueArg;
+  }
+
+  return isLiteral(unwrappedValueArg) ? unwrappedValueArg : null;
+}
+
+/**
+ * Extracts field name and values from an MV_CONTAINS function AST node,
+ * supporting both casted and uncast scalar or list values
+ */
+export function extractMvContainsFunctionDetails(mvContainsFunction: ESQLFunction): {
+  columnName: string;
+  literalValues: Array<string | number>;
+} | null {
+  const [column, valueArg] = mvContainsFunction.args;
+  const valueNode = getMvContainsValueNode(valueArg);
+  if (!isColumn(column) || !valueNode) {
+    return null;
+  }
+
+  let literalNodes: ESQLLiteral[];
+  if (valueNode.type === 'list') {
+    const filteredLiteralNodes = valueNode.values.filter(isLiteral);
+    if (filteredLiteralNodes.length === valueNode.values.length) {
+      literalNodes = filteredLiteralNodes;
+    } else {
+      literalNodes = [];
+    }
+  } else {
+    literalNodes = [valueNode];
+  }
+
+  if (literalNodes.length === 0) {
+    return null;
+  }
+
+  return {
+    columnName: (column as ESQLColumn).name,
+    literalValues: literalNodes.map((literal) =>
+      literal.literalType === 'keyword' ? literal.valueUnquoted : literal.value
+    ),
+  };
 }

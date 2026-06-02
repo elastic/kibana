@@ -5,11 +5,139 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+
+import { createFleetTestRendererMock } from '../../../../../../mock';
+
 import {
   validateHost,
   validateDownloadSourceHeaders,
+  useDowloadSourceFlyoutForm,
   type AuthType,
 } from './use_download_source_flyout_form';
+
+jest.mock('../../../../../../hooks/use_authz', () => ({
+  useAuthz: () => ({
+    fleet: {
+      allSettings: true,
+    },
+  }),
+}));
+
+describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
+  it('should block submission when certificate path contains spaces', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.sslCertificateInput.setValue('/path with spaces/cert.pem');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(result.current.inputs.sslCertificateInput.errors).toBeDefined();
+      expect(onSuccess).not.toBeCalled();
+      expect(result.current.isDisabled).toBeTruthy();
+    });
+  });
+
+  it('should block submission when certificate key path contains spaces', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.sslKeyInput.setValue('/path with spaces/key.pem');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(result.current.inputs.sslKeyInput.errors).toBeDefined();
+      expect(onSuccess).not.toBeCalled();
+      expect(result.current.isDisabled).toBeTruthy();
+    });
+  });
+
+  it('should block submission when certificate authorities path contains spaces', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.sslCertificateAuthoritiesInput.props.onChange([
+        '/path with spaces/ca.pem',
+      ]);
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(result.current.inputs.sslCertificateAuthoritiesInput.props.errors).toBeDefined();
+      expect(onSuccess).not.toBeCalled();
+      expect(result.current.isDisabled).toBeTruthy();
+    });
+  });
+
+  it('should allow submission when all SSL paths are valid', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.sslCertificateInput.setValue('/valid/path/cert.pem');
+      result.current.inputs.sslKeyInput.setValue('/valid/path/key.pem');
+      result.current.inputs.sslCertificateAuthoritiesInput.props.onChange(['/valid/ca.pem']);
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+  });
+
+  it('should block submission when username contains only spaces', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.authTypeInput.setValue('username_password');
+      result.current.inputs.usernameInput.setValue('   ');
+      result.current.inputs.passwordInput.setValue('password');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(result.current.inputs.usernameInput.errors).toEqual(['Username is required']);
+      expect(onSuccess).not.toBeCalled();
+      expect(result.current.isDisabled).toBeTruthy();
+    });
+  });
+});
 
 describe('Download source form validation', () => {
   describe('validateHost', () => {
@@ -123,6 +251,28 @@ describe('Download source form validation', () => {
       const res = validateDownloadSourceHeaders([{ key: '', value: '' }]);
 
       expect(res).toBeUndefined();
+    });
+
+    it('should treat whitespace-only key or value as missing', () => {
+      expect(validateDownloadSourceHeaders([{ key: '   ', value: '\t ' }])).toBeUndefined();
+
+      expect(validateDownloadSourceHeaders([{ key: 'X-Custom-Header', value: '   ' }])).toEqual([
+        {
+          message: 'Missing value for key "X-Custom-Header"',
+          index: 0,
+          hasKeyError: false,
+          hasValueError: true,
+        },
+      ]);
+
+      expect(validateDownloadSourceHeaders([{ key: '   ', value: 'some-value' }])).toEqual([
+        {
+          message: 'Missing key for value "some-value"',
+          index: 0,
+          hasKeyError: true,
+          hasValueError: false,
+        },
+      ]);
     });
 
     it('should return error when key is provided without value', () => {

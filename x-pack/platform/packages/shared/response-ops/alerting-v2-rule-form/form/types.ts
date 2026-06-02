@@ -9,7 +9,14 @@
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
-export type StateTransitionDelayMode = 'immediate' | 'breaches' | 'duration';
+export const DELAY_MODE = {
+  immediate: 'immediate',
+  breaches: 'breaches',
+  recoveries: 'recoveries',
+  duration: 'duration',
+} as const;
+
+export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
 /**
  * Rule metadata containing identification and categorization info.
@@ -49,6 +56,17 @@ export interface RuleArtifact {
   value: string;
 }
 
+export interface WorkflowFormComponentProps<TWorkflow extends object = object> {
+  value: TWorkflow;
+  onChange: (next: TWorkflow) => void;
+  isInvalid?: boolean;
+  errorMessage?: string;
+}
+
+export interface RuleNotificationsValue<TWorkflow extends object = object> {
+  workflow: TWorkflow;
+}
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -76,4 +94,7 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  notifications?: RuleNotificationsValue;
+  runbookArtifacts?: RuleArtifact[];
+  dashboardArtifacts?: RuleArtifact[];
 }

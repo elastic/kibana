@@ -14,7 +14,7 @@ import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
-import { deleteFleetProxy } from './fleet_proxies';
+import { createFleetProxy, deleteFleetProxy, bulkCreateFleetProxies } from './fleet_proxies';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
@@ -143,6 +143,46 @@ describe('Fleet proxies service', () => {
       }
 
       throw new Error(`${id} not found`);
+    });
+  });
+
+  describe('bulkCreateFleetProxies', () => {
+    it('should return empty array without calling soClient when given no proxies', async () => {
+      const result = await bulkCreateFleetProxies(soClientMock, []);
+      expect(result).toEqual([]);
+      expect(soClientMock.bulkCreate).not.toBeCalled();
+    });
+
+    it('should throw if any item in the bulk response has an error', async () => {
+      soClientMock.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'proxy-1',
+            type: FLEET_PROXY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
+            references: [],
+            error: { statusCode: 409, error: 'Conflict', message: 'Document already exists' },
+          },
+        ],
+      } as any);
+
+      await expect(() =>
+        bulkCreateFleetProxies(soClientMock, [
+          { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
+        ])
+      ).rejects.toMatchObject({ statusCode: 409 });
+    });
+  });
+
+  describe('create', () => {
+    it('should throw FleetError when given an invalid id', async () => {
+      await expect(
+        createFleetProxy(
+          soClientMock,
+          { name: 'Test', url: 'http://proxy.co', is_preconfigured: false },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
     });
   });
 

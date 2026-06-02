@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -27,7 +27,13 @@ import {
   updateYamlFieldDefault,
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
-import { FieldType } from '../../../../common/types/domain/template/fields';
+import { validateTemplateDefinitionYaml } from '../utils/validate_template_definition';
+import { computeChangedLines } from '../hooks/use_line_differences_decorations';
+import {
+  FieldType,
+  UserPickerDefaultSchema,
+} from '../../../../common/types/domain/template/fields';
+import { normalizeYamlString } from '../utils/normalize_yaml_string';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -65,13 +71,13 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
-  const [savedValue, setSavedValue] = useState(initialValue);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
   const {
     value: yamlValue,
     onChange: onYamlChange,
     handleReset,
+    clearDraft,
     isSaving: isYamlSaving,
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
@@ -80,33 +86,53 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
+  const hasChanges = useMemo(
+    () =>
+      computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue))
+        .length > 0,
+    [initialValue, yamlValue]
+  );
 
-  const hasChanges = yamlValue !== savedValue;
+  const hasValidationErrors = useMemo(
+    () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
+    [yamlValue]
+  );
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      const trimmedValue = value.trim();
-      if (control === FieldType.INPUT_NUMBER && trimmedValue === '') {
+      const isEmptyNumeric = control === FieldType.INPUT_NUMBER && value.trim() === '';
+      const isEmptyUserPicker =
+        control === FieldType.USER_PICKER && (value === '' || value === '[]');
+
+      if (isEmptyNumeric || isEmptyUserPicker) {
         const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
         if (updatedYaml !== yamlValueRef.current) {
           onYamlChange(updatedYaml);
         }
         return;
       }
+
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
-        parsedValue = Number(trimmedValue);
+        parsedValue = Number(value.trim());
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
         } catch {
           parsedValue = [];
         }
+      } else if (control === FieldType.USER_PICKER) {
+        try {
+          const result = UserPickerDefaultSchema.safeParse(JSON.parse(value));
+          parsedValue = result.success ? result.data : [];
+        } catch {
+          parsedValue = [];
+        }
       } else {
-        parsedValue = trimmedValue;
+        parsedValue = value;
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
@@ -131,11 +157,18 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleSave = useCallback(() => {
     setSubmitError(null);
+
+    const validationResult = validateTemplateDefinitionYaml(yamlValue ?? '');
+    if (!validationResult.success) {
+      setSubmitError(i18n.FIX_VALIDATION_ERRORS);
+      return;
+    }
+
     form.handleSubmit(
       async (data) => {
         try {
           await onCreate(data, isEnabled);
-          setSavedValue(data.definition);
+          clearDraft(isEdit ? data.definition : undefined);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -144,7 +177,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled]);
+  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -165,6 +198,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             hasChanges={hasChanges}
             isEdit={isEdit}
             submitError={submitError}
+            hasValidationErrors={hasValidationErrors}
             isEnabled={isEnabled}
             onBack={navigateToCasesTemplates}
             onReset={handleResetClick}
@@ -183,6 +217,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
+            currentTemplateId={templateId}
+            savedValue={isEdit ? initialValue : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

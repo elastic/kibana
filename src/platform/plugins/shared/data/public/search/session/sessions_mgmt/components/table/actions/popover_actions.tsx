@@ -28,6 +28,7 @@ interface PopoverActionItemsProps {
   onActionComplete: OnActionComplete;
   core: CoreStart;
   allowedActions?: UISession['actions'];
+  isWithinFlyout?: boolean;
 }
 
 export const PopoverActionsMenu = ({
@@ -36,6 +37,7 @@ export const PopoverActionsMenu = ({
   session,
   core,
   allowedActions,
+  isWithinFlyout = false,
 }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -71,7 +73,7 @@ export const PopoverActionsMenu = ({
     }) || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, core);
+    const actionDef = getAction(api, actionType, session, core, isWithinFlyout);
     if (actionDef) {
       const { label, iconType, onClick } = actionDef;
 
@@ -109,6 +111,9 @@ export const PopoverActionsMenu = ({
       closePopover={closePopover}
       anchorPosition="downLeft"
       panelPaddingSize={'s'}
+      aria-label={i18n.translate('data.mgmt.searchSessions.popoverActions.ariaLabel', {
+        defaultMessage: 'Background Search actions',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

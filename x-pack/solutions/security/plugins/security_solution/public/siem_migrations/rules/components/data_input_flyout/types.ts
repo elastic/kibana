@@ -22,3 +22,14 @@ export enum QradarDataInputStep {
   Enhancements = 3,
   End = 10,
 }
+
+export enum SentinelDataInputStepId {
+  Rules = 'sentinel_rules',
+  Watchlists = 'sentinel_watchlists',
+}
+
+export enum SentinelDataInputStep {
+  Rules = 1,
+  Watchlists = 2,
+  End = 10,
+}

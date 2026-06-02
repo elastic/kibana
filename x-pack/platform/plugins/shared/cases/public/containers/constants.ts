@@ -19,12 +19,21 @@ export const casesQueriesKeys = {
   alerts: ['alerts'] as const,
   userActions: ['user-actions'] as const,
   templates: ['templates'] as const,
-  template: (templateId: string, version?: number) =>
-    [...casesQueriesKeys.templates, 'detail', templateId, version ?? 'latest'] as const,
+  template: (templateId: string, version?: number, includeDeleted?: boolean) =>
+    [
+      ...casesQueriesKeys.templates,
+      'detail',
+      templateId,
+      version ?? 'latest',
+      includeDeleted ?? false,
+    ] as const,
   templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
   templatesCreators: () => [...casesQueriesKeys.templates, 'creators'] as const,
+  fieldDefinitions: ['field-definitions'] as const,
+  fieldDefinitionsList: (params: unknown) =>
+    [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -81,9 +90,13 @@ export const casesMutationsKeys = {
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,
+  createFieldDefinition: ['create-field-definition'] as const,
+  updateFieldDefinition: ['update-field-definition'] as const,
+  deleteFieldDefinition: ['delete-field-definition'] as const,
   exportTemplate: ['export-template'] as const,
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
+  changeAppliedTemplate: ['change-applied-template'] as const,
 };
 
 export const inferenceKeys = {
@@ -99,6 +112,7 @@ const DEFAULT_SEARCH_FIELDS = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ];
 
 export const DEFAULT_FROM_DATE = 'now-30d';
@@ -116,6 +130,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,
   to: DEFAULT_TO_DATE,
 };

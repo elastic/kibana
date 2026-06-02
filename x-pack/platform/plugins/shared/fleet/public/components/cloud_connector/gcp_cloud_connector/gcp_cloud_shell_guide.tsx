@@ -123,11 +123,12 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudConnector.gcp.guide.step7"
-              defaultMessage="Copy the {targetServiceAccount}, {audience}, and {cloudConnectorId} outputs and paste into inputs below"
+              defaultMessage="Copy the {targetServiceAccount}, {audience} outputs and paste into inputs below and copy {cloudConnectorId} into {federatedIdentityId}"
               values={{
                 targetServiceAccount: <strong>Target Service Account</strong>,
                 audience: <strong>Audience</strong>,
-                cloudConnectorId: <strong>Federated Identity ID</strong>,
+                cloudConnectorId: <strong>Cloud Connector ID</strong>,
+                federatedIdentityId: <strong>Federated Identity ID</strong>,
               }}
             />
           </li>

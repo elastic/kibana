@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
@@ -47,7 +47,10 @@ export function initializeDrilldownsManager(
     comparators: {
       drilldowns: (a, b) => deepEqual(a ?? [], b ?? []),
     } as StateComparators<SerializedDrilldowns>,
-    anyStateChange$: drilldowns$.pipe(map(() => undefined)),
+    anyStateChange$: drilldowns$.pipe(
+      skip(1),
+      map(() => undefined)
+    ),
     getLatestState: () => ({
       drilldowns: drilldowns$.value.map((drilldown) => {
         const { actionId, ...rest } = drilldown;

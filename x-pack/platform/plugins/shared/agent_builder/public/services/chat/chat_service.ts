@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
@@ -26,7 +26,7 @@ interface BaseConverseParams {
   signal?: AbortSignal;
   agentId?: string;
   connectorId?: string;
-  conversationId?: string;
+  conversationId: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
 }
@@ -37,13 +37,16 @@ export type ChatParams = BaseConverseParams & {
 };
 
 export type ResumeRoundParams = BaseConverseParams & {
-  conversationId: string;
   prompts: Record<string, PromptResponse>;
 };
 
-export type RegenerateParams = BaseConverseParams & {
-  conversationId: string;
-};
+export type RegenerateParams = BaseConverseParams;
+
+/**
+ * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
+ * Agent Builder UI caller passes a client-generated UUID before chat fires.
+ */
+type ConversePayload = ChatRequestBodyPayload & { conversation_id: string };
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -91,7 +94,21 @@ export class ChatService {
     });
   }
 
-  private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
+  followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
+    return defer(() => {
+      return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
+        signal,
+        asResponse: true,
+        rawResponse: true,
+      });
+    }).pipe(
+      // @ts-expect-error SseEvent mixin issue
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
+    );
+  }
+
+  private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
         signal,
@@ -103,7 +120,10 @@ export class ChatService {
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
       unwrapAgentBuilderErrors(),
-      propagateEvents({ eventsService: this.events })
+      propagateEvents({
+        eventsService: this.events,
+        conversationId: payload.conversation_id,
+      })
     );
   }
 }

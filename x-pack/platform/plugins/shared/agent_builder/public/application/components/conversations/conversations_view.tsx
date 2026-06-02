@@ -13,17 +13,18 @@ import { Conversation } from './conversation';
 import { ConversationDetailShell } from './detail/conversation_detail_shell';
 import { shouldShowTemplateDetailShell } from './detail/template_conversation_utils';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import {
-  SendMessageProvider,
-  useSendMessage,
-} from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
 import { ConversationHeader } from './conversation_header/conversation_header';
-import { useConversation, useConversationId, useHasPersistedConversation } from '../../hooks/use_conversation';
+import {
+  useConversation,
+  useConversationId,
+  useHasPersistedConversation,
+} from '../../hooks/use_conversation';
+import { useConversationStream } from '../../hooks/use_conversation_stream';
 
 const LocationErrorClearer: React.FC<{}> = () => {
   const { key: locationKey } = useLocation();
-  const { removeError } = useSendMessage();
+  const { removeError } = useConversationStream();
   useEffect(() => {
     removeError();
   }, [locationKey, removeError]);
@@ -77,9 +78,7 @@ const ConversationPageContent: React.FC<{}> = () => {
     return (
       <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
         <div css={templateDetailContentStyles}>
-          {isFetched || conversation ? (
-            <ConversationDetailShell />
-          ) : null}
+          {isFetched || conversation ? <ConversationDetailShell /> : null}
         </div>
       </div>
     );
@@ -100,10 +99,8 @@ const ConversationPageContent: React.FC<{}> = () => {
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
-      <SendMessageProvider>
-        <LocationErrorClearer />
-        <ConversationPageContent />
-      </SendMessageProvider>
+      <LocationErrorClearer />
+      <ConversationPageContent />
     </RoutedConversationsProvider>
   );
 };

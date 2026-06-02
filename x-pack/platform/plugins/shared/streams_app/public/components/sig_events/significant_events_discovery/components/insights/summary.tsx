@@ -244,6 +244,9 @@ export function Summary({ count }: { count: number }) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBasicTable
+              tableCaption={i18n.translate('xpack.streams.insights.tableCaption', {
+                defaultMessage: 'Significant events insights',
+              })}
               data-test-subj="streamsInsightsTable"
               columns={columns}
               items={insights}
@@ -289,7 +292,7 @@ export function Summary({ count }: { count: number }) {
             'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
             {
               defaultMessage:
-                'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                'Discover Insights from your logs, and understand what they mean with the power of AI and Elastic Observability.',
             }
           )}
         </p>
@@ -307,10 +310,10 @@ export function Summary({ count }: { count: number }) {
           >
             {task?.status === TaskStatus.InProgress
               ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                  defaultMessage: 'Discovering Significant Events',
+                  defaultMessage: 'Discovering Insights',
                 })
               : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                  defaultMessage: 'Discover Significant Events',
+                  defaultMessage: 'Discover Insights',
                 })}
           </EuiButton>
           {(task?.status === TaskStatus.InProgress || isCancellingTask) && (

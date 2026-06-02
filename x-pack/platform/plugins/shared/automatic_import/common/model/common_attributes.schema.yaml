@@ -29,6 +29,7 @@ components:
               description: The logo of the integration
               type: string
               format: binary
+              maxLength: 100000
             description:
               description: The description of the integration
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -165,23 +166,35 @@ components:
               description: The logo of the integration
               type: string
               format: binary
+              maxLength: 100000
             description:
               description: The description of the integration
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             version:
               description: The version of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/SemVer"
+            connectorId:
+              description: The ID of the connector associated with this integration
               type: string
+              maxLength: 256
             createdBy:
               description: The username of the user who created the integration
               type: string
+              maxLength: 512
             createdByProfileUid:
               description: The profile UID of the user who created the integration
-              type: string
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/UUID"
             dataStreams:
               type: array
               description: The data streams of the integration
               items:
                 $ref: "#/components/schemas/DataStreamResponse"
+            categories:
+              description: The categories of the integration
+              type: array
+              items:
+                type: string
+                maxLength: 100
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"
@@ -206,6 +219,7 @@ components:
             logo:
               description: The logo of the integration (base64 encoded SVG)
               type: string
+              maxLength: 100000
             totalDataStreamCount:
               description: The number of data streams of the integration
               type: integer
@@ -214,13 +228,13 @@ components:
               type: integer
             version:
               description: The version of the integration
-              type: string
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/SemVer"
             createdBy:
               description: The username of the user who created the integration
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             createdByProfileUid:
               description: The profile UID of the user who created the integration
-              type: string
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/UUID"
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"
@@ -235,7 +249,9 @@ components:
       properties:
         projectName:
           type: string
+          maxLength: 512
           description: The project name.
         apiKey:
           type: string
+          maxLength: 256
           description: The apiKey to use for tracing.

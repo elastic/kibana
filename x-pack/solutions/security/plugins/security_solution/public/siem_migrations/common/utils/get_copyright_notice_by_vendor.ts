@@ -7,6 +7,7 @@
 
 import {
   QRADAR_COPYRIGHT_NOTICE,
+  SENTINEL_COPYRIGHT_NOTICE,
   SPLUNK_COPYRIGHT_NOTICE,
 } from '../translations/data_input_flyouts';
 import { MigrationSource } from '../types';
@@ -14,6 +15,7 @@ import { MigrationSource } from '../types';
 export const VENDOR_COPYRIGHT_NOTICES: Record<MigrationSource, string> = {
   [MigrationSource.SPLUNK]: SPLUNK_COPYRIGHT_NOTICE,
   [MigrationSource.QRADAR]: QRADAR_COPYRIGHT_NOTICE,
+  [MigrationSource.SENTINEL]: SENTINEL_COPYRIGHT_NOTICE,
 };
 
 export const getCopyrightNoticeByVendor = (vendor: MigrationSource): string => {

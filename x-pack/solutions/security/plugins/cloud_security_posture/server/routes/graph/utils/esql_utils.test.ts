@@ -9,7 +9,6 @@ import {
   getFieldNamespace,
   generateFieldHintCases,
   concatJsonObjectPropertyEsqlExprSafe,
-  buildLookupJoinEsql,
 } from './esql_utils';
 
 describe('ESQL utils', () => {
@@ -95,47 +94,6 @@ describe('ESQL utils', () => {
 
       expect(result).toContain('customProp');
       expect(result).toContain('customVar');
-    });
-  });
-
-  describe('buildLookupJoinEsql', () => {
-    it('should generate LOOKUP JOIN statements with provided index name', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_default-00001');
-
-      expect(result).toContain('| DROP entity.id');
-      expect(result).toContain('| DROP entity.target.id');
-      expect(result).toContain(
-        '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
-      );
-      expect(result).toContain('| RENAME actorEntityName    = entity.name');
-      expect(result).toContain('| RENAME actorEntityType    = entity.type');
-      expect(result).toContain('| RENAME actorEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME actorHostIp        = host.ip');
-      expect(result).toContain('| RENAME targetEntityName    = entity.name');
-      expect(result).toContain('| RENAME targetEntityType    = entity.type');
-      expect(result).toContain('| RENAME targetEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME targetHostIp        = host.ip');
-    });
-
-    it('should include two LOOKUP JOIN statements for actor and target', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
-
-      const lookupJoinMatches = result.match(/LOOKUP JOIN/g);
-      expect(lookupJoinMatches).toHaveLength(2);
-    });
-
-    it('should use the provided index name in both LOOKUP JOIN statements', () => {
-      const indexName = '.entities.v2.latest.security_custom-00001';
-      const result = buildLookupJoinEsql(indexName);
-
-      const indexMatches = result.match(new RegExp(indexName.replace(/\./g, '\\.'), 'g'));
-      expect(indexMatches).toHaveLength(2);
-    });
-    it('should preserve the lookup entity id aliases for both joins', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
-
-      expect(result).toContain('| RENAME actorLookupEntityId = entity.id');
-      expect(result).toContain('| RENAME targetLookupEntityId = entity.id');
     });
   });
 });

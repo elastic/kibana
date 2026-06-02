@@ -31,4 +31,7 @@ export interface Model {
   provider: ModelProvider;
   family: ModelFamily;
   id?: string;
+  creator?: string;
+  name?: string;
+  platform?: ModelPlatform;
 }

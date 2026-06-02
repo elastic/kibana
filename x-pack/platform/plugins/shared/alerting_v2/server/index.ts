@@ -9,10 +9,12 @@ import { ContainerModule } from 'inversify';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
+import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
+import { bindEvents } from './setup/bind_events';
 import { bindRuleExecutionServices } from './setup/bind_rule_executor';
 import { bindDispatcherExecutionServices } from './setup/bind_dispatcher_executor';
 import { bindTasks } from './setup/bind_tasks';
@@ -24,11 +26,14 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 export const module = new ContainerModule((options) => {
   bindOnSetup(options);
   bindOnStart(options);
+  bindContract(options);
   bindRoutes(options);
   bindServices(options);
+  bindEvents(options);
   bindRuleExecutionServices(options);
   bindDispatcherExecutionServices(options);
   bindTasks(options);
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';
+export type { AlertingServerStart, RulesClientApi } from './types';

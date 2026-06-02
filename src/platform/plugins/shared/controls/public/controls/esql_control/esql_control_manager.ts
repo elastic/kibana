@@ -242,7 +242,9 @@ export function initializeESQLControlManager(
     .pipe(debounceTime(50))
     .subscribe(([searchString, availableOptions]) => {
       const displayOptions =
-        availableOptions?.filter((option) => option.includes(searchString)) ?? [];
+        availableOptions?.filter((option) =>
+          option.toLowerCase().includes(searchString.toLowerCase())
+        ) ?? [];
       displayedAvailableOptions$.next(displayOptions.map((value) => ({ value })));
       totalCardinality$.next(displayOptions.length);
     });
@@ -310,13 +312,31 @@ export function initializeESQLControlManager(
       singleSelect$: singleSelect$ as PublishingSubject<boolean>,
     },
     anyStateChange$: merge(
-      selectedOptions$,
-      availableOptions$,
-      variableName$,
-      singleSelect$,
-      variableType$,
-      esqlQuery$
-    ).pipe(map(() => undefined)),
+      selectedOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      availableOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableName$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      singleSelect$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableType$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      esqlQuery$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     reinitializeState: (lastSaved?: ESQLOptionsListRuntimeState) => {
       setSelectedOptions(lastSaved?.selected_options ?? []);
       variableName$.next(lastSaved?.variable_name ?? '');

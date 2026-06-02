@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/data-view-editor-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/data-visualizer-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-ml'
   - '@kbn/embeddable-plugin'
@@ -67,6 +68,7 @@ dependsOn:
   - '@kbn/maps-plugin'
   - '@kbn/ml-agg-utils'
   - '@kbn/ml-anomaly-utils'
+  - '@kbn/ml-server-schemas'
   - '@kbn/ml-category-validator'
   - '@kbn/ml-creation-wizard-utils'
   - '@kbn/ml-data-frame-analytics-utils'
@@ -137,9 +139,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/presentation-util'
   - '@kbn/licensing-types'
-  - '@kbn/data-service-server'
-  - '@kbn/es-query-server'
-  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/ml-common-types'
   - '@kbn/file-upload-plugin'
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
@@ -148,6 +148,9 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/lens-common'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -161,6 +164,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json

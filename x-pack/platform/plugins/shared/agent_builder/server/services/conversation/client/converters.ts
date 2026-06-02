@@ -19,9 +19,11 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
   timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
@@ -101,6 +103,8 @@ const convertBaseFromEs = (document: Document) => {
     updated_at: document._source.updated_at,
     ...convertMetadataFromEs(document._source),
     ...convertCollaborationFromEs(document._source),
+    status: document._source.status,
+    read: document._source.read,
   };
 };
 
@@ -166,6 +170,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
               });
             }),
             progression: step.progression ?? [],
+            tool_origin: step.tool_origin ?? inferToolOrigin(step.tool_id),
           };
         } else {
           return step;
@@ -196,6 +201,15 @@ function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }
   }
   return state;
 }
+
+const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
+  // Legacy rounds do not reliably differentiate registry vs inline tools.
+  // Only infer internal tools; leave others undefined for UI-side fallback.
+  if (isInternalTool(toolId)) {
+    return ToolOrigin.internal;
+  }
+  return undefined;
+};
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
@@ -301,6 +315,8 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     state: conversation.state,
     ...convertMetadataToEs(conversation),
     ...convertCollaborationToEs(conversation),
+    status: conversation.status,
+    read: conversation.read,
   };
 };
 
@@ -358,5 +374,7 @@ export const createRequestToEs = ({
     state: conversation.state,
     ...convertMetadataToEs(conversationWithSnapshot as Conversation),
     ...convertCollaborationToEs(conversationWithSnapshot as Conversation),
+    status: conversation.status,
+    read: false,
   };
 };

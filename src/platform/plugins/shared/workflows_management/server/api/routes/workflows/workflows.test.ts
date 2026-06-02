@@ -13,7 +13,7 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerWorkflowRoutes } from '.';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
+import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
@@ -22,6 +22,16 @@ jest.mock('../utils/route_error_handlers', () => ({
 }));
 
 const createLicensingContext = () => ({
+  workflows: Promise.resolve({
+    isWorkflowsAvailable: true,
+    emitEvent: jest.fn(),
+    managedWorkflows: {
+      install: jest.fn(),
+      uninstall: jest.fn(),
+      getWorkflowStatus: jest.fn(),
+      execute: jest.fn(),
+    },
+  }),
   licensing: Promise.resolve({
     license: {
       isAvailable: true,
@@ -113,7 +123,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
-      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
+      audit: createWorkflowManagementAuditLogMock(),
     } as unknown as RouteDependencies);
   });
 
@@ -286,7 +296,33 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request);
+      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request, {
+        allowManagedWorkflowMutation: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: updated });
+    });
+  });
+
+  describe('PUT:/api/workflows/managed/workflow/{id}', () => {
+    const key = 'PUT:/api/workflows/managed/workflow/{id}';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.updateWorkflow with managed mutation enabled', async () => {
+      const updated = { id: 'wf-1', name: 'U' };
+      mockApi.updateWorkflow.mockResolvedValue(updated);
+      const body = { name: 'U', enabled: true, tags: [], yaml: 'x' };
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request, {
+        allowManagedWorkflowMutation: true,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: updated });
     });
   });
@@ -691,6 +727,19 @@ describe('Workflow routes', () => {
       const aggs = { tags: {} };
       mockApi.getWorkflowAggs.mockResolvedValue(aggs);
       const request = httpServerMock.createKibanaRequest({ query: { fields: ['tags'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space');
+      expect(response.ok).toHaveBeenCalledWith({ body: aggs });
+    });
+
+    it('should normalize a single string field to an array', async () => {
+      const aggs = { tags: {} };
+      mockApi.getWorkflowAggs.mockResolvedValue(aggs);
+      const request = httpServerMock.createKibanaRequest({ query: { fields: 'tags' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 

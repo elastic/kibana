@@ -34,7 +34,6 @@ const stateSchemaV1 = schema.object({
   ),
   count_by_schedule: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_by_lookback: schema.maybe(schema.arrayOf(nameValuePairSchema)),
-  count_with_query_condition: schema.maybe(schema.number()),
   count_with_recovery_policy: schema.maybe(schema.number()),
   count_by_recovery_policy_type: schema.maybe(
     schema.object({
@@ -42,7 +41,6 @@ const stateSchemaV1 = schema.object({
       no_breach: schema.maybe(schema.number()),
     })
   ),
-  count_with_recovery_query_condition: schema.maybe(schema.number()),
   avg_pending_count: schema.maybe(schema.nullable(schema.number())),
   avg_recovering_count: schema.maybe(schema.nullable(schema.number())),
   count_by_pending_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
@@ -75,14 +73,14 @@ const stateSchemaV1 = schema.object({
   executions_delay_p99_ms: schema.maybe(schema.nullable(schema.number())),
   dispatcher_executions_count_24hr: schema.maybe(schema.number()),
 
-  // notification policy stats
-  notification_policies_count: schema.maybe(schema.number()),
-  notification_policies_unique_workflow_count: schema.maybe(schema.number()),
-  notification_policies_count_with_matcher: schema.maybe(schema.number()),
-  notification_policies_count_with_group_by: schema.maybe(schema.number()),
-  notification_policies_avg_group_by_fields_count: schema.maybe(schema.nullable(schema.number())),
-  notification_policies_count_by_throttle_interval: schema.maybe(
-    schema.arrayOf(nameValuePairSchema)
+  // action policy stats
+  action_policies_count: schema.maybe(schema.number()),
+  action_policies_unique_workflow_count: schema.maybe(schema.number()),
+  action_policies_count_with_matcher: schema.maybe(schema.number()),
+  action_policies_count_with_group_by: schema.maybe(schema.number()),
+  action_policies_avg_group_by_fields_count: schema.maybe(schema.nullable(schema.number())),
+  action_policies_count_by_throttle_interval: schema.maybe(
+    schema.arrayOf(nameValuePairSchema, { maxSize: 100 })
   ),
 
   // alert event stats
@@ -117,10 +115,8 @@ export const stateSchemaByVersion = {
       count_by_kind: state.count_by_kind ?? undefined,
       count_by_schedule: state.count_by_schedule ?? undefined,
       count_by_lookback: state.count_by_lookback ?? undefined,
-      count_with_query_condition: state.count_with_query_condition ?? undefined,
       count_with_recovery_policy: state.count_with_recovery_policy ?? undefined,
       count_by_recovery_policy_type: state.count_by_recovery_policy_type ?? undefined,
-      count_with_recovery_query_condition: state.count_with_recovery_query_condition ?? undefined,
       avg_pending_count: state.avg_pending_count ?? undefined,
       avg_recovering_count: state.avg_recovering_count ?? undefined,
       count_by_pending_timeframe: state.count_by_pending_timeframe ?? undefined,
@@ -138,17 +134,15 @@ export const stateSchemaByVersion = {
       executions_delay_p95_ms: state.executions_delay_p95_ms ?? undefined,
       executions_delay_p99_ms: state.executions_delay_p99_ms ?? undefined,
       dispatcher_executions_count_24hr: state.dispatcher_executions_count_24hr ?? undefined,
-      notification_policies_count: state.notification_policies_count ?? undefined,
-      notification_policies_unique_workflow_count:
-        state.notification_policies_unique_workflow_count ?? undefined,
-      notification_policies_count_with_matcher:
-        state.notification_policies_count_with_matcher ?? undefined,
-      notification_policies_count_with_group_by:
-        state.notification_policies_count_with_group_by ?? undefined,
-      notification_policies_avg_group_by_fields_count:
-        state.notification_policies_avg_group_by_fields_count ?? undefined,
-      notification_policies_count_by_throttle_interval:
-        state.notification_policies_count_by_throttle_interval ?? undefined,
+      action_policies_count: state.action_policies_count ?? undefined,
+      action_policies_unique_workflow_count:
+        state.action_policies_unique_workflow_count ?? undefined,
+      action_policies_count_with_matcher: state.action_policies_count_with_matcher ?? undefined,
+      action_policies_count_with_group_by: state.action_policies_count_with_group_by ?? undefined,
+      action_policies_avg_group_by_fields_count:
+        state.action_policies_avg_group_by_fields_count ?? undefined,
+      action_policies_count_by_throttle_interval:
+        state.action_policies_count_by_throttle_interval ?? undefined,
       alerts_count: state.alerts_count ?? undefined,
       alerts_count_by_kind: state.alerts_count_by_kind ?? undefined,
       alerts_count_by_source: state.alerts_count_by_source ?? undefined,

@@ -6,21 +6,19 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
-// Failing: See https://github.com/elastic/kibana/issues/261380
-test.describe.skip(
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.search,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
-    ],
+    tag: '@local-stateful-classic',
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -28,7 +26,7 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsAlertingV2Viewer();
       await pageObjects.discover.goto();
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'
@@ -40,27 +38,19 @@ test.describe.skip(
       await apiServices.sampleData.remove(SAMPLE_DATA_SET);
     });
 
-    test('should show Alerts menu with v2 ES|QL rule row and New badge', async ({
+    test('should show Alerts menu with the v2 ES|QL rule row and hide v1 entries', async ({
       pageObjects,
     }) => {
-      await test.step('open the alerts menu', async () => {
-        await pageObjects.discoverAppMenu.openAlertsMenu();
-      });
+      await pageObjects.discoverAppMenu.openAlertsMenu();
 
-      await test.step('verify no top-level Rules button exists', async () => {
-        await expect(pageObjects.discoverAppMenu.getRulesTopLevelButton()).not.toBeVisible();
-      });
+      await expect(pageObjects.discoverAppMenu.rulesTopLevelButton).toBeHidden();
 
-      await test.step('verify v2 ES|QL rule row is visible with New badge', async () => {
-        await expect(pageObjects.discoverAppMenu.getV2RuleButton()).toBeVisible();
-        await expect(pageObjects.discoverAppMenu.getV2RuleBadge()).toBeVisible();
-        await expect(pageObjects.discoverAppMenu.getV2RuleBadge()).toHaveText('New');
-      });
+      await expect(pageObjects.discoverAppMenu.createEsqlRuleButton).toBeVisible();
+      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toBeVisible();
+      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toHaveText('New');
 
-      await test.step('verify legacy rows are still present', async () => {
-        await expect(pageObjects.discoverAppMenu.getCreateAlertButton()).toBeVisible();
-        await expect(pageObjects.discoverAppMenu.getManageAlertsButton()).toBeVisible();
-      });
+      await expect(pageObjects.discoverAppMenu.createAlertButton).toBeHidden();
+      await expect(pageObjects.discoverAppMenu.manageAlertsButton).toBeHidden();
     });
   }
 );

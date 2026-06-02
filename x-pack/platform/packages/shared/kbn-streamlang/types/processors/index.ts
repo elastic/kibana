@@ -161,6 +161,49 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
   ) satisfies z.Schema<DissectProcessor>;
 
 /**
+ * URI parts processor
+ */
+
+export interface UriPartsProcessor extends ProcessorBaseWithWhere {
+  action: 'uri_parts';
+  from: string;
+  to?: string;
+  keep_original?: boolean;
+  remove_if_successful?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const uriPartsProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('uri_parts'),
+    from: StreamlangSourceField.describe('Source field holding the URI string to parse'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe(
+        'Target field / column prefix for the extracted URI components (defaults to "url"). ' +
+          'May equal `from` — the canonical ECS shape parses the `url` field in place. ' +
+          'Note: combining `to === from` with `remove_if_successful: true` nulls the parsed ' +
+          'object after writing it.'
+      ),
+    keep_original: z
+      .optional(z.boolean())
+      .describe(
+        'If true (default), preserve the original URI string alongside the extracted parts'
+      ),
+    remove_if_successful: z
+      .optional(z.boolean())
+      .describe(
+        'If true, remove the source field after a successful parse. Source field is kept on failure.'
+      ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'URI parts processor - Parse a URI into components (scheme, domain, port, path, query, fragment, ...)'
+  ) satisfies z.Schema<UriPartsProcessor>;
+
+/**
  * Date processor
  */
 
@@ -232,7 +275,7 @@ export interface SetProcessor extends ProcessorBaseWithWhere {
   copy_from?: string;
 }
 
-const setProcessorSchema = processorBaseWithWhereSchema
+export const setProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('set'),
     to: StreamlangTargetField.describe('Target field to set or create'),
@@ -242,10 +285,17 @@ const setProcessorSchema = processorBaseWithWhereSchema
       .optional(StreamlangSourceField)
       .describe('Copy value from another field instead of providing a literal'),
   })
-  .refine((obj) => (obj.value && !obj.copy_from) || (!obj.value && obj.copy_from), {
-    message: 'Set processor must have either value or copy_from, but not both.',
-    path: ['value', 'copy_from'],
-  })
+  .refine(
+    (obj) => {
+      const hasValue = obj.value !== undefined;
+      const hasCopyFrom = obj.copy_from !== undefined;
+      return (hasValue && !hasCopyFrom) || (!hasValue && hasCopyFrom);
+    },
+    {
+      message: 'Set processor must have either value or copy_from, but not both.',
+      path: ['value', 'copy_from'],
+    }
+  )
   .describe(
     'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
   ) satisfies z.Schema<SetProcessor>;
@@ -738,11 +788,40 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
   override: z.optional(z.boolean()),
 }) satisfies z.Schema<EnrichProcessor>;
 
+/**
+ * Registered domain processor
+ */
+
+export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
+  action: 'registered_domain';
+  expression: string;
+  prefix: string;
+  ignore_missing?: boolean;
+}
+
+export const registeredDomainSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('registered_domain'),
+    expression: StreamlangSourceField.describe(
+      'The string expression containing the FQDN to parse'
+    ),
+    prefix: NonEmptyString.describe(
+      'The prefix for the output columns. The extracted parts are available as prefix.part_name'
+    ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when expression field is missing'),
+  })
+  .describe(
+    'Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN'
+  ) satisfies z.Schema<RegisteredDomainProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | UriPartsProcessor
   | MathProcessor
   | RenameProcessor
   | SetProcessor
@@ -762,11 +841,13 @@ export type StreamlangProcessorDefinition =
   | NetworkDirectionProcessor
   | JsonExtractProcessor
   | EnrichProcessor
+  | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
+  uriPartsProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
   mathProcessorSchema,
@@ -788,6 +869,7 @@ export const streamlangProcessorSchema = z.union([
   networkDirectionProcessorSchema,
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
+  registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -802,6 +884,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     renameProcessorSchema,
     grokProcessorSchema,
     dissectProcessorSchema,
+    uriPartsProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
     redactProcessorSchema,
@@ -809,6 +892,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     splitProcessorSchema,
     jsonExtractProcessorSchema,
     enrichProcessorSchema,
+    registeredDomainSchema,
   ])
 );
 

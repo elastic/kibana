@@ -15,7 +15,7 @@ import type {
   ColorMappingCategoricalType,
   ColorMappingType,
 } from './color';
-import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
+import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
@@ -393,6 +393,20 @@ describe('Color Schema', () => {
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });
+    });
+  });
+
+  describe('noColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(NO_COLOR);
+      expect(validated).toEqual({ type: 'none' });
+    });
+  });
+
+  describe('autoColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(AUTO_COLOR);
+      expect(validated).toEqual({ type: 'auto' });
     });
   });
 });

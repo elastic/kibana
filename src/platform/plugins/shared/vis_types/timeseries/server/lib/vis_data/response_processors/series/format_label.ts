@@ -10,7 +10,7 @@
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
-  createCachedFieldValueFormatter,
+  createCachedTextFieldValueFormatter,
   getFieldsForTerms,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
@@ -53,7 +53,7 @@ export function formatLabel(
         fields = await extractFields(meta.indexPatternString);
       }
 
-      const formatField = createCachedFieldValueFormatter(
+      const formatField = createCachedTextFieldValueFormatter(
         fetchedIndex?.indexPattern,
         fields,
         fieldFormatService,

@@ -17,6 +17,8 @@ import {
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
 
+import { isDeprecatedStepType } from '../../../../../common/schema';
+
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
   getSuggestions: jest.fn(() => []),
@@ -28,7 +30,12 @@ jest.mock('./context/build_autocomplete_context', () => ({
     path: ['triggers', 0, 'type'],
     linePrefix: '  - type:',
     lineSuffix: '',
+    isInEsqlQueryField: false,
   })),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -58,6 +65,7 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -73,7 +81,19 @@ describe('getCompletionItemProvider', () => {
 
     it('should have correct trigger characters', () => {
       const provider = getCompletionItemProvider(getState);
-      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '"', "'", '(', ':', '|', '{']);
+      expect(provider.triggerCharacters).toEqual([
+        '@',
+        '.',
+        ' ',
+        '"',
+        "'",
+        '(',
+        ':',
+        '|',
+        '{',
+        '[',
+        '?',
+      ]);
     });
   });
 
@@ -134,6 +154,52 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.map((s) => s.label)).toEqual(
         expect.arrayContaining(['alert', 'scheduled'])
       );
+    });
+
+    it('should filter deprecated step types from workflow and YAML suggestions', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'kibana.createCase',
+          insertText: 'kibana.createCase',
+          filterText: 'kibana.createCase',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'kibana.createCaseDefaultSpace',
+              insertText: 'kibana.createCaseDefaultSpace',
+              filterText: 'kibana.createCaseDefaultSpace',
+            },
+            {
+              label: 'scheduled',
+              insertText: 'scheduled',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      const deprecatedStepTypes = new Set(['kibana.createCase', 'kibana.createCaseDefaultSpace']);
+      (isDeprecatedStepType as jest.Mock).mockImplementation((stepType: string) =>
+        deprecatedStepTypes.has(stepType)
+      );
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].label).toBe('scheduled');
     });
 
     it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
@@ -411,6 +477,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
         isInLiquidBlock: false,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 
@@ -454,6 +521,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '  assign',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
         isInLiquidBlock: true,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 

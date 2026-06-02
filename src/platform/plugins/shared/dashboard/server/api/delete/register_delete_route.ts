@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { schema } from '@kbn/config-schema';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import { getRouteConfig } from '../get_route_config';
+import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
-import { telemetryHandler } from '../telemetry_handler';
+import { logRequest } from '../log_request';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
-  usageCounter: UsageCounter | undefined
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
     path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
     ...routeConfig,
+    description: 'Permanently deletes a dashboard by ID.',
   });
 
   deleteRoute.addVersion(
@@ -34,7 +39,7 @@ export function registerDeleteRoute(
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the dashboard.',
+                description: 'The dashboard ID, as returned by the create or search endpoints.',
               },
             }),
           }),
@@ -49,25 +54,39 @@ export function registerDeleteRoute(
           404: {
             description: 'not found',
           },
+          500: {
+            description: 'internal server error',
+          },
         },
       },
     },
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          await deleteDashboard(ctx, req.params.id);
+          const result = await deleteDashboard(ctx, req.params.id);
+          try {
+            await trackDeleteDashboardAction(result, req);
+          } catch (e) {
+            // if tracking throws, just swallow the error; no need to surface it
+          }
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A dashboard with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
             return res.notFound({
               body: {
-                message: `A dashboard with ID [${req.params.id}] was not found.`,
+                message,
               },
             });
           }
+
           if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
-          return res.badRequest({ body: { message: e.message } });
+
+          logRequest(logger, req, 'error', e.message);
+          return res.customError({ statusCode: 500, body: { message: e.message } });
         }
 
         return res.noContent();

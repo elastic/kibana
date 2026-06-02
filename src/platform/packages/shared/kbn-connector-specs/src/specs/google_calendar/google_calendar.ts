@@ -48,6 +48,7 @@ export const GoogleCalendar: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
     types: [
       'bearer',
@@ -63,6 +64,17 @@ export const GoogleCalendar: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      },
+      {
+        type: 'ears',
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
           scope: 'https://www.googleapis.com/auth/calendar.readonly',
         },
       },

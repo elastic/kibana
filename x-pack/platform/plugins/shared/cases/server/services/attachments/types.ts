@@ -21,7 +21,6 @@ import type {
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
@@ -35,7 +34,6 @@ export type MixSavedObjectResponse =
 
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   config: ConfigType;
 }
@@ -58,7 +56,9 @@ export interface BulkOptionalAttributes<T>
   saved_objects: Array<OptionalAttributes<T>>;
 }
 
-export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+};
 
 export interface AlertIdsAggsResult {
   alertIds: {
@@ -69,7 +69,13 @@ export interface AlertIdsAggsResult {
 }
 
 export interface EventIdsAggsResult {
-  eventIds: {
+  legacyEventIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  /** Present only when `cases-attachments` is included in the find `type` list (attachments feature enabled). */
+  unifiedEventIds?: {
     buckets: Array<{
       key: string;
     }>;
@@ -80,10 +86,6 @@ export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   attachmentType: AttachmentType;
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
-
-export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
   aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
 

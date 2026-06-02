@@ -57,7 +57,14 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
   } = params;
 
-  const { enabled, apiKey, uiamApiKey, alertTypeId: ruleTypeId } = rawRule;
+  const {
+    enabled,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+    apiKeyOwner,
+    alertTypeId: ruleTypeId,
+  } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -69,13 +76,18 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
+  const fakeRequest = getFakeKibanaRequest(
+    context,
+    spaceId,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+    apiKeyOwner
+  );
   const rule = getAlertFromRaw({
     id: ruleId,
-    includeLegacyId: false,
     isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
     logger,
-    omitGeneratedValues: false,
     rawRule,
     references,
     ruleTypeId,
@@ -155,7 +167,9 @@ export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
   apiKey: RawRule['apiKey'],
-  uiamApiKey?: RawRule['uiamApiKey']
+  uiamApiKey?: RawRule['uiamApiKey'],
+  apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser'],
+  apiKeyOwner?: RawRule['apiKeyOwner']
 ) {
   const requestHeaders: Headers = {};
 
@@ -164,12 +178,28 @@ export function getFakeKibanaRequest(
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
       requestHeaders.authorization = `ApiKey ${apiKey}`;
-      context.logger.warn(
-        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
-        {
-          tags: UIAM_LOGS_USAGE_TAGS,
-        }
-      );
+      if (apiKeyCreatedByUser && apiKey) {
+        context.logger.debug(
+          'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+          {
+            tags: UIAM_LOGS_USAGE_TAGS,
+          }
+        );
+      } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
+        context.logger.debug(
+          'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
+          {
+            tags: UIAM_LOGS_USAGE_TAGS,
+          }
+        );
+      } else {
+        context.logger.warn(
+          'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+          {
+            tags: UIAM_LOGS_USAGE_TAGS,
+          }
+        );
+      }
     } else {
       const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
       requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
@@ -191,3 +221,12 @@ export function getFakeKibanaRequest(
 
   return fakeRequest;
 }
+
+const isLikelyNonCloudUserApiKeyOwner = (apiKeyOwner?: string | null): boolean => {
+  if (typeof apiKeyOwner !== 'string') {
+    return false;
+  }
+
+  const trimmedApiKeyOwner = apiKeyOwner.trim();
+  return trimmedApiKeyOwner.length > 0 && !/^\d+$/.test(trimmedApiKeyOwner);
+};

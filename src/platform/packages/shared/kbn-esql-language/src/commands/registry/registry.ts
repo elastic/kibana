@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -17,6 +17,7 @@ import type {
   ESQLCommandSummary,
   UnmappedFieldsStrategy,
 } from './types';
+import type { ESQLMessage } from '../definitions/types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -96,6 +97,9 @@ export interface ICommandMetadata {
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
   hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
+  subquerySupport?: boolean; // Temporary property to indicate if the command supports subquery suggestions.
+  subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
+  subquerySourceHidden?: boolean; // Hides the command from subquery source suggestions (e.g. snapshot-only commands).
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
@@ -279,7 +283,9 @@ export class CommandRegistry implements ICommandRegistry {
     const queryContainsSubqueries = options?.queryContainsSubqueries ?? false;
 
     const filtered = isStartingSubquery
-      ? allCommands.filter(({ name }) => name === 'from')
+      ? allCommands.filter(
+          ({ metadata }) => !!metadata.subquerySource && !metadata.subquerySourceHidden
+        )
       : allCommands;
 
     // Then apply subquery restrictions

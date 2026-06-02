@@ -15,7 +15,7 @@ import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { EvaluatorStats } from './utils/score_repository';
+import type { EvalsClient, EvaluatorStats } from './utils/evals_client';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -134,7 +134,16 @@ export interface EvalsExecutorClient {
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     options: {
-      dataset: TEvaluationDataset;
+      /**
+       * Human-readable experiment name (e.g. the task name)
+       */
+      name?: string;
+      /**
+       * Datasets to run the experiment against.
+       * Each dataset is processed independently and a separate
+       * {@link DatasetRunResult} is returned per dataset.
+       */
+      datasets: TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
@@ -148,9 +157,9 @@ export interface EvalsExecutorClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment>;
+  ): Promise<DatasetRunResult[]>;
 
-  getRanExperiments(): Promise<RanExperiment[]>;
+  getDatasetRunResults(): Promise<DatasetRunResult[]>;
 }
 
 export interface ExampleWithId extends Example {
@@ -175,8 +184,9 @@ export interface EvaluationRun {
   exampleId?: string;
 }
 
-export interface RanExperiment {
+export interface DatasetRunResult {
   id: string;
+  experimentName: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
@@ -184,6 +194,33 @@ export interface RanExperiment {
   evaluationRuns: EvaluationRun[];
   experimentMetadata?: Record<string, unknown>;
 }
+
+/**
+ * Emitted by the executor client when an experiment starts.
+ */
+export interface ExperimentStartEvent {
+  experimentId: string;
+}
+
+export type OnExperimentStart = (event: ExperimentStartEvent) => Promise<void>;
+
+/**
+ * Emitted by the executor client after each evaluator completes for a single
+ * example+repetition. Consumers (e.g. the Playwright fixture) can use this to
+ * incrementally export score documents to Elasticsearch so that results survive
+ * worker crashes.
+ */
+export interface EvaluationCompleteEvent {
+  experimentId: string;
+  experimentName: string;
+  datasetId: string;
+  datasetName: string;
+  taskRun: TaskRun;
+  evaluationRun: EvaluationRun;
+  exampleId: string;
+}
+
+export type OnEvaluationComplete = (event: EvaluationCompleteEvent) => Promise<void>;
 
 export interface ReportDisplayOptions {
   /**
@@ -203,30 +240,34 @@ export interface EvaluationReport {
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
-  runId: string;
+  experimentId: string;
+}
+
+export interface WorkerExperimentIdRef {
+  current: string | undefined;
+}
+
+export interface WorkerExecutionIdRef {
+  current: string | undefined;
 }
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
-  evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
-  /**
-   * Whether the target Kibana has the evals plugin enabled (xpack.evals.enabled: true).
-   * Determined once per worker by probing the plugin's enabled endpoint.
-   */
-  evaluationsPluginEnabled: boolean;
+  evalsClient: EvalsClient;
   /**
    * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
+  workerExperimentId: WorkerExperimentIdRef;
+  workerExecutionId: WorkerExecutionIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
-  evaluationsEsClient: EsClient;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {

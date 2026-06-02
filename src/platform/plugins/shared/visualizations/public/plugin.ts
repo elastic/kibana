@@ -479,7 +479,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+    embeddable.registerEmbeddablePublicDefinition(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
       return visualizeEmbeddableFactory;
     });
@@ -582,7 +582,7 @@ export class VisualizationsPlugin
         const isServerless = Boolean(serverless);
         const isSolutionView = space.solution && space.solution !== 'classic';
         const visibleIn: AppDeepLinkLocations[] =
-          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
+          isServerless || isSolutionView ? [] : ['globalSearch', 'classicSideNav'];
         this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }
