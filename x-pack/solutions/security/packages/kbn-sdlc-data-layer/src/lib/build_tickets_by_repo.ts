@@ -114,5 +114,47 @@ export const resolveEpicTitle = ({
   fields: Record<string, string>;
 }): string => anchorTitle?.trim() || fields.Title?.trim() || fields.Epic?.trim() || epicKey;
 
-export const resolveEpicOwner = (fields: Record<string, string>): string | undefined =>
-  fields.Owner?.trim() || fields.Assignee?.trim() || fields['Product Owner']?.trim();
+export const collectEpicGithubAssignees = ({
+  anchorAssignees,
+  childIssues,
+}: {
+  anchorAssignees?: readonly string[];
+  childIssues?: ReadonlyArray<{ assignees?: readonly string[] }>;
+}): readonly string[] => {
+  const seen = new Set<string>();
+  const ordered: string[] = [];
+
+  const add = (logins: readonly string[] | undefined): void => {
+    for (const login of logins ?? []) {
+      const trimmed = login.trim();
+      if (!trimmed || seen.has(trimmed)) {
+        continue;
+      }
+      seen.add(trimmed);
+      ordered.push(trimmed);
+    }
+  };
+
+  add(anchorAssignees);
+  for (const issue of childIssues ?? []) {
+    add(issue.assignees);
+  }
+
+  return ordered;
+};
+
+export const resolveEpicOwner = ({
+  fields,
+  githubAssignees,
+}: {
+  fields: Record<string, string>;
+  githubAssignees?: readonly string[];
+}): string | undefined => {
+  const fromProjectFields =
+    fields.Owner?.trim() || fields.Assignee?.trim() || fields['Product Owner']?.trim();
+  if (fromProjectFields) {
+    return fromProjectFields;
+  }
+
+  return githubAssignees?.find((login) => login.trim().length > 0)?.trim();
+};

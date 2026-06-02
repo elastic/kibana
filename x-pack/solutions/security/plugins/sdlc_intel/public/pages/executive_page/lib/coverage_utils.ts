@@ -30,6 +30,23 @@ export const getOwnerInitials = (owner?: string): string => {
     .slice(0, 2);
 };
 
+export const getDeckBucketLabel = (deckBucket?: string, milestone?: string): string | undefined => {
+  if (deckBucket === 'released_9_3') {
+    return `Released (${milestone ?? '9.3'})`;
+  }
+  if (deckBucket === 'now') {
+    return 'Now';
+  }
+  if (deckBucket === 'next') {
+    return 'Next';
+  }
+  if (deckBucket === 'later') {
+    return 'Later';
+  }
+
+  return undefined;
+};
+
 export const getEpicStatusLabel = (status: string): string => {
   if (status === 'closed') {
     return 'Done';

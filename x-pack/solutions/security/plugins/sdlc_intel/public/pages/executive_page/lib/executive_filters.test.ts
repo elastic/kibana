@@ -21,7 +21,9 @@ const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhas
   roadmap: { id: 'dlvp', title: 'Lifecycle visibility', product: 'Sec AI Dev Accelerators' },
   teams: {
     ownOrgTeam: 'siem',
+    ownEngineeringTeam: 'One Workflow',
     contributingOrgTeams: ['siem'],
+    contributingEngineeringTeams: ['One Workflow'],
     crossTeam: false,
     teamCount: 1,
   },
@@ -73,6 +75,8 @@ describe('executive_filters', () => {
       product: '',
       owner: 'N. Oren',
       coverage: 'risk',
+      engineeringTeam: '',
+      deckBucket: '',
     });
 
     expect(filtered).toHaveLength(1);
@@ -112,12 +116,16 @@ describe('executive_filters', () => {
         product: '',
         owner: '',
         coverage: '',
+        engineeringTeam: '',
+        deckBucket: '',
       }
     );
 
     expect(result.summary.epicCount).toBe(1);
     expect(result.derived.prdLinkedCount).toBe(1);
     expect(result.derived.openTicketCount).toBe(1);
+  });
+
   it('excludes epics outside Security org teams', () => {
     const roadmaps: SdlcRoadmapGroup[] = [
       {
@@ -154,6 +162,8 @@ describe('executive_filters', () => {
       product: '',
       owner: '',
       coverage: '',
+      engineeringTeam: '',
+      deckBucket: '',
     });
 
     expect(filtered).toHaveLength(1);

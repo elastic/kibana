@@ -9,10 +9,14 @@ import { useEffect, useMemo, useState } from 'react';
 import type { SdlcRoadmapsResponse } from '../../../../common/api/types';
 import { useSdlcApi } from '../../../context/sdlc_api_context';
 import {
+  collectEngineeringTeams,
   collectOwners,
   collectProducts,
+  DEFAULT_EXECUTIVE_ENGINEERING_TEAM,
+  DEFAULT_EXECUTIVE_PRODUCT,
   getFilteredSummary,
   type CoverageFilter,
+  type DeckBucketFilter,
   type ExecutiveFilters,
 } from '../lib/executive_filters';
 
@@ -27,9 +31,11 @@ export const useExecutiveRoadmaps = () => {
   const [state, setState] = useState<ExecutiveRoadmapsState>({ loading: true });
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [product, setProduct] = useState('');
+  const [product, setProduct] = useState(DEFAULT_EXECUTIVE_PRODUCT);
   const [owner, setOwner] = useState('');
   const [coverage, setCoverage] = useState<CoverageFilter>('');
+  const [engineeringTeam, setEngineeringTeam] = useState(DEFAULT_EXECUTIVE_ENGINEERING_TEAM);
+  const [deckBucket, setDeckBucket] = useState<DeckBucketFilter>('');
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -88,8 +94,10 @@ export const useExecutiveRoadmaps = () => {
       product,
       owner,
       coverage,
+      engineeringTeam,
+      deckBucket,
     }),
-    [search, product, owner, coverage]
+    [search, product, owner, coverage, engineeringTeam, deckBucket]
   );
 
   const filtered = useMemo(() => {
@@ -108,6 +116,10 @@ export const useExecutiveRoadmaps = () => {
     () => collectProducts(state.response?.roadmaps ?? []),
     [state.response?.roadmaps]
   );
+  const engineeringTeamOptions = useMemo(
+    () => collectEngineeringTeams(state.response?.roadmaps ?? []),
+    [state.response?.roadmaps]
+  );
 
   return {
     loading: state.loading,
@@ -119,15 +131,20 @@ export const useExecutiveRoadmaps = () => {
     roadmaps: filtered?.roadmaps ?? [],
     ownerOptions,
     productOptions,
+    engineeringTeamOptions,
     filters: {
       search,
       product,
       owner,
       coverage,
+      engineeringTeam,
+      deckBucket,
     },
     setSearch,
     setProduct,
     setOwner,
     setCoverage,
+    setEngineeringTeam,
+    setDeckBucket,
   };
 };

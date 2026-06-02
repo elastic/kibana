@@ -9,17 +9,22 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SdlcRoadmapGroup } from '../../../../common/api/types';
-import { groupRoadmapsByOrgTeamSubteam } from '../lib/executive_filters';
+import { groupRoadmapsByOrgTeamSubteam, isWorkflowsExecutiveView } from '../lib/executive_filters';
+import type { ExecutiveFilters } from '../lib/executive_filters';
 import { OrgTeamGroup } from './org_team_group';
+import { RoadmapCard } from './roadmap_card';
 
 export const RoadmapList = ({
   roadmaps,
   expandAll,
+  filters,
 }: {
   roadmaps: readonly SdlcRoadmapGroup[];
   expandAll: boolean;
+  filters: ExecutiveFilters;
 }) => {
   const orgTeamGroups = useMemo(() => groupRoadmapsByOrgTeamSubteam(roadmaps), [roadmaps]);
+  const workflowsView = isWorkflowsExecutiveView(filters);
 
   if (orgTeamGroups.length === 0) {
     return (
@@ -40,6 +45,23 @@ export const RoadmapList = ({
           </EuiText>
         }
       />
+    );
+  }
+
+  if (workflowsView) {
+    return (
+      <>
+        {roadmaps.map((roadmap) => (
+          <RoadmapCard
+            key={roadmap.id}
+            roadmap={roadmap}
+            forceOpen
+            forceEpicsOpen={expandAll}
+            showPlatformSubtitle
+          />
+        ))}
+        <EuiSpacer size="l" />
+      </>
     );
   }
 

@@ -93,6 +93,14 @@ describe('phase gates', () => {
       'fail'
     );
   });
+
+  it('does not treat all tickets as AI-generated when no ai-generated labels exist', () => {
+    const tickets = rollupTickets([
+      { state: 'OPEN', labels: ['enhancement'], assignees: ['dev1'] },
+      { state: 'CLOSED', labels: [], assignees: ['dev2'] },
+    ]);
+    expect(tickets).toMatchObject({ total: 2, aiGen: 0 });
+  });
 });
 
 describe('buildEpicPhaseDocument', () => {
@@ -155,7 +163,10 @@ describe('buildEpicPhaseDocument', () => {
     });
 
     expect(doc.roadmap).toMatchObject({ id: 'workflows' });
-    expect(doc.release).toMatchObject({ deck_feature: 'Workflow Versioning' });
+    expect(doc.release).toMatchObject({
+      deck_feature: 'Workflow Versioning',
+      deck_bucket: 'next',
+    });
   });
 
   it('includes Security Intelligence when child issues carry GenAI labels alongside SIEM labels', () => {

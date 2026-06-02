@@ -12,3 +12,4 @@ export const SDLC_SYNC_STATUS_ROUTE = `${SDLC_INTERNAL_API_BASE}/sync_status`;
 export const SDLC_ROADMAPS_ROUTE = `${SDLC_INTERNAL_API_BASE}/roadmaps`;
 export const SDLC_EPICS_ROUTE = `${SDLC_INTERNAL_API_BASE}/epics`;
 export const SDLC_TEAMS_ROUTE = `${SDLC_INTERNAL_API_BASE}/teams`;
+export const SDLC_SEED_WORKFLOWS_EXECUTIVE_DEMO_ROUTE = `${SDLC_INTERNAL_API_BASE}/seed_workflows_executive_demo`;

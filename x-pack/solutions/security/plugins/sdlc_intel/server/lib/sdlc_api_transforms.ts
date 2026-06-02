@@ -9,6 +9,7 @@ import {
   buildSubteamCards,
   formatSubteamSelectionKey,
   groupEpicsBySubteam,
+  UNMAPPED_ROADMAP_GROUP_TITLE,
   type TeamDimensionRecord,
 } from '@kbn/sdlc-data-layer';
 import type {
@@ -49,6 +50,7 @@ export interface EpicPhaseSource {
     readonly summary?: string;
     readonly owner?: string;
     readonly url?: string;
+    readonly teams?: readonly string[];
   };
   readonly teams?: {
     readonly own_org_team?: string;
@@ -72,6 +74,13 @@ export interface EpicPhaseSource {
   };
   readonly tickets_by_repo?: SdlcTicketByRepoGroup[];
   readonly project?: { readonly number?: number };
+  readonly release?: {
+    readonly milestone?: string;
+    readonly deck_feature?: string;
+    readonly deck_bucket?: string;
+    readonly roadmap_stage?: string;
+    readonly initiative?: string;
+  };
 }
 
 export const mapTeamDimensionDocument = (
@@ -152,6 +161,13 @@ export const mapEpicPhaseDocument = (
     phases: source.phases ?? {},
     ticketsByRepo: source.tickets_by_repo ?? [],
     projectNumber: source.project?.number,
+    release: {
+      milestone: source.release?.milestone,
+      deckFeature: source.release?.deck_feature,
+      deckBucket: source.release?.deck_bucket,
+      roadmapStage: source.release?.roadmap_stage,
+    },
+    productTags: source.epic?.teams?.filter((team) => team !== 'One Workflow') ?? [],
   };
 };
 
@@ -172,7 +188,10 @@ export const groupEpicsByRoadmap = (epics: readonly SdlcEpicPhaseSummary[]): Sdl
 
     groups.set(roadmapId, {
       id: roadmapId,
-      title: epic.roadmap.title ?? roadmapId,
+      title:
+        roadmapId === 'unmapped'
+          ? UNMAPPED_ROADMAP_GROUP_TITLE
+          : epic.roadmap.title ?? roadmapId,
       product: epic.roadmap.product ?? 'Unknown',
       coveragePct: 0,
       epicCount: 1,

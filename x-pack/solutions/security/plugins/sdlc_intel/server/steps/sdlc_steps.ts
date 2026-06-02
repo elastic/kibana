@@ -13,6 +13,7 @@ import {
   buildRelationshipsStepCommonDefinition,
   listGithubProjectsToSyncStepCommonDefinition,
   seedReferenceDataStepCommonDefinition,
+  seedWorkflowsExecutiveDemoStepCommonDefinition,
   setupIndicesStepCommonDefinition,
   syncGithubOrgCatalogStepCommonDefinition,
   syncGithubProjectsStepCommonDefinition,
@@ -28,6 +29,7 @@ import {
   buildRelationships,
   listGithubProjectsToSync,
   seedSdlcReferenceData,
+  seedSdlcWorkflowsExecutiveDemo,
   setupSdlcIndices,
   syncGithubOrgCatalog,
   syncGithubProjects,
@@ -84,6 +86,23 @@ export const seedReferenceDataStepDefinition = createServerStepDefinition({
       return {
         error: new Error(
           error instanceof Error ? error.message : 'Failed to seed SDLC reference data'
+        ),
+      };
+    }
+  },
+});
+
+export const seedWorkflowsExecutiveDemoStepDefinition = createServerStepDefinition({
+  ...seedWorkflowsExecutiveDemoStepCommonDefinition,
+  handler: async (context) => {
+    try {
+      const esClient = context.contextManager.getScopedEsClient();
+      const output = await seedSdlcWorkflowsExecutiveDemo(esClient);
+      return { output };
+    } catch (error) {
+      return {
+        error: new Error(
+          error instanceof Error ? error.message : 'Failed to seed Workflows executive demo data'
         ),
       };
     }

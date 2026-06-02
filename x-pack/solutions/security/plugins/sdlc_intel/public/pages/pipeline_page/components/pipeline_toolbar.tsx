@@ -8,71 +8,114 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiButtonGroup,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GateStatusFilter } from '../lib/pipeline_filters';
+import type { PipelineScope } from '../lib/pipeline_scope';
 
 interface PipelineToolbarProps {
-  readonly roadmapId: string;
+  readonly scope: PipelineScope;
+  readonly orgTeamOptions: ReadonlyArray<{ value: string; text: string }>;
+  readonly subteamOptions: ReadonlyArray<{ value: string; text: string }>;
+  readonly productRoadmapOptions: ReadonlyArray<{ value: string; text: string }>;
   readonly search: string;
   readonly gateStatus: GateStatusFilter;
-  readonly roadmapTabs: ReadonlyArray<{ id: string; label: string }>;
   readonly expandAll: boolean;
-  readonly onRoadmapChange: (roadmapId: string) => void;
+  readonly onOrgTeamChange: (orgTeamKey: string) => void;
+  readonly onSubteamChange: (subteamKey: string) => void;
+  readonly onProductRoadmapChange: (productRoadmapId: string) => void;
   readonly onSearchChange: (search: string) => void;
   readonly onGateStatusChange: (gateStatus: GateStatusFilter) => void;
   readonly onToggleExpandAll: () => void;
 }
 
 export const PipelineToolbar = ({
-  roadmapId,
+  scope,
+  orgTeamOptions,
+  subteamOptions,
+  productRoadmapOptions,
   search,
   gateStatus,
-  roadmapTabs,
   expandAll,
-  onRoadmapChange,
+  onOrgTeamChange,
+  onSubteamChange,
+  onProductRoadmapChange,
   onSearchChange,
   onGateStatusChange,
   onToggleExpandAll,
-}: PipelineToolbarProps) => {
-  const roadmapOptions = [
-    {
-      id: '',
-      label: i18n.translate('xpack.sdlcIntel.pipeline.toolbar.allRoadmaps', {
-        defaultMessage: 'All',
-      }),
-    },
-    ...roadmapTabs.map((tab) => ({
-      id: tab.id,
-      label: tab.label,
-    })),
-  ];
-
-  return (
+}: PipelineToolbarProps) => (
+  <>
+    <EuiText size="xs" color="subdued">
+      <FormattedMessage
+        id="xpack.sdlcIntel.pipeline.toolbar.scopeHint"
+        defaultMessage="Scope by Security org team and subteam, or filter to a product roadmap (Workflows, lifecycle platform). Epics roll up under teams—not individual epic titles."
+      />
+    </EuiText>
     <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive wrap>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
         <EuiFormRow
-          label={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.roadmapLabel', {
-            defaultMessage: 'Roadmap',
+          label={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.orgTeamLabel', {
+            defaultMessage: 'Org team',
           })}
           display="rowCompressed"
           fullWidth
         >
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.roadmapLegend', {
-              defaultMessage: 'Filter by roadmap',
-            })}
-            options={roadmapOptions}
-            idSelected={roadmapId}
-            onChange={(id) => onRoadmapChange(id)}
-            isFullWidth
+          <EuiSelect
+            fullWidth
+            value={scope.orgTeamKey}
+            onChange={(event) => onOrgTeamChange(event.target.value)}
+            options={orgTeamOptions}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+        <EuiFormRow
+          label={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.subteamLabel', {
+            defaultMessage: 'Subteam',
+          })}
+          display="rowCompressed"
+          fullWidth
+        >
+          <EuiSelect
+            fullWidth
+            disabled={!scope.orgTeamKey}
+            value={scope.subteamKey}
+            onChange={(event) => onSubteamChange(event.target.value)}
+            options={
+              subteamOptions.length > 0
+                ? subteamOptions
+                : [
+                    {
+                      value: '',
+                      text: i18n.translate('xpack.sdlcIntel.pipeline.toolbar.selectOrgTeamFirst', {
+                        defaultMessage: 'Select an org team first',
+                      }),
+                    },
+                  ]
+            }
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={1} style={{ minWidth: 220 }}>
+        <EuiFormRow
+          label={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.productRoadmapLabel', {
+            defaultMessage: 'Product roadmap',
+          })}
+          display="rowCompressed"
+          fullWidth
+        >
+          <EuiSelect
+            fullWidth
+            value={scope.productRoadmapId}
+            onChange={(event) => onProductRoadmapChange(event.target.value)}
+            options={productRoadmapOptions}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -120,7 +163,7 @@ export const PipelineToolbar = ({
       <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
         <EuiFormRow
           label={i18n.translate('xpack.sdlcIntel.pipeline.toolbar.searchLabel', {
-            defaultMessage: 'Search',
+            defaultMessage: 'Search epics',
           })}
           display="rowCompressed"
           fullWidth
@@ -152,5 +195,5 @@ export const PipelineToolbar = ({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
+  </>
+);

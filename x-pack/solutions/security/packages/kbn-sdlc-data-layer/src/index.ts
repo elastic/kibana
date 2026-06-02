@@ -17,8 +17,10 @@ export {
 } from './mappings/index';
 export { TEAM_DIMENSION_SEED, type TeamDimensionRecord } from './config/team_dimension';
 export {
+  CANONICAL_PRODUCT_ROADMAPS,
   ELASTIC_WORKFLOWS_ROADMAP,
   SDLC_VISIBILITY_ROADMAP,
+  UNMAPPED_ROADMAP_GROUP_TITLE,
   PRODUCT_INITIATIVE_ROADMAP_MAP,
   VIEW_ROADMAP_MAP,
   resolveRoadmapFromInitiative,
@@ -44,6 +46,12 @@ export {
   type EpicSubteamMatchInput,
   type SubteamCardMetrics,
 } from './lib/team_subteams';
+export {
+  WORKFLOWS_EXECUTIVE_DEMO_EPICS,
+  WORKFLOWS_EXECUTIVE_DEMO_SEED_TAG,
+  buildWorkflowsExecutiveDemoDocuments,
+  type WorkflowsExecutiveDemoEpicSeed,
+} from './config/workflows_executive_demo_seed';
 export {
   WORKFLOWS_DECK_EPIC_CORRELATIONS,
   WORKFLOWS_ROADMAP_GITHUB_PROJECT_NUMBER,
@@ -83,6 +91,7 @@ export {
   extractEpicLinks,
   formatIssueRef,
   formatPullRequestRef,
+  collectEpicGithubAssignees,
   resolveEpicOwner,
   resolveEpicTitle,
   resolveTicketStatus,

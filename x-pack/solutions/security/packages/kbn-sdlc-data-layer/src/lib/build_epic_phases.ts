@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
 import { getDeckFeatureForGithubEpicKey } from '../config/workflows_deck_epic_correlation';
-import { resolveRoadmapForEpic } from '../config/roadmap_mapping';
+import { resolveRoadmapForEpic, UNMAPPED_ROADMAP_GROUP_TITLE } from '../config/roadmap_mapping';
 import {
   buildPhasePayload,
   computeDeliveryCoveragePct,
@@ -56,8 +63,7 @@ export interface BuildEpicPhaseInput {
 
 const notStartedPhase = (): Record<string, unknown> => ({ gate: 'ns' });
 
-const getDeckFeatureLabel = (epicKey: string): string | undefined =>
-  getDeckFeatureForGithubEpicKey(epicKey)?.deckFeature;
+const getDeckCorrelation = (epicKey: string) => getDeckFeatureForGithubEpicKey(epicKey);
 
 export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<string, unknown> => {
   const roadmap = resolveRoadmapForEpic({
@@ -115,7 +121,7 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
     '@timestamp': new Date().toISOString(),
     roadmap: {
       id: roadmap?.id ?? 'unmapped',
-      title: roadmap?.title ?? input.title,
+      title: roadmap?.title ?? UNMAPPED_ROADMAP_GROUP_TITLE,
       product: roadmap?.product ?? 'Unknown',
     },
     epic: {
@@ -143,7 +149,8 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
       roadmap_stage: input.fields['Product Roadmap Stage'],
       initiative: input.fields['Product Initiative'],
       serverless_iteration: input.fields.Serverless,
-      deck_feature: getDeckFeatureLabel(input.epicKey),
+      deck_feature: getDeckCorrelation(input.epicKey)?.deckFeature,
+      deck_bucket: getDeckCorrelation(input.epicKey)?.deckBucket,
     },
     links: {
       project_url: input.links?.project_url ?? input.projectUrl,
@@ -162,25 +169,20 @@ export const buildEpicPhaseDocument = (input: BuildEpicPhaseInput): Record<strin
         open: ticketRollup.open,
         in_progress: ticketRollup.inProgress,
         ai_gen_pct:
-          ticketRollup.total > 0
-            ? Math.round((ticketRollup.aiGen / ticketRollup.total) * 100)
-            : 0,
+          ticketRollup.total > 0 ? Math.round((ticketRollup.aiGen / ticketRollup.total) * 100) : 0,
         eng_validated_pct:
           ticketRollup.aiGen > 0
             ? Math.round((ticketRollup.engValidated / ticketRollup.aiGen) * 100)
             : 0,
         done_pct:
-          ticketRollup.total > 0
-            ? Math.round((ticketRollup.done / ticketRollup.total) * 100)
-            : 0,
+          ticketRollup.total > 0 ? Math.round((ticketRollup.done / ticketRollup.total) * 100) : 0,
       }),
       p5_prs: buildPhasePayload(p5Gate, {
         total: prRollup.total,
         merged: prRollup.merged,
         open: prRollup.open,
         closed_unmerged: prRollup.closedUnmerged,
-        merged_pct:
-          prRollup.total > 0 ? Math.round((prRollup.merged / prRollup.total) * 100) : 0,
+        merged_pct: prRollup.total > 0 ? Math.round((prRollup.merged / prRollup.total) * 100) : 0,
       }),
       p6_defects: notStartedPhase(),
       p7_production: notStartedPhase(),

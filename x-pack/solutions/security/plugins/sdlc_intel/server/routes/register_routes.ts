@@ -12,6 +12,7 @@ import {
   SDLC_INTERNAL_API_VERSION,
   SDLC_ROADMAPS_ROUTE,
   SDLC_SYNC_STATUS_ROUTE,
+  SDLC_SEED_WORKFLOWS_EXECUTIVE_DEMO_ROUTE,
   SDLC_TEAMS_ROUTE,
 } from '../../common/api/constants';
 import {
@@ -20,6 +21,7 @@ import {
   getRoadmapsResponse,
   getTeamsResponse,
 } from '../services/sdlc_read_api_service';
+import { seedSdlcWorkflowsExecutiveDemo } from '../services/sdlc_data_layer_service';
 
 const ROUTE_SECURITY = {
   authz: {
@@ -164,6 +166,27 @@ export const registerSdlcReadRoutes = (router: IRouter, logger: Logger): void =>
           response,
           error,
           message: 'Failed to fetch SDLC teams dashboard data',
+        });
+      }
+    });
+
+  router.versioned
+    .post({
+      path: SDLC_SEED_WORKFLOWS_EXECUTIVE_DEMO_ROUTE,
+      access: 'internal',
+      security: ROUTE_SECURITY,
+    })
+    .addVersion({ version: SDLC_INTERNAL_API_VERSION, validate: {} }, async (context, _request, response) => {
+      try {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const body = await seedSdlcWorkflowsExecutiveDemo(esClient);
+        return response.ok({ body });
+      } catch (error) {
+        return handleRouteError({
+          logger,
+          response,
+          error,
+          message: 'Failed to seed Workflows executive demo data',
         });
       }
     });

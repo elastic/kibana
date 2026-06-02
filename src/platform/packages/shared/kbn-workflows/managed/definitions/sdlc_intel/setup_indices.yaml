@@ -16,7 +16,10 @@ steps:
   - name: seed_reference_data
     type: sdlc.seedReferenceData
 
+  - name: seed_workflows_executive_demo
+    type: sdlc.seedWorkflowsExecutiveDemo
+
   - name: log_complete
     type: console
     with:
-      message: "SDLC indices ready. created={{ steps.setup_indices.output.created }}, team dimension seeded={{ steps.seed_reference_data.output.updated }}"
+      message: "SDLC indices ready. created={{ steps.setup_indices.output.created }}, team dimension seeded={{ steps.seed_reference_data.output.updated }}, workflows demo seeded={{ steps.seed_workflows_executive_demo.output.updated }}"

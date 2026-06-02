@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SetupIndicesStepTypeId = 'sdlc.setupIndices';
 export const SeedReferenceDataStepTypeId = 'sdlc.seedReferenceData';
+export const SeedWorkflowsExecutiveDemoStepTypeId = 'sdlc.seedWorkflowsExecutiveDemo';
 export const SyncGithubProjectsStepTypeId = 'sdlc.syncGithubProjects';
 export const ListGithubProjectsToSyncStepTypeId = 'sdlc.listGithubProjectsToSync';
 export const SyncGithubOrgCatalogStepTypeId = 'sdlc.syncGithubOrgCatalog';
@@ -33,6 +34,9 @@ export const SetupIndicesOutputSchema = countOutput.extend({
 
 export const SeedReferenceDataInputSchema = emptyInput;
 export const SeedReferenceDataOutputSchema = countOutput;
+
+export const SeedWorkflowsExecutiveDemoInputSchema = emptyInput;
+export const SeedWorkflowsExecutiveDemoOutputSchema = countOutput;
 
 export const SyncGithubProjectsInputSchema = z.object({
   orgLogin: z.string().default('elastic'),
@@ -157,6 +161,19 @@ export const seedReferenceDataStepCommonDefinition = createDefinition({
   }),
   inputSchema: SeedReferenceDataInputSchema,
   outputSchema: SeedReferenceDataOutputSchema,
+});
+
+export const seedWorkflowsExecutiveDemoStepCommonDefinition = createDefinition({
+  id: SeedWorkflowsExecutiveDemoStepTypeId,
+  label: i18n.translate('sdlcIntel.seedWorkflowsExecutiveDemoStep.label', {
+    defaultMessage: 'Seed Workflows executive demo',
+  }),
+  description: i18n.translate('sdlcIntel.seedWorkflowsExecutiveDemoStep.description', {
+    defaultMessage:
+      'Seeds sdlc-epic-phases demo documents for the Elastic Workflows executive roadmap (deck features, 9.3 release cycle).',
+  }),
+  inputSchema: SeedWorkflowsExecutiveDemoInputSchema,
+  outputSchema: SeedWorkflowsExecutiveDemoOutputSchema,
 });
 
 export const syncGithubProjectsStepCommonDefinition = createDefinition({

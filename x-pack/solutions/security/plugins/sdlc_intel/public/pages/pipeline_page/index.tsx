@@ -23,6 +23,7 @@ import { SyncStatusBanner } from '../../components/sync_status_banner';
 import { PipelineLegend } from './components/pipeline_legend';
 import { PipelineRoadmapBlock } from './components/pipeline_roadmap_block';
 import { PipelineToolbar } from './components/pipeline_toolbar';
+import { PipelineVisionPanel } from './components/pipeline_vision_panel';
 import { usePipelineData } from './hooks/use_pipeline_data';
 import { PHASE_DEFINITIONS } from './lib/phase_definitions';
 
@@ -34,9 +35,14 @@ export const PipelinePage = () => {
     loading,
     error,
     roadmaps,
-    roadmapTabs,
+    scope,
+    orgTeamOptions,
+    subteamOptions,
+    productRoadmapOptions,
     filters,
-    setRoadmapId,
+    setOrgTeamKey,
+    setSubteamKey,
+    setProductRoadmapId,
     setSearch,
     setGateStatus,
   } = usePipelineData();
@@ -82,7 +88,7 @@ export const PipelinePage = () => {
           pageTitle={
             <FormattedMessage
               id="xpack.sdlcIntel.pipeline.pageTitle"
-              defaultMessage="Phase pipeline"
+              defaultMessage="Development lifecycle — phase pipeline"
             />
           }
           description={
@@ -92,7 +98,7 @@ export const PipelinePage = () => {
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.sdlcIntel.pipeline.pageSubtitle"
-                  defaultMessage="3 bands · 8 phases · P4/P5 live from GitHub ingest"
+                  defaultMessage="Shared view for all Security teams — track every epic from PRD through production telemetry."
                 />
               </EuiText>
             </>
@@ -101,26 +107,8 @@ export const PipelinePage = () => {
         />
 
         <EuiPageTemplate.Section paddingSize="none">
+          <PipelineVisionPanel />
           <PipelineLegend />
-          <EuiSpacer size="s" />
-
-          <EuiCallOut
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.sdlcIntel.pipeline.timeline.title"
-                defaultMessage="Release timeline (Track B)"
-              />
-            }
-            color="primary"
-            iconType="calendar"
-          >
-            <FormattedMessage
-              id="xpack.sdlcIntel.pipeline.timeline.body"
-              defaultMessage="Stack/Serverless release calendar and epic span overlays require milestone data that is not in the current indices. P1–P3 and P6–P8 gates show as Upcoming until Track B ingest lands."
-            />
-          </EuiCallOut>
-
           <EuiSpacer size="s" />
 
           {loading ? (
@@ -150,12 +138,16 @@ export const PipelinePage = () => {
           {!loading && !error ? (
             <>
               <PipelineToolbar
-                roadmapId={filters.roadmapId}
+                scope={scope}
+                orgTeamOptions={orgTeamOptions}
+                subteamOptions={subteamOptions}
+                productRoadmapOptions={productRoadmapOptions}
                 search={filters.search}
                 gateStatus={filters.gateStatus}
-                roadmapTabs={roadmapTabs}
                 expandAll={expandAll}
-                onRoadmapChange={setRoadmapId}
+                onOrgTeamChange={setOrgTeamKey}
+                onSubteamChange={setSubteamKey}
+                onProductRoadmapChange={setProductRoadmapId}
                 onSearchChange={setSearch}
                 onGateStatusChange={setGateStatus}
                 onToggleExpandAll={handleToggleExpandAll}

@@ -27,6 +27,15 @@ export const SDLC_VISIBILITY_ROADMAP: RoadmapMappingEntry = {
   title: 'Development lifecycle visibility platform',
 };
 
+/** Epics without a mapped product initiative roll up under this label (not per-epic titles). */
+export const UNMAPPED_ROADMAP_GROUP_TITLE = 'Other initiatives';
+
+/** Product roadmaps shown in pipeline / executive product filters (not GitHub epic titles). */
+export const CANONICAL_PRODUCT_ROADMAPS: readonly RoadmapMappingEntry[] = [
+  ELASTIC_WORKFLOWS_ROADMAP,
+  SDLC_VISIBILITY_ROADMAP,
+];
+
 const mapWorkflowInitiatives = (
   entries: readonly string[]
 ): Readonly<Record<string, RoadmapMappingEntry>> =>

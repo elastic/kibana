@@ -69,9 +69,6 @@ export const rollupTickets = (issues: readonly GitHubIssueLike[]): TicketRollup 
   }
 
   const total = issues.length;
-  if (aiGen === 0 && total > 0) {
-    aiGen = total;
-  }
   if (engValidated === 0 && done > 0) {
     engValidated = done;
   }

@@ -438,6 +438,14 @@ export const SDLC_INDEX_DEFINITIONS: Record<SdlcIndexName, IndexDefinition> = {
             roadmap_stage: { type: 'keyword' },
             initiative: { type: 'keyword' },
             serverless_iteration: { type: 'keyword' },
+            deck_feature: { type: 'keyword' },
+            deck_bucket: { type: 'keyword' },
+          },
+        },
+        metadata: {
+          properties: {
+            seed: { type: 'keyword' },
+            demo: { type: 'boolean' },
           },
         },
         links: {

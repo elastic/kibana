@@ -16,20 +16,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoverageFilter } from '../lib/executive_filters';
+import type { CoverageFilter, DeckBucketFilter } from '../lib/executive_filters';
 
 interface ExecutiveToolbarProps {
   readonly search: string;
   readonly product: string;
   readonly owner: string;
   readonly coverage: CoverageFilter;
+  readonly engineeringTeam: string;
+  readonly deckBucket: DeckBucketFilter;
   readonly productOptions: readonly string[];
   readonly ownerOptions: readonly string[];
+  readonly engineeringTeamOptions: readonly string[];
   readonly expandAll: boolean;
   readonly onSearchChange: (value: string) => void;
   readonly onProductChange: (value: string) => void;
   readonly onOwnerChange: (value: string) => void;
   readonly onCoverageChange: (value: CoverageFilter) => void;
+  readonly onEngineeringTeamChange: (value: string) => void;
+  readonly onDeckBucketChange: (value: DeckBucketFilter) => void;
   readonly onToggleExpandAll: () => void;
 }
 
@@ -38,13 +43,18 @@ export const ExecutiveToolbar = ({
   product,
   owner,
   coverage,
+  engineeringTeam,
+  deckBucket,
   productOptions,
   ownerOptions,
+  engineeringTeamOptions,
   expandAll,
   onSearchChange,
   onProductChange,
   onOwnerChange,
   onCoverageChange,
+  onEngineeringTeamChange,
+  onDeckBucketChange,
   onToggleExpandAll,
 }: ExecutiveToolbarProps) => (
   <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive wrap>
@@ -87,6 +97,77 @@ export const ExecutiveToolbar = ({
               }),
             },
             ...productOptions.map((option) => ({ value: option, text: option })),
+          ]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+      <EuiFormRow
+        label={i18n.translate('xpack.sdlcIntel.executive.toolbar.engineeringTeamLabel', {
+          defaultMessage: 'Engineering team',
+        })}
+        display="rowCompressed"
+        fullWidth
+      >
+        <EuiSelect
+          fullWidth
+          value={engineeringTeam}
+          onChange={(event) => onEngineeringTeamChange(event.target.value)}
+          options={[
+            {
+              value: '',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.allEngineeringTeams', {
+                defaultMessage: 'All engineering teams',
+              }),
+            },
+            ...engineeringTeamOptions.map((option) => ({ value: option, text: option })),
+          ]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+      <EuiFormRow
+        label={i18n.translate('xpack.sdlcIntel.executive.toolbar.releaseCycleLabel', {
+          defaultMessage: 'Release cycle',
+        })}
+        display="rowCompressed"
+        fullWidth
+      >
+        <EuiSelect
+          fullWidth
+          value={deckBucket}
+          onChange={(event) => onDeckBucketChange(event.target.value as DeckBucketFilter)}
+          options={[
+            {
+              value: '',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.allReleaseCycles', {
+                defaultMessage: 'All release cycles',
+              }),
+            },
+            {
+              value: 'released_9_3',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.released93', {
+                defaultMessage: 'Released (9.3)',
+              }),
+            },
+            {
+              value: 'now',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.deckNow', {
+                defaultMessage: 'Now',
+              }),
+            },
+            {
+              value: 'next',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.deckNext', {
+                defaultMessage: 'Next',
+              }),
+            },
+            {
+              value: 'later',
+              text: i18n.translate('xpack.sdlcIntel.executive.toolbar.deckLater', {
+                defaultMessage: 'Later',
+              }),
+            },
           ]}
         />
       </EuiFormRow>

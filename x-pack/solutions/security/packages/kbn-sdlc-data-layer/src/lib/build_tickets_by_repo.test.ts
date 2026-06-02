@@ -6,6 +6,7 @@
 
 import {
   buildTicketsByRepo,
+  collectEpicGithubAssignees,
   extractEpicLinks,
   resolveEpicOwner,
   resolveEpicTitle,
@@ -123,6 +124,24 @@ describe('build_tickets_by_repo', () => {
       })
     ).toBe('Phase A — engineering core');
 
-    expect(resolveEpicOwner({ Owner: 'Y. Naumenko' })).toBe('Y. Naumenko');
+    expect(resolveEpicOwner({ fields: { Owner: 'Y. Naumenko' } })).toBe('Y. Naumenko');
+    expect(
+      resolveEpicOwner({
+        fields: {},
+        githubAssignees: ['yuliianaumenko', 'dev2'],
+      })
+    ).toBe('yuliianaumenko');
+    expect(
+      resolveEpicOwner({
+        fields: { Owner: 'Y. Naumenko' },
+        githubAssignees: ['other-user'],
+      })
+    ).toBe('Y. Naumenko');
+    expect(
+      collectEpicGithubAssignees({
+        anchorAssignees: ['anchor-dev'],
+        childIssues: [{ assignees: ['child-dev'] }, { assignees: ['anchor-dev'] }],
+      })
+    ).toEqual(['anchor-dev', 'child-dev']);
   });
 });

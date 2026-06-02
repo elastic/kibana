@@ -10,6 +10,7 @@ import {
   buildRelationshipsStepDefinition,
   listGithubProjectsToSyncStepDefinition,
   seedReferenceDataStepDefinition,
+  seedWorkflowsExecutiveDemoStepDefinition,
   setupIndicesStepDefinition,
   syncGithubOrgCatalogStepDefinition,
   syncGithubProjectsStepDefinition,
@@ -22,6 +23,7 @@ export const registerSdlcWorkflowSteps = (
 ): void => {
   workflowsExtensions.registerStepDefinition(setupIndicesStepDefinition);
   workflowsExtensions.registerStepDefinition(seedReferenceDataStepDefinition);
+  workflowsExtensions.registerStepDefinition(seedWorkflowsExecutiveDemoStepDefinition);
   workflowsExtensions.registerStepDefinition(listGithubProjectsToSyncStepDefinition);
   workflowsExtensions.registerStepDefinition(syncGithubProjectsStepDefinition);
   workflowsExtensions.registerStepDefinition(syncGithubOrgCatalogStepDefinition);

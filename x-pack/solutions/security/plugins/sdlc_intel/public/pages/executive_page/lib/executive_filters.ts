@@ -7,6 +7,7 @@
 
 import {
   TEAM_DIMENSION_SEED,
+  UNMAPPED_ROADMAP_GROUP_TITLE,
   epicBelongsToOrgTeam,
   groupEpicsBySubteam,
   resolveSubteamDefinitionsForOrg,
@@ -68,7 +69,10 @@ const groupEpicsIntoRoadmaps = (epics: readonly SdlcEpicPhaseSummary[]): SdlcRoa
 
     groups.set(roadmapId, {
       id: roadmapId,
-      title: epic.roadmap.title ?? roadmapId,
+      title:
+        roadmapId === 'unmapped'
+          ? UNMAPPED_ROADMAP_GROUP_TITLE
+          : epic.roadmap.title ?? roadmapId,
       product: epic.roadmap.product ?? 'Unknown',
       coveragePct: 0,
       epicCount: 1,
@@ -92,12 +96,44 @@ const groupEpicsIntoRoadmaps = (epics: readonly SdlcEpicPhaseSummary[]): SdlcRoa
 
 export type CoverageFilter = '' | 'risk' | 'amber' | 'good';
 
+export type DeckBucketFilter = '' | 'released_9_3' | 'now' | 'next' | 'later';
+
+export const DEFAULT_EXECUTIVE_PRODUCT = 'Elastic Workflows';
+export const DEFAULT_EXECUTIVE_ENGINEERING_TEAM = 'One Workflow';
+
 export interface ExecutiveFilters {
   readonly search: string;
   readonly product: string;
   readonly owner: string;
   readonly coverage: CoverageFilter;
+  readonly engineeringTeam: string;
+  readonly deckBucket: DeckBucketFilter;
 }
+
+const epicMatchesEngineeringTeam = (
+  epic: SdlcEpicPhaseSummary,
+  engineeringTeam: string
+): boolean => {
+  if (!engineeringTeam) {
+    return true;
+  }
+
+  const teams = [
+    epic.teams.ownEngineeringTeam,
+    ...epic.teams.contributingEngineeringTeams,
+    ...(epic.productTags ?? []),
+  ].filter((team): team is string => Boolean(team));
+
+  return teams.some((team) => team === engineeringTeam);
+};
+
+const epicMatchesDeckBucket = (epic: SdlcEpicPhaseSummary, deckBucket: DeckBucketFilter): boolean => {
+  if (!deckBucket) {
+    return true;
+  }
+
+  return epic.release?.deckBucket === deckBucket;
+};
 
 export interface ExecutiveDerivedMetrics {
   readonly prdLinkedCount: number;
@@ -144,6 +180,14 @@ const filterEpic = (epic: SdlcEpicPhaseSummary, filters: ExecutiveFilters): bool
   }
 
   if (filters.owner && epic.owner !== filters.owner) {
+    return false;
+  }
+
+  if (!epicMatchesEngineeringTeam(epic, filters.engineeringTeam)) {
+    return false;
+  }
+
+  if (!epicMatchesDeckBucket(epic, filters.deckBucket)) {
     return false;
   }
 
@@ -266,6 +310,28 @@ export const collectOwners = (roadmaps: readonly SdlcRoadmapGroup[]): string[] =
 
   return [...owners].sort((left, right) => left.localeCompare(right));
 };
+
+export const collectEngineeringTeams = (roadmaps: readonly SdlcRoadmapGroup[]): string[] => {
+  const securityRoadmaps = applySecurityScopeToRoadmaps(roadmaps);
+  const teams = new Set<string>();
+
+  for (const roadmap of securityRoadmaps) {
+    for (const epic of roadmap.epics) {
+      if (epic.teams.ownEngineeringTeam) {
+        teams.add(epic.teams.ownEngineeringTeam);
+      }
+      for (const team of epic.teams.contributingEngineeringTeams) {
+        teams.add(team);
+      }
+    }
+  }
+
+  return [...teams].sort((left, right) => left.localeCompare(right));
+};
+
+export const isWorkflowsExecutiveView = (filters: ExecutiveFilters): boolean =>
+  filters.product === DEFAULT_EXECUTIVE_PRODUCT ||
+  filters.engineeringTeam === DEFAULT_EXECUTIVE_ENGINEERING_TEAM;
 
 export const collectProducts = (roadmaps: readonly SdlcRoadmapGroup[]): string[] => {
   const securityRoadmaps = applySecurityScopeToRoadmaps(roadmaps);

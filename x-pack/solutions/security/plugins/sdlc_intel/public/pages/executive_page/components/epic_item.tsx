@@ -20,8 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SdlcEpicPhaseSummary } from '../../../../common/api/types';
 import {
+  getDeckBucketLabel,
   getEpicStatusLabel,
-  getOwnerInitials,
   getCoverageLevel,
 } from '../lib/coverage_utils';
 import { TicketsView } from './tickets_view';
@@ -46,10 +46,12 @@ export const EpicItem = ({
   const { euiTheme } = useEuiTheme();
   const coverageLevel = getCoverageLevel(epic.coveragePct);
   const isAtRisk = coverageLevel === 'risk';
+  const releaseLabel = getDeckBucketLabel(epic.release?.deckBucket, epic.release?.milestone);
   const teamTags = [
-    ...(epic.teams.ownOrgTeam ? [epic.teams.ownOrgTeam] : []),
-    ...epic.teams.contributingOrgTeams.filter((team) => team !== epic.teams.ownOrgTeam),
-  ];
+    epic.owner ? `WT ${epic.owner}` : epic.teams.ownEngineeringTeam,
+    'Kibana Platform',
+    ...(epic.productTags ?? []),
+  ].filter((tag): tag is string => Boolean(tag));
 
   return (
     <EuiAccordion
@@ -81,11 +83,17 @@ export const EpicItem = ({
                   <strong>{epic.title}</strong>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={getEpicStatusColor(epic.status)}>
-                  {getEpicStatusLabel(epic.status)}
-                </EuiBadge>
-              </EuiFlexItem>
+              {releaseLabel ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="success">{releaseLabel}</EuiBadge>
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={getEpicStatusColor(epic.status)}>
+                    {getEpicStatusLabel(epic.status)}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {isAtRisk ? (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning">
@@ -103,16 +111,9 @@ export const EpicItem = ({
               </EuiText>
             ) : null}
             <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
-              {epic.owner ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge iconType="user">
-                    {getOwnerInitials(epic.owner)} {epic.owner}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ) : null}
               {teamTags.map((team) => (
                 <EuiFlexItem grow={false} key={team}>
-                  <EuiBadge iconType="users">{team}</EuiBadge>
+                  <EuiBadge iconType={team.startsWith('WT ') ? 'user' : 'tag'}>{team}</EuiBadge>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

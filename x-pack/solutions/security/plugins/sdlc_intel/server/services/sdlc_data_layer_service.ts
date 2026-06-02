@@ -13,6 +13,8 @@ import {
   attributeTeam,
   buildEpicPhaseDocument,
   buildEpicPhaseDocumentId,
+  buildWorkflowsExecutiveDemoDocuments,
+  WORKFLOWS_EXECUTIVE_DEMO_SEED_TAG,
   buildRelationshipDocumentId,
   buildRelationshipEdgesFromProjectItems,
   buildTeamRepositoryEdges,
@@ -20,6 +22,7 @@ import {
   computeCoverageStatus,
   dedupeRelationshipEdges,
   extractEpicLinks,
+  collectEpicGithubAssignees,
   resolveEpicOwner,
   resolveEpicTitle,
   fetchGitHubGraphQl,
@@ -148,6 +151,35 @@ export const seedSdlcReferenceData = async (esClient: ElasticsearchClient) => {
 
   const teamCount = getTeamDimensionRecords().length;
   return { processed: teamCount, updated: teamCount };
+};
+
+export const seedSdlcWorkflowsExecutiveDemo = async (esClient: ElasticsearchClient) => {
+  const documents = buildWorkflowsExecutiveDemoDocuments();
+
+  try {
+    await esClient.deleteByQuery({
+      index: SDLC_INDEX_NAMES.SDLC_EPIC_PHASES,
+      conflicts: 'proceed',
+      query: {
+        term: { 'metadata.seed': WORKFLOWS_EXECUTIVE_DEMO_SEED_TAG },
+      },
+    });
+  } catch (error) {
+    if (!isIndexMissingError(error)) {
+      throw error;
+    }
+  }
+
+  const operations = documents.flatMap(({ id, doc }) => [
+    { index: { _index: SDLC_INDEX_NAMES.SDLC_EPIC_PHASES, _id: id } },
+    doc,
+  ]);
+
+  if (operations.length) {
+    await esClient.bulk({ refresh: 'wait_for', operations });
+  }
+
+  return { processed: documents.length, updated: documents.length };
 };
 
 interface ProjectSyncResult {
@@ -1312,7 +1344,13 @@ const buildEpicPhasesForProject = async ({
         anchorTitle: anchorSource?.content?.title,
         fields,
       }),
-      owner: resolveEpicOwner(fields),
+      owner: resolveEpicOwner({
+        fields,
+        githubAssignees: collectEpicGithubAssignees({
+          anchorAssignees: anchorSource?.people?.assignees,
+          childIssues,
+        }),
+      }),
       projectItemId: anchorSource?.entity?.id ?? anchor?.id ?? epicKey,
       projectNumber,
       projectUrl,

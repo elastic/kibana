@@ -13,6 +13,14 @@ import {
   type GateStatusFilter,
   type PipelineFilters,
 } from '../lib/pipeline_filters';
+import {
+  buildPipelineDisplayGroups,
+  buildOrgTeamScopeOptions,
+  buildProductRoadmapScopeOptions,
+  buildSubteamScopeOptions,
+  DEFAULT_PIPELINE_SCOPE,
+  type PipelineScope,
+} from '../lib/pipeline_scope';
 
 interface PipelineDataState {
   readonly loading: boolean;
@@ -23,7 +31,7 @@ interface PipelineDataState {
 export const usePipelineData = () => {
   const api = useSdlcApi();
   const [state, setState] = useState<PipelineDataState>({ loading: true, roadmaps: [] });
-  const [roadmapId, setRoadmapId] = useState('');
+  const [scope, setScope] = useState<PipelineScope>(DEFAULT_PIPELINE_SCOPE);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [gateStatus, setGateStatus] = useState<GateStatusFilter>('all');
@@ -72,38 +80,63 @@ export const usePipelineData = () => {
 
   const filters: PipelineFilters = useMemo(
     () => ({
-      roadmapId,
       search,
       gateStatus,
     }),
-    [roadmapId, search, gateStatus]
+    [search, gateStatus]
+  );
+
+  const displayRoadmaps = useMemo(
+    () => buildPipelineDisplayGroups(state.roadmaps, scope),
+    [scope, state.roadmaps]
   );
 
   const filteredRoadmaps = useMemo(
-    () => filterPipelineRoadmaps(state.roadmaps, filters),
-    [filters, state.roadmaps]
+    () => filterPipelineRoadmaps(displayRoadmaps, filters),
+    [displayRoadmaps, filters]
   );
 
-  const roadmapTabs = useMemo(
-    () =>
-      state.roadmaps.map((roadmap) => ({
-        id: roadmap.id,
-        label: roadmap.title,
-      })),
-    [state.roadmaps]
-  );
+  const orgTeamOptions = useMemo(() => buildOrgTeamScopeOptions(), []);
+  const subteamOptions = useMemo(() => buildSubteamScopeOptions(scope.orgTeamKey), [scope.orgTeamKey]);
+  const productRoadmapOptions = useMemo(() => buildProductRoadmapScopeOptions(), []);
+
+  const setOrgTeamKey = (orgTeamKey: string) => {
+    setScope((current) => ({
+      ...current,
+      orgTeamKey,
+      subteamKey: '',
+    }));
+  };
+
+  const setSubteamKey = (subteamKey: string) => {
+    setScope((current) => ({
+      ...current,
+      subteamKey,
+    }));
+  };
+
+  const setProductRoadmapId = (productRoadmapId: string) => {
+    setScope((current) => ({
+      ...current,
+      productRoadmapId,
+    }));
+  };
 
   return {
     loading: state.loading,
     error: state.error,
     roadmaps: filteredRoadmaps,
-    roadmapTabs,
+    scope,
+    orgTeamOptions,
+    subteamOptions,
+    productRoadmapOptions,
     filters: {
-      roadmapId,
       search,
       gateStatus,
     },
-    setRoadmapId,
+    setOrgTeamKey,
+    setSubteamKey,
+    setProductRoadmapId,
     setSearch,
     setGateStatus,
   };

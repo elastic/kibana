@@ -42,6 +42,9 @@ export const ExecutivePage = () => {
     setProduct,
     setOwner,
     setCoverage,
+    engineeringTeamOptions,
+    setEngineeringTeam,
+    setDeckBucket,
   } = useExecutiveRoadmaps();
 
   return (
@@ -135,13 +138,18 @@ export const ExecutivePage = () => {
                 product={filters.product}
                 owner={filters.owner}
                 coverage={filters.coverage}
+                engineeringTeam={filters.engineeringTeam}
+                deckBucket={filters.deckBucket}
                 productOptions={productOptions}
                 ownerOptions={ownerOptions}
+                engineeringTeamOptions={engineeringTeamOptions}
                 expandAll={expandAll}
                 onSearchChange={setSearch}
                 onProductChange={setProduct}
                 onOwnerChange={setOwner}
                 onCoverageChange={setCoverage}
+                onEngineeringTeamChange={setEngineeringTeam}
+                onDeckBucketChange={setDeckBucket}
                 onToggleExpandAll={() => setExpandAll((current) => !current)}
               />
               <EuiSpacer size="m" />
@@ -153,7 +161,7 @@ export const ExecutivePage = () => {
                   />
                 </EuiText>
               ) : (
-                <RoadmapList roadmaps={roadmaps} expandAll={expandAll} />
+                <RoadmapList roadmaps={roadmaps} expandAll={expandAll} filters={filters} />
               )}
             </>
           ) : null}

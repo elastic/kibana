@@ -12,7 +12,6 @@ import type { PhaseGate } from './phase_definitions';
 export type GateStatusFilter = 'all' | PhaseGate;
 
 export interface PipelineFilters {
-  readonly roadmapId: string;
   readonly search: string;
   readonly gateStatus: GateStatusFilter;
 }
@@ -43,7 +42,6 @@ export const filterPipelineRoadmaps = (
   filters: PipelineFilters
 ): SdlcRoadmapGroup[] =>
   roadmaps
-    .filter((roadmap) => !filters.roadmapId || roadmap.id === filters.roadmapId)
     .map((roadmap) => ({
       ...roadmap,
       epics: roadmap.epics.filter((epic) => {

@@ -58,6 +58,13 @@ export interface SdlcEpicPhaseSummary {
   readonly phases: Record<string, unknown>;
   readonly ticketsByRepo: readonly SdlcTicketByRepoGroup[];
   readonly projectNumber?: number;
+  readonly release?: {
+    readonly milestone?: string;
+    readonly deckFeature?: string;
+    readonly deckBucket?: string;
+    readonly roadmapStage?: string;
+  };
+  readonly productTags?: readonly string[];
 }
 
 export interface SdlcRoadmapGroup {

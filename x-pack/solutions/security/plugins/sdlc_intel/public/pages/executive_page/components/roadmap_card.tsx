@@ -37,10 +37,12 @@ export const RoadmapCard = ({
   roadmap,
   forceOpen,
   forceEpicsOpen,
+  showPlatformSubtitle,
 }: {
   roadmap: SdlcRoadmapGroup;
   forceOpen?: boolean;
   forceEpicsOpen?: boolean;
+  showPlatformSubtitle?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -104,11 +106,19 @@ export const RoadmapCard = ({
               <strong>{roadmap.title}</strong>
             </EuiText>
             <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.sdlcIntel.executive.roadmap.subtitle"
-                defaultMessage="{product} · {count, plural, one {# epic} other {# epics}}"
-                values={{ product: roadmap.product, count: roadmap.epicCount }}
-              />
+              {showPlatformSubtitle ? (
+                <FormattedMessage
+                  id="xpack.sdlcIntel.executive.roadmap.platformSubtitle"
+                  defaultMessage="Platform / Kibana · {count, plural, one {# item} other {# items}}"
+                  values={{ count: roadmap.epicCount }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.sdlcIntel.executive.roadmap.subtitle"
+                  defaultMessage="{product} · {count, plural, one {# epic} other {# epics}}"
+                  values={{ product: roadmap.product, count: roadmap.epicCount }}
+                />
+              )}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -126,17 +136,35 @@ export const RoadmapCard = ({
               ) : null}
               {statusCounts.closed > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="success">{statusCounts.closed}</EuiBadge>
+                  <EuiBadge color="success">
+                    <FormattedMessage
+                      id="xpack.sdlcIntel.executive.roadmap.doneCount"
+                      defaultMessage="{count} done"
+                      values={{ count: statusCounts.closed }}
+                    />
+                  </EuiBadge>
                 </EuiFlexItem>
               ) : null}
               {statusCounts.inProgress > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">{statusCounts.inProgress}</EuiBadge>
+                  <EuiBadge color="warning">
+                    <FormattedMessage
+                      id="xpack.sdlcIntel.executive.roadmap.activeCount"
+                      defaultMessage="{count} active"
+                      values={{ count: statusCounts.inProgress }}
+                    />
+                  </EuiBadge>
                 </EuiFlexItem>
               ) : null}
               {statusCounts.open > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{statusCounts.open}</EuiBadge>
+                  <EuiBadge>
+                    <FormattedMessage
+                      id="xpack.sdlcIntel.executive.roadmap.plannedCount"
+                      defaultMessage="{count} planned"
+                      values={{ count: statusCounts.open }}
+                    />
+                  </EuiBadge>
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>
