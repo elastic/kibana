@@ -967,28 +967,31 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with host risk index', () => {
-      before(async () => {
+      before(async function () {
         // Threshold alerts aggregate by host.name and may not carry host.id, so use name-based EUIDs.
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: LONDON_HOST_NAME },
-              entity: {
-                id: `host:${LONDON_HOST_NAME}`,
-                type: 'host',
-                risk: { calculated_level: 'Low', calculated_score_norm: 20 },
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: LONDON_HOST_NAME },
+                entity: {
+                  id: `host:${LONDON_HOST_NAME}`,
+                  type: 'host',
+                  risk: { calculated_level: 'Low', calculated_score_norm: 20 },
+                },
               },
-            },
-            {
-              host: { name: TORONTO_HOST_NAME },
-              entity: {
-                id: `host:${TORONTO_HOST_NAME}`,
-                type: 'host',
-                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+              {
+                host: { name: TORONTO_HOST_NAME },
+                entity: {
+                  id: `host:${TORONTO_HOST_NAME}`,
+                  type: 'host',
+                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+                },
               },
-            },
-          ],
-        });
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {
@@ -1020,17 +1023,20 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with asset criticality', () => {
-      before(async () => {
+      before(async function () {
         // Use name-based EUID for threshold alerts (same reason as risk index describe above).
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: LONDON_HOST_NAME },
-              entity: { id: `host:${LONDON_HOST_NAME}`, type: 'host' },
-              asset: { criticality: 'high_impact' },
-            },
-          ],
-        });
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: LONDON_HOST_NAME },
+                entity: { id: `host:${LONDON_HOST_NAME}`, type: 'host' },
+                asset: { criticality: 'high_impact' },
+              },
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {

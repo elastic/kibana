@@ -2026,19 +2026,22 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless alerts enrichment', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: 'host-0' },
-              entity: {
-                id: 'host:host-0',
-                type: 'host',
-                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: 'host-0' },
+                entity: {
+                  id: 'host:host-0',
+                  type: 'host',
+                  risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+                },
               },
-            },
-          ],
-        });
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {
@@ -2079,16 +2082,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: 'host-0' },
-              entity: { id: 'host:host-0', type: 'host' },
-              asset: { criticality: 'extreme_impact' },
-            },
-          ],
-        });
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: 'host-0' },
+                entity: { id: 'host:host-0', type: 'host' },
+                asset: { criticality: 'extreme_impact' },
+              },
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {

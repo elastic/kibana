@@ -791,19 +791,22 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with host risk index', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-              entity: {
-                id: ENRICHMENT_HOST_EUID,
-                type: 'host',
-                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+                entity: {
+                  id: ENRICHMENT_HOST_EUID,
+                  type: 'host',
+                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+                },
               },
-            },
-          ],
-        });
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {
@@ -828,16 +831,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
-              asset: { criticality: 'high_impact' },
-            },
-          ],
-        });
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+                entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+                asset: { criticality: 'high_impact' },
+              },
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {

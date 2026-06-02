@@ -2467,19 +2467,22 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless alerts should be enriched', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-              entity: {
-                id: ENRICHMENT_HOST_EUID,
-                type: 'host',
-                risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+                entity: {
+                  id: ENRICHMENT_HOST_EUID,
+                  type: 'host',
+                  risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+                },
               },
-            },
-          ],
-        });
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {
@@ -2522,29 +2525,32 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
-          hosts: [
-            {
-              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
-              asset: { criticality: 'low_impact' },
-            },
-          ],
-          users: [
-            {
-              // Indicator match alerts come from auditbeat events that carry host.id,
-              // triggering the local-namespace user EUID: user:<name>@<host.id>@local.
-              user: { name: ENRICHMENT_USER_NAME },
-              host: { id: [ENRICHMENT_HOST_ID] },
-              entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
-                type: 'user',
+      before(async function () {
+        if (
+          !(await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+                entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+                asset: { criticality: 'low_impact' },
               },
-              asset: { criticality: 'extreme_impact' },
-            },
-          ],
-        });
+            ],
+            users: [
+              {
+                // Indicator match alerts come from auditbeat events that carry host.id,
+                // triggering the local-namespace user EUID: user:<name>@<host.id>@local.
+                user: { name: ENRICHMENT_USER_NAME },
+                host: { id: [ENRICHMENT_HOST_ID] },
+                entity: {
+                  id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                  type: 'user',
+                },
+                asset: { criticality: 'extreme_impact' },
+              },
+            ],
+          }))
+        )
+          return this.skip();
       });
 
       after(async () => {

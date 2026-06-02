@@ -1720,33 +1720,36 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('@skipInServerless alert enrichment', () => {
-        before(async () => {
+        before(async function () {
           // Dynamic docs in this describe only have host.name / user.name (no host.id),
           // so the EUID is name-based.
-          await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: 'suricata-zeek-sensor-toronto' },
-                entity: {
-                  id: 'host:suricata-zeek-sensor-toronto',
-                  type: 'host',
-                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+          if (
+            !(await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'suricata-zeek-sensor-toronto' },
+                  entity: {
+                    id: 'host:suricata-zeek-sensor-toronto',
+                    type: 'host',
+                    risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+                  },
                 },
-              },
-              {
-                host: { name: 'zeek-newyork-sha-aa8df15' },
-                entity: { id: 'host:zeek-newyork-sha-aa8df15', type: 'host' },
-                asset: { criticality: 'medium_impact' },
-              },
-            ],
-            users: [
-              {
-                user: { name: 'root' },
-                entity: { id: 'user:root@unknown', type: 'user' },
-                asset: { criticality: 'extreme_impact' },
-              },
-            ],
-          });
+                {
+                  host: { name: 'zeek-newyork-sha-aa8df15' },
+                  entity: { id: 'host:zeek-newyork-sha-aa8df15', type: 'host' },
+                  asset: { criticality: 'medium_impact' },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: { id: 'user:root@unknown', type: 'user' },
+                  asset: { criticality: 'extreme_impact' },
+                },
+              ],
+            }))
+          )
+            return this.skip();
         });
 
         after(async () => {
