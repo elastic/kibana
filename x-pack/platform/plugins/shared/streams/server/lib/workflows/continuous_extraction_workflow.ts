@@ -9,12 +9,32 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import { STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
-import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
+// The managed continuous extraction workflow is installed and scheduled in the
+// default space so its executions (and the onboarding executions it triggers)
+// are stored there, matching the legacy workflow's original space.
+const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
+// The legacy (pre-migration) workflow was always created in the default space.
+const LEGACY_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
+
 export interface ContinuousKiExtractionWorkflowService {
+  /**
+   * Reconciles the continuous extraction workflow when the user toggles the
+   * feature on or off.
+   *
+   * - Enabling only enables the managed workflow (which schedules its trigger).
+   *   The legacy normal workflow is never created again.
+   * - Disabling deletes the legacy workflow if it is still present (users who had
+   *   the feature enabled before the migration keep running on it until then),
+   *   disables the managed workflow, and cancels any in-flight executions.
+   *
+   * Should be invoked only on an actual enabled-state transition so the legacy
+   * and managed workflows never run at the same time.
+   */
   ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
 }
 
@@ -29,43 +49,104 @@ export const createContinuousKiExtractionWorkflowService = ({
 }): ContinuousKiExtractionWorkflowService => {
   const log = logger.get('continuous-ki-extraction-workflow');
 
-  const getNonTerminalExecutions = async () => {
+  const getNonTerminalExecutions = async ({
+    workflowId,
+    spaceId,
+  }: {
+    workflowId: string;
+    spaceId: string;
+  }) => {
     const { results, total } = await managementApi.getWorkflowExecutions(
       {
-        workflowId: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        workflowId,
         statuses: [...NonTerminalExecutionStatuses],
       },
-      DEFAULT_SPACE_ID
+      spaceId
     );
     return { results, total };
   };
 
-  const cancelAndAwaitTermination = async () => {
-    const { results } = await getNonTerminalExecutions();
+  const cancelAndAwaitTermination = async ({
+    workflowId,
+    spaceId,
+    request,
+  }: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }) => {
+    const { results } = await getNonTerminalExecutions({ workflowId, spaceId });
     if (results.length === 0) {
       return;
     }
 
     await Promise.all(
-      results.map((result) => managementApi.cancelWorkflowExecution(result.id, DEFAULT_SPACE_ID))
+      results.map((result) => managementApi.cancelWorkflowExecution(result.id, spaceId, request))
     );
 
     log.debug(() => `Requested cancellation for ${results.length} running workflow execution(s)`);
 
     await pollUntil(
-      () => getNonTerminalExecutions(),
+      () => getNonTerminalExecutions({ workflowId, spaceId }),
       ({ total }) => total === 0
     );
   };
 
-  const hardDelete = async (request: KibanaRequest) => {
-    await cancelAndAwaitTermination().catch((err) =>
-      log.warn(`Failed to cancel running workflow executions: ${err}`)
+  const setManagedEnabled = async ({
+    enabled,
+    request,
+  }: {
+    enabled: boolean;
+    request: KibanaRequest;
+  }) => {
+    const existing = await managementApi.getWorkflow(
+      STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      MANAGED_WORKFLOW_SPACE_ID
     );
 
+    if (!existing) {
+      if (enabled) {
+        throw new Error(
+          `Managed continuous onboarding workflow ${STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID} is not installed yet`
+        );
+      }
+      return;
+    }
+
+    if ((existing.enabled ?? false) === enabled) {
+      return;
+    }
+
+    await managementApi.updateWorkflow(
+      STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      { enabled },
+      MANAGED_WORKFLOW_SPACE_ID,
+      request
+    );
+  };
+
+  const deleteLegacyWorkflow = async ({ request }: { request: KibanaRequest }) => {
+    const legacy = await managementApi.getWorkflow(
+      LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+      LEGACY_WORKFLOW_SPACE_ID
+    );
+    if (!legacy) {
+      return;
+    }
+
+    log.info(
+      `Found legacy continuous KI extraction workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}, removing it`
+    );
+
+    await cancelAndAwaitTermination({
+      workflowId: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+      spaceId: LEGACY_WORKFLOW_SPACE_ID,
+      request,
+    }).catch((err) => log.warn(`Failed to cancel legacy workflow executions: ${err}`));
+
     const { deleted, failures } = await managementApi.deleteWorkflows(
-      [CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
-      DEFAULT_SPACE_ID,
+      [LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
+      LEGACY_WORKFLOW_SPACE_ID,
       request,
       { force: true }
     );
@@ -73,48 +154,40 @@ export const createContinuousKiExtractionWorkflowService = ({
     if (deleted === 0 && failures.length > 0) {
       const reasons = failures.map((f) => `${f.id}: ${f.error}`).join('; ');
       throw new Error(
-        `Failed to delete workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}: ${reasons}`
+        `Failed to delete legacy workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}: ${reasons}`
       );
     }
 
-    log.info(`Hard-deleted workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
+    log.info(`Deleted legacy workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
   };
 
   return {
     async ensureWorkflow({ enabled, request }) {
-      const existing = await managementApi.getWorkflow(
-        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-        DEFAULT_SPACE_ID
-      );
-      const currentlyEnabled = existing?.enabled ?? false;
-
-      if (enabled === currentlyEnabled) {
-        log.debug(() => `Workflow already ${enabled ? 'enabled' : 'disabled'}, no-op`);
+      if (enabled) {
+        await setManagedEnabled({ enabled: true, request });
+        log.info(`Enabled continuous KI extraction workflow`);
         return;
       }
 
-      if (existing) {
-        try {
-          await streamsKIsOnboardingClient.cancelAllRunning({ request });
-        } catch (err) {
-          throw new Error('Cannot delete workflow: failed to cancel running onboarding workflows', {
-            cause: err,
-          });
-        }
-        await hardDelete(request);
-      }
+      // Disabling: stop scheduling new managed runs, drain in-flight work, and
+      // retire the legacy workflow if the user was still running on it.
+      await setManagedEnabled({ enabled: false, request });
 
-      if (!enabled) {
-        return;
-      }
+      await deleteLegacyWorkflow({ request });
 
-      await managementApi.createWorkflow(
-        { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
-        DEFAULT_SPACE_ID,
-        request
+      await cancelAndAwaitTermination({
+        workflowId: STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        spaceId: MANAGED_WORKFLOW_SPACE_ID,
+        request,
+      }).catch((err) =>
+        log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)
       );
 
-      log.info(`Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
+      await streamsKIsOnboardingClient
+        .cancelAllRunning({ request })
+        .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
+
+      log.info(`Disabled continuous KI extraction workflow`);
     },
   };
 };

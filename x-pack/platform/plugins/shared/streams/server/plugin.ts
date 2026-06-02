@@ -27,6 +27,7 @@ import {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+  STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
@@ -660,6 +661,11 @@ export class StreamsPlugin
         }),
         client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
           spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        }),
+        // Installed in the default space (not global) so its scheduled executions
+        // are stored alongside the onboarding executions it triggers.
+        client.install(STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, {
+          spaceId: DEFAULT_SPACE_ID,
         }),
       ]);
 
