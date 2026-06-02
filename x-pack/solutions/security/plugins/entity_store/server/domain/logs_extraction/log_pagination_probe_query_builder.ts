@@ -8,6 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   buildLogPageProbeSourceClause,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
   TIMESTAMP_FIELD,
   type LogPageProbeSourceClauseParams,
   type LogSlicePaginationParams,
@@ -27,7 +28,7 @@ export function buildLogPaginationCursorProbeEsql(
 ): string {
   const { maxLogsPerPage, ...sourceParams } = params;
   return (
-    `SET unmapped_fields="nullify";\n` +
+    `${NULLIFY_UNMAPPED_FIELDS_SETTING}\n` +
     buildLogPageProbeSourceClause(sourceParams) +
     `
   | SORT ${TIMESTAMP_FIELD} ASC
