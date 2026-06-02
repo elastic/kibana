@@ -53,7 +53,15 @@ describe('CustomizeNavigationModal', () => {
 
   it('should render hidden items section', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByText('Hide under More')).toBeInTheDocument();
     expect(screen.getByText('Discover')).toBeInTheDocument();
+  });
+
+  it('should render an empty drop zone when there are no hidden items', () => {
+    const allVisible = items.map((item) => ({ ...item, hidden: false }));
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} items={allVisible} />);
+    expect(screen.getByText('Hide under More')).toBeInTheDocument();
+    expect(screen.getByTestId('customizeNavigationEmptyDropPlaceholder')).toBeInTheDocument();
   });
 
   it('should render the Apply button', () => {

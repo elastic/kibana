@@ -16,12 +16,14 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,8 +34,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
 import { EmptyDropPlaceholder } from './empty_drop_placeholder';
-import { HiddenItemsSection } from './hidden_items_section';
-import { useItemList, VISIBLE_DROPPABLE_ID } from './use_item_list';
+import { useItemList, HIDDEN_DROPPABLE_ID, VISIBLE_DROPPABLE_ID } from './use_item_list';
 
 const modalCss = css`
   width: 576px;
@@ -148,7 +149,48 @@ export const CustomizeNavigationModal = ({
             )}
           </EuiDroppable>
           <EuiSpacer size="s" />
-          <HiddenItemsSection items={hiddenItems} toggleItemVisibility={toggleItemVisibility} />
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="navigationCustomizationComponents.moreLabel"
+                    defaultMessage="Hide under More"
+                  />
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('navigationCustomizationComponents.moreTooltip', {
+                  defaultMessage:
+                    'With limited screen space, visible items may appear under More too',
+                })}
+                position="right"
+                type="info"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiDroppable droppableId={HIDDEN_DROPPABLE_ID} spacing="none">
+            {hiddenItems.length > 0 ? (
+              hiddenItems.map((item, index) => (
+                <DraggableItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  toggleItemVisibility={toggleItemVisibility}
+                />
+              ))
+            ) : (
+              <EmptyDropPlaceholder
+                message={i18n.translate('navigationCustomizationComponents.emptyHiddenList', {
+                  defaultMessage: 'Drag an item here to hide it under More.',
+                })}
+              />
+            )}
+          </EuiDroppable>
         </EuiDragDropContext>
       </EuiModalBody>
       <EuiModalFooter>
