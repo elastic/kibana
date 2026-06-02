@@ -202,6 +202,7 @@ describe('dashboardSmlType', () => {
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
         permissions: ['saved_object:dashboard/get'],
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -259,6 +260,7 @@ describe('dashboardSmlType', () => {
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
         permissions: ['saved_object:dashboard/get'],
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
