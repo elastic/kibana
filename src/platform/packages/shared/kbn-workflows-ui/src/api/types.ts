@@ -14,9 +14,9 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
+  WorkflowsEventsLogDocumentSource,
   WorkflowsSearchParams,
 } from '@kbn/workflows';
-import type { WorkflowsEventsLogDocumentSource } from '@kbn/workflows/common/event_trigger_replay';
 
 export interface BulkCreateWorkflowsParams {
   workflows: BulkCreateWorkflowsCommand['workflows'];
