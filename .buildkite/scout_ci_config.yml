@@ -26,6 +26,7 @@ plugins:
     - discover_enhanced
     - entity_store
     - error_boundary_example
+    - eventAnnotationListing
     - exploratory_view
     - fleet
     - flyoutSystemExamples
@@ -41,6 +42,7 @@ plugins:
     - ingest_pipelines
     - intercepts
     - kibana_overview
+    - kql
     - lens
     - logstash
     - management

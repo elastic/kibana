@@ -25,6 +25,10 @@ export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
       marginInlineStart: 0,
     },
 
+    p: {
+      margin: 0,
+    },
+
     '.expExpressionRenderer__expression': {
       padding: `${euiTheme.size.s} 0`,
     },
