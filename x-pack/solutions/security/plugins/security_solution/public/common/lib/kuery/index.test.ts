@@ -10,7 +10,6 @@ import { fromKueryExpression } from '@kbn/es-query';
 import type { DataProvider } from '../../../../common/types/timeline';
 import { buildGlobalQuery, convertToBuildEsQuery } from '.';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { mockDataViewSpec } from '../../mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 describe('convertToBuildEsQuery', () => {
