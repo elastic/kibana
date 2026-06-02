@@ -74,11 +74,10 @@ spaceTest.describe(
       await expectDocsRenderedWithTabsBar(discover);
     });
 
-    spaceTest('can enter ES|QL mode from the empty state', async ({ page, pageObjects }) => {
+    spaceTest('can enter ES|QL mode from the empty state', async ({ pageObjects }) => {
       const { discover } = pageObjects;
 
-      await page.testSubj.click('tryESQLLink');
-      await discover.waitUntilTabIsLoaded();
+      await discover.enterEsqlModeFromPrompt();
 
       expect(await discover.getEsqlQueryValue()).toBe(DEFAULT_ESQL_QUERY);
       await expectDocsRenderedWithTabsBar(discover);

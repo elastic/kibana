@@ -173,6 +173,15 @@ export class DiscoverApp {
   }
 
   /**
+   * Enters ES|QL mode from the Discover "no data views" empty-state prompt
+   * (the `tryESQLLink` button) and waits for the tab to finish loading.
+   */
+  async enterEsqlModeFromPrompt() {
+    await this.page.testSubj.click('tryESQLLink');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /**
    * Creates a new data view from the Discover search bar data-view switcher
    * (classic mode only). The editor appends `*` to the title automatically.
    */
@@ -720,11 +729,20 @@ export class DiscoverApp {
   }
 
   /**
+   * Clicks the "New tab" button without waiting for the new tab to settle.
+   * Prefer `createNewTab()` for the common case; use this only when a test
+   * intentionally opens several tabs in quick succession (rapid-open race).
+   */
+  async clickNewTabButton() {
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
+  }
+
+  /**
    * Clicks the "New tab" button in the Discover tab bar and waits for the
    * newly created tab to become the active one.
    */
   async createNewTab() {
-    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
+    await this.clickNewTabButton();
     await this.activeTabLocator.waitFor({ state: 'visible' });
   }
 

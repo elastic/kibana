@@ -16,8 +16,8 @@ import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
-// Ad hoc data view names; the editor appends `*` to the title automatically,
-// so the selected data view ends up as `logsta*` / `logst*`.
+// The editor appends `*` to the title automatically, so the selected data view
+// ends up as `logsta*` / `logst*`.
 const CLASSIC_DATA_VIEW = 'logsta';
 const ESQL_DATA_VIEW = 'logst';
 const KQL_QUERY = 'machine.os: "macOS"';
@@ -143,7 +143,7 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('completes all tabs that are opened quickly', async ({ page, pageObjects }) => {
+    spaceTest('completes all tabs that are opened quickly', async ({ pageObjects }) => {
       const { discover, datePicker } = pageObjects;
 
       await spaceTest.step(
@@ -161,7 +161,7 @@ spaceTest.describe(
 
         // Click without waiting between clicks to reproduce the rapid-open race.
         for (let i = 0; i < newTabCount; i++) {
-          await page.testSubj.click('unifiedTabs_tabsBar_newTabBtn');
+          await discover.clickNewTabButton();
         }
         await discover.waitUntilTabIsLoaded();
 
