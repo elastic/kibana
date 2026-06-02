@@ -44,10 +44,11 @@ import {
 } from '../components/home/constants';
 import {
   DataViewContext,
+  useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_SORT,
   type EntitiesBaseURLQuery,
   EntitiesTableSection,
   type URLQuery,
-  useEntityURLState,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
@@ -74,10 +75,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   query,
   filters,
   pageFilters: [],
-  sort: [
-    ['entity.risk.calculated_score_norm', 'desc'],
-    ['@timestamp', 'desc'],
-  ],
+  sort: DEFAULT_ENTITIES_TABLE_SORT,
   pageIndex: 0,
 });
 
