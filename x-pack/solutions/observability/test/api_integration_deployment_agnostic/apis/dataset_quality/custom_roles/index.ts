@@ -38,10 +38,32 @@ const datasetQualityMonitorUserRole: KibanaRoleDescriptors = {
   kibana: [],
 };
 
-type CustomRoleNames = 'noAccessUserRole' | 'readUserRole' | 'datasetQualityMonitorUserRole';
+// Grants access to every index except system indices, ILM history and `logs-apm*`,
+// using a Lucene complement (negated) index pattern. The wildcard `_has_privileges`
+// check for `logs-*-*` therefore returns false, even though individual logs data
+// streams (e.g. `logs-synth-default`) remain readable. Used to verify the page works
+// for roles built with negated/complement patterns.
+const negatedLogsUserRole: KibanaRoleDescriptors = {
+  elasticsearch: {
+    indices: [
+      {
+        names: ['/~(([.]|ilm-history-|logs-apm).*)/'],
+        privileges: ['read', 'monitor', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [],
+};
+
+type CustomRoleNames =
+  | 'noAccessUserRole'
+  | 'readUserRole'
+  | 'datasetQualityMonitorUserRole'
+  | 'negatedLogsUserRole';
 
 export const customRoles: Record<CustomRoleNames, KibanaRoleDescriptors> = {
   noAccessUserRole,
   readUserRole,
   datasetQualityMonitorUserRole,
+  negatedLogsUserRole,
 };

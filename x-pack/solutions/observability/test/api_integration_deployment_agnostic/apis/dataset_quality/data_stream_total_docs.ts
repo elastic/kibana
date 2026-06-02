@@ -310,5 +310,74 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(res.statusCode).to.be(403);
       });
     });
+
+    // A role built with a negated/complement index pattern (excluding `logs-apm*`)
+    // can still read most logs data streams, but the wildcard `logs-*-*`
+    // `_has_privileges` read check returns false. The endpoint must not 403; it
+    // should return counts for the accessible streams only.
+    describe('Negated logs role with partial stream access', () => {
+      const accessibleDataset = 'synth';
+      const excludedDataset = 'apm.error';
+      const accessibleDataStreamName = `${dataStreamType}-${accessibleDataset}-${namespace}`;
+      const excludedDataStreamName = `${dataStreamType}-${excludedDataset}-${namespace}`;
+
+      let supertestNegatedWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await synthtraceLogsEsClient.index([
+          timerange(from, to)
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => [
+              log
+                .create()
+                .message('Accessible log message')
+                .timestamp(timestamp)
+                .dataset(accessibleDataset)
+                .namespace(namespace)
+                .defaults({ 'log.file.path': '/my-service.log' }),
+              log
+                .create()
+                .message('Excluded log message')
+                .timestamp(timestamp)
+                .dataset(excludedDataset)
+                .namespace(namespace)
+                .defaults({ 'log.file.path': '/my-service.log' }),
+            ]),
+        ]);
+
+        await samlAuth.setCustomRole(customRoles.negatedLogsUserRole);
+        supertestNegatedWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await synthtraceLogsEsClient.clean();
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await samlAuth.deleteCustomRole();
+      });
+
+      it('returns 200 with counts for accessible streams and excludes negated ones', async () => {
+        const res = await callApiAs({
+          roleScopedSupertestWithCookieCredentials: supertestNegatedWithCookieCredentials,
+          apiParams: {
+            type: dataStreamType,
+            start: from,
+            end: to,
+          },
+        });
+
+        expect(res.statusCode).to.be(200);
+
+        const datasets = res.body.totalDocs.map((stat: DataStreamDocsStat) => stat.dataset);
+        expect(datasets).to.contain(accessibleDataStreamName);
+        expect(datasets).to.not.contain(excludedDataStreamName);
+      });
+    });
   });
 }

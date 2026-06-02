@@ -158,6 +158,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    // A role built with a negated/complement index pattern (excluding `logs-apm*`)
+    // can read most logs data streams while the wildcard `logs-*-*` privilege check
+    // returns false. Stats must still list the accessible streams and omit the
+    // excluded ones, so the page is usable for such roles.
+    describe('Negated logs role with partial stream access', () => {
+      const accessibleDataStreamName = 'logs-synth-default';
+      const excludedDataStreamName = 'logs-apm.error-default';
+
+      let supertestNegatedWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await synthtraceLogsEsClient.index([
+          timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => [
+              log
+                .create()
+                .message('Accessible log message')
+                .timestamp(timestamp)
+                .dataset('synth')
+                .defaults({ 'log.file.path': '/my-service.log' }),
+              log
+                .create()
+                .message('Excluded log message')
+                .timestamp(timestamp)
+                .dataset('apm.error')
+                .defaults({ 'log.file.path': '/my-service.log' }),
+            ]),
+        ]);
+
+        await saml.setCustomRole(customRoles.negatedLogsUserRole);
+        supertestNegatedWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+        await synthtraceLogsEsClient.clean();
+      });
+
+      it('lists accessible logs streams and omits negated ones despite the wildcard check failing', async () => {
+        const resp = await callApiAs(supertestNegatedWithCookieCredentials);
+
+        // Wildcard privilege check fails for the negated role.
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canRead).to.be(false);
+
+        const names = resp.body.dataStreamsStats.map(({ name }: { name: string }) => name);
+        expect(names).to.contain(accessibleDataStreamName);
+        expect(names).to.not.contain(excludedDataStreamName);
+      });
+    });
+
     describe('uncategorized datastreams', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;

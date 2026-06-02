@@ -312,7 +312,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should keep a type whose wildcard privilege check fails (negated role) so its accessible data streams are still queried', async () => {
+    it('should authorize all known types even when a wildcard privilege check fails (negated role)', async () => {
       const { machine } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
           getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(partialPrivilegesResponse),
@@ -328,8 +328,42 @@ describe('DatasetQualityControllerStateMachine', () => {
 
       const { authorizedDatasetTypes } = actor.getSnapshot().context;
       // `logs` must remain even though its wildcard `logs-*-*` privilege is false,
-      // because the server enforces per-data-stream authorization.
-      expect(authorizedDatasetTypes).toContain('logs');
+      // because the server enforces per-data-stream authorization. All known types
+      // are considered so accessible data streams of every type are still queried.
+      expect(authorizedDatasetTypes).toEqual(
+        expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
+      );
+      expect(authorizedDatasetTypes).toHaveLength(4);
+
+      actor.stop();
+    });
+
+    it('should still fetch total docs for a type whose wildcard privilege check fails (negated role)', async () => {
+      const dataStreamStatsClient = createMockDataStreamStatsClient({
+        getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(partialPrivilegesResponse),
+      });
+
+      const { machine } = buildStateMachine({
+        initialContext: {
+          ...DEFAULT_CONTEXT,
+          filters: {
+            ...DEFAULT_CONTEXT.filters,
+            types: [], // empty means all authorized types are selected
+          },
+        },
+        dataStreamStatsClient,
+      });
+      const actor = createActor(machine);
+      actor.start();
+
+      await waitForState(actor, 'main.stats.docsStats.loaded');
+
+      // `logs` total docs must still be requested even though its `logs-*-*`
+      // wildcard privilege is false; the server returns only accessible streams.
+      expect(dataStreamStatsClient.getDataStreamsTotalDocs).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'logs' })
+      );
+      expect(dataStreamStatsClient.getDataStreamsTotalDocs).toHaveBeenCalledTimes(4);
 
       actor.stop();
     });
