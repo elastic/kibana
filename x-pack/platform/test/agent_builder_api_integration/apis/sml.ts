@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             updated_at: now,
             spaces: ['default'],
             permissions: [],
+            ingestion_method: 'crawled',
           },
         });
       });
@@ -162,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
             updated_at: now,
             spaces: ['default'],
             permissions: [],
+            ingestion_method: 'crawled',
           },
         });
       });
