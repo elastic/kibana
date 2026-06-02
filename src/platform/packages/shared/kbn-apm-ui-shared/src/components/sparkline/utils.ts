@@ -14,16 +14,16 @@ import type {
   RecursivePartial,
 } from '@elastic/charts';
 
-export interface Coordinate {
+export interface SparklinePoint {
   x: number;
   y: number | null;
 }
 
 export interface SplitSeriesResult {
-  mainSegments: Coordinate[][];
-  leadingEdge: Coordinate[] | null;
-  trailingEdge: Coordinate[] | null;
-  interiorEdges: Coordinate[][];
+  mainSegments: SparklinePoint[][];
+  leadingEdge: SparklinePoint[] | null;
+  trailingEdge: SparklinePoint[] | null;
+  interiorEdges: SparklinePoint[][];
 }
 
 export const DOTTED_LINE_STYLE: RecursivePartial<LineSeriesStyle> = {
@@ -43,7 +43,7 @@ function isValidY(y: number | null | undefined): y is number {
   return y != null && !Number.isNaN(y);
 }
 
-export function splitSeriesAtNullGaps(data: ReadonlyArray<Coordinate>): SplitSeriesResult {
+export function splitSeriesAtNullGaps(data: ReadonlyArray<SparklinePoint>): SplitSeriesResult {
   if (data.length === 0) {
     return { mainSegments: [], leadingEdge: null, trailingEdge: null, interiorEdges: [] };
   }
@@ -86,8 +86,8 @@ export function splitSeriesAtNullGaps(data: ReadonlyArray<Coordinate>): SplitSer
         ]
       : null;
 
-  const mainSegments: Coordinate[][] = [];
-  let currentSegment: Coordinate[] = [];
+  const mainSegments: SparklinePoint[][] = [];
+  let currentSegment: SparklinePoint[] = [];
 
   for (let i = first; i <= last; i++) {
     if (isValidY(data[i].y)) {
@@ -99,7 +99,7 @@ export function splitSeriesAtNullGaps(data: ReadonlyArray<Coordinate>): SplitSer
   }
   if (currentSegment.length > 0) mainSegments.push(currentSegment);
 
-  const interiorEdges: Coordinate[][] = [];
+  const interiorEdges: SparklinePoint[][] = [];
   for (let i = 0; i < mainSegments.length - 1; i++) {
     const prev = mainSegments[i];
     const next = mainSegments[i + 1];

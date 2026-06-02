@@ -8,9 +8,9 @@
  */
 
 import { splitSeriesAtNullGaps } from './utils';
-import type { Coordinate } from './utils';
+import type { SparklinePoint } from './utils';
 
-const p = (x: number, y: number | null): Coordinate => ({ x, y });
+const p = (x: number, y: number | null): SparklinePoint => ({ x, y });
 
 describe('splitSeriesAtNullGaps', () => {
   it('returns empty results for an empty array', () => {

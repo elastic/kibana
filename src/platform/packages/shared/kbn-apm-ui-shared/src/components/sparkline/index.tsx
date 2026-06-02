@@ -22,9 +22,7 @@ import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useChartThemes } from '../../hooks/use_chart_theme';
 import { COMPARISON_CHART_THEME, DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from './utils';
-import type { Coordinate } from './utils';
-
-export type { Coordinate };
+import type { SparklinePoint } from './utils';
 
 const CHART_HEIGHT = 24;
 const COMPACT_WIDTH = 64;
@@ -32,15 +30,15 @@ const DEFAULT_WIDTH = 80;
 
 export interface SparklineProps {
   color: string;
-  series?: Coordinate[] | null;
-  comparisonSeries?: Coordinate[];
+  series?: SparklinePoint[] | null;
+  comparisonSeries?: SparklinePoint[];
   comparisonSeriesColor?: string;
   type?: 'line' | 'bar';
   compact?: boolean;
   isLoading?: boolean;
 }
 
-function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
+function hasValidTimeseries(series?: SparklinePoint[] | null): series is SparklinePoint[] {
   return !!series?.some((point) => point.y !== null);
 }
 

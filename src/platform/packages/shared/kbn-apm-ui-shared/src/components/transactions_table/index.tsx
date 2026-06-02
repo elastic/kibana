@@ -50,6 +50,7 @@ interface TransactionsTableProps {
   };
   onSearchQueryChange?: (query: string) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
+  showSparklines?: boolean;
 }
 
 function shouldFetchServer({
@@ -78,6 +79,7 @@ export function TransactionsTable({
   columnInteractions,
   onSearchQueryChange,
   remainingTransactionsCellTooltipContent,
+  showSparklines: showSparklinesProp,
 }: TransactionsTableProps) {
   const searchQueryRef = useRef('');
 
@@ -91,7 +93,7 @@ export function TransactionsTable({
   useEffect(() => () => debouncedSearchQueryChange.current.cancel(), []);
 
   const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
-  const resolvedShowSparklines = !isWithinLBreakpoint;
+  const resolvedShowSparklines = showSparklinesProp ?? !isWithinLBreakpoint;
 
   const resolvedColumns = useMemo(() => {
     const builtIn = getBuiltInColumns({

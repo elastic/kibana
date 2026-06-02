@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPanel,
   EuiProgress,
   EuiText,
   RIGHT_ALIGNMENT,
@@ -351,6 +352,28 @@ export const Empty: StoryFn = () => (
     maxCountExceeded={false}
     latencyAggregationType={LatencyAggregationType.p95}
   />
+);
+
+export const Compact: StoryFn = () => (
+  <EuiPanel style={{ maxWidth: 768 }}>
+    <TransactionsTable
+      items={items}
+      isLoading={false}
+      maxCountExceeded={false}
+      latencyAggregationType={LatencyAggregationType.p95}
+      showSparklines={false}
+      headerActions={[
+        {
+          label: 'Open in APM',
+          href: '#',
+          ebt: { action: 'openInApm', element: 'transactionsTableHeader' },
+        },
+      ]}
+      columnInteractions={{
+        name: { href: () => '#' },
+      }}
+    />
+  </EuiPanel>
 );
 
 export const Complete: StoryFn = () => (

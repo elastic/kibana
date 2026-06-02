@@ -8,13 +8,11 @@
  */
 
 import type { EbtClickAttrs } from '@kbn/ebt-click';
-import type { Coordinate } from '../sparkline/utils';
-
-export type { Coordinate };
+import type { SparklinePoint } from '../sparkline/utils';
 
 interface MetricSeries {
-  value: Coordinate[];
-  comparison?: Coordinate[];
+  value: SparklinePoint[];
+  comparison?: SparklinePoint[];
 }
 
 export interface TransactionMetric {
