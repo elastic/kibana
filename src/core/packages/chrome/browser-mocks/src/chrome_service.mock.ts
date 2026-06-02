@@ -120,6 +120,10 @@ const createStartContractMock = () => {
     }),
     next: lazyObject({
       isEnabled: false,
+      aiButton: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+        register: jest.fn().mockReturnValue(() => {}),
+      }),
       globalSearch: lazyObject({
         set: jest.fn(),
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),

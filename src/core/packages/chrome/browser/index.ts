@@ -24,6 +24,7 @@ export type {
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
   ChromeNext,
+  GlobalHeaderAiButton,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,

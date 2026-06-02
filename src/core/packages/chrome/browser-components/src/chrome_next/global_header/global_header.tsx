@@ -10,6 +10,7 @@
 import React from 'react';
 import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
 import { SearchButton } from './search_button';
+import { AiButtonSlot } from './ai_button_slot';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
 import { useContextSwitcher } from '../../shared/chrome_hooks';
 
@@ -17,6 +18,7 @@ export const ChromeNextGlobalHeader = React.memo(() => (
   <ChromeNextGlobalHeaderShell
     logo={<ChromeNextGlobalHeaderLogo />}
     search={<SearchButton />}
+    actions={<AiButtonSlot />}
     switcher={useContextSwitcher()}
   />
 ));

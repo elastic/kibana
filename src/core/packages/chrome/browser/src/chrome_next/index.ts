@@ -20,4 +20,5 @@ export type {
   AppHeaderTab,
   ChromeNext,
 } from './chrome_next';
+export type { GlobalHeaderAiButton } from './ai_button';
 export type { GlobalSearchConfig } from './global_search';
