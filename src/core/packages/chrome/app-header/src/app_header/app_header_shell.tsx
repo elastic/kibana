@@ -66,7 +66,7 @@ const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
-  hasPrimaryContent: boolean,
+  hasTitleAppend: boolean,
   hasMetadata: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
@@ -117,7 +117,6 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
-      overflow: hidden;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       ${paddingBlock &&
       css`
@@ -131,7 +130,6 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1;
       min-width: 0;
-      overflow: hidden;
     `;
 
     const titleGroup = css`
@@ -141,14 +139,14 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
-      ${hasPrimaryContent &&
+      ${hasTitleAppend &&
       css`
         max-width: min(40%, 360px);
       `}
     `;
 
     const titleClusterSpacer = css`
-      flex: ${hasPrimaryContent ? '0 0 auto' : '1 1 auto'};
+      flex: ${hasTitleAppend ? '0 0 auto' : '1 1 auto'};
       min-width: 0;
     `;
 
@@ -204,7 +202,7 @@ const useHeaderStyles = (
       metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent, hasMetadata]);
+  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
