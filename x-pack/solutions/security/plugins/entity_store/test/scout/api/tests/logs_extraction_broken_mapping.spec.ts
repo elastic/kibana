@@ -115,6 +115,23 @@ const EXPECTED_USER_LATEST_SOURCES = [
   },
 ] as const;
 
+/**
+ * Full expected `_source` for the service entity. service.name is long in source —
+ * TO_STRING (via castField) converts 99999 → "99999" for the EUID and stored value.
+ */
+const EXPECTED_SERVICE_LATEST_SOURCES = [
+  {
+    '@timestamp': '2026-04-14T10:03:00.000Z',
+    entity: {
+      id: 'service:99999',
+      name: '99999',
+      type: 'Service',
+      EngineMetadata: { Type: 'service', UntypedId: '99999' },
+    },
+    service: { name: '99999' },
+  },
+] as const;
+
 const matchExpectedLatestSources = <T extends { entity: { id: string } }>(
   hits: ReadonlyArray<{ _source?: unknown }>,
   expectedDocuments: readonly T[]
@@ -185,6 +202,12 @@ const createBrokenMappingTemplate = async (esClient: EsClient) => {
               outcome: { type: 'text' },
               module: { type: 'text' },
               dataset: { type: 'text' }, // used in entity.source field evaluation; tests text mapping in SPLIT/MV_FIRST path
+            },
+          },
+          // Service identity field; tests long → string coercion via castField (TO_STRING)
+          service: {
+            properties: {
+              name: { type: 'long' }, // expected as keyword in entity definition
             },
           },
           data_stream: {
@@ -283,6 +306,20 @@ const cleanupBrokenMappingArtifacts = async (esClient: EsClient) => {
   await esClient.indices.deleteIndexTemplate({ name: BROKEN_MAPPING_TEMPLATE }, { ignore: [404] });
 };
 
+const ingestBrokenServiceDoc = async (esClient: EsClient) => {
+  const bulkResponse = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: [
+      { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
+      {
+        '@timestamp': '2026-04-14T10:03:00Z',
+        service: { name: 99999 },
+      },
+    ],
+  });
+  expect(bulkResponse.errors).toBe(false);
+};
+
 apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
@@ -315,6 +352,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       { name: BROKEN_MAPPING_DATA_STREAM },
       { ignore: [400] }
     );
+
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
@@ -508,6 +546,51 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         },
       });
       matchExpectedLatestSources(bothUsers.hits.hits, EXPECTED_USER_LATEST_SOURCES);
+    }
+  );
+
+  apiTest(
+    'should extract service successfully when service.name is mapped as long (triggers castField ambiguity fix)',
+    async ({ apiClient, esClient }) => {
+      await ingestBrokenServiceDoc(esClient);
+
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: FROM_DATE,
+            toDateISO: TO_DATE,
+          },
+        }
+      );
+
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({
+        success: true,
+        count: 1,
+        pages: 1,
+      });
+
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      const serviceEntities = await esClient.search({
+        index: LATEST_ALIAS,
+        size: 10,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'entity.EngineMetadata.Type': 'service' } },
+              {
+                terms: {
+                  'entity.id': ['service:99999'],
+                },
+              },
+            ],
+          },
+        },
+      });
+      matchExpectedLatestSources(serviceEntities.hits.hits, EXPECTED_SERVICE_LATEST_SOURCES);
     }
   );
 });
