@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { MAX_TITLE_LENGTH } from '../../../../constants';
 import { SingleFileAttachmentMetadataSchema } from '../../../domain/attachment/v1';
 
 export const FileAttachmentMetadataSchema = z
@@ -23,8 +24,8 @@ export type FileAttachmentMetadata = z.infer<typeof FileAttachmentMetadataSchema
 export const FileAttachmentPayloadSchema = z
   .object({
     type: z.literal(FILE_ATTACHMENT_TYPE),
-    owner: z.string(),
-    attachmentId: z.string(),
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    attachmentId: z.string().max(MAX_TITLE_LENGTH),
     metadata: FileAttachmentMetadataSchema,
   })
   .strict();

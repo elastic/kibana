@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { limitedStringSchema, mimeTypeString, jsonValueSchema } from '../../../schema';
 import { UserSchema } from '../user/v1';
-import { MAX_FILENAME_LENGTH } from '../../../constants';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_FILENAME_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../constants';
 
 export enum AttachmentType {
   actions = 'actions',
@@ -28,10 +33,10 @@ export enum ExternalReferenceStorageType {
  * Files
  */
 export const SingleFileAttachmentMetadataSchema = z.object({
-  name: z.string(),
-  extension: z.string(),
-  mimeType: z.string(),
-  created: z.string(),
+  name: z.string().max(MAX_FILENAME_LENGTH),
+  extension: z.string().max(10),
+  mimeType: z.string().max(100),
+  created: z.string().max(30),
 });
 
 export const FileAttachmentMetadataSchema = z.object({
@@ -41,12 +46,12 @@ export const FileAttachmentMetadataSchema = z.object({
 export type FileAttachmentMetadata = z.infer<typeof FileAttachmentMetadataSchema>;
 
 export const AttachmentAttributesBasicSchema = z.object({
-  created_at: z.string(),
+  created_at: z.string().max(30),
   created_by: UserSchema,
-  owner: z.string(),
-  pushed_at: z.string().nullable(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  pushed_at: z.string().max(30).nullable(),
   pushed_by: UserSchema.nullable(),
-  updated_at: z.string().nullable(),
+  updated_at: z.string().max(30).nullable(),
   updated_by: UserSchema.nullable(),
 });
 
@@ -59,9 +64,9 @@ export const FileAttachmentMetadataPayloadSchema = z.object({
  * User comment
  */
 export const UserCommentAttachmentPayloadSchema = z.object({
-  comment: z.string(),
+  comment: z.string().max(MAX_COMMENT_LENGTH),
   type: z.literal(AttachmentType.user),
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
 const UserCommentAttachmentAttributesSchema = UserCommentAttachmentPayloadSchema.merge(
@@ -69,8 +74,8 @@ const UserCommentAttachmentAttributesSchema = UserCommentAttachmentPayloadSchema
 );
 
 export const UserCommentAttachmentSchema = UserCommentAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export type UserCommentAttachmentPayload = z.infer<typeof UserCommentAttachmentPayloadSchema>;
@@ -82,9 +87,9 @@ export type UserCommentAttachment = z.infer<typeof UserCommentAttachmentSchema>;
  */
 export const EventAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.event),
-  eventId: z.union([z.array(z.string()), z.string()]),
-  index: z.union([z.array(z.string()), z.string()]),
-  owner: z.string(),
+  eventId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
 /**
@@ -92,13 +97,13 @@ export const EventAttachmentPayloadSchema = z.object({
  */
 export const AlertAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.alert),
-  alertId: z.union([z.array(z.string()), z.string()]),
-  index: z.union([z.array(z.string()), z.string()]),
+  alertId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
   rule: z.object({
-    id: z.string().nullable(),
-    name: z.string().nullable(),
+    id: z.string().max(MAX_TITLE_LENGTH).nullable(),
+    name: z.string().max(MAX_RULE_NAME_LENGTH).nullable(),
   }),
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
 export const AlertAttachmentAttributesSchema = AlertAttachmentPayloadSchema.merge(
@@ -110,13 +115,13 @@ export const EventAttachmentAttributesSchema = EventAttachmentPayloadSchema.merg
 );
 
 export const AlertAttachmentSchema = AlertAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export const EventAttachmentSchema = EventAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export type AlertAttachmentPayload = z.infer<typeof AlertAttachmentPayloadSchema>;
@@ -143,17 +148,17 @@ export enum IsolateHostActionType {
 
 export const ActionsAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.actions),
-  comment: z.string(),
+  comment: z.string().max(MAX_COMMENT_LENGTH),
   actions: z.object({
     targets: z.array(
       z.object({
-        hostname: z.string(),
-        endpointId: z.string(),
+        hostname: z.string().max(256),
+        endpointId: z.string().max(MAX_TITLE_LENGTH),
       })
     ),
-    type: z.string(),
+    type: z.string().max(MAX_TITLE_LENGTH),
   }),
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
 const ActionsAttachmentAttributesSchema = ActionsAttachmentPayloadSchema.merge(
@@ -161,8 +166,8 @@ const ActionsAttachmentAttributesSchema = ActionsAttachmentPayloadSchema.merge(
 );
 
 export const ActionsAttachmentSchema = ActionsAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export type ActionsAttachmentPayload = z.infer<typeof ActionsAttachmentPayloadSchema>;
@@ -178,25 +183,25 @@ const ExternalReferenceStorageNoSOSchema = z.object({
 
 const ExternalReferenceStorageSOSchema = z.object({
   type: z.literal(ExternalReferenceStorageType.savedObject),
-  soType: z.string(),
+  soType: z.string().max(MAX_TITLE_LENGTH),
 });
 
 const ExternalReferenceBaseAttachmentPayloadSchema = z.object({
-  externalReferenceAttachmentTypeId: z.string(),
-  externalReferenceMetadata: z.record(z.string(), jsonValueSchema).nullable(),
+  externalReferenceAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  externalReferenceMetadata: z.record(z.string().max(MAX_TITLE_LENGTH), jsonValueSchema).nullable(),
   type: z.literal(AttachmentType.externalReference),
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
 export const ExternalReferenceNoSOAttachmentPayloadSchema =
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
-    externalReferenceId: z.string(),
+    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
     externalReferenceStorage: ExternalReferenceStorageNoSOSchema,
   });
 
 export const ExternalReferenceSOAttachmentPayloadSchema =
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
-    externalReferenceId: z.string(),
+    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
     externalReferenceStorage: ExternalReferenceStorageSOSchema,
   });
 
@@ -229,7 +234,7 @@ const ExternalReferenceSOAttachmentAttributesSchema =
   ExternalReferenceSOAttachmentPayloadSchema.merge(AttachmentAttributesBasicSchema);
 
 export const ExternalReferenceAttachmentSchema = ExternalReferenceAttachmentAttributesSchema.and(
-  z.object({ id: z.string(), version: z.string() })
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
 );
 
 export type ExternalReferenceAttachmentPayload = z.infer<
@@ -260,9 +265,9 @@ export type ExternalReferenceAttachment = z.infer<typeof ExternalReferenceAttach
  */
 export const PersistableStateAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.persistableState),
-  owner: z.string(),
-  persistableStateAttachmentTypeId: z.string(),
-  persistableStateAttachmentState: z.record(z.string(), jsonValueSchema),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentState: z.record(z.string().max(MAX_TITLE_LENGTH), jsonValueSchema),
 });
 
 const PersistableStateAttachmentAttributesSchema = PersistableStateAttachmentPayloadSchema.merge(
@@ -270,8 +275,8 @@ const PersistableStateAttachmentAttributesSchema = PersistableStateAttachmentPay
 );
 
 export const PersistableStateAttachmentSchema = PersistableStateAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export type PersistableStateAttachmentPayload = z.infer<
@@ -323,7 +328,7 @@ const AttachmentAttributesWithoutRefsSchema = z.union([
 ]);
 
 export const AttachmentSchema = AttachmentAttributesSchema.and(
-  z.object({ id: z.string(), version: z.string() })
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
 );
 
 export const AttachmentsSchema = z.array(AttachmentSchema);
