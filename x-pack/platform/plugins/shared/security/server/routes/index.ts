@@ -65,6 +65,7 @@ export interface RouteDefinitionParams {
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  serverlessProjectId: string | undefined;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;
