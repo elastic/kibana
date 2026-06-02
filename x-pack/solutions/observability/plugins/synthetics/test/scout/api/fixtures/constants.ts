@@ -22,6 +22,8 @@ export const SYNTHETICS_API_URLS = {
   FILTERS: '/internal/synthetics/monitor/filters',
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
+  PRIVATE_LOCATIONS_MONITORS: '/internal/synthetics/private_locations/monitors',
+  SERVICE_LOCATIONS: '/internal/uptime/service/locations',
   DYNAMIC_SETTINGS: '/internal/synthetics/settings',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
 } as const;
