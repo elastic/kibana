@@ -29,9 +29,8 @@ import {
   stopService,
   connectorsHash,
   tailLog,
-  EDOT_CONTAINER_NAME,
+  isEdotDockerRunning,
 } from '../services';
-import { safeExec } from '../utils';
 import { readCachedEisConnectors } from '../eis_connectors_cache';
 import {
   defaultExportProfile,
@@ -48,17 +47,6 @@ import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
-
-const isEdotRunningViaDocker = (): boolean => {
-  const result = safeExec('docker', [
-    'ps',
-    '--filter',
-    `name=${EDOT_CONTAINER_NAME}`,
-    '--format',
-    '{{.Names}}',
-  ]);
-  return result !== null && result.length > 0;
-};
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -439,7 +427,7 @@ export const startCmd: Command<void> = {
 
     if (!skipServer) {
       // --- Step 1: EDOT collector (exports traces to configured ES) ---
-      if (isServiceRunning(repoRoot, 'edot') || isEdotRunningViaDocker()) {
+      if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
         log.info('[1/4] EDOT collector already running -- reusing');
       } else {
         log.info('[1/4] Starting EDOT collector (backgrounded)...');
@@ -456,7 +444,7 @@ export const startCmd: Command<void> = {
         await new Promise((r) => setTimeout(r, 5000));
         stopTail();
 
-        if (!isEdotRunningViaDocker()) {
+        if (!isEdotDockerRunning()) {
           log.warning(
             'EDOT collector may not have started. Check logs: node scripts/evals logs --service edot'
           );

@@ -156,7 +156,7 @@ export const startService = (
   return pid;
 };
 
-const isEdotDockerRunning = (): boolean => {
+export const isEdotDockerRunning = (): boolean => {
   try {
     const result = execFileSync(
       'docker',
@@ -190,10 +190,15 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
       return;
     }
   } catch (err) {
-    const isTimeout =
-      err instanceof Error && (err as unknown as { signal?: string }).signal != null;
-    if (isTimeout) {
+    const signal = (err as Record<string, unknown>).signal;
+    if (signal != null) {
       log.warning('[edot] docker compose down timed out, falling back to docker stop');
+    } else {
+      log.warning(
+        `[edot] docker compose down failed (${
+          err instanceof Error ? err.message : err
+        }), falling back to docker stop`
+      );
     }
   }
 
@@ -296,33 +301,17 @@ export const stopService = async (
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
 
   // Kill the process group (negative PID) so Scout's child ES/Kibana processes also die
-  try {
-    process.kill(-entry.pid, 'SIGTERM');
-  } catch {
-    try {
-      process.kill(entry.pid, 'SIGTERM');
-    } catch {
-      // already dead
-    }
-  }
+  killProcessGroup(entry.pid, 'SIGTERM');
 
-  // Wait up to 10s for graceful shutdown
+  // Wait up to 10s for the entire process group to exit
   const deadline = Date.now() + 10_000;
-  while (isAlive(entry.pid) && Date.now() < deadline) {
+  while (isProcessGroupAlive(entry.pid) && Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 500));
   }
 
-  if (isAlive(entry.pid)) {
+  if (isProcessGroupAlive(entry.pid)) {
     log.warning(`[${name}] did not stop gracefully, sending SIGKILL`);
-    try {
-      process.kill(-entry.pid, 'SIGKILL');
-    } catch {
-      try {
-        process.kill(entry.pid, 'SIGKILL');
-      } catch {
-        // already dead
-      }
-    }
+    killProcessGroup(entry.pid, 'SIGKILL');
   }
 
   if (name === 'edot') {
