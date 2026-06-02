@@ -417,11 +417,13 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
       condition: schema.maybe(
-        schema.string({
-          meta: {
-            description: 'Agent condition expression to evaluate whether to apply this input.',
-          },
-        })
+        schema.nullable(
+          schema.string({
+            meta: {
+              description: 'Agent condition expression to evaluate whether to apply this input.',
+            },
+          })
+        )
       ),
       streams: schema.maybe(
         schema.recordOf(
@@ -438,12 +440,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             var_group_selections: VarGroupSelectionsSchema,
             deprecated: schema.maybe(DeprecationInfoSchema),
             condition: schema.maybe(
-              schema.string({
-                meta: {
-                  description:
-                    'Agent condition expression to evaluate whether to apply this stream.',
-                },
-              })
+              schema.nullable(
+                schema.string({
+                  meta: {
+                    description:
+                      'Agent condition expression to evaluate whether to apply this stream.',
+                  },
+                })
+              )
             ),
           }),
           {
@@ -533,12 +537,14 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
       ])
     ),
     condition: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Agent condition expression to evaluate whether to apply this integration to its inputs.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Agent condition expression to evaluate whether to apply this integration to its inputs.',
+          },
+        })
+      )
     ),
   },
   { meta: { id: 'simplified_package_policy_base' } }
