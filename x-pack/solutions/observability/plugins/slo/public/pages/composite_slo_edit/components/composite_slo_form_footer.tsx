@@ -44,9 +44,7 @@ export function CompositeSloFormFooter({ compositeSloId, isEditMode }: Props) {
 
   const onInvalid = () => {
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(
-        '[aria-invalid="true"], .euiFormErrorText'
-      );
+      const el = document.querySelector<HTMLElement>('[aria-invalid="true"], .euiFormErrorText');
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el?.focus?.({ preventScroll: true });
     });
