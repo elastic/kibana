@@ -19,3 +19,6 @@ export const getRuleDetailsTabUrl = (detailName: string, tabName: string, search
 
 export const getEditRuleUrl = (detailName: string, search?: string) =>
   `/id/${encodeURIComponent(detailName)}/edit${appendSearch(search)}`;
+
+export const getRuleChangesHistoryUrl = (detailName: string, search?: string) =>
+  `/id/${encodeURIComponent(detailName)}/changes-history${appendSearch(search)}`;

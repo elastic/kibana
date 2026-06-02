@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DATE_DISPLAY_FORMAT } from '../change_history_table/constants';
+export * from './change_history_timeline';

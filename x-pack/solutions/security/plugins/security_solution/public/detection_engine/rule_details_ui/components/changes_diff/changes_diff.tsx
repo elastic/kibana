@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
+import type { GutterOptions } from 'react-diff-view';
+import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
+import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
+import { DiffView } from '../../../rule_management/components/rule_details/json_diff/diff_view';
+import { filterAndSort, reconstructBefore } from './utils';
+import * as i18n from './translations';
+
+interface ChangesPanelProps {
+  item: RuleHistoryItem | undefined;
+  isLoading?: boolean;
+}
+
+export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Element {
+  const numOfChangedFields = useMemo(
+    () => (item ? extractChangedFieldNames(item).length : 0),
+    [item]
+  );
+  const { oldSource, newSource } = useMemo(() => {
+    if (!item) {
+      return { oldSource: '', newSource: '' };
+    }
+
+    const after = filterAndSort(item.rule);
+
+    // old_values is null for create/install actions — there is no previous state.
+    // In that case show the full rule as a pure insertion.
+    if (!item.old_values) {
+      return { oldSource: '', newSource: JSON.stringify(after, null, 2) };
+    }
+
+    if (numOfChangedFields === 0) {
+      return { oldSource: '', newSource: '' };
+    }
+
+    const oldValues = item.old_values ?? {};
+    const before = filterAndSort(reconstructBefore(after, oldValues));
+
+    return {
+      oldSource: JSON.stringify(before, null, 2),
+      newSource: JSON.stringify(after, null, 2),
+    };
+  }, [item, numOfChangedFields]);
+
+  if (!item) {
+    if (isLoading) {
+      return (
+        <EuiPanel hasBorder data-test-subj="ruleChangesHistoryDiffLoading">
+          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18n.LOADING_LABEL}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      );
+    }
+
+    return (
+      <EuiPanel hasBorder data-test-subj="ruleChangesHistoryNothingSelected">
+        <EuiEmptyPrompt
+          iconType="inspect"
+          title={<h2>{i18n.SELECT_VERSION_TITLE}</h2>}
+          body={<p>{i18n.SELECT_VERSION_BODY}</p>}
+        />
+      </EuiPanel>
+    );
+  }
+
+  if (item.old_values && numOfChangedFields === 0) {
+    return (
+      <EuiPanel hasBorder data-test-subj="ruleChangesHistoryNoChanges">
+        <EuiEmptyPrompt
+          iconType="checkInCircleFilled"
+          title={<h2>{i18n.NO_VISIBLE_CHANGES_TITLE}</h2>}
+        />
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <EuiPanel hasBorder>
+      <DiffView
+        viewType="unified"
+        oldSource={oldSource}
+        newSource={newSource}
+        renderGutter={renderLineNumberGutter}
+        data-test-subj="ruleChangesHistoryDiff"
+      />
+    </EuiPanel>
+  );
+}
+
+function renderLineNumberGutter({ change }: GutterOptions): JSX.Element {
+  return <span>{change.type === 'normal' ? change.oldLineNumber : change.lineNumber}</span>;
+}

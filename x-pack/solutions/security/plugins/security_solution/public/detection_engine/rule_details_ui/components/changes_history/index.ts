@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ChangeHistoryTable } from './change_history_table';
+export * from './changes_history';

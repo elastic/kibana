@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { DATE_DISPLAY_FORMAT } from './constants';
 
 export const FIELD_CHANGES_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.fieldChangesLabel',
@@ -27,36 +29,6 @@ export const VIEW_DETAILS_LINK = (): JSX.Element => (
   />
 );
 
-interface ShownEventsVsTotal {
-  /**
-   * 1-based page number
-   */
-  page: number;
-  perPage: number;
-  total: number;
-}
-
-export const SHOWN_EVENTS_VS_TOTAL = ({
-  page,
-  perPage,
-  total,
-}: ShownEventsVsTotal): JSX.Element => {
-  const start = (page - 1) * perPage + 1;
-  const end = Math.min(page * perPage, total);
-
-  return (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.totalEvents"
-      defaultMessage="Showing {range} of {total} {totalNum, plural, one {change} other {changes}}"
-      values={{
-        range: <strong>{`${start}-${end}`}</strong>,
-        total: <strong>{total}</strong>,
-        totalNum: total,
-      }}
-    />
-  );
-};
-
 export const TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.timelineAriaLabel',
   {
@@ -64,18 +36,107 @@ export const TIMELINE_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const PAGINATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.paginationAriaLabel',
+export const CURRENT_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.currentVersion',
+  { defaultMessage: 'Current version' }
+);
+
+export const N_CHANGES = (count: number): string =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.nChanges', {
+    defaultMessage: '{count, plural, one {# change} other {# changes}}',
+    values: { count },
+  });
+
+export const REVISION_BADGE_PREFIX = 'R';
+export const VERSION_BADGE_PREFIX = 'V';
+
+export const ACTION_LABEL_ENABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelEnabled',
+  { defaultMessage: 'Enabled the rule' }
+);
+
+export const ACTION_LABEL_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDisabled',
+  { defaultMessage: 'Disabled the rule' }
+);
+
+export const ACTION_LABEL_SNOOZED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelSnoozed',
+  { defaultMessage: 'Snoozed notifications' }
+);
+
+export const ACTION_LABEL_UNSNOOZED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUnsnoozed',
+  { defaultMessage: 'Unsnoozed notifications' }
+);
+
+export const ACTION_LABEL_API_KEY_UPDATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelApiKeyUpdated',
+  { defaultMessage: 'Updated API key' }
+);
+
+export const ACTION_LABEL_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelCreated',
+  { defaultMessage: 'Created the rule' }
+);
+
+export const ACTION_LABEL_UPDATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUpdated',
+  { defaultMessage: 'Updated the rule' }
+);
+
+export const ACTION_LABEL_DELETED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDeleted',
+  { defaultMessage: 'Deleted the rule' }
+);
+
+export const ACTION_LABEL_INSTALLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelInstalled',
+  { defaultMessage: 'Installed the rule' }
+);
+
+export const ACTION_LABEL_UPGRADED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUpgraded',
+  { defaultMessage: 'Upgraded the rule' }
+);
+
+export const ACTION_LABEL_DUPLICATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDuplicated',
+  { defaultMessage: 'Duplicated the rule' }
+);
+
+export const ACTION_LABEL_IMPORTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelImported',
+  { defaultMessage: 'Imported the rule' }
+);
+
+export const ACTION_LABEL_REVERTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelReverted',
+  { defaultMessage: 'Reverted the rule' }
+);
+
+export const CHANGED_FIELDS_TOGGLE_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.changedFieldsToggleAriaLabel',
+  { defaultMessage: 'Toggle changed fields' }
+);
+
+export const SYSTEM_USER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.systemUserLabel',
   {
-    defaultMessage: 'Rule change history pagination',
+    defaultMessage: 'System',
   }
 );
 
-export const TRACKING_STARTED_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.trackingStartedLabel',
-  {
-    defaultMessage: 'Rule change tracking started',
-  }
+interface TrackingStartedOnProps {
+  date: Date;
+}
+
+export const TRACKING_STARTED_ON = ({ date }: TrackingStartedOnProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.trackingStartedOn"
+    defaultMessage="On {date} History started"
+    values={{ date: <PreferenceFormattedDate value={date} dateFormat={DATE_DISPLAY_FORMAT} /> }}
+  />
 );
 
 export const EMPTY_PROMPT_TITLE = i18n.translate(

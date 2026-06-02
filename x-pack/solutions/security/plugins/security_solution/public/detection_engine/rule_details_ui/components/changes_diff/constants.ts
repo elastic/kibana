@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { ChangeHistoryFlyout } from './change_history_flyout';
+export const IGNORED_FIELDS: ReadonlySet<string> = new Set([
+  'updated_at',
+  'updated_by',
+  'created_at',
+  'created_by',
+  'revision',
+  'execution_summary',
+  'meta',
+]);

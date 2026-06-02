@@ -21,7 +21,6 @@ export enum RuleDetailTabs {
   exceptions = 'rule_exceptions',
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
-  history = 'history',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -30,7 +29,6 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.history]: i18n.CHANGE_HISTORY_TAB,
 };
 
 export interface UseRuleDetailsTabsProps {
@@ -82,12 +80,6 @@ export const useRuleDetailsTabs = ({
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
       },
-      [RuleDetailTabs.history]: {
-        id: RuleDetailTabs.history,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.history],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.history}`,
-      },
     }),
     [isExistingRule, rule, ruleId]
   );
@@ -109,9 +101,6 @@ export const useRuleDetailsTabs = ({
     }
     if (!canReadExceptions) {
       hiddenTabs.push(RuleDetailTabs.exceptions);
-    }
-    if (!isRuleChangesHistoryEnabled) {
-      hiddenTabs.push(RuleDetailTabs.history);
     }
     if (rule != null) {
       const hasEndpointList = (rule.exceptions_list ?? []).some(

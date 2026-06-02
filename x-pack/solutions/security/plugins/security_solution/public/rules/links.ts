@@ -17,6 +17,7 @@ import {
   DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
+  RULES_CHANGES_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
@@ -67,6 +68,14 @@ export const links: LinkItem = {
           path: RULES_ADD_PATH,
           skipUrlState: true,
           hideTimeline: true,
+        },
+        {
+          id: SecurityPageName.rulesChangesHistory,
+          title: SIEM_RULES,
+          path: RULES_CHANGES_HISTORY_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+          globalSearchDisabled: true,
         },
         {
           id: SecurityPageName.rulesCreate,

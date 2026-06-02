@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { SecurityRuleChangeTrackingAction } from '../../../../../common/detection_engine/rule_management/rule_change_tracking';
+
 export const DATE_DISPLAY_FORMAT = 'MMM D\\, YYYY @ HH:mm';
 export const DATE_DISPLAY_FORMAT_WITH_SECONDS = 'MMM D, YYYY @ HH:mm:ss';
-
-export const DEFAULT_PAGE_SIZE = 10;
-export const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 /**
  * Maximum number of changed-field badges rendered inline on a timeline row
@@ -25,3 +25,13 @@ export const INLINE_CHANGED_FIELDS_LIMIT = 3;
  * (full rule snapshots can have dozens of fields).
  */
 export const POPOVER_CHANGED_FIELDS_LIMIT = 30;
+
+export const DIFFABLE_CHANGE_ACTIONS: ReadonlyArray<string> = [
+  RuleChangeTrackingAction.ruleUpdate,
+  RuleChangeTrackingAction.ruleCreate,
+  SecurityRuleChangeTrackingAction.ruleInstall,
+  SecurityRuleChangeTrackingAction.ruleUpgrade,
+  SecurityRuleChangeTrackingAction.ruleDuplicate,
+  SecurityRuleChangeTrackingAction.ruleImport,
+  SecurityRuleChangeTrackingAction.ruleRevert,
+];
