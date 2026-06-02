@@ -99,7 +99,7 @@ export {
   createHooksExecutionError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName } from './base/users';
+export { type UserIdAndName, type CurrentUser } from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
@@ -112,8 +112,24 @@ export {
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
+  type EffectiveAgentRole,
+  type AgentAuthzArgs,
   canCurrentUserEditAgent,
+  AgentAclRole,
+  AGENT_ACL_MAX_ENTRIES,
+  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAclRole,
+  aclRoleMeets,
+  maxAclRole,
+  getEmptyAgentAcl,
+  type AgentAcl,
+  type AgentAclEntry,
+  type AgentAclPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -268,3 +284,4 @@ export {
   type OAuthClientConnectionsSummary,
   OAuthClientType,
 } from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

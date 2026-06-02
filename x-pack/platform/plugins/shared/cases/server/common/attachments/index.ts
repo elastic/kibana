@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import {
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
   EXTERNAL_REFERENCE_TYPE_MAP,
+  LEGACY_ACTIONS_TYPE,
 } from '../../../common/constants/attachments';
 import {
   isAlertAttachmentType,
@@ -26,9 +28,11 @@ import { commentAttachmentTransformer } from './comment';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 import { persistableStateAttachmentTransformer } from './persistable_state';
 import { eventAttachmentTransformer } from './event';
+import { actionsAttachmentTransformer } from './actions';
 import { alertAttachmentTransformer } from './alert';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
+export { actionsAttachmentTransformer } from './actions';
 export {
   getAttachmentSavedObjectType,
   resolveAttachmentSavedObjectType,
@@ -44,7 +48,7 @@ export {
  * @throws Error if attributes is null or not an object
  */
 export function getAttachmentTypeFromAttributes(attributes: unknown): string {
-  if (attributes === null || typeof attributes !== 'object') {
+  if (!isPlainObject(attributes) || attributes === null) {
     throw new Error('Invalid attributes: expected non-null object');
   }
   const { type, persistableStateAttachmentTypeId, externalReferenceAttachmentTypeId } =
@@ -93,6 +97,9 @@ export function getAttachmentTypeTransformers(
   }
   if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
     return eventAttachmentTransformer;
+  }
+  if (type === LEGACY_ACTIONS_TYPE) {
+    return actionsAttachmentTransformer;
   }
   if (isAlertAttachmentType(normalizedType)) {
     return alertAttachmentTransformer;

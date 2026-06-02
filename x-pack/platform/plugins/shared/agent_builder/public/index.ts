@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -14,7 +15,8 @@ import type {
   ConfigSchema,
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
-import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
+import { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges } from '../common/features';
+import { type CreateSkillResponse, SKILLS_API_PATH } from '../common/http_api/skills';
 
 export type {
   AgentBuilderPluginSetup,
@@ -22,7 +24,8 @@ export type {
   PublicEmbeddableConversationProps,
 } from './types';
 export type { EmbeddableConversationProps } from './embeddable/types';
-export { AGENTBUILDER_FEATURE_ID, uiPrivileges };
+export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_PATH };
+export { type CreateSkillResponse, SKILLS_API_PATH };
 export { ConversationInputShell } from '@kbn/agent-builder-browser';
 export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
 export const plugin: PluginInitializer<

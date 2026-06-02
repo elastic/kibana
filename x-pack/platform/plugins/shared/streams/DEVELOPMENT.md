@@ -501,13 +501,13 @@ Scout tests for the streams_app use Playwright:
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:

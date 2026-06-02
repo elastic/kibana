@@ -1,6 +1,22 @@
 {
   "suites": [
     {
+      "id": "smoke-tests",
+      "name": "@kbn/evals Smoke Tests",
+      "slackChannel": "#obs-ai-team-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/playwright.config.ts",
+      "tags": [
+        "platform",
+        "smoke"
+      ],
+      "ciLabels": [
+        "evals:smoke-tests"
+      ],
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "agent-builder",
       "name": "Agent Builder",
       "slackChannel": "#agent-builder-alerts",
@@ -163,6 +179,20 @@
       ]
     },
     {
+      "id": "lead-generation",
+      "name": "Lead Generation",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/playwright.config.ts",
+      "tags": [
+        "security",
+        "lead-generation",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:lead-generation"
+      ],
+      "serverConfigSet": "evals_lead_generation"
+    },
+    {
       "id": "workflows",
       "name": "Workflows Authoring",
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
@@ -202,6 +232,33 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
       "ciLabels": ["evals:security-esql-generation-regression"]
+    },
+    {
+      "id": "agent-builder-dashboards",
+      "name": "Agent Builder Dashboards",
+      "slackChannel": "#kibana-presentation-reminders",
+      "configPath": "x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-dashboards"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-dashboards"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.6-opus",
+        "eis/openai-gpt-5.2",
+        "eis/openai-gpt-5.4"
+      ]
+    },
+    {
+      "id": "security-alert-triage",
+      "name": "Security Alert Triage",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
+      "tags": ["security", "alert-triage"],
+      "ciLabels": ["evals:security-alert-triage"]
     }
   ]
 }
