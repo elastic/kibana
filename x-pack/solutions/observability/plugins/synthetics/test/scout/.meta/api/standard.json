@@ -1,5 +1,5 @@
 {
-  "sha1": "2c9bd37f28a7c69ee2f5e6eb8f85da935f64e8cf",
+  "sha1": "9dcdb89d961bf4920ab7dabe0bd0a107d938b0ea",
   "tests": [
     {
       "id": "8ac308de9d7a2bf-019801460b8f6ef",
@@ -12,6 +12,132 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/api_keys.spec.ts",
         "line": 50,
         "column": 10
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-39423a0033f9d41",
+      "title": "getCertificates returns an empty result when no monitors are configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-70e2396560b1ffa",
+      "title": "getCertificates returns lightweight certificates across the expiry spectrum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-5628c1eb0d06786",
+      "title": "getCertificates filters certificates by monitor type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 267,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-906968ab3b602e5",
+      "title": "getCertificates filters certificates by tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 277,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-f93ac990bb1d547",
+      "title": "getCertificates filters certificates by issuer (CA)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 287,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-2d7ba069a35ace4",
+      "title": "getCertificates filters certificates by expiry window (notValidAfter)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 298,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-5233bbaf36f75bb",
+      "title": "getCertificates returns global distinct-cert counts per filter value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 314,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-8d4a78e30743922",
+      "title": "getCertificates includes browser certificates and scopes them by resource type and origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 352,
+        "column": 12
+      }
+    },
+    {
+      "id": "5fe6d49ff15b4f7-97758b8d3c68725",
+      "title": "getCertificates reports browser resource-type and origin facet counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
+        "line": 410,
+        "column": 12
       }
     },
     {

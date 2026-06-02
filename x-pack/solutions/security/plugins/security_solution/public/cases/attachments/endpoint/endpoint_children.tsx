@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import type { EndpointMetadata } from './types';
+import type { EndpointData } from './types';
 
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
@@ -21,12 +21,17 @@ export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   -webkit-box-orient: vertical;
 `;
 
-type Props = Pick<UnifiedReferenceAttachmentViewProps, 'metadata'>;
+type Props = Pick<UnifiedReferenceAttachmentViewProps, 'data'>;
 
-const AttachmentContentChildren = ({ metadata }: Props) => {
+const AttachmentContentChildren = ({ data }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const endpointMetadata = metadata as EndpointMetadata | undefined;
-  const comment = endpointMetadata?.comment ?? '';
+  // `data` is typed as `unknown` on the framework prop; the cases server
+  // attachment framework guarantees the shape because the unified
+  // `security.endpoint` payload is validated against `EndpointAttachmentPayloadSchema`
+  // (or projected from a legacy `actions` / `externalReference` shape via the
+  // server-side transformers) before it reaches the renderer.
+  const endpointData = data as EndpointData | undefined;
+  const comment = endpointData?.content ?? '';
 
   return comment.trim().length > 0 ? (
     <div css={getContentWrapperCss(euiTheme)}>
