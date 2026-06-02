@@ -18,7 +18,19 @@ import { SYNTHETICS_TEMP_DATA_VIEW, mapExtraSyntheticsFilters } from './syntheti
  * @returns KQL query string
  */
 export function syntheticsTlsAlertParamsToKqlQuery(params: TLSRuleParams): string {
-  const { certAgeThreshold, certExpirationThreshold, search, kqlQuery, ...rest } = params;
+  const {
+    certAgeThreshold,
+    certExpirationThreshold,
+    search,
+    kqlQuery,
+    // Browser-certificate params are not monitor-document filters, so they are
+    // not mapped into the related-documents Discover query.
+    includeBrowserCerts,
+    certOrigin,
+    browserResourceTypes,
+    issuers,
+    ...rest
+  } = params;
 
   const expirationFilters: KueryNode[] = [];
   const filters: KueryNode[] = [];

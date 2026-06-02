@@ -17,6 +17,7 @@ export const SYNTHETICS_API_URLS = {
   SYNTHETICS_MONITORS: '/api/synthetics/monitors',
   CERTS: '/internal/synthetics/certs',
   CERTS_FACETS: '/internal/synthetics/certs/facets',
+  INSPECT_TLS_RULE: '/internal/synthetics/inspect_tls_rule',
   GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
   TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
   FILTERS: '/internal/synthetics/monitor/filters',
