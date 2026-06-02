@@ -159,6 +159,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
       await this.options.upsertDataset?.(resolvedDataset);
 
+      const isDryRun = process.env.EVALUATION_DRY_RUN === 'true';
+      const effectiveExamples = isDryRun
+        ? resolvedDataset.examples.slice(0, 1)
+        : resolvedDataset.examples;
+
       const datasetId = computeDatasetId(resolvedDataset.name);
       const experimentId = computeExperimentId(
         this.options.executionId,
@@ -180,7 +185,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
 
       for (let rep = 0; rep < repetitions; rep++) {
-        resolvedDataset.examples.forEach((example, exampleIndex) => {
+        effectiveExamples.forEach((example, exampleIndex) => {
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;

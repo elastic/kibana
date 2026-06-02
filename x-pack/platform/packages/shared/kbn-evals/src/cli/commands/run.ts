@@ -224,12 +224,14 @@ export const runSuiteCmd: Command<void> = {
       args.push(...positionals);
     }
 
+    if (flagsReader.boolean('dry-run')) {
+      envOverrides.EVALUATION_REPETITIONS = '1';
+      envOverrides.EVALUATION_DRY_RUN = 'true';
+      log.info('[DRY-RUN] sampling 1 example per dataset, repetitions=1');
+    }
+
     const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
-
-    if (flagsReader.boolean('dry-run')) {
-      return;
-    }
 
     await new Promise<void>((resolve, reject) => {
       const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<

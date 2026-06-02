@@ -23,6 +23,7 @@
 
 // CLI tools
 export * as cli from './src/cli';
+export { injectLocalConnector } from './src/cli/inject_local_connector';
 
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
