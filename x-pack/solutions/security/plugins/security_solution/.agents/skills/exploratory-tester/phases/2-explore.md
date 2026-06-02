@@ -86,38 +86,29 @@ Paste the full content of `scripts/check-dom-anomalies.js` as the function argum
 
 ---
 
-**Detector B — Console** (`browser_console_messages(level: "error")`)
+**Detector B — Console** (`browser_console_messages` → `browser_evaluate`)
 
-Apply this classification table exactly — pattern matching, no judgment:
-
-| Pattern in message | Level | Action |
-|---|---|---|
-| contains `Maximum update depth exceeded` | 1 | Log: "Infinite React re-render" |
-| contains `[5][0][2][3][4]` in HTTP status, or message contains ` 500`, ` 502`, ` 503`, ` 504` | 1 | Log: "Server error in console" |
-| starts with `Warning:` | 2 | Log: "React warning" |
-| contains `Executing inline script violates the following Content Security Policy` | suppress | ECH infrastructure noise |
-| contains `Failed to load resource` AND URL contains `/internal/cloud/solution` | suppress | ECH infrastructure noise |
-| contains `Failed to load resource` AND URL contains `/internal/osquery/` | suppress | Osquery not installed on ECH |
-| anything else at error level | 3 | Log as observation |
+1. Call `browser_console_messages(level: "error")` — collect the message texts.
+2. Format them as a JSON string array: `["msg 1", "msg 2", ...]`
+3. Call `browser_evaluate` with the content of `scripts/classify-console.js`, replacing the `/*MESSAGES*/` placeholder with the array:
+   ```
+   // Replace:  )(/*MESSAGES*/)
+   // With:     )(["msg 1", "msg 2", ...])
+   ```
+4. Log each returned item at its indicated level. Do not log `suppressed[]` items.
 
 ---
 
-**Detector C — Network** (`browser_network_requests(static: false)`)
+**Detector C — Network** (`browser_network_requests` → `browser_evaluate`)
 
-Apply this algorithm exactly — no judgment:
-
-```
-POLLING = ["/health", "/status", "/metrics", "/fleet-setup", "/api/security/me"]
-
-counts = {}
-for each request r:
-  key = r.method + " " + r.url.split("?")[0]   // strip query string
-  counts[key] = (counts[key] || 0) + 1
-
-for each key where counts[key] >= 2:
-  if NONE of the POLLING paths appear in key:
-    → Level 2: "Duplicate API call: {key} called {counts[key]} times"
-```
+1. Call `browser_network_requests(static: false)` — parse each line of the form `N. [METHOD] https://... => [STATUS]` into `{method, url}`.
+2. Format as a JSON array: `[{"method":"GET","url":"https://..."},...]`
+3. Call `browser_evaluate` with the content of `scripts/dedup-network.js`, replacing `/*REQUESTS*/` with the array:
+   ```
+   // Replace:  )(/*REQUESTS*/)
+   // With:     )([{"method":"GET","url":"https://..."}, ...])
+   ```
+4. Log each item in `findings[]` as a Level 2 finding.
 
 ---
 

@@ -63,4 +63,6 @@ Execute in order — read each file before starting it:
 | `templates/report-format.md` | report.md structure |
 | `scripts/create-noise-index.sh` | Creates non-ECS test data — executed by Phase 1 |
 | `scripts/check-dom-anomalies.js` | DOM anomaly detector — pasted into `browser_evaluate` after each action |
+| `scripts/classify-console.js` | Console classifier — pasted into `browser_evaluate` with messages array injected |
+| `scripts/dedup-network.js` | Network duplicate detector — pasted into `browser_evaluate` with requests array injected |
 | `knowledge/<area_slug>.md` | Known non-bugs and navigation patterns — loaded at Phase 0 end |
