@@ -267,13 +267,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     await deleteTemporaryReplayIndices(esClient, log);
                     await apiServices.streams.disable().catch(() => {});
                     await apiServices.streams.enable();
-                    const replayStart = Date.now();
                     await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
-                    logger.info(
-                      `replayIntoManagedStream took ${((Date.now() - replayStart) / 1000).toFixed(
-                        1
-                      )}s`
-                    );
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }
