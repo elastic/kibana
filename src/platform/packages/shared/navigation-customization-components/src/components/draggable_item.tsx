@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NavigationItemInfo } from '../types';
@@ -25,6 +26,15 @@ interface Props {
   index: number;
   toggleItemVisibility: (id: string) => void;
 }
+
+const i18nTexts = {
+  showItem: i18n.translate('navigationCustomizationComponents.toggleVisibilityShow', {
+    defaultMessage: 'Show this item',
+  }),
+  hideItem: i18n.translate('navigationCustomizationComponents.toggleVisibilityHide', {
+    defaultMessage: 'Hide this item',
+  }),
+};
 
 export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
   <EuiDraggable
@@ -61,17 +71,19 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
             <EuiText size="s">{item.title}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              compressed
-              label={i18n.translate('navigationCustomizationComponents.draggableItemAriaLabel', {
-                defaultMessage: 'Show {itemTitle}',
-                values: { itemTitle: item.title },
-              })}
-              showLabel={false}
-              checked={!item.hidden}
-              onChange={() => toggleItemVisibility(item.id)}
-              data-test-subj={`customizeNavigationItemToggle-${item.id}`}
-            />
+            <EuiToolTip
+              position="right"
+              content={item.hidden ? i18nTexts.showItem : i18nTexts.hideItem}
+            >
+              <EuiSwitch
+                compressed
+                label={item.hidden ? i18nTexts.showItem : i18nTexts.hideItem}
+                showLabel={false}
+                checked={!item.hidden}
+                onChange={() => toggleItemVisibility(item.id)}
+                data-test-subj={`customizeNavigationItemToggle-${item.id}`}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
