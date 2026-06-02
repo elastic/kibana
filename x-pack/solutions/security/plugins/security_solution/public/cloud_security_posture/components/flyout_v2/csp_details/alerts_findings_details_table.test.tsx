@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { EntityIdentifierFields } from '../../../../../common/entity_analytics/types';
 
 jest.mock('@kbn/entity-store/public', () => ({
   ...jest.requireActual('@kbn/entity-store/public'),
@@ -67,7 +68,7 @@ describe('AlertsDetailsTable (v2)', () => {
   it('renders without crashing', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsDetailsTable field="host.name" value="my-host" onShowAlert={mockOnShowAlert} />
+        <AlertsDetailsTable field={EntityIdentifierFields.hostName} value="my-host" onShowAlert={mockOnShowAlert} />
       </TestProviders>
     );
 
@@ -79,7 +80,7 @@ describe('AlertsDetailsTable (v2)', () => {
       render(
         <TestProviders>
           <AlertsDetailsTable
-            field="host.name"
+            field={EntityIdentifierFields.hostName}
             value="my-host"
             entityId="host-entity-id"
             entityType="host"

@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { EntityIdentifierFields } from '../../../../../common/entity_analytics/types';
 
 jest.mock('@kbn/cloud-security-posture', () => ({
   useMisconfigurationFindings: jest.fn().mockReturnValue({ data: { page: [] }, isLoading: false }),
@@ -56,7 +57,7 @@ describe('MisconfigurationFindingsDetailsTable (v2)', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MisconfigurationFindingsDetailsTable
-          field="host.name"
+          field={EntityIdentifierFields.hostName}
           value="my-host"
           scopeId="scope-id"
           onShowFinding={mockOnShowFinding}
@@ -72,7 +73,7 @@ describe('MisconfigurationFindingsDetailsTable (v2)', () => {
       render(
         <TestProviders>
           <MisconfigurationFindingsDetailsTable
-            field="host.name"
+            field={EntityIdentifierFields.hostName}
             value="my-host"
             scopeId="scope-id"
             entityId="host-entity-id"

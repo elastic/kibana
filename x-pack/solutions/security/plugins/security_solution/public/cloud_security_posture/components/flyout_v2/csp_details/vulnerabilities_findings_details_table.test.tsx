@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { EntityIdentifierFields } from '../../../../../common/entity_analytics/types';
 
 jest.mock('@kbn/cloud-security-posture', () => ({
   useVulnerabilitiesFindings: jest.fn().mockReturnValue({ data: { page: [] }, isLoading: false }),
@@ -64,7 +65,7 @@ describe('VulnerabilitiesFindingsDetailsTable (v2)', () => {
     const { getByTestId } = render(
       <TestProviders>
         <VulnerabilitiesFindingsDetailsTable
-          identityField="host.name"
+          identityField={EntityIdentifierFields.hostName}
           value="my-host"
           scopeId="scope-id"
           onShowVulnerability={mockOnShowVulnerability}
@@ -80,7 +81,7 @@ describe('VulnerabilitiesFindingsDetailsTable (v2)', () => {
       render(
         <TestProviders>
           <VulnerabilitiesFindingsDetailsTable
-            identityField="host.name"
+            identityField={EntityIdentifierFields.hostName}
             value="my-host"
             scopeId="scope-id"
             entityId="host-entity-id"
