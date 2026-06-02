@@ -7,12 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
+import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDeleteCompositeSlo } from '../../../../hooks/use_delete_composite_slo';
-import { useRefreshCompositeSloSummaries } from '../../../../hooks/use_refresh_composite_slo_summaries';
 import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
 import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import {
@@ -21,6 +20,7 @@ import {
   type CompositeSloSortDirection,
 } from '../../../../hooks/use_fetch_composite_slo_list';
 import { useFetchCompositeSloSuggestions } from '../../../../hooks/use_fetch_composite_slo_suggestions';
+import { useRefreshCompositeSloSummaries } from '../../../../hooks/use_refresh_composite_slo_summaries';
 import { CompositeSloDeleteModal } from './composite_slo_delete_modal';
 import { CompositeSloTable } from './composite_slo_table';
 import { CompositeSloToolbar } from './composite_slo_toolbar';
@@ -70,15 +70,12 @@ export function CompositeSloList() {
     setPage(0);
   };
 
-  const tagsParam = selectedTags.length > 0 ? selectedTags.join(',') : undefined;
-  const statusParam = selectedStatuses.length > 0 ? selectedStatuses.join(',') : undefined;
-
   const { data, isInitialLoading, isLoading, isError } = useFetchCompositeSloList({
     page: page + 1,
     perPage,
     search: debouncedSearch || undefined,
-    tags: tagsParam,
-    status: statusParam,
+    tags: selectedTags,
+    status: selectedStatuses,
     sortBy,
     sortDirection,
   });
