@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
@@ -111,12 +112,17 @@ export function createSyntheticsPrivateLocationApi(
       geo: { lat: 0, lon: 0 },
       isServiceManaged: false,
     }));
-    const urlSpaceId = spaceId ? (Array.isArray(spaceId) ? spaceId[0] : spaceId) : 'default';
     const initialNamespaces = spaceId
       ? Array.isArray(spaceId)
         ? spaceId
         : [spaceId]
       : ['default'];
+    // `*` (ALL_SPACES_ID) is not a valid URL space prefix — issue the
+    // bulk_create from the default space and rely on `initialNamespaces` to
+    // share the saved object to all spaces (mirrors the FTR service).
+    const firstNamespace = initialNamespaces[0];
+    const urlSpaceId =
+      !firstNamespace || firstNamespace === ALL_SPACES_ID ? 'default' : firstNamespace;
 
     await kbnClient.request({
       path: `/s/${urlSpaceId}/api/saved_objects/_bulk_create`,

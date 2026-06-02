@@ -40,12 +40,18 @@ export async function addMonitor(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   monitor: Record<string, unknown>,
-  opts: { gettingStarted?: boolean; savedObjectType?: string; statusCode?: number } = {}
+  opts: {
+    gettingStarted?: boolean;
+    savedObjectType?: string;
+    id?: string;
+    statusCode?: number;
+  } = {}
 ) {
-  const { gettingStarted, savedObjectType, statusCode = 200 } = opts;
+  const { gettingStarted, savedObjectType, id, statusCode = 200 } = opts;
   const qs: string[] = [];
   if (gettingStarted) qs.push('gettingStarted=true');
   if (savedObjectType) qs.push(`savedObjectType=${savedObjectType}`);
+  if (id) qs.push(`id=${id}`);
   const path = `api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
 
   const res = await apiClient.post(path, {

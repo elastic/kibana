@@ -8,6 +8,7 @@
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import { tryForTime } from './retry';
 
 /** Fleet package-policies query scoped to the synthetics package. */
 const fleetPackagePoliciesPath = (spaceId?: string) =>
@@ -72,6 +73,55 @@ export async function deletePackagePolicyById(
   );
   expect(res).toHaveStatusCode(200);
   return res;
+}
+
+/**
+ * Creates a legacy-format synthetics package policy (id =
+ * `${monitorId}-${locationId}-${spaceId}`) directly via the Fleet API and marks
+ * it `is_managed`, mirroring the FTR `createLegacyPackagePolicy` helper used to
+ * seed pre-migration state. Both calls are retried to absorb transient Fleet
+ * failures.
+ */
+export async function createLegacyPackagePolicy(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  params: {
+    monitorId: string;
+    locationId: string;
+    spaceId: string;
+    fleetPolicyId: string;
+    packageVersion: string;
+  }
+): Promise<string> {
+  const { monitorId, locationId, spaceId, fleetPolicyId, packageVersion } = params;
+  const legacyPolicyId = `${monitorId}-${locationId}-${spaceId}`;
+
+  await tryForTime(60_000, async () => {
+    const res = await apiClient.post('api/fleet/package_policies', {
+      headers,
+      body: {
+        id: legacyPolicyId,
+        name: `legacy-${legacyPolicyId}`,
+        namespace: 'default',
+        policy_ids: [fleetPolicyId],
+        package: { name: 'synthetics', version: packageVersion },
+        inputs: [{ type: 'synthetics/http', enabled: true, streams: [] }],
+      },
+      responseType: 'json',
+    });
+    expect(res).toHaveStatusCode(200);
+  });
+
+  await tryForTime(60_000, async () => {
+    const res = await apiClient.put(`api/fleet/package_policies/${legacyPolicyId}`, {
+      headers,
+      body: { is_managed: true, force: true },
+      responseType: 'json',
+    });
+    expect(res).toHaveStatusCode(200);
+  });
+
+  return legacyPolicyId;
 }
 
 /**
