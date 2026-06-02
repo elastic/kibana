@@ -74,7 +74,7 @@ export const warningsSchema = schema.arrayOf(
     maxSize: 100,
     meta: {
       description:
-        'A list of warnings returned by the Dashboard API. Present only when one or more Dashboard properties failed validation.',
+        'A list of warnings returned by the Dashboards API. Present only when one or more dashboard properties failed validation.',
     },
   }
 );
