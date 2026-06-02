@@ -33,6 +33,10 @@ export type {
   EmbeddableStoryParameters,
 } from './src/lib/embeddable';
 export type { DocsRegistry, MountStoryOptions } from './src/lib/embed_runtime';
+export {
+  extractStorybookDocsReferences,
+  validateStorybookDocsReferences,
+} from './src/lib/docs_references';
 export type {
   BuildDocsArchiveResult,
   BuildDocsArchiveOptions,
@@ -48,3 +52,7 @@ export type {
   StorybookDocsMetadata,
   StorybookDocsRegistry,
 } from './src/lib/docs_assets';
+export type {
+  StorybookDocsReference,
+  ValidateStorybookDocsReferencesResult,
+} from './src/lib/docs_references';
