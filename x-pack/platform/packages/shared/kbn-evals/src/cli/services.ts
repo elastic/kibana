@@ -190,7 +190,8 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
       return;
     }
   } catch (err) {
-    const isTimeout = err instanceof Error && 'killed' in err;
+    const isTimeout =
+      err instanceof Error && (err as unknown as { signal?: string }).signal != null;
     if (isTimeout) {
       log.warning('[edot] docker compose down timed out, falling back to docker stop');
     }
