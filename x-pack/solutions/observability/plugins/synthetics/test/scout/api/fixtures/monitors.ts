@@ -346,6 +346,48 @@ export async function triggerPrivateLocationCleanup(
 }
 
 /**
+ * `POST /internal/synthetics/monitors/{id}/_reset` — re-syncs a monitor's Fleet
+ * package policies. Mirrors the FTR `resetMonitor` helper.
+ */
+export async function resetMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  opts: { force?: boolean; spaceId?: string; statusCode?: number } = {}
+) {
+  const { force = false, spaceId, statusCode = 200 } = opts;
+  const base = spaceId ? `s/${spaceId}/` : '';
+  const res = await apiClient.post(
+    `${base}internal/synthetics/monitors/${monitorId}/_reset?force=${force}`,
+    { headers, responseType: 'json' }
+  );
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `POST /internal/synthetics/monitors/_bulk_reset` — re-syncs many monitors'
+ * Fleet package policies in a single request. Mirrors the FTR `bulkResetMonitors`
+ * helper.
+ */
+export async function bulkResetMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  ids: string[],
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const base = spaceId ? `s/${spaceId}/` : '';
+  const res = await apiClient.post(`${base}internal/synthetics/monitors/_bulk_reset`, {
+    headers,
+    body: { ids },
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
  * `POST /internal/synthetics/service/monitor/inspect` — inspects a monitor and
  * returns the would-be Fleet policy. Mirrors the FTR
  * `SyntheticsMonitorTestService.inspectMonitor`: it strips the server-generated

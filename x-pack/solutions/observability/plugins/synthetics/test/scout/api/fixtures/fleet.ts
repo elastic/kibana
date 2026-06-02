@@ -36,6 +36,45 @@ export async function getSyntheticsPackagePolicies(
 }
 
 /**
+ * `GET /api/fleet/package_policies?...synthetics` then `.find` by the
+ * `${monitorId}-${locationId}` package-policy id. Mirrors the FTR
+ * `getPackagePoliciesForMonitor` helper used by the reset suites.
+ */
+export async function getPackagePolicyForMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  locationId: string,
+  opts: { spaceId?: string } = {}
+): Promise<PackagePolicy | undefined> {
+  const policies = await getSyntheticsPackagePolicies(apiClient, headers, opts);
+  return policies.find((policy) => policy.id === `${monitorId}-${locationId}`);
+}
+
+/**
+ * Force-deletes a single Fleet package policy by id. Mirrors the FTR
+ * `deletePackagePolicyDirectly` helper used to simulate a corrupted/missing
+ * package policy before a reset.
+ */
+export async function deletePackagePolicyById(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  policyId: string,
+  opts: { spaceId?: string } = {}
+) {
+  const res = await apiClient.post(
+    `${opts.spaceId ? `s/${opts.spaceId}/` : ''}api/fleet/package_policies/delete`,
+    {
+      headers,
+      body: { packagePolicyIds: [policyId], force: true },
+      responseType: 'json',
+    }
+  );
+  expect(res).toHaveStatusCode(200);
+  return res;
+}
+
+/**
  * Force-deletes every synthetics Fleet package policy via the Fleet bulk-delete
  * API. Used by package-policy-count-sensitive suites to guarantee a clean Fleet
  * baseline, since `savedObjects.clean` does not reliably remove the hidden
