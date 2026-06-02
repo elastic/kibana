@@ -45,7 +45,7 @@ exports[`TextWithEdit should render the edit icon  when isReadonly is false 1`] 
         id="generated-id_euiToolTipAnchor"
       >
         <button
-          aria-label="Edit Text List Header"
+          aria-label="Edit text"
           class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
           data-test-subj="TextWithEditTestEditIcon"
           type="button"

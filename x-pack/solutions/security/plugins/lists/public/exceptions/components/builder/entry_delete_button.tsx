@@ -10,6 +10,8 @@ import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
+import * as i18n from './translations';
+
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 25px;
 `;
@@ -36,13 +38,13 @@ export const BuilderEntryDeleteButtonComponent = React.memo<BuilderEntryDeleteBu
     }, [onDelete, entryIndex, nestedParentIndex]);
 
     const button = (
-      <EuiToolTip content="entryDeleteButton" disableScreenReaderOutput>
+      <EuiToolTip content={i18n.DELETE_ENTRY_ARIA_LABEL} disableScreenReaderOutput>
         <EuiButtonIcon
           color="danger"
           iconType="trash"
           onClick={handleDelete}
           isDisabled={isDisabled}
-          aria-label="entryDeleteButton"
+          aria-label={i18n.DELETE_ENTRY_ARIA_LABEL}
           className="exceptionItemEntryDeleteButton"
           data-test-subj="builderItemEntryDeleteButton"
         />

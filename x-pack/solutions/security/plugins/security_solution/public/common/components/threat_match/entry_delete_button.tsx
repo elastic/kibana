@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
+import * as i18n from './translations';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;
@@ -36,13 +37,13 @@ export const EntryDeleteButtonComponent = React.memo<EntryDeleteButtonProps>(
     }, [onDelete, entryIndex]);
 
     const button = (
-      <EuiToolTip content="entryDeleteButton" disableScreenReaderOutput>
+      <EuiToolTip content={i18n.DELETE_ENTRY_ARIA_LABEL} disableScreenReaderOutput>
         <EuiButtonIcon
           color="danger"
           iconType="trash"
           onClick={handleDelete}
           isDisabled={isDisabled}
-          aria-label="entryDeleteButton"
+          aria-label={i18n.DELETE_ENTRY_ARIA_LABEL}
           className="itemEntryDeleteButton"
           data-test-subj="itemEntryDeleteButton"
         />
