@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/core-i18n-browser'
   - '@kbn/es-types'
+  - '@kbn/search-errors'
 tags:
   - shared-browser
   - package
