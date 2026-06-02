@@ -42,7 +42,7 @@ describe('registerCaseAttachments', () => {
     );
   });
 
-  it('registers the unified indicator attachment type with the zod schema', () => {
+  it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
@@ -55,10 +55,14 @@ describe('registerCaseAttachments', () => {
     );
   });
 
-  // The cases-plugin routes inbound `externalReferenceAttachmentTypeId: 'endpoint'`
-  // payloads through `EXTERNAL_REFERENCE_TYPE_MAP` -> 'security.endpoint' at the
-  // validator boundary, so the unified registration above is sufficient for
-  // back-compat. No external-reference registration is required.
+  it('registers exactly three unified attachment types', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework);
+
+    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
+  });
+
   it('does not register any external-reference attachment types', () => {
     const framework = buildFramework();
 
@@ -73,13 +77,5 @@ describe('registerCaseAttachments', () => {
     registerCaseAttachments(framework);
 
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
-  });
-
-  it('registers exactly the three expected unified attachment types', () => {
-    const framework = buildFramework();
-
-    registerCaseAttachments(framework);
-
-    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
   });
 });
