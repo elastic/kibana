@@ -60,7 +60,10 @@ const isDashboardSection = (widget: DashboardWidget): widget is DashboardSection
   'panels' in widget;
 
 // transform the options to the saved dashboard options
-const transformOptionsIn = (options: typeof overviewDashboard.options): string => {
+export const transformOptionsIn = (
+  options: typeof overviewDashboard.options,
+  logger: Logger
+): string => {
   const apiToSavedObjectOptionsKeys = {
     hide_panel_titles: 'hidePanelTitles',
     hide_panel_borders: 'hidePanelBorders',
@@ -77,6 +80,15 @@ const transformOptionsIn = (options: typeof overviewDashboard.options): string =
       savedObjectOptions[soKey] = options[apiKey as keyof typeof options];
     }
   }
+
+  for (const key of Object.keys(options)) {
+    if (!(key in apiToSavedObjectOptionsKeys)) {
+      logger.warn(
+        `Agent Builder dashboard: unknown option key "${key}" has no saved-object mapping and will be ignored`
+      );
+    }
+  }
+
   return JSON.stringify(savedObjectOptions);
 };
 
@@ -142,7 +154,7 @@ function transformPanel(
 }
 
 // build the panels for the dashboard
-function buildOverviewDashboardPanels(): {
+export function buildOverviewDashboardPanels(): {
   panels: SavedDashboardPanel[];
   sections: SavedDashboardSection[];
 } {
@@ -170,7 +182,7 @@ function buildOverviewDashboardPanels(): {
 }
 
 // return the id of the dashboard in the given space
-function overviewDashboardId(spaceId: string): string {
+export function overviewDashboardId(spaceId: string): string {
   return `${AGENT_BUILDER_OVERVIEW_DASHBOARD_ID}-${spaceId}`;
 }
 
@@ -199,12 +211,17 @@ async function installAgentBuilderOverviewDashboard(
           },
         }),
       },
-      optionsJSON: transformOptionsIn(overviewDashboard.options),
+      optionsJSON: transformOptionsIn(overviewDashboard.options, logger),
       panelsJSON: JSON.stringify(panels).replaceAll(
         AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
         spaceId
       ),
-      ...(sections.length > 0 && { sections }),
+      ...(sections.length > 0 && {
+        sections: sections.map((section) => ({
+          ...section,
+          title: section.title.replaceAll(AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER, spaceId),
+        })),
+      }),
       timeRestore: false,
       title: overviewDashboard.title,
       version: AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION,
@@ -292,28 +309,56 @@ export async function syncAgentBuilderOverviewDashboard(
 
   // `space` is a hidden SO type and must be explicitly allowlisted.
   const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-  const { saved_objects: spaceObjects } = await spaceRepo.find({
-    type: 'space',
-    perPage: 1000,
-    page: 1,
-  });
-  const spaceIds = ['default', ...spaceObjects.map((s) => s.id).filter((id) => id !== 'default')];
+  const perPage = 100;
+  const allSpaceObjects: Array<{ id: string }> = [];
+  let page = 1;
 
-  for (const spaceId of spaceIds) {
-    const namespace = spaceId === 'default' ? undefined : spaceId;
+  while (true) {
+    const { saved_objects: batch, total } = await spaceRepo.find({
+      type: 'space',
+      perPage,
+      page,
+    });
 
-    const enabled = await isExperimentalFeaturesEnabledForSpace(client, kibanaVersion, namespace);
-    if (enabled) {
-      const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
-      if (installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION) {
-        logger.debug(
-          `Agent Builder overview dashboard is up to date in space "${spaceId}", skipping`
-        );
-        continue;
+    allSpaceObjects.push(...batch);
+
+    if (allSpaceObjects.length >= total || batch.length < perPage) {
+      break;
+    }
+    page++;
+  }
+
+  logger.info(`Agent Builder dashboard sync: found ${allSpaceObjects.length} space(s)`);
+
+  const spaceIds = [
+    'default',
+    ...allSpaceObjects.map((s) => s.id).filter((id) => id !== 'default'),
+  ];
+
+  const results = await Promise.allSettled(
+    spaceIds.map(async (spaceId) => {
+      const namespace = spaceId === 'default' ? undefined : spaceId;
+
+      const enabled = await isExperimentalFeaturesEnabledForSpace(client, kibanaVersion, namespace);
+      logger.info(`Experimental features enabled: ${enabled}`);
+      if (enabled) {
+        const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
+        if (installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION) {
+          logger.debug(
+            `Agent Builder overview dashboard is up to date in space "${spaceId}", skipping`
+          );
+          return;
+        }
+        await installAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
+      } else {
+        await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
       }
-      await installAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
-    } else {
-      await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
+    })
+  );
+
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      logger.error(`Agent Builder dashboard sync failed for a space: ${result.reason}`);
     }
   }
 }
