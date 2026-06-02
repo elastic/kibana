@@ -92,7 +92,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       <AppHeader
         title={
           persistedDiscoverSession?.title ??
-          i18n.translate('discover.pageTitleWithoutSavedSearch', {
+          i18n.translate('discover.pageTitleNewSession', {
             defaultMessage: 'New session',
           })
         }
