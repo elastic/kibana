@@ -13,22 +13,61 @@ import type { SmlDocument } from './types';
 
 export const smlIndexName = chatSystemIndex('sml-data');
 
+const SEMANTIC_MULTI_FIELD = {
+  semantic: types.semantic_text({ index_options: { dense_vector: { type: 'bbq_disk' } } }),
+};
+
 /**
  * Single source of truth for SML data index field mappings (storage + Elasticsearch).
+ *
+ * Each text source field carries a `semantic` multi-field (`title.semantic`,
+ * `description.semantic`, `content.semantic`) so the RRF retriever can address
+ * them independently without a separate top-level field or `copy_to`.
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
-  type: types.keyword({
-    fields: {
-      autocomplete: types.search_as_you_type({}),
+  type: types.keyword({}),
+  title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
+  origin_id: types.keyword({}),
+  origin: types.object({
+    properties: {
+      uri: types.keyword({}),
     },
   }),
-  title: types.search_as_you_type({}),
-  origin_id: types.keyword({}),
-  content: types.semantic_text({}),
-  description: types.semantic_text({}),
+  content: types.text({ fields: SEMANTIC_MULTI_FIELD }),
+  description: types.text({ fields: SEMANTIC_MULTI_FIELD }),
+  tags: types.keyword({ normalizer: 'lowercase' }),
+  /**
+   * Autocomplete surface. The indexer auto-prepends two entries on every record:
+   *   { value: chunk.title, kind: 'title' }
+   *   { value: chunk.type,  kind: 'type'  }
+   * plus any entries the producer provides (taglines, nicknames, categories, etc.).
+   * The @ menu queries `discovery_labels.value` with `multi_match bool_prefix`
+   * (SAYT's native query type) and reads `inner_hits` to render which entry
+   * matched, with `kind`-driven UI badging.
+   *
+   * `discovery_labels.value` is `search_as_you_type`. ES auto-generates the
+   * `_2gram`, `_3gram`, and `_index_prefix` subfields used by `bool_prefix`.
+   *
+   * Known limitation: ES does not produce useful highlight snippets for
+   * SAYT + `bool_prefix` queries in a nested context (bug
+   * elastic/elasticsearch#53744, open since 2020). `matched_discovery_labels`
+   * entries are returned without `highlighted`; the UI falls back to rendering
+   * plain `value` for those entries.
+   */
+  discovery_labels: types.nested({
+    properties: {
+      value: types.search_as_you_type({}),
+      kind: types.keyword({}),
+    },
+  }),
+  references: types.object({
+    properties: {
+      uri: types.keyword({}),
+    },
+  }),
+  extended_attrs: types.flattened({}),
   user_id: types.keyword({}),
-  references: types.keyword({}),
   created_at: types.date({}),
   updated_at: types.date({}),
   spaces: types.keyword({}),

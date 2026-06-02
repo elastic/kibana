@@ -40,8 +40,6 @@ jest.mock('uuid', () => ({ v4: () => `mock-uuid-${++mockUuidCounter}` }));
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-    // Default: no existing manual entries for any origin_id.
-    count: jest.fn().mockResolvedValue({ count: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -136,11 +134,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
-          },
-        },
+        query: { term: { origin_id: 'att-1' } },
         refresh: false,
       });
       expect(getSmlData).not.toHaveBeenCalled();
@@ -183,7 +177,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { bool: { filter: [{ term: { origin_id: 'att-2' } }] } },
+        query: { term: { origin_id: 'att-2' } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -199,12 +193,91 @@ describe('createSmlIndexer', () => {
         type: 'lens',
         title: 'My Viz',
         origin_id: 'att-2',
+        origin: { uri: 'lens://att-2' },
         content: 'content',
         created_at: expect.any(String),
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: ['perm1'],
-        ingestion_method: 'crawled',
+        discovery_labels: [
+          { value: 'My Viz', kind: 'title' },
+          { value: 'lens', kind: 'type' },
+        ],
+      });
+    });
+
+    it('create action: round-trips all new schema fields (tags, discovery_labels, extended_attrs, references, description, user_id)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'dashboard',
+            title: 'Sales Q3',
+            content: 'sales dashboard for Q3 with revenue and conversion metrics',
+            description: 'Quarterly sales overview, executive audience',
+            tags: ['sales', 'executive', 'quarterly'],
+            discovery_labels: [
+              { value: 'q3 sales', kind: 'tagline' },
+              { value: 'sales q3 dashboard', kind: 'nickname' },
+            ],
+            extended_attrs: {
+              owner_team: 'sales-ops',
+              fields: [{ name: 'revenue', type: 'currency' }],
+            },
+            user_id: 'user-7',
+            references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
+            permissions: ['saved_object:dashboard/get'],
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'dashboard', getSmlData })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'dash-100',
+          attachmentType: 'dashboard',
+          action: 'create',
+          spaces: ['default'],
+          esClient,
+        })
+      );
+
+      expect(bulkMock).toHaveBeenCalledTimes(1);
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document).toEqual({
+        id: 'dashboard:dash-100:mock-uuid',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin_id: 'dash-100',
+        origin: { uri: 'dashboard://dash-100' },
+        content: 'sales dashboard for Q3 with revenue and conversion metrics',
+        description: 'Quarterly sales overview, executive audience',
+        tags: ['sales', 'executive', 'quarterly'],
+        discovery_labels: [
+          { value: 'Sales Q3', kind: 'title' },
+          { value: 'dashboard', kind: 'type' },
+          { value: 'q3 sales', kind: 'tagline' },
+          { value: 'sales q3 dashboard', kind: 'nickname' },
+        ],
+        extended_attrs: {
+          owner_team: 'sales-ops',
+          fields: [{ name: 'revenue', type: 'currency' }],
+        },
+        user_id: 'user-7',
+        references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+        spaces: ['default'],
+        permissions: ['saved_object:dashboard/get'],
       });
     });
 
@@ -358,9 +431,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('failed to delete crawled chunks')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to delete chunks'));
     });
 
     it('bulk index errors are logged', async () => {

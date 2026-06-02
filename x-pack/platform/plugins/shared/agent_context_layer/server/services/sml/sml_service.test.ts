@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import { SmlSearchFilterType } from '../../../common/http_api/sml';
 import { createSmlService, isNotFoundError } from './sml_service';
 import { SmlResultWindowExceededError } from './sml_errors';
 import { smlIndexName, createSmlStorage } from './sml_storage';
@@ -27,8 +28,62 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     search: jest.fn(),
     count: jest.fn(),
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    esql: {
+      query: jest.fn(),
+    },
   } as unknown as jest.Mocked<ElasticsearchClient>);
+
+// Column order produced by buildSmlEsqlQuery. permissions is always present;
+// spaces and other optional fields appear only when explicitly requested.
+const makeEsqlColumns = (includeContent = true, includeSpaces = false) => [
+  { name: 'id', type: 'keyword' },
+  { name: 'type', type: 'keyword' },
+  { name: 'title', type: 'text' },
+  { name: 'origin_uri', type: 'keyword' },
+  { name: 'description', type: 'text' },
+  { name: 'tags', type: 'keyword' },
+  { name: 'ref_uris', type: 'keyword' },
+  ...(includeSpaces ? [{ name: 'spaces', type: 'keyword' }] : []),
+  { name: 'permissions', type: 'keyword' },
+  ...(includeContent ? [{ name: 'content', type: 'text' }] : []),
+];
+
+// Build a single ES|QL row value array matching makeEsqlColumns order.
+const makeEsqlRow = (
+  id: string,
+  type: string,
+  title: string,
+  originId: string,
+  permissions: string | string[],
+  {
+    spaces,
+    description,
+    tags,
+    refUris,
+    content,
+    includeContent = true,
+    includeSpaces = false,
+  }: {
+    spaces?: string | string[];
+    description?: string;
+    tags?: string[] | null;
+    refUris?: string[] | null;
+    content?: string;
+    includeContent?: boolean;
+    includeSpaces?: boolean;
+  } = {}
+): unknown[] => [
+  id,
+  type,
+  title,
+  originId,
+  description ?? null,
+  tags ?? null,
+  refUris ?? null,
+  ...(includeSpaces ? [spaces ?? null] : []),
+  permissions,
+  ...(includeContent ? [content ?? null] : []),
+];
 
 const createMockScopedClient = (
   internalUser: jest.Mocked<ElasticsearchClient>
@@ -121,6 +176,7 @@ describe('createSmlService', () => {
       const smlService = service.start({ logger });
 
       expect(smlService.search).toBeDefined();
+      expect(smlService.autocomplete).toBeDefined();
       expect(smlService.checkItemsAccess).toBeDefined();
       expect(smlService.getDocuments).toBeDefined();
       expect(smlService.indexAttachment).toBeDefined();
@@ -164,37 +220,29 @@ describe('isNotFoundError', () => {
 
 describe('SmlService', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let esqlQueryMock: jest.Mock;
   let scopedClient: IScopedClusterClient;
   let logger: ReturnType<typeof createMockLogger>;
   let request: KibanaRequest;
 
   beforeEach(() => {
     esClient = createMockEsClient();
+    // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
+    esqlQueryMock = (esClient as unknown as { esql: { query: jest.Mock } }).esql.query;
     scopedClient = createMockScopedClient(esClient);
     logger = createMockLogger();
     request = {} as unknown as KibanaRequest;
   });
 
   describe('search', () => {
-    const saytBoolPrefixFields = [
-      'title',
-      'title._2gram',
-      'title._3gram',
-      'title._index_prefix',
-      'type.autocomplete',
-      'type.autocomplete._index_prefix',
-    ];
-
-    it('calls ES search with correct query, space filter, and _source fields', async () => {
+    it('issues an ES|QL FORK+FUSE hybrid query with MV_CONTAINS space filter', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 0,
-          hits: [],
-        },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
       } as any);
 
       await smlService.search({
@@ -205,77 +253,46 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esqlQueryMock).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(
         (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
-      const call = esClient.search.mock.calls[0]![0]!;
-      expect(call.index).toBe(smlIndexName);
-      expect(call.size).toBe(10);
-      expect(call.allow_no_indices).toBe(true);
-      expect(call.ignore_unavailable).toBe(true);
-      expect(call.query).toEqual({
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query: 'foo bar',
-                      type: 'bool_prefix',
-                      fields: saytBoolPrefixFields,
-                    },
-                  },
-                  { match: { content: 'foo bar' } },
-                  { match: { description: 'foo bar' } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-          filter: [
-            {
-              bool: {
-                should: [{ term: { spaces: 'default' } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      });
-      expect(call._source).toEqual(true);
+
+      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
+        query: string;
+        params?: unknown[];
+      };
+      // Hybrid search path: FORK + FUSE present
+      expect(esql).toContain('| FORK');
+      expect(esql).toContain('| FUSE');
+      // METADATA required for FUSE (_id, _index, _score columns)
+      expect(esql).toContain('METADATA _id, _index, _score');
+      // Space filter uses MV_CONTAINS (not `==`) for multi-value safety
+      expect(esql).toContain('| WHERE MV_CONTAINS(spaces, ?)');
+      // Two FORK branches: BM25 (OR across text fields) + semantic (OR across semantic multi-fields)
+      expect(esql).toContain(
+        '(WHERE MATCH(title, ?) OR MATCH(description, ?) OR MATCH(content, ?) | LIMIT 100)'
+      );
+      expect(esql).toContain(
+        '(WHERE MATCH(title.semantic, ?) OR MATCH(description.semantic, ?) OR MATCH(content.semantic, ?) | LIMIT 100)'
+      );
+      // Outer overfetch limit after FUSE: size(10) × MAX_SCAN_MULTIPLIER(10)
+      expect(esql).toContain('| LIMIT 100');
+      // Sorted by relevance score after FUSE
+      expect(esql).toContain('| SORT _score DESC');
+      // spaceId is first positional param
+      expect(params![0]).toBe('default');
     });
 
-    it('uses _source excludes when skipContent is true', async () => {
+    it('uses plain sorted scan for query "*" (no FORK/FUSE)', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
-      } as any);
-
-      await smlService.search({
-        query: 'viz',
-        size: 10,
-        spaceId: 'default',
-        esClient: scopedClient,
-        request,
-        skipContent: true,
-      });
-
-      const call = esClient.search.mock.calls[0]![0]!;
-      expect(call._source).toEqual({ excludes: ['content', 'description'] });
-    });
-
-    it('uses match_all for query "*"', async () => {
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
       } as any);
 
       await smlService.search({
@@ -286,19 +303,20 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
-        query?: { bool?: { must?: unknown[] } };
-      };
-      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      expect(esql).not.toContain('FORK');
+      expect(esql).not.toContain('FUSE');
+      expect(esql).toContain('| SORT id ASC');
     });
 
-    it('uses match_all for empty query after trim', async () => {
+    it('uses plain sorted scan for empty query after trim (no FORK/FUSE)', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
       } as any);
 
       await smlService.search({
@@ -309,40 +327,101 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
-        query?: { bool?: { must?: unknown[] } };
-      };
-      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      expect(esql).not.toContain('FORK');
+      expect(esql).toContain('| SORT id ASC');
     });
 
-    it('maps response to SmlSearchResult', async () => {
+    it('threads constraints and agent filters as WHERE clauses with positional params', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 1,
-          hits: [
-            {
-              _source: {
-                id: 'chunk-1',
-                type: 'lens',
-                title: 'My Viz',
-                origin_id: 'ref-1',
-                content: 'content text',
-                description: 'A lens viz',
-                user_id: 'user-1',
-                references: ['lens:other:uuid'],
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
-              },
-              _score: 1.5,
-            },
-          ],
-        },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
+      } as any);
+
+      await smlService.search({
+        query: 'github',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        constraints: { [SmlSearchFilterType.connector]: { ids: ['gh-1'] } },
+        filters: { types: ['connector', 'dashboard'], tags: ['production'] },
+      });
+
+      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
+        query: string;
+        params?: unknown[];
+      };
+
+      // Constraints WHERE clause: exclude type OR allow specific origin_ids
+      expect(esql).toContain('| WHERE type != ? OR origin_id IN (?)');
+      // Agent type filter
+      expect(esql).toContain('| WHERE type IN (?, ?)');
+      // Agent tag filter with MV_CONTAINS
+      expect(esql).toContain('| WHERE MV_CONTAINS(tags, ?)');
+
+      // Positional params: [spaceId, scopeTypeId, scopeId, filterType1, filterType2, filterTag, ...queryX6]
+      expect(params![0]).toBe('default'); // spaceId
+      expect(params![1]).toBe('connector'); // constraints typeId
+      expect(params![2]).toBe('gh-1'); // constraints id
+      expect(params![3]).toBe('connector'); // filter type 1
+      expect(params![4]).toBe('dashboard'); // filter type 2
+      expect(params![5]).toBe('production'); // filter tag
+      // query string repeated for each of the 6 MATCH branches
+      expect(params!.slice(6)).toEqual(Array(6).fill('github'));
+    });
+
+    it('passes query to MATCH branches for all BM25 and semantic fields', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
+      } as any);
+
+      await smlService.search({
+        query: 'how is the fleet performing this quarter',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
+        query: string;
+        params?: unknown[];
+      };
+      // Both FORK branches present with all six fields
+      expect(esql).toContain('MATCH(title, ?)');
+      expect(esql).toContain('MATCH(description, ?)');
+      expect(esql).toContain('MATCH(content, ?)');
+      expect(esql).toContain('MATCH(title.semantic, ?)');
+      expect(esql).toContain('MATCH(description.semantic, ?)');
+      expect(esql).toContain('MATCH(content.semantic, ?)');
+      // Query repeated six times (once per MATCH branch), after the spaceId param
+      const queryString = 'how is the fleet performing this quarter';
+      expect(params!.slice(1)).toEqual(Array(6).fill(queryString));
+    });
+
+    it('returns baseline fields only when no fields param is provided', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(false),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+            description: 'A lens viz',
+            includeContent: false,
+          }),
+        ],
       } as any);
 
       const result = await smlService.search({
@@ -358,60 +437,146 @@ describe('SmlService', () => {
         id: 'chunk-1',
         type: 'lens',
         title: 'My Viz',
-        origin_id: 'ref-1',
-        content: 'content text',
+        origin: { uri: 'ref-1' },
         description: 'A lens viz',
-        user_id: 'user-1',
-        references: ['lens:other:uuid'],
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
-        spaces: ['default'],
-        permissions: ['saved_object:lens/get'],
-        ingestion_method: 'crawled',
-        score: 1.5,
       });
-      expect(result.total).toBe(1);
+      expect(result.results[0]).not.toHaveProperty('content');
+      expect(result.results[0]).not.toHaveProperty('tags');
+      expect(result.results[0]).not.toHaveProperty('spaces');
+      expect(result.results[0]).not.toHaveProperty('permissions');
+
+      // content not in KEEP when fields is omitted
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      expect(esql).not.toMatch(/\bKEEP\b.*\bcontent\b/);
     });
 
-    it('handles total as object with value', async () => {
+    it('returns requested optional fields when fields param is provided', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: { value: 2, relation: 'eq' },
-          hits: [
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+            description: 'A lens viz',
+            refUris: ['lens:other:uuid'],
+            content: 'content text',
+          }),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: 'viz',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        fields: ['content', 'description', 'references'],
+      });
+
+      expect(result.results[0]).toEqual({
+        id: 'chunk-1',
+        type: 'lens',
+        title: 'My Viz',
+        origin: { uri: 'ref-1' },
+        content: 'content text',
+        description: 'A lens viz',
+        references: [{ uri: 'lens:other:uuid' }],
+      });
+      expect(result.results[0]).not.toHaveProperty('spaces');
+      expect(result.results[0]).not.toHaveProperty('permissions');
+    });
+
+    it('returns only the requested fields when fields param is provided', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(false),
+        values: [
+          makeEsqlRow('chunk-bare', 'connector', 'Bare', 'b1', [], {
+            includeContent: false,
+          }),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        fields: ['description'],
+      });
+      expect(result.results[0]).not.toHaveProperty('content');
+
+      // Only requested optional fields appear in KEEP; content is absent
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      expect(esql).not.toMatch(/\bKEEP\b.*\bcontent\b/);
+      expect(esql).toContain('description');
+    });
+
+    it('surfaces description, tags, and references on hits (compact LLM shape)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [
+          makeEsqlRow(
+            'chunk-2',
+            'dashboard',
+            'Sales Q3',
+            'dash-100',
+            ['saved_object:dashboard/get'],
             {
-              _source: {
-                id: 'chunk-1',
-                type: 'lens',
-                title: 'A',
-                origin_id: 'r1',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: [],
-                permissions: [],
-              },
-              _score: 1,
-            },
-            {
-              _source: {
-                id: 'chunk-2',
-                type: 'lens',
-                title: 'B',
-                origin_id: 'r2',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: [],
-                permissions: [],
-              },
-              _score: 1,
-            },
-          ],
-        },
+              description: 'sales summary',
+              tags: ['sales', 'executive'],
+              refUris: ['category://sales'],
+              content: 'sales content',
+            }
+          ),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: 'sales',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        fields: ['content', 'tags', 'references'],
+      });
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).toEqual({
+        id: 'chunk-2',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin: { uri: 'dash-100' },
+        content: 'sales content',
+        description: 'sales summary',
+        tags: ['sales', 'executive'],
+        references: [{ uri: 'category://sales' }],
+      });
+      expect(result.results[0]).not.toHaveProperty('spaces');
+      expect(result.results[0]).not.toHaveProperty('permissions');
+    });
+
+    it('returns multiple results from ES|QL tabular response', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'A', 'r1', [], { content: '' }),
+          makeEsqlRow('chunk-2', 'lens', 'B', 'r2', [], { content: '' }),
+        ],
       } as any);
 
       const result = await smlService.search({
@@ -422,7 +587,6 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(result.total).toBe(2);
       expect(result.results).toHaveLength(2);
     });
 
@@ -431,7 +595,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockRejectedValue(createNotFoundError());
+      esqlQueryMock.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.search({
         query: 'foo',
@@ -442,7 +606,6 @@ describe('SmlService', () => {
       });
 
       expect(result.results).toEqual([]);
-      expect(result.total).toBe(0);
       expect(logger.debug).toHaveBeenCalledWith(
         'SML index does not exist yet — returning empty results'
       );
@@ -453,7 +616,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockRejectedValue(new Error('Connection refused'));
+      esqlQueryMock.mockRejectedValue(new Error('Connection refused'));
 
       await expect(
         smlService.search({
@@ -477,40 +640,14 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 2,
-          hits: [
-            {
-              _source: {
-                id: 'chunk-1',
-                type: 'lens',
-                title: 'Lens',
-                origin_id: 'r1',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
-              },
-              _score: 1,
-            },
-            {
-              _source: {
-                id: 'chunk-2',
-                type: 'dashboard',
-                title: 'Dashboard',
-                origin_id: 'r2',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: ['default'],
-                permissions: ['saved_object:dashboard/get'],
-              },
-              _score: 1,
-            },
-          ],
-        },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'Lens', 'r1', ['saved_object:lens/get'], { content: '' }),
+          makeEsqlRow('chunk-2', 'dashboard', 'Dashboard', 'r2', ['saved_object:dashboard/get'], {
+            content: '',
+          }),
+        ],
       } as any);
 
       const result = await smlService.search({
@@ -524,7 +661,6 @@ describe('SmlService', () => {
       expect(result.results).toHaveLength(1);
       expect(result.results[0].id).toBe('chunk-1');
       expect(result.results[0].type).toBe('lens');
-      expect(result.total).toBe(1);
     });
 
     it('returns all results when securityAuthz is absent', async () => {
@@ -532,40 +668,14 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 2,
-          hits: [
-            {
-              _source: {
-                id: 'chunk-1',
-                type: 'lens',
-                title: 'Lens',
-                origin_id: 'r1',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
-              },
-              _score: 1,
-            },
-            {
-              _source: {
-                id: 'chunk-2',
-                type: 'dashboard',
-                title: 'Dashboard',
-                origin_id: 'r2',
-                content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
-                spaces: ['default'],
-                permissions: ['saved_object:dashboard/get'],
-              },
-              _score: 1,
-            },
-          ],
-        },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'Lens', 'r1', ['saved_object:lens/get'], { content: '' }),
+          makeEsqlRow('chunk-2', 'dashboard', 'Dashboard', 'r2', ['saved_object:dashboard/get'], {
+            content: '',
+          }),
+        ],
       } as any);
 
       const result = await smlService.search({
@@ -577,16 +687,16 @@ describe('SmlService', () => {
       });
 
       expect(result.results).toHaveLength(2);
-      expect(result.total).toBe(2);
     });
 
-    it('uses default size of 10 when not specified', async () => {
+    it('uses default size of 10 when not specified (LIMIT = size × 10)', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(),
+        values: [],
       } as any);
 
       await smlService.search({
@@ -596,11 +706,322 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          size: 10,
-        })
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      // Default size 10, MAX_SCAN_MULTIPLIER 10 → LIMIT 100
+      expect(esql).toContain('| LIMIT 100');
+    });
+  });
+
+  describe('autocomplete', () => {
+    it('builds a single nested discovery_labels query (with inner_hits) and a space filter', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call.query).toEqual({
+        bool: {
+          must: [
+            {
+              nested: {
+                path: 'discovery_labels',
+                query: {
+                  multi_match: {
+                    query: 'git',
+                    type: 'bool_prefix',
+                    operator: 'and',
+                    fields: [
+                      'discovery_labels.value',
+                      'discovery_labels.value._2gram',
+                      'discovery_labels.value._3gram',
+                    ],
+                  },
+                },
+                inner_hits: {
+                  _source: ['discovery_labels.value', 'discovery_labels.kind'],
+                  size: 10,
+                  highlight: {
+                    type: 'unified',
+                    number_of_fragments: 0,
+                    pre_tags: ['<em>'],
+                    post_tags: ['</em>'],
+                    encoder: 'html',
+                    fields: {
+                      'discovery_labels.value': {},
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          filter: [
+            {
+              bool: {
+                should: [{ term: { spaces: 'default' } }, { term: { spaces: '*' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      });
+      expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
+    });
+
+    it('uses match_all for query "*"', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      await smlService.autocomplete({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
+    });
+
+    it('threads per-type constraints through buildConstraintsFilter into the ES filter clauses', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        constraints: { [SmlSearchFilterType.connector]: { ids: ['gh-1', 'jira-1'] } },
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      // First clause is the space filter; second is the constraints filter.
+      expect(filterClauses).toHaveLength(2);
+      expect(filterClauses[1]).toEqual({
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  { term: { type: 'connector' } },
+                  { terms: { origin_id: ['gh-1', 'jira-1'] } },
+                ],
+              },
+            },
+            { bool: { must_not: [{ term: { type: 'connector' } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('maps inner_hits onto matched_discovery_labels', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'chunk-1',
+                type: 'connector',
+                title: 'GitHub Connector',
+                origin: { uri: 'gh-1' },
+                spaces: ['default'],
+                permissions: [],
+              },
+              _score: 5.4,
+              inner_hits: {
+                discovery_labels: {
+                  hits: {
+                    total: { value: 2, relation: 'eq' },
+                    hits: [
+                      {
+                        _nested: { field: 'discovery_labels', offset: 0 },
+                        _score: 5.4,
+                        _source: { value: 'GitHub Connector', kind: 'title' },
+                        highlight: {
+                          'discovery_labels.value': ['<em>GitHub</em> Connector'],
+                        },
+                      },
+                      {
+                        _nested: { field: 'discovery_labels', offset: 2 },
+                        _score: 4.1,
+                        _source: { value: 'github', kind: 'tagline' },
+                        highlight: {
+                          'discovery_labels.value': ['<em>github</em>'],
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).toEqual({
+        id: 'chunk-1',
+        type: 'connector',
+        title: 'GitHub Connector',
+        origin: { uri: 'gh-1' },
+        spaces: ['default'],
+        permissions: [],
+        matched_discovery_labels: [
+          {
+            value: 'GitHub Connector',
+            kind: 'title',
+            highlighted: '<em>GitHub</em> Connector',
+          },
+          { value: 'github', kind: 'tagline', highlighted: '<em>github</em>' },
+        ],
+      });
+    });
+
+    it('omits matched_discovery_labels when absent', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'chunk-2',
+                type: 'dashboard',
+                title: 'Sales Q3',
+                origin: { uri: 'dash-1' },
+                spaces: ['default'],
+                permissions: [],
+              },
+              _score: 2.0,
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.autocomplete({
+        query: 'sal',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.results[0]).toEqual({
+        id: 'chunk-2',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin: { uri: 'dash-1' },
+        spaces: ['default'],
+        permissions: [],
+      });
+    });
+
+    it('returns empty results when the index does not exist (404)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockRejectedValue(createNotFoundError());
+
+      const result = await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result).toEqual({ results: [] });
+    });
+
+    it('applies permission filtering when securityAuthz is present', async () => {
+      const securityAuthz = createMockSecurityAuthzPartial(
+        ['saved_object:dashboard/get'],
+        ['saved_object:connector/get']
       );
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 2,
+          hits: [
+            {
+              _source: {
+                id: 'chunk-allowed',
+                type: 'dashboard',
+                title: 'Allowed',
+                origin: { uri: 'd1' },
+                spaces: ['default'],
+                permissions: ['saved_object:dashboard/get'],
+              },
+              _score: 3,
+            },
+            {
+              _source: {
+                id: 'chunk-denied',
+                type: 'connector',
+                title: 'Denied',
+                origin: { uri: 'c1' },
+                spaces: ['default'],
+                permissions: ['saved_object:connector/get'],
+              },
+              _score: 2,
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.autocomplete({
+        query: 'a',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].id).toBe('chunk-allowed');
     });
   });
 
@@ -815,6 +1236,7 @@ describe('SmlService', () => {
                 type: 'lens',
                 title: 'Doc 1',
                 origin_id: 'ref-1',
+                origin: { uri: 'ref-1' },
                 content: 'content 1',
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
@@ -828,10 +1250,11 @@ describe('SmlService', () => {
                 type: 'dashboard',
                 title: 'Doc 2',
                 origin_id: 'ref-2',
+                origin: { uri: 'ref-2' },
                 content: 'content 2',
                 description: 'dash desc',
                 user_id: 'u2',
-                references: ['lens:x:y'],
+                references: [{ uri: 'lens:x:y' }],
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
@@ -854,27 +1277,86 @@ describe('SmlService', () => {
         type: 'lens',
         title: 'Doc 1',
         origin_id: 'ref-1',
+        origin: { uri: 'ref-1' },
         content: 'content 1',
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
-        ingestion_method: 'crawled',
       });
       expect(result.get('doc-2')).toEqual({
         id: 'doc-2',
         type: 'dashboard',
         title: 'Doc 2',
         origin_id: 'ref-2',
+        origin: { uri: 'ref-2' },
         content: 'content 2',
         description: 'dash desc',
         user_id: 'u2',
-        references: ['lens:x:y'],
+        references: [{ uri: 'lens:x:y' }],
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
-        ingestion_method: 'crawled',
+      });
+    });
+
+    it('round-trips all new schema fields (origin, tags, discovery_labels, extended_attrs)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'doc-3',
+                type: 'dashboard',
+                title: 'Sales Q3',
+                origin_id: 'dash-100',
+                origin: { uri: 'dash-100' },
+                content: 'sales content',
+                description: 'sales summary',
+                tags: ['sales', 'executive'],
+                discovery_labels: [{ value: 'q3 sales', kind: 'tagline' }],
+                extended_attrs: { owner_team: 'sales-ops' },
+                user_id: 'user-7',
+                references: [{ uri: 'category://sales' }],
+                created_at: '2026-04-01T00:00:00.000Z',
+                updated_at: '2026-04-02T00:00:00.000Z',
+                spaces: ['default'],
+                permissions: ['saved_object:dashboard/get'],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.getDocuments({
+        ids: ['doc-3'],
+        spaceId: 'default',
+        esClient: scopedClient,
+      });
+
+      expect(result.get('doc-3')).toEqual({
+        id: 'doc-3',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin_id: 'dash-100',
+        origin: { uri: 'dash-100' },
+        content: 'sales content',
+        description: 'sales summary',
+        tags: ['sales', 'executive'],
+        discovery_labels: [{ value: 'q3 sales', kind: 'tagline' }],
+        extended_attrs: { owner_team: 'sales-ops' },
+        user_id: 'user-7',
+        references: [{ uri: 'category://sales' }],
+        created_at: '2026-04-01T00:00:00.000Z',
+        updated_at: '2026-04-02T00:00:00.000Z',
+        spaces: ['default'],
+        permissions: ['saved_object:dashboard/get'],
       });
     });
 
@@ -975,12 +1457,12 @@ describe('SmlService', () => {
         type: 'lens',
         title: 'Doc 1',
         origin_id: 'ref-1',
+        origin: { uri: 'lens://ref-1' },
         content: 'c',
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
-        ingestion_method: 'crawled' as const,
       },
     };
 
@@ -1368,72 +1850,6 @@ describe('SmlService', () => {
       ).rejects.toThrow('boom');
       expect(smlClient.index).not.toHaveBeenCalled();
     });
-
-    it("tags the written document with ingestion_method='manual'", async () => {
-      smlClient.get.mockRejectedValue(createNotFoundError());
-
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      const result = await smlService.upsertDocument({
-        id: 'doc-manual',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'Manual Doc',
-          origin_id: 'ref-manual',
-          content: 'c',
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.document.ingestion_method).toBe('manual');
-      expect(smlClient.index).toHaveBeenCalledWith({
-        id: 'doc-manual',
-        document: expect.objectContaining({ ingestion_method: 'manual' }),
-      });
-    });
-
-    it('deletes stale crawled chunks for the same origin after a manual upsert', async () => {
-      smlClient.get.mockRejectedValue(createNotFoundError());
-
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      await smlService.upsertDocument({
-        id: 'doc-manual',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'Manual Doc',
-          origin_id: 'ref-manual',
-          content: 'c',
-        },
-        esClient: scopedClient,
-      });
-
-      // After writing the manual chunk, the upsert should wipe any chunks for the same
-      // origin that carry ingestion_method=crawled, so search/list reflect the curator's
-      // intent immediately and stale crawled output doesn't linger forever (the crawler
-      // would otherwise skip this origin because of the manual entry).
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-        index: smlIndexName,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [
-              { term: { origin_id: 'ref-manual' } },
-              { term: { ingestion_method: 'crawled' } },
-            ],
-          },
-        },
-        refresh: false,
-      });
-    });
   });
 
   describe('deleteDocument', () => {
@@ -1479,8 +1895,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
+                created_at: '',
+                updated_at: '',
                 spaces: ['default'],
                 permissions: [],
               },
@@ -1516,8 +1932,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
+                created_at: '',
+                updated_at: '',
                 spaces: ['default'],
                 permissions: [],
               },
@@ -1552,8 +1968,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
+                created_at: '',
+                updated_at: '',
                 spaces: ['default'],
                 permissions: [],
               },
@@ -1588,8 +2004,8 @@ describe('SmlService', () => {
                 title: 'A',
                 origin_id: 'ref-1',
                 content: '',
-                created_at: '2024-01-01',
-                updated_at: '2024-01-02',
+                created_at: '',
+                updated_at: '',
                 spaces: ['default'],
                 permissions: [],
               },

@@ -20,54 +20,58 @@ import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useKibana } from '../use_kibana';
 import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
-const SML_SEARCH_DEBOUNCE_MS = 250;
-const SML_SEARCH_STALE_TIME_MS = 60_000;
-const SML_SEARCH_CACHE_TIME_MS = 300_000;
+const SML_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+const SML_AUTOCOMPLETE_STALE_TIME_MS = 60_000;
+const SML_AUTOCOMPLETE_CACHE_TIME_MS = 300_000;
 
-const smlSearchErrorToastTitle = i18n.translate(
-  'xpack.agentBuilder.conversationInput.commandMenu.smlSearchErrorTitle',
-  { defaultMessage: 'Unable to load semantic knowledge' }
+const smlAutocompleteErrorToastTitle = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.smlAutocompleteErrorTitle',
+  { defaultMessage: 'Unable to load autocomplete suggestions' }
 );
 
-export interface UseSmlSearchOptions {
-  /** Runtime-imposed per-type id-allowlist constraints. */
+export interface UseSmlAutocompleteOptions {
+  /** Runtime-imposed per-type id-allowlist constraints (e.g. agent-centric connector allow-list). */
   readonly constraints?: SmlSearchConstraints;
-  /** Agent-discoverable filters (`types[]`, `tags[]`). */
+  /** Caller-supplied type/tag refinements (e.g. connectors-only picker). */
   readonly filters?: SmlSearchFilters;
 }
 
-export const useSmlSearch = (query: string, options?: UseSmlSearchOptions) => {
+/**
+ * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which returns
+ * per-row `matched_discovery_labels` (with `kind` for UI badging, and
+ * `highlighted` when ES is able to produce a snippet).
+ *
+ * For full retrieval (LLM tool, content search), see `useSmlSearch`.
+ */
+export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOptions) => {
   const { services } = useKibana();
   const { smlService } = useAgentBuilderServices();
-  const debouncedQuery = useDebouncedValue(query, SML_SEARCH_DEBOUNCE_MS);
+  const debouncedQuery = useDebouncedValue(query, SML_AUTOCOMPLETE_DEBOUNCE_MS);
   const constraints = options?.constraints;
   const filters = options?.filters;
 
-  const searchQuery = useMemo(() => normalizeSmlSearchQuery(debouncedQuery), [debouncedQuery]);
+  const normalized = useMemo(() => normalizeSmlSearchQuery(debouncedQuery), [debouncedQuery]);
 
   const { isError, isLoading, error, data } = useQuery({
-    queryKey: queryKeys.sml.search(searchQuery, constraints, filters),
+    queryKey: queryKeys.sml.autocomplete(normalized, constraints, filters),
     queryFn: () =>
-      smlService.search({
-        query: searchQuery,
+      smlService.autocomplete({
+        query: normalized,
         size: SML_SEARCH_DEFAULT_SIZE,
         constraints,
         filters,
       }),
-    staleTime: SML_SEARCH_STALE_TIME_MS,
-    cacheTime: SML_SEARCH_CACHE_TIME_MS,
+    staleTime: SML_AUTOCOMPLETE_STALE_TIME_MS,
+    cacheTime: SML_AUTOCOMPLETE_CACHE_TIME_MS,
   });
 
   useEffect(() => {
     if (!isError || isLoading) {
       return;
     }
-    const err = error;
     services.notifications.toasts.addError(
-      err instanceof Error ? err : new Error(formatAgentBuilderErrorMessage(err)),
-      {
-        title: smlSearchErrorToastTitle,
-      }
+      error instanceof Error ? error : new Error(formatAgentBuilderErrorMessage(error)),
+      { title: smlAutocompleteErrorToastTitle }
     );
   }, [isError, isLoading, error, services.notifications.toasts]);
 
