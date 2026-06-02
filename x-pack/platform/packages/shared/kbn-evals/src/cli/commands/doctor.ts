@@ -116,7 +116,8 @@ export const doctorCmd: Command<void> = {
       '--format',
       '{{.Names}}',
     ]);
-    const edotDockerAlive = dockerPs !== null && dockerPs.length > 0;
+    const edotDockerAlive =
+      dockerPs !== null && dockerPs.split('\n').some((name) => name.trim() === EDOT_CONTAINER_NAME);
 
     if (edotManagedAlive || edotDockerAlive) {
       const source = edotManagedAlive ? 'managed' : 'docker';
@@ -143,7 +144,10 @@ export const doctorCmd: Command<void> = {
             '--format',
             '{{.Names}}',
           ]);
-          if (edotUpAfterFix && edotUpAfterFix.length > 0) {
+          if (
+            edotUpAfterFix &&
+            edotUpAfterFix.split('\n').some((n) => n.trim() === EDOT_CONTAINER_NAME)
+          ) {
             log.info('EDOT collector started successfully');
           } else {
             log.warning(

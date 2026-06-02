@@ -163,7 +163,7 @@ export const isEdotDockerRunning = (): boolean => {
       ['ps', '--filter', `name=${EDOT_CONTAINER_NAME}`, '--format', '{{.Names}}'],
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5_000 }
     ).trim();
-    return result.length > 0;
+    return result.split('\n').some((name) => name.trim() === EDOT_CONTAINER_NAME);
   } catch {
     return false;
   }
@@ -218,11 +218,14 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
  * PID) has exited but children (ES, Kibana) may still be running.
  * Returns true if any process in the group was signalled.
  */
-const killProcessGroup = (pid: number, signal: NodeJS.Signals): boolean => {
+const killProcessGroup = (pid: number, signal: NodeJS.Signals, log?: ToolingLog): boolean => {
   try {
     process.kill(-pid, signal);
     return true;
-  } catch {
+  } catch (err) {
+    if (log && (err as NodeJS.ErrnoException).code !== 'ESRCH') {
+      log.warning(`Failed to signal process group ${pid}: ${(err as Error).message}`);
+    }
     return false;
   }
 };
@@ -249,7 +252,7 @@ const terminateProcessGroup = async (
   label: string,
   timeoutMs = 10_000
 ): Promise<void> => {
-  if (!killProcessGroup(pid, 'SIGTERM')) {
+  if (!killProcessGroup(pid, 'SIGTERM', log)) {
     return;
   }
 
@@ -259,8 +262,8 @@ const terminateProcessGroup = async (
   }
 
   if (isProcessGroupAlive(pid)) {
-    log.warning(`[${label}] orphaned children did not stop gracefully, sending SIGKILL`);
-    killProcessGroup(pid, 'SIGKILL');
+    log.warning(`[${label}] did not stop gracefully, sending SIGKILL`);
+    killProcessGroup(pid, 'SIGKILL', log);
   }
 };
 
@@ -300,19 +303,7 @@ export const stopService = async (
 
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
 
-  // Kill the process group (negative PID) so Scout's child ES/Kibana processes also die
-  killProcessGroup(entry.pid, 'SIGTERM');
-
-  // Wait up to 10s for the entire process group to exit
-  const deadline = Date.now() + 10_000;
-  while (isProcessGroupAlive(entry.pid) && Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 500));
-  }
-
-  if (isProcessGroupAlive(entry.pid)) {
-    log.warning(`[${name}] did not stop gracefully, sending SIGKILL`);
-    killProcessGroup(entry.pid, 'SIGKILL');
-  }
+  await terminateProcessGroup(entry.pid, log, name);
 
   if (name === 'edot') {
     stopEdotDockerContainer(repoRoot, log);
