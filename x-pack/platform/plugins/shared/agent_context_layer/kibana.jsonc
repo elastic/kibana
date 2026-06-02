@@ -9,6 +9,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["features", "taskManager"],
-    "optionalPlugins": ["security", "spaces", "workflowsExtensions"]
+    "optionalPlugins": ["security", "spaces", "workflowsExtensions"],
+    "requiredBundles": ["workflowsExtensions"]
   }
 }
