@@ -73,7 +73,10 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   query,
   filters,
   pageFilters: [],
-  sort: [['@timestamp', 'desc']],
+  sort: [
+    ['entity.risk.calculated_score_norm', 'desc'],
+    ['@timestamp', 'desc'],
+  ],
   pageIndex: 0,
 });
 
