@@ -19,7 +19,7 @@ import { StreamDetailManagement } from '../components/stream_management/data_man
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
 import {
   AllEntitiesView,
-  CategoryComingSoonView,
+  CategoryEntitiesView,
   ManageEntityTypesView,
   SignificantEventsView,
 } from '../components/entity_centric_lab';
@@ -105,11 +105,12 @@ const streamsAppRoutes = {
       },
       /**
        * Entity-centric lab: per-category sub-pages reachable via the
-       * `streams:entities<Category>` deep links. All categories share the
-       * same placeholder view (it picks its content from the path param).
+       * `streams:entities<Category>` deep links. All categories share
+       * `CategoryEntitiesView`, which validates the path param and mounts
+       * `AllEntitiesView` scoped to that category.
        */
       '/entities/{category}': {
-        element: <CategoryComingSoonView />,
+        element: <CategoryEntitiesView />,
         params: t.type({
           path: t.type({
             category: t.string,

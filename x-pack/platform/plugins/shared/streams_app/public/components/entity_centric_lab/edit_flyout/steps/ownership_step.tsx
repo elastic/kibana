@@ -343,6 +343,14 @@ const OwnerCard = ({ owner, index, testSubjPrefix, onUpdate, onRemove }: OwnerCa
           data-test-subj={`${testSubjPrefix}ResolverValue-${owner.id}`}
         />
       </EuiFormRow>
+      {/*
+        The resolver-value EuiFormRow has no built-in bottom margin, so
+        without this spacer the owner name / email / slack row would butt
+        right up against the field above — which was visibly too tight.
+        A single `m` spacer brings the gap in line with the rest of the
+        owner-card rhythm (title -> row, hint -> ownership type).
+      */}
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <EuiFormRow
@@ -384,6 +392,7 @@ const OwnerCard = ({ owner, index, testSubjPrefix, onUpdate, onRemove }: OwnerCa
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         <p>
           {i18n.translate('xpack.streams.entityCentricLab.editFlyout.ownership.ownerHint', {

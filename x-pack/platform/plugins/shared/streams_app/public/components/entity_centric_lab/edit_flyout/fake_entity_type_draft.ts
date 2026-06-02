@@ -74,6 +74,21 @@ export interface FlyoutTabConfig {
   readonly enabled: boolean;
 }
 
+/**
+ * Curated link surfaced under the entity flyout's Custom tab. The wizard
+ * keeps a small narrow union of link types for the dropdown; the shared
+ * package treats them as opaque `string` and falls back to a generic icon
+ * for any unknown value.
+ */
+export type CustomLinkType = 'runbook' | 'dashboard' | 'repository' | 'documentation' | 'other';
+
+export interface CustomLinkDraft {
+  readonly id: string;
+  readonly type: CustomLinkType;
+  readonly url: string;
+  readonly label: string;
+}
+
 export type FilterOperator = 'equals' | 'notEquals' | 'contains' | 'exists';
 
 export interface FilterCondition {
@@ -111,6 +126,12 @@ export interface EntityTypeDraft {
   readonly ownership: OwnershipConfig;
   readonly coveragePreview: CoveragePreview;
   readonly flyoutTabs: readonly FlyoutTabConfig[];
+  /**
+   * Custom links surfaced under the Custom tab. We always seed at least
+   * one blank row so the editor in the wizard has somewhere to type even
+   * before any data exists. Empty rows are filtered out at save time.
+   */
+  readonly customLinks: readonly CustomLinkDraft[];
   readonly subsets: readonly SubsetDraft[];
 }
 
@@ -126,6 +147,19 @@ const defaultCoveragePreview = (): CoveragePreview => ({
   totalCount: 0,
   unmatched: [],
 });
+
+/**
+ * Build a fresh, empty link row. Exported so the editor can append rows
+ * via the "Add link" button using the same identity scheme.
+ */
+export const buildBlankCustomLink = (): CustomLinkDraft => ({
+  id: `link-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  type: 'runbook',
+  url: '',
+  label: '',
+});
+
+const defaultCustomLinks = (): CustomLinkDraft[] => [buildBlankCustomLink()];
 
 const defaultFlyoutTabs = (): FlyoutTabConfig[] => [
   {
@@ -382,6 +416,7 @@ export const buildFakeEntityTypeDraft = (entityType: FakeEntityType): EntityType
     },
     coveragePreview: preset.coverage,
     flyoutTabs: defaultFlyoutTabs(),
+    customLinks: defaultCustomLinks(),
     subsets: preset.subsets,
   };
 };

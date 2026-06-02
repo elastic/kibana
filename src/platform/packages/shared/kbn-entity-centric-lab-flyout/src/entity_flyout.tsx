@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,7 +23,10 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiNotificationBadge,
+  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiTab,
@@ -48,6 +52,9 @@ import {
   buildEntityFlyoutAttachment,
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
+import { entityTypeToKind, inferEntityKind } from './kind_templates';
+import { useFlyoutTemplateOverride } from './flyout_template_overrides';
+import type { FlyoutCustomLink } from './flyout_template_overrides';
 
 interface EntityFlyoutProps {
   readonly entityName: string;
@@ -80,7 +87,27 @@ interface EntityFlyoutProps {
   readonly onSelectEntity?: (entityName: string) => void;
 }
 
-type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
+type BuiltInTabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
+
+/**
+ * Tab ids can be either one of the six built-in tabs or a free-form string
+ * coming from a user override (e.g. `'custom'`, `'profiling'`, or any future
+ * id defined in the Manage entity types wizard). Unknown ids render a
+ * placeholder so the flyout never crashes if the override schema drifts.
+ */
+type TabId = BuiltInTabId | string;
+
+const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
+  'overview',
+  'metrics',
+  'logs',
+  'alerts',
+  'relationships',
+  'security',
+];
+
+const isBuiltInTabId = (id: string): id is BuiltInTabId =>
+  (BUILT_IN_TAB_IDS as readonly string[]).includes(id);
 
 export const EntityFlyout = ({
   entityName,
@@ -298,8 +325,16 @@ export const EntityFlyout = ({
     ];
   }, [handleActionClick]);
 
-  const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(
-    () => [
+  // Resolve the canonical kind once — used both for template selection
+  // upstream and for the override lookup below.
+  const kind = useMemo(
+    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
+    [entityType, entityName]
+  );
+  const templateOverride = useFlyoutTemplateOverride(kind);
+
+  const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(() => {
+    const defaultTabs: Array<{ id: TabId; label: string; appendBadge?: number }> = [
       {
         id: 'overview',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.overview', {
@@ -340,9 +375,38 @@ export const EntityFlyout = ({
         }),
         appendBadge: overview.securityIssueCount,
       },
-    ],
-    [overview.securityIssueCount]
-  );
+    ];
+
+    if (!templateOverride) return defaultTabs;
+
+    // Apply user override: respect the user's order, drop disabled tabs,
+    // and reuse the user's label verbatim (so renames in the wizard show up
+    // here too). Unknown ids are accepted and rendered via the placeholder
+    // in `TabContent` — that's how the demo's "Custom" / "Profiling" tabs
+    // come to life without further wiring.
+    return templateOverride.flyoutTabs
+      .filter((tab) => tab.enabled)
+      .map((tab) => {
+        const builtIn = isBuiltInTabId(tab.id)
+          ? defaultTabs.find((candidate) => candidate.id === tab.id)
+          : undefined;
+        return {
+          id: tab.id,
+          label: tab.label,
+          appendBadge: builtIn?.appendBadge,
+        };
+      });
+  }, [overview.securityIssueCount, templateOverride]);
+
+  // If the active tab disappears (override toggled it off, or the user
+  // reordered everything and the previously-selected tab is gone), fall
+  // back to the first tab so the body doesn't render an empty switch.
+  useEffect(() => {
+    if (tabs.length === 0) return;
+    if (!tabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
 
   return (
     <EuiFlyout
@@ -504,9 +568,11 @@ export const EntityFlyout = ({
       <EuiFlyoutBody>
         <TabContent
           activeTab={activeTab}
+          activeTabLabel={tabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
           entityName={entityName}
           overview={overview}
           tabsData={tabsData}
+          customLinks={templateOverride?.customLinks}
           onSelectEntity={onSelectEntity}
         />
       </EuiFlyoutBody>
@@ -560,15 +626,19 @@ export const EntityFlyout = ({
 
 const TabContent = ({
   activeTab,
+  activeTabLabel,
   entityName,
   overview,
   tabsData,
+  customLinks,
   onSelectEntity,
 }: {
   readonly activeTab: TabId;
+  readonly activeTabLabel: string;
   readonly entityName: string;
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
+  readonly customLinks?: readonly FlyoutCustomLink[];
   readonly onSelectEntity?: (entityName: string) => void;
 }) => {
   switch (activeTab) {
@@ -586,5 +656,118 @@ const TabContent = ({
       );
     case 'security':
       return <SecurityTab security={tabsData.security} />;
+    default:
+      // Custom tab with curated links from the Manage entity types wizard:
+      // we render a tidy link list. Anything else (or `custom` with no
+      // links configured yet) falls back to the placeholder so the demo
+      // still conveys "this tab is alive, plug content in".
+      if (activeTab === 'custom' && customLinks && customLinks.length > 0) {
+        return <CustomLinksTab links={customLinks} />;
+      }
+      return (
+        <EuiEmptyPrompt
+          iconType="documentEdit"
+          title={<h2>{activeTabLabel}</h2>}
+          body={
+            <EuiText size="s" color="subdued">
+              <p>
+                {i18n.translate('entityCentricLabFlyout.flyout.customTabPlaceholder', {
+                  defaultMessage:
+                    'This tab was added from "Manage entity types". Configure its content for {entityName} to surface domain-specific data here.',
+                  values: { entityName },
+                })}
+              </p>
+            </EuiText>
+          }
+        />
+      );
   }
+};
+
+const CUSTOM_LINK_TYPE_LABEL: Record<string, string> = {
+  runbook: i18n.translate('entityCentricLabFlyout.flyout.customLinkType.runbook', {
+    defaultMessage: 'Runbook',
+  }),
+  dashboard: i18n.translate('entityCentricLabFlyout.flyout.customLinkType.dashboard', {
+    defaultMessage: 'Dashboard',
+  }),
+  repository: i18n.translate('entityCentricLabFlyout.flyout.customLinkType.repository', {
+    defaultMessage: 'Repository',
+  }),
+  documentation: i18n.translate('entityCentricLabFlyout.flyout.customLinkType.documentation', {
+    defaultMessage: 'Documentation',
+  }),
+  other: i18n.translate('entityCentricLabFlyout.flyout.customLinkType.other', {
+    defaultMessage: 'Other',
+  }),
+};
+
+/**
+ * Maps a wizard-defined link `type` to an EUI icon. Unknown types fall
+ * back to the generic `link` glyph so the shared package stays tolerant
+ * of new types added later without a coordinated release.
+ */
+const iconForLinkType = (type: string): string => {
+  switch (type) {
+    case 'runbook':
+      return 'document';
+    case 'dashboard':
+      return 'dashboardApp';
+    case 'repository':
+      return 'logoGithub';
+    case 'documentation':
+      return 'documents';
+    default:
+      return 'link';
+  }
+};
+
+const CustomLinksTab = ({ links }: { readonly links: readonly FlyoutCustomLink[] }) => {
+  // Belt-and-suspenders: the wizard already strips empty-URL rows on save,
+  // but tolerate legacy payloads that might still have them.
+  const visible = links.filter((link) => link.url.trim().length > 0);
+  if (visible.length === 0) return null;
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('entityCentricLabFlyout.flyout.customLinksTitle', {
+            defaultMessage: 'Links',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiListGroup gutterSize="s" flush>
+        {visible.map((link) => {
+          const text = link.label.length > 0 ? link.label : link.url;
+          const typeLabel = CUSTOM_LINK_TYPE_LABEL[link.type] ?? link.type;
+          // `EuiListGroupItem`'s `extraAction` expects a button config, not
+          // arbitrary ReactNode, so we put the type badge into the `label`
+          // slot alongside the link text — `label` accepts ReactNode.
+          return (
+            <EuiListGroupItem
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              external
+              iconType={iconForLinkType(link.type)}
+              label={
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  responsive={false}
+                  justifyContent="spaceBetween"
+                >
+                  <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{typeLabel}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            />
+          );
+        })}
+      </EuiListGroup>
+    </EuiPanel>
+  );
 };

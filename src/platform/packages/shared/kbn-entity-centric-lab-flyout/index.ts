@@ -52,3 +52,15 @@ export {
 
 export { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './src/kind_templates';
 export type { EntityKind, EntityHealthVariant } from './src/kind_templates';
+
+export {
+  getFlyoutTemplateOverride,
+  setFlyoutTemplateOverride,
+  subscribeFlyoutTemplateOverrides,
+  useFlyoutTemplateOverride,
+} from './src/flyout_template_overrides';
+export type {
+  FlyoutCustomLink,
+  FlyoutTabOverride,
+  FlyoutTemplateOverride,
+} from './src/flyout_template_overrides';

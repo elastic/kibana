@@ -45,6 +45,13 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
 export const getCategoryDescriptor = (id: EntityCategoryId): EntityCategoryDescriptor | undefined =>
   ENTITY_CATEGORIES.find((category) => category.id === id);
 
+/**
+ * Type-narrowing guard for route params, where the category segment is a
+ * plain `string` until we've checked it against the canonical list.
+ */
+export const isKnownCategoryId = (value: string): value is EntityCategoryId =>
+  ENTITY_CATEGORIES.some((category) => category.id === value);
+
 export const TAG_KEYS = ['application', 'environment', 'team', 'region'] as const;
 export type TagKey = (typeof TAG_KEYS)[number];
 

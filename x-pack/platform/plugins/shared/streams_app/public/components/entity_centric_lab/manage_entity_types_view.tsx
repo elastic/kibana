@@ -11,6 +11,7 @@ import {
   EuiBasicTable,
   EuiBetaBadge,
   EuiButton,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -32,8 +33,22 @@ type FlyoutState =
 
 export const ManageEntityTypesView = () => {
   const [flyout, setFlyout] = useState<FlyoutState>({ kind: 'closed' });
+  const [search, setSearch] = useState('');
 
   const closeFlyout = () => setFlyout({ kind: 'closed' });
+
+  // Lightweight client-side filter: matches against name and category, the
+  // two visible identifiers users would naturally search for ("k8s",
+  // "service", "kubernetes"). Trimmed + lowercased once per render.
+  const filteredEntityTypes = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return [...FAKE_ENTITY_TYPES];
+    return FAKE_ENTITY_TYPES.filter(
+      (entityType) =>
+        entityType.name.toLowerCase().includes(query) ||
+        entityType.category.toLowerCase().includes(query)
+    );
+  }, [search]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<FakeEntityType>>>(
     () => [
@@ -132,13 +147,31 @@ export const ManageEntityTypesView = () => {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        <EuiFieldSearch
+          fullWidth
+          incremental
+          placeholder={i18n.translate('xpack.streams.entityCentricLab.manage.searchPlaceholder', {
+            defaultMessage: 'Filter entity types by name or category',
+          })}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          data-test-subj="entityCentricLabManageEntityTypesSearch"
+          aria-label={i18n.translate('xpack.streams.entityCentricLab.manage.searchAriaLabel', {
+            defaultMessage: 'Filter entity types',
+          })}
+        />
+        <EuiSpacer size="m" />
         <EuiBasicTable<FakeEntityType>
           tableCaption={i18n.translate('xpack.streams.entityCentricLab.manage.tableCaption', {
             defaultMessage: 'Entity types',
           })}
-          items={[...FAKE_ENTITY_TYPES]}
+          items={filteredEntityTypes}
           columns={columns}
           rowHeader="name"
+          noItemsMessage={i18n.translate('xpack.streams.entityCentricLab.manage.noResults', {
+            defaultMessage: 'No entity types match "{query}".',
+            values: { query: search.trim() },
+          })}
           data-test-subj="entityCentricLabEntityTypesTable"
         />
       </StreamsAppPageTemplate.Body>

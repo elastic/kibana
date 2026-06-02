@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -35,10 +36,11 @@ import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
-import type { ActiveTagFilters } from './fake_entities';
+import type { ActiveTagFilters, EntityCategoryId } from './fake_entities';
 import {
   EMPTY_TAG_FILTERS,
   buildFakeEntities,
+  getCategoryDescriptor,
   getTagFacets,
   matchesTagFilters,
 } from './fake_entities';
@@ -65,7 +67,19 @@ const VIEW_MODE_OPTIONS = [
   },
 ];
 
-export const AllEntitiesView = () => {
+interface AllEntitiesViewProps {
+  /**
+   * When set, the view is scoped to a single category — it shows only
+   * entities whose `category` matches, and the page title swaps from
+   * "All entities" to the descriptor's label + icon. Used by the category
+   * routes (e.g. `/entities/hosts`) which mount this component through
+   * `CategoryEntitiesView`. Undefined (the default) renders the full
+   * cross-category page mounted at `/entities`.
+   */
+  readonly categoryScope?: EntityCategoryId;
+}
+
+export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) => {
   const router = useStreamsAppRouter();
   const {
     core: { notifications },
@@ -74,7 +88,24 @@ export const AllEntitiesView = () => {
     },
   } = useKibana();
   const dataset = useMemo(() => buildFakeEntities(), []);
-  const tagFacets = useMemo(() => getTagFacets(dataset.entities), [dataset.entities]);
+  // Narrow the dataset to the active category once, then drive every
+  // downstream concern (facets, summary, grid, list, flyout context) off
+  // the same slice. Doing the filter here — rather than at each consumer —
+  // keeps the rest of the component identical to the un-scoped All
+  // entities page.
+  const scopedEntities = useMemo(
+    () =>
+      categoryScope
+        ? dataset.entities.filter((entity) => entity.category === categoryScope)
+        : dataset.entities,
+    [dataset.entities, categoryScope]
+  );
+  // Tag facets must be computed from the visible slice. If we kept them
+  // global, a scoped page would show filter options that always empty the
+  // grid (e.g. "Application: ml-platform" on the Databases page when no
+  // database is tagged with that application).
+  const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
+  const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   const [search, setSearch] = useState('');
   const [activeTagFilters, setActiveTagFilters] = useState<ActiveTagFilters>(EMPTY_TAG_FILTERS);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -82,11 +113,11 @@ export const AllEntitiesView = () => {
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return dataset.entities.filter((entity) => {
+    return scopedEntities.filter((entity) => {
       if (query && !entity.name.toLowerCase().includes(query)) return false;
       return matchesTagFilters(entity, activeTagFilters);
     });
-  }, [dataset.entities, search, activeTagFilters]);
+  }, [scopedEntities, search, activeTagFilters]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
   // shared flyout can pick the right kind template (service / host / pod /
@@ -96,6 +127,10 @@ export const AllEntitiesView = () => {
   // name may not be in the dataset — in that case both lookups return
   // undefined and the shared package falls back to name-based inference +
   // the `'healthy'` health variant.
+  // Built from the *unscoped* dataset so a Dependencies-row click inside
+  // the flyout can still resolve type/health for an entity that lives
+  // outside the current category page (e.g. a service depending on a pod
+  // while the user is on the Services page).
   const entityByName = useMemo(() => {
     type DatasetEntity = (typeof dataset.entities)[number];
     const map = new Map<string, DatasetEntity>();
@@ -118,11 +153,24 @@ export const AllEntitiesView = () => {
       <StreamsAppPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {categoryDescriptor?.icon ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={categoryDescriptor.icon} size="l" aria-hidden />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.streams.entityCentricLab.entities.title', {
-                defaultMessage: 'All entities ({count})',
-                values: { count: filteredEntities.length.toLocaleString() },
-              })}
+              {categoryDescriptor
+                ? i18n.translate('xpack.streams.entityCentricLab.entities.categoryTitle', {
+                    defaultMessage: '{label} ({count})',
+                    values: {
+                      label: categoryDescriptor.label,
+                      count: filteredEntities.length.toLocaleString(),
+                    },
+                  })
+                : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
+                    defaultMessage: 'All entities ({count})',
+                    values: { count: filteredEntities.length.toLocaleString() },
+                  })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
@@ -176,7 +224,16 @@ export const AllEntitiesView = () => {
                   defaultMessage: '{entities} Entities · {groups} Groups',
                   values: {
                     entities: filteredEntities.length.toLocaleString(),
-                    groups: dataset.totalGroups,
+                    // On the cross-category page the dataset-wide group
+                    // total is the right summary. When scoped to one
+                    // category the grid only ever renders that single
+                    // section, so collapse the count to 1 (or 0 if the
+                    // category is empty).
+                    groups: categoryScope
+                      ? filteredEntities.length > 0
+                        ? 1
+                        : 0
+                      : dataset.totalGroups,
                   },
                 })}
               </h3>

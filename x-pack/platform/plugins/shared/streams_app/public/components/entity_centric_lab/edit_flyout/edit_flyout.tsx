@@ -26,8 +26,10 @@ import {
   type EuiStepsHorizontalProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { entityTypeToKind, setFlyoutTemplateOverride } from '@kbn/entity-centric-lab-flyout';
 import type { FakeEntityType } from '../fake_entity_types';
 import type {
+  CustomLinkDraft,
   EntityTypeDraft,
   FlyoutTabConfig,
   GeneralFields,
@@ -36,6 +38,11 @@ import type {
   SubsetDraft,
 } from './fake_entity_type_draft';
 import { buildBlankSubsetDraft, buildFakeEntityTypeDraft } from './fake_entity_type_draft';
+import {
+  getPersistedEntityTypeDraft,
+  mergePersistedDraft,
+  persistEntityTypeDraft,
+} from './edit_flyout_persistence';
 import { GeneralStep } from './steps/general_step';
 import { HealthStep } from './steps/health_step';
 import { OwnershipStep } from './steps/ownership_step';
@@ -62,7 +69,18 @@ type View = { kind: 'wizard' } | { kind: 'subset-editor'; subset: SubsetDraft };
 
 export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
   const titleId = useGeneratedHtmlId({ prefix: 'editEntityTypeFlyoutTitle' });
-  const [draft, setDraft] = useState<EntityTypeDraft>(() => buildFakeEntityTypeDraft(entityType));
+  // Re-opening the wizard for a previously-saved row should land the user
+  // back on whatever they last persisted, not on the original mock defaults.
+  // We seed the draft once with `buildFakeEntityTypeDraft(entityType)` and
+  // overlay any persisted slice (general / health / ownership / flyoutTabs
+  // / subsets) on top. The `entityType` and `coveragePreview` fields stay
+  // pinned to the latest hard-coded values from `FAKE_ENTITY_TYPES`.
+  const [draft, setDraft] = useState<EntityTypeDraft>(() =>
+    mergePersistedDraft(
+      buildFakeEntityTypeDraft(entityType),
+      getPersistedEntityTypeDraft(entityType.id)
+    )
+  );
   const [currentStep, setCurrentStep] = useState<WizardStepId>('general');
   const [view, setView] = useState<View>({ kind: 'wizard' });
 
@@ -117,6 +135,10 @@ export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
     (next: FlyoutTabConfig[]) => setDraft((prev) => ({ ...prev, flyoutTabs: next })),
     []
   );
+  const updateCustomLinks = useCallback(
+    (next: CustomLinkDraft[]) => setDraft((prev) => ({ ...prev, customLinks: next })),
+    []
+  );
   const updateSubsets = useCallback(
     (next: SubsetDraft[]) => setDraft((prev) => ({ ...prev, subsets: next })),
     []
@@ -160,14 +182,51 @@ export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
     );
   }, []);
 
+  // Only ever invoked from the "Next step" button, which the footer hides on
+  // the last step. The previous last-step branch that just closed the flyout
+  // without saving is gone — that path now lives in
+  // `handleSaveModifications` and is wired to a single primary button.
   const handleNext = useCallback(() => {
-    if (isLastStep) {
-      onClose();
-      return;
-    }
+    if (isLastStep) return;
     const next = WIZARD_STEPS[stepIndex + 1];
     setCurrentStep(next);
-  }, [isLastStep, onClose, stepIndex]);
+  }, [isLastStep, stepIndex]);
+
+  // "Save modifications" feeds two stores:
+  //   1. The shared per-`EntityKind` override store (`@kbn/entity-centric-
+  //      lab-flyout`), which the entity flyout reads at render time so
+  //      reordered / disabled / renamed tabs show up immediately.
+  //   2. The wizard-local persistence store, keyed by `FakeEntityType.id`,
+  //      so re-opening the same row hydrates the form with the user's last
+  //      saved values rather than the original mock defaults.
+  const handleSaveModifications = useCallback(() => {
+    const kind = entityTypeToKind(draft.entityType.name);
+    if (kind) {
+      // The seeded blank row (and any rows the user added but never filled
+      // in) shouldn't pollute the runtime override — `url` is the minimum
+      // signal that an entry was intentional. We persist the *unfiltered*
+      // list to the wizard store below so re-opening the form still shows
+      // the user's in-progress rows.
+      const meaningfulLinks = draft.customLinks
+        .filter((link) => link.url.trim().length > 0)
+        .map((link) => ({
+          id: link.id,
+          type: link.type,
+          url: link.url,
+          label: link.label,
+        }));
+      setFlyoutTemplateOverride(kind, {
+        flyoutTabs: draft.flyoutTabs.map((tab) => ({
+          id: tab.id,
+          label: tab.label,
+          enabled: tab.enabled,
+        })),
+        customLinks: meaningfulLinks,
+      });
+    }
+    persistEntityTypeDraft(draft.entityType.id, draft);
+    onClose();
+  }, [draft, onClose]);
 
   const isSubsetEditor = view.kind === 'subset-editor';
 
@@ -210,6 +269,7 @@ export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
             onUpdateHealth={updateHealth}
             onUpdateOwnership={updateOwnership}
             onUpdateFlyoutTabs={updateFlyoutTabs}
+            onUpdateCustomLinks={updateCustomLinks}
             onUpdateSubsets={updateSubsets}
             onAddSubset={handleAddSubset}
             onEditSubset={handleEditSubset}
@@ -223,7 +283,7 @@ export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
           <FooterWizard
             isLastStep={isLastStep}
             onCancel={onClose}
-            onSaveModifications={onClose}
+            onSaveModifications={handleSaveModifications}
             onNext={handleNext}
           />
         )}
@@ -364,6 +424,7 @@ interface WizardBodyProps {
   readonly onUpdateHealth: (next: HealthSignals) => void;
   readonly onUpdateOwnership: (next: OwnershipConfig) => void;
   readonly onUpdateFlyoutTabs: (next: FlyoutTabConfig[]) => void;
+  readonly onUpdateCustomLinks: (next: CustomLinkDraft[]) => void;
   readonly onUpdateSubsets: (next: SubsetDraft[]) => void;
   readonly onAddSubset: () => void;
   readonly onEditSubset: (subsetId: string) => void;
@@ -376,6 +437,7 @@ const WizardBody = ({
   onUpdateHealth,
   onUpdateOwnership,
   onUpdateFlyoutTabs,
+  onUpdateCustomLinks,
   onUpdateSubsets,
   onAddSubset,
   onEditSubset,
@@ -388,7 +450,13 @@ const WizardBody = ({
     case 'ownership':
       return <OwnershipStep draft={draft} onChange={onUpdateOwnership} />;
     case 'flyoutContent':
-      return <FlyoutContentStep draft={draft} onChange={onUpdateFlyoutTabs} />;
+      return (
+        <FlyoutContentStep
+          draft={draft}
+          onChange={onUpdateFlyoutTabs}
+          onCustomLinksChange={onUpdateCustomLinks}
+        />
+      );
     case 'subsets':
       return (
         <SubsetsStep
@@ -409,6 +477,9 @@ interface FooterWizardProps {
 }
 
 const FooterWizard = ({ isLastStep, onCancel, onSaveModifications, onNext }: FooterWizardProps) => {
+  const saveLabel = i18n.translate('xpack.streams.entityCentricLab.editFlyout.save', {
+    defaultMessage: 'Save modifications',
+  });
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -419,29 +490,38 @@ const FooterWizard = ({ isLastStep, onCancel, onSaveModifications, onNext }: Foo
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onSaveModifications}
-              data-test-subj="entityCentricLabEditFlyoutSave"
-            >
-              {i18n.translate('xpack.streams.entityCentricLab.editFlyout.save', {
-                defaultMessage: 'Save modifications',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onNext} data-test-subj="entityCentricLabEditFlyoutNext">
-              {isLastStep
-                ? i18n.translate('xpack.streams.entityCentricLab.editFlyout.finish', {
-                    defaultMessage: 'Finish',
-                  })
-                : i18n.translate('xpack.streams.entityCentricLab.editFlyout.next', {
-                    defaultMessage: 'Next step',
-                  })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {isLastStep ? (
+          // On the final step there is nothing left to navigate to, so the
+          // old "Save modifications" link + "Finish" pair collapsed into a
+          // single primary action that both persists the draft and closes
+          // the flyout. The previous "Finish" button only closed without
+          // saving, which was the source of confusion.
+          <EuiButton
+            fill
+            onClick={onSaveModifications}
+            data-test-subj="entityCentricLabEditFlyoutSave"
+          >
+            {saveLabel}
+          </EuiButton>
+        ) : (
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onSaveModifications}
+                data-test-subj="entityCentricLabEditFlyoutSave"
+              >
+                {saveLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onNext} data-test-subj="entityCentricLabEditFlyoutNext">
+                {i18n.translate('xpack.streams.entityCentricLab.editFlyout.next', {
+                  defaultMessage: 'Next step',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
