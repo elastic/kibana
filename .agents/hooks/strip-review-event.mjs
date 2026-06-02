@@ -11,7 +11,9 @@
  *
  * Denied (the common-case slips):
  *   - gh pr review --approve | --request-changes | --comment  (and -a/-r/-c, and
- *     the `--approve=true` form), with an optional `env`/`NAME=value` prefix.
+ *     the `--approve=true` form), with an optional `env`/`NAME=value` prefix and
+ *     a tolerated leading `gh` global flag (`-R`/`--repo`/`--hostname`), which
+ *     `gh` accepts before the subcommand (`gh -R o/r pr review --approve`).
  *   - gh api <…/pulls/{n}/reviews> with an inline body flag (-f/-F/--field/
  *     --raw-field, which can carry `event=…`), `--input -` (stdin), or an
  *     `--input <file>` the hook cannot read/parse.
@@ -28,8 +30,9 @@
  *   tricks (`env --split-string …`). These pass through; do not chase them.
  *
  * The flow is: split the command into pipeline segments, turn each segment into
- * an argv, drop any `env`/assignment prefix, then inspect `gh pr review` and
- * `gh api .../reviews` calls. Helpers below are ordered as they are used.
+ * an argv, drop any `env`/assignment prefix and leading `gh` global flags, then
+ * inspect `gh pr review` and `gh api .../reviews` calls. Helpers below are
+ * ordered as they are used.
  *
  * @see .claude/hooks/strip-review-event.mjs for the Claude Code wrapper.
  * @see .cursor/hooks/strip-review-event.mjs for the Cursor wrapper.
@@ -70,6 +73,9 @@ const API_VALUE_FLAGS = new Set([
   '-f', '-F', '--field', '--raw-field', '-H', '--header', '-X', '--method',
   '--hostname', '-q', '--jq', '-t', '--template', '--input', '--cache',
 ]);
+
+/** `gh` global flags that may precede the subcommand and consume the next token. */
+const GH_GLOBAL_VALUE_FLAGS = new Set(['-R', '--repo', '--hostname']);
 
 // --- Shell parsing (approximate; see header NON-GOALS) -----------------------
 
@@ -197,6 +203,23 @@ const stripCommandPrefix = (args) => {
   return args.slice(start);
 };
 
+/**
+ * Drop a leading run of `gh` global flags (and the values they consume) so the
+ * subcommand lands at `args[1]`. `gh` (via cobra) accepts these before the
+ * subcommand, so `gh -R owner/repo pr review --approve` parses and publishes;
+ * without this the fixed `subcommand === 'pr'`/`'api'` checks would miss it.
+ * Subcommands never start with `-`, so the first non-flag token is preserved.
+ */
+const stripGhGlobalFlags = (args) => {
+  if (args[0] !== 'gh') return args;
+  let index = 1;
+  while (index < args.length && args[index].startsWith('-')) {
+    const consumesValue = !args[index].includes('=') && GH_GLOBAL_VALUE_FLAGS.has(args[index]);
+    index += consumesValue ? 2 : 1;
+  }
+  return [args[0], ...args.slice(index)];
+};
+
 // --- gh argv inspection ------------------------------------------------------
 
 /**
@@ -297,7 +320,7 @@ export const analyzeReviewCommand = (rawCommand) => {
   const command = rawCommand.replace(/\\\n/g, ''); // join bash line continuations
 
   for (const segment of splitSegments(command)) {
-    const args = stripCommandPrefix(tokenize(segment));
+    const args = stripGhGlobalFlags(stripCommandPrefix(tokenize(segment)));
     const [program, subcommand] = args;
     if (program !== 'gh') continue;
 
