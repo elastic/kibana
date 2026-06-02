@@ -148,7 +148,7 @@ import { registerFieldsMetadataExtractors } from './services/register_fields_met
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
-import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
+import { registerBumpMigratedAgentPoliciesTask } from './services/agent_policies/bump_migrated_agent_policies_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
@@ -703,7 +703,7 @@ export class FleetPlugin
     // Register tasks
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
-    registerBumpAgentPoliciesTask(deps.taskManager);
+    registerBumpMigratedAgentPoliciesTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
