@@ -60,6 +60,20 @@ interface PreviewLinkProps {
    * when clicking on "Source event" id
    */
   ancestorsIndexName?: string;
+  /**
+   * When `true` (default), clicking the link calls `openPreviewPanel` on the
+   * legacy expandable-flyout API.
+   *
+   * When `false`, the link is still rendered (so the cell remains visually
+   * consistent) but `onClick` is a no-op. Pass `false` from v2 callers — e.g.
+   * `<UserDetails>` / `<HostDetails>` rendered inside the v2 attack-details
+   * Entities child flyout — where the legacy expandable flyout is not the
+   * visible host. The dedicated v2 user/host tools flyouts are still in
+   * development; once they ship, the no-op branch should be replaced with a
+   * call into the new flyout system (or `PreviewLink` should be replaced with
+   * a v2 `ChildLink` at the call site).
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**
@@ -75,6 +89,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   ruleId,
   children,
   ancestorsIndexName,
+  useLegacyExpandableFlyout = true,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -133,6 +148,13 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   );
 
   const onClick = useCallback(() => {
+    if (!useLegacyExpandableFlyout) {
+      // TODO replace this no-op with a call into the v2 system flyout once the
+      // v2 entity / network preview tools flyouts ship. For now the link is
+      // rendered (so v2 callers like the attack-details Entities child flyout
+      // keep visual parity with the legacy panel) but does nothing on click.
+      return;
+    }
     if (previewParams) {
       openPreviewPanel({
         id: previewParams.id,
@@ -143,7 +165,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         panel: 'preview',
       });
     }
-  }, [scopeId, telemetry, openPreviewPanel, previewParams]);
+  }, [useLegacyExpandableFlyout, scopeId, telemetry, openPreviewPanel, previewParams]);
 
   return shouldShowLink && previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>

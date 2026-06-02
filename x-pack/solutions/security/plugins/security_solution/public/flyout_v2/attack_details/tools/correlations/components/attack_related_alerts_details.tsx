@@ -28,6 +28,19 @@ export interface AttackRelatedAlertsDetailsProps {
    * legacy `useExpandableFlyoutApi().openPreviewPanel` call.
    */
   onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * When `true`, the rule cell in the related-alerts table renders a legacy
+   * `<PreviewLink>` that opens the rule preview via the expandable-flyout
+   * `openPreviewPanel` API. When `false` (default), it renders a v2
+   * `<ChildLink>` that opens the rule details as a system flyout.
+   *
+   * Pass `true` from the legacy attack-details left panel
+   * (`flyout/attack_details/left/insights_sub_panel.tsx`) so the rule link
+   * routes through the legacy expandable flyout consistent with the
+   * surrounding chrome; leave it `false` (the default) for the v2
+   * attack-correlations child flyout.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**
@@ -39,7 +52,7 @@ export interface AttackRelatedAlertsDetailsProps {
  * system-flyout flow.
  */
 export const AttackRelatedAlertsDetails: React.FC<AttackRelatedAlertsDetailsProps> = memo(
-  ({ attack, onShowAlert }) => {
+  ({ attack, onShowAlert, useLegacyExpandableFlyout = false }) => {
     const scopeId = useSpaceId() ?? '';
     const attackId = attack.id;
     const { originalAlertIds: alertIds } = useHeaderData(attack);
@@ -50,9 +63,9 @@ export const AttackRelatedAlertsDetails: React.FC<AttackRelatedAlertsDetailsProp
           scopeId,
           dataTestSubj: ATTACK_CORRELATIONS_RELATED_ALERTS_TABLE_TEST_ID,
           onShowAlert,
-          useLegacyExpandableFlyout: false,
+          useLegacyExpandableFlyout,
         }),
-      [scopeId, onShowAlert]
+      [scopeId, onShowAlert, useLegacyExpandableFlyout]
     );
 
     return (

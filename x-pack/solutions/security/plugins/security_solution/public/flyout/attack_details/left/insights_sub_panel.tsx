@@ -121,9 +121,15 @@ export const InsightsSubPanel: React.FC<InsightsSubPanelProps> = memo(
           data-test-subj="attack-details-left-insights-button-group"
         />
         <EuiSpacer size="m" />
-        {subTab === ENTITIES_TAB_ID && <AttackEntitiesDetails attack={attack} />}
+        {subTab === ENTITIES_TAB_ID && (
+          <AttackEntitiesDetails attack={attack} useLegacyExpandableFlyout />
+        )}
         {subTab === CORRELATION_TAB_ID && (
-          <AttackRelatedAlertsDetails attack={attack} onShowAlert={onShowAlert} />
+          <AttackRelatedAlertsDetails
+            attack={attack}
+            onShowAlert={onShowAlert}
+            useLegacyExpandableFlyout
+          />
         )}
       </>
     );

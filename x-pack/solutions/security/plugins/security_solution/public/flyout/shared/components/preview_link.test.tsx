@@ -290,4 +290,24 @@ describe('<PreviewLink />', () => {
 
     expect(getByTestId('host-link')).toBeInTheDocument();
   });
+
+  it('still renders the link but no-ops the click when useLegacyExpandableFlyout=false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <PreviewLink
+          field="host.name"
+          value="host"
+          scopeId="scopeId"
+          useLegacyExpandableFlyout={false}
+          data-test-subj="host-link"
+        />
+      </TestProviders>
+    );
+
+    const link = getByTestId('host-link');
+    expect(link).toBeInTheDocument();
+
+    link.click();
+    expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+  });
 });

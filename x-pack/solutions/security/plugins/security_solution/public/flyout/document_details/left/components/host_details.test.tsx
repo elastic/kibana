@@ -358,4 +358,35 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).toBeInTheDocument();
     });
   });
+
+  describe('useLegacyExpandableFlyout=false (v2 host)', () => {
+    const renderV2 = () =>
+      render(
+        <TestProviders>
+          <DocumentDetailsContext.Provider value={mockContextValue}>
+            <HostDetails {...defaultProps} useLegacyExpandableFlyout={false} />
+          </DocumentDetailsContext.Provider>
+        </TestProviders>
+      );
+
+    it('still renders the host title link but the click is a no-op', () => {
+      const { getByTestId } = renderV2();
+      const titleLink = getByTestId(HOST_DETAILS_LINK_TEST_ID);
+      expect(titleLink).toBeInTheDocument();
+
+      titleLink.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('still renders related-users preview links but their clicks are no-ops', () => {
+      const { getAllByTestId } = renderV2();
+      const userCell = getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)[0];
+      userCell.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+
+      const ipCell = getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0];
+      ipCell.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+  });
 });

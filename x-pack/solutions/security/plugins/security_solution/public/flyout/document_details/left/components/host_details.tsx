@@ -140,6 +140,21 @@ export interface HostDetailsProps {
    * Set for attack flyout entity panels; omit in document details flyout.
    */
   isAttackDetails?: boolean;
+  /**
+   * When `true` (default), preview-open interactions (the title preview link,
+   * `<PreviewLink>` cells in the related-users table, and the
+   * CSP/vulnerabilities/alert-count insight callbacks) route through the
+   * legacy expandable-flyout `openPreviewPanel` API.
+   *
+   * When `false`, those interactions become no-ops — the affected links and
+   * insights are still rendered (so the panel keeps visual parity with the
+   * legacy left panel) but clicking them does nothing. Set this from v2
+   * callers (e.g. the v2 attack-details Entities child flyout) where the
+   * expandable flyout is not the visible host. The dedicated v2 user/host
+   * tools flyouts are still in development; once they ship, the no-op
+   * branches below should be replaced with calls into the new flyout system.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**
@@ -153,6 +168,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   expandedOnFirstRender = true,
   hostEntityFromStoreResult,
   isAttackDetails = false,
+  useLegacyExpandableFlyout = true,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -194,6 +210,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   );
 
   const openHostPreview = useCallback(() => {
+    if (!useLegacyExpandableFlyout) {
+      // TODO replace this no-op with an `overlays.openSystemFlyout(<HostDetails .../>)`
+      // call once the v2 host-details tools flyout ships (tracked alongside the
+      // v2 attack-details Entities child flyout work). Until then the title
+      // link is still rendered for visual parity but clicking it does nothing.
+      return;
+    }
     openPreviewPanel({
       id: HostPreviewPanelKey,
       params: {
@@ -207,7 +230,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
+  }, [useLegacyExpandableFlyout, openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
@@ -329,6 +352,19 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     contextID: HOST_DETAILS_INSIGHTS_ID,
   });
 
+  const openDetailsPanelOrNoop = useCallback<typeof openDetailsPanel>(
+    (args) => {
+      if (!useLegacyExpandableFlyout) {
+        // TODO replace this no-op with the v2 host details tools flyout once it
+        // ships (CSP / vulnerability / alert-count drill-ins should land in the
+        // same surface as the v2 host preview).
+        return;
+      }
+      openDetailsPanel(args);
+    },
+    [useLegacyExpandableFlyout, openDetailsPanel]
+  );
+
   const {
     loading: isRelatedUsersLoading,
     inspect: inspectRelatedUsers,
@@ -363,6 +399,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
                 value={user}
                 entityId={entityId}
                 scopeId={scopeId}
+                useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
               />
             </EntityCellActions>
@@ -383,18 +420,20 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
               rowItems={toFieldRendererItems(ips)}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
-              render={(ip) =>
-                ip == null ? (
-                  getEmptyTagValue()
-                ) : (
+              render={(ip) => {
+                if (ip == null) {
+                  return getEmptyTagValue();
+                }
+                return (
                   <PreviewLink
                     field="host.ip"
                     value={ip}
                     scopeId={scopeId}
+                    useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                     data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
                   />
-                )
-              }
+                );
+              }}
               scopeId={scopeId}
             />
           );
@@ -418,7 +457,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           ]
         : []),
     ],
-    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId]
+    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId, useLegacyExpandableFlyout]
   );
 
   const relatedUsersCount = useMemo(
@@ -539,7 +578,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}
           direction="column"
           onShowAlertCountDetails={() =>
-            openDetailsPanel({
+            openDetailsPanelOrNoop({
               tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
               subTab: CspInsightLeftPanelSubTab.ALERTS,
             })
@@ -550,7 +589,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           identityFields={hostInsightsIdentityFields}
           direction="column"
           onShowMisconfigurationsDetails={() =>
-            openDetailsPanel({
+            openDetailsPanelOrNoop({
               tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
               subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
             })
@@ -562,7 +601,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           identityFields={hostInsightsIdentityFields}
           direction="column"
           onShowVulnerabilitiesDetails={() =>
-            openDetailsPanel({
+            openDetailsPanelOrNoop({
               tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
               subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
             })
