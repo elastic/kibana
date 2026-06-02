@@ -16,7 +16,6 @@ import type {
   CaseUserActionsStats,
   CasesConfigurationUI,
 } from '../../containers/types';
-import type { CasesNavigation } from '../links';
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -31,9 +30,9 @@ export interface UserActionTreeProps {
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
   casesConfiguration: CasesConfigurationUI;
-  actionsNavigation?: ActionsNavigation;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
 }
@@ -60,7 +59,6 @@ export interface UserActionBuilderArgs {
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
-  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
   euiTheme: EuiThemeComputed<{}>;
@@ -71,8 +69,6 @@ export type UserActionBuilder = (args: UserActionBuilderArgs) => {
 };
 
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;
-
-export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 interface Signal {
   rule: {

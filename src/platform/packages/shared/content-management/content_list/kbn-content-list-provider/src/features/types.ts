@@ -12,6 +12,7 @@ import type { PaginationConfig } from './pagination';
 import type { SearchConfig } from './search';
 import type { SelectionConfig } from './selection';
 import type { ActiveFilters } from '../datasource';
+import type { ContentListItem } from '../item';
 import type { FieldDefinition, FlagDefinition } from '../query_model/types';
 
 /**
@@ -69,6 +70,22 @@ export const isFilterFacetConfig = (
   typeof value === 'object' &&
   value !== null &&
   typeof (value as FilterFacetConfig).getFacets === 'function';
+
+/**
+ * Content editor feature configuration on the base provider.
+ *
+ * The editor is list-level: at most one per list, opened against any row.
+ * Wiring `open` is what makes `<Action.ContentEditor />` render — the action
+ * reads it from `features.contentEditor.open` and self-skips when undefined.
+ *
+ * Base-provider consumers supply their own `open`; the client provider
+ * synthesises one from its `isReadonly` / `onSave` / `customValidators` /
+ * `appendRows` bag and `useOpenContentEditor()`.
+ */
+export interface ContentEditorFeatureConfig {
+  /** Per-item callback that opens the content editor. Leave undefined to omit the row icon. */
+  open?: (item: ContentListItem) => void;
+}
 
 /**
  * Feature configuration for enabling/customizing content list capabilities.
@@ -144,6 +161,21 @@ export interface ContentListFeatures {
    * Merged with built-in flag definitions (starred) in `useFieldDefinitions`.
    */
   flags?: FlagDefinition[];
+
+  /**
+   * Toolbar filter configs compiled by a provider variant.
+   *
+   * Internal pass-through from a provider to {@link `@kbn/content-list-toolbar`};
+   * the toolbar narrows each value to `SearchFilterConfig` at the consumption
+   * site, keeping the EUI dependency out of this base package's public types.
+   */
+  toolbarFilters?: Record<string, unknown>;
+
+  /**
+   * Content editor configuration. See {@link ContentEditorFeatureConfig}.
+   * Populated automatically by the client provider.
+   */
+  contentEditor?: ContentEditorFeatureConfig;
 }
 
 /**

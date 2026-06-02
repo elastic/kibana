@@ -7,24 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-
+import type { Field } from '../../public/types';
+import type { FieldEditorFormState } from '../../public/components/field_editor/field_editor';
+import { act, screen } from '@testing-library/react';
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment, mockDocuments } from './helpers';
-import type {
-  FieldEditorFormState,
-  Props,
-} from '../../public/components/field_editor/field_editor';
-import type { Field } from '../../public/types';
+import { flushDocumentsAndPreviewTimers } from './helpers/rtl_helpers';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
-import type { FieldEditorTestBed } from './field_editor.helpers';
-import { setup, waitForDocumentsAndPreviewUpdate } from './field_editor.helpers';
+import { setup } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
-  let testBed: FieldEditorTestBed;
-  let onChange: jest.Mock<Props['onChange']> = jest.fn();
+  let onChange = jest.fn();
 
   const lastOnChangeCall = (): FieldEditorFormState[] =>
     onChange.mock.calls[onChange.mock.calls.length - 1];
@@ -39,22 +34,14 @@ describe('<FieldEditor />', () => {
         }
       | undefined;
 
-    let promise: ReturnType<FieldEditorFormState['submit']>;
-
     await act(async () => {
       // We can't await for the promise here ("await state.submit()") as the validation for the
       // "script" field has different setTimeout mocked by jest.
       // If we await here (await state.submit()) we don't have the chance to call jest.advanceTimersByTime()
       // below and the test times out.
-      promise = state.submit();
-    });
-
-    await waitForDocumentsAndPreviewUpdate();
-
-    await act(async () => {
-      promise.then((response) => {
-        formState = response;
-      });
+      const promise = state.submit();
+      await flushDocumentsAndPreviewTimers();
+      formState = await promise;
     });
 
     if (formState === undefined) {
@@ -80,31 +67,22 @@ describe('<FieldEditor />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
-  test('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
-    testBed = await setup();
+  it.each(['Set custom label', 'Set custom description', 'Set value', 'Set format'])(
+    'initial state should have "%s" turned off',
+    async (name) => {
+      await setup();
+      expect(screen.getByRole('switch', { name })).not.toBeChecked();
+    }
+  );
 
-    ['customLabel', 'customDescription', 'value', 'format'].forEach((row) => {
-      const testSubj = `${row}Row.toggle`;
-      const toggle = testBed.find(testSubj);
-      const isOn = toggle.props()['aria-checked'];
-
-      try {
-        expect(isOn).toBe(false);
-      } catch (e: any) {
-        e.message = `"${row}" row toggle expected to be 'off' but was 'on'. \n${e.message}`;
-        throw e;
-      }
-    });
-  });
-
-  test('should accept a defaultValue and onChange prop to forward the form state', async () => {
+  it('should accept a defaultValue and onChange prop to forward the form state', async () => {
     const field = {
       name: 'foo',
       type: 'date' as const,
       script: { source: 'emit("hello")' },
     };
 
-    testBed = await setup({ onChange, field });
+    await setup({ onChange, field });
 
     expect(onChange).toHaveBeenCalled();
 
@@ -116,16 +94,17 @@ describe('<FieldEditor />', () => {
     const { data: formData } = await submitFormAndGetData(lastState);
     expect(formData).toEqual({ ...field, format: null });
 
-    // Make sure that both isValid and isSubmitted state are now "true"
     lastState = getLastStateUpdate();
     expect(lastState.isValid).toBe(true);
     expect(lastState.isSubmitted).toBe(true);
   });
 
   describe('validation', () => {
-    test('should prevent creating duplicates', async () => {
+    it('should prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
-      testBed = await setup(
+      const {
+        actions: { toggleFormRow, fields },
+      } = await setup(
         {
           onChange,
         },
@@ -142,11 +121,9 @@ describe('<FieldEditor />', () => {
         }
       );
 
-      const { form, component, actions } = testBed;
-
-      await actions.toggleFormRow('value');
-      await actions.fields.updateName(existingFields[0]);
-      await actions.fields.updateScript('echo("hello")');
+      await toggleFormRow('value');
+      await fields.updateName(existingFields[0]);
+      await fields.updateScript('echo("hello")');
 
       await act(async () => {
         jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
@@ -154,19 +131,18 @@ describe('<FieldEditor />', () => {
 
       const lastState = getLastStateUpdate();
       await submitFormAndGetData(lastState);
-      component.update();
       expect(getLastStateUpdate().isValid).toBe(false);
-      expect(form.getErrorsMessages()).toEqual(['A field with this name already exists.']);
+      expect(screen.getAllByText('A field with this name already exists.')).toHaveLength(2);
     });
 
-    test('should not count the default value as a duplicate', async () => {
+    it('should not count the default value as a duplicate', async () => {
       const field: Field = {
         name: 'myRuntimeField',
         type: 'boolean',
         script: { source: 'emit("hello"' },
       };
 
-      testBed = await setup(
+      await setup(
         {
           field,
           onChange,
@@ -176,13 +152,11 @@ describe('<FieldEditor />', () => {
         }
       );
 
-      const { form, component } = testBed;
       const lastState = getLastStateUpdate();
       await submitFormAndGetData(lastState);
-      component.update();
 
       expect(getLastStateUpdate().isValid).toBe(true);
-      expect(form.getErrorsMessages()).toEqual([]);
+      expect(screen.queryByText('A field with this name already exists.')).not.toBeInTheDocument();
     });
   });
 });

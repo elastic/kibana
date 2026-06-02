@@ -15,6 +15,10 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerSearchRoute } from './routes/search';
+import { registerGetRoute } from './routes/get';
+import { registerListRoute } from './routes/list';
+import { registerUpsertRoute } from './routes/upsert';
+import { registerDeleteRoute } from './routes/delete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -80,6 +84,10 @@ export class AgentContextLayerPlugin
       logger: this.logger,
       getSmlService,
     });
+    registerGetRoute({ router, coreSetup, logger: this.logger, getSmlService });
+    registerListRoute({ router, coreSetup, logger: this.logger, getSmlService });
+    registerUpsertRoute({ router, coreSetup, logger: this.logger, getSmlService });
+    registerDeleteRoute({ router, coreSetup, logger: this.logger, getSmlService });
 
     return {
       registerType: smlSetup.registerType,
@@ -146,7 +154,7 @@ export class AgentContextLayerPlugin
         });
         const spaceId =
           params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return smlService.indexAttachment({
+        const base = {
           originId: params.originId,
           attachmentType: params.attachmentType,
           action: params.action,
@@ -154,7 +162,11 @@ export class AgentContextLayerPlugin
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),
-        });
+        };
+        if (params.content !== undefined) {
+          return smlService.indexAttachment({ ...base, content: params.content });
+        }
+        return smlService.indexAttachment({ ...base, force: params.force });
       },
     };
   }

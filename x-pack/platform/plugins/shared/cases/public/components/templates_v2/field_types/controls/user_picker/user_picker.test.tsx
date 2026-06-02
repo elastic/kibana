@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
 import { userProfiles, userProfilesMap } from '../../../../../containers/user_profiles/api.mock';
 import { useSuggestUserProfiles } from '../../../../../containers/user_profiles/use_suggest_user_profiles';
@@ -48,20 +48,23 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   onSubmitResult = jest.fn(),
 }) => {
   const serialized = JSON.stringify(initialUsers ?? []);
-  const { form } = useForm<{}>({
-    defaultValue: {
+  const form = useForm({
+    defaultValues: {
       [CASE_EXTENDED_FIELDS]: { assignee_as_keyword: serialized },
     },
-    options: { stripEmptyFields: false },
   });
 
-  const handleSubmit = async () => {
-    const { isValid, data } = await form.submit();
-    onSubmitResult({ isValid: isValid ?? false, data: data as Record<string, unknown> });
-  };
+  const handleSubmit = form.handleSubmit(
+    (data) => onSubmitResult({ isValid: true, data: data as Record<string, unknown> }),
+    () =>
+      onSubmitResult({
+        isValid: false,
+        data: form.getValues() as Record<string, unknown>,
+      })
+  );
 
   return (
-    <FormProvider form={form}>
+    <FormProvider {...form}>
       <UserPicker
         name="assignee"
         control="USER_PICKER"

@@ -13,19 +13,10 @@ import type {
   IlmPolicyPhases,
 } from '@kbn/streams-schema';
 import type { IlmPhasesFlyoutFormInternal, PreservedTimeUnit } from './types';
-import { parseInterval } from './utils';
+import { formatDuration, parseInterval, parseIntervalWithDefaultUnit } from './utils';
 
 type AnyRecord = Record<string, unknown>;
 type DownsampleOutput = { after: string; fixed_interval: string } & AnyRecord;
-
-const formatDuration = (
-  value: string | undefined,
-  unit: string | undefined
-): string | undefined => {
-  if (!value || value.trim() === '') return;
-  if (!unit) return;
-  return `${Number(value)}${unit}`;
-};
 
 const formatDownsampleInterval = (
   value: string | undefined,
@@ -43,12 +34,10 @@ export const mapIlmPolicyPhasesToFormValues = (
   phases: IlmPolicyPhases
 ): IlmPhasesFlyoutFormInternal => {
   const withMillis = (duration: string | undefined) => {
-    const parsed = parseInterval(duration);
-    const minAgeValue = parsed?.value ?? '';
-    const minAgeUnit = (parsed?.unit ?? 'd') as PreservedTimeUnit;
+    const parsed = parseIntervalWithDefaultUnit(duration);
     return {
-      minAgeValue,
-      minAgeUnit,
+      minAgeValue: parsed.value,
+      minAgeUnit: parsed.unit,
     };
   };
 

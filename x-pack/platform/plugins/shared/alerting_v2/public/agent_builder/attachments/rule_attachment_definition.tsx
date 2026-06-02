@@ -14,28 +14,19 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 
 export { RULE_ATTACHMENT_TYPE };
-import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
+import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
-import type { RulesApi } from '../../services/rules_api';
 import { RuleInlineContent } from './rule_inline_content';
 import { RuleCanvasContent } from './rule_canvas_content';
 
 export type RuleAttachment = Attachment<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
 interface RuleAttachmentDefinitionServices {
-  rulesApi: RulesApi;
-  application: ApplicationStart;
-  basePath: IBasePath;
-  notifications: NotificationsStart;
   container: Container;
 }
 
 export const createRuleAttachmentDefinition = ({
-  rulesApi,
-  application,
-  basePath,
-  notifications,
   container,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
@@ -46,15 +37,9 @@ export const createRuleAttachmentDefinition = ({
   renderInlineContent: (props) => <RuleInlineContent {...props} />,
 
   renderCanvasContent: (props, callbacks) => (
-    <RuleCanvasContent
-      {...props}
-      {...callbacks}
-      rulesApi={rulesApi}
-      application={application}
-      basePath={basePath}
-      notifications={notifications}
-      container={container}
-    />
+    <Context.Provider value={container}>
+      <RuleCanvasContent {...props} {...callbacks} />
+    </Context.Provider>
   ),
 
   getActionButtons: ({ openCanvas, isCanvas }) => {

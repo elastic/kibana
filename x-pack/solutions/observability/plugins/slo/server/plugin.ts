@@ -95,13 +95,11 @@ export class SLOPlugin
   ): SLOServerSetup {
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-    const isCompositeSloEnabled = this.config.experimental?.compositeSlo?.enabled === true;
-
     const savedObjectTypes = [
       SO_SLO_TYPE,
       SO_SLO_SETTINGS_TYPE,
       SO_SLO_TEMPLATE_TYPE,
-      ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
+      SO_SLO_COMPOSITE_TYPE,
     ];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
@@ -166,10 +164,7 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
-    if (isCompositeSloEnabled) {
-      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
-      core.savedObjects.registerType(sloComposite);
-    }
+    core.savedObjects.registerType(sloComposite);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
@@ -206,10 +201,7 @@ export class SLOPlugin
           );
 
           const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [
-              SO_SLO_TEMPLATE_TYPE,
-              ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
-            ],
+            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE, SO_SLO_COMPOSITE_TYPE],
           });
           const rawScopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
@@ -268,7 +260,6 @@ export class SLOPlugin
       logger: this.logger,
       repository: getSloServerRouteRepository({
         isServerless: this.isServerless,
-        isCompositeSloEnabled,
       }),
       isDev: this.isDev,
     });
@@ -277,11 +268,7 @@ export class SLOPlugin
       .getStartServices()
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(
-          esInternalClient,
-          this.logger,
-          isCompositeSloEnabled
-        );
+        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
         await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
           sloResourceInstaller.ensureCommonResourcesInstalled()
         );

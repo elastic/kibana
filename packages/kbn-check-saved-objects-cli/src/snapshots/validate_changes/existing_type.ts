@@ -20,12 +20,12 @@ import {
 } from './common_utils';
 import {
   mappingsUpdated,
-  validateNoModelVersionChanges,
-  validateModelVersionsChanges,
+  validateNoStructuralModelVersionChanges,
   validateNewMappingsInModelVersion,
   validateIgnoreAboveExistingType,
   validateNameTitleFieldTypesExistingType,
 } from './existing_type_utils';
+import { validateAdditiveOnlyMappings } from './additive_only_mappings';
 
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
@@ -74,8 +74,15 @@ export function validateChangesExistingType({
 
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
 
+  // assert that no mapped property has been removed compared to the baseline snapshot
+  validateAdditiveOnlyMappings(name, from.mappings, to.mappings);
   // validate that keyword and flattened fields have ignore_above
   validateIgnoreAboveExistingType(name, to, from, log);
+
+  // Validate existing model versions for structural and schema-only mutations.
+  // Structural mutations always throw; schema-only mutations are classified
+  // with granular diffing (breaking → throw, warnings → log).
+  validateNoStructuralModelVersionChanges(from, to, registeredType, log);
 
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
@@ -91,11 +98,8 @@ export function validateChangesExistingType({
           docsAnchor: '#defining-model-versions',
         });
       }
-      validateModelVersionsChanges({ from, to, registeredType, log });
       break;
-    case 1:
-      validateNoModelVersionChanges(from, to);
-
+    case 1: {
       const newModelVersion = getLatestModelVersion(to);
 
       if (to.modelVersions.length === 1) {
@@ -108,6 +112,7 @@ export function validateChangesExistingType({
 
       validateNoIndexOrEnabledFalse(name, to, [newModelVersion]);
       break;
+    }
     default:
       throw new SavedObjectsCheckError({
         ruleId: RULE_IDS.EXISTING_TYPE_TOO_MANY_NEW_MODEL_VERSIONS,

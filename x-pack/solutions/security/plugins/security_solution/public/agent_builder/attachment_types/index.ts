@@ -138,7 +138,7 @@ export const registerRuleAttachment = ({
 }): void => {
   void import(
     /* webpackChunkName: "security_rule_attachment" */
-    './rule_attachment'
+    './rule'
   ).then(({ registerRuleAttachment: register }) => {
     register({ attachments, application, aiRuleCreation, uiSettings });
   });
