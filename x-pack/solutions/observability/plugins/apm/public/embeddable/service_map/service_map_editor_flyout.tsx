@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import datemath from '@kbn/datemath';
 import {
   ENVIRONMENT_ALL,
@@ -479,9 +479,7 @@ export function ServiceMapEditorFlyout({
                 return { label: opt?.label ?? value, value };
               })}
               onChange={(selected) =>
-                setConnectionFilter(
-                  selected.map((s) => (s.value ?? s.label) as ConnectionFilter)
-                )
+                setConnectionFilter(selected.map((s) => (s.value ?? s.label) as ConnectionFilter))
               }
               data-test-subj="apmServiceMapEditorConnectionFilter"
             />
@@ -523,10 +521,9 @@ export function ServiceMapEditorFlyout({
               compressed
               fullWidth
               isClearable
-              placeholder={i18n.translate(
-                'xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder',
-                { defaultMessage: 'Filter by SLO status' }
-              )}
+              placeholder={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder', {
+                defaultMessage: 'Filter by SLO status',
+              })}
               options={sloStatusComboBoxOptions}
               selectedOptions={sloStatusFilter.map((value) => {
                 const opt = SLO_STATUS_OPTIONS.find((o) => o.value === value);

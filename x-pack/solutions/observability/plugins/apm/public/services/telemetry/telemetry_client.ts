@@ -47,9 +47,7 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK, params);
   };
 
-  public reportServiceMapAddedToDashboard = (
-    params: ServiceMapAddedToDashboardParams
-  ): void => {
+  public reportServiceMapAddedToDashboard = (params: ServiceMapAddedToDashboardParams): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD, params);
   };
 }

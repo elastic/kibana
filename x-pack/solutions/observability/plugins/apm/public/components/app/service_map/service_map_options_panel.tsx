@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
@@ -160,20 +161,21 @@ export function ServiceMapOptionsPanelToggle({
         gutterSize="none"
         responsive={false}
       >
-        <EuiButtonIcon
-          display="empty"
-          color={isExpanded ? 'primary' : 'text'}
-          size="s"
-          iconType="controls"
-          css={mapToolbarToggleIconCss}
-          onClick={() => onExpandedChange(!isExpanded)}
-          aria-expanded={isExpanded}
-          title={toggleLabel}
-          aria-label={toggleLabel}
-          data-test-subj={
-            isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
-          }
-        />
+        <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="empty"
+            color={isExpanded ? 'primary' : 'text'}
+            size="s"
+            iconType="controls"
+            css={mapToolbarToggleIconCss}
+            onClick={() => onExpandedChange(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-label={toggleLabel}
+            data-test-subj={
+              isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
+            }
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
       {showBadge && (
         <span
@@ -324,9 +326,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onAlertStatusFilterChange(
-                selected.map((s) => (s.value ?? s.label) as AlertStatus)
-              );
+              onAlertStatusFilterChange(selected.map((s) => (s.value ?? s.label) as AlertStatus));
             }}
             fullWidth
             compressed
@@ -349,9 +349,7 @@ export function ServiceMapOptionsPanel({
               return { label: opt?.label ?? value, value };
             })}
             onChange={(selected) => {
-              onSloStatusFilterChange(
-                selected.map((s) => (s.value ?? s.label) as SloStatus)
-              );
+              onSloStatusFilterChange(selected.map((s) => (s.value ?? s.label) as SloStatus));
             }}
             fullWidth
             compressed

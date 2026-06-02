@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -258,46 +259,60 @@ export function ServiceMapFindInPage({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="chevronSingleUp"
-                  display="empty"
-                  color="text"
-                  size="s"
-                  aria-label={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
                     defaultMessage: 'Go to previous match on the map',
                   })}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    goToPreviousMatch();
-                  }}
-                  isDisabled={searchResults.length === 0}
-                  data-test-subj="serviceMapFindPrevious"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="chevronSingleUp"
+                    display="empty"
+                    color="text"
+                    size="s"
+                    aria-label={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
+                      defaultMessage: 'Go to previous match on the map',
+                    })}
+                    onMouseDown={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      goToPreviousMatch();
+                    }}
+                    isDisabled={searchResults.length === 0}
+                    data-test-subj="serviceMapFindPrevious"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="chevronSingleDown"
-                  display="empty"
-                  color="text"
-                  size="s"
-                  aria-label={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
                     defaultMessage: 'Go to next match on the map',
                   })}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    goToNextMatch();
-                  }}
-                  isDisabled={searchResults.length === 0}
-                  data-test-subj="serviceMapFindNext"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="chevronSingleDown"
+                    display="empty"
+                    color="text"
+                    size="s"
+                    aria-label={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
+                      defaultMessage: 'Go to next match on the map',
+                    })}
+                    onMouseDown={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      goToNextMatch();
+                    }}
+                    isDisabled={searchResults.length === 0}
+                    data-test-subj="serviceMapFindNext"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

@@ -13,19 +13,7 @@ jest.mock('./use_filter_url_sync', () => ({
 }));
 
 import { readInitialAppStateFromRawUrl } from './use_filter_url_sync';
-// We exercise the non-exported `capturePageFilters` via the same module that re-exports it via
-// `AddToDashboardButton`'s save path. To keep the test focused on the pure logic, we re-import
-// from a dedicated test wrapper that just re-exports the helper.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { __testOnly__ } = require('./add_to_dashboard_button') as {
-  __testOnly__: {
-    capturePageFilters: (args: {
-      urlKuery: string;
-      urlServiceName: string | undefined;
-      filterManagerFilters: Filter[];
-    }) => { kuery: string | undefined; service_name: string | undefined };
-  };
-};
+import { __testOnly__ } from './add_to_dashboard_button';
 
 const mockedReader = readInitialAppStateFromRawUrl as jest.MockedFunction<
   typeof readInitialAppStateFromRawUrl
