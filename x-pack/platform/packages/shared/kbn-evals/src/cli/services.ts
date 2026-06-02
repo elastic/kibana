@@ -179,10 +179,8 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
 
   const composePath = Path.join(repoRoot, 'data/edot_collector/docker-compose.yaml');
 
-  try {
-    if (!Fs.existsSync(composePath)) {
-      log.info('[edot] compose file not found, using docker stop');
-    } else {
+  if (Fs.existsSync(composePath)) {
+    try {
       execFileSync('docker', ['compose', '-f', composePath, 'down'], {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -190,15 +188,17 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
       });
       log.info('[edot] Docker container stopped via compose');
       return;
+    } catch (err) {
+      const { signal, stderr } = err as Record<string, unknown>;
+      if (signal != null) {
+        log.warning('[edot] docker compose down timed out, falling back to docker stop');
+      } else {
+        const detail = typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err);
+        log.warning(`[edot] docker compose down failed (${detail}), falling back to docker stop`);
+      }
     }
-  } catch (err) {
-    const { signal, stderr } = err as Record<string, unknown>;
-    if (signal != null) {
-      log.warning('[edot] docker compose down timed out, falling back to docker stop');
-    } else {
-      const detail = typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err);
-      log.warning(`[edot] docker compose down failed (${detail}), falling back to docker stop`);
-    }
+  } else {
+    log.info('[edot] compose file not found, using docker stop');
   }
 
   try {
@@ -306,7 +306,7 @@ export const stopService = async (
 
     delete state[name];
     writeState(repoRoot, state);
-    return false;
+    return true;
   }
 
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
