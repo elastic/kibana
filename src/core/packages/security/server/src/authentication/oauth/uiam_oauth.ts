@@ -47,10 +47,12 @@ export interface UiamOAuthConnectionResponse {
   revocation?: string;
   revocation_reason?: string;
   scopes?: string[];
+  user_id?: string;
 }
 
 export interface CreateUiamOAuthClientParams {
   resource: string;
+  project_id: string;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;

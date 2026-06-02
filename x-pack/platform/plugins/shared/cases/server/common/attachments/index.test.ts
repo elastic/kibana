@@ -9,11 +9,13 @@ import { AttachmentType } from '../../../common/types/domain';
 import {
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  LEGACY_ACTIONS_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
+import { actionsAttachmentTransformer } from './actions';
 import { commentAttachmentTransformer } from './comment';
 import { alertAttachmentTransformer } from './alert';
 import { passThroughTransformer } from './base';
@@ -125,22 +127,28 @@ describe('common/attachments', () => {
       expect(transformer).toBe(externalReferenceAttachmentTransformer);
     });
 
-    it('returns alert transformer for legacy and unified alert types', () => {
-      const legacyAlertTransformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
-      expect(legacyAlertTransformer).toBe(alertAttachmentTransformer);
-
-      const unifiedAlertTransformer = getAttachmentTypeTransformers('stack.alert', owner);
-      expect(unifiedAlertTransformer).toBe(alertAttachmentTransformer);
+    it('returns actions transformer for legacy actions routing key', () => {
+      const transformer = getAttachmentTypeTransformers(LEGACY_ACTIONS_TYPE, owner);
+      expect(transformer).toBe(actionsAttachmentTransformer);
     });
 
-    it('returns event transformer for legacy and unified event types', () => {
-      const transformer = getAttachmentTypeTransformers(
+    it('returns actions transformer when dispatching from attribute type', () => {
+      const routingKey = getAttachmentTypeFromAttributes({
+        type: AttachmentType.actions,
+        comment: 'hi',
+        actions: { type: 'isolate', targets: [] },
+      });
+      expect(routingKey).toBe(LEGACY_ACTIONS_TYPE);
+      expect(getAttachmentTypeTransformers(routingKey, owner)).toBe(actionsAttachmentTransformer);
+    });
+
+    it('returns event transformer for security.event in both legacy and unified routing keys', () => {
+      const legacyEventTransformer = getAttachmentTypeTransformers(
         AttachmentType.event,
         SECURITY_SOLUTION_OWNER
       );
-      expect(transformer).not.toBe(externalReferenceAttachmentTransformer);
       expect(
-        transformer.isType({
+        legacyEventTransformer.isType({
           type: AttachmentType.event,
           eventId: 'event-1',
           index: 'index-1',
@@ -160,6 +168,11 @@ describe('common/attachments', () => {
           owner: SECURITY_SOLUTION_OWNER,
         } as never)
       ).toBe(true);
+    });
+
+    it('returns alert transformer for AttachmentType.alert', () => {
+      const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
+      expect(transformer).toBe(alertAttachmentTransformer);
     });
 
     it('returns pass-through transformer for unrecognized types', () => {

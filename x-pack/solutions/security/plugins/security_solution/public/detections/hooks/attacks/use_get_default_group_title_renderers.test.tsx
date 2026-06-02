@@ -37,8 +37,16 @@ jest.mock(
   })
 );
 
+const mockReportEvent = jest.fn();
 jest.mock('../../../common/lib/kibana', () => ({
   useDateFormat: jest.fn(() => jest.fn()),
+  useKibana: () => ({
+    services: {
+      telemetry: {
+        reportEvent: mockReportEvent,
+      },
+    },
+  }),
 }));
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
