@@ -20,7 +20,7 @@
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
 import { conditionSchema } from '@kbn/streamlang';
-import { routingStatus } from '@kbn/streams-schema';
+import { flattenRecord, routingStatus } from '@kbn/streams-schema';
 import { ingestStreamLifecycleSchema } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -85,7 +85,11 @@ export const loadGraphDslRoute = createServerRoute({
   params: z.object({
     body: graphDslSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{
     topology: string;
     nodes: string[];
     results: Array<{ name: string; status: 'created' | 'error'; error?: string }>;
@@ -105,7 +109,11 @@ export const loadGraphDslRoute = createServerRoute({
         await streamsClient.upsertStream({ name, request: upsertRequest });
         results.push({ name, status: 'created' });
       } catch (err) {
-        results.push({ name, status: 'error', error: err instanceof Error ? err.message : String(err) });
+        results.push({
+          name,
+          status: 'error',
+          error: err instanceof Error ? err.message : String(err),
+        });
       }
     }
 
@@ -133,7 +141,11 @@ export const deleteGraphTopologyRoute = createServerRoute({
     path: z.object({ topology: z.string() }),
     body: graphDslSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{
     topology: string;
     results: Array<{ name: string; status: 'deleted' | 'error'; error?: string }>;
   }> => {
@@ -146,7 +158,11 @@ export const deleteGraphTopologyRoute = createServerRoute({
         await streamsClient.deleteStream(name);
         results.push({ name, status: 'deleted' });
       } catch (err) {
-        results.push({ name, status: 'error', error: err instanceof Error ? err.message : String(err) });
+        results.push({
+          name,
+          status: 'error',
+          error: err instanceof Error ? err.message : String(err),
+        });
       }
     }
 
@@ -154,7 +170,69 @@ export const deleteGraphTopologyRoute = createServerRoute({
   },
 });
 
+export const routeTestGraphRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_graph/_route_test',
+  options: {
+    access: 'internal',
+    summary: 'Test-route a document through the graph topology',
+    description:
+      'Runs cluster-level simulate ingest (POST /_ingest/_simulate) on a single document, ' +
+      'following reroutes across data streams without persisting. Returns the landing node, ' +
+      'executed pipeline chain, and the transformed document.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      source: z.string(),
+      document: flattenRecord,
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<
+    | { landedIn: string; executedPipelines: string[]; document: Record<string, unknown> }
+    | { error: string }
+  > => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    const result = await esClient.simulate.ingest({
+      docs: [
+        {
+          _index: params.body.source,
+          _source: params.body.document,
+        },
+      ],
+    });
+
+    const docResult = result.docs[0]?.doc;
+    if (!docResult) {
+      return { error: 'No result returned from simulate ingest' };
+    }
+    if (docResult.error) {
+      const errMsg =
+        typeof docResult.error.reason === 'string'
+          ? docResult.error.reason
+          : JSON.stringify(docResult.error);
+      return { error: errMsg };
+    }
+
+    return {
+      landedIn: docResult._index,
+      executedPipelines: docResult.executed_pipelines,
+      document: docResult._source as Record<string, unknown>,
+    };
+  },
+});
+
 export const graphRoutes = {
   ...loadGraphDslRoute,
   ...deleteGraphTopologyRoute,
+  ...routeTestGraphRoute,
 };
