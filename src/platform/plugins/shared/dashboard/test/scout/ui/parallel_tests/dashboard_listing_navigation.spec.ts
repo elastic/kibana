@@ -40,7 +40,6 @@ spaceTest.describe(
           async () => {
             await pageObjects.dashboard.goto();
             await page.testSubj.click('dashboardListingCreateButton');
-            await page.testSubj.click('createDashboardButton');
             await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
               timeout: 20_000,
             });
@@ -59,7 +58,6 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await pageObjects.dashboard.goto();
         await page.testSubj.click('dashboardListingCreateButton');
-        await page.testSubj.click('createDashboardButton');
         await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
           timeout: 20_000,
         });

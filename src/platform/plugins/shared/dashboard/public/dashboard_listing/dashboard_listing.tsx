@@ -95,25 +95,12 @@ export const DashboardListing = ({
     const createAnnotationAction = tabsByIdMap.get('annotations')?.createAction;
     const createMenuItems: AppMenuPopoverItem[] = [];
 
-    if (createDashboardAction) {
-      createMenuItems.push({
-        id: 'createDashboard',
-        order: 1,
-        label: i18n.translate('dashboard.listing.createDashboardButtonLabel', {
-          defaultMessage: 'Create Dashboard',
-        }),
-        iconType: 'productDashboard',
-        testId: 'createDashboardButton',
-        run: createDashboardAction,
-      });
-    }
-
     if (createVisualizationAction) {
       createMenuItems.push({
         id: 'createVisualization',
-        order: 2,
+        order: 1,
         label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
-          defaultMessage: 'Create Visualization',
+          defaultMessage: 'Create visualization',
         }),
         iconType: 'chartBarVertical',
         testId: 'createVisualizationButton',
@@ -124,9 +111,9 @@ export const DashboardListing = ({
     if (createAnnotationAction) {
       createMenuItems.push({
         id: 'createAnnotation',
-        order: 3,
+        order: 2,
         label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
-          defaultMessage: 'Create Annotation',
+          defaultMessage: 'Create annotation',
         }),
         iconType: 'flag',
         testId: 'createAnnotationButton',
@@ -134,20 +121,32 @@ export const DashboardListing = ({
       });
     }
 
-    if (createMenuItems.length === 0) {
+    if (!createDashboardAction) {
       return undefined;
     }
 
     return {
       primaryActionItem: {
-        id: 'create',
+        id: 'createDashboard',
         testId: 'dashboardListingCreateButton',
         iconType: 'plus',
         label: i18n.translate('dashboard.listing.createButtonLabel', {
-          defaultMessage: 'Create',
+          defaultMessage: 'Create dashboard',
         }),
-        popoverWidth: 180,
-        items: createMenuItems,
+        run: createDashboardAction,
+        popoverWidth: 200,
+        splitButtonProps:
+          createMenuItems.length > 0
+            ? {
+                secondaryButtonAriaLabel: i18n.translate(
+                  'dashboard.listing.createMoreActionsButtonAriaLabel',
+                  {
+                    defaultMessage: 'Create more dashboard content',
+                  }
+                ),
+                items: createMenuItems,
+              }
+            : undefined,
       },
     };
   }, [tabs]);
