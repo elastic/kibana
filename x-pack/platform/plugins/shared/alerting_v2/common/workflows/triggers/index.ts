@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export type {
-  DomainEvent,
-  EventBus,
-  EventBusContextRest,
-  EventBusHandlerArgs,
-  EventBusSubscriber,
-  Subscription,
-} from './types';
-export { EventBusSubscriberToken } from './types';
-export { AsyncDomainEventBus } from './event_bus';
+export {
+  EPISODE_ASSIGNED_TRIGGER_ID,
+  episodeAssignedPayloadSchema,
+  episodeAssignedTriggerCommonDefinition,
+} from './episode_assigned';
+export type { EpisodeAssignedPayload } from './episode_assigned';
