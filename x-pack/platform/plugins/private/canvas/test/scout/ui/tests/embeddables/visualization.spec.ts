@@ -13,16 +13,17 @@
  *   2. By-value: creating a new Vega panel via the Canvas editor menu, saving and returning,
  *      adds a rendered panel to the workpad.
  *
- * The FTR suite also renamed panels to "v2" through the Visualize/Vega editors; those steps
- * exercise the editor save-as flow rather than Canvas, so they are trimmed here.
- *
- * Auth: canvas:all + visualize/dashboard access (CANVAS_FULL_EDITOR_ROLE).
+ * The FTR suite also renamed panels to "v2" through the Visualize/Vega editors and re-edited
+ * existing panels; those steps exercise the editor save-as/save-and-return flow rather than
+ * Canvas (and the by-value creation test below already covers editor → save-and-return), so
+ * they are trimmed here.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../fixtures';
 
 const { VISUALIZATION } = testData.EMBEDDABLES;
+const EXTENDED_TIMEOUT = 20_000;
 
 test.describe('Canvas visualization embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -36,7 +37,6 @@ test.describe('Canvas visualization embeddable', { tag: testData.CANVAS_UI_TAGS 
     await canvas.gotoListing();
     await canvas.createNewWorkpad();
     await expect(canvas.workpadPage).toBeVisible();
-    await canvas.setWorkpadName('visualization tests');
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -48,18 +48,15 @@ test.describe('Canvas visualization embeddable', { tag: testData.CANVAS_UI_TAGS 
   }) => {
     await canvas.addEmbeddableFromLibrary(VISUALIZATION.libraryName, 'Visualization');
     await expect(canvas.embeddablePanelHeading(VISUALIZATION.headingId)).toBeVisible({
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
   });
 
   test('creates a by-value Vega panel via the editor menu', async ({ pageObjects: { canvas } }) => {
-    const initialCount = await canvas.getEmbeddableCount();
-
     await canvas.addNewPanel('Vega');
     await canvas.saveVisualizeAndReturn();
 
-    await expect
-      .poll(() => canvas.getEmbeddableCount(), { timeout: 30_000 })
-      .toBe(initialCount + 1);
+    // A fresh workpad starts empty, so saving the Vega panel adds exactly one panel.
+    await expect.poll(() => canvas.getEmbeddableCount(), { timeout: EXTENDED_TIMEOUT }).toBe(1);
   });
 });

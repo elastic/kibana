@@ -14,20 +14,16 @@
  *   3. Four rendered elements are visible (markdown + 3 datatables: essql/csv/timelion)
  *      with the expected row counts, confirming the expression pipeline ran.
  *
- * Note on element content selectors: `.canvasMarkdown` and `.canvasDataTable` are CSS
- * class selectors on rendered expression output — they're brittle but unavoidable until
- * the Canvas renderer adds `data-test-subj` attributes to the output components.
- * TODO: add `data-test-subj` to canvasMarkdown and canvasDataTable render components
- * so these assertions can migrate to testSubj-based locators.
- *
- * Auth: canvas:read is sufficient for viewing workpads (uses CANVAS_VIEWER_ROLE).
+ * Element content is matched via CSS classes (`.canvasMarkdown`, `.canvasDataTable`) because
+ * the rendered expression output has no `data-test-subj` yet.
+ * TODO: add `data-test-subj` to the canvasMarkdown/canvasDataTable render components so these
+ * assertions (and the per-datatable row counts) can use testSubj-based locators.
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 
-test.describe('Canvas smoke test', { tag: tags.stateful.classic }, () => {
+test.describe('Canvas smoke test', { tag: testData.CANVAS_UI_TAGS }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
@@ -66,8 +62,6 @@ test.describe('Canvas smoke test', { tag: tags.stateful.classic }, () => {
     const RENDER_TIMEOUT = 30_000;
 
     await test.step('one element is a visible markdown containing "Welcome to Canvas"', async () => {
-      // Distinguish by CSS class since expression output has no data-test-subj yet.
-      // Use locator.filter() instead of positional selectors to avoid fragile :nth-child counts.
       const markdownContainer = canvas.workpadPageElements.filter({
         has: page.locator('.canvasMarkdown'),
       });
@@ -88,12 +82,8 @@ test.describe('Canvas smoke test', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('total datatable row count is 24 (essql:10 + csv:2 + timelion:12)', async () => {
-      // Without data-test-subj on individual element containers we cannot reliably
-      // isolate per-datatable rows using positional CSS selectors.  Asserting the
-      // aggregate row count still validates that all three expressions executed and
-      // returned the expected number of results.
-      // TODO: add data-test-subj to canvasDataTable containers so per-datatable
-      // row counts can be asserted independently.
+      // Assert the aggregate row count across all three datatables (they can't be isolated
+      // without per-element data-test-subj); this still proves all three expressions ran.
       const allRows = page.locator(
         '[data-test-subj="canvasWorkpadPage"] [data-test-subj="canvasWorkpadPageElementContent"] .canvasDataTable tbody tr'
       );

@@ -114,11 +114,6 @@ export class CanvasPage {
     );
   }
 
-  /** Navigate back to the Canvas listing via the first breadcrumb link. */
-  async goToListingPageViaBreadcrumbs() {
-    await this.page.locator('[data-test-subj~="breadcrumb"][data-test-subj~="first"]').click();
-  }
-
   // ── Workpad listing interactions ────────────────────────────────────────────
 
   /**
@@ -138,16 +133,6 @@ export class CanvasPage {
    */
   async openSoleWorkpad() {
     await this.workpadListItems.click();
-  }
-
-  /** Search the listing for a workpad by name. */
-  async searchForWorkpad(name: string) {
-    await this.page.testSubj.locator('tableListSearchBox').fill(name);
-  }
-
-  /** Return the current browser URL (for path/workpad-id assertions in the spec). */
-  async getCurrentUrl(): Promise<string> {
-    return this.page.url();
   }
 
   // ── Workpad editing ────────────────────────────────────────────────────────
@@ -304,6 +289,7 @@ export class CanvasPage {
    */
   private panelHoverActions(title?: string): Locator {
     if (!title) {
+      // eslint-disable-next-line playwright/no-nth-methods
       return this.page.locator('.embPanel__hoverActionsAnchor').first();
     }
     return this.page.testSubj.locator(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
@@ -401,67 +387,6 @@ export class CanvasPage {
     const content = await contentElem.innerText();
     const parsed = JSON.parse(content) as { filters: Array<{ query: Record<string, unknown> }> };
     return parsed.filters.filter((f) => f.query[type]);
-  }
-
-  /**
-   * Set the Canvas time-filter element's absolute date range.
-   *
-   * Canvas's `EuiSuperDatePicker` with `width="full"` renders both the start
-   * and end date calendars permanently inline (not as popovers), so both month
-   * containers are always present in the DOM.  Filtering by month name alone
-   * therefore finds two containers, causing strict-mode violations.
-   *
-   * This method scopes each calendar click to the tabpanel that belongs to the
-   * target date section.  Each "Start date: Absolute" / "End date: Absolute"
-   * tab carries an `aria-controls` attribute pointing to the id of its own
-   * tabpanel, which contains only that section's react-datepicker calendar.
-   * Scoping the day locator to that panel guarantees a single match.
-   *
-   * Date strings must follow the EUI/Scout convention:
-   * `'Oct 19, 2020 @ 00:00:00.000'`
-   */
-  async setTimeFilterRange(from: string, to: string) {
-    const parseDateLabel = (dateStr: string): { month: string; day: string } => {
-      const match = dateStr.match(/^(\w{3})\s+(\d{1,2}),\s+\d{4}/);
-      if (!match) {
-        throw new Error(`setTimeFilterRange: cannot parse date string "${dateStr}"`);
-      }
-      const monthMap: Record<string, string> = {
-        Jan: 'January',
-        Feb: 'February',
-        Mar: 'March',
-        Apr: 'April',
-        May: 'May',
-        Jun: 'June',
-        Jul: 'July',
-        Aug: 'August',
-        Sep: 'September',
-        Oct: 'October',
-        Nov: 'November',
-        Dec: 'December',
-      };
-      return { month: monthMap[match[1]], day: match[2] };
-    };
-
-    const pickDay = async (tabLabel: string, month: string, day: string) => {
-      const tab = this.page.getByRole('tab', { name: tabLabel });
-      const panelId = await tab.getAttribute('aria-controls');
-      if (!panelId) {
-        throw new Error(`setTimeFilterRange: tab "${tabLabel}" has no aria-controls`);
-      }
-      await this.page
-        .locator(`#${panelId}`)
-        .locator('.react-datepicker__month-container')
-        .filter({ hasText: month })
-        .locator(`[aria-label="day-${day}"]`)
-        .click({ timeout: 20_000 });
-    };
-
-    const { month: fromMonth, day: fromDay } = parseDateLabel(from);
-    const { month: toMonth, day: toDay } = parseDateLabel(to);
-
-    await pickDay('Start date: Absolute', fromMonth, fromDay);
-    await pickDay('End date: Absolute', toMonth, toDay);
   }
 
   // ── Monaco editor helpers ──────────────────────────────────────────────────

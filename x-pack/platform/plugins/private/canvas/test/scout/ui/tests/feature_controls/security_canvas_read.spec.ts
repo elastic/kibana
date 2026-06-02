@@ -47,7 +47,7 @@ test.describe('Canvas security — canvas:read privileges', { tag: testData.CANV
     const canvasNavLink = page.testSubj
       .locator('collapsibleNavAppLink')
       .filter({ hasText: 'Canvas' });
-    await expect(canvasNavLink).toBeVisible({ timeout: 15_000 });
+    await expect(canvasNavLink).toBeVisible();
   });
 
   test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
@@ -58,7 +58,7 @@ test.describe('Canvas security — canvas:read privileges', { tag: testData.CANV
     });
 
     await test.step('shows "Read only" badge', async () => {
-      await expect(canvas.headerBadge).toBeVisible({ timeout: 15_000 });
+      await expect(canvas.headerBadge).toBeVisible();
       await expect(canvas.headerBadge).toHaveAttribute('data-test-badge-label', /read only/i);
     });
   });
@@ -69,7 +69,7 @@ test.describe('Canvas security — canvas:read privileges', { tag: testData.CANV
     // canvas:read users cannot create workpads; the app redirects them back to
     // the listing page where the create button remains disabled.
     await canvas.gotoWorkpad('create');
-    await expect(canvas.createWorkpadButton).toBeVisible({ timeout: 20_000 });
+    await expect(canvas.createWorkpadButton).toBeVisible();
     await expect(canvas.createWorkpadButton).toBeDisabled();
   });
 
@@ -77,9 +77,9 @@ test.describe('Canvas security — canvas:read privileges', { tag: testData.CANV
     pageObjects: { canvas },
   }) => {
     await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
-    await expect(canvas.workpadPage).toBeVisible({ timeout: 20_000 });
+    await expect(canvas.workpadPage).toBeVisible();
     // Wait for workpad to finish loading (refresh control is visible when loaded)
-    await expect(canvas.refreshControl).toBeVisible({ timeout: 20_000 });
+    await expect(canvas.refreshControl).toBeVisible();
     await expect(canvas.addElementButton).toBeHidden();
   });
 });

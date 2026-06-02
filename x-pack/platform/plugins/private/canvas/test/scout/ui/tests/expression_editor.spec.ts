@@ -49,14 +49,15 @@ test.describe('Canvas expression editor', { tag: testData.CANVAS_UI_TAGS }, () =
   }) => {
     // ── Step 1: wait for workpad to render all 4 elements ─────────────────
     await test.step('workpad renders 4 elements', async () => {
-      await expect(canvas.workpadPageElements).toHaveCount(4, { timeout: 30_000 });
+      await expect(canvas.workpadPageElements).toHaveCount(4);
     });
 
     // ── Step 2: click the first element (markdown) and open the expression editor ──
     let originalMd = '';
 
     await test.step('click first element and open expression editor', async () => {
-      await canvas.workpadPageElements.first().click({ timeout: 20_000 });
+      // eslint-disable-next-line playwright/no-nth-methods
+      await canvas.workpadPageElements.first().click();
       await canvas.waitForCodeEditorReady('canvasCodeEditorField');
       await canvas.openExpressionEditor();
       await canvas.waitForCodeEditorReady('canvasExpressionInput');
@@ -98,7 +99,7 @@ test.describe('Canvas expression editor', { tag: testData.CANVAS_UI_TAGS }, () =
       await page.testSubj.locator('canvasExpressionInput').click();
       await page.keyboard.press('Space');
 
-      await expect(suggestions).not.toHaveCount(0, { timeout: 10_000 });
+      await expect(suggestions).not.toHaveCount(0);
 
       // Reset expression
       await canvas.setCodeEditorValue(currentExpr, 1);

@@ -120,7 +120,7 @@ test.describe('Canvas saved object resolve', { tag: testData.CANVAS_UI_TAGS }, (
     });
 
     await test.step('workpad renders 4 elements', async () => {
-      await expect(canvas.workpadPageElements).toHaveCount(4, { timeout: 30_000 });
+      await expect(canvas.workpadPageElements).toHaveCount(4);
     });
   });
 
@@ -141,7 +141,7 @@ test.describe('Canvas saved object resolve', { tag: testData.CANVAS_UI_TAGS }, (
     });
 
     await test.step('workpad renders 4 elements', async () => {
-      await expect(canvas.workpadPageElements).toHaveCount(4, { timeout: 30_000 });
+      await expect(canvas.workpadPageElements).toHaveCount(4);
     });
   });
 });

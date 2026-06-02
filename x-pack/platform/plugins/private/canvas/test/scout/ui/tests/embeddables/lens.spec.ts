@@ -16,10 +16,20 @@
  *   3. Page switch: a workpad whose element renders via a `savedLens` expression keeps rendering
  *      after navigating pages.
  *
+ * The FTR edit flows ("edits lens by-value/by-reference") are de-scoped: the by-value creation
+ * test already exercises the editor → save-and-return path, and renaming a panel to "v2"
+ * exercises the Lens save-as flow rather than the Canvas integration.
+ *
  * The FTR `uiSettings.replace({ defaultIndex })` (which wipes ALL settings) is replaced with a
  * non-destructive `update`, reverted in `afterAll` (plan §12.1).
  *
- * Auth: canvas:all + visualize/dashboard access (CANVAS_FULL_EDITOR_ROLE) + logstash-* read.
+ * Data: a Scout-only copy of the FTR `canvas/lens` + `canvas/logstash_lens` archives whose
+ * index is named `canvas_lens` (not `logstash-lens`). The original index maps `bytes` as
+ * `float`, which collides with `logstash_functional`'s `long` mapping under the `logstash*`
+ * wildcard that Canvas `essql` panels query. Renaming the index keeps the data Scout ingests
+ * harmless to other specs, so no index cleanup is required (Scout only ingests, never deletes).
+ *
+ * Auth: canvas:all + visualize/dashboard access (CANVAS_FULL_EDITOR_ROLE) + logstash* read.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -27,16 +37,20 @@ import { test, testData } from '../../fixtures';
 
 const { LENS } = testData.EMBEDDABLES;
 const { label: METRIC_LABEL, value: METRIC_VALUE } = testData.LENS_METRIC;
+const EXTENDED_TIMEOUT = 20_000;
 
 test.describe('Canvas lens embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH_LENS);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.CANVAS_LENS);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.LENS);
-    await kbnClient.uiSettings.update({ defaultIndex: 'logstash-lens' });
+    await kbnClient.uiSettings.update({ defaultIndex: 'canvas_lens' });
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects: { canvas } }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects: { canvas }, page }) => {
     await browserAuth.loginWithCustomRole(testData.CANVAS_FULL_EDITOR_ROLE);
+    await page.addInitScript(() => {
+      window.localStorage.setItem('data.noDataPopover', 'true');
+    });
     await canvas.gotoListing();
   });
 
@@ -68,7 +82,7 @@ test.describe('Canvas lens embeddable', { tag: testData.CANVAS_UI_TAGS }, () => 
     });
     await canvas.saveLensAndReturn();
 
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible({ timeout: 30_000 });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
   });
 
   test('adds a by-reference Lens visualization from the library and renders it', async ({
@@ -79,13 +93,13 @@ test.describe('Canvas lens embeddable', { tag: testData.CANVAS_UI_TAGS }, () => 
     await expect(canvas.workpadPage).toBeVisible();
 
     await canvas.addEmbeddableFromLibrary(LENS.libraryName, 'lens');
-    await expect(canvas.embeddablePanelHeading(LENS.headingId)).toBeVisible({ timeout: 30_000 });
-    // Assert the Lens rendered on the workpad (label present). The exact aggregated
-    // value depends on the global time range (this by-reference viz has none of its own,
-    // so it shows "(null)" outside the data's range) — that's a data assertion, not a
-    // Canvas one, and is covered by the savedLens render test below + the data layer.
+    await expect(canvas.embeddablePanelHeading(LENS.headingId)).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
+    // Only assert the label: the aggregated value depends on the global time range (this viz
+    // has none of its own), and the savedLens test below covers value rendering.
     await expect(page.testSubj.locator('metric_label')).toHaveText(METRIC_LABEL, {
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
   });
 
@@ -96,14 +110,14 @@ test.describe('Canvas lens embeddable', { tag: testData.CANVAS_UI_TAGS }, () => 
     await canvas.openWorkpadByName(testData.TEST_WORKPAD_NAME);
     await expect(canvas.workpadPage).toBeVisible();
     await expect(page.testSubj.locator('metric_value')).toHaveText(METRIC_VALUE, {
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
 
     await canvas.addNewPage();
     await canvas.goToPreviousPage();
 
     await expect(page.testSubj.locator('metric_value')).toHaveText(METRIC_VALUE, {
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
   });
 });

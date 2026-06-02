@@ -12,16 +12,12 @@
  *   1. Changing the dropdown filter value updates the term filter in the debug panel.
  *   2. Changing the date-range filter updates the range filter in the debug panel.
  *
- * Both tests are combined into one `test()` because they share state:
- * the second date-range assertion relies on the workpad being open from step 1.
+ * The two scenarios are independent `test()` blocks; each re-opens the Filter Debug
+ * Workpad in `beforeEach`, so they do not share browser state.
  *
- * Auth: canvas:read is sufficient for interacting with filter elements.
- *
- * Date range changes use `canvas.setTimeFilterRange()` (see CanvasPage) which
- * types absolute dates into the EUI SuperDatePicker text inputs.  Canvas's
- * `width="full"` EuiSuperDatePicker renders both start and end sections inline
- * at all times, so Scout's generic `datePicker.setAbsoluteRange` helper cannot
- * be used directly (it expects exactly one visible tab/input at a time).
+ * The date-range scenario changes the range via the SuperDatePicker quick-menu ("Today")
+ * and asserts only that the resulting range differs from the starting one (more robust than
+ * asserting exact dates, which depend on "now").
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -44,7 +40,7 @@ test.describe('Canvas filters', { tag: testData.CANVAS_UI_TAGS }, () => {
 
   test('filter updates when dropdown is changed', async ({ page, pageObjects: { canvas } }) => {
     await test.step('wait for 3 elements to load', async () => {
-      await expect(canvas.workpadPageElements).toHaveCount(3, { timeout: 30_000 });
+      await expect(canvas.workpadPageElements).toHaveCount(3);
     });
 
     await test.step('starting term filter value is "apm"', async () => {
@@ -70,7 +66,7 @@ test.describe('Canvas filters', { tag: testData.CANVAS_UI_TAGS }, () => {
 
   test('filter updates when time range is changed', async ({ page, pageObjects: { canvas } }) => {
     await test.step('wait for 3 elements to load', async () => {
-      await expect(canvas.workpadPageElements).toHaveCount(3, { timeout: 30_000 });
+      await expect(canvas.workpadPageElements).toHaveCount(3);
     });
 
     let initialGte: string;

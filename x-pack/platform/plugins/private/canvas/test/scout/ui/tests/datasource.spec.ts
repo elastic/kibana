@@ -58,7 +58,9 @@ test.describe('Canvas datasource', { tag: testData.CANVAS_UI_TAGS }, () => {
     });
 
     await test.step(`verify 'logstash-*' is selected and expression updates`, async () => {
-      await expect(page.testSubj.locator('canvasDataViewSelect').locator('input')).toHaveValue('logstash-*');
+      await expect(page.testSubj.locator('canvasDataViewSelect').locator('input')).toHaveValue(
+        'logstash-*'
+      );
 
       await page.testSubj.locator('canvasDataViewSelect > comboBoxSearchInput').press('Enter');
       await canvas.saveDatasourceChanges();

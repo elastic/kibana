@@ -46,7 +46,7 @@ test.describe('Canvas security — canvas:all privileges', { tag: testData.CANVA
     const canvasNavLink = page.testSubj
       .locator('collapsibleNavAppLink')
       .filter({ hasText: 'Canvas' });
-    await expect(canvasNavLink).toBeVisible({ timeout: 15_000 });
+    await expect(canvasNavLink).toBeVisible();
   });
 
   test('Canvas listing page', async ({ pageObjects: { canvas } }) => {
@@ -57,12 +57,12 @@ test.describe('Canvas security — canvas:all privileges', { tag: testData.CANVA
     });
 
     await test.step('shows no read-only badge', async () => {
-      await expect(canvas.headerBadge).not.toBeVisible({ timeout: 10_000 });
+      await expect(canvas.headerBadge).toBeHidden();
     });
 
     await test.step('allows a workpad to be created', async () => {
       await canvas.createNewWorkpad();
-      await expect(canvas.addElementButton).toBeVisible({ timeout: 20_000 });
+      await expect(canvas.addElementButton).toBeVisible();
     });
   });
 
@@ -70,7 +70,7 @@ test.describe('Canvas security — canvas:all privileges', { tag: testData.CANVA
     pageObjects: { canvas },
   }) => {
     await canvas.gotoWorkpad(testData.TEST_WORKPAD_ID);
-    await expect(canvas.workpadPage).toBeVisible({ timeout: 20_000 });
-    await expect(canvas.addElementButton).toBeVisible({ timeout: 20_000 });
+    await expect(canvas.workpadPage).toBeVisible();
+    await expect(canvas.addElementButton).toBeVisible();
   });
 });

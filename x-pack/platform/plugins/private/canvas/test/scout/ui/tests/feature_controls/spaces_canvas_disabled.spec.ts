@@ -57,7 +57,7 @@ test.describe(
       const canvasNavLink = page.testSubj
         .locator('collapsibleNavAppLink')
         .filter({ hasText: 'Canvas' });
-      await expect(canvasNavLink).not.toBeVisible({ timeout: 10_000 });
+      await expect(canvasNavLink).toBeHidden();
     });
   }
 );

@@ -15,14 +15,13 @@
  * The FTR suite additionally renamed the search to "v2" in Discover and asserted the workpad
  * picked up the new title. That round-trip mostly exercises Discover's save-as flow, so it is
  * trimmed here to keep the spec focused purely on the Canvas integration (add + edit-routing).
- *
- * Auth: canvas:all + discover/dashboard/visualize access (CANVAS_FULL_EDITOR_ROLE).
  */
 
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../fixtures';
 
 const { SAVED_SEARCH } = testData.EMBEDDABLES;
+const EXTENDED_TIMEOUT = 20_000;
 
 test.describe('Canvas saved search embeddable', { tag: testData.CANVAS_UI_TAGS }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -36,7 +35,6 @@ test.describe('Canvas saved search embeddable', { tag: testData.CANVAS_UI_TAGS }
     await canvas.gotoListing();
     await canvas.createNewWorkpad();
     await expect(canvas.workpadPage).toBeVisible();
-    await canvas.setWorkpadName('saved search tests');
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -48,7 +46,7 @@ test.describe('Canvas saved search embeddable', { tag: testData.CANVAS_UI_TAGS }
   }) => {
     await canvas.addEmbeddableFromLibrary(SAVED_SEARCH.libraryName, 'search');
     await expect(canvas.embeddablePanelHeading(SAVED_SEARCH.headingId)).toBeVisible({
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
   });
 
@@ -58,12 +56,12 @@ test.describe('Canvas saved search embeddable', { tag: testData.CANVAS_UI_TAGS }
   }) => {
     await canvas.addEmbeddableFromLibrary(SAVED_SEARCH.libraryName, 'search');
     await expect(canvas.embeddablePanelHeading(SAVED_SEARCH.headingId)).toBeVisible({
-      timeout: 30_000,
+      timeout: EXTENDED_TIMEOUT,
     });
 
     await canvas.editPanel();
     await canvas.clickEditInDiscover();
 
-    await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
+    await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
   });
 });
