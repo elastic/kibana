@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "node scripts/git_remote_guard_hook.js"
+      }
+    ]
+  }
+}
