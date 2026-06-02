@@ -19,6 +19,7 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
@@ -165,7 +166,7 @@ export const ConfigurationRequestSchema = z.object({
   /**
    * The plugin owner that manages this configuration
    */
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
@@ -176,11 +177,13 @@ export const GetConfigurationFindRequestSchema = z.object({
    * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
    * that the user has permissions to access
    */
-  owner: z.union([z.array(z.string()), z.string()]).optional(),
+  owner: z
+    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+    .optional(),
 });
 
 export const CaseConfigureRequestParamsSchema = z.object({
-  configuration_id: z.string(),
+  configuration_id: z.string().max(512),
 });
 
 export const ConfigurationPatchRequestSchema = z.object({
@@ -189,7 +192,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
-  version: z.string(),
+  version: z.string().max(512),
 });
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;

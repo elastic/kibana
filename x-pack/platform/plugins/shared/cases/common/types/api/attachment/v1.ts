@@ -13,6 +13,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
@@ -67,7 +68,7 @@ export const AttachmentRequestSchema = z.union([
   z.object({
     comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
     type: z.literal(AttachmentType.user),
-    owner: z.string(),
+    owner: z.string().max(MAX_TITLE_LENGTH),
   }),
   EventAttachmentPayloadSchema,
   AlertAttachmentPayloadSchema,
@@ -77,13 +78,13 @@ export const AttachmentRequestSchema = z.union([
     actions: z.object({
       targets: z.array(
         z.object({
-          hostname: z.string(),
-          endpointId: z.string(),
+          hostname: z.string().max(255),
+          endpointId: z.string().max(512),
         })
       ),
-      type: z.string(),
+      type: z.string().max(256),
     }),
-    owner: z.string(),
+    owner: z.string().max(MAX_TITLE_LENGTH),
   }),
   ExternalReferenceNoSOAttachmentPayloadSchema,
   ExternalReferenceSOAttachmentPayloadSchema,
@@ -108,7 +109,7 @@ export const AttachmentRequestWithoutRefsSchema = z.union([
  * persistableStateAttachmentState on a patch.
  */
 export const AttachmentPatchRequestSchema = AttachmentRequestSchema.and(
-  z.object({ id: z.string(), version: z.string() })
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
 );
 
 export const AttachmentsFindResponseSchema = z.object({
@@ -136,7 +137,7 @@ export const BulkCreateAttachmentsRequestSchema = limitedArraySchema({
 
 export const BulkGetAttachmentsRequestSchema = z.object({
   ids: limitedArraySchema({
-    codec: z.string(),
+    codec: z.string().max(512),
     min: 1,
     max: MAX_BULK_GET_ATTACHMENTS,
     fieldName: 'ids',
@@ -147,10 +148,10 @@ export const BulkGetAttachmentsResponseSchema = z.object({
   attachments: AttachmentsSchema,
   errors: z.array(
     z.object({
-      error: z.string(),
-      message: z.string(),
+      error: z.string().max(32000),
+      message: z.string().max(32000),
       status: z.number().optional(),
-      savedObjectId: z.string(),
+      savedObjectId: z.string().max(512),
     })
   ),
 });

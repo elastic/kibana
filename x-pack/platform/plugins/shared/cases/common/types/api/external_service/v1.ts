@@ -6,18 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TITLE_LENGTH } from '../../../constants';
 
 export const ExternalServiceResponseSchema = z.object({
-  title: z.string(),
-  id: z.string(),
-  pushedDate: z.string(),
-  url: z.string(),
+  title: z.string().max(MAX_TITLE_LENGTH),
+  id: z.string().max(512),
+  pushedDate: z.string().max(50),
+  url: z.string().max(2048),
   comments: z
     .array(
       z.object({
-        commentId: z.string(),
-        pushedDate: z.string(),
-        externalCommentId: z.string().optional(),
+        commentId: z.string().max(512),
+        pushedDate: z.string().max(50),
+        externalCommentId: z.string().max(512).optional(),
       })
     )
     .optional(),

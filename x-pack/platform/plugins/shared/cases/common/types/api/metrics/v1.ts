@@ -43,7 +43,7 @@ const StatusInfoSchema = z.object({
   /**
    * The ISO string representation of the dates the case was reopened
    */
-  reopenDates: z.array(z.string()),
+  reopenDates: z.array(z.string().max(50)),
 });
 
 const AlertHostsMetricsSchema = z.object({
@@ -56,11 +56,11 @@ const AlertHostsMetricsSchema = z.object({
       /**
        * Host name
        */
-      name: z.string().optional(),
+      name: z.string().max(255).optional(),
       /**
        * Unique identifier for the host
        */
-      id: z.string(),
+      id: z.string().max(512),
       /**
        * Number of alerts that have this particular host name
        */

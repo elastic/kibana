@@ -25,8 +25,14 @@ import {
 } from '../../domain/attachment/v2';
 
 export const UnifiedAttachmentPatchRequestSchema = z.union([
-  UnifiedReferenceAttachmentPayloadSchema.extend({ id: z.string(), version: z.string() }),
-  UnifiedValueAttachmentPayloadSchema.extend({ id: z.string(), version: z.string() }),
+  UnifiedReferenceAttachmentPayloadSchema.extend({
+    id: z.string().max(512),
+    version: z.string().max(512),
+  }),
+  UnifiedValueAttachmentPayloadSchema.extend({
+    id: z.string().max(512),
+    version: z.string().max(512),
+  }),
 ]);
 
 export const AttachmentRequestSchemaV2 = z.union([
@@ -62,10 +68,10 @@ export const BulkGetAttachmentsResponseSchemaV2 = z.object({
   attachments: AttachmentsSchemaV2,
   errors: z.array(
     z.object({
-      error: z.string(),
-      message: z.string(),
+      error: z.string().max(32000),
+      message: z.string().max(32000),
       status: z.union([z.undefined(), z.number()]),
-      savedObjectId: z.string(),
+      savedObjectId: z.string().max(512),
     })
   ),
 });

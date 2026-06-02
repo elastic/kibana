@@ -15,7 +15,7 @@ import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
  * metadata.
  */
 export const CaseFileMetadataForDeletionSchema = z.object({
-  caseIds: z.array(z.string()),
+  caseIds: z.array(z.string().max(512)),
 });
 
 export type CaseFileMetadataForDeletion = z.infer<typeof CaseFileMetadataForDeletionSchema>;

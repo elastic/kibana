@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod/v4';
 
 const DocumentSchema = z.object({
-  id: z.string(),
-  index: z.string(),
-  attached_at: z.string(),
+  id: z.string().max(512),
+  index: z.string().max(256),
+  attached_at: z.string().max(50),
 });
 
 export const DocumentResponseSchema = z.array(DocumentSchema);

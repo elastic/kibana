@@ -25,7 +25,7 @@ export const CustomFieldPutRequestSchema = z.object({
     CaseCustomFieldTextWithValidationValueSchema('value'),
     CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
   ]),
-  caseVersion: z.string(),
+  caseVersion: z.string().max(512),
 });
 
 export type CustomFieldPutRequest = z.infer<typeof CustomFieldPutRequestSchema>;

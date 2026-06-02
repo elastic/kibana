@@ -6,12 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TITLE_LENGTH } from '../../../constants';
 import { ExternalServiceSchema } from '../../domain/external_service/v1';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../../domain/connector/v1';
 
 const PushDetailsSchema = z.object({
-  latestUserActionPushDate: z.string(),
-  oldestUserActionPushDate: z.string(),
+  latestUserActionPushDate: z.string().max(50),
+  oldestUserActionPushDate: z.string().max(50),
   externalService: ExternalServiceSchema,
 });
 
@@ -22,28 +23,28 @@ const CaseConnectorPushInfoSchema = z.object({
 });
 
 export const GetCaseConnectorsResponseSchema = z.record(
-  z.string(),
+  z.string().max(512),
   CaseConnectorSchema.and(z.object({ push: CaseConnectorPushInfoSchema }))
 );
 
 const ActionConnectorResultSchema = z.object({
-  id: z.string(),
-  actionTypeId: z.string(),
-  name: z.string(),
+  id: z.string().max(512),
+  actionTypeId: z.string().max(256),
+  name: z.string().max(MAX_TITLE_LENGTH),
   isDeprecated: z.boolean(),
   isPreconfigured: z.boolean(),
   isSystemAction: z.boolean(),
   referencedByCount: z.number(),
   isConnectorTypeDeprecated: z.boolean(),
-  config: z.record(z.string(), z.unknown()).optional(),
+  config: z.record(z.string().max(256), z.unknown()).optional(),
   isMissingSecrets: z.boolean().optional(),
 });
 
 export const FindActionConnectorResponseSchema = z.array(ActionConnectorResultSchema);
 
 export const ConnectorMappingResponseSchema = z.object({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
   mappings: ConnectorMappingsSchema,
 });
 

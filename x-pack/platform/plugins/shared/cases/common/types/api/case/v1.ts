@@ -16,6 +16,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -55,13 +56,13 @@ import {
 } from '../custom_field/v1';
 
 const CaseCustomFieldTextWithValidationSchema = z.object({
-  key: z.string(),
+  key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
   type: CustomFieldTextTypeSchema,
   value: z.union([CaseCustomFieldTextWithValidationValueSchema('value'), z.null()]),
 });
 
 const CaseCustomFieldNumberWithValidationSchema = z.object({
-  key: z.string(),
+  key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
   type: CustomFieldNumberTypeSchema,
   value: z.union([
     CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
@@ -139,7 +140,9 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
    */
   settings: CaseSettingsSchema.optional(),
   template: CaseTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  [CASE_EXTENDED_FIELDS]: z
+    .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
+    .optional(),
   /**
    * The close reason to sync to attached alerts
    */
@@ -154,7 +157,7 @@ export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.exten
   /**
    * The plugin owner of the case
    */
-  owner: z.string().optional(),
+  owner: z.string().max(MAX_TITLE_LENGTH).optional(),
 });
 
 /**
@@ -194,7 +197,7 @@ export const CasePostRequestSchema = z.object({
    * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
    * creating this case must also be granted access to that plugin's feature.
    */
-  owner: z.string(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
   /**
    * The users assigned to the case
    */
@@ -223,7 +226,9 @@ export const CasePostRequestSchema = z.object({
    */
   customFields: CaseRequestCustomFieldsSchema.optional(),
   template: CaseTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  [CASE_EXTENDED_FIELDS]: z
+    .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
+    .optional(),
 });
 
 /**
@@ -231,7 +236,7 @@ export const CasePostRequestSchema = z.object({
  */
 
 const CaseCreateRequestWithOptionalIdSchema = CasePostRequestSchema.extend({
-  id: z.string().optional(),
+  id: z.string().max(512).optional(),
 });
 
 export const BulkCreateCasesRequestSchema = z.object({
@@ -269,12 +274,12 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   tags: z
     .union([
       limitedArraySchema({
-        codec: z.string(),
+        codec: z.string().max(MAX_LENGTH_PER_TAG),
         fieldName: 'tags',
         min: 0,
         max: MAX_TAGS_FILTER_LENGTH,
       }),
-      z.string(),
+      z.string().max(MAX_LENGTH_PER_TAG),
     ])
     .optional(),
   /**
@@ -291,12 +296,12 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   assignees: z
     .union([
       limitedArraySchema({
-        codec: z.string(),
+        codec: z.string().max(512),
         fieldName: 'assignees',
         min: 0,
         max: MAX_ASSIGNEES_FILTER_LENGTH,
       }),
-      z.string(),
+      z.string().max(512),
     ])
     .optional(),
   /**
@@ -305,12 +310,12 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   reporters: z
     .union([
       limitedArraySchema({
-        codec: z.string(),
+        codec: z.string().max(512),
         fieldName: 'reporters',
         min: 0,
         max: MAX_REPORTERS_FILTER_LENGTH,
       }),
-      z.string(),
+      z.string().max(512),
     ])
     .optional(),
   /**
@@ -320,11 +325,11 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   /**
    * A KQL date. If used all cases created after (gte) the from date will be returned
    */
-  from: z.string().optional(),
+  from: z.string().max(50).optional(),
   /**
    * An Elasticsearch simple_query_string
    */
-  search: z.string().optional(),
+  search: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
   /**
    * The field to use for sorting the found objects.
    *
@@ -337,25 +342,27 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   /**
    * A KQL date. If used all cases created before (lte) the to date will be returned.
    */
-  to: z.string().optional(),
+  to: z.string().max(50).optional(),
   /**
    * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
    * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
    * that the user has access to.
    */
-  owner: z.union([z.array(z.string()), z.string()]).optional(),
+  owner: z
+    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+    .optional(),
   /**
    * The category of the case.
    */
   category: z
     .union([
       limitedArraySchema({
-        codec: z.string(),
+        codec: z.string().max(MAX_CATEGORY_LENGTH),
         fieldName: 'category',
         min: 0,
         max: MAX_CATEGORY_FILTER_LENGTH,
       }),
-      z.string(),
+      z.string().max(MAX_CATEGORY_LENGTH),
     ])
     .optional(),
 });
@@ -388,8 +395,8 @@ const CasesSearchRequestSearchFieldsValues = [
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
 
 const ExtendedFieldFilterSchema = z.object({
-  label: z.string(),
-  value: z.string(),
+  label: z.string().max(MAX_TITLE_LENGTH),
+  value: z.string().max(MAX_DESCRIPTION_LENGTH),
 });
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
@@ -397,7 +404,10 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
    * custom fields of the case
    */
   customFields: z
-    .record(z.string(), z.array(z.union([z.string(), z.boolean(), z.number(), z.null()])))
+    .record(
+      z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+      z.array(z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()]))
+    )
     .optional(),
   /**
    * The fields to perform the simple_query_string parsed query against.
@@ -416,7 +426,10 @@ export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.ext
    * custom fields of the case
    */
   customFields: z
-    .record(z.string(), z.array(z.union([z.string(), z.boolean(), z.number(), z.null()])))
+    .record(
+      z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+      z.array(z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()]))
+    )
     .optional(),
 });
 
@@ -452,7 +465,7 @@ export const CasesDeleteRequestSchema = limitedArraySchema({
 export const CaseResolveResponseSchema = z.object({
   case: CaseSchema,
   outcome: z.enum(['exactMatch', 'aliasMatch', 'conflict']),
-  alias_target_id: z.string().optional(),
+  alias_target_id: z.string().max(512).optional(),
   alias_purpose: z.enum(['savedObjectConversion', 'savedObjectImport']).optional(),
 });
 
@@ -461,17 +474,22 @@ export const CaseResolveResponseSchema = z.object({
  */
 
 export const CasesBulkGetRequestSchema = z.object({
-  ids: limitedArraySchema({ codec: z.string(), min: 1, max: MAX_BULK_GET_CASES, fieldName: 'ids' }),
+  ids: limitedArraySchema({
+    codec: z.string().max(512),
+    min: 1,
+    max: MAX_BULK_GET_CASES,
+    fieldName: 'ids',
+  }),
 });
 
 export const CasesBulkGetResponseSchema = z.object({
   cases: CasesSchema,
   errors: z.array(
     z.object({
-      error: z.string(),
-      message: z.string(),
+      error: z.string().max(32000),
+      message: z.string().max(32000),
       status: z.number().optional(),
-      caseId: z.string(),
+      caseId: z.string().max(512),
     })
   ),
 });
@@ -484,8 +502,8 @@ export const CasesBulkGetResponseSchema = z.object({
  * The saved object ID and version
  */
 export const CasePatchRequestSchema = CaseRequestFieldsSchema.extend({
-  id: z.string(),
-  version: z.string(),
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
 export const CasesPatchRequestSchema = z.object({
@@ -512,8 +530,8 @@ export const PatchCasesResponseSchema = z.array(CaseWithUpdateSummarySchema);
  */
 
 export const CasePushRequestParamsSchema = z.object({
-  case_id: z.string(),
-  connector_id: z.string(),
+  case_id: z.string().max(512),
+  connector_id: z.string().max(512),
 });
 
 /**
@@ -525,14 +543,16 @@ export const AllTagsFindRequestSchema = z.object({
    * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
    * that the user has access to will be returned.
    */
-  owner: z.union([z.array(z.string()), z.string()]).optional(),
+  owner: z
+    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+    .optional(),
 });
 
 export const AllCategoriesFindRequestSchema = AllTagsFindRequestSchema;
 export const AllReportersFindRequestSchema = AllTagsFindRequestSchema;
 
-export const GetTagsResponseSchema = z.array(z.string());
-export const GetCategoriesResponseSchema = z.array(z.string());
+export const GetTagsResponseSchema = z.array(z.string().max(MAX_LENGTH_PER_TAG));
+export const GetCategoriesResponseSchema = z.array(z.string().max(MAX_CATEGORY_LENGTH));
 export const GetReportersResponseSchema = z.array(UserSchema);
 
 /**
@@ -544,7 +564,9 @@ export const CasesByAlertIDRequestSchema = z.object({
    * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
    * that the user has access to will be returned.
    */
-  owner: z.union([z.array(z.string()), z.string()]).optional(),
+  owner: z
+    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+    .optional(),
 });
 
 export const GetRelatedCasesByAlertResponseSchema = z.array(RelatedCaseSchema);
@@ -555,17 +577,17 @@ export const FindCasesContainingAllDocumentsRequestSchema = z.object({
   /**
    * The IDs of the documents to find cases for.
    */
-  documentIds: z.array(z.string()).optional(),
+  documentIds: z.array(z.string().max(512)).optional(),
   /**
    * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
    */
-  alertIds: z.array(z.string()).optional(),
+  alertIds: z.array(z.string().max(512)).optional(),
   // The IDs of the cases to find alerts for.
-  caseIds: z.array(z.string()),
+  caseIds: z.array(z.string().max(512)),
 });
 
 export const FindCasesContainingAllAlertsResponseSchema = z.object({
-  casesWithAllAttachments: z.array(z.string()),
+  casesWithAllAttachments: z.array(z.string().max(512)),
 });
 
 export type CasePostRequest = z.infer<typeof CasePostRequestSchema>;

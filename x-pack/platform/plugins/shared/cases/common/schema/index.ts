@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
-import { MAX_DOCS_PER_PAGE } from '../constants';
+import { MAX_COMMENT_LENGTH, MAX_DOCS_PER_PAGE } from '../constants';
 
 export interface LimitedSchemaType {
   fieldName: string;
@@ -19,37 +19,41 @@ export interface LimitedSchemaType {
 // Preserves the original (untrimmed) string on success.
 export const NonEmptyString = z
   .string()
+  .max(1000)
   .refine((s) => s.trim().length >= 1, 'string must have length >= 1');
 
 export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
-  z.string().superRefine((s, ctx) => {
-    const trimmed = s.trim();
+  z
+    .string()
+    .max(max)
+    .superRefine((s, ctx) => {
+      const trimmed = s.trim();
 
-    // io-ts parity: an empty / whitespace-only string is only rejected when
-    // `min > 0`; with `min === 0` it should pass through.
-    if (trimmed.length === 0 && min > 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The ${fieldName} field cannot be an empty string.`,
-      });
-      return;
-    }
+      // io-ts parity: an empty / whitespace-only string is only rejected when
+      // `min > 0`; with `min === 0` it should pass through.
+      if (trimmed.length === 0 && min > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The ${fieldName} field cannot be an empty string.`,
+        });
+        return;
+      }
 
-    if (trimmed.length < min) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The length of the ${fieldName} is too short. The minimum length is ${min}.`,
-      });
-      return;
-    }
+      if (trimmed.length < min) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The length of the ${fieldName} is too short. The minimum length is ${min}.`,
+        });
+        return;
+      }
 
-    if (trimmed.length > max) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The length of the ${fieldName} is too long. The maximum length is ${max}.`,
-      });
-    }
-  });
+      if (trimmed.length > max) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The length of the ${fieldName} is too long. The maximum length is ${max}.`,
+        });
+      }
+    });
 
 export const limitedArraySchema = <T extends z.ZodTypeAny>({
   codec,
@@ -100,7 +104,7 @@ export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) => {
   // The transform is on the union (rather than only on the string variant) so
   // the custom error message survives instead of being swallowed by the
   // union's "no variant matched" error.
-  const pageCoerce = z.union([z.number(), z.string()]).transform((value, ctx) => {
+  const pageCoerce = z.union([z.number(), z.string().max(20)]).transform((value, ctx) => {
     if (typeof value === 'number') return value;
     const n = Number(value);
     if (!Number.isFinite(n)) {
@@ -162,14 +166,17 @@ export const regexStringSchema = ({
     }
   });
 
-export const mimeTypeString = z.string().superRefine((s, ctx) => {
-  if (!ALLOWED_MIME_TYPES.includes(s)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `The mime type field value ${s} is not allowed.`,
-    });
-  }
-});
+export const mimeTypeString = z
+  .string()
+  .max(255)
+  .superRefine((s, ctx) => {
+    if (!ALLOWED_MIME_TYPES.includes(s)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The mime type field value ${s} is not allowed.`,
+      });
+    }
+  });
 
 /**
  * Zod equivalent of jsonValueRt — a recursive JSON value type.
@@ -184,11 +191,11 @@ export type JsonValue =
 
 export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   z.union([
-    z.string(),
+    z.string().max(MAX_COMMENT_LENGTH),
     z.number(),
     z.boolean(),
     z.null(),
     z.array(jsonValueSchema),
-    z.record(z.string(), jsonValueSchema),
+    z.record(z.string().max(1000), jsonValueSchema),
   ])
 );
