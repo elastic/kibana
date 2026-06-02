@@ -50,6 +50,7 @@ paths:
                   type: array
                   description: |
                     Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
+                  maxItems: 100
                   items:
                     type: string
       responses:
@@ -91,6 +92,7 @@ components:
         Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
         may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
       minItems: 1
+      maxItems: 3
       items:
         $ref: '#/components/schemas/PrebuiltRuleAssetsSortItem'
 
@@ -110,6 +112,7 @@ components:
         counts:
           type: array
           description: Facet categories for which to compute counts over the filtered + searched set.
+          maxItems: 2
           items:
             $ref: '#/components/schemas/PrebuiltRuleAssetsFacetCategory'
 

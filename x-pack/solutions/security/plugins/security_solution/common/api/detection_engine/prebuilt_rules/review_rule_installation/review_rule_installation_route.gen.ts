@@ -21,7 +21,6 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
-
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -62,7 +61,9 @@ export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortIt
 may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
 
   */
-export const PrebuiltRuleAssetsSort = lazySchema(() => z.array(PrebuiltRuleAssetsSortItem).min(1));
+export const PrebuiltRuleAssetsSort = lazySchema(() =>
+  z.array(PrebuiltRuleAssetsSortItem).min(1).max(3)
+);
 export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
 
 /**
@@ -83,7 +84,7 @@ export const PrebuiltRuleAssetsAggregations = lazySchema(() =>
       /**
        * Facet categories for which to compute counts over the filtered + searched set.
        */
-      counts: z.array(PrebuiltRuleAssetsFacetCategory).optional(),
+      counts: z.array(PrebuiltRuleAssetsFacetCategory).max(2).optional(),
     })
     .strict()
 );
@@ -175,7 +176,7 @@ installable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(z.string()).optional(),
+      fields: z.array(z.string()).max(100).optional(),
     })
     .strict()
 );
