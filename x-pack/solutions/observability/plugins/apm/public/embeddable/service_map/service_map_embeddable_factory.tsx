@@ -54,10 +54,10 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   service_name: undefined,
   service_group_id: undefined,
   map_orientation: 'horizontal',
-  // Default ON: the panel uses only its own captured filters and ignores the
+  // Default OFF: the panel uses only its own captured filters and ignores the
   // dashboard's KQL/Controls. Dashboards usually have broader filter contexts
   // that don't make sense for a service map.
-  apply_custom_filters: true,
+  sync_with_dashboard_filters: false,
   alert_status_filter: undefined,
   slo_status_filter: undefined,
   connection_filter: undefined,
@@ -71,7 +71,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   service_name: 'referenceEquality',
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
-  apply_custom_filters: 'referenceEquality',
+  sync_with_dashboard_filters: 'referenceEquality',
   // Array fields use deepEquality: the editor flyout's handleSave + the in-graph options
   // panel both produce fresh arrays on every save, which would otherwise mark the panel
   // dirty regardless of whether the selected values actually changed.
@@ -84,22 +84,24 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
 
 /**
  * Published on the panel API so the "Service map filter settings" context-menu action can
- * read + write whether the panel ignores the dashboard's filters. `true` (default) = panel
+ * read + write whether the panel follows the dashboard's filters. `false` (default) = panel
  * uses only its own captured filters.
  */
-export interface HasApplyCustomFilters {
-  applyCustomFilters$: PublishingSubject<boolean | undefined>;
-  setApplyCustomFilters: (next: boolean | undefined) => void;
+export interface HasSyncWithDashboardFilters {
+  syncWithDashboardFilters$: PublishingSubject<boolean | undefined>;
+  setSyncWithDashboardFilters: (next: boolean | undefined) => void;
 }
 
-export const apiHasApplyCustomFilters = (api: unknown): api is HasApplyCustomFilters =>
-  Boolean(api && typeof (api as HasApplyCustomFilters).setApplyCustomFilters === 'function');
+export const apiHasSyncWithDashboardFilters = (api: unknown): api is HasSyncWithDashboardFilters =>
+  Boolean(
+    api && typeof (api as HasSyncWithDashboardFilters).setSyncWithDashboardFilters === 'function'
+  );
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
   PublishesUnifiedSearch &
-  HasApplyCustomFilters & {
+  HasSyncWithDashboardFilters & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
     canEditUnifiedSearch: () => boolean;
   };
@@ -166,7 +168,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           service_name: state.service_name,
           service_group_id: state.service_group_id,
           map_orientation: state.map_orientation,
-          apply_custom_filters: state.apply_custom_filters,
+          sync_with_dashboard_filters: state.sync_with_dashboard_filters,
           alert_status_filter: state.alert_status_filter,
           slo_status_filter: state.slo_status_filter,
           connection_filter: state.connection_filter,
@@ -219,8 +221,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         filters$,
         query$,
         // Exposed so the "Service map filter settings" panel-menu action can read + toggle it.
-        applyCustomFilters$: customStateManager.api.applyCustomFilters$,
-        setApplyCustomFilters: customStateManager.api.setApplyCustomFilters,
+        syncWithDashboardFilters$: customStateManager.api.syncWithDashboardFilters$,
+        setSyncWithDashboardFilters: customStateManager.api.setSyncWithDashboardFilters,
         canEditUnifiedSearch: () => true,
         getTypeDisplayName: () => 'configuration',
         isEditingEnabled: () => true,
@@ -249,7 +251,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
                       customStateManager.api.setMapOrientation(newState.map_orientation);
-                      // `apply_custom_filters` is intentionally NOT set here — it's owned by the
+                      // `sync_with_dashboard_filters` is intentionally NOT set here — it's owned by the
                       // "Service map filter settings" panel-menu action, so editing data fields
                       // (env / service / KQL / view filters / orientation) never resets it.
                       // View filters live in the edit flyout per product direction: the
@@ -295,7 +297,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             serviceName,
             serviceGroupId,
             mapOrientation,
-            applyCustomFilters,
+            syncWithDashboardFilters,
             alertStatusFilter,
             sloStatusFilter,
             connectionFilter,
@@ -307,7 +309,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.serviceName$,
             customStateManager.api.serviceGroupId$,
             customStateManager.api.mapOrientation$,
-            customStateManager.api.applyCustomFilters$,
+            customStateManager.api.syncWithDashboardFilters$,
             customStateManager.api.alertStatusFilter$,
             customStateManager.api.sloStatusFilter$,
             customStateManager.api.connectionFilter$,
@@ -354,10 +356,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
 
           // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
-          // `apply_custom_filters` defaults true (panel uses only its own captured filters).
-          // Forward parent filters only when the user opted out of custom filters.
-          const parentFilters = !applyCustomFilters ? fetchContext.filters : undefined;
-          const parentQuery = !applyCustomFilters ? fetchContext.query : undefined;
+          // `sync_with_dashboard_filters` defaults false (panel uses only its own captured
+          // filters). Forward parent filters only when the user opted in to syncing.
+          const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
+          const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>

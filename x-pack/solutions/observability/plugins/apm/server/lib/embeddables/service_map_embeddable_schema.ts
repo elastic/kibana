@@ -22,13 +22,12 @@ export const serviceMapCustomStateSchema = schema.object({
   map_orientation: schema.maybe(
     schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')])
   ),
-  // True (default) = panel uses only its own captured filters and ignores the
-  // dashboard's KQL/Controls. False = panel responds to dashboard filters too.
-  apply_custom_filters: schema.maybe(schema.boolean()),
-  // Time-range customization is handled entirely via Kibana's built-in "Customize
-  // time range" panel-menu action — when set, it writes `time_range` here. Presence
-  // of `time_range` IS the toggle: set → panel uses its own; absent → panel inherits
-  // the dashboard's global time (via fetch$ fallback when timeRange$ emits undefined).
+  // True = panel follows the dashboard's global filters / KQL / Controls. False (default)
+  // = panel uses only its own captured filters. Time-range customization is separate:
+  // handled by Kibana's built-in "Customize time range" panel-menu action, which writes
+  // `time_range` here — presence of `time_range` is the implicit toggle (set → panel uses
+  // its own; absent → panel inherits the dashboard's global time via fetch$ fallback).
+  sync_with_dashboard_filters: schema.maybe(schema.boolean()),
   alert_status_filter: schema.maybe(
     schema.arrayOf(
       schema.oneOf([

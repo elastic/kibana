@@ -24,24 +24,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ServiceMapFilterSettingsFlyoutProps {
   ariaLabelledBy: string;
-  /** Current value of `apply_custom_filters` (default true). */
-  initialApplyCustomFilters: boolean;
+  /** Current value of `sync_with_dashboard_filters` (default false). */
+  initialSyncWithDashboardFilters: boolean;
   onCancel: () => void;
-  onSave: (applyCustomFilters: boolean) => void;
+  onSave: (syncWithDashboardFilters: boolean) => void;
 }
 
 /**
  * Panel-level "filter settings" flyout for a service map dashboard panel. Holds the
- * "Apply custom panel filters" toggle. Time-range customization is handled separately by
+ * "Sync with dashboard filters" toggle. Time-range customization is handled separately by
  * Kibana's built-in "Customize time range" panel-menu action / panel Settings flyout.
  */
 export function ServiceMapFilterSettingsFlyout({
   ariaLabelledBy,
-  initialApplyCustomFilters,
+  initialSyncWithDashboardFilters,
   onCancel,
   onSave,
 }: ServiceMapFilterSettingsFlyoutProps) {
-  const [applyCustomFilters, setApplyCustomFilters] = useState<boolean>(initialApplyCustomFilters);
+  const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
+    initialSyncWithDashboardFilters
+  );
 
   return (
     <>
@@ -58,22 +60,19 @@ export function ServiceMapFilterSettingsFlyout({
       <EuiFlyoutBody>
         <EuiForm fullWidth>
           <EuiFormRow
-            helpText={i18n.translate(
-              'xpack.apm.serviceMapFilterSettings.applyCustomFiltersHelpText',
-              {
-                defaultMessage:
-                  "When on, the panel uses only its own filters and ignores the dashboard's KQL bar and Controls. When off, the panel also responds to the dashboard's global filters.",
-              }
-            )}
+            helpText={i18n.translate('xpack.apm.serviceMapFilterSettings.syncFiltersHelpText', {
+              defaultMessage:
+                "When on, the panel also responds to the dashboard's global filters / KQL / Controls. When off, the panel uses only its own filters.",
+            })}
             fullWidth
           >
             <EuiSwitch
-              label={i18n.translate('xpack.apm.serviceMapFilterSettings.applyCustomFiltersLabel', {
-                defaultMessage: 'Apply custom panel filters',
+              label={i18n.translate('xpack.apm.serviceMapFilterSettings.syncFiltersLabel', {
+                defaultMessage: 'Sync with dashboard filters',
               })}
-              checked={applyCustomFilters}
-              onChange={(e) => setApplyCustomFilters(e.target.checked)}
-              data-test-subj="apmServiceMapFilterSettingsApplyCustomFiltersToggle"
+              checked={syncWithDashboardFilters}
+              onChange={(e) => setSyncWithDashboardFilters(e.target.checked)}
+              data-test-subj="apmServiceMapFilterSettingsSyncFiltersToggle"
             />
           </EuiFormRow>
         </EuiForm>
@@ -96,7 +95,7 @@ export function ServiceMapFilterSettingsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={() => onSave(applyCustomFilters)}
+              onClick={() => onSave(syncWithDashboardFilters)}
               fill
               color="primary"
               size="m"

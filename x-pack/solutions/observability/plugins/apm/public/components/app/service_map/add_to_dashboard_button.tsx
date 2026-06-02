@@ -207,18 +207,19 @@ export function AddToDashboardButton({
       const serializedState: ServiceMapEmbeddableState = {
         title: newTitle,
         description: newDescription,
-        // No `time_range` here: with `apply_custom_time_range` defaulting OFF, the panel
-        // inherits the dashboard's global time range (which we seed from APM below via
-        // `dashboardPathForId`). The user can switch on a custom time later via the
-        // dashboard panel-menu's "Customize time range" action + the flyout toggle.
+        // No `time_range` here: the panel inherits the dashboard's global time range
+        // (which we seed from APM below via `dashboardPathForId`). The user can set a
+        // custom panel time later via the dashboard panel-menu's "Customize time range"
+        // action.
         environment,
         kuery: capturedKuery,
         service_name: capturedServiceName,
         service_group_id: serviceGroupId || undefined,
         map_orientation: mapOrientation,
-        // Default ON: panel uses only its own captured filters and ignores the dashboard's
-        // KQL/Controls (the user opted into copying THIS view, not following the dashboard).
-        apply_custom_filters: true,
+        // Default OFF: the panel uses only its own captured filters and ignores the
+        // dashboard's KQL/Controls (the user opted into copying THIS view, not following
+        // the dashboard). Stored explicitly for clarity.
+        sync_with_dashboard_filters: false,
         // Snapshot the options-panel selections so the dashboard panel renders with the
         // same filter chips selected. Empty arrays are dropped to keep saved state minimal.
         alert_status_filter: viewFilters.alertStatusFilter.length
@@ -258,10 +259,7 @@ export function AddToDashboardButton({
           (serializedState.slo_status_filter?.length ?? 0) +
           (serializedState.connection_filter?.length ?? 0) +
           (serializedState.anomaly_severity_filter?.length ?? 0),
-        // Preserve the old EBT field name + semantics (true when the panel "syncs" with
-        // dashboard filters) so existing telemetry dashboards keep working. With the new
-        // `apply_custom_filters` semantics, "sync" means the inverse.
-        sync_with_dashboard_filters: serializedState.apply_custom_filters === false,
+        sync_with_dashboard_filters: serializedState.sync_with_dashboard_filters ?? false,
       });
 
       stateTransfer.navigateToWithEmbeddablePackages<ServiceMapEmbeddableState>('dashboards', {

@@ -392,7 +392,7 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
-      // `apply_custom_filters` is owned by the "Service map filter settings" panel-menu
+      // `sync_with_dashboard_filters` is owned by the "Service map filter settings" panel-menu
       // action, not this data-editing flyout — intentionally not set here so editing other
       // fields never resets it.
       // Empty arrays drop to undefined so they're omitted from the saved object payload.

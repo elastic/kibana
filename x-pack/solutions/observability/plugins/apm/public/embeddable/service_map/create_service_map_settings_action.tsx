@@ -15,7 +15,7 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { APM_SERVICE_MAP_EMBEDDABLE, APM_SERVICE_MAP_SETTINGS_ACTION_ID } from './constants';
-import { apiHasApplyCustomFilters } from './service_map_embeddable_factory';
+import { apiHasSyncWithDashboardFilters } from './service_map_embeddable_factory';
 import { ServiceMapFilterSettingsFlyout } from './service_map_filter_settings_flyout';
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
@@ -38,14 +38,14 @@ export function createServiceMapSettingsAction(
       return (
         deps.config.serviceMapEnabled &&
         apiIsOfType(embeddable, APM_SERVICE_MAP_EMBEDDABLE) &&
-        apiHasApplyCustomFilters(embeddable)
+        apiHasSyncWithDashboardFilters(embeddable)
       );
     },
     execute: async ({ embeddable }) => {
       if (
         !deps.config.serviceMapEnabled ||
         !apiIsOfType(embeddable, APM_SERVICE_MAP_EMBEDDABLE) ||
-        !apiHasApplyCustomFilters(embeddable)
+        !apiHasSyncWithDashboardFilters(embeddable)
       ) {
         throw new IncompatibleActionError();
       }
@@ -62,10 +62,12 @@ export function createServiceMapSettingsAction(
             <ApmEmbeddableContext deps={deps}>
               <ServiceMapFilterSettingsFlyout
                 ariaLabelledBy={ariaLabelledBy}
-                initialApplyCustomFilters={embeddable.applyCustomFilters$.getValue() ?? true}
+                initialSyncWithDashboardFilters={
+                  embeddable.syncWithDashboardFilters$.getValue() ?? false
+                }
                 onCancel={closeFlyout}
-                onSave={(applyCustomFilters) => {
-                  embeddable.setApplyCustomFilters(applyCustomFilters);
+                onSave={(syncWithDashboardFilters) => {
+                  embeddable.setSyncWithDashboardFilters(syncWithDashboardFilters);
                   closeFlyout();
                 }}
               />
