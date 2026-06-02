@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -16,6 +17,8 @@ import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { createSignificantEventAttachmentType } from './attachments/significant_event_attachment_type';
+import { createSignificantEventSmlType } from './sml/significant_event_sml_type';
 
 export const createMemoryToolsOptions = ({
   server,
@@ -38,6 +41,7 @@ export const createMemoryToolsOptions = ({
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
+  agentContextLayer,
   getScopedClients,
   server,
   logger,
@@ -46,6 +50,7 @@ export const registerStreamsAgentBuilder = async ({
   streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
@@ -53,6 +58,7 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
+<<<<<<< HEAD
   registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,
@@ -60,6 +66,23 @@ export const registerStreamsAgentBuilder = async ({
     logger,
     telemetry,
   });
+=======
+  agentBuilder.attachments.registerType(
+    createSignificantEventAttachmentType({
+      logger: logger.get('significant_event_attachment'),
+      getScopedClients,
+    }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+
+  agentContextLayer?.registerType(
+    createSignificantEventSmlType({
+      logger: logger.get('significant_event_sml'),
+      getScopedClients,
+    })
+  );
+
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+>>>>>>> fdbc2dd858de ([Sig Events] Register Sig Event attachment type)
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
 
   const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
