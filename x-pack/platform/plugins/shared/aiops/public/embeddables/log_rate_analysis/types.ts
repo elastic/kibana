@@ -12,11 +12,11 @@ import type {
   PublishesTimeRange,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 
 export interface LogRateAnalysisComponentApi {
-  dataViewId: PublishingSubject<LogRateAnalysisEmbeddableState['dataViewId']>;
-  updateUserInput: (update: LogRateAnalysisEmbeddableState) => void;
+  dataViewId: PublishingSubject<LogRateAnalysisEmbeddableState['data_view_id']>;
+  updateUserInput: (update: Pick<LogRateAnalysisEmbeddableState, 'data_view_id'>) => void;
 }
 
 export type LogRateAnalysisEmbeddableApi = DefaultEmbeddableApi<LogRateAnalysisEmbeddableState> &

@@ -168,6 +168,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerMlAnomalyDetectionBehaviorMaintainer } from './lib/entity_analytics/maintainers/behaviors/ml_anomaly_detection';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
@@ -273,9 +274,11 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.logger.error(`Error registering security tools: ${error}`);
       }
     );
-    registerAttachments(agentBuilder).catch((error) => {
+
+    registerAttachments(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
+
     registerSkills({
       agentBuilder,
       experimentalFeatures,
@@ -330,6 +333,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
         telemetry: core.analytics,
       });
+      if (experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {
+        registerMlAnomalyDetectionBehaviorMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          ml: plugins.ml,
+          logger: this.logger,
+        });
+      }
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
           entityStore: plugins.entityStore,
@@ -478,6 +489,15 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'ai_value_report',
+        featureName: 'AI Value Report',
+        featureDescription: 'AI Value Report inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -916,6 +936,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
       agentBuilder: plugins.agentBuilder,
+      getExceptionListClient: this.lists?.getExceptionListClient,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {

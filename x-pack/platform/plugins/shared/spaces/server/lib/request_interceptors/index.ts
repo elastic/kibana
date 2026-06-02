@@ -12,7 +12,10 @@ import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 export type InterceptorDeps = OnRequestInterceptorDeps & OnPostAuthInterceptorDeps;
 
-export function initSpacesRequestInterceptors(deps: InterceptorDeps) {
-  initSpacesOnRequestInterceptor(deps);
-  initSpacesOnPostAuthRequestInterceptor(deps);
+export function initSpacesRequestInterceptors({
+  http,
+  ...authRequestInterceptorDeps
+}: InterceptorDeps) {
+  initSpacesOnRequestInterceptor({ http });
+  initSpacesOnPostAuthRequestInterceptor({ http, ...authRequestInterceptorDeps });
 }

@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Permissions smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const { common, error, maps, security } = getPageObjects(['common', 'error', 'maps', 'security']);

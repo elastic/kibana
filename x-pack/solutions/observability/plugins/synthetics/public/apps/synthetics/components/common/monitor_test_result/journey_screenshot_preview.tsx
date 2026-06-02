@@ -14,6 +14,7 @@ import { POPOVER_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
 import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog';
 import type { ScreenshotImageProps } from '../screenshot/screenshot_image';
 import { ScreenshotImage } from '../screenshot/screenshot_image';
+import { useGetUrlParams } from '../../../hooks';
 
 export interface StepImagePopoverProps {
   timestamp?: string;
@@ -43,6 +44,7 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   borderRadius,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { remoteName } = useGetUrlParams();
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
 
@@ -111,6 +113,7 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
           isOpen={isImageDialogOpen}
           onClose={onDialogClose}
           timestamp={timestamp}
+          remoteName={remoteName}
         />
       ) : null}
       <EuiPopover

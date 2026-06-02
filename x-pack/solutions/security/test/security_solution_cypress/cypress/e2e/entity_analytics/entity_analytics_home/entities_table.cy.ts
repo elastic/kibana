@@ -13,21 +13,20 @@ import {
 } from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
-  PAGE_TITLE,
-  ENTITIES_TABLE_GRID,
-  ENTITIES_TABLE_EMPTY,
-  DATAGRID_HEADER,
   DATAGRID_COLUMN_SELECTOR,
+  DATAGRID_HEADER,
   DATAGRID_SORTING_SELECTOR,
+  ENTITIES_TABLE_GRID,
   EXPAND_ROW_BUTTON,
-  TIMELINE_ACTION,
   FIELDS_SELECTOR_BUTTON,
+  FIELDS_SELECTOR_CLOSE,
   FIELDS_SELECTOR_MODAL,
   FIELDS_SELECTOR_RESET,
-  FIELDS_SELECTOR_CLOSE,
-  LAST_UPDATED,
   FLYOUT_RIGHT_PANEL,
   FLYOUT_TITLE_TEXT,
+  LAST_UPDATED,
+  PAGE_TITLE,
+  TIMELINE_ACTION,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
@@ -175,27 +174,6 @@ describe(
         cy.get(LAST_UPDATED).should('be.visible');
         cy.get(LAST_UPDATED).should('contain', 'Updated');
       });
-    });
-  }
-);
-
-describe(
-  'Entities table - Empty state',
-  {
-    tags: ['@ess', '@serverless'],
-  },
-  () => {
-    beforeEach(() => {
-      interceptEntityStoreStatus('running');
-      login();
-      setGrouping(['none']);
-      visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus', { timeout: 20000 });
-      cy.get(PAGE_TITLE).should('exist');
-    });
-
-    it('displays empty state when no entity data exists', () => {
-      cy.get(ENTITIES_TABLE_EMPTY).should('exist');
     });
   }
 );

@@ -5,29 +5,81 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
+import type { ComposeFormValues } from '../compose_form_types';
 
-// TODO (#268770): Notifications step -- wire workflow selector and notification policy fields
-// to FormValues once the action policy API integration is in place.
-export function NotificationsStep() {
-  return (
-    <EuiCallOut
-      title={i18n.translate('xpack.alertingV2.composeDiscover.notifications.comingSoonTitle', {
-        defaultMessage: 'Notifications configuration coming soon',
-      })}
-      iconType="clock"
-      color="primary"
-      size="s"
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.alertingV2.composeDiscover.notifications.comingSoonDescription"
-          defaultMessage="Notification policies will be configurable here. Rules are created without notifications until this step is wired."
-        />
-      </p>
-    </EuiCallOut>
-  );
+const notificationsTitle = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
+  { defaultMessage: 'Simple actions' }
+);
+
+const notificationsSubtext = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
+  {
+    defaultMessage: "Send a notification when this rule's alerts change status.",
+  }
+);
+
+const createSingleActionLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
+  { defaultMessage: 'Create single action' }
+);
+
+interface Props {
+  services: RuleFormServices;
 }
+
+export const NotificationsStep = ({ services }: Props) => {
+  const { watch, setValue } = useFormContext<ComposeFormValues>();
+  const notifications = watch('notifications');
+  const enabled = !!notifications;
+  const { workflowForm } = services;
+  const [touched, setTouched] = useState(false);
+  const isWorkflowInvalid =
+    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
+
+  const handleCreate = useCallback(() => {
+    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
+  }, [setValue, workflowForm]);
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>{notificationsTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        <p>{notificationsSubtext}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      {enabled ? (
+        <div onBlur={() => setTouched(true)}>
+          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+            <workflowForm.Component
+              value={notifications!.workflow}
+              onChange={(next) =>
+                setValue('notifications', { workflow: next }, { shouldDirty: true })
+              }
+              isInvalid={isWorkflowInvalid}
+            />
+          </Suspense>
+        </div>
+      ) : workflowForm.supported !== false ? (
+        <EuiButton
+          iconType="plusInCircle"
+          onClick={handleCreate}
+          size="s"
+          color="text"
+          data-test-subj="createSingleActionButton"
+        >
+          {createSingleActionLabel}
+        </EuiButton>
+      ) : null}
+    </>
+  );
+};

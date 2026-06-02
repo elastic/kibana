@@ -14,9 +14,11 @@
     "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json"
+    "server/**/*.json",
+    "test/scenarios/**/*"
   ],
   "kbn_references": [
+    "@kbn/synthtrace",
     "@kbn/apm-embeddable-common",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -165,6 +167,7 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/ebt-click",
     "@kbn/apm-types-shared",
+    "@kbn/apm-common",
     "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
