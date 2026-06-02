@@ -57,7 +57,7 @@ echo "Build react TS definitions..."
 # tsc --outFile wraps everything in 'declare module "types" { ... }' which is
 # not usable as a package declaration. Compile first, then strip the wrapper,
 # dedent, and append the OneConsole component export.
-npx tsc "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
+"$KIBANA_ROOT/node_modules/.bin/tsc" "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
 node -e "
   const fs = require('fs');
   let src = fs.readFileSync('$OUTPUT_DIR/index.d.ts', 'utf8');
