@@ -72,6 +72,7 @@ const API_FIELD_FLAGS = new Set(['-f', '-F', '--field', '--raw-field']);
 const API_VALUE_FLAGS = new Set([
   '-f', '-F', '--field', '--raw-field', '-H', '--header', '-X', '--method',
   '--hostname', '-q', '--jq', '-t', '--template', '--input', '--cache',
+  '-p', '--preview',
 ]);
 
 /** `gh` global flags that may precede the subcommand and consume the next token. */
