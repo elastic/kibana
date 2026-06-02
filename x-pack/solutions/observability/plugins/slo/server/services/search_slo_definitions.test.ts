@@ -36,12 +36,12 @@ function createMockSummaryDocResponse(docs: MockSummaryDocOptions[] = []): {
             _source: {
               ...(doc.name !== undefined || doc.groupBy !== undefined
                 ? {
-                    slo: {
-                      id: doc.id || 'slo-1',
-                      ...(doc.name !== undefined && { name: doc.name }),
-                      ...(doc.groupBy !== undefined && { groupBy: doc.groupBy }),
-                    },
-                  }
+                  slo: {
+                    id: doc.id || 'slo-1',
+                    ...(doc.name !== undefined && { name: doc.name }),
+                    ...(doc.groupBy !== undefined && { groupBy: doc.groupBy }),
+                  },
+                }
                 : {}),
               ...(doc.kibanaUrl && { kibanaUrl: doc.kibanaUrl }),
             },
@@ -330,6 +330,24 @@ describe('SearchSLODefinitions', () => {
           name: 'Local SLO',
           groupBy: [],
           remoteName: 'local',
+        },
+      ]);
+
+      mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
+
+      const result = await searchSLODefinitions.execute({});
+
+      expect(result.results[0].remote).toBeUndefined();
+    });
+
+    it('does not build a remote object for a local SLO when kibanaUrl is set', async () => {
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Local SLO',
+          groupBy: [],
+          remoteName: 'local',
+          kibanaUrl: 'https://local-kibana.example.com',
         },
       ]);
 
