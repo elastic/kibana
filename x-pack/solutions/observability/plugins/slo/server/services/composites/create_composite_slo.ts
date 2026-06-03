@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CreateCompositeSLOInput, CreateCompositeSLOResponse } from '@kbn/slo-schema';
+import type { CreateCompositeSLOInput, CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { persistCompositeSummaryDoc } from './composite_summary_writer';
@@ -29,7 +29,7 @@ export interface CreateCompositeSloDeps {
 export const createCompositeSlo = async (
   params: CreateCompositeSloParams,
   deps: CreateCompositeSloDeps
-): Promise<CreateCompositeSLOResponse> => {
+): Promise<CompositeSLODefinitionResponse> => {
   const { spaceId, userId, ...body } = params;
   const now = new Date().toISOString();
   const compositeSlo = {
