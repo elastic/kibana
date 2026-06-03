@@ -281,7 +281,7 @@ export interface UiamServicePublic {
 }
 
 interface UiamServiceOptions {
-  /** The base URL of the Kibana server. */
+  /** The URL of the Kibana resource server. */
   kibanaServerResourceURL: string;
   /** The URL of the Elasticsearch cluster. */
   elasticsearchUrl?: string;
