@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/kbn-client'
   - '@kbn/spaces-plugin'
+  - '@kbn/apm-types'
 tags:
   - test-helper
   - package
