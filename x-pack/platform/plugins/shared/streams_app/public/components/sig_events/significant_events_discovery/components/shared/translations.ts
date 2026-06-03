@@ -50,6 +50,20 @@ export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
   }
 );
 
+export const MODEL_SELECTION_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.modelSelectionButtonLabel',
+  {
+    defaultMessage: 'Models',
+  }
+);
+
+export const MODEL_SELECTION_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.modelSelectionButtonAriaLabel',
+  {
+    defaultMessage: 'Select models',
+  }
+);
+
 export const MODEL_SETTINGS_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.modelSettingsLabel',
   {
