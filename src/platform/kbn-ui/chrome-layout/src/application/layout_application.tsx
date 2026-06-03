@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
 import { styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';

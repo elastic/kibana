@@ -27,6 +27,7 @@ import {
   getEventChainDepthFromHeaders,
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
+import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
 import { classifyWorkflowTriggerMatch } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import {
@@ -63,6 +64,7 @@ export interface TriggerEventHandlerDeps {
   scheduleWorkflow: ScheduleWorkflow;
   config: EventTriggersConfig;
   logger: Logger;
+  triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
 }
 
 interface ScheduleEventParams {
@@ -156,7 +158,7 @@ export class TriggerEventHandler {
   private readonly spaces: SpacesServiceStart | undefined;
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
-  private readonly triggerEventsClientPromise: ReturnType<typeof initializeTriggerEventsClient>;
+  private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -171,7 +173,8 @@ export class TriggerEventHandler {
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-    this.triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
+    this.triggerEventsClientPromise =
+      deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {

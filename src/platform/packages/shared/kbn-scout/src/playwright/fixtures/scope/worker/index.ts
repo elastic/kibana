@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { coreWorkerFixtures } from './core_fixtures';
-export type {
-  ScoutLogger,
-  ScoutTestConfig,
-  KibanaUrl,
-  EsClient,
-  KbnClient,
-  SamlAuth,
-  CoreWorkerFixtures,
-} from './core_fixtures';
+// The samlAuthFixture extends the base coreWorkerFixtures with `samlAuth`.
+// Re-export it as `coreWorkerFixtures` so all downstream consumers get
+// the full fixture set (including samlAuth) without any import-path changes.
+export { samlAuthFixture as coreWorkerFixtures } from './saml_auth';
+export type { ScoutLogger, ScoutTestConfig, KibanaUrl, EsClient, KbnClient } from './core_fixtures';
+export type { SamlAuth, CoreWorkerFixtures } from './saml_auth';
 
 export { esArchiverFixture } from './es_archiver';
 export type { EsArchiverFixture } from './es_archiver';
