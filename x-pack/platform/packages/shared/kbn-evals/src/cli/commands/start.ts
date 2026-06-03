@@ -6,6 +6,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
