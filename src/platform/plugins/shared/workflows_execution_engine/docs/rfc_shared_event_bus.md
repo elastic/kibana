@@ -1,4 +1,6 @@
-# RFC: Shared In-Process Event Bus
+# RFC: Domain Event Bus (`@kbn/domain-events`)
+
+> A shared, in-process publish/subscribe layer for Kibana plugins. Packaged as `@kbn/domain-events`; "shared" describes its topology (one neutral instance, not a per-plugin private bus).
 
 **Status:** Draft
 **Authors:** Workflows Engine Team
@@ -43,7 +45,7 @@ export function registerCasesWorkflowEventBridge(
   };
 ```
 
-This is a sensible local design, but it is **a pattern every domain will copy**: own bus → adapter → workflows API. The bus is private, so no third plugin (telemetry, billing, Agent Builder, an inbox) can subscribe to Cases events; they would each need their own bridge.
+This is a sensible local design, and that is exactly the problem: **other plugins will copy it**. Cases adopted this pattern specifically to keep workflow-event publishing out of its domain code — the domain emits a plain `caseCreated` event, and a separate bridge translates it into workflows calls. Any plugin that wants the same separation (domain code that does not import or call workflows directly) has no choice but to reproduce the same machinery: own bus → adapter → workflows API. The bus is private, so no third plugin (telemetry, billing, Agent Builder, an inbox) can subscribe to Cases events either; they would each need their own bridge.
 
 ### Problem 3: The only "shared" inbound API is workflows-specific
 
@@ -55,18 +57,16 @@ Multiple in-flight efforts independently need the same thing — a way to observ
 
 - **Agent Builder** wants workflow lifecycle (`WorkflowStarted`, `WorkflowFinished`) and a neutral event layer rather than a workflows-only path ([AB Slack thread](https://elastic.slack.com/archives/C0A2RUHDJCB/p1779788276043349)).
 - **Inbox / HITL** wants to react to specific step lifecycle events.
-- **Cases** wants to stop maintaining its own bus + bridge.
-- **Workflows telemetry and billing** want to observe the engine without being woven into execution code.
 
-Each of these will otherwise build its own bridge. We are about to repeat Problem 2 four more times.
+Each of these will otherwise build its own bridge. We are about to repeat Problem 2 once per consumer.
 
 ---
 
 ## The Core Idea
 
-> The shared event bus is an **in-process** publish/subscribe layer built on Node's built-in `EventEmitter`. If an event is emitted on `kibana_node_3`, **all subscribers handle that event on `kibana_node_3`**. There is **no event distribution across nodes, no dead-letter queue, no retries, no persistence, no ordering guarantees**. It is a simple, synchronous, fire-and-forget publisher/subscriber mechanism — the kind a single process needs, not the kind a distributed micro-service mesh needs.
+> The domain event bus is an **in-process** publish/subscribe layer built on Node's built-in `EventEmitter`. If an event is emitted on `kibana_node_3`, **all subscribers handle that event on `kibana_node_3`**. There is **no event distribution across nodes, no dead-letter queue, no retries, no persistence, no ordering guarantees**. It is a simple, synchronous, fire-and-forget publisher/subscriber mechanism — the kind a single process needs, not the kind a distributed micro-service mesh needs.
 
-It is an **alternative to calling a specific plugin's API function**, with one crucial difference: **the publisher does not know who (if anyone) will handle the event.** A plugin publishes a fact about its own domain; zero or more plugins react. Adding or removing a consumer never touches the publisher.
+It is an **alternative to calling a specific plugin's API function** directly, with one crucial difference: **the publisher does not know who (if anyone) will handle the event.** A plugin publishes a fact about its own domain; zero or more plugins react. Adding or removing a consumer never touches the publisher.
 
 This is deliberately the *smallest possible* thing that solves the coupling problem. Anything durable, cross-node, or guaranteed already has a home in Kibana (Elasticsearch as the source of truth, Task Manager for durable/retried work). The bus does not compete with those.
 
@@ -95,7 +95,7 @@ A single bus instance per Kibana node, exposed on a neutral contract (a dedicate
 
 ```
                     ┌─────────────────────────┐
-                    │   Shared event bus      │
+                    │   Domain event bus      │
                     │   (in-process, 1/node)  │
                     └───────────▲─────────────┘
                                 │
@@ -122,7 +122,7 @@ The engine is special only in that it has a trigger registry and emits lifecycle
 ### Proposed contract (illustrative)
 
 ```ts
-interface SharedEvent<T = unknown> {
+interface DomainEvent<T = unknown> {
   /** Stable `domain.action` identifier, e.g. 'cases.caseCreated', 'workflows.workflowFinished'. */
   type: string;
   /** Versioned payload. */
@@ -131,9 +131,9 @@ interface SharedEvent<T = unknown> {
   request?: KibanaRequest;
 }
 
-interface SharedEventBus {
-  publish(event: SharedEvent): void;                       // fire-and-forget, returns immediately
-  subscribe(type: string, handler: (event: SharedEvent) => void): () => void; // returns unsubscribe
+interface DomainEventBus {
+  publish(event: DomainEvent): void;                       // fire-and-forget, returns immediately
+  subscribe(type: string, handler: (event: DomainEvent) => void): () => void; // returns unsubscribe
 }
 ```
 
@@ -175,10 +175,10 @@ The snippets below are illustrative and trace one end-to-end flow: **Cases publi
 Event types are declared once, as a `domain.action` map, so both `publish` and `subscribe` are type-checked. The bus interface from the contract section becomes generic over this map:
 
 ```ts
-// @kbn/shared-event-bus/common/events.ts
+// @kbn/domain-events/common/events.ts
 import type { KibanaRequest } from '@kbn/core/server';
 
-export interface KibanaEventMap {
+export interface DomainEventMap {
   'cases.caseCreated': { caseId: string; owner: string; title: string };
   'cases.caseUpdated': { caseId: string; updatedFields: string[] };
   'workflows.workflowStarted': { spaceId: string; workflowId: string; workflowRunId: string };
@@ -197,21 +197,21 @@ export interface KibanaEventMap {
   };
 }
 
-export type KibanaEventType = keyof KibanaEventMap;
+export type DomainEventType = keyof DomainEventMap;
 
-export interface KibanaEvent<T extends KibanaEventType = KibanaEventType> {
+export interface DomainEvent<T extends DomainEventType = DomainEventType> {
   type: T;
-  payload: KibanaEventMap[T];
+  payload: DomainEventMap[T];
   request?: KibanaRequest; // space / auth scope, preserved as-is
 }
 
-export interface SharedEventBus {
+export interface DomainEventBus {
   /** Fire-and-forget; returns immediately, never throws on subscriber errors. */
-  publish<T extends KibanaEventType>(event: KibanaEvent<T>): void;
+  publish<T extends DomainEventType>(event: DomainEvent<T>): void;
   /** Returns an unsubscribe function. */
-  subscribe<T extends KibanaEventType>(
+  subscribe<T extends DomainEventType>(
     type: T,
-    handler: (event: KibanaEvent<T>) => void
+    handler: (event: DomainEvent<T>) => void
   ): () => void;
 }
 ```
@@ -223,13 +223,13 @@ No plugin imports another plugin's code — they only depend on the neutral bus 
 ```ts
 // any_plugin/server/plugin.ts
 interface MyPluginStartDeps {
-  sharedEventBus: SharedEventBus;
+  domainEvents: DomainEventBus;
   // ...other deps
 }
 
 export class MyPlugin implements Plugin {
   public start(core: CoreStart, plugins: MyPluginStartDeps) {
-    const { sharedEventBus } = plugins;
+    const { domainEvents } = plugins;
     // publish and/or subscribe here
   }
 }
@@ -251,7 +251,7 @@ await client.emitEvent(CaseCreatedTriggerId, payload);
 
 ```ts
 // cases/server/.../create_case.ts
-sharedEventBus.publish({
+domainEvents.publish({
   type: 'cases.caseCreated',
   payload: { caseId, owner, title },
   request,
@@ -265,7 +265,7 @@ The engine registers its subscribers at `start()`. It receives the fact, matches
 ```ts
 // workflows_execution_engine/server/plugin.ts (start)
 this.unsubscribers.push(
-  sharedEventBus.subscribe('cases.caseCreated', (event) => {
+  domainEvents.subscribe('cases.caseCreated', (event) => {
     // fire-and-forget: never block the publisher on scheduling I/O
     void this.matchTriggersAndScheduleWorkflows(event);
   })
@@ -280,7 +280,7 @@ Persist first, then publish. The execution indices remain the source of truth:
 // after the repository write succeeds
 await workflowExecutionRepository.updateStatus(workflowRunId, 'completed');
 
-sharedEventBus.publish({
+domainEvents.publish({
   type: 'workflows.workflowFinished',
   payload: { spaceId, workflowId, workflowRunId, status: 'completed' },
 });
@@ -292,7 +292,7 @@ Inbox only cares about human-in-the-loop steps, so it filters inside its handler
 
 ```ts
 // inbox/server/plugin.ts (start)
-sharedEventBus.subscribe('workflows.stepFinished', (event) => {
+domainEvents.subscribe('workflows.stepFinished', (event) => {
   if (!event.payload.stepType.startsWith('hitl.')) {
     return; // ignore everything that is not a HITL step
   }
@@ -306,17 +306,17 @@ Three independent plugins react to the same `workflows.workflowFinished` fact. A
 
 ```ts
 // agent_builder/server/plugin.ts
-sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
+domainEvents.subscribe('workflows.workflowFinished', (event) => {
   void this.advanceConversationRound(event.payload.workflowRunId);
 });
 
 // workflows telemetry
-sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
+domainEvents.subscribe('workflows.workflowFinished', (event) => {
   void this.telemetry.reportWorkflowFinished(event.payload);
 });
 
 // workflows billing
-sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
+domainEvents.subscribe('workflows.workflowFinished', (event) => {
   void this.billing.countWorkflowRun(event.payload.spaceId);
 });
 ```
@@ -327,12 +327,12 @@ APM tracing is the same pattern, but pairs the start and finish facts to bound a
 // workflows APM tracing
 const transactions = new Map<string, Transaction>();
 
-sharedEventBus.subscribe('workflows.workflowStarted', (event) => {
+domainEvents.subscribe('workflows.workflowStarted', (event) => {
   const transaction = apm.startTransaction(`workflow ${event.payload.workflowId}`, 'workflow');
   transactions.set(event.payload.workflowRunId, transaction);
 });
 
-sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
+domainEvents.subscribe('workflows.workflowFinished', (event) => {
   const transaction = transactions.get(event.payload.workflowRunId);
   transaction?.setOutcome(event.payload.status === 'completed' ? 'success' : 'failure');
   transaction?.end();
@@ -342,15 +342,15 @@ sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
 
 ### 8. Clean up subscriptions on stop
 
-`subscribe` returns an unsubscribe function; capture it and release on `stop()` to avoid leaks and the `EventEmitter` max-listeners warning:
+`subscribe` returns an unsubscribe function; capture it and release on `stop()` to avoid leaked subscriptions:
 
 ```ts
 export class MyPlugin implements Plugin {
   private readonly unsubscribers: Array<() => void> = [];
 
-  public start(core: CoreStart, { sharedEventBus }: MyPluginStartDeps) {
+  public start(core: CoreStart, { domainEvents }: MyPluginStartDeps) {
     this.unsubscribers.push(
-      sharedEventBus.subscribe('workflows.workflowFinished', (event) => {
+      domainEvents.subscribe('workflows.workflowFinished', (event) => {
         void this.handle(event);
       })
     );
@@ -397,7 +397,7 @@ Payloads carry stable identifiers (`spaceId`, `workflowId`, `workflowRunId`, `st
 
 | Mechanism | Role |
 |---|---|
-| **Shared event bus (proposed)** | Neutral, in-process publish/subscribe between plugins on one node |
+| **Domain event bus (proposed)** | Neutral, in-process publish/subscribe between plugins on one node |
 | **Per-plugin private bus** (e.g. `CasesEventBus`) | Becomes unnecessary for cross-plugin flows; removed once domains publish to the shared bus |
 | **`emitEvent` as a primary API** | Workflows-specific; wraps or delegates to shared `publish` |
 | **Task Manager** | Durable, retried, scheduled work — where a subscriber goes when delivery must be guaranteed |
@@ -418,8 +418,8 @@ Payloads carry stable identifiers (`spaceId`, `workflowId`, `workflowRunId`, `st
 
 The bus lives behind a **shared contract**, not on `workflows_execution_engine` start.
 
-- New neutral home: a dedicated package (e.g. `@kbn/shared-event-bus`) or an existing platform plugin's setup/start contract.
-- `publish(event: SharedEvent)` — any plugin.
+- New neutral home: a dedicated package (e.g. `@kbn/domain-events`) or an existing platform plugin's setup/start contract.
+- `publish(event: DomainEvent)` — any plugin.
 - `subscribe(type, handler): unsubscribe` — any plugin.
 - The engine registers its subscriber(s) and publishes lifecycle types in `start`.
 
@@ -433,12 +433,10 @@ Open question to resolve before implementation: **package vs platform plugin**. 
 
 | Deliverable | Description |
 |---|---|
-| `SharedEventBus` contract | `publish` / `subscribe` over Node `EventEmitter`, per-handler try/catch + logging |
+| `DomainEventBus` contract | `publish` / `subscribe` over Node `EventEmitter`, per-handler try/catch + logging |
 | Neutral home | Exposed on a shared package or platform plugin contract (decision in PoC) |
 | Engine consumer | Workflows listener: bus event → trigger registry → schedule (wrapping/replacing `emitEvent`) |
 | Engine publisher | `WorkflowStarted`, `WorkflowFinished`, `StepStarted`, `StepFinished` published after repository writes |
-| Cases migration | Cases publishes domain events to the shared bus; remove `event_bridge.ts` + `CasesEventBus` for cross-plugin flows |
-| One reference subscriber | e.g. workflows telemetry subscribing to lifecycle events, to prove the symmetric path |
 | Event naming + types | `domain.action` convention, versioned payload types in the shared package |
 | Unit tests | publish/subscribe, fire-and-forget non-blocking, handler isolation on throw, trigger-matching via bus |
 
@@ -448,18 +446,16 @@ Open question to resolve before implementation: **package vs platform plugin**. 
 - Dead-letter queue, retries, or any delivery guarantee (use Task Manager from a handler instead).
 - Ordering or exactly-once guarantees beyond `EventEmitter`'s synchronous, in-registration-order invocation on a single node.
 - Backpressure / per-key queueing (e.g. Agent Builder's per-conversation serialization — a consumer concern).
-- Migrating every existing bridge at once (Cases first; others follow incrementally).
+- Migrating every existing bridge at once.
 
 ---
 
 ## Implementation Outline
 
-1. Define `SharedEventBus` + `SharedEvent` shape; expose on a neutral start contract; wrap each handler in try/catch with logging.
+1. Define `DomainEventBus` + `DomainEvent` shape; expose on a neutral start contract; wrap each handler in try/catch with logging.
 2. Migrate/wrap inbound triggers: bus event → trigger registry → schedule (engine or a thin workflows listener). Keep `emitEvent` as a wrapper.
 3. Engine publishes `WorkflowStarted`, `WorkflowFinished`, `StepStarted`, `StepFinished` **after** repository writes.
-4. Migrate Cases: publish domain events to the shared bus; delete the private bus + bridge for cross-plugin flows.
-5. Document event-type naming (`domain.action`) and payload-compatibility rules.
-6. Add one reference subscriber (telemetry or billing) to validate the symmetric path.
+4. Document event-type naming (`domain.action`) and payload-compatibility rules.
 
 ---
 
@@ -473,6 +469,16 @@ Open question to resolve before implementation: **package vs platform plugin**. 
 
 4. **No ordering across event types.** Two related events (e.g. `StepStarted` then `StepFinished`) are only ordered to the extent the publisher emits them in order on one node; subscribers must not assume global ordering.
 
-5. **Listener limits.** `EventEmitter` warns past its `maxListeners` threshold. With many subscribers we must raise the limit deliberately (as `CasesEventBus` does with `setMaxListeners(50)`) and track subscriber count to catch leaks.
+5. **Payload coupling risk.** Even without import coupling, subscribers depend on payload shape. Versioning discipline and a central type registry are required to prevent silent breakage.
 
-6. **Payload coupling risk.** Even without import coupling, subscribers depend on payload shape. Versioning discipline and a central type registry are required to prevent silent breakage.
+---
+
+## Open Questions
+
+1. **Ownership and maintenance.** Who owns the shared bus — the team that builds it, maintains the contract, reviews new event types, and is on the hook when something breaks? Because the bus is deliberately neutral (not workflows-owned), it needs a clear home: a platform team owning a shared package/plugin, or a designated owner with a lightweight review process for additions. This must be settled before the bus becomes load-bearing for multiple plugins.
+
+2. **Package vs platform plugin.** Should the bus ship as a stateless `@kbn/domain-events` package or as a platform plugin exposing a single per-node instance on its contract? A plugin is warranted if we need lifecycle hooks (startup subscriber registration, `stop` cleanup); a package is simpler if the bus stays purely in-memory and stateless.
+
+3. **Event registry governance.** Where do event types and payload schemas live, and what is the process to add/change one? Is registration centralized (one schema file all teams edit) or federated (each domain declares its own types that the bus aggregates)? How are breaking payload changes reviewed and versioned?
+
+4. **Scope of the first migration.** Cases is the obvious first publisher to migrate off its private bus + bridge. Do we also migrate inbound trigger handling (`emitEvent`) in the same effort, or keep `emitEvent` as a wrapper indefinitely?
