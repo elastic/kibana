@@ -192,7 +192,7 @@ const firewallTopology: GraphDsl = {
     fortinet_firewall_logs: { type: 'elasticsearch' },
     siem_high_severity_alerts: {
       type: 'elasticsearch',
-      lifecycle: { dsl: { data_retention: '2y' } },
+      lifecycle: { dsl: { data_retention: '730d' } },
     },
   },
   routing: [
@@ -229,6 +229,75 @@ const firewallTopology: GraphDsl = {
       where: { field: 'attributes.severity', eq: 'critical' },
     },
     { from: 'fortinet_parse', to: 'fortinet_firewall_logs' },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Security log normalization — 4 sequential processing stages
+// ---------------------------------------------------------------------------
+const securityTopology: GraphDsl = {
+  name: 'security-topology',
+  sources: {
+    raw_syslog_in: { type: 'async_bulk' },
+  },
+  pipelines: {
+    parse_syslog: {
+      steps: [
+        {
+          action: 'grok',
+          from: 'body.message',
+          patterns: [
+            '%{SYSLOGTIMESTAMP:attributes.ts} %{SYSLOGHOST:attributes.host} %{DATA:attributes.process}\\[%{POSINT:attributes.pid}\\]: %{GREEDYDATA:attributes.msg}',
+          ],
+        },
+      ],
+    },
+    enrich_geoip: {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.geo.country_iso_code',
+          value: 'RU',
+        },
+        {
+          action: 'set',
+          to: 'attributes.geo.city_name',
+          value: 'Moscow',
+        },
+      ],
+    },
+    enrich_threat_intel: {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.threat.feed',
+          value: 'known-bad-ips',
+        },
+        {
+          action: 'set',
+          to: 'attributes.threat.score',
+          value: 9.2,
+        },
+      ],
+    },
+  },
+  destinations: {
+    siem_critical: {
+      type: 'elasticsearch',
+      lifecycle: { dsl: { data_retention: '730d' } },
+    },
+    siem_archive: { type: 'elasticsearch' },
+  },
+  routing: [
+    { from: 'raw_syslog_in', to: 'parse_syslog' },
+    { from: 'parse_syslog', to: 'enrich_geoip' },
+    { from: 'enrich_geoip', to: 'enrich_threat_intel' },
+    {
+      from: 'enrich_threat_intel',
+      to: 'siem_critical',
+      where: { field: 'resource.attributes.host.name', eq: 'prod-firewall-01' },
+    },
+    { from: 'enrich_threat_intel', to: 'siem_archive' },
   ],
 };
 
@@ -285,6 +354,22 @@ export const GRAPH_PRESETS: GraphPreset[] = [
       'attributes.dst_ip': '10.0.0.5',
       'attributes.action': 'block',
       'body.message': '2026-06-02T10:00:00,paloalto,THREAT,critical,203.0.113.42,10.0.0.5',
+    },
+  },
+  {
+    id: 'security',
+    label: 'Security log normalization (4 stages)',
+    description:
+      'Syslog enters a 4-stage pipeline: parse → geo-enrich → threat-intel → route. ' +
+      'Demonstrates sequential multi-stage processing before a routing decision.',
+    topology: securityTopology,
+    entrySource: 'raw_syslog_in',
+    sampleDocument: {
+      '@timestamp': '2026-06-03T10:00:00Z',
+      'body.message':
+        'Jun  3 10:00:01 prod-firewall-01 sshd[1234]: Failed password for root from 185.220.101.42 port 54321',
+      'resource.attributes.host.name': 'prod-firewall-01',
+      'resource.attributes.service.name': 'syslog',
     },
   },
 ];

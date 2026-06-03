@@ -308,7 +308,11 @@ export const GraphStreamsDemoPage = () => {
             <p>{selectedPreset.description}</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <TopologyGraph preset={selectedPreset} />
+          <TopologyGraph
+            preset={selectedPreset}
+            executedPipelines={routeTestResult?.executedPipelines}
+            landedIn={routeTestResult?.landedIn}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>

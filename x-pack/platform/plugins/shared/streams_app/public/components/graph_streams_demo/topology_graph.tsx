@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -13,10 +13,10 @@ import {
   MarkerType,
   Handle,
   Position,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeTypes,
-  type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useEuiTheme } from '@elastic/eui';
@@ -25,15 +25,18 @@ import Dagre from '@dagrejs/dagre';
 import type { GraphPreset } from './presets';
 
 // ---------------------------------------------------------------------------
-// Layout constants
+// Constants
 // ---------------------------------------------------------------------------
 
 const NODE_W = 150;
 const NODE_H = 44;
 const GRAPH_H = 300;
 
+// Strip "@stream.processing" / "@stream.reroutes" suffix to get node id
+const toNodeId = (pipelineName: string) => pipelineName.replace(/@stream\.\w+$/, '');
+
 // ---------------------------------------------------------------------------
-// Node types
+// Node component
 // ---------------------------------------------------------------------------
 
 type TopologyNodeType = 'source' | 'pipeline' | 'destination';
@@ -41,42 +44,35 @@ type TopologyNodeType = 'source' | 'pipeline' | 'destination';
 interface TopologyNodeData extends Record<string, unknown> {
   label: string;
   nodeType: TopologyNodeType;
+  active: boolean;
+  landed: boolean; // final landing destination
 }
 
 const TopologyNode = ({ data }: { data: TopologyNodeData }) => {
   const { euiTheme } = useEuiTheme();
 
-  const palette: Record<TopologyNodeType, { bg: string; border: string; text: string }> = {
-    source: {
-      bg: euiTheme.colors.vis.euiColorVis1,
-      border: euiTheme.colors.vis.euiColorVis1,
-      text: '#fff',
-    },
-    pipeline: {
-      bg: euiTheme.colors.vis.euiColorVis2,
-      border: euiTheme.colors.vis.euiColorVis2,
-      text: '#fff',
-    },
-    destination: {
-      bg: euiTheme.colors.vis.euiColorVis0,
-      border: euiTheme.colors.vis.euiColorVis0,
-      text: '#fff',
-    },
+  const palette: Record<TopologyNodeType, { bg: string; text: string }> = {
+    source: { bg: euiTheme.colors.vis.euiColorVis1, text: '#fff' },
+    pipeline: { bg: euiTheme.colors.vis.euiColorVis2, text: '#fff' },
+    destination: { bg: euiTheme.colors.vis.euiColorVis0, text: '#fff' },
   };
 
-  const { bg, border, text } = palette[data.nodeType];
+  const { bg, text } = palette[data.nodeType];
+
+  const glowColor = data.landed ? euiTheme.colors.warning : euiTheme.colors.accentSecondary;
+  const outline = data.landed
+    ? `0 0 0 3px ${euiTheme.colors.warning}, 0 0 14px ${euiTheme.colors.warning}`
+    : data.active
+    ? `0 0 0 3px ${euiTheme.colors.accentSecondary}, 0 0 10px ${glowColor}`
+    : undefined;
 
   return (
     <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: border, border: 'none' }}
-      />
+      <Handle type="target" position={Position.Left} style={{ background: bg, border: 'none' }} />
       <div
         style={{
           background: bg,
-          border: `2px solid ${border}`,
+          border: `2px solid ${bg}`,
           borderRadius: 6,
           padding: '6px 12px',
           fontSize: 12,
@@ -92,15 +88,13 @@ const TopologyNode = ({ data }: { data: TopologyNodeData }) => {
           boxSizing: 'border-box',
           lineHeight: 1.2,
           wordBreak: 'break-all',
+          boxShadow: outline,
+          transition: 'box-shadow 0.3s ease',
         }}
       >
         {data.label}
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{ background: border, border: 'none' }}
-      />
+      <Handle type="source" position={Position.Right} style={{ background: bg, border: 'none' }} />
     </>
   );
 };
@@ -125,7 +119,7 @@ const conditionToLabel = (where: Record<string, unknown> | undefined): string =>
 };
 
 // ---------------------------------------------------------------------------
-// Build nodes + edges from a preset
+// Build raw nodes + edges from preset (no layout, no active state)
 // ---------------------------------------------------------------------------
 
 const buildGraph = (
@@ -139,8 +133,8 @@ const buildGraph = (
     nodes.push({
       id,
       type: 'topology',
-      position: { x: 0, y: 0 }, // overwritten by Dagre
-      data: { label: id, nodeType },
+      position: { x: 0, y: 0 },
+      data: { label: id, nodeType, active: false, landed: false },
     });
   };
 
@@ -149,12 +143,11 @@ const buildGraph = (
   Object.keys(topology.destinations ?? {}).forEach((id) => addNode(id, 'destination'));
 
   topology.routing.forEach((edge, idx) => {
-    const label = conditionToLabel(edge.where);
     edges.push({
       id: `e-${idx}`,
       source: edge.from,
       target: edge.to,
-      label,
+      label: conditionToLabel(edge.where),
       labelStyle: { fontSize: 10, fill: '#666' },
       labelBgStyle: { fill: '#fff', fillOpacity: 0.8 },
       markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
@@ -166,7 +159,7 @@ const buildGraph = (
 };
 
 // ---------------------------------------------------------------------------
-// Dagre layout (LR, simple — no compound groups)
+// Dagre layout
 // ---------------------------------------------------------------------------
 
 const applyLayout = (
@@ -205,19 +198,79 @@ const applyLayout = (
 
 interface TopologyGraphProps {
   preset: GraphPreset;
+  /** executedPipelines from a route-test result — used to highlight the active path */
+  executedPipelines?: string[];
+  /** landedIn from a route-test result — highlights the final destination */
+  landedIn?: string;
 }
 
-const TopologyGraphInner: React.FC<TopologyGraphProps> = ({ preset }) => {
+const TopologyGraphInner: React.FC<TopologyGraphProps> = ({
+  preset,
+  executedPipelines,
+  landedIn,
+}) => {
   const { euiTheme } = useEuiTheme();
 
-  const { nodes, edges } = useMemo(() => {
+  // Expensive: layout only changes when the preset changes
+  const { layoutedNodes, baseEdges } = useMemo(() => {
     const raw = buildGraph(preset);
-    return { nodes: applyLayout(raw.nodes, raw.edges), edges: raw.edges };
+    return { layoutedNodes: applyLayout(raw.nodes, raw.edges), baseEdges: raw.edges };
   }, [preset]);
 
-  const onInit = (instance: ReactFlowInstance) => {
-    setTimeout(() => instance.fitView({ padding: 0.25 }), 50);
-  };
+  // Cheap: active-path overlay — recomputes when route-test result changes
+  const { nodes, edges } = useMemo(() => {
+    if (!executedPipelines?.length) {
+      return { nodes: layoutedNodes, edges: baseEdges };
+    }
+
+    const pathIds = executedPipelines.map(toNodeId);
+    const activeSet = new Set(pathIds);
+
+    // Consecutive pairs in the executed path
+    const activePairs = new Set<string>();
+    for (let i = 0; i < pathIds.length - 1; i++) {
+      activePairs.add(`${pathIds[i]}->${pathIds[i + 1]}`);
+    }
+
+    const activeColor = euiTheme.colors.accentSecondary;
+    const markerActive = {
+      type: MarkerType.ArrowClosed,
+      color: activeColor,
+      width: 14,
+      height: 14,
+    };
+
+    const activeNodes = layoutedNodes.map((n) => ({
+      ...n,
+      data: {
+        ...n.data,
+        active: activeSet.has(n.id),
+        landed: n.id === landedIn,
+      },
+    }));
+
+    const activeEdges = baseEdges.map((e) => {
+      const isActive = activePairs.has(`${e.source}->${e.target}`);
+      return isActive
+        ? {
+            ...e,
+            style: { strokeWidth: 2.5, stroke: activeColor },
+            markerEnd: markerActive,
+            labelStyle: { fontSize: 10, fill: activeColor, fontWeight: 600 },
+            labelBgStyle: { fill: euiTheme.colors.body, fillOpacity: 0.9 },
+          }
+        : e;
+    });
+
+    return { nodes: activeNodes, edges: activeEdges };
+  }, [layoutedNodes, baseEdges, executedPipelines, landedIn, euiTheme]);
+
+  // Re-fit whenever nodes change (preset switch or path highlight update)
+  const { fitView } = useReactFlow();
+  useEffect(() => {
+    const id = setTimeout(() => fitView({ padding: 0.3 }), 100);
+    return () => clearTimeout(id);
+  }, [nodes, fitView]);
 
   return (
     <div style={{ height: GRAPH_H, border: `1px solid ${euiTheme.border.color}`, borderRadius: 6 }}>
@@ -225,16 +278,13 @@ const TopologyGraphInner: React.FC<TopologyGraphProps> = ({ preset }) => {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
-        onInit={onInit}
-        fitView
-        fitViewOptions={{ padding: 0.3 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
         panOnDrag
         zoomOnScroll={false}
         zoomOnPinch={false}
-        minZoom={0.3}
+        minZoom={0.2}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >
