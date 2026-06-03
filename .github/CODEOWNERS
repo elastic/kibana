@@ -1337,6 +1337,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/con
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-detection-emulation @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
@@ -3318,6 +3319,14 @@ x-pack/platform/test/automatic_import_api_integration @elastic/integration-exper
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation/payloads @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation/log_injection @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation/emulation_history @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/common/detection_emulation @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/emulation @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/detection_emulation @elastic/security-detection-engine @elastic/security-defend-workflows
+/x-pack/solutions/security/packages/kbn-evals-suite-detection-emulation @elastic/security-detection-engine @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Security Posture team

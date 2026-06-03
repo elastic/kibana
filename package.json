@@ -1749,6 +1749,7 @@
     "@kbn/evals-suite-agent-builder-dashboards": "link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards",
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",
     "@kbn/evals-suite-attack-discovery": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery",
+    "@kbn/evals-suite-detection-emulation": "link:x-pack/solutions/security/packages/kbn-evals-suite-detection-emulation",
     "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
     "@kbn/evals-suite-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics",
     "@kbn/evals-suite-lead-generation": "link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation",

@@ -232,6 +232,151 @@ export const configSchema = schema.object({
       }),
     })
   ),
+
+  /**
+   * Detection-emulation runtime knobs (allowlist, rate limiter, idempotency cache).
+   *
+   * These are intentionally `maybe` — the feature ships dark, and operators only
+   * need to set them when they want to override the safe defaults baked into
+   * `createDefaultAllowlistConfig`, `createDefaultRateLimiterConfig`, and
+   * `createDefaultIdempotencyCacheConfig`.
+   */
+  detectionEmulation: schema.maybe(
+    schema.object({
+      /**
+       * Runtime kill switch for `real_execution` dispatch. Defaults to `true`
+       * so the existing static feature flag (`xpack.securitySolution.enableExperimental:
+       * detectionEmulationRealExecution`) remains the primary gate. When set
+       * to `false` while the feature flag is on, the route, agent-builder
+       * tool, and shared `withCommandGates` helper all short-circuit with a
+       * 403 `feature_disabled` whose `likely_cause` reports
+       * `runtime_kill_switch_engaged`. Designed for fast operator response
+       * to anomalous behaviour without a Kibana restart.
+       */
+      realExecutionEnabled: schema.boolean({ defaultValue: true }),
+      allowlist: schema.maybe(
+        schema.object({
+          /**
+           * When true, every endpoint is allowed regardless of `endpointIds`.
+           * Useful for short-lived test deployments only — production should
+           * leave this `false` and populate `endpointIds`.
+           */
+          allowAll: schema.boolean({ defaultValue: false }),
+          /** Explicit list of endpoint IDs that may receive emulation actions. */
+          endpointIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        })
+      ),
+      rateLimiter: schema.maybe(
+        schema.object({
+          maxCommands: schema.number({ defaultValue: 100, min: 1 }),
+          windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+          disabled: schema.boolean({ defaultValue: false }),
+          /**
+           * Per-host (PROD-4) bucket. When omitted, only the per-space
+           * bucket is enforced — preserves pre-PROD-4 behaviour.
+           *
+           * Defaults match `createDefaultRateLimiterConfig`: 3 commands per
+           * host per hour. The lower bound of what major EDR vendors document
+           * as their host-side response-action queue depth before backpressure
+           * kicks in. Raising it requires confirming the target vendor can
+           * absorb the additional load AND raising `MAX_ENDPOINT_FANOUT`
+           * (PROD-3) in lockstep, since the realistic ceiling on a single
+           * emulation is `fanout × per-host`.
+           */
+          perHost: schema.maybe(
+            schema.object({
+              capacity: schema.number({ defaultValue: 3, min: 1 }),
+              windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+            })
+          ),
+        })
+      ),
+      idempotencyCache: schema.maybe(
+        schema.object({
+          ttlMs: schema.number({ defaultValue: 30_000, min: 0 }),
+          maxEntriesPerSpace: schema.number({ defaultValue: 256, min: 1 }),
+          disabled: schema.boolean({ defaultValue: false }),
+        })
+      ),
+      logInjection: schema.maybe(
+        schema.object({
+          /**
+           * Base name of the ILM-managed index template used to store
+           * synthesised ECS documents during log-injection emulation.
+           * The runtime appends `<spaceId>-*` to form the full index pattern.
+           */
+          indexTemplateName: schema.string({
+            defaultValue: '.kibana-security-emulation-logs',
+          }),
+          /**
+           * Number of days before log-injection index data is deleted by ILM.
+           * Must be ≥ 1. Default 7 days balances storage cost against the
+           * investigation window analysts need to review results.
+           */
+          retentionDays: schema.number({ defaultValue: 7, min: 1 }),
+        })
+      ),
+      validation: schema.maybe(
+        schema.object({
+          /**
+           * Default wall-clock budget in milliseconds for a single
+           * `validateRule` run before the telemetry collector times out.
+           * Default 60 000 ms (60 s) — enough for most detection rules to
+           * fire on injected or real-execution signals.
+           */
+          wallBudgetMsDefault: schema.number({ defaultValue: 60_000, min: 1_000 }),
+          /**
+           * Hard ceiling on the wall-clock budget accepted from API callers.
+           * Requests that ask for a budget above this value are clamped.
+           * Default 300 000 ms (5 min) prevents runaway long-poll connections.
+           */
+          wallBudgetMsMax: schema.number({ defaultValue: 300_000, min: 1_000 }),
+          /**
+           * Curated-only mode for the per-family `run*Command` tools. When
+           * `true`, the four tools accept a command/parameters tuple ONLY if
+           * its `(command, parameters.command)` fingerprint exists in the
+           * bundled curated payload library
+           * (`server/lib/detection_emulation/payloads/payloads.json`).
+           * Commands with no free-form `command` parameter
+           * (e.g. `running-processes`, `kill-process`, `isolate`) match on
+           * the API command name alone.
+           *
+           * Default `false` preserves today's behaviour (any command the
+           * other gates approve is dispatched). Operators flip to `true`
+           * via `kibana.yml` reload to lock the LLM down to the
+           * pre-blessed payload set — primarily intended for MSSP /
+           * multi-tenant deployments where the "let the LLM
+           * pick a command" tradeoff isn't acceptable.
+           *
+           * Closes register row #15 (no safe-by-default payload library
+           * lockdown) — see `detection-emulation-production-risk-analysis.html`.
+           */
+          curatedOnly: schema.boolean({ defaultValue: false }),
+          /**
+           * Per-script allow-list for the `runscript` command. When the
+           * array is non-empty AND the LLM dispatches `runscript`, the
+           * supplied `parameters.scriptId` (or the `script_id` field used
+           * by some EDR vendors) MUST be present in this list — otherwise
+           * the gate rejects with 403 `script_not_allowed` BEFORE the EDR
+           * sees the request. When empty (default), the gate is a no-op
+           * and the existing per-command RBAC privilege
+           * (`writeExecuteOperations`) is the only enforcement.
+           *
+           * This is defense-in-depth on top of RBAC: RBAC asks "is this
+           * user allowed to runscript at all", `allowedScriptIds` asks
+           * "is this *specific* script approved by the operator". Useful
+           * when the operator has a finite set of vetted scripts and
+           * doesn't want the LLM dispatching arbitrary IDs that may
+           * exist on the EDR side.
+           *
+           * Closes register row #12 (`runscript` parameters passed
+           * through to the EDR).
+           */
+          allowedScriptIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        })
+      ),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

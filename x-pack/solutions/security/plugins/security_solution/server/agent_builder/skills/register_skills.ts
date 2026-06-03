@@ -9,6 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { ConfigType } from '../../config';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
@@ -18,6 +20,7 @@ import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { siemReadinessSkill } from './siem_readiness';
+import { getDetectionEmulationSkill } from './detection_emulation';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -29,6 +32,8 @@ interface RegisterSkillsOpts {
   options: {
     endpointAppContextService: EndpointAppContextService;
   };
+  core: SecuritySolutionPluginCoreSetupDependencies;
+  config: ConfigType;
 }
 
 /**
@@ -42,6 +47,8 @@ export const registerSkills = async ({
   logger,
   ml,
   options,
+  core,
+  config,
 }: RegisterSkillsOpts): Promise<void> => {
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     agentBuilder.skills.register(
@@ -65,5 +72,19 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (
+    experimentalFeatures.detectionEmulationLogInjection ||
+    experimentalFeatures.detectionEmulationRealExecution
+  ) {
+    agentBuilder.skills.register(
+      getDetectionEmulationSkill({
+        core,
+        endpointService: options.endpointAppContextService,
+        config,
+        logger,
+      })
+    );
   }
 };
