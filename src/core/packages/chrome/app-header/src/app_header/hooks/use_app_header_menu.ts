@@ -66,7 +66,7 @@ const useStaticItems = ({
 }) => {
   const chrome = useChromeService();
   const basePath = useBasePath();
-  const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
+  const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
@@ -96,12 +96,12 @@ const useStaticItems = ({
 
     return staticItems;
   }, [
-    feedbackHandler,
     basePath,
     explicitDocLink,
-    documentationLink,
     helpExtension,
     showAddIntegrations,
+    feedbackHandler,
+    documentationLink,
   ]);
 };
 
