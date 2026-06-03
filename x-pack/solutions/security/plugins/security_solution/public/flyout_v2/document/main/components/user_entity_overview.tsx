@@ -29,7 +29,6 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import type { ESQuery } from '../../../../../common/typed_json';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -53,7 +52,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import {
@@ -133,16 +131,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   enableEntityLinks = false,
 }) => {
   const { from, to } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns();
 
   const timerange = useMemo(
     () => ({
