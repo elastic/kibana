@@ -609,9 +609,11 @@ export class WorkflowExecutionQueryService {
    *
    * Index-not-found is treated as an empty result (cold install). Other ES
    * errors are logged and rethrown so the caller can decide how to surface
-   * them. Soft-deleted-parent filtering is intentionally skipped: the list
-   * endpoint already drops orphan rows from the feed, and the bucket count
-   * is bounded by the `terms` agg `size` cap.
+   * them. Soft-deleted-parent filtering is intentionally skipped here so the
+   * dropdown stays consistent with the history list endpoint, which RETAINS
+   * rows whose parent workflow was deleted (it flags them rather than dropping
+   * them — an audit trail must survive deletion). The bucket count is bounded
+   * by the `terms` agg `size` cap.
    */
   async listProcessedWaitForInputFacets(
     spaceId: string,

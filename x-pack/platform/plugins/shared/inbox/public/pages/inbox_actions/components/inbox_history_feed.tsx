@@ -573,9 +573,11 @@ export const InboxHistoryFeed: React.FC = () => {
   );
 
   const { data, isLoading, error, refetch } = useInboxActionsHistory(filters);
-  // Facets feed the dropdown options. Cached for 60s server-side so opening a
-  // popover is cheap. Empty fallback keeps the bar operational on first paint
-  // / cold cache.
+  // Facets feed the dropdown options. React Query holds them with a 60s
+  // client-side stale time (see `useInboxActionsHistoryFacets`) so opening a
+  // popover doesn't refetch every time; the facets route itself is not cached
+  // server-side. Empty fallback keeps the bar operational on first paint /
+  // cold cache.
   const { data: facetsData } = useInboxActionsHistoryFacets();
   const channelOptions = facetsData?.channel ?? [];
   const responderOptions = facetsData?.respondedBy ?? [];

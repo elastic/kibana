@@ -54,10 +54,17 @@ export const registerRespondToActionRoute = ({
           // Default to `inbox` so callers that don't explicitly identify
           // their surface (e.g. the existing Kibana inbox UI) end up with
           // the same audit tag as before — preserving the audit-feed
-          // semantics that landed with the inbox-history rollout. Closed
-          // enum is enforced by the request-body Zod validator above, so
-          // by the time we read `request.body.channel` it's either a known
-          // `InboxChannel` value or `undefined`.
+          // semantics that landed with the inbox-history rollout.
+          //
+          // `channel` is NOT a closed enum: the request-body Zod validator
+          // only constrains it to a slug shape (lowercase + digits + `_-`,
+          // ≤64 chars). So by the time we read `request.body.channel` it is
+          // either `undefined` or some validated slug — which may be a
+          // well-known `INBOX_CHANNELS` value OR an arbitrary client id like
+          // `example-mcp-app-security`. It is a client-supplied, trusted-shape
+          // (but not trusted-value) audit tag only; never branch security or
+          // identity decisions off it — `responded_by` (derived server-side
+          // from the request auth context) is the trustworthy identity field.
           await registry.respondTo(sourceApp, sourceId, request.body.input, {
             request,
             spaceId: getSpaceId(request),
