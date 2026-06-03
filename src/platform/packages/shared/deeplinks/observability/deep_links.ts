@@ -106,7 +106,8 @@ export type StreamsLinkId =
   | 'entitiesServices'
   | 'entitiesCloud'
   | 'entitiesMiddlewares'
-  | 'entitiesLlms';
+  | 'entitiesLlms'
+  | 'entitiesOther';
 
 export type LinkId =
   | LogsLinkId

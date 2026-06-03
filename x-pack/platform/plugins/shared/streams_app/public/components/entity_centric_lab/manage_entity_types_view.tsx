@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -16,16 +16,21 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { setEntityTypeEnabled, useEntityTypeEnabled } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { CreateEntityTypeFlyout } from './create_entity_type_flyout';
 import { EditEntityTypeFlyout } from './edit_entity_type_flyout';
 import type { FakeEntityType } from './fake_entity_types';
 import { FAKE_ENTITY_TYPES } from './fake_entity_types';
+import { useUserEntityTypes } from './user_entity_types';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { getCanonicalCategoryLabel, isCustomCategoryLabel } from './entities/fake_entities';
 
 type FlyoutState =
   | { kind: 'closed' }
@@ -37,37 +42,48 @@ export const ManageEntityTypesView = () => {
     query: { edit: editIdFromQuery },
   } = useStreamsAppParams('/manage-entity-types');
 
+  // User-created rows live in a `localStorage`-backed pub-sub store so
+  // a successful create lands in the table without needing the page to
+  // re-mount. Hardcoded `FAKE_ENTITY_TYPES` come first so the catalogue
+  // order stays familiar; user types are appended at the end.
+  const userEntityTypes = useUserEntityTypes();
+  const allEntityTypes = useMemo<readonly FakeEntityType[]>(
+    () => [...FAKE_ENTITY_TYPES, ...userEntityTypes],
+    [userEntityTypes]
+  );
+
   const [flyout, setFlyout] = useState<FlyoutState>({ kind: 'closed' });
   const [search, setSearch] = useState('');
 
   // Auto-open the edit flyout when the page lands with `?edit=<id>` (e.g.
   // deep-linked from the entity flyout's cog). Tracked with a ref so the
   // user can close the flyout without it immediately reopening from the
-  // same query value still hanging around in the URL.
+  // same query value still hanging around in the URL. The lookup runs
+  // against the *combined* list so user-created rows are deep-linkable too.
   const consumedEditIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!editIdFromQuery) return;
     if (consumedEditIdRef.current === editIdFromQuery) return;
-    const match = FAKE_ENTITY_TYPES.find((entityType) => entityType.id === editIdFromQuery);
+    const match = allEntityTypes.find((entityType) => entityType.id === editIdFromQuery);
     if (!match) return;
     consumedEditIdRef.current = editIdFromQuery;
     setFlyout({ kind: 'edit', entityType: match });
-  }, [editIdFromQuery]);
+  }, [editIdFromQuery, allEntityTypes]);
 
   const closeFlyout = () => setFlyout({ kind: 'closed' });
 
   // Lightweight client-side filter: matches against name and category, the
   // two visible identifiers users would naturally search for ("k8s",
   // "service", "kubernetes"). Trimmed + lowercased once per render.
-  const filteredEntityTypes = useMemo(() => {
+  const filteredEntityTypes = useMemo<FakeEntityType[]>(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return [...FAKE_ENTITY_TYPES];
-    return FAKE_ENTITY_TYPES.filter(
+    if (!query) return [...allEntityTypes];
+    return allEntityTypes.filter(
       (entityType) =>
         entityType.name.toLowerCase().includes(query) ||
         entityType.category.toLowerCase().includes(query)
     );
-  }, [search]);
+  }, [allEntityTypes, search]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<FakeEntityType>>>(
     () => [
@@ -101,6 +117,44 @@ export const ManageEntityTypesView = () => {
         name: i18n.translate('xpack.streams.entityCentricLab.manage.columns.category', {
           defaultMessage: 'Category',
         }),
+        render: (rawCategory: string) => {
+          // Free-form category strings (legacy seed values, user-typed
+          // "+ Create new category" labels) get tagged with an
+          // "Other" badge so the table makes the bucket boundary
+          // visible — and a tooltip surfaces the original input.
+          // Canonical categories render plain so the table stays clean
+          // for the common case.
+          const label = getCanonicalCategoryLabel(rawCategory);
+          if (!isCustomCategoryLabel(rawCategory)) {
+            return <EuiText size="s">{label}</EuiText>;
+          }
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{label}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'xpack.streams.entityCentricLab.manage.columns.categoryOtherTooltip',
+                    {
+                      defaultMessage:
+                        'This category doesn\u2019t match a canonical Entities nav section, so its entity types are bucketed under \u201cOther\u201d.',
+                    }
+                  )}
+                >
+                  <EuiBadge color="hollow">
+                    {i18n.translate(
+                      'xpack.streams.entityCentricLab.manage.columns.categoryOtherBadge',
+                      { defaultMessage: 'Other' }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'entitiesCount',
@@ -117,6 +171,28 @@ export const ManageEntityTypesView = () => {
         }),
         align: 'right',
         width: '120px',
+      },
+      {
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.streams.entityCentricLab.manage.columns.triggersFlyoutTooltip',
+              {
+                defaultMessage:
+                  'When off, clicking an entity name of this type (in Discover logs, the entities list, etc.) no longer opens the entity flyout.',
+              }
+            )}
+          >
+            <span>
+              {i18n.translate('xpack.streams.entityCentricLab.manage.columns.triggersFlyout', {
+                defaultMessage: 'Triggers flyout',
+              })}
+            </span>
+          </EuiToolTip>
+        ),
+        align: 'center',
+        width: '160px',
+        render: (row: FakeEntityType) => <TriggersFlyoutSwitch row={row} />,
       },
     ],
     []
@@ -199,5 +275,37 @@ export const ManageEntityTypesView = () => {
         <EditEntityTypeFlyout entityType={flyout.entityType} onClose={closeFlyout} />
       ) : null}
     </>
+  );
+};
+
+/**
+ * Per-row switch wired to the shared
+ * {@link useEntityTypeEnabled} store. Pulled out so the hook can live
+ * at the cell level (one subscription per visible row, scoped to that
+ * row's id) without leaking the dependency into the parent component's
+ * memoised `columns` factory.
+ */
+interface TriggersFlyoutSwitchProps {
+  readonly row: FakeEntityType;
+}
+
+const TriggersFlyoutSwitch = ({ row }: TriggersFlyoutSwitchProps) => {
+  const enabled = useEntityTypeEnabled(row.id);
+  const onToggle = useCallback(() => {
+    setEntityTypeEnabled(row.id, !enabled);
+  }, [row.id, enabled]);
+
+  return (
+    <EuiSwitch
+      compressed
+      showLabel={false}
+      label={i18n.translate('xpack.streams.entityCentricLab.manage.columns.triggersFlyoutLabel', {
+        defaultMessage: 'Trigger flyout for {name}',
+        values: { name: row.name },
+      })}
+      checked={enabled}
+      onChange={onToggle}
+      data-test-subj={`entityCentricLabTriggersFlyoutSwitch-${row.id}`}
+    />
   );
 };

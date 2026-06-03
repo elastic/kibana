@@ -131,6 +131,13 @@ export const persistEntityTypeDraft = (entityTypeId: string, draft: EntityTypeDr
  * Apply a persisted slice on top of a freshly built draft. Fields the user
  * never touched keep their default values, so the merge is a partial
  * overlay rather than a wholesale replacement.
+ *
+ * The persisted `general` block goes through {@link migrateGeneralFields}
+ * to upgrade legacy shapes (e.g. the pre-multi-identifier
+ * `identifierField: string` field) into the current
+ * `identifierFields: string[] + displayField: string` model so drafts
+ * saved before the schema change still hydrate cleanly without
+ * dropping the user's previously-saved identifier choice.
  */
 export const mergePersistedDraft = (
   base: EntityTypeDraft,
@@ -139,11 +146,63 @@ export const mergePersistedDraft = (
   if (!persisted) return base;
   return {
     ...base,
-    general: persisted.general ?? base.general,
+    general: persisted.general ? migrateGeneralFields(persisted.general) : base.general,
     health: persisted.health ?? base.health,
     ownership: persisted.ownership ?? base.ownership,
     flyoutTabs: persisted.flyoutTabs ?? base.flyoutTabs,
     customLinks: persisted.customLinks ?? base.customLinks,
     subsets: persisted.subsets ?? base.subsets,
+  };
+};
+
+/**
+ * Legacy shape — the wizard used to expose a single
+ * `identifierField: string` instead of the current
+ * `identifierFields: string[] + displayField: string` pair. Persisted
+ * payloads written under that schema need to be upgraded on read so the
+ * General step doesn't try to render `undefined.map(...)` on the
+ * identifier ComboBox. We keep the legacy field as optional rather
+ * than removing it from the type because any old `localStorage` entry
+ * is plain JSON and TypeScript can't enforce its absence at the
+ * boundary.
+ */
+interface LegacyGeneralFields {
+  readonly name: string;
+  readonly dataStream: string;
+  readonly identifierField?: string;
+  readonly identifierFields?: readonly string[];
+  readonly displayField?: string;
+  readonly category: string;
+  readonly description: string;
+}
+
+const migrateGeneralFields = (raw: GeneralFields): GeneralFields => {
+  // `raw` is typed as the new shape but at runtime can still be the
+  // legacy one — `JSON.parse` doesn't validate. We re-type once,
+  // locally, then map it back into the current model.
+  const legacy = raw as unknown as LegacyGeneralFields;
+  if (Array.isArray(legacy.identifierFields)) {
+    // Already in the new shape; just make sure `displayField` exists so
+    // downstream `EuiSelect` doesn't get `undefined` as `value`.
+    return {
+      name: legacy.name,
+      dataStream: legacy.dataStream,
+      identifierFields: legacy.identifierFields,
+      displayField: legacy.displayField ?? legacy.identifierFields[0] ?? '',
+      category: legacy.category,
+      description: legacy.description,
+    };
+  }
+  // Legacy single-field draft: promote the lone identifier to both the
+  // multi-field tuple AND the display field, since that was the
+  // implicit "display = identifier" contract before the split.
+  const legacyId = legacy.identifierField?.trim() ?? '';
+  return {
+    name: legacy.name,
+    dataStream: legacy.dataStream,
+    identifierFields: legacyId.length > 0 ? [legacyId] : [],
+    displayField: legacyId,
+    category: legacy.category,
+    description: legacy.description,
   };
 };

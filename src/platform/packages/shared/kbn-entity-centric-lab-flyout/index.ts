@@ -64,3 +64,34 @@ export type {
   FlyoutTabOverride,
   FlyoutTemplateOverride,
 } from './src/flyout_template_overrides';
+
+export {
+  isEntityTypeEnabled,
+  setEntityTypeEnabled,
+  subscribeEntityTypeEnablement,
+  useEntityTypeEnabled,
+} from './src/entity_type_enablement';
+
+export { KIND_TO_ENTITY_TYPE_ID, resolveEntityTypeIdForName } from './src/entity_type_id_mapping';
+
+export {
+  getEntityDisplayConfig,
+  setEntityDisplayConfig,
+  subscribeEntityDisplayConfig,
+  useEntityDisplayConfig,
+} from './src/entity_display_config';
+export type { EntityDisplayConfig } from './src/entity_display_config';
+
+export {
+  resolveEntityDisplayName,
+  resolveEntityFieldValue,
+  useEntityDisplayName,
+} from './src/entity_display_name';
+
+export {
+  getChaosModeEnabled,
+  setChaosModeEnabled,
+  subscribeChaosMode,
+  useChaosModeEnabled,
+  getEffectiveEntityHealth,
+} from './src/chaos_mode';

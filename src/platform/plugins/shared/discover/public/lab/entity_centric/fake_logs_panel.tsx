@@ -18,12 +18,21 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
+  EuiToolTip,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  resolveEntityTypeIdForName,
+  setChaosModeEnabled,
+  useChaosModeEnabled,
+  useEntityDisplayName,
+  useEntityTypeEnabled,
+} from '@kbn/entity-centric-lab-flyout';
 import { useEntityCentricLab } from './entity_centric_lab_provider';
 import { FAKE_LOG_ENTRIES, type FakeLogEntry, type FakeLogLevel } from './constants';
 
@@ -58,6 +67,17 @@ const styles = {
       text-overflow: ellipsis;
       white-space: nowrap;
     `,
+  // The service name is rendered as plain subdued text when the
+  // resolved entity type has its flyout trigger disabled. We keep the
+  // help cursor + dotted underline so the user gets a visual hint that
+  // there's *something* (a tooltip) rather than dead text.
+  disabledServiceName: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.subduedText};
+      cursor: help;
+      text-decoration: underline dotted ${euiTheme.colors.subduedText};
+      text-underline-offset: 2px;
+    `,
 };
 
 const levelToColor = (level: FakeLogLevel) => {
@@ -77,24 +97,68 @@ const levelToColor = (level: FakeLogLevel) => {
 const FakeLogRow = ({ entry }: { entry: FakeLogEntry }) => {
   const rowStyles = useMemoCss(styles);
   const { openEntity } = useEntityCentricLab();
+
+  // Resolve the entity-type id that gates the flyout trigger for this
+  // service name and subscribe to its enablement. When the type is
+  // disabled in the "Manage entity types" table, we suppress the click
+  // and render the service name as plain subdued text (still hinted by
+  // a help cursor + dotted underline + tooltip so the user understands
+  // why nothing happens).
+  const entityTypeId = resolveEntityTypeIdForName(entry.serviceName);
+  const triggerEnabled = useEntityTypeEnabled(entityTypeId);
+  // Resolve the rendered label through the shared store so the wizard's
+  // per-type `displayField` choice changes what shows up in Discover
+  // without forcing a reload — e.g. picking `service.environment` for
+  // the APM Service type swaps `payments-service` for `production`.
+  // Navigation still uses the canonical name so the flyout can find
+  // the entity in its own dataset.
+  const displayServiceName = useEntityDisplayName(entry.serviceName);
+
   const onClickService = useCallback(() => {
+    if (!triggerEnabled) return;
     openEntity(entry.serviceName);
-  }, [openEntity, entry.serviceName]);
+  }, [openEntity, entry.serviceName, triggerEnabled]);
 
   return (
     <div css={rowStyles.row} data-test-subj={`entityCentricLabFakeLogRow-${entry.id}`}>
       <span css={rowStyles.timestamp}>{entry.timestamp}</span>
       <EuiBadge color={levelToColor(entry.level)}>{entry.level}</EuiBadge>
-      <EuiLink
-        onClick={onClickService}
-        data-test-subj={`entityCentricLabServiceLink-${entry.serviceName}`}
-        aria-label={i18n.translate('discover.entityCentricLab.fakeLogs.serviceLinkAriaLabel', {
-          defaultMessage: 'Open entity details for {serviceName}',
-          values: { serviceName: entry.serviceName },
-        })}
-      >
-        {entry.serviceName}
-      </EuiLink>
+      {triggerEnabled ? (
+        <EuiLink
+          onClick={onClickService}
+          // Stable test-subj key based on the canonical name so
+          // existing selectors don't break when the wizard re-labels
+          // the entity in the UI.
+          data-test-subj={`entityCentricLabServiceLink-${entry.serviceName}`}
+          aria-label={i18n.translate('discover.entityCentricLab.fakeLogs.serviceLinkAriaLabel', {
+            defaultMessage: 'Open entity details for {serviceName}',
+            values: { serviceName: displayServiceName },
+          })}
+        >
+          {displayServiceName}
+        </EuiLink>
+      ) : (
+        <EuiToolTip
+          content={i18n.translate('discover.entityCentricLab.fakeLogs.serviceLinkDisabledTooltip', {
+            defaultMessage:
+              'The flyout trigger for this entity type is turned off in Manage entity types.',
+          })}
+        >
+          <span
+            css={rowStyles.disabledServiceName}
+            data-test-subj={`entityCentricLabServiceLinkDisabled-${entry.serviceName}`}
+            aria-label={i18n.translate(
+              'discover.entityCentricLab.fakeLogs.serviceLinkDisabledAriaLabel',
+              {
+                defaultMessage: '{serviceName} (entity flyout disabled for this type)',
+                values: { serviceName: displayServiceName },
+              }
+            )}
+          >
+            {displayServiceName}
+          </span>
+        </EuiToolTip>
+      )}
       <span css={rowStyles.message}>{entry.message}</span>
     </div>
   );
@@ -112,6 +176,39 @@ export const EntityCentricLabPanel = () => {
     return null;
   }
   return <FakeLogsPanel />;
+};
+
+/**
+ * Compact toggle that flips the lab's global "chaos mode" boolean.
+ * When OFF the PayFlow incident storyline is replaced by healthy
+ * kind templates everywhere the storyline entities surface (this
+ * panel's service links, the entity list, the grouped grid tiles
+ * and the entity flyout). The dotted-underline tooltip explains
+ * the demo wiring without cluttering the header.
+ */
+const ChaosModeToggle = () => {
+  const chaosOn = useChaosModeEnabled();
+  const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setChaosModeEnabled(event.target.checked);
+  }, []);
+  return (
+    <EuiToolTip
+      content={i18n.translate('discover.entityCentricLab.fakeLogs.chaosToggleTooltip', {
+        defaultMessage:
+          'Replay the PayFlow incident across the entity list, grouped grid and flyouts. Turn off to roll back to the healthy state.',
+      })}
+    >
+      <EuiSwitch
+        compressed
+        checked={chaosOn}
+        onChange={onChange}
+        label={i18n.translate('discover.entityCentricLab.fakeLogs.chaosToggleLabel', {
+          defaultMessage: 'Chaos mode',
+        })}
+        data-test-subj="entityCentricLabChaosModeSwitch"
+      />
+    </EuiToolTip>
+  );
 };
 
 export const FakeLogsPanel = () => {
@@ -155,12 +252,19 @@ export const FakeLogsPanel = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="discover.entityCentricLab.fakeLogs.hint"
-              defaultMessage="Click a service name to inspect the entity"
-            />
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="discover.entityCentricLab.fakeLogs.hint"
+                  defaultMessage="Click a service name to inspect the entity"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ChaosModeToggle />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

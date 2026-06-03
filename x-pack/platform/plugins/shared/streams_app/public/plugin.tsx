@@ -205,6 +205,18 @@ export class StreamsAppPlugin
           path: '/entities/llms',
           visibleIn: [],
         },
+        {
+          // Catch-all bucket for entity types whose `category` field
+          // doesn't match any of the canonical labels above —
+          // user-typed via the wizard's "+ Create new category" path,
+          // or legacy seed values that haven't been migrated.
+          id: 'entitiesOther',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesOtherTitle', {
+            defaultMessage: 'Other',
+          }),
+          path: '/entities/other',
+          visibleIn: [],
+        },
       ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>

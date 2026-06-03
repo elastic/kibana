@@ -20,7 +20,24 @@ export type OwnershipType = 'operational' | 'dev' | 'infrastructure' | 'security
 export interface GeneralFields {
   readonly name: string;
   readonly dataStream: string;
-  readonly identifierField: string;
+  /**
+   * Composite key — the (possibly multi-field) tuple that uniquely
+   * identifies one instance of this entity type. Modeled as an array so
+   * the wizard can express e.g. `[kubernetes.pod.uid, kubernetes.namespace]`
+   * for a pod that's only unique within a namespace. An empty array
+   * means "no identity defined yet" (Create-mode default).
+   */
+  readonly identifierFields: readonly string[];
+  /**
+   * Single field rendered everywhere the entity appears as text — flyout
+   * title, entities list rows, dependency rows, etc. Typically one of
+   * the identifier fields, but the wizard allows picking any field from
+   * the data stream's catalogue so an entity can be identified by a
+   * machine-friendly value (e.g. `kubernetes.pod.uid`) while still being
+   * displayed by a human-friendly one (`kubernetes.pod.name`).
+   * Empty string means "no display field picked yet".
+   */
+  readonly displayField: string;
   readonly category: string;
   readonly description: string;
 }
@@ -116,6 +133,15 @@ export interface SubsetDraft {
   readonly contentOverride: {
     readonly enabled: boolean;
     readonly flyoutTabs: readonly FlyoutTabConfig[];
+    /**
+     * Subset-scoped custom links. Same shape and editing semantics as
+     * {@link EntityTypeDraft.customLinks}: seeded with one blank row so
+     * the inline editor always has somewhere to type, empty-URL rows are
+     * stripped at save time, and a `customLinks` field on the subset
+     * overrides the parent entity-type list when the override is enabled
+     * AND the Custom tab is enabled within `flyoutTabs`.
+     */
+    readonly customLinks: readonly CustomLinkDraft[];
   };
 }
 
@@ -214,7 +240,17 @@ const defaultFlyoutTabs = (): FlyoutTabConfig[] => [
 
 interface PresetSeed {
   readonly dataStream: string;
-  readonly identifierField: string;
+  /**
+   * Composite identifier tuple for the preset. See
+   * {@link GeneralFields.identifierFields} for semantics. Single-field
+   * presets just wrap the existing string in an array of one.
+   */
+  readonly identifierFields: readonly string[];
+  /**
+   * Field rendered as the entity's human-readable name. See
+   * {@link GeneralFields.displayField}.
+   */
+  readonly displayField: string;
   readonly description: string;
   readonly resolverField: string;
   readonly owners: readonly OwnerMapping[];
@@ -225,7 +261,8 @@ interface PresetSeed {
 const PRESETS: Readonly<Record<string, PresetSeed>> = {
   'k8s-cluster': {
     dataStream: 'metrics-kubernetes.state_node-*',
-    identifierField: 'cluster.name',
+    identifierFields: ['cluster.name'],
+    displayField: 'cluster.name',
     description:
       'A Kubernetes cluster identified by cluster.name, detected from node-level state metrics collected by the Kubernetes integration',
     resolverField: 'cluster.labels.team',
@@ -290,7 +327,11 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
             unmatched: [{ value: 'checkout-beta', unmatchedEntities: 2 }],
           },
         },
-        contentOverride: { enabled: false, flyoutTabs: defaultFlyoutTabs() },
+        contentOverride: {
+          enabled: false,
+          flyoutTabs: defaultFlyoutTabs(),
+          customLinks: defaultCustomLinks(),
+        },
       },
       {
         id: 'subset-2',
@@ -309,13 +350,15 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
           flyoutTabs: defaultFlyoutTabs().map((tab) =>
             tab.id === 'profiling' ? { ...tab, enabled: true } : tab
           ),
+          customLinks: defaultCustomLinks(),
         },
       },
     ],
   },
   'apm-service': {
     dataStream: 'metrics-apm.service_summary-*',
-    identifierField: 'service.name',
+    identifierFields: ['service.name'],
+    displayField: 'service.name',
     description: 'An APM service identified by service.name, collected by APM agents.',
     resolverField: 'service.labels.team',
     owners: [
@@ -342,7 +385,8 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
   },
   'aws-ec2': {
     dataStream: 'metrics-aws.ec2_metrics-*',
-    identifierField: 'aws.ec2.instance.id',
+    identifierFields: ['aws.ec2.instance.id'],
+    displayField: 'aws.ec2.instance.id',
     description:
       'An AWS EC2 instance identified by aws.ec2.instance.id, collected by the AWS integration.',
     resolverField: 'aws.tags.Team',
@@ -378,11 +422,32 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
   },
 };
 
+/**
+ * Default resolver field surfaced both as the placeholder option in the
+ * Ownership step dropdown ({@link RESOLVER_FIELD_OPTIONS}) and as the
+ * fallback seed for any entity type without a curated preset (e.g. the
+ * Create flow and ad-hoc user types). Kept in this module so both
+ * places agree on the exact "suggested" string instead of relying on
+ * the dropdown happening to list it first.
+ */
+export const DEFAULT_SUGGESTED_RESOLVER_FIELD = '[suggested] cluster.labels.team';
+
 const defaultPreset = (entityType: FakeEntityType): PresetSeed => ({
   dataStream: `metrics-${entityType.id}-*`,
-  identifierField: `${entityType.id}.name`,
+  // Synthetic single-field tuple — non-curated rows don't have any
+  // catalogue mapping (see {@link IDENTIFIER_FIELDS_BY_DATA_STREAM} in
+  // `general_step.tsx`), so we seed both the identifier list and the
+  // display field with the same `${id}.name` value as a sensible
+  // fallback the user can immediately edit.
+  identifierFields: [`${entityType.id}.name`],
+  displayField: `${entityType.id}.name`,
   description: `Auto-generated description for ${entityType.name}.`,
-  resolverField: `${entityType.id}.labels.team`,
+  // Seed any non-curated entity type with the same suggested resolver
+  // field the dropdown highlights. Previously this synthesised a
+  // `${id}.labels.team` value that nothing else recognised, leaving the
+  // dropdown stuck rendering an unknown option on first open of a
+  // freshly-created entity type.
+  resolverField: DEFAULT_SUGGESTED_RESOLVER_FIELD,
   owners: [],
   coverage: {
     resolvedPercent: 0,
@@ -391,6 +456,23 @@ const defaultPreset = (entityType: FakeEntityType): PresetSeed => ({
     unmatched: [],
   },
   subsets: [],
+});
+
+/**
+ * Build a synthetic {@link FakeEntityType} for the "Create entity type"
+ * wizard. The minted id is unique per call so concurrent or back-to-back
+ * create flows don't collide in any downstream store keyed by id. The
+ * row never lands in the read-only `FAKE_ENTITY_TYPES` table — it only
+ * exists to seed a fresh `EntityTypeDraft` with sensible defaults.
+ */
+export const buildBlankEntityType = (): FakeEntityType => ({
+  id: `new-entity-type-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  name: '',
+  generatedBy: 'User',
+  category: '',
+  entitiesCount: '0',
+  subsetsCount: '0',
+  lastUpdate: '—',
 });
 
 /**
@@ -405,7 +487,8 @@ export const buildFakeEntityTypeDraft = (entityType: FakeEntityType): EntityType
     general: {
       name: entityType.name,
       dataStream: preset.dataStream,
-      identifierField: preset.identifierField,
+      identifierFields: preset.identifierFields,
+      displayField: preset.displayField,
       category: entityType.category,
       description: preset.description,
     },
@@ -455,6 +538,11 @@ export const buildBlankSubsetDraft = (parent: EntityTypeDraft): SubsetDraft => (
   contentOverride: {
     enabled: false,
     flyoutTabs: parent.flyoutTabs.map((tab) => ({ ...tab })),
+    // Seed the subset's link editor from the parent entity type as a
+    // sensible starting point — the user can then prune, add, or replace
+    // entries to make them subset-specific. Cloned so mutations on the
+    // subset don't leak back into the parent draft.
+    customLinks: parent.customLinks.map((link) => ({ ...link })),
   },
 });
 

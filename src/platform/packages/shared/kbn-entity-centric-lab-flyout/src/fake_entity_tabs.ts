@@ -15,6 +15,7 @@
  */
 
 import { getStoryTabsData } from './payflow_story';
+import { getEffectiveEntityHealth } from './chaos_mode';
 import {
   buildKindTemplate,
   entityTypeToKind,
@@ -197,7 +198,14 @@ export const buildFakeEntityTabsData = (
     return storyTabs;
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
-  const kindTemplate = buildKindTemplate(entityName, kind, normalizeEntityHealth(entityHealth));
+  // Same chaos-mode override as `buildFakeEntityOverview` — flips the
+  // PayFlow click-path entities to the healthy kind template when the
+  // user has rolled back. Other entities pass through unchanged.
+  const effectiveHealth = getEffectiveEntityHealth(
+    entityName,
+    normalizeEntityHealth(entityHealth)
+  );
+  const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType);
   if (kindTemplate) {
     return kindTemplate.tabs;
   }

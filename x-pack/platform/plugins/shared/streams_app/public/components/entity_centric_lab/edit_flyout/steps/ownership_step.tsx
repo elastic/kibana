@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -38,6 +38,51 @@ import type {
   UnmatchedResolverValue,
 } from '../fake_entity_type_draft';
 import { buildBlankOwnerMapping } from '../fake_entity_type_draft';
+
+/**
+ * Sentinels for the per-owner resolver-value dropdown. Real catalogue
+ * values are plain strings; these tokens stand in for the synthetic
+ * options the dropdown adds on top (default "Any value", visual
+ * separators, free-text fallback).
+ */
+const RESOLVER_VALUE_ANY = '__resolver_value_any__';
+const RESOLVER_VALUE_OTHER = '__resolver_value_other__';
+const RESOLVER_VALUE_DIVIDER_TOP = '__resolver_value_divider_top__';
+const RESOLVER_VALUE_DIVIDER_BOTTOM = '__resolver_value_divider_bottom__';
+
+/**
+ * Curated mock catalogue of observed values per resolver field. Powers
+ * the per-owner resolver-value dropdown so the demo shows credible
+ * team-like values instead of forcing free-text everywhere. Anything
+ * not in this map falls back to {@link DEFAULT_KNOWN_RESOLVER_VALUES}.
+ * Values pulled from the live draft (existing owners + coverage
+ * unmatched list) are merged in at runtime so historical / mock data
+ * is always selectable, regardless of which field is selected.
+ */
+const KNOWN_RESOLVER_VALUES_BY_FIELD: Readonly<Record<string, readonly string[]>> = {
+  '[suggested] cluster.labels.team': [
+    'checkout',
+    'payment-2',
+    'data-eng',
+    'platform',
+    'sre',
+    'observability',
+    'edge',
+  ],
+  'cluster.labels.team': ['checkout', 'payment-2', 'data-eng', 'platform', 'sre', 'observability'],
+  'service.labels.team': ['checkout', 'frontend', 'mobile', 'ml-team', 'platform', 'payments'],
+  'aws.tags.Team': ['platform', 'sre', 'devops', 'security', 'data', 'legacy'],
+  'host.tags.owner': ['operations', 'platform', 'sre', 'security', 'finance'],
+};
+
+const DEFAULT_KNOWN_RESOLVER_VALUES: readonly string[] = [
+  'platform',
+  'sre',
+  'devops',
+  'security',
+  'data',
+  'operations',
+];
 
 interface StepProps {
   readonly draft: EntityTypeDraft;
@@ -173,6 +218,32 @@ export const OwnershipForm = ({
     });
   }, [onChange, ownership]);
 
+  // Build the dropdown's "known values" list once per render and
+  // forward it to every owner card. Sources:
+  //   1. Curated catalogue for the currently-selected resolver field.
+  //   2. Anything already authored on the draft (owner values + the
+  //      values surfaced by the coverage preview table) so historical
+  //      / persisted data stays selectable even if the catalogue
+  //      doesn't list it.
+  // Deduped case-insensitively to avoid `'Platform'` vs `'platform'`
+  // doubles in the dropdown.
+  const knownResolverValues = useMemo(() => {
+    const fromCatalogue =
+      KNOWN_RESOLVER_VALUES_BY_FIELD[ownership.resolverField] ?? DEFAULT_KNOWN_RESOLVER_VALUES;
+    const fromExisting: string[] = [
+      ...ownership.owners.map((owner) => owner.resolverValue),
+      ...coveragePreview.unmatched.map((entry) => entry.value),
+    ];
+    const seen = new Map<string, string>();
+    for (const value of [...fromCatalogue, ...fromExisting]) {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) continue;
+      const key = trimmed.toLowerCase();
+      if (!seen.has(key)) seen.set(key, trimmed);
+    }
+    return [...seen.values()];
+  }, [ownership.resolverField, ownership.owners, coveragePreview.unmatched]);
+
   return (
     <>
       <EuiAccordion
@@ -251,6 +322,7 @@ export const OwnershipForm = ({
                 owner={owner}
                 index={index + 1}
                 testSubjPrefix={testSubjPrefix}
+                knownResolverValues={knownResolverValues}
                 onUpdate={(patch) => updateOwner(owner.id, patch)}
                 onRemove={() => removeOwner(owner.id)}
               />
@@ -295,11 +367,136 @@ interface OwnerCardProps {
   readonly owner: OwnerMapping;
   readonly index: number;
   readonly testSubjPrefix: string;
+  /**
+   * Deduped catalogue of values the resolver field is known to take,
+   * merged from {@link KNOWN_RESOLVER_VALUES_BY_FIELD} and the live
+   * draft. Used to populate the resolver-value dropdown so it stays
+   * consistent with whatever else already exists on the entity type.
+   */
+  readonly knownResolverValues: readonly string[];
   readonly onUpdate: (patch: Partial<OwnerMapping>) => void;
   readonly onRemove: () => void;
 }
 
-const OwnerCard = ({ owner, index, testSubjPrefix, onUpdate, onRemove }: OwnerCardProps) => {
+const OwnerCard = ({
+  owner,
+  index,
+  testSubjPrefix,
+  knownResolverValues,
+  onUpdate,
+  onRemove,
+}: OwnerCardProps) => {
+  const trimmedResolverValue = owner.resolverValue.trim();
+  // Case-insensitive lookup so a value persisted as `'Platform'` still
+  // selects the catalogued `'platform'` option without forcing the
+  // user into the free-text "Other value" branch.
+  const matchingKnownValue = useMemo(() => {
+    if (trimmedResolverValue.length === 0) return undefined;
+    return knownResolverValues.find(
+      (value) => value.toLowerCase() === trimmedResolverValue.toLowerCase()
+    );
+  }, [knownResolverValues, trimmedResolverValue]);
+  const isKnownValue = matchingKnownValue !== undefined;
+
+  /**
+   * Three scenarios where the inline free-text input must be visible:
+   *   1. The user explicitly picked "Other value" from the dropdown
+   *      but hasn't typed anything yet (`resolverValue === ''`).
+   *   2. The owner was hydrated with a value that doesn't match any
+   *      catalogued option (e.g. saved before the catalogue grew, or
+   *      a fully bespoke string). We auto-flip into other mode so the
+   *      user sees + can edit the persisted value.
+   *   3. The user picks a known value, edits the resolver field
+   *      upstream so the value no longer matches, and the effect
+   *      below re-syncs them.
+   */
+  const [isOtherMode, setIsOtherMode] = useState<boolean>(
+    () => trimmedResolverValue.length > 0 && !isKnownValue
+  );
+
+  // Reconcile other-mode against the live known-values list. If the
+  // catalogue grows (e.g. resolver field swapped to one that knows
+  // this value) we drop out of other mode so the dropdown highlights
+  // the matching option instead of "Other value". The converse — a
+  // previously-known value becoming unknown — also needs to flip the
+  // flag on so the text input appears.
+  useEffect(() => {
+    if (isOtherMode) {
+      if (trimmedResolverValue.length > 0 && isKnownValue) setIsOtherMode(false);
+      return;
+    }
+    if (trimmedResolverValue.length > 0 && !isKnownValue) setIsOtherMode(true);
+  }, [isOtherMode, trimmedResolverValue, isKnownValue]);
+
+  const resolverValueOptions = useMemo(() => {
+    const dividerText = '\u2500\u2500\u2500\u2500\u2500\u2500';
+    const head = [
+      {
+        value: RESOLVER_VALUE_ANY,
+        text: i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.ownership.resolverValueAny',
+          { defaultMessage: 'Any value' }
+        ),
+      },
+    ];
+    const otherEntry = {
+      value: RESOLVER_VALUE_OTHER,
+      text: i18n.translate(
+        'xpack.streams.entityCentricLab.editFlyout.ownership.resolverValueOther',
+        { defaultMessage: 'Other value' }
+      ),
+    };
+    // Layout: "Any value" → divider → known values → divider → "Other
+    // value". The dividers are non-selectable visual separators that
+    // turn the three categories into a hierarchy the user can scan
+    // (default → known → escape hatch).
+    if (knownResolverValues.length === 0) {
+      return [
+        ...head,
+        { value: RESOLVER_VALUE_DIVIDER_BOTTOM, text: dividerText, disabled: true },
+        otherEntry,
+      ];
+    }
+    return [
+      ...head,
+      { value: RESOLVER_VALUE_DIVIDER_TOP, text: dividerText, disabled: true },
+      ...knownResolverValues.map((value) => ({ value, text: value })),
+      { value: RESOLVER_VALUE_DIVIDER_BOTTOM, text: dividerText, disabled: true },
+      otherEntry,
+    ];
+  }, [knownResolverValues]);
+
+  // What the dropdown actually shows as selected. The sentinel cases
+  // ("Any value" / "Other value") snap to their tokens; a known value
+  // shows the catalogued (correctly-cased) string; anything else falls
+  // through to "Other value" so the row still reads as resolved.
+  const resolverValueSelectValue = isOtherMode
+    ? RESOLVER_VALUE_OTHER
+    : trimmedResolverValue.length === 0
+    ? RESOLVER_VALUE_ANY
+    : matchingKnownValue ?? RESOLVER_VALUE_OTHER;
+
+  const handleResolverValueSelect = (nextValue: string) => {
+    if (nextValue === RESOLVER_VALUE_DIVIDER_TOP || nextValue === RESOLVER_VALUE_DIVIDER_BOTTOM) {
+      return; // visual separators, not selectable
+    }
+    if (nextValue === RESOLVER_VALUE_ANY) {
+      setIsOtherMode(false);
+      onUpdate({ resolverValue: '' });
+      return;
+    }
+    if (nextValue === RESOLVER_VALUE_OTHER) {
+      setIsOtherMode(true);
+      // Clear any previously-picked value so the text input starts
+      // blank — the user expects "Other value" to mean "let me type a
+      // fresh value", not "preserve whatever was here".
+      onUpdate({ resolverValue: '' });
+      return;
+    }
+    setIsOtherMode(false);
+    onUpdate({ resolverValue: nextValue });
+  };
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
@@ -336,13 +533,42 @@ const OwnerCard = ({ owner, index, testSubjPrefix, onUpdate, onRemove }: OwnerCa
         )}
         fullWidth
       >
-        <EuiFieldText
+        <EuiSelect
           fullWidth
-          value={owner.resolverValue}
-          onChange={(event) => onUpdate({ resolverValue: event.target.value })}
+          options={resolverValueOptions}
+          value={resolverValueSelectValue}
+          onChange={(event) => handleResolverValueSelect(event.target.value)}
           data-test-subj={`${testSubjPrefix}ResolverValue-${owner.id}`}
+          aria-label={i18n.translate(
+            'xpack.streams.entityCentricLab.editFlyout.ownership.resolverValueLabel',
+            { defaultMessage: 'Resolver field value' }
+          )}
         />
       </EuiFormRow>
+      {isOtherMode ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.streams.entityCentricLab.editFlyout.ownership.resolverValueOtherLabel',
+              { defaultMessage: 'Custom resolver value' }
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              autoFocus
+              value={owner.resolverValue}
+              placeholder={i18n.translate(
+                'xpack.streams.entityCentricLab.editFlyout.ownership.resolverValueOtherPlaceholder',
+                { defaultMessage: 'e.g. checkout-beta' }
+              )}
+              onChange={(event) => onUpdate({ resolverValue: event.target.value })}
+              data-test-subj={`${testSubjPrefix}ResolverValueOther-${owner.id}`}
+            />
+          </EuiFormRow>
+        </>
+      ) : null}
       {/*
         The resolver-value EuiFormRow has no built-in bottom margin, so
         without this spacer the owner name / email / slack row would butt

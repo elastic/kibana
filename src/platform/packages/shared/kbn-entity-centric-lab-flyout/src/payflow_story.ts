@@ -41,6 +41,10 @@ import type {
   SecurityTabData,
 } from './fake_entity_tabs';
 import { INCIDENT_DEPLOY_TIME_MS, INCIDENT_X_DOMAIN } from './time_domain';
+// `chaos_mode` imports `STORY_CLICKABLE_NAMES` from this file but only
+// reads it inside function bodies, so this back-reference resolves at
+// runtime regardless of module init order.
+import { getChaosModeEnabled } from './chaos_mode';
 
 // ---------------------------------------------------------------------------
 // Click-path set: rows whose names are in this set render as clickable links
@@ -1109,8 +1113,21 @@ const STORY_TABS_DATA: Record<string, EntityTabsData> = {
   'node-prod-eu-04': nodeTabsData,
 };
 
-export const getStoryOverview = (entityName: string): EntityOverview | undefined =>
-  STORY_OVERVIEWS[entityName];
+/**
+ * Returns the curated PayFlow overview for `entityName`, or `undefined`
+ * when chaos mode is OFF (rollback) so the caller falls back to the
+ * regular kind-template path.
+ */
+export const getStoryOverview = (entityName: string): EntityOverview | undefined => {
+  if (!getChaosModeEnabled()) return undefined;
+  return STORY_OVERVIEWS[entityName];
+};
 
-export const getStoryTabsData = (entityName: string): EntityTabsData | undefined =>
-  STORY_TABS_DATA[entityName];
+/**
+ * Returns the curated PayFlow tab payload for `entityName`, or
+ * `undefined` when chaos mode is OFF (rollback).
+ */
+export const getStoryTabsData = (entityName: string): EntityTabsData | undefined => {
+  if (!getChaosModeEnabled()) return undefined;
+  return STORY_TABS_DATA[entityName];
+};

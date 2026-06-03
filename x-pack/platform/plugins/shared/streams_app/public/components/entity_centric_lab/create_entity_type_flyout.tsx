@@ -5,68 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
-interface Props {
-  onClose: () => void;
-}
-
-export const CreateEntityTypeFlyout = ({ onClose }: Props) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'createEntityTypeFlyoutTitle' });
-
-  return (
-    <EuiFlyout
-      ownFocus
-      onClose={onClose}
-      aria-labelledby={titleId}
-      size="m"
-      data-test-subj="entityCentricLabCreateEntityTypeFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id={titleId}>
-                {i18n.translate('xpack.streams.entityCentricLab.createFlyout.title', {
-                  defaultMessage: 'Create entity type',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.streams.entityCentricLab.createFlyout.labBadgeLabel', {
-                defaultMessage: 'Lab',
-              })}
-              size="s"
-              color="hollow"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiText color="subdued">
-          <p>
-            {i18n.translate('xpack.streams.entityCentricLab.createFlyout.description', {
-              defaultMessage:
-                'Placeholder for the “Create entity type” form. The full create flow ' +
-                'is not implemented in this prototype.',
-            })}
-          </p>
-        </EuiText>
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
+// The create flyout shares the same wizard component as the edit flyout —
+// just configured for the empty-draft "create" mode. Kept as a thin
+// re-export so callers (e.g. `ManageEntityTypesView`) don't need to know
+// the two surfaces collapsed into one.
+export { CreateEntityTypeFlyout } from './edit_flyout/edit_flyout';

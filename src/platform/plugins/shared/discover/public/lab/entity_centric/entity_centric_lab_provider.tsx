@@ -9,7 +9,12 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
-import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-lab-flyout';
+import {
+  EntityFlyout,
+  EntityFlyoutServicesProvider,
+  isEntityTypeEnabled,
+  resolveEntityTypeIdForName,
+} from '@kbn/entity-centric-lab-flyout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { ENTITY_CENTRIC_LAB_SETTING } from './constants';
 
@@ -34,7 +39,16 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
 
   const [currentEntityName, setCurrentEntityName] = useState<string | null>(null);
 
+  // Honour the per-entity-type enablement switch from "Manage entity
+  // types" (Streams app). When the resolved type for `entityName` is
+  // disabled, the click silently no-ops — both for the initial click
+  // from the FakeLogRow and for subsequent Dependencies-row clicks
+  // inside an already-open flyout. The FakeLogRow already short-circuits
+  // its own click, but Dependencies clicks come through here so this is
+  // the canonical gate.
   const openEntity = useCallback((entityName: string) => {
+    const entityTypeId = resolveEntityTypeIdForName(entityName);
+    if (!isEntityTypeEnabled(entityTypeId)) return;
     setCurrentEntityName(entityName);
   }, []);
 

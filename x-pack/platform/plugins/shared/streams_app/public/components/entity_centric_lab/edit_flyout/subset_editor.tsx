@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FakeEntityType } from '../fake_entity_types';
 import type {
+  CustomLinkDraft,
   FilterCondition,
   FilterOperator,
   FlyoutTabConfig,
@@ -145,6 +146,16 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
       onChange({
         ...subset,
         contentOverride: { ...subset.contentOverride, flyoutTabs: next },
+      });
+    },
+    [onChange, subset]
+  );
+
+  const updateCustomLinks = useCallback(
+    (next: CustomLinkDraft[]) => {
+      onChange({
+        ...subset,
+        contentOverride: { ...subset.contentOverride, customLinks: next },
       });
     },
     [onChange, subset]
@@ -368,6 +379,12 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
           onChange={updateFlyoutTabs}
           droppableId={`entityCentricLabSubsetFlyoutTabsDroppable-${subset.id}`}
           testSubjPrefix="entityCentricLabEditFlyoutSubsetEditorContent"
+          // `?? []` guards drafts persisted before `customLinks` existed
+          // on `contentOverride` — the editor itself seeds a blank row
+          // when the list is empty, so the user still gets a working
+          // editor on legacy payloads.
+          customLinks={subset.contentOverride.customLinks ?? []}
+          onCustomLinksChange={updateCustomLinks}
         />
       </OverrideAccordion>
 

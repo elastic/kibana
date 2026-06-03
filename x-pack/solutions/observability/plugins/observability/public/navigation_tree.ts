@@ -160,6 +160,14 @@ function createNavTree({
                       id: 'entityCentricLab-entitiesLlms',
                       link: 'streams:entitiesLlms' as const,
                     },
+                    {
+                      // Catch-all bucket for entity types whose
+                      // `category` field doesn't match a canonical
+                      // nav section (legacy seed values, "+ Create
+                      // new category" user inputs).
+                      id: 'entityCentricLab-entitiesOther',
+                      link: 'streams:entitiesOther' as const,
+                    },
                   ],
                 },
                 {

@@ -2809,7 +2809,55 @@ const buildDatabaseTemplate = (
   };
 };
 
+/**
+ * AWS sub-variant that drives the cloud flyout's tags, narrative,
+ * entity details and golden signals. Computed from the raw `.type`
+ * string so an EC2 instance no longer gets rendered with the "AWS
+ * region" tag and a `Region:` row showing its instance id (the bug
+ * Nicolas hit at https://github.com/elastic/kibana — see screenshot).
+ *
+ * `'region'` is the default fallback when `typeLabel` is missing or
+ * doesn't match any known sub-string, which preserves the original
+ * region-template behaviour for entities only identified by name.
+ */
+type AwsCloudVariant = 'region' | 'ec2' | 'lambda' | 's3';
+
+const detectAwsCloudVariant = (typeLabel: string | undefined): AwsCloudVariant => {
+  if (!typeLabel) return 'region';
+  const lower = typeLabel.toLowerCase();
+  if (lower.includes('ec2') || lower.includes('instance')) return 'ec2';
+  if (lower.includes('lambda') || lower.includes('function')) return 'lambda';
+  if (lower.includes('s3') || lower.includes('bucket')) return 's3';
+  return 'region';
+};
+
+/**
+ * Cloud dispatcher — picks the AWS sub-variant from `typeLabel`
+ * (`'AWS region'`, `'AWS EC2 Instance'`, `'AWS Lambda function'`,
+ * `'AWS S3 bucket'`) and renders a tailored template. Region keeps
+ * the original wide-angle "API success / throttling / spend" story;
+ * the other three swap in compute / function / storage signals so
+ * the flyout reads true for the actual resource.
+ */
 const buildCloudTemplate = (
+  name: string,
+  h: EntityHealthVariant,
+  typeLabel?: string
+): { overview: EntityOverview; tabs: EntityTabsData } => {
+  switch (detectAwsCloudVariant(typeLabel)) {
+    case 'ec2':
+      return buildCloudEc2Template(name, h);
+    case 'lambda':
+      return buildCloudLambdaTemplate(name, h);
+    case 's3':
+      return buildCloudS3Template(name, h);
+    case 'region':
+    default:
+      return buildCloudRegionTemplate(name, h);
+  }
+};
+
+const buildCloudRegionTemplate = (
   name: string,
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
@@ -3098,6 +3146,769 @@ const buildCloudTemplate = (
   return {
     overview,
     tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'cloud'), relationships, security),
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Cloud sub-variants: EC2 / Lambda / S3
+// ---------------------------------------------------------------------------
+//
+// Each sub-builder mirrors the shape of `buildCloudRegionTemplate` but
+// swaps the tag set, narrative, golden signals and metric series for
+// resource-appropriate ones. Logs / related entities / security
+// findings are kept light: enough to feel real, without exploding the
+// file. The `alertsByHealth` / `securityIssueCount` helpers still
+// receive the umbrella `'cloud'` kind so alert generation stays
+// consistent across the four AWS sub-types.
+
+const cloudOwnership = () => healthyOwnership('platform-cloud', '#cloud-platform', 'cloud-primary');
+
+/**
+ * Lightweight shared related-entities block for the three cloud
+ * sub-variants. The region template has its own richer set; the
+ * compute/function/storage variants reuse this minimal version
+ * because the related panel isn't the focus of those flyouts.
+ */
+const sharedCloudRelationships = (name: string, h: EntityHealthVariant): RelationshipsTabData => {
+  const related: RelatedEntity[] = [
+    {
+      id: `${name}-rel-region`,
+      name: 'aws-eu-west-1',
+      health: relatedHealth(h),
+      entityType: 'cloud',
+      relation: 'Hosted in — AWS region',
+    },
+    {
+      id: `${name}-rel-team`,
+      name: 'platform-cloud',
+      health: 'Healthy',
+      entityType: 'team',
+      relation: 'Owned by',
+    },
+  ];
+  return {
+    topology: {
+      focalHealth: relatedHealth(h),
+      nodes: [
+        { id: 'focal', label: name, focal: true },
+        { id: 'region', label: 'aws-eu-west-1' },
+        { id: 'team', label: 'platform-cloud' },
+      ],
+      edges: [
+        { from: 'focal', to: 'region', emphasized: true },
+        { from: 'focal', to: 'team' },
+      ],
+    },
+    related,
+  };
+};
+
+const buildCloudEc2Template = (
+  name: string,
+  h: EntityHealthVariant
+): { overview: EntityOverview; tabs: EntityTabsData } => {
+  const tags: EntityTag[] = [
+    { label: 'cloud', color: 'hollow' },
+    { label: 'AWS EC2 Instance', color: 'hollow' },
+    healthTag(h),
+    { label: 'Production', color: 'hollow' },
+  ];
+  const narrative = {
+    healthy: {
+      headline: `${name} is healthy — CPU steady around 28%, no status check failures in the last 24 h.`,
+      issues: [],
+      nextSteps: [
+        'No action required — continue monitoring CPU credits on the next promo window.',
+        'Confirm the AMI is on the latest hardened baseline.',
+      ],
+    },
+    atRisk: {
+      headline: `${name} is at risk — CPU sustained above 80% and CPU credit balance trending down.`,
+      issues: [
+        'CPU utilisation at 84% — sustained > 30 min',
+        'CPU credit balance at 32 — burnable for ~18 min at current rate',
+      ],
+      nextSteps: [
+        'Consider moving from `t3` burstable to a fixed-performance instance type.',
+        'Check the noisy-neighbour processes via SSM Run Command.',
+      ],
+    },
+    unhealthy: {
+      headline: `${name} is unhealthy — instance status check failing and network out-bound errors climbing.`,
+      issues: [
+        'System status check FAILED at 02:46',
+        'Network out errors at 0.4% — climbing',
+        'CPU utilisation at 96% — pegged',
+      ],
+      nextSteps: [
+        'Stop / start the instance to migrate it off the impaired host.',
+        'Cordon the instance from the target group during recovery.',
+        'Open an AWS support case if the failure persists after migration.',
+      ],
+    },
+  };
+  const overview: EntityOverview = {
+    displayName: name,
+    lastUpdate: `${today} @ 02:47:30`,
+    tags,
+    summary: summaryFromNarrative(h, narrative),
+    goldenSignals: [
+      {
+        // `GoldenSignal.id` is a 3-value enum (`latency` / `errorRate`
+        // / `throughput`) shared by the overview card grid — we
+        // repurpose the slots: `latency` = primary saturation,
+        // `errorRate` = secondary stressor, `throughput` = workload.
+        id: 'latency',
+        label: 'CPU utilisation',
+        value: pick(h, 28, 84, 96),
+        unit: '%',
+        delta: pick(h, 'Stable in last 5 min', '+12 pts in last 15 min', 'Pegged since 02:46'),
+        color: signalColor(h),
+        trend: trendFor(h, 28, 96, 81),
+        description: 'CloudWatch CPUUtilization, 1-min granularity.',
+      },
+      {
+        id: 'errorRate',
+        label: 'Network out',
+        value: pick(h, 18.2, 36.7, 41.1),
+        unit: 'MB/s',
+        delta: deltaCopy(h),
+        color: signalColor(h),
+        trend: trendFor(h, 18, 41, 82),
+        description: 'CloudWatch NetworkOut, 1-min granularity.',
+      },
+      {
+        id: 'throughput',
+        label: 'Status check failures',
+        value: pick(h, 0, 0, 3),
+        unit: '',
+        delta: pick(h, 'Healthy 24h', 'Healthy 24h', '3 failures since 02:46'),
+        color: pick<GoldenSignalLevel>(h, 'success', 'warning', 'danger'),
+        trend: trendFor(h, 0, 3, 83),
+        description: 'CloudWatch StatusCheckFailed, 1-min granularity.',
+      },
+    ],
+    details: [
+      { id: 'provider', label: 'Provider', value: 'AWS' },
+      { id: 'instanceId', label: 'Instance id', value: name },
+      {
+        id: 'instanceType',
+        label: 'Instance type',
+        value: pick(h, 'm6i.large', 'm6i.large', 't3.medium'),
+      },
+      { id: 'region', label: 'Region', value: 'eu-west-1' },
+      { id: 'az', label: 'Availability zone', value: 'eu-west-1a' },
+      { id: 'ami', label: 'AMI', value: 'ami-0a1b2c3d4e5f67890' },
+    ],
+    ownership: cloudOwnership(),
+    securityIssueCount: securityIssueCount(h, 'cloud'),
+  };
+  const metrics: MetricsTabData = {
+    events: eventsByHealth(h),
+    goldenSignals: [
+      {
+        id: 'cpu',
+        label: 'CPU utilisation',
+        unit: '%',
+        threshold: 80,
+        description: 'CloudWatch CPUUtilization.',
+        series: [series('cpu', 'CPU %', trendFor(h, 28, 96, 84))],
+      },
+      {
+        id: 'netout',
+        label: 'Network out',
+        unit: 'MB/s',
+        description: 'CloudWatch NetworkOut.',
+        series: [series('netout', 'MB/s', trendFor(h, 18, 41, 85))],
+      },
+      {
+        id: 'status',
+        label: 'Status check failures',
+        unit: '',
+        threshold: 1,
+        description: 'CloudWatch StatusCheckFailed.',
+        series: [series('status', 'Failures', trendFor(h, 0, 3, 86))],
+      },
+    ],
+    otherMetrics: [
+      {
+        id: 'credit',
+        label: 'CPU credit balance',
+        unit: '',
+        description: 'CloudWatch CPUCreditBalance (burstable types only).',
+        series: [series('credit', 'Credits', trendFor(h, 240, 32, 87, 'down'))],
+      },
+      {
+        id: 'disk',
+        label: 'EBS read latency',
+        unit: 'ms',
+        description: 'CloudWatch VolumeTotalReadTime / VolumeReadOps.',
+        series: [series('disk', 'ms', trendFor(h, 2.1, 6.8, 88))],
+      },
+    ],
+  };
+  const logs: LogRow[] = pick<LogRow[]>(
+    h,
+    [
+      log(
+        'ec2-1',
+        `${today} @ 02:47:20.001`,
+        'Info',
+        'body.text',
+        `Cloud-init reached final stage on ${name}`
+      ),
+      log(
+        'ec2-2',
+        `${today} @ 02:47:09.084`,
+        'Info',
+        'body.text',
+        `SSM session ssm-user closed cleanly`
+      ),
+    ],
+    [
+      log(
+        'ec2-1',
+        `${today} @ 02:47:20.001`,
+        'Warning',
+        'body.text',
+        `CPU credit balance below 100 on ${name}`
+      ),
+      log(
+        'ec2-2',
+        `${today} @ 02:47:09.084`,
+        'Warning',
+        'body.text',
+        `kernel: TCP: out of memory -- consider tuning tcp_mem`
+      ),
+    ],
+    [
+      log(
+        'ec2-1',
+        `${today} @ 02:47:20.001`,
+        'Error',
+        'body.text',
+        `Instance status check FAILED on ${name}`
+      ),
+      log(
+        'ec2-2',
+        `${today} @ 02:47:09.084`,
+        'Error',
+        'body.text',
+        `kernel: BUG: soft lockup - CPU#0 stuck for 23s`
+      ),
+      log(
+        'ec2-3',
+        `${today} @ 02:46:58.421`,
+        'Warning',
+        'body.text',
+        `dropped 12 TCP RSTs to elb-healthcheck`
+      ),
+    ]
+  );
+  const security = securityByHealth(
+    h,
+    [],
+    [
+      {
+        id: `ec2-cve-h1-${name}`,
+        severity: 'High',
+        title: `Security group on ${name} allows 0.0.0.0/0 to port 22`,
+        detectedAt: `${today} @ 02:46:18`,
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: `ec2-cve-h2-${name}`,
+        severity: 'Medium',
+        title: 'IMDSv1 still allowed on instance metadata service',
+        detectedAt: 'May 5, 2026, 18:42',
+        source: 'CSPM',
+        status: 'Open',
+      },
+    ]
+  );
+  return {
+    overview,
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'cloud'),
+      sharedCloudRelationships(name, h),
+      security
+    ),
+  };
+};
+
+const buildCloudLambdaTemplate = (
+  name: string,
+  h: EntityHealthVariant
+): { overview: EntityOverview; tabs: EntityTabsData } => {
+  const tags: EntityTag[] = [
+    { label: 'cloud', color: 'hollow' },
+    { label: 'AWS Lambda function', color: 'hollow' },
+    healthTag(h),
+    { label: 'Production', color: 'hollow' },
+  ];
+  const narrative = {
+    healthy: {
+      headline: `${name} is healthy — invocations steady, p99 duration under the 1s budget.`,
+      issues: [],
+      nextSteps: [
+        'No action required — keep the reserved concurrency at the current value.',
+        'Confirm the next runtime upgrade lands on the staging alias first.',
+      ],
+    },
+    atRisk: {
+      headline: `${name} is at risk — error rate climbing past 1% and cold starts elevated.`,
+      issues: [
+        'Error rate at 1.4% — climbing 0.2 pts / min',
+        'Cold-start rate at 6.8% — usually < 2%',
+      ],
+      nextSteps: [
+        'Bump provisioned concurrency by +5 to absorb the next promo spike.',
+        'Check downstream RDS Postgres pool — likely behind the error climb.',
+      ],
+    },
+    unhealthy: {
+      headline: `${name} is unhealthy — 5xx errors above 5% and concurrency throttling triggered.`,
+      issues: [
+        'Error rate at 5.7% — sustained',
+        'Concurrent executions hit reserved limit (200) — 14 throttles in last 5 min',
+        'p99 duration at 2.4s — above 1s budget',
+      ],
+      nextSteps: [
+        'Page the on-call function-owner team.',
+        'Raise reserved concurrency to 400 temporarily and roll forward to runtime patch.',
+        'Open a postmortem item for the queue-depth alert that fired late.',
+      ],
+    },
+  };
+  const overview: EntityOverview = {
+    displayName: name,
+    lastUpdate: `${today} @ 02:47:30`,
+    tags,
+    summary: summaryFromNarrative(h, narrative),
+    goldenSignals: [
+      {
+        // `latency` slot holds the workload-shape signal here
+        // (invocations); `errorRate` keeps its semantic meaning;
+        // `throughput` is repurposed for p99 duration.
+        id: 'latency',
+        label: 'Invocations',
+        value: pick(h, 38420, 41280, 47120),
+        unit: '/min',
+        delta: deltaCopy(h),
+        color: pick<GoldenSignalLevel>(h, 'success', 'warning', 'warning'),
+        trend: trendFor(h, 38000, 47120, 91),
+        description: 'CloudWatch Invocations, 1-min granularity.',
+      },
+      {
+        id: 'errorRate',
+        label: 'Error rate',
+        value: pick(h, 0.18, 1.4, 5.7),
+        unit: '%',
+        delta: pick(h, 'Stable in last 5 min', '+0.2 pts / min', '+1.8 pts in 5 min'),
+        color: signalColor(h),
+        trend: trendFor(h, 0.18, 5.7, 92),
+        description: 'CloudWatch Errors / Invocations.',
+      },
+      {
+        id: 'throughput',
+        label: 'p99 duration',
+        value: pick(h, 480, 820, 2400),
+        unit: 'ms',
+        delta: deltaCopy(h),
+        color: signalColor(h),
+        trend: trendFor(h, 480, 2400, 93),
+        description: 'CloudWatch Duration p99.',
+      },
+    ],
+    details: [
+      { id: 'provider', label: 'Provider', value: 'AWS' },
+      { id: 'functionName', label: 'Function name', value: name },
+      { id: 'runtime', label: 'Runtime', value: 'nodejs20.x' },
+      { id: 'memory', label: 'Memory', value: '512 MB' },
+      { id: 'region', label: 'Region', value: 'eu-west-1' },
+      {
+        id: 'reservedConcurrency',
+        label: 'Reserved concurrency',
+        value: pick(h, '100', '100', '200'),
+      },
+    ],
+    ownership: cloudOwnership(),
+    securityIssueCount: securityIssueCount(h, 'cloud'),
+  };
+  const metrics: MetricsTabData = {
+    events: eventsByHealth(h),
+    goldenSignals: [
+      {
+        id: 'invocations',
+        label: 'Invocations',
+        unit: '/min',
+        description: 'CloudWatch Invocations.',
+        series: [series('invocations', 'Invocations', trendFor(h, 38000, 47120, 94))],
+      },
+      {
+        id: 'errors',
+        label: 'Error rate',
+        unit: '%',
+        threshold: 1,
+        description: 'CloudWatch Errors.',
+        series: [series('errors', 'Error %', trendFor(h, 0.18, 5.7, 95))],
+      },
+      {
+        id: 'p99',
+        label: 'p99 duration',
+        unit: 'ms',
+        threshold: 1000,
+        description: 'CloudWatch Duration p99.',
+        series: [series('p99', 'ms', trendFor(h, 480, 2400, 96))],
+      },
+    ],
+    otherMetrics: [
+      {
+        id: 'coldstart',
+        label: 'Cold-start rate',
+        unit: '%',
+        description: 'CloudWatch InitDuration / Invocations.',
+        series: [series('coldstart', 'Cold %', trendFor(h, 1.4, 6.8, 97))],
+      },
+      {
+        id: 'concurrency',
+        label: 'Concurrent executions',
+        unit: '',
+        threshold: 200,
+        description: 'CloudWatch ConcurrentExecutions.',
+        series: [series('concurrency', 'Concurrent', trendFor(h, 64, 198, 98))],
+      },
+    ],
+  };
+  const logs: LogRow[] = pick<LogRow[]>(
+    h,
+    [
+      log(
+        'lm-1',
+        `${today} @ 02:47:20.001`,
+        'Info',
+        'body.text',
+        `END RequestId d1f2a3b4 Duration: 482.10 ms`
+      ),
+      log(
+        'lm-2',
+        `${today} @ 02:47:09.084`,
+        'Info',
+        'body.text',
+        `START RequestId e5f6a708 Version: $LATEST`
+      ),
+    ],
+    [
+      log(
+        'lm-1',
+        `${today} @ 02:47:20.001`,
+        'Warning',
+        'body.text',
+        `END RequestId d1f2a3b4 Duration: 1810.00 ms`
+      ),
+      log(
+        'lm-2',
+        `${today} @ 02:47:09.084`,
+        'Warning',
+        'body.text',
+        `INIT_REPORT InitDuration: 920.40 ms`
+      ),
+    ],
+    [
+      log(
+        'lm-1',
+        `${today} @ 02:47:20.001`,
+        'Error',
+        'body.text',
+        `Task timed out after 3.00 seconds`
+      ),
+      log(
+        'lm-2',
+        `${today} @ 02:47:09.084`,
+        'Error',
+        'body.text',
+        `Rate Exceeded: 14 throttled invocations`
+      ),
+      log(
+        'lm-3',
+        `${today} @ 02:46:58.421`,
+        'Warning',
+        'body.text',
+        `Concurrent executions: 198 of 200 reserved`
+      ),
+    ]
+  );
+  const security = securityByHealth(
+    h,
+    [],
+    [
+      {
+        id: `lm-cve-h1-${name}`,
+        severity: 'High',
+        title: `Execution role on ${name} allows iam:PassRole *`,
+        detectedAt: `${today} @ 02:46:18`,
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: `lm-cve-h2-${name}`,
+        severity: 'Medium',
+        title: 'Function exposed via Function URL with AWS_IAM auth_type only',
+        detectedAt: 'May 5, 2026, 18:42',
+        source: 'CSPM',
+        status: 'Open',
+      },
+    ]
+  );
+  return {
+    overview,
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'cloud'),
+      sharedCloudRelationships(name, h),
+      security
+    ),
+  };
+};
+
+const buildCloudS3Template = (
+  name: string,
+  h: EntityHealthVariant
+): { overview: EntityOverview; tabs: EntityTabsData } => {
+  const tags: EntityTag[] = [
+    { label: 'cloud', color: 'hollow' },
+    { label: 'AWS S3 bucket', color: 'hollow' },
+    healthTag(h),
+    { label: 'Production', color: 'hollow' },
+  ];
+  const narrative = {
+    healthy: {
+      headline: `${name} is healthy — request rate steady, 4xx ratio under 0.1%, no replication lag.`,
+      issues: [],
+      nextSteps: [
+        'No action required — review the lifecycle rule on the next platform sync.',
+        'Confirm versioning + MFA delete on the next compliance pass.',
+      ],
+    },
+    atRisk: {
+      headline: `${name} is at risk — 4xx ratio above 1% and replication lag climbing past 90s.`,
+      issues: [
+        '4xx error ratio at 1.2% — usually < 0.1%',
+        'Replication lag at 96s — replica region falling behind',
+      ],
+      nextSteps: [
+        'Investigate which IAM principal is generating the AccessDenied bursts.',
+        'Confirm the replication role still has kms:Decrypt on the source CMK.',
+      ],
+    },
+    unhealthy: {
+      headline: `${name} is unhealthy — 5xx ratio above 1% and SlowDown errors triggering retries.`,
+      issues: [
+        '5xx error ratio at 1.8% — sustained',
+        'SlowDown errors at 240 / min — request rate above bucket partition limit',
+        'Replication lag at 4 min — RPO at risk',
+      ],
+      nextSteps: [
+        'Page the on-call data-platform rotation.',
+        'Spread writes across more key prefixes (current top-prefix takes 62% of writes).',
+        'Open AWS support case if SlowDown persists after re-sharding.',
+      ],
+    },
+  };
+  const overview: EntityOverview = {
+    displayName: name,
+    lastUpdate: `${today} @ 02:47:30`,
+    tags,
+    summary: summaryFromNarrative(h, narrative),
+    goldenSignals: [
+      {
+        // `latency` slot is repurposed for request rate;
+        // `errorRate` is the 4xx ratio; `throughput` is replication
+        // lag — the three signals customers actually watch for an
+        // S3 bucket.
+        id: 'latency',
+        label: 'Request rate',
+        value: pick(h, 1280, 2410, 3820),
+        unit: '/s',
+        delta: deltaCopy(h),
+        color: pick<GoldenSignalLevel>(h, 'success', 'warning', 'warning'),
+        trend: trendFor(h, 1280, 3820, 101),
+        description: 'CloudWatch AllRequests.',
+      },
+      {
+        id: 'errorRate',
+        label: '4xx error ratio',
+        value: pick(h, 0.04, 1.2, 1.4),
+        unit: '%',
+        delta: deltaCopy(h),
+        color: signalColor(h),
+        trend: trendFor(h, 0.04, 1.4, 102),
+        description: 'CloudWatch 4xxErrors / AllRequests.',
+      },
+      {
+        id: 'throughput',
+        label: 'Replication lag',
+        value: pick(h, 2, 96, 240),
+        unit: 's',
+        delta: pick(h, 'Stable', '+18s in last 5 min', '+38s in last 5 min'),
+        color: signalColor(h),
+        trend: trendFor(h, 2, 240, 103),
+        description: 'CloudWatch ReplicationLatency, CRR-enabled buckets only.',
+      },
+    ],
+    details: [
+      { id: 'provider', label: 'Provider', value: 'AWS' },
+      { id: 'bucketName', label: 'Bucket name', value: name },
+      { id: 'region', label: 'Region', value: 'eu-west-1' },
+      {
+        id: 'storage',
+        label: 'Storage size',
+        value: pick(h, '128.4 TiB', '128.4 TiB', '129.1 TiB'),
+      },
+      { id: 'objects', label: 'Object count', value: '14.2 M' },
+      { id: 'versioning', label: 'Versioning', value: 'Enabled' },
+    ],
+    ownership: cloudOwnership(),
+    securityIssueCount: securityIssueCount(h, 'cloud'),
+  };
+  const metrics: MetricsTabData = {
+    events: eventsByHealth(h),
+    goldenSignals: [
+      {
+        id: 'requests',
+        label: 'Request rate',
+        unit: '/s',
+        description: 'CloudWatch AllRequests.',
+        series: [series('requests', 'Req/s', trendFor(h, 1280, 3820, 104))],
+      },
+      {
+        id: '4xx',
+        label: '4xx error ratio',
+        unit: '%',
+        threshold: 1,
+        description: 'CloudWatch 4xxErrors ratio.',
+        series: [series('4xx', '4xx %', trendFor(h, 0.04, 1.4, 105))],
+      },
+      {
+        id: '5xx',
+        label: '5xx error ratio',
+        unit: '%',
+        threshold: 1,
+        description: 'CloudWatch 5xxErrors ratio.',
+        series: [series('5xx', '5xx %', trendFor(h, 0.01, 1.8, 106))],
+      },
+    ],
+    otherMetrics: [
+      {
+        id: 'replag',
+        label: 'Replication lag',
+        unit: 's',
+        threshold: 60,
+        description: 'CloudWatch ReplicationLatency.',
+        series: [series('replag', 's', trendFor(h, 2, 240, 107))],
+      },
+      {
+        id: 'firstbyte',
+        label: 'First-byte latency',
+        unit: 'ms',
+        description: 'CloudWatch FirstByteLatency p50.',
+        series: [series('firstbyte', 'ms', trendFor(h, 42, 86, 108))],
+      },
+    ],
+  };
+  const logs: LogRow[] = pick<LogRow[]>(
+    h,
+    [
+      log(
+        's3-1',
+        `${today} @ 02:47:20.001`,
+        'Info',
+        'body.text',
+        `PutObject 200 — key: receipts/2026/04/14/abc.json (4.2 KB)`
+      ),
+      log(
+        's3-2',
+        `${today} @ 02:47:09.084`,
+        'Info',
+        'body.text',
+        `GetObject 200 — key: receipts/2026/04/14/def.json`
+      ),
+    ],
+    [
+      log(
+        's3-1',
+        `${today} @ 02:47:20.001`,
+        'Warning',
+        'body.text',
+        `PutObject 403 AccessDenied — by ci-bot (12 retries)`
+      ),
+      log(
+        's3-2',
+        `${today} @ 02:47:09.084`,
+        'Warning',
+        'body.text',
+        `Replication lag rising — 92s on eu-central-1 destination`
+      ),
+    ],
+    [
+      log(
+        's3-1',
+        `${today} @ 02:47:20.001`,
+        'Error',
+        'body.text',
+        `PutObject 503 SlowDown — top prefix /receipts at 62% of writes`
+      ),
+      log(
+        's3-2',
+        `${today} @ 02:47:09.084`,
+        'Error',
+        'body.text',
+        `PutObject 500 InternalError — second retry burst`
+      ),
+      log(
+        's3-3',
+        `${today} @ 02:46:58.421`,
+        'Warning',
+        'body.text',
+        `Replication lag 4 min — RPO at risk`
+      ),
+    ]
+  );
+  const security = securityByHealth(
+    h,
+    [],
+    [
+      {
+        id: `s3-cve-h1-${name}`,
+        severity: 'High',
+        title: `Bucket ${name} policy allows s3:GetObject from "*"`,
+        detectedAt: `${today} @ 02:46:18`,
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: `s3-cve-h2-${name}`,
+        severity: 'Medium',
+        title: 'Default encryption not enforced (BucketEncryption rule missing)',
+        detectedAt: 'May 5, 2026, 18:42',
+        source: 'CSPM',
+        status: 'Open',
+      },
+    ]
+  );
+  return {
+    overview,
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'cloud'),
+      sharedCloudRelationships(name, h),
+      security
+    ),
   };
 };
 
@@ -3686,11 +4497,19 @@ const buildLlmTemplate = (
  * kind beforehand (via {@link entityTypeToKind} or {@link inferEntityKind})
  * and the entity's health (via {@link normalizeEntityHealth}); pass
  * `undefined` for the kind to fall back on the generic mock shape upstream.
+ *
+ * `typeLabel` (the raw `.type` string from the entities dataset, e.g.
+ * `'AWS EC2 Instance'`, `'AWS S3 bucket'`) is forwarded to kinds that
+ * have sub-variants — currently just `'cloud'`, which fans out into
+ * region / EC2 / Lambda / S3 templates so an EC2 instance no longer
+ * gets rendered with the "AWS region" tag and a `Region:` label
+ * showing the instance id.
  */
 export const buildKindTemplate = (
   entityName: string,
   kind: EntityKind | undefined,
-  health: EntityHealthVariant = 'healthy'
+  health: EntityHealthVariant = 'healthy',
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } | undefined => {
   if (!kind) return undefined;
   switch (kind) {
@@ -3711,7 +4530,7 @@ export const buildKindTemplate = (
     case 'database':
       return buildDatabaseTemplate(entityName, health);
     case 'cloud':
-      return buildCloudTemplate(entityName, health);
+      return buildCloudTemplate(entityName, health, typeLabel);
     case 'middleware':
       return buildMiddlewareTemplate(entityName, health);
     case 'llm':

@@ -24,7 +24,13 @@ export type EntityCategoryId =
   | 'services'
   | 'cloud'
   | 'middlewares'
-  | 'llms';
+  | 'llms'
+  // Catch-all bucket for entity types whose `category` field doesn't
+  // match any of the canonical labels above (user-typed via the
+  // wizard's "+ Create new category", legacy seed values, …). Lives
+  // here on the closed enum so route validation, nav and the manage
+  // table all agree on the same set of categories.
+  | 'other';
 
 export interface EntityCategoryDescriptor {
   readonly id: EntityCategoryId;
@@ -32,6 +38,27 @@ export interface EntityCategoryDescriptor {
   readonly icon: string;
 }
 
+/**
+ * Single source of truth for category id + display label + icon.
+ *
+ * Drives:
+ *   - The left-nav "Entities" panel children (deep-link ids match the
+ *     `id` field via `entities${PascalCase(id)}`).
+ *   - The Grouped grid + List + Map views (one card per entry).
+ *   - The wizard's category dropdown in the "Manage entity types"
+ *     create / edit flyout (we filter out `'other'` since that bucket
+ *     is what users land in *implicitly* via "+ Create new category",
+ *     not something they'd pick explicitly).
+ *   - The manage-table category column display logic
+ *     (`getCanonicalCategoryLabel`).
+ *
+ * Add a new canonical category by:
+ *   1. extending `EntityCategoryId` and this array,
+ *   2. adding a matching deep-link in `streams_app/public/plugin.tsx`,
+ *   3. registering it in `navigation_tree.ts`,
+ *   4. (optionally) seeding entity instances + entity types so the
+ *      new nav section isn't empty.
+ */
 export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   { id: 'hosts', label: 'Hosts', icon: 'storage' },
   { id: 'kubernetes', label: 'Kubernetes', icon: 'logoKubernetes' },
@@ -40,6 +67,11 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   { id: 'cloud', label: 'Cloud', icon: 'cloudSunny' },
   { id: 'middlewares', label: 'Middlewares', icon: 'logstashIf' },
   { id: 'llms', label: 'LLMs', icon: 'sparkles' },
+  // Catch-all bucket — rendered as a nav section so user-typed
+  // categories aren't invisible, but never offered as a dropdown
+  // option in the wizard (the wizard exposes the 7 canonical
+  // categories + "+ Create new category" instead).
+  { id: 'other', label: 'Other', icon: 'package' },
 ];
 
 export const getCategoryDescriptor = (id: EntityCategoryId): EntityCategoryDescriptor | undefined =>
@@ -51,6 +83,56 @@ export const getCategoryDescriptor = (id: EntityCategoryId): EntityCategoryDescr
  */
 export const isKnownCategoryId = (value: string): value is EntityCategoryId =>
   ENTITY_CATEGORIES.some((category) => category.id === value);
+
+/**
+ * Map any free-form "category" string (the user-typed value on a
+ * `FakeEntityType.category` field, or a wizard draft, or a legacy
+ * seed value) to its canonical `EntityCategoryId`. Tries:
+ *   1. exact slug match (already canonical, just narrowing),
+ *   2. label match (case-insensitive, e.g. `"Kubernetes"` ↔ `"kubernetes"`),
+ *   3. fallback to `'other'`.
+ * Empty / nullish input also falls back to `'other'` — keeps the
+ * manage-table category column from rendering blank cells.
+ */
+export const normalizeCategoryToId = (raw: string | undefined | null): EntityCategoryId => {
+  if (!raw) return 'other';
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return 'other';
+  const lower = trimmed.toLowerCase();
+  // Slug match first — cheaper than scanning labels and covers the
+  // common case where callers already pass an `EntityCategoryId`.
+  const bySlug = ENTITY_CATEGORIES.find((category) => category.id === lower);
+  if (bySlug) return bySlug.id;
+  const byLabel = ENTITY_CATEGORIES.find((category) => category.label.toLowerCase() === lower);
+  if (byLabel) return byLabel.id;
+  return 'other';
+};
+
+/**
+ * Resolve the canonical display label for any category string. Returns
+ * the canonical `ENTITY_CATEGORIES` label when the input maps cleanly
+ * (so `"kubernetes"`, `"Kubernetes"`, `"KUBERNETES"` all render as
+ * `"Kubernetes"`), and the original trimmed string otherwise — that
+ * way the manage-table keeps showing the user's typed-in custom
+ * category label while the nav surfaces it under "Other".
+ */
+export const getCanonicalCategoryLabel = (raw: string | undefined | null): string => {
+  if (!raw) return getCategoryDescriptor('other')?.label ?? 'Other';
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return getCategoryDescriptor('other')?.label ?? 'Other';
+  const id = normalizeCategoryToId(trimmed);
+  if (id !== 'other') return getCategoryDescriptor(id)?.label ?? trimmed;
+  return trimmed;
+};
+
+/**
+ * `true` when the supplied category string does not match any
+ * canonical category (i.e. it would be bucketed under "Other" in the
+ * left nav). Used by the manage table to mark custom-category rows
+ * with a small "Other" tag.
+ */
+export const isCustomCategoryLabel = (raw: string | undefined | null): boolean =>
+  normalizeCategoryToId(raw) === 'other';
 
 export const TAG_KEYS = ['application', 'environment', 'team', 'region'] as const;
 export type TagKey = (typeof TAG_KEYS)[number];
@@ -98,10 +180,24 @@ const HEALTH_RANK: Record<EntityHealth, number> = {
   healthy: 2,
 };
 
+/**
+ * Demo-friendly health distribution. Tuned so a typical screenshot
+ * of the entities list / Grouped grid shows enough warning + danger
+ * badges to be visually interesting without making the dataset feel
+ * like everything's on fire:
+ *   - 25 % unhealthy
+ *   - 30 % at risk
+ *   - 45 % healthy
+ * The previous 18/22/60 split made most cards look uniformly green
+ * (and the heatmap tiles, which now follow the entity's health,
+ * inherited the same lack of variety). 25/30/45 keeps "mostly OK"
+ * as the dominant state while leaving every category with a credible
+ * mix of red and yellow.
+ */
 const seededHealth = (seed: number, index: number): EntityHealth => {
   const value = (seed * 31 + index * 17) % 100;
-  if (value < 18) return 'unhealthy';
-  if (value < 40) return 'atRisk';
+  if (value < 25) return 'unhealthy';
+  if (value < 55) return 'atRisk';
   return 'healthy';
 };
 
@@ -215,24 +311,56 @@ const DATABASE_SEED_ROWS: readonly SeedRow[] = [
   { name: 'fraud-db', type: 'Postgres', health: 'healthy' },
 ];
 
+// Entity `.type` is the human-readable label rendered in the "Type"
+// column of the entities list and the title of the entity flyout, so
+// it doubles as the Manage entity types table's `name` for the
+// matching seed row in `fake_entity_types.ts`. We use the display
+// label ("APM Service") instead of the ECS field name ("apm.service")
+// so the two surfaces line up letter-for-letter. Kind inference in
+// `kbn-entity-centric-lab-flyout/src/kind_templates.ts` is
+// case-insensitive and matches both `apm.service` and `APM Service`,
+// so the rename doesn't break any storyline templates.
 const SERVICE_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'payments-service', type: 'apm.service', health: 'unhealthy' },
-  { name: 'checkout-service', type: 'apm.service', health: 'unhealthy' },
-  { name: 'fraud-service', type: 'apm.service', health: 'healthy' },
-  { name: 'merchant-portal', type: 'apm.service', health: 'healthy' },
-  { name: 'billing-api', type: 'apm.service', health: 'healthy' },
-  { name: 'settlement-service', type: 'apm.service', health: 'healthy' },
-  { name: 'wallet-service', type: 'apm.service', health: 'healthy' },
-  { name: 'reporting-service', type: 'apm.service', health: 'healthy' },
-  { name: 'notifications-service', type: 'apm.service', health: 'healthy' },
-  { name: 'identity-service', type: 'apm.service', health: 'healthy' },
-  { name: 'webhooks-service', type: 'apm.service', health: 'healthy' },
-  { name: 'pricing-service', type: 'apm.service', health: 'healthy' },
+  { name: 'payments-service', type: 'APM Service', health: 'unhealthy' },
+  { name: 'checkout-service', type: 'APM Service', health: 'unhealthy' },
+  { name: 'fraud-service', type: 'APM Service', health: 'healthy' },
+  { name: 'merchant-portal', type: 'APM Service', health: 'healthy' },
+  { name: 'billing-api', type: 'APM Service', health: 'healthy' },
+  { name: 'settlement-service', type: 'APM Service', health: 'healthy' },
+  { name: 'wallet-service', type: 'APM Service', health: 'healthy' },
+  { name: 'reporting-service', type: 'APM Service', health: 'healthy' },
+  { name: 'notifications-service', type: 'APM Service', health: 'healthy' },
+  { name: 'identity-service', type: 'APM Service', health: 'healthy' },
+  { name: 'webhooks-service', type: 'APM Service', health: 'healthy' },
+  { name: 'pricing-service', type: 'APM Service', health: 'healthy' },
 ];
 
+// Cloud entities cover the four AWS-flavoured types the Manage table
+// exposes (regions, EC2 instances, Lambda functions, S3 buckets).
+// Every entity is seeded by name so the demo never falls back to
+// generic `cloud-001` placeholders, and so each of the four types in
+// `fake_entity_types.ts` has the same count as what's listed here.
 const CLOUD_SEED_ROWS: readonly SeedRow[] = [
+  // ---------- AWS region (4) ----------
   { name: 'aws-eu-west-1', type: 'AWS region', health: 'healthy' },
-  { name: 'aws-eu-central-1', type: 'AWS region', health: 'healthy' },
+  { name: 'aws-eu-central-1', type: 'AWS region', health: 'atRisk' },
+  { name: 'aws-us-east-1', type: 'AWS region', health: 'healthy' },
+  { name: 'aws-us-west-2', type: 'AWS region', health: 'healthy' },
+  // ---------- AWS EC2 Instance (4) ----------
+  { name: 'i-0a1b2c3d4e5f6789a', type: 'AWS EC2 Instance', health: 'unhealthy' },
+  { name: 'i-04e5f6a708b9c1d2e', type: 'AWS EC2 Instance', health: 'healthy' },
+  { name: 'i-0b9c1d2e304e5f6a7', type: 'AWS EC2 Instance', health: 'atRisk' },
+  { name: 'i-0e5f6a708b9c1d2e3', type: 'AWS EC2 Instance', health: 'healthy' },
+  // ---------- AWS Lambda function (4) ----------
+  { name: 'orders-api-handler', type: 'AWS Lambda function', health: 'healthy' },
+  { name: 'fraud-screener', type: 'AWS Lambda function', health: 'atRisk' },
+  { name: 'checkout-webhook', type: 'AWS Lambda function', health: 'healthy' },
+  { name: 'auth-callback', type: 'AWS Lambda function', health: 'unhealthy' },
+  // ---------- AWS S3 bucket (4) ----------
+  { name: 'payflow-receipts', type: 'AWS S3 bucket', health: 'healthy' },
+  { name: 'payments-audit-logs', type: 'AWS S3 bucket', health: 'healthy' },
+  { name: 'merchant-assets', type: 'AWS S3 bucket', health: 'healthy' },
+  { name: 'analytics-exports', type: 'AWS S3 bucket', health: 'atRisk' },
 ];
 
 const MIDDLEWARE_SEED_ROWS: readonly SeedRow[] = [
@@ -263,14 +391,19 @@ const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
   {
     category: 'services',
     total: 12,
-    typeCycle: ['apm.service'],
+    typeCycle: ['APM Service'],
     seedRows: SERVICE_SEED_ROWS,
     fallbackName: (index) => `svc-${padIndex(index, 2)}`,
   },
   {
+    // 16 total entities — 4 per AWS sub-type — all fully seeded by
+    // `CLOUD_SEED_ROWS`. Keeping seed count == total avoids relying
+    // on `typeCycle` here: the fallback names (`cloud-NN`) wouldn't
+    // hint at the sub-type and the table counts would drift away
+    // from the actual instance counts.
     category: 'cloud',
-    total: 2,
-    typeCycle: ['AWS region'],
+    total: 16,
+    typeCycle: ['AWS region', 'AWS EC2 Instance', 'AWS Lambda function', 'AWS S3 bucket'],
     seedRows: CLOUD_SEED_ROWS,
     fallbackName: (index) => `cloud-${padIndex(index, 2)}`,
   },

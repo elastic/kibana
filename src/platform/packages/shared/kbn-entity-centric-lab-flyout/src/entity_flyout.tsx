@@ -36,7 +36,10 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEntityFlyoutServices } from './services_context';
 import { OverviewTab } from './overview_tab';
@@ -55,6 +58,8 @@ import {
 import { entityTypeToKind, inferEntityKind } from './kind_templates';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink } from './flyout_template_overrides';
+import { resolveEntityDisplayName, useEntityDisplayName } from './entity_display_name';
+import { setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
 
 interface EntityFlyoutProps {
   readonly entityName: string;
@@ -189,14 +194,27 @@ export const EntityFlyout = ({
     });
   }, [onSelectEntity]);
 
+  // Subscribe to chaos-mode flips so the flyout re-renders the
+  // moment the user toggles the storyline. `buildFakeEntityOverview`
+  // / `buildFakeEntityTabsData` already read the toggle internally;
+  // this just makes the memos recompute. No-op for entities outside
+  // the PayFlow storyline.
+  const chaosOn = useChaosModeEnabled();
   const overview = useMemo(
     () => buildFakeEntityOverview(entityName, entityType, entityHealth),
-    [entityName, entityType, entityHealth]
+    [entityName, entityType, entityHealth, chaosOn]
   );
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, entityHealth),
-    [entityName, entityType, entityHealth]
+    [entityName, entityType, entityHealth, chaosOn]
   );
+
+  // Resolved label honoured everywhere the entity reads as text. The
+  // hook subscribes to the shared `entity_display_config` store so the
+  // wizard's save call instantly re-labels the flyout — no
+  // close-and-reopen required. Falls back to `entityName` when no
+  // override is configured, preserving the default behavior.
+  const displayName = useEntityDisplayName(entityName, entityType);
 
   const chatAttachment = useMemo(
     () => buildEntityFlyoutAttachment({ entityName, activeTab, overview, tabsData }),
@@ -250,6 +268,36 @@ export const EntityFlyout = ({
     [closeActionMenu, notifications, entityName]
   );
 
+  // Rollback is a "real" lab action — it flips the global chaos-mode
+  // toggle off so the PayFlow storyline is replaced by the healthy
+  // kind templates everywhere it's read (this flyout, the entity
+  // list, the grouped grid tiles). A success toast hints at how to
+  // re-arm chaos from the Discover logs panel.
+  const handleRollbackClick = useCallback(() => {
+    closeActionMenu();
+    setChaosModeEnabled(false);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('entityCentricLabFlyout.flyout.rollbackToastTitle', {
+        defaultMessage: 'Rolled back {entityName} to the previous version',
+        values: { entityName },
+      }),
+      text: i18n.translate('entityCentricLabFlyout.flyout.rollbackToastText', {
+        defaultMessage:
+          'PayFlow services are recovering. Toggle "Chaos mode" in the Discover logs panel to replay the incident.',
+      }),
+    });
+  }, [closeActionMenu, notifications, entityName]);
+
+  // Resolve the canonical kind once — used both for template selection
+  // upstream and for kind-gated entries in the actions menu (e.g.
+  // "Roll back to previous version" only shows up for services and
+  // K8s deployments, the two kinds where a one-click rollback is a
+  // credible action against the entity itself).
+  const kind = useMemo(
+    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
+    [entityType, entityName]
+  );
+
   const actionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
     const viewInApmLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
       defaultMessage: 'View in APM',
@@ -276,6 +324,47 @@ export const EntityFlyout = ({
     const annotateDeploymentLabel = i18n.translate(
       'entityCentricLabFlyout.flyout.actions.annotateDeployment',
       { defaultMessage: 'Annotate deployment' }
+    );
+    const rollbackLabel = i18n.translate(
+      'entityCentricLabFlyout.flyout.actions.rollbackToPreviousVersion',
+      { defaultMessage: 'Roll back to previous version' }
+    );
+
+    // Build the "write" section dynamically so the rollback entry
+    // only surfaces for kinds where it actually maps to something
+    // (APM service / K8s deployment have a "previous version"; an
+    // S3 bucket or AWS region does not). Sits at the top of the
+    // write section, separated from the deep-link entries above,
+    // and uses a distinct `danger` colour so users notice this is a
+    // destructive change to the entity itself.
+    const writeItems: EuiContextMenuPanelItemDescriptor[] = [];
+    if (kind === 'service' || kind === 'deployment') {
+      writeItems.push({
+        name: rollbackLabel,
+        icon: 'editorUndo',
+        'data-test-subj': 'entityCentricLabFlyoutAction-rollbackToPreviousVersion',
+        onClick: handleRollbackClick,
+      });
+    }
+    writeItems.push(
+      {
+        name: addToCaseLabel,
+        icon: 'casesApp',
+        'data-test-subj': 'entityCentricLabFlyoutAction-addToCase',
+        onClick: () => handleActionClick(addToCaseLabel),
+      },
+      {
+        name: createAlertRuleLabel,
+        icon: 'bell',
+        'data-test-subj': 'entityCentricLabFlyoutAction-createAlertRule',
+        onClick: () => handleActionClick(createAlertRuleLabel),
+      },
+      {
+        name: annotateDeploymentLabel,
+        icon: 'tag',
+        'data-test-subj': 'entityCentricLabFlyoutAction-annotateDeployment',
+        onClick: () => handleActionClick(annotateDeploymentLabel),
+      }
     );
 
     return [
@@ -310,35 +399,12 @@ export const EntityFlyout = ({
             onClick: () => handleActionClick(openRelatedDashboardLabel),
           },
           { isSeparator: true, key: 'sep-manage' },
-          {
-            name: addToCaseLabel,
-            icon: 'casesApp',
-            'data-test-subj': 'entityCentricLabFlyoutAction-addToCase',
-            onClick: () => handleActionClick(addToCaseLabel),
-          },
-          {
-            name: createAlertRuleLabel,
-            icon: 'bell',
-            'data-test-subj': 'entityCentricLabFlyoutAction-createAlertRule',
-            onClick: () => handleActionClick(createAlertRuleLabel),
-          },
-          {
-            name: annotateDeploymentLabel,
-            icon: 'tag',
-            'data-test-subj': 'entityCentricLabFlyoutAction-annotateDeployment',
-            onClick: () => handleActionClick(annotateDeploymentLabel),
-          },
+          ...writeItems,
         ],
       },
     ];
-  }, [handleActionClick]);
+  }, [handleActionClick, handleRollbackClick, kind]);
 
-  // Resolve the canonical kind once — used both for template selection
-  // upstream and for the override lookup below.
-  const kind = useMemo(
-    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
-    [entityType, entityName]
-  );
   const templateOverride = useFlyoutTemplateOverride(kind);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(() => {
@@ -450,7 +516,15 @@ export const EntityFlyout = ({
                     canGoBack
                       ? i18n.translate('entityCentricLabFlyout.flyout.history.backTooltip', {
                           defaultMessage: 'Back to {entityName}',
-                          values: { entityName: history.entries[history.index - 1] },
+                          values: {
+                            // Resolve through the shared store so the
+                            // tooltip label tracks the wizard's
+                            // displayField pick instead of always
+                            // showing the raw entity name.
+                            entityName: resolveEntityDisplayName(
+                              history.entries[history.index - 1]
+                            ),
+                          },
                         })
                       : null
                   }
@@ -475,7 +549,11 @@ export const EntityFlyout = ({
                     canGoForward
                       ? i18n.translate('entityCentricLabFlyout.flyout.history.forwardTooltip', {
                           defaultMessage: 'Forward to {entityName}',
-                          values: { entityName: history.entries[history.index + 1] },
+                          values: {
+                            entityName: resolveEntityDisplayName(
+                              history.entries[history.index + 1]
+                            ),
+                          },
                         })
                       : null
                   }
@@ -522,7 +600,15 @@ export const EntityFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h2 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">
-                {overview.displayName}
+                {/*
+                  Live display-name resolution honours the wizard's
+                  per-entity-type `displayField` choice — when the user
+                  swaps e.g. `kubernetes.pod.name` for `kubernetes.pod.uid`,
+                  this title re-renders immediately via the shared
+                  `entity_display_config` store. Falls back to the entity
+                  name when no override is configured.
+                */}
+                {displayName}
               </h2>
             </EuiTitle>
           </EuiFlexItem>

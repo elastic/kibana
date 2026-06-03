@@ -13,6 +13,7 @@
  */
 
 import { getStoryOverview } from './payflow_story';
+import { getEffectiveEntityHealth } from './chaos_mode';
 import {
   buildKindTemplate,
   entityTypeToKind,
@@ -137,7 +138,15 @@ export const buildFakeEntityOverview = (
     return storyOverview;
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
-  const kindTemplate = buildKindTemplate(entityName, kind, normalizeEntityHealth(entityHealth));
+  // Apply the chaos-mode override BEFORE normalising so a PayFlow
+  // storyline entity (e.g. `payments-service`) flips to the healthy
+  // template the moment the user rolls back. Non-storyline entities
+  // pass through unchanged.
+  const effectiveHealth = getEffectiveEntityHealth(
+    entityName,
+    normalizeEntityHealth(entityHealth)
+  );
+  const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType);
   if (kindTemplate) {
     return kindTemplate.overview;
   }

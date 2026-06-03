@@ -33,6 +33,7 @@ import type {
   TopologyNode,
 } from './fake_entity_tabs';
 import { STORY_CLICKABLE_NAMES } from './payflow_story';
+import { useEntityDisplayName } from './entity_display_name';
 
 interface RelationshipsTabProps {
   readonly relationships: RelationshipsTabData;
@@ -106,25 +107,13 @@ const DependencyGroupPanel = ({
         name: i18n.translate('entityCentricLabFlyout.flyout.dependencies.columns.entityName', {
           defaultMessage: 'Entity name',
         }),
-        render: (name: string) => {
-          // Every entity renders as a link for visual consistency — only the
-          // curated PayFlow click-path entities actually open a flyout; the
-          // rest are no-op links so the table reads uniformly clickable while
-          // the demo stays scoped to the storyline.
-          const navigable = STORY_CLICKABLE_NAMES.has(name) && Boolean(onSelectEntity);
-          return (
-            <EuiLink
-              data-test-subj={
-                navigable
-                  ? 'entityCentricLabDependencyEntityLink'
-                  : 'entityCentricLabDependencyEntityLinkInert'
-              }
-              onClick={navigable ? () => onSelectEntity!(name) : () => undefined}
-            >
-              {name}
-            </EuiLink>
-          );
-        },
+        render: (name: string, row: RelatedEntity) => (
+          <DependencyEntityCell
+            name={name}
+            entityType={row.entityType}
+            onSelectEntity={onSelectEntity}
+          />
+        ),
       },
       {
         field: 'health',
@@ -187,6 +176,38 @@ const DependencyGroupPanel = ({
         data-test-subj={`entityCentricLabDependencyGroup-${group}`}
       />
     </EuiPanel>
+  );
+};
+
+/**
+ * Per-row entity cell. Resolves the displayed label through the shared
+ * `entity_display_config` store so dependency rows automatically pick
+ * up the wizard's `displayField` choice (e.g. `kubernetes.pod.uid`
+ * instead of `kubernetes.pod.name`). Navigation gating + the inert /
+ * navigable styling stays exactly the same as before.
+ */
+interface DependencyEntityCellProps {
+  readonly name: string;
+  readonly entityType: string;
+  readonly onSelectEntity?: (entityName: string) => void;
+}
+
+const DependencyEntityCell = ({ name, entityType, onSelectEntity }: DependencyEntityCellProps) => {
+  // Pass the row's `entityType` so the resolver picks the right entity
+  // type id for kinds that share a name pattern with another kind.
+  const displayName = useEntityDisplayName(name, entityType);
+  const navigable = STORY_CLICKABLE_NAMES.has(name) && Boolean(onSelectEntity);
+  return (
+    <EuiLink
+      data-test-subj={
+        navigable
+          ? 'entityCentricLabDependencyEntityLink'
+          : 'entityCentricLabDependencyEntityLinkInert'
+      }
+      onClick={navigable ? () => onSelectEntity!(name) : () => undefined}
+    >
+      {displayName}
+    </EuiLink>
   );
 };
 
@@ -494,6 +515,11 @@ const TopologyNodeMark = ({
   const labelColor = node.focal ? euiTheme.colors.textHeading : euiTheme.colors.textParagraph;
   const labelWeight = node.focal ? 600 : 400;
   const isClickable = Boolean(onSelect);
+  // Resolve the visible label through the shared store so a wizard
+  // `displayField` change re-labels the topology node alongside the
+  // dependency table — the two views read as a single colour- AND
+  // label-coded view of the same neighbourhood.
+  const displayLabel = useEntityDisplayName(node.label);
   const handleKeyDown = (event: React.KeyboardEvent<SVGGElement>) => {
     if (!onSelect) return;
     if (event.key === 'Enter' || event.key === ' ') {
@@ -509,7 +535,7 @@ const TopologyNodeMark = ({
         isClickable
           ? i18n.translate('entityCentricLabFlyout.flyout.relationships.openEntityAriaLabel', {
               defaultMessage: 'Open {entityName}',
-              values: { entityName: node.label },
+              values: { entityName: displayLabel },
             })
           : undefined
       }
@@ -556,7 +582,7 @@ const TopologyNodeMark = ({
         // Underline clickable labels so the affordance reads even before hover.
         textDecoration={isClickable ? 'underline' : undefined}
       >
-        {node.label}
+        {displayLabel}
       </text>
     </g>
   );
