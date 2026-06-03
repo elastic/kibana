@@ -100,6 +100,14 @@ spaceTest.describe(
 
       const filterBadges = page.testSubj.locator('^filter-badge');
       await expect(filterBadges).toHaveCount(1);
+
+      await spaceTest.step('verify filter preview text', async () => {
+        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
+        await filterBadge.click();
+        await page.testSubj.click('editFilter');
+        const preview = page.testSubj.locator('filter-preview');
+        await expect(preview).toContainText('extension: png OR bytes: 1,000 to 2,000');
+      });
     });
 
     spaceTest('should add AND filter', async ({ page, pageObjects }) => {
@@ -113,9 +121,7 @@ spaceTest.describe(
         const form = page.locator('[data-test-subj="filter-0\\.0"]');
         await form.locator('[data-test-subj="filterFieldSuggestionList"] input').fill('extension');
         await page.locator('.euiComboBoxOption[title="extension"]').click();
-        await form
-          .locator('[data-test-subj="filterOperatorList"] input')
-          .fill('is one of');
+        await form.locator('[data-test-subj="filterOperatorList"] input').fill('is one of');
         await page.locator('.euiComboBoxOption[title="is one of"]').click();
         const filterInput = form.locator('[data-test-subj="filterParams"] input');
         await filterInput.fill('png');
@@ -140,6 +146,16 @@ spaceTest.describe(
 
       const filterBadges = page.testSubj.locator('^filter-badge');
       await expect(filterBadges).toHaveCount(1);
+
+      await spaceTest.step('verify filter preview text', async () => {
+        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
+        await filterBadge.click();
+        await page.testSubj.click('editFilter');
+        const preview = page.testSubj.locator('filter-preview');
+        await expect(preview).toContainText(
+          'extension: is one of png, jpeg AND bytes: 1,000 to 2,000'
+        );
+      });
     });
 
     spaceTest('should add nested filters', async ({ page, pageObjects }) => {
@@ -160,9 +176,7 @@ spaceTest.describe(
           .locator('[data-test-subj="filterFieldSuggestionList"] input')
           .fill('clientip');
         await page.locator('.euiComboBoxOption[title="clientip"]').click();
-        await form000
-          .locator('[data-test-subj="filterOperatorList"] input')
-          .fill('does not exist');
+        await form000.locator('[data-test-subj="filterOperatorList"] input').fill('does not exist');
         await page.locator('.euiComboBoxOption[title="does not exist"]').click();
 
         const form001 = page.locator('[data-test-subj="filter-0\\.0\\.1"]');
@@ -195,6 +209,16 @@ spaceTest.describe(
 
       const filterBadges = page.testSubj.locator('^filter-badge');
       await expect(filterBadges).toHaveCount(1);
+
+      await spaceTest.step('verify filter preview text', async () => {
+        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
+        await filterBadge.click();
+        await page.testSubj.click('editFilter');
+        const preview = page.testSubj.locator('filter-preview');
+        await expect(preview).toContainText(
+          '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000 to 2,000'
+        );
+      });
     });
 
     spaceTest('should display negated values correctly', async ({ page, pageObjects }) => {
@@ -247,9 +271,7 @@ spaceTest.describe(
       await page.locator('.euiComboBoxOption[title="is one of"]').click();
 
       const filterInput = page.locator('[data-test-subj="filterParams"] input');
-      await filterInput.fill('png');
-      await filterInput.press('Enter');
-      await filterInput.fill('jpeg');
+      await filterInput.fill('png, jpeg');
       await filterInput.press('Enter');
 
       await page.testSubj.click('saveFilter');
@@ -258,6 +280,14 @@ spaceTest.describe(
 
       const filterBadges = page.testSubj.locator('^filter-badge');
       await expect(filterBadges).toHaveCount(1);
+
+      await spaceTest.step('verify filter preview text', async () => {
+        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
+        await filterBadge.click();
+        await page.testSubj.click('editFilter');
+        const preview = page.testSubj.locator('filter-preview');
+        await expect(preview).toContainText('extension: is one of png, jpeg');
+      });
     });
   }
 );

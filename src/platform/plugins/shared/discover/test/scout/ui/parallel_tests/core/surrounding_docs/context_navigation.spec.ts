@@ -98,8 +98,8 @@ spaceTest.describe(
         }
 
         const timeRange = await pageObjects.datePicker.getTimeConfig();
-        expect(timeRange.start).toBeTruthy();
-        expect(timeRange.end).toBeTruthy();
+        expect(timeRange.start).toContain('2015-09-19');
+        expect(timeRange.end).toContain('2015-09-23');
       }
     );
 
@@ -168,24 +168,21 @@ spaceTest.describe(
           }
         );
 
-        await spaceTest.step(
-          'go back to context and verify modified filter state',
-          async () => {
-            await page.goBack();
-            await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+        await spaceTest.step('go back to context and verify modified filter state', async () => {
+          await page.goBack();
+          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-            const filterBadges = page.testSubj.locator('^filter-badge');
-            await expect(filterBadges).toHaveCount(1);
-            const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
-            expect(
-              await pageObjects.filterBar.hasFilter({
-                field: 'extension',
-                value: extensionValue,
-                enabled: false,
-              })
-            ).toBe(true);
-          }
-        );
+          const filterBadges = page.testSubj.locator('^filter-badge');
+          await expect(filterBadges).toHaveCount(1);
+          const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
+          expect(
+            await pageObjects.filterBar.hasFilter({
+              field: 'extension',
+              value: extensionValue,
+              enabled: false,
+            })
+          ).toBe(true);
+        });
 
         await spaceTest.step(
           'return to discover and verify original filters are restored',
