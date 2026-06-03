@@ -8,12 +8,6 @@
 /** Stable saved object id for the managed Agent Builder overview dashboard. */
 export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-overview';
 
-/**
- * Bump when panel layout or visualization definitions change so startup reinstall
- * overwrites the managed dashboard with the latest asset bundle.
- */
-export const AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION = 1;
-
 /** Placeholder in dashboard ES|QL queries replaced with the Kibana space namespace at install time. */
 export const AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER = '__AGENT_BUILDER_TRACES_NAMESPACE__';
 

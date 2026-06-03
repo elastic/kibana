@@ -50,7 +50,6 @@ export class AgentBuilderPlugin
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
-  private kibanaVersion: string;
   private serviceManager: ServiceManager;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
@@ -61,7 +60,6 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
-    this.kibanaVersion = context.env.packageInfo.version;
     this.serviceManager = new ServiceManager(this.config);
   }
 
@@ -252,13 +250,15 @@ export class AgentBuilderPlugin
       registerSampleData(this.home, this.logger);
     }
 
-    void syncAgentBuilderOverviewDashboard(coreStart, this.kibanaVersion, this.logger).catch(
-      (error) => {
-        this.logger.error(
-          `Failed to sync Agent Builder overview dashboard: ${(error as Error).message}`
-        );
-      }
-    );
+    void syncAgentBuilderOverviewDashboard(
+      coreStart,
+      this.config.tracing.send_to_self,
+      this.logger
+    ).catch((error) => {
+      this.logger.error(
+        `Failed to sync Agent Builder overview dashboard: ${(error as Error).message}`
+      );
+    });
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
