@@ -6,6 +6,7 @@ title: "[Accessibility] <affected area>: <user impact>"
 ---
 <!--
 Glossary:
+- Accessibility: The practice of removing barriers so that users with disabilities, keyboard-only users, and screen reader users can perceive, navigate, and interact with the application.
 - `affected area`: The Kibana feature, page, view, panel, control, or EUI component where the issue occurs.
 - `user impact`: What a user cannot do, cannot perceive, or experiences incorrectly because of the issue.
 
