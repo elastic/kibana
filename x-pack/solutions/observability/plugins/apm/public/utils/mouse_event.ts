@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
+import type { MouseEvent } from 'react';
 
-import type { services } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/services';
+export const isModifiedClick = (event: MouseEvent) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export const isLeftClick = (event: MouseEvent) => event.button === 0;

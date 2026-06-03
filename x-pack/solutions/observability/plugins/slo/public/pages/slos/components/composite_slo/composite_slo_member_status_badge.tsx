@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { displayStatus } from '../../../components/slo/slo_badges/slo_status_badge';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { displayStatus } from '../../../../components/slo/slo_badges/slo_status_badge';
 
 export function MemberStatusBadge({ status }: { status: CompositeSLOMemberSummary['status'] }) {
   const statusInfo = displayStatus[status];
