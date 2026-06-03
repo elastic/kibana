@@ -23,19 +23,21 @@ const DATA_DIR = path.resolve(__dirname, 'android_retrace_data');
 const scenarios = [
   { name: '01-simple.txt', documents: ['l8.txt'] },
   { name: '02-multiline-range.txt', documents: ['p.txt', 'l8.txt'] },
-  { name: '03-inline-chain.txt', documents: ['co_elastic_otel_android_integration_MainActivity.txt'] },
+  {
+    name: '03-inline-chain.txt',
+    documents: ['co_elastic_otel_android_integration_MainActivity.txt'],
+  },
   { name: '04-separate-ranges.txt', documents: ['l8.txt'] },
-  { name: '05-cross-class-inline.txt', documents: ['co_elastic_otel_android_integration_MainActivity.txt'] },
+  {
+    name: '05-cross-class-inline.txt',
+    documents: ['co_elastic_otel_android_integration_MainActivity.txt'],
+  },
   { name: '06-no-range-entry.txt', documents: ['vv.txt'] },
   { name: '07-catch-all-range.txt', documents: ['s1.txt'] },
   { name: '08-chained-exception.txt', documents: ['l8.txt'] },
   {
     name: '09-activity-not-obfuscated.txt',
-    documents: [
-      'l8.txt',
-      'i8.txt',
-      'co_elastic_otel_android_integration_CrashActivity.txt',
-    ],
+    documents: ['l8.txt', 'i8.txt', 'co_elastic_otel_android_integration_CrashActivity.txt'],
   },
   { name: '10-synthesized.txt', documents: ['l8.txt', 'i8.txt'] },
   { name: '11-outline.txt', documents: ['s2.txt', 's3.txt'] },
@@ -54,12 +56,6 @@ export const androidMapFixtures: AndroidMapFixture[] = scenarios.map(({ name, do
     content: fs.readFileSync(path.resolve(DATA_DIR, 'es-documents', fileName)).toString(),
     fileName,
   })),
-  expected: fs
-    .readFileSync(path.resolve(DATA_DIR, 'expected-output', name))
-    .toString()
-    .trimEnd(),
-  stacktrace: fs
-    .readFileSync(path.resolve(DATA_DIR, 'stacktraces', name))
-    .toString()
-    .trimEnd(),
+  expected: fs.readFileSync(path.resolve(DATA_DIR, 'expected-output', name)).toString().trimEnd(),
+  stacktrace: fs.readFileSync(path.resolve(DATA_DIR, 'stacktraces', name)).toString().trimEnd(),
 }));

@@ -17,16 +17,19 @@ interface RetraceParams {
   logger: Logger;
 }
 
-export async function retrace({ esClient, stacktrace, buildId, logger }: RetraceParams): Promise<string> {
+export async function retrace({
+  esClient,
+  stacktrace,
+  buildId,
+  logger,
+}: RetraceParams): Promise<string> {
   const index = `android-r8-mappings-${buildId}`;
 
   const retracer = new RetracerAndroid(
     stacktrace,
     {
       fetch: async (classNames) => {
-        const ids = classNames.map((cls) =>
-          crypto.createHash('sha256').update(cls).digest('hex')
-        );
+        const ids = classNames.map((cls) => crypto.createHash('sha256').update(cls).digest('hex'));
         const response = await esClient.mget<AndroidClassMap>({ index, ids });
         return response.docs
           .filter((doc) => 'found' in doc && doc.found && '_source' in doc)

@@ -138,10 +138,9 @@ describe('RetracerAndroid', () => {
           },
         },
       };
-      const stacktrace = [
-        'java.lang.RuntimeException: synth-chain',
-        '\tat a.m(SourceFile:5)',
-      ].join('\n');
+      const stacktrace = ['java.lang.RuntimeException: synth-chain', '\tat a.m(SourceFile:5)'].join(
+        '\n'
+      );
 
       const result = await retraceWith(stacktrace, [map]);
 
@@ -297,10 +296,7 @@ describe('RetracerAndroid', () => {
           },
         },
       };
-      const stacktrace = [
-        'java.lang.NullPointerException: x',
-        '\tat a.m(SourceFile:1)',
-      ].join('\n');
+      const stacktrace = ['java.lang.NullPointerException: x', '\tat a.m(SourceFile:1)'].join('\n');
 
       const result = await retraceWith(stacktrace, [map]);
 
@@ -339,10 +335,7 @@ describe('RetracerAndroid', () => {
           },
         },
       };
-      const stacktrace = [
-        'java.lang.NullPointerException: x',
-        '\tat a.m(SourceFile:1)',
-      ].join('\n');
+      const stacktrace = ['java.lang.NullPointerException: x', '\tat a.m(SourceFile:1)'].join('\n');
 
       const result = await retraceWith(stacktrace, [map]);
 
