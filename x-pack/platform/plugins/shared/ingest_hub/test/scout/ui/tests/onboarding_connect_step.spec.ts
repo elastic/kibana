@@ -53,10 +53,13 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsAdmin();
 
-    // Deselect all services so selectedServiceIds is empty → showIdentityFederation = true
-    await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
-    await page.testSubj.locator('servicesStep-deselectAllButton').click();
+    // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+      );
+    });
 
     await page.gotoApp('onboarding/aws#connect');
     await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
@@ -133,10 +136,13 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
       await browserAuth.loginAsAdmin();
 
-      // Deselect all services so selectedServiceIds is empty → showIdentityFederation = true
-      await page.gotoApp('onboarding/aws#services');
-      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
-      await page.testSubj.locator('servicesStep-deselectAllButton').click();
+      // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+      await page.evaluate(() => {
+        sessionStorage.setItem(
+          'onboarding.aws.servicesStep',
+          JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+        );
+      });
 
       await page.gotoApp('onboarding/aws#connect');
       await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
