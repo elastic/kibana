@@ -12,6 +12,41 @@ import type { LogRecord } from './log_record';
 import type { LogLevelId } from './log_level';
 
 /**
+ * Defines a log filter based on {@link LogRecord.meta} key-value pairs.
+ *
+ * When a logger has one or more meta filters configured, any log record whose
+ * meta satisfies ALL predicates in `match` is evaluated against the filter's
+ * `level` instead of the logger's nominal level. The most permissive matching
+ * filter wins, allowing specific meta values to receive more verbose output
+ * without increasing the noise for the rest of the logger's traffic.
+ *
+ * @example
+ * ```yaml
+ * logging:
+ *   loggers:
+ *     - name: plugins.alerting
+ *       level: warn
+ *       filters:
+ *         - type: meta
+ *           match:
+ *             labels.ruleType: esql
+ *           level: debug
+ * ```
+ *
+ * @public
+ */
+export interface MetaFilterConfig {
+  type: 'meta';
+  /** Key-value pairs that must ALL match the log record's {@link LogRecord.meta} (strict equality). */
+  match: Record<string, string | number | boolean>;
+  /**
+   * Effective minimum log level for records whose meta satisfies `match`.
+   * Must be more permissive than the logger's nominal level to have any effect.
+   */
+  level: LogLevelId;
+}
+
+/**
  * @public
  */
 export type LogMessageSource = string | (() => string);

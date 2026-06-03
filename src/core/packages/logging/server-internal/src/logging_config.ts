@@ -22,7 +22,7 @@ import { Appenders } from './appenders/appenders';
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
-const levelSchema = schema.oneOf(
+const makeLevelValues = () =>
   [
     schema.literal('all'),
     schema.literal('fatal'),
@@ -32,11 +32,21 @@ const levelSchema = schema.oneOf(
     schema.literal('debug'),
     schema.literal('trace'),
     schema.literal('off'),
-  ],
-  {
-    defaultValue: 'info',
-  }
-);
+  ] as [
+    ReturnType<typeof schema.literal<'all'>>,
+    ReturnType<typeof schema.literal<'fatal'>>,
+    ReturnType<typeof schema.literal<'error'>>,
+    ReturnType<typeof schema.literal<'warn'>>,
+    ReturnType<typeof schema.literal<'info'>>,
+    ReturnType<typeof schema.literal<'debug'>>,
+    ReturnType<typeof schema.literal<'trace'>>,
+    ReturnType<typeof schema.literal<'off'>>
+  ];
+
+const levelSchema = schema.oneOf(makeLevelValues(), { defaultValue: 'info' });
+
+/** Level schema without a default — used in contexts where omitting the level should be a validation error. */
+const requiredLevelSchema = schema.oneOf(makeLevelValues());
 
 // until we have feature parity between browser and server logging, we need to define distinct logger schemas
 const browserLoggerSchema = schema.object({
@@ -54,6 +64,19 @@ const browserConfig = schema.object({
   }),
 });
 
+const metaFilterSchema = schema.object({
+  type: schema.literal('meta'),
+  match: schema.recordOf(
+    schema.string(),
+    schema.oneOf([schema.string(), schema.number(), schema.boolean()]),
+    {
+      validate: (value) =>
+        Object.keys(value).length === 0 ? 'match must not be empty' : undefined,
+    }
+  ),
+  level: requiredLevelSchema,
+});
+
 /**
  * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
  *
@@ -63,6 +86,7 @@ export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
   name: schema.string(),
   level: levelSchema,
+  filters: schema.arrayOf(metaFilterSchema, { defaultValue: [], maxSize: 10 }),
 });
 
 export const config = {
@@ -200,7 +224,14 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [{ name: ROOT_CONTEXT_NAME, ...loggingConfig.root }, ...loggingConfig.loggers];
+    const loggers = [
+      {
+        name: ROOT_CONTEXT_NAME,
+        filters: [] as LoggerConfigType['filters'],
+        ...loggingConfig.root,
+      },
+      ...loggingConfig.loggers,
+    ];
 
     const loggerConfigByContext = new Map(
       loggers.map((loggerConfig) => toTuple(loggerConfig.name, loggerConfig))
