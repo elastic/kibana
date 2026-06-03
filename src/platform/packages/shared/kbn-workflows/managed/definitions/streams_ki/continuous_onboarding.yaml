@@ -96,6 +96,9 @@ steps:
                 streamName: "${{ foreach.item.streamName }}"
                 skipFeatures: false
                 skipQueries: false
+                # Align the feature-recency guard with the user's onboarding
+                # interval so features refresh on the same cadence eligibility uses.
+                featuresRecencyThresholdHours: "${{ steps.get_eligible.output.settings.intervalHours }}"
                 # onboarding expects epoch ms; the eligibility endpoint returns
                 # ISO timestamps, so convert here (date '%s' yields epoch seconds).
                 featuresStart: "${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"
