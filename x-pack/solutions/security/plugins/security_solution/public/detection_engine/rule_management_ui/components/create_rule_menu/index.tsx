@@ -253,18 +253,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
               defaultMessage="AI rule creation"
             />
           </EuiContextMenuItem>
-          <EuiContextMenuItem
-            key="v2-rule-creation"
-            onClick={handleV2RuleCreation}
-            data-test-subj="v2-rule-creation"
-            icon="beaker"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.v2RuleCreation"
-              defaultMessage="Create v2 rule"
-            />{' '}
-            <EuiBadge color="primary">{'New'}</EuiBadge>
-          </EuiContextMenuItem>
           <EuiContextMenuItem key="manual-rule-creation">
             <SecuritySolutionLinkAnchor
               deepLinkId={SecurityPageName.rulesCreate}
@@ -276,6 +264,18 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
                 defaultMessage="Manual rule creation"
               />
             </SecuritySolutionLinkAnchor>
+          </EuiContextMenuItem>
+          <EuiContextMenuItem
+            key="v2-rule-creation"
+            onClick={handleV2RuleCreation}
+            data-test-subj="v2-rule-creation"
+            icon="beaker"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.v2RuleCreation"
+              defaultMessage="Create v2 rule"
+            />{' '}
+            <EuiBadge color="primary">{'New'}</EuiBadge>
           </EuiContextMenuItem>
         </EuiContextMenuPanel>
       </EuiPopover>

@@ -38,6 +38,8 @@ export interface UsePreviewChartParams {
   query: string;
   /** The time field name for the date histogram */
   timeField: string;
+  /** The schedule interval string (e.g. '5m', '1h') */
+  interval: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
   /** ES|QL columns from the preview query result (used for suggestions) */
@@ -90,6 +92,7 @@ const columnsToKey = (columns: PreviewColumn[]): string =>
 export const usePreviewChart = ({
   query,
   timeField,
+  interval,
   lookback,
   esqlColumns = [],
   enabled = true,
@@ -109,18 +112,19 @@ export const usePreviewChart = ({
   datatableColumnsRef.current = useMemo(() => toDatatableColumns(esqlColumns), [esqlColumns]);
 
   const timeRange = useMemo(() => {
-    if (!lookback?.trim()) return undefined;
+    if (!interval?.trim() || !lookback?.trim()) return undefined;
     try {
+      const intervalMs = parseDuration(interval);
       const lookbackMs = parseDuration(lookback);
       const now = Date.now();
       return {
-        from: new Date(now - lookbackMs).toISOString(),
+        from: new Date(now - intervalMs - lookbackMs).toISOString(),
         to: new Date(now).toISOString(),
       };
     } catch {
       return undefined;
     }
-  }, [lookback]);
+  }, [interval, lookback]);
 
   const [lensAttributes, setLensAttributes] = useState<
     TypedLensByValueInput['attributes'] | undefined
@@ -133,6 +137,7 @@ export const usePreviewChart = ({
       enabled &&
       Boolean(debouncedQuery?.trim()) &&
       Boolean(timeField?.trim()) &&
+      Boolean(interval?.trim()) &&
       Boolean(lookback?.trim());
 
     if (!hasValidInputs) {
@@ -237,7 +242,7 @@ export const usePreviewChart = ({
     // columnsKey is a stable string derived from esqlColumns content.
     // datatableColumns is read from a ref to avoid re-triggering the effect
     // on every object reference change.
-  }, [enabled, debouncedQuery, timeField, lookback, columnsKey, dataViews, lens]);
+  }, [enabled, debouncedQuery, timeField, interval, lookback, columnsKey, dataViews, lens]);
 
   // True while the debounce timer is pending
   const isDebouncing = query !== debouncedQuery;

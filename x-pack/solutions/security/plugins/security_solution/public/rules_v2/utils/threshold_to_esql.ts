@@ -28,6 +28,7 @@ export interface ThresholdConfig {
   cardinalityField?: string;
   cardinalityValue?: number;
   filterQuery?: string;
+  filterLanguage?: 'kuery';
 }
 
 export interface ParsedThresholdConfig {
@@ -80,9 +81,15 @@ export const buildThresholdEsqlQuery = (config: ThresholdConfig): string => {
     cardinalityField,
     cardinalityValue,
     filterQuery,
+    filterLanguage,
   } = config;
 
-  if (indexPatterns.length === 0) return '';
+  if (indexPatterns.length === 0) {
+    throw new Error(
+      'Cannot build threshold ES|QL query: no index patterns specified. ' +
+        'Rules that use only a data view without explicit index patterns cannot be converted.'
+    );
+  }
 
   const commands = [];
 
@@ -96,9 +103,17 @@ export const buildThresholdEsqlQuery = (config: ThresholdConfig): string => {
 
   // WHERE (user-supplied global filter)
   if (filterQuery?.trim()) {
-    const filterAst = parseFragment(filterQuery.trim());
-    if (filterAst) {
-      commands.push(Builder.command({ name: 'where', args: [filterAst] }));
+    if (filterLanguage === 'kuery') {
+      const escaped = filterQuery.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const kqlAst = parseFragment(`KQL("${escaped}")`);
+      if (kqlAst) {
+        commands.push(Builder.command({ name: 'where', args: [kqlAst] }));
+      }
+    } else {
+      const filterAst = parseFragment(filterQuery.trim());
+      if (filterAst) {
+        commands.push(Builder.command({ name: 'where', args: [filterAst] }));
+      }
     }
   }
 

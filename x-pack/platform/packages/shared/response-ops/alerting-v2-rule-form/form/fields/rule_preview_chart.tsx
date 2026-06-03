@@ -20,6 +20,8 @@ export interface PreviewChartProps {
   query: string;
   /** The time field name for bucketing */
   timeField: string;
+  /** The schedule interval string (e.g. '5m', '1h') */
+  interval: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
   /** ES|QL columns from the preview query result (used for STATS query suggestions) */
@@ -41,10 +43,11 @@ export interface PreviewChartProps {
  * This component renders only the chart content (no panel wrapper) and is
  * intended to be placed inside a parent panel such as `QueryResultsGrid`.
  */
-export const PreviewChart = ({ query, timeField, lookback, esqlColumns, additionalFilter }: PreviewChartProps) => {
+export const PreviewChart = ({ query, timeField, interval, lookback, esqlColumns, additionalFilter }: PreviewChartProps) => {
   const { lensAttributes, timeRange, isLoading, hasError, lensFilters } = usePreviewChart({
     query,
     timeField,
+    interval,
     lookback,
     esqlColumns,
     additionalFilter,

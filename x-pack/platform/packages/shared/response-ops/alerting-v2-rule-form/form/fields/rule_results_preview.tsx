@@ -30,8 +30,10 @@ export const RuleResultsPreview = () => {
     hasValidQuery,
     query,
     timeField,
+    interval,
     lookback,
     additionalFilter,
+    refetch,
   } = useRulePreview();
 
   return (
@@ -59,8 +61,10 @@ export const RuleResultsPreview = () => {
       hasValidQuery={hasValidQuery}
       query={query}
       timeField={timeField}
+      interval={interval}
       lookback={lookback}
       additionalFilter={additionalFilter}
+      onRunQuery={refetch}
     />
   );
 };

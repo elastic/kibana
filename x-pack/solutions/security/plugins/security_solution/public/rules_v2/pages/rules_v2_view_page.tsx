@@ -33,7 +33,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { RULES_V2_PATH } from '../../../common/constants';
 import { ExecutionLogTable } from '../components/execution_log_table';
 import { RuleAlertsTable } from '../components/rule_alerts_table';
 import { ExceptionsViewer } from '../../detection_engine/rule_exceptions/components/all_exception_items_table';
@@ -394,7 +393,7 @@ export const RulesV2ViewPage = () => {
     <SecuritySolutionPageWrapper>
       <EuiButtonEmpty
         iconType="arrowLeft"
-        onClick={() => history.push(RULES_V2_PATH)}
+        onClick={() => history.push('/rules')}
         flush="left"
         size="s"
       >

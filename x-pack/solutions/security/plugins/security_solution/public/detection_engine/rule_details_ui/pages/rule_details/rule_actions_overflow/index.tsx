@@ -58,6 +58,7 @@ interface RuleActionsOverflowComponentProps {
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
+  onConvertToV2?: (rule: Rule) => void;
 }
 
 /**
@@ -70,6 +71,7 @@ const RuleActionsOverflowComponent = ({
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
+  onConvertToV2,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const {
@@ -220,6 +222,23 @@ const RuleActionsOverflowComponent = ({
                   </EuiContextMenuItem>,
                 ]
               : []),
+            ...(onConvertToV2 &&
+            (rule.type === 'esql' || rule.type === 'threshold')
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.CONVERT_TO_V2}
+                    icon="push"
+                    disabled={!canEditRules}
+                    data-test-subj="rules-details-convert-to-v2"
+                    onClick={() => {
+                      closePopover();
+                      onConvertToV2(rule);
+                    }}
+                  >
+                    {i18nActions.CONVERT_TO_V2}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
@@ -267,6 +286,7 @@ const RuleActionsOverflowComponent = ({
       openCustomizationsRevertFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
+      onConvertToV2,
     ]
   );
 

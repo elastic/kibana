@@ -20,8 +20,8 @@
  */
 export const ruleFormKeys = {
   all: ['ruleForm'] as const,
-  preview: (query: string, timeField: string, lookback: string) =>
-    [...ruleFormKeys.all, 'preview', query, timeField, lookback] as const,
+  preview: (query: string, timeField: string, interval: string, lookback: string) =>
+    [...ruleFormKeys.all, 'preview', query, timeField, interval, lookback] as const,
   queryColumns: (query: string) => [...ruleFormKeys.all, 'queryColumns', query] as const,
   dataFields: (query: string) => [...ruleFormKeys.all, 'dataFields', query] as const,
 };

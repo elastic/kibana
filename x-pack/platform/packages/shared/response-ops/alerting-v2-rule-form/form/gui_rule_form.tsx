@@ -16,6 +16,7 @@ import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field
 import { RULE_FORM_ID } from './constants';
 import { KindField } from './fields/kind_field';
 import { RunbookArtifactField } from './field_groups/runbook_artifact_field';
+import { EnabledField } from './fields/enabled_field';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -57,6 +58,8 @@ export const GuiRuleForm = ({
       <AlertConditionsFieldGroup />
       <EuiSpacer size="m" />
       <RunbookArtifactField />
+      <EuiSpacer size="m" />
+      <EnabledField />
     </EuiForm>
   );
 };

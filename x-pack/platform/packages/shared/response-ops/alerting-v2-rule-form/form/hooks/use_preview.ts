@@ -49,10 +49,14 @@ export interface PreviewResult {
   query: string;
   /** The time field name used for the range filter */
   timeField: string;
+  /** The schedule interval string (e.g. '5m', '1h') */
+  interval: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
   /** Optional additional DSL filter applied to the preview (e.g. exception exclusions) */
   additionalFilter?: unknown;
+  /** Re-executes the preview query with a fresh time window */
+  refetch: () => void;
 }
 
 export interface UsePreviewParams {
@@ -60,6 +64,8 @@ export interface UsePreviewParams {
   query: string;
   /** The time field name for the range filter */
   timeField: string;
+  /** The schedule interval string (e.g. '5m', '1h') */
+  interval: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
   /** Fields selected as the grouping key */
@@ -72,10 +78,15 @@ export interface UsePreviewParams {
 
 /**
  * Constructs a time range filter for the ES|QL query preview.
- * Uses the same pattern as the existing ES query rule expression.
+ *
+ * The preview window spans `interval + lookback` to match what the rule
+ * executor actually queries: the interval covers the scheduling gap and the
+ * lookback extends further back to catch late-arriving data.
  */
-const getTimeFilter = (timeField: string, lookback: string) => {
-  const timeWindow = parseDuration(lookback);
+const getTimeFilter = (timeField: string, interval: string, lookback: string) => {
+  const intervalMs = parseDuration(interval);
+  const lookbackMs = parseDuration(lookback);
+  const timeWindow = intervalMs + lookbackMs;
   const now = Date.now();
   const dateEnd = new Date(now).toISOString();
   const dateStart = new Date(now - timeWindow).toISOString();
@@ -126,6 +137,7 @@ const formatCellValue = (value: unknown): string | null => {
 export const usePreview = ({
   query,
   timeField,
+  interval,
   lookback,
   groupingFields,
   enabled = true,
@@ -146,14 +158,15 @@ export const usePreview = ({
 
   // Determine if we have enough inputs to run the query
   const canExecute =
-    enabled && Boolean(debouncedQuery?.trim() && timeField?.trim() && lookback?.trim());
+    enabled &&
+    Boolean(debouncedQuery?.trim() && timeField?.trim() && interval?.trim() && lookback?.trim());
 
   const fetchPreview = useCallback(async () => {
     if (!canExecute) {
       return { columns: [], values: [] };
     }
 
-    const { timeFilter, timeRange } = getTimeFilter(timeField, lookback);
+    const { timeFilter, timeRange } = getTimeFilter(timeField, interval, lookback);
 
     const composedFilter =
       stableAdditionalFilter != null
@@ -185,15 +198,16 @@ export const usePreview = ({
     });
 
     return result.response;
-  }, [canExecute, debouncedQuery, timeField, lookback, data.search.search, stableAdditionalFilter]);
+  }, [canExecute, debouncedQuery, timeField, interval, lookback, data.search.search, stableAdditionalFilter]);
 
   const {
     data: response,
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery({
-    queryKey: [...ruleFormKeys.preview(debouncedQuery, timeField, lookback), stableAdditionalFilter],
+    queryKey: [...ruleFormKeys.preview(debouncedQuery, timeField, interval, lookback), stableAdditionalFilter],
     queryFn: fetchPreview,
     enabled: canExecute,
     keepPreviousData: true,
@@ -243,6 +257,10 @@ export const usePreview = ({
     [query, canExecute]
   );
 
+  const handleRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   return {
     columns,
     rows,
@@ -255,7 +273,9 @@ export const usePreview = ({
     hasValidQuery,
     query,
     timeField,
+    interval,
     lookback,
     additionalFilter: stableAdditionalFilter,
+    refetch: handleRefetch,
   };
 };

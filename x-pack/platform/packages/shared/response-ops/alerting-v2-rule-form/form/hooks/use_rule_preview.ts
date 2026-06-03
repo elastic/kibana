@@ -25,12 +25,14 @@ export const useRulePreview = () => {
 
   const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
   const timeField = useWatch({ control, name: 'timeField' });
+  const interval = useWatch({ control, name: 'schedule.every' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });
   const groupingFields = useWatch({ control, name: 'grouping.fields' }) ?? [];
 
   return usePreview({
     query: baseQuery ?? '',
     timeField,
+    interval,
     lookback,
     groupingFields,
     additionalFilter: additionalPreviewFilter,

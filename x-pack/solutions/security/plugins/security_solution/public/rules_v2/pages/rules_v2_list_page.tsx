@@ -90,14 +90,6 @@ export const RulesV2ListPage = () => {
         ),
       },
       {
-        field: 'kind',
-        name: 'Kind',
-        width: '100px',
-        render: (kind: string) => (
-          <EuiBadge color={kind === 'alert' ? 'primary' : 'hollow'}>{kind}</EuiBadge>
-        ),
-      },
-      {
         field: 'enabled',
         name: 'Enabled',
         width: '90px',

@@ -31,7 +31,9 @@ export const RecoveryResultsPreview = () => {
     hasValidQuery,
     query,
     timeField,
+    interval,
     lookback,
+    refetch,
   } = useRecoveryPreview();
 
   return (
@@ -62,7 +64,9 @@ export const RecoveryResultsPreview = () => {
       hasValidQuery={hasValidQuery}
       query={query}
       timeField={timeField}
+      interval={interval}
       lookback={lookback}
+      onRunQuery={refetch}
     />
   );
 };

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiDataGrid,
   type EuiDataGridCellValueElementProps,
@@ -67,10 +68,14 @@ export interface QueryResultsGridProps {
   query?: string;
   /** The time field name for the chart bucketing */
   timeField?: string;
+  /** The schedule interval string (e.g. '5m', '1h') */
+  interval?: string;
   /** The lookback duration string for the chart time range (e.g. '5m', '1h') */
   lookback?: string;
   /** Optional additional DSL filter for the chart (e.g. exception exclusions) */
   additionalFilter?: unknown;
+  /** Callback to manually re-run the preview query */
+  onRunQuery?: () => void;
 }
 
 /**
@@ -98,8 +103,10 @@ export const QueryResultsGrid = ({
   hasValidQuery = false,
   query,
   timeField,
+  interval,
   lookback,
   additionalFilter,
+  onRunQuery,
 }: QueryResultsGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
@@ -176,17 +183,33 @@ export const QueryResultsGrid = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            {lookback && (
+            {interval && lookback && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate('xpack.alertingV2.ruleForm.queryResultsGrid.timeRangeLabel', {
-                    defaultMessage: 'Last {lookback}',
-                    values: { lookback },
+                    defaultMessage: 'Last {interval} + {lookback}',
+                    values: { interval, lookback },
                   })}
                 </EuiText>
               </EuiFlexItem>
             )}
-            {isLoading && (
+            {onRunQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="refresh"
+                  onClick={onRunQuery}
+                  isLoading={isLoading}
+                  disabled={!hasValidQuery}
+                  data-test-subj="queryResultsRunQueryButton"
+                >
+                  {i18n.translate('xpack.alertingV2.ruleForm.queryResultsGrid.runQueryButton', {
+                    defaultMessage: 'Run query',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {isLoading && !onRunQuery && (
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
@@ -195,12 +218,13 @@ export const QueryResultsGrid = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {rows.length > 0 && query && timeField && lookback && (
+      {rows.length > 0 && query && timeField && interval && lookback && (
         <>
           <EuiSpacer size="s" />
           <PreviewChart
             query={query}
             timeField={timeField}
+            interval={interval}
             lookback={lookback}
             esqlColumns={columns}
             additionalFilter={additionalFilter}

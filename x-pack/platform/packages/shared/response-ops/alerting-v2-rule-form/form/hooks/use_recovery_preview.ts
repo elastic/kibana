@@ -27,12 +27,14 @@ export const useRecoveryPreview = (): PreviewResult => {
   const recoveryBase = useWatch({ control, name: 'recoveryPolicy.query.base' });
   const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
   const timeField = useWatch({ control, name: 'timeField' });
+  const interval = useWatch({ control, name: 'schedule.every' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });
   const groupingFields = useWatch({ control, name: 'grouping.fields' }) ?? [];
 
   return usePreview({
     query: recoveryBase?.trim() ?? '',
     timeField,
+    interval,
     lookback,
     groupingFields,
     enabled: recoveryType === 'query',

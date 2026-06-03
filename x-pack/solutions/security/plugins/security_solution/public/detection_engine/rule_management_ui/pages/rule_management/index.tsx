@@ -43,6 +43,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
+import { V2RulesSection } from '../../components/v2_rules_section/v2_rules_section';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -76,6 +77,7 @@ const RulesPageContent = () => {
   const { isEsqlRuleTypeEnabled } = useEsqlAvailability();
   const isAiRuleCreationAvailable =
     aiRuleCreationEnabled && isAgentBuilderEnabled && isEsqlRuleTypeEnabled;
+  const isAlertingV2Enabled = useIsExperimentalFeatureEnabled('alertingV2RuleCreationEnabled');
   const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
@@ -173,6 +175,7 @@ const RulesPageContent = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          {isAlertingV2Enabled && <V2RulesSection />}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

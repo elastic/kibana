@@ -25,7 +25,6 @@ import type { RuleFormServices, FormValues } from '@kbn/alerting-v2-rule-form';
 import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SecurityRuleForm } from '../components/security_rule_form';
-import { RULES_V2_PATH } from '../../../common/constants';
 import * as i18n from '../translations';
 
 const MAX_WIDTH_CSS = css`
@@ -66,12 +65,8 @@ const CreateRulePage = () => {
   );
 
   const handleCancel = useCallback(() => {
-    if (returnTo === 'rules') {
-      history.push('/rules');
-    } else {
-      history.push(RULES_V2_PATH);
-    }
-  }, [history, returnTo]);
+    history.push('/rules');
+  }, [history]);
 
   const handleBackToV1 = useCallback(() => {
     history.push('/rules/create');
