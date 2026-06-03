@@ -11,8 +11,6 @@ import { EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
-import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../../../../../../../common/constants';
-
 const actionNames: {
   [key: string]: { inProgressText: string; completedText: string; cancelledText: string };
 } = {
@@ -80,8 +78,6 @@ const actionNames: {
   },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
-
-export { SCHEDULED_UNENROLL_ACTION_ID_PREFIX };
 
 export const getAction = (type?: string, actionId?: string) => {
   // handling a special case of force unenrollment coming from an automatic task
