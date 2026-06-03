@@ -292,11 +292,12 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   // EuiFlyout with session="start" uses EUI's managed flyout system, which
   // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
-  // our onClose callback. By the time handleRequestClose runs, the flyout is
-  // already unregistered from the manager and unmounted. Incrementing the key
-  // forces React to re-mount the EuiFlyout, which re-registers it with the
-  // manager and restores the session. Form state is preserved because
-  // FormProvider sits above the flyout in the tree.
+  // our onClose callback for EUI-managed close paths (X, ESC, outside click).
+  // By the time handleRequestClose runs, the flyout is already unregistered
+  // from the manager. Incrementing the key forces React to re-mount the
+  // EuiFlyout, re-registering it with the manager. The Cancel button doesn't
+  // go through closeAllFlyouts(), so no remount is needed for that path.
+  // Form state is preserved because FormProvider sits above the flyout.
   const [flyoutKey, setFlyoutKey] = useState(0);
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
@@ -310,6 +311,16 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
+
+  // Tracks whether the close was triggered by the Cancel button ('button')
+  // or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
+  // EUI path calls closeAllFlyouts() which unregisters the flyout and
+  // requires a flyoutKey remount.
+  const closeSourceRef = useRef<'button' | 'eui'>('eui');
+
+  // After "Continue editing" on the EUI-managed path, the flyoutKey remount
+  // cascade-closes the sandbox. This ref tells the subsequent effect whether
+  // to re-dispatch OPEN_CHILD to restore it.
   const reopenChildRef = useRef(false);
 
   const handleRequestClose = useCallback(() => {
@@ -323,16 +334,22 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   }, [onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
-    reopenChildRef.current = false;
     setIsConfirmCloseVisible(false);
+    closeSourceRef.current = 'eui';
     onClose();
   }, [onClose]);
 
   const handleCancelDiscard = useCallback(() => {
-    reopenChildRef.current = uiState.yamlMode;
     setIsConfirmCloseVisible(false);
-    setFlyoutKey((k) => k + 1);
-  }, [uiState.yamlMode]);
+    if (closeSourceRef.current === 'eui') {
+      // EUI-managed close already called closeAllFlyouts() — remount to
+      // re-register the flyout with the manager, and reopen the sandbox
+      // if it was cascade-closed.
+      reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
+      setFlyoutKey((k) => k + 1);
+    }
+    closeSourceRef.current = 'eui';
+  }, [uiState.yamlMode, uiState.childOpen]);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
@@ -723,7 +740,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    onClick={handleRequestClose}
+                    onClick={() => {
+                      closeSourceRef.current = 'button';
+                      handleRequestClose();
+                    }}
                     data-test-subj="composeDiscoverCancel"
                   >
                     {CANCEL_BUTTON_LABEL}
