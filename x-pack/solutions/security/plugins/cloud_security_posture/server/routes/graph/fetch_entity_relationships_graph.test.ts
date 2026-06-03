@@ -346,7 +346,13 @@ describe('regroupRelationships', () => {
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
         'host:my-server-9',
-        { name: 'my-server-9', type: 'Host', subType: 'Linux Host', engineType: 'ecs', hostIps: [] },
+        {
+          name: 'my-server-9',
+          type: 'Host',
+          subType: 'Linux Host',
+          engineType: 'ecs',
+          hostIps: [],
+        },
       ],
     ]);
 
@@ -384,7 +390,13 @@ describe('regroupRelationships', () => {
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
         'host:my-server-9',
-        { name: 'my-server-9', type: 'Host', subType: 'Linux Host', engineType: 'ecs', hostIps: [] },
+        {
+          name: 'my-server-9',
+          type: 'Host',
+          subType: 'Linux Host',
+          engineType: 'ecs',
+          hostIps: [],
+        },
       ],
     ]);
 
@@ -410,9 +422,7 @@ describe('regroupRelationships', () => {
     expect(result[0].relationshipNodeId).toBe(
       'user:data-pipeline@my-project.iam.gserviceaccount.com@gcp-owns'
     );
-    expect(result[0].actorNodeId).toBe(
-      'user:data-pipeline@my-project.iam.gserviceaccount.com@gcp'
-    );
+    expect(result[0].actorNodeId).toBe('user:data-pipeline@my-project.iam.gserviceaccount.com@gcp');
   });
 
   it('relationshipNodeId is stable across actor merges and not derived from any individual entity.id', () => {
