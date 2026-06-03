@@ -130,7 +130,13 @@ function getStepContextSchemaEnrichmentEntries(
   stepId: string
 ) {
   const enrichments: { key: 'foreach' | 'while' | 'item' | 'index'; value: z.ZodType }[] = [];
-  const stack = workflowExecutionGraph.getNodeStack(stepId);
+  const stepNode = workflowExecutionGraph.getStepNode(stepId);
+
+  if (!stepNode) {
+    throw new Error(`Step node not found for step id: ${stepId}`);
+  }
+
+  const stack = workflowExecutionGraph.getNodeStack(stepNode?.id);
 
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);

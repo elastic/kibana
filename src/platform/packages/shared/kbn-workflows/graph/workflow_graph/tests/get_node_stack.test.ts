@@ -95,6 +95,14 @@ describe('getNodeStack', () => {
     expect(nodeStack).toEqual([]);
   });
 
+  it('throws when the node id does not exist in the graph', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    expect(() => workflowGraph.getNodeStack('unknown-node-id')).toThrow(
+      'Node not found for node id: unknown-node-id'
+    );
+  });
+
   it('should return enterThen stack for firstThenTestConnectorStep', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     expect(workflowGraph.getNodeStack('firstThenTestConnectorStep')).toEqual([

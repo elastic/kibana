@@ -530,4 +530,30 @@ describe('getContextSchemaForStep', () => {
 
     expect(result).toBe(baseSchema);
   });
+
+  it('throws when the step node is missing during context schema enrichment', () => {
+    const baseSchema = DynamicStepContextSchema.extend({
+      inputs: z.object({}),
+    }) as typeof DynamicStepContextSchema;
+
+    const mockStepNode = { id: 'step-a' };
+    let getStepNodeCallCount = 0;
+    const getStepNodeSpy = jest.spyOn(workflowGraph, 'getStepNode').mockImplementation(() => {
+      getStepNodeCallCount++;
+      if (getStepNodeCallCount <= 2) {
+        return mockStepNode as ReturnType<WorkflowGraph['getStepNode']>;
+      }
+      return undefined;
+    });
+    const getAllPredecessorsSpy = jest
+      .spyOn(workflowGraph, 'getAllPredecessors')
+      .mockReturnValue([]);
+
+    expect(() => getContextSchemaForStep(baseSchema, workflowGraph, 'step-a')).toThrow(
+      'Step node not found for step id: step-a'
+    );
+
+    getStepNodeSpy.mockRestore();
+    getAllPredecessorsSpy.mockRestore();
+  });
 });

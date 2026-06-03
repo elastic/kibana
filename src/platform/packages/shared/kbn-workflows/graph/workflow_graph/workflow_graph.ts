@@ -89,7 +89,7 @@ export class WorkflowGraph {
     const currentNode = this.getNode(nodeId);
 
     if (!currentNode) {
-      return [];
+      throw new Error(`Node not found for node id: ${nodeId}`);
     }
 
     const predecessors = this.getAllPredecessors(nodeId).toReversed();
@@ -106,7 +106,7 @@ export class WorkflowGraph {
       }
     }
 
-    if (this.getNode(nodeId).type.startsWith('exit-')) {
+    if (currentNode.type.startsWith('exit-')) {
       stack.pop();
     }
 
