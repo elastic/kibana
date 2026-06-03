@@ -74,7 +74,7 @@ describe('CustomizeNavigationModal', () => {
     expect(screen.getByText('Reset to default')).toBeInTheDocument();
   });
 
-  it('should show the space callout', () => {
+  it('should show the space description', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     expect(
       screen.getByText('Reorder or hide apps in this space without affecting other users.')

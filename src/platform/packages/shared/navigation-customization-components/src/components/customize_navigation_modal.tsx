@@ -11,7 +11,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -42,6 +42,12 @@ const modalCss = css`
 
 const headerCss = (euiTheme: EuiThemeComputed) => css`
   padding-bottom: ${euiTheme.size.s};
+`;
+
+const modalBodyCss = (euiTheme: EuiThemeComputed) => css`
+  .euiModalBody__overflow {
+    padding-block: ${euiTheme.size.s};
+  }
 `;
 
 interface Props {
@@ -112,23 +118,22 @@ export const CustomizeNavigationModal = ({
         }}
       />
       <EuiModalHeader css={headerCss(euiTheme)}>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          <FormattedMessage
-            id="navigationCustomizationComponents.modalTitle"
-            defaultMessage="Customize navigation"
-          />
-        </EuiModalHeaderTitle>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiModalHeaderTitle id={modalTitleId}>
+            <FormattedMessage
+              id="navigationCustomizationComponents.modalTitle"
+              defaultMessage="Customize navigation"
+            />
+          </EuiModalHeaderTitle>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="navigationCustomizationComponents.spaceDescription"
+              defaultMessage="Reorder or hide apps in this space without affecting other users."
+            />
+          </EuiText>
+        </EuiFlexGroup>
       </EuiModalHeader>
-      <EuiModalBody>
-        <EuiSpacer size="s" />
-        <EuiCallOut
-          announceOnMount
-          size="s"
-          title={i18n.translate('navigationCustomizationComponents.spaceCallout', {
-            defaultMessage: 'Reorder or hide apps in this space without affecting other users.',
-          })}
-        />
-        <EuiSpacer size="m" />
+      <EuiModalBody css={modalBodyCss(euiTheme)}>
         <EuiDragDropContext onDragEnd={handleDragEnd}>
           <EuiDroppable droppableId={VISIBLE_DROPPABLE_ID} spacing="none">
             {visibleItems.length > 0 ? (
@@ -148,7 +153,7 @@ export const CustomizeNavigationModal = ({
               />
             )}
           </EuiDroppable>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
@@ -172,7 +177,7 @@ export const CustomizeNavigationModal = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />
           <EuiDroppable droppableId={HIDDEN_DROPPABLE_ID} spacing="none">
             {hiddenItems.length > 0 ? (
               hiddenItems.map((item, index) => (
