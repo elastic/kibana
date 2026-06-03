@@ -119,6 +119,42 @@ const serviceMapAddedToDashboardEventType: TelemetryEvent = {
   },
 };
 
+const metricsCalloutDateRangeSelectedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED,
+  schema: {
+    calloutType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Whether the mixed metrics callout is for overlapping or non-overlapping data',
+      },
+    },
+    selectedInstrumentationType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The instrumentation type selected by the user: classic_apm or otel_native',
+      },
+    },
+  },
+};
+
+const metricsCalloutLoadedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.METRICS_CALLOUT_LOADED,
+  schema: {
+    calloutType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Whether the mixed metrics callout is for overlapping or non-overlapping data',
+      },
+    },
+    shownInstrumentationType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The instrumentation type shown by the callout: classic_apm or otel_native',
+      },
+    },
+  },
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
@@ -127,4 +163,6 @@ export const apmTelemetryEventBasedTypes = [
   sloInfoShownEventType,
   serviceMapDagreLayoutFallbackEventType,
   serviceMapAddedToDashboardEventType,
+  metricsCalloutDateRangeSelectedEventType,
+  metricsCalloutLoadedEventType,
 ];

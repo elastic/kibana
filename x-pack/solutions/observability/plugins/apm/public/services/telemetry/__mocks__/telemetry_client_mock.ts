@@ -15,4 +15,6 @@ export const mockTelemetryClient: ITelemetryClient = {
   reportSloInfoShown: jest.fn(),
   reportServiceMapDagreLayoutFallback: jest.fn(),
   reportServiceMapAddedToDashboard: jest.fn(),
+  reportMetricsCalloutDateRangeSelected: jest.fn(),
+  reportMetricsCalloutLoaded: jest.fn(),
 };

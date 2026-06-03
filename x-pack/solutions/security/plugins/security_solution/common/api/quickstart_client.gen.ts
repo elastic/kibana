@@ -28,6 +28,10 @@ import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  SearchAttacksRequestBodyInput,
+  SearchAttacksResponse,
+} from './detection_engine/attacks/search/search_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
@@ -3231,6 +3235,22 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+   */
+  async searchAttacks(props: SearchAttacksProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchAttacks`);
+    return this.kbnClient
+      .request<SearchAttacksResponse>({
+        path: '/api/detection_engine/attacks/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -4196,6 +4216,9 @@ export interface ScheduleRiskEngineNowProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchAttacksProps {
+  body: SearchAttacksRequestBodyInput;
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;

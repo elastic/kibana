@@ -8,6 +8,8 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   ITelemetryClient,
+  MetricsCalloutDateRangeSelectedParams,
+  MetricsCalloutLoadedParams,
   SearchQuerySubmittedParams,
   ServiceMapAddedToDashboardParams,
   ServiceMapDagreLayoutFallbackParams,
@@ -49,5 +51,15 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportServiceMapAddedToDashboard = (params: ServiceMapAddedToDashboardParams): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD, params);
+  };
+
+  public reportMetricsCalloutDateRangeSelected = (
+    params: MetricsCalloutDateRangeSelectedParams
+  ): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED, params);
+  };
+
+  public reportMetricsCalloutLoaded = (params: MetricsCalloutLoadedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.METRICS_CALLOUT_LOADED, params);
   };
 }
