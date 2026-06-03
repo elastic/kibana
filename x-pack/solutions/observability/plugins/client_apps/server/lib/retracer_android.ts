@@ -294,8 +294,7 @@ const KEEP_SOURCE_INFO = new Set<string>(['Native Method']);
 /** Precompiled patterns used on every stack line or hot merge paths. */
 const MAP_VERSION_PARTS_RE = /^\d+(\.\d+)*$/;
 const STACK_FRAME_LINE_RE = /^(\s*)at\s+(.+)\((.*)\)$/;
-const THROWABLE_CLASS_NAME_RE =
-  /^(\s*(?:Caused by:\s+|Suppressed:\s+)?)([A-Za-z_$][\w.$]*)(?::|$)/;
+const THROWABLE_CLASS_NAME_RE = /^(\s*(?:Caused by:\s+|Suppressed:\s+)?)([A-Za-z_$][\w.$]*)(?::|$)/;
 const REMOVE_INNER_FRAMES_RE = /^removeInnerFrames\((\d+)\)$/;
 const THROWS_CONDITION_RE = /^throws\((.*)\)$/;
 
@@ -432,8 +431,7 @@ function retraceFrame(
     // If the outline callsite map has no entry for this carry
     // position, use the carry position as-is so range lookups
     // can still find a matching entry.
-    lineNumber =
-      findOutlineCallsiteLine(method, carryOutlinePosition) ?? carryOutlinePosition;
+    lineNumber = findOutlineCallsiteLine(method, carryOutlinePosition) ?? carryOutlinePosition;
   }
 
   // A few special source-file strings (like `Native Method`)
@@ -493,9 +491,7 @@ function retraceFrame(
       : [];
   if (defaultFrames.length > 0) {
     return {
-      output: defaultFrames.map((frame) =>
-        formatResolvedFrame(line.indent, frame, keepSourceInfo)
-      ),
+      output: defaultFrames.map((frame) => formatResolvedFrame(line.indent, frame, keepSourceInfo)),
       nextCarryOutlinePosition: undefined,
     };
   }
@@ -550,10 +546,7 @@ function parseClassDocument(classMap: AndroidClassMap): ClassDocument {
   const docSourceFile = classMap.source_file;
   const methods = new Map<string, MethodDocument>();
   for (const [obfMethod, methodDoc] of Object.entries(classMap.methods)) {
-    methods.set(
-      obfMethod,
-      parseMethodDocument(methodDoc, classMap.original_class, docSourceFile)
-    );
+    methods.set(obfMethod, parseMethodDocument(methodDoc, classMap.original_class, docSourceFile));
   }
   return {
     obfuscatedClass: classMap.obfuscated_class,
@@ -708,19 +701,13 @@ function findMatchingEntries(
   if (lineNumber === undefined) {
     return [];
   }
-  return entries.filter(
-    (entry) => lineNumber >= entry.obfStart && lineNumber <= entry.obfEnd
-  );
+  return entries.filter((entry) => lineNumber >= entry.obfStart && lineNumber <= entry.obfEnd);
 }
 
-function resolveEntries(
-  entries: MappingEntry[],
-  lineNumber: number | undefined
-): ResolvedFrame[] {
+function resolveEntries(entries: MappingEntry[], lineNumber: number | undefined): ResolvedFrame[] {
   return entries.map((entry) => ({
     call: entry.originalCall,
-    lineNumber:
-      lineNumber === undefined ? undefined : interpolateLineNumber(entry, lineNumber),
+    lineNumber: lineNumber === undefined ? undefined : interpolateLineNumber(entry, lineNumber),
     entry,
   }));
 }
@@ -770,9 +757,7 @@ function stripOutermostSynthesizedFrame(frames: ResolvedFrame[]): ResolvedFrame[
 }
 
 function isSynthesizedFrame(entry: MappingEntry): boolean {
-  return (
-    hasExtra(entry, SYNTHESIZED_ID) || entry.originalCall.call.includes('$$ExternalSynthetic')
-  );
+  return hasExtra(entry, SYNTHESIZED_ID) || entry.originalCall.call.includes('$$ExternalSynthetic');
 }
 
 function applyRewriteFrame(
@@ -846,10 +831,7 @@ function formatResolvedFrame(
   return `${indent}at ${formatCall(frame.call, frame.lineNumber)}`;
 }
 
-function formatUnmappedFrame(
-  frame: ParsedFrame,
-  document: ClassDocument | undefined
-): string {
+function formatUnmappedFrame(frame: ParsedFrame, document: ClassDocument | undefined): string {
   if (!document) {
     return frame.originalLine;
   }
@@ -857,9 +839,7 @@ function formatUnmappedFrame(
     document.sourceFile ??
     inferSourceFile(document.originalClass, `${document.originalClass}.${frame.methodName}`);
   const sourceInfo =
-    frame.lineNumber === undefined
-      ? frame.sourceInfo
-      : `${sourceFile}:${frame.lineNumber}`;
+    frame.lineNumber === undefined ? frame.sourceInfo : `${sourceFile}:${frame.lineNumber}`;
   return `${frame.indent}at ${document.originalClass}.${frame.methodName}(${sourceInfo})`;
 }
 
