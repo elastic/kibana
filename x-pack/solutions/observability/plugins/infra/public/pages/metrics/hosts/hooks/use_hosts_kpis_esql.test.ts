@@ -25,9 +25,15 @@ const ECS_FIELDS = new Set([
   'system.filesystem.used.pct',
 ]);
 
+// The builders gate on a field predicate; tests express availability as a Set.
+const has =
+  (fields: Set<string>) =>
+  (field: string): boolean =>
+    fields.has(field);
+
 describe('use_hosts_kpis_esql query builders', () => {
   it('aggregates per host then averages across the first `limit` hosts (semconv)', () => {
-    const query = buildSemconvQuery('metrics-*,metricbeat-*', 100, SEMCONV_FIELDS);
+    const query = buildSemconvQuery('metrics-*,metricbeat-*', 100, has(SEMCONV_FIELDS));
 
     expect(query).toContain('FROM metrics-*,metricbeat-*');
     expect(query).toContain('BY host.name');
@@ -41,24 +47,36 @@ describe('use_hosts_kpis_esql query builders', () => {
   });
 
   it('threads the limit through the ECS variant', () => {
-    expect(buildEcsQuery('metrics-*,metricbeat-*', 500, ECS_FIELDS)).toContain('LIMIT 500');
-    expect(buildEcsQuery('metrics-*,metricbeat-*', 50, ECS_FIELDS)).toContain(
+    expect(buildEcsQuery('metrics-*,metricbeat-*', 500, has(ECS_FIELDS))).toContain('LIMIT 500');
+    expect(buildEcsQuery('metrics-*,metricbeat-*', 50, has(ECS_FIELDS))).toContain(
       'FROM metrics-*,metricbeat-*'
     );
   });
 
   it('reduces ECS disk usage with a cross-host MAX (mirrors the `max(...)` formula)', () => {
-    const query = buildEcsQuery('metrics-*,metricbeat-*', 100, ECS_FIELDS);
+    const query = buildEcsQuery('metrics-*,metricbeat-*', 100, has(ECS_FIELDS));
     expect(query).toContain('diskUsage = MAX(host_diskUsage)');
     expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
     expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
+  });
+
+  it('casts metric fields to double so mixed CCS mappings resolve as a union type', () => {
+    const semconv = buildSemconvQuery('metrics-*', 100, has(SEMCONV_FIELDS))!;
+    expect(semconv).toContain('AVG(metrics.system.cpu.utilization::double)');
+    expect(semconv).toContain('AVG(`metrics.system.cpu.load_average.1m`::double)');
+    expect(semconv).toContain('MAX(metrics.system.cpu.logical.count::double)');
+
+    const ecs = buildEcsQuery('metrics-*', 100, has(ECS_FIELDS))!;
+    expect(ecs).toContain('AVG(system.cpu.total.norm.pct::double)');
+    expect(ecs).toContain('AVG(`system.load.1`::double)');
+    expect(ecs).toContain('MAX(system.filesystem.used.pct::double)');
   });
 
   it('drops only the metrics whose fields are absent (avoids unknown-column failure)', () => {
     // No filesystem field: disk is dropped, the rest stay.
     const noDisk = new Set(SEMCONV_FIELDS);
     noDisk.delete('metrics.system.filesystem.usage');
-    const semconvNoDisk = buildSemconvQuery('metrics-*', 100, noDisk)!;
+    const semconvNoDisk = buildSemconvQuery('metrics-*', 100, has(noDisk))!;
     expect(semconvNoDisk).not.toContain('metrics.system.filesystem.usage');
     expect(semconvNoDisk).not.toContain('diskUsage');
     expect(semconvNoDisk).toContain('cpuUsage = AVG(host_cpuUsage)');
@@ -67,7 +85,7 @@ describe('use_hosts_kpis_esql query builders', () => {
     // No cpu utilization (e.g. warm-up): cpu is dropped but load/memory survive.
     const noCpu = new Set(SEMCONV_FIELDS);
     noCpu.delete('metrics.system.cpu.utilization');
-    const semconvNoCpu = buildSemconvQuery('metrics-*', 100, noCpu)!;
+    const semconvNoCpu = buildSemconvQuery('metrics-*', 100, has(noCpu))!;
     expect(semconvNoCpu).not.toContain('metrics.system.cpu.utilization');
     expect(semconvNoCpu).not.toContain('cpuUsage');
     expect(semconvNoCpu).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
@@ -78,7 +96,7 @@ describe('use_hosts_kpis_esql query builders', () => {
     // No filesystem field: disk is dropped, the rest stay.
     const noDisk = new Set(ECS_FIELDS);
     noDisk.delete('system.filesystem.used.pct');
-    const ecsNoDisk = buildEcsQuery('metrics-*', 100, noDisk)!;
+    const ecsNoDisk = buildEcsQuery('metrics-*', 100, has(noDisk))!;
     expect(ecsNoDisk).not.toContain('system.filesystem.used.pct');
     expect(ecsNoDisk).not.toContain('diskUsage');
     expect(ecsNoDisk).toContain('cpuUsage = AVG(host_cpuUsage)');
@@ -87,7 +105,7 @@ describe('use_hosts_kpis_esql query builders', () => {
     // No cpu field: cpu is dropped but load/memory/disk survive.
     const noCpu = new Set(ECS_FIELDS);
     noCpu.delete('system.cpu.total.norm.pct');
-    const ecsNoCpu = buildEcsQuery('metrics-*', 100, noCpu)!;
+    const ecsNoCpu = buildEcsQuery('metrics-*', 100, has(noCpu))!;
     expect(ecsNoCpu).not.toContain('system.cpu.total.norm.pct');
     expect(ecsNoCpu).not.toContain('cpuUsage');
     expect(ecsNoCpu).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
@@ -98,15 +116,15 @@ describe('use_hosts_kpis_esql query builders', () => {
     const query = buildSemconvQuery(
       'metrics-*',
       100,
-      new Set(['metrics.system.cpu.load_average.1m', 'metrics.system.cpu.logical.count'])
+      has(new Set(['metrics.system.cpu.load_average.1m', 'metrics.system.cpu.logical.count']))
     )!;
     expect(query).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
     expect(query).not.toContain('WHERE state');
   });
 
   it('returns undefined when no KPI field is mapped', () => {
-    expect(buildSemconvQuery('metrics-*', 100, new Set())).toBeUndefined();
-    expect(buildEcsQuery('metrics-*', 100, new Set())).toBeUndefined();
+    expect(buildSemconvQuery('metrics-*', 100, () => false)).toBeUndefined();
+    expect(buildEcsQuery('metrics-*', 100, () => false)).toBeUndefined();
   });
 });
 

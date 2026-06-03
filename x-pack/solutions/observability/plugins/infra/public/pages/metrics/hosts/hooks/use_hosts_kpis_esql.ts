@@ -48,11 +48,9 @@ export interface UseHostsKpisResult {
   error: ReturnType<typeof useFetcher>['error'];
 }
 
-// OTel/metricbeat fields land incrementally and some are optional (e.g. an
-// OTel collector that scrapes load but not cpu utilization or filesystem).
-// ES|QL fails the *whole* query when a referenced column is absent from the
-// mapping, so each KPI is gated on its source field(s) being present in the
-// data view; a missing field drops that one tile instead of blanking all four.
+// ES|QL fails the whole query when a referenced column is absent, so each KPI
+// is gated on its source field(s) being mapped; a missing field drops that one
+// tile instead of blanking all four.
 const STATE_FIELD = 'state';
 const SEMCONV_CPU_FIELD = 'metrics.system.cpu.utilization';
 const SEMCONV_LOAD_FIELD = 'metrics.system.cpu.load_average.1m';
@@ -80,6 +78,11 @@ interface KpiClause {
 // Coerce to a safe integer literal before interpolating into the query string.
 const sanitizeLimit = (limit: number): number =>
   Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
+
+// Cast to `double` so a field mapped with mixed numeric types across clusters
+// (CCS union type) resolves instead of failing the whole query.
+const asDouble = (field: string): string => `${field}::double`;
+const quotedAsDouble = (field: string): string => `\`${field}\`::double`;
 
 const assembleQuery = (
   indexPattern: string,
@@ -110,16 +113,16 @@ const assembleQuery = (
 export const buildSemconvQuery = (
   indexPattern: string,
   limit: number,
-  availableFields: ReadonlySet<string>
+  hasField: (field: string) => boolean
 ): string | undefined => {
-  const has = (...fields: string[]): boolean => fields.every((field) => availableFields.has(field));
-  const hasState = availableFields.has(STATE_FIELD);
+  const has = (...fields: string[]): boolean => fields.every(hasField);
+  const hasState = hasField(STATE_FIELD);
   const clauses: KpiClause[] = [];
 
   if (hasState && has(SEMCONV_CPU_FIELD)) {
     clauses.push({
       key: 'cpuUsage',
-      perHost: [`cpu_idle = AVG(${SEMCONV_CPU_FIELD}) WHERE state == "idle"`],
+      perHost: [`cpu_idle = AVG(${asDouble(SEMCONV_CPU_FIELD)}) WHERE state == "idle"`],
       evalExpr: 'host_cpuUsage = 1 - cpu_idle',
       fleet: 'cpuUsage = AVG(host_cpuUsage)',
     });
@@ -127,7 +130,10 @@ export const buildSemconvQuery = (
   if (has(SEMCONV_LOAD_FIELD, SEMCONV_CORES_FIELD)) {
     clauses.push({
       key: 'normalizedLoad1m',
-      perHost: [`load1m = AVG(\`${SEMCONV_LOAD_FIELD}\`)`, `cores = MAX(${SEMCONV_CORES_FIELD})`],
+      perHost: [
+        `load1m = AVG(${quotedAsDouble(SEMCONV_LOAD_FIELD)})`,
+        `cores = MAX(${asDouble(SEMCONV_CORES_FIELD)})`,
+      ],
       evalExpr: 'host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
       fleet: 'normalizedLoad1m = AVG(host_normalizedLoad1m)',
     });
@@ -135,7 +141,7 @@ export const buildSemconvQuery = (
   if (hasState && has(SEMCONV_MEMORY_FIELD)) {
     clauses.push({
       key: 'memoryUsage',
-      perHost: [`host_memoryUsage = AVG(${SEMCONV_MEMORY_FIELD}) WHERE state == "used"`],
+      perHost: [`host_memoryUsage = AVG(${asDouble(SEMCONV_MEMORY_FIELD)}) WHERE state == "used"`],
       fleet: 'memoryUsage = AVG(host_memoryUsage)',
     });
   }
@@ -143,8 +149,8 @@ export const buildSemconvQuery = (
     clauses.push({
       key: 'diskUsage',
       perHost: [
-        `disk_free = SUM(${SEMCONV_DISK_FIELD}) WHERE state == "free"`,
-        `disk_total = SUM(${SEMCONV_DISK_FIELD})`,
+        `disk_free = SUM(${asDouble(SEMCONV_DISK_FIELD)}) WHERE state == "free"`,
+        `disk_total = SUM(${asDouble(SEMCONV_DISK_FIELD)})`,
       ],
       evalExpr:
         'host_diskUsage = CASE(disk_total > 0, 1 - TO_DOUBLE(disk_free) / TO_DOUBLE(disk_total), NULL)',
@@ -164,22 +170,25 @@ export const buildSemconvQuery = (
 export const buildEcsQuery = (
   indexPattern: string,
   limit: number,
-  availableFields: ReadonlySet<string>
+  hasField: (field: string) => boolean
 ): string | undefined => {
-  const has = (...fields: string[]): boolean => fields.every((field) => availableFields.has(field));
+  const has = (...fields: string[]): boolean => fields.every(hasField);
   const clauses: KpiClause[] = [];
 
   if (has(ECS_CPU_FIELD)) {
     clauses.push({
       key: 'cpuUsage',
-      perHost: [`host_cpuUsage = AVG(${ECS_CPU_FIELD})`],
+      perHost: [`host_cpuUsage = AVG(${asDouble(ECS_CPU_FIELD)})`],
       fleet: 'cpuUsage = AVG(host_cpuUsage)',
     });
   }
   if (has(ECS_LOAD_FIELD, ECS_CORES_FIELD)) {
     clauses.push({
       key: 'normalizedLoad1m',
-      perHost: [`load1m = AVG(\`${ECS_LOAD_FIELD}\`)`, `cores = MAX(${ECS_CORES_FIELD})`],
+      perHost: [
+        `load1m = AVG(${quotedAsDouble(ECS_LOAD_FIELD)})`,
+        `cores = MAX(${asDouble(ECS_CORES_FIELD)})`,
+      ],
       evalExpr: 'host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
       fleet: 'normalizedLoad1m = AVG(host_normalizedLoad1m)',
     });
@@ -187,7 +196,7 @@ export const buildEcsQuery = (
   if (has(ECS_MEMORY_FIELD)) {
     clauses.push({
       key: 'memoryUsage',
-      perHost: [`host_memoryUsage = AVG(${ECS_MEMORY_FIELD})`],
+      perHost: [`host_memoryUsage = AVG(${asDouble(ECS_MEMORY_FIELD)})`],
       fleet: 'memoryUsage = AVG(host_memoryUsage)',
     });
   }
@@ -196,7 +205,7 @@ export const buildEcsQuery = (
   if (has(ECS_DISK_FIELD)) {
     clauses.push({
       key: 'diskUsage',
-      perHost: [`host_diskUsage = MAX(${ECS_DISK_FIELD})`],
+      perHost: [`host_diskUsage = MAX(${asDouble(ECS_DISK_FIELD)})`],
       fleet: 'diskUsage = MAX(host_diskUsage)',
     });
   }
@@ -236,12 +245,8 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   // A missing schema (empty/degraded cluster) leaves `esqlQuery` undefined
   // rather than guessing and querying non-existent indices.
   const schema: DataSchemaFormat | undefined = searchCriteria?.preferredSchema ?? undefined;
-  // Configured metrics indices (not a hardcoded pattern); the schema `nodeFilter`
-  // below scopes to the right docs, so the broad pattern is safe.
-  // These are infra-metric KPIs, so the query only sees hosts with metrics docs.
-  // In a mixed fleet the table can also list APM-only hosts (no metrics), so the
-  // averaged host set can be a subset of the table's — this matches the behaviour
-  // before this change (the KPIs always read the metrics indices) and is fine.
+  // Configured metrics indices (not a hardcoded pattern) so non-standard setups
+  // keep working.
   const indexPattern = metricsView?.indices;
   const limit = sanitizeLimit(searchCriteria.limit);
 
@@ -287,13 +292,16 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
 
   const esqlQuery = useMemo(() => {
     if (!limit || !indexPattern) return undefined;
-    if (schema === 'semconv') {
-      return buildSemconvQuery(indexPattern, limit, availableFields);
-    }
-    if (schema === 'ecs') {
-      return buildEcsQuery(indexPattern, limit, availableFields);
-    }
-    return undefined;
+    const build =
+      schema === 'semconv' ? buildSemconvQuery : schema === 'ecs' ? buildEcsQuery : undefined;
+    if (!build) return undefined;
+    // Fall back to the full query when a stale data view exposes none of the
+    // schema's fields, so it returns values (or a real error) rather than
+    // leaving the tiles stuck loading.
+    return (
+      build(indexPattern, limit, (field) => availableFields.has(field)) ??
+      build(indexPattern, limit, () => true)
+    );
   }, [schema, indexPattern, limit, availableFields]);
 
   const {
@@ -310,7 +318,9 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     })();
   }, [isReady, esqlQuery, filter, data.search]);
 
-  const loading = isPending(status);
+  // With no query to run we're only "loading" while the data view resolves;
+  // otherwise the fetcher never fires and status would stay pending forever.
+  const loading = esqlQuery ? isPending(status) : !indexPattern;
 
   return {
     kpis: result ?? EMPTY_KPIS,
