@@ -11,7 +11,9 @@ import type { Logger } from '@kbn/core/server';
 import {
   createInboxActionConflictError,
   type InboxActionProvider,
+  type InboxActionProviderFacetsResult,
   type InboxActionProviderListParams,
+  type InboxActionProviderListProcessedParams,
   type InboxActionProviderListResult,
   type InboxRequestContext,
 } from '@kbn/inbox-plugin/server';
@@ -72,30 +74,54 @@ export const createWorkflowsInboxProvider = ({
       _params: InboxActionProviderListParams,
       ctx: InboxRequestContext
     ): Promise<InboxActionProviderListResult> {
-      const { results, total } = await api.listWaitingForInputSteps(ctx.spaceId, {
-        page: 1,
-        perPage: pageSize,
-      });
+      const { results, total, reasoningByStepId } = await api.listWaitingForInputSteps(
+        ctx.spaceId,
+        {
+          page: 1,
+          perPage: pageSize,
+        }
+      );
 
       return {
-        actions: results.map(toInboxAction),
+        actions: results.map((step) => toInboxAction(step, reasoningByStepId.get(step.id))),
         total,
       };
     },
 
     async listProcessed(
-      _params: InboxActionProviderListParams,
+      params: InboxActionProviderListProcessedParams,
       ctx: InboxRequestContext
     ): Promise<InboxActionProviderListResult> {
-      const { results, total } = await api.listProcessedWaitForInputSteps(ctx.spaceId, {
-        page: 1,
-        perPage: pageSize,
-      });
+      const { results, total, reasoningByStepId, deletedWorkflowIds } =
+        await api.listProcessedWaitForInputSteps(ctx.spaceId, {
+          page: 1,
+          perPage: pageSize,
+          // Push the filter dimensions the workflows step-exec index can
+          // answer with native predicates straight down to the query service.
+          q: params.q,
+          channel: params.channel,
+          workflowId: params.workflowId,
+          respondedBy: params.respondedBy,
+          sortOrder: params.sortOrder,
+        });
 
       return {
-        actions: results.map(toInboxHistoryAction),
+        actions: results.map((step) =>
+          toInboxHistoryAction(step, reasoningByStepId.get(step.id), {
+            workflowDeleted: step.workflowId ? deletedWorkflowIds.has(step.workflowId) : false,
+          })
+        ),
         total,
       };
+    },
+
+    async listProcessedFacets(ctx: InboxRequestContext): Promise<InboxActionProviderFacetsResult> {
+      // The query service computes facets against the same baseline scope as
+      // the listing (space + waitForInput + terminated-or-audit-stamped) but
+      // skips user-supplied filter clauses on purpose. See
+      // `listProcessedWaitForInputFacets` for the stability rationale.
+      const { channel, respondedBy } = await api.listProcessedWaitForInputFacets(ctx.spaceId);
+      return { channel, respondedBy };
     },
 
     async respond(

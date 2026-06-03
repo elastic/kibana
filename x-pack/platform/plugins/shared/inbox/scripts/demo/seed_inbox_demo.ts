@@ -15,15 +15,25 @@
  *   node --import tsx x-pack/platform/plugins/shared/inbox/scripts/demo/seed_inbox_demo.ts
  *
  * Flags:
+ *   --reset              Before seeding, hard-delete any existing
+ *                        `inbox-demo-*` workflows (and their step-execution
+ *                        docs) so re-runs stay idempotent instead of piling
+ *                        up duplicate `inbox-demo-*-N` workflows. Safe to
+ *                        combine with --respond.
  *   --respond            After seeding, auto-respond to a subset of the
  *                        pending rows so the inbox-history audit feed
- *                        has rows to render. Skips the short-timeout
- *                        workflow so its timeout fires and produces an
- *                        abnormal-settle row. Mixes approve/reject
- *                        payloads and tags responses with rotating
- *                        channels (`api`, `agent_builder`,
- *                        `kibana_execution_view`) so the per-channel
- *                        badges in the history feed all show up.
+ *                        has rows to render. Mixes approve/reject payloads,
+ *                        rotates the response `channel` (so every per-channel
+ *                        badge shows up), and rotates the *responder identity*
+ *                        across a few demo users (so the history "Responder"
+ *                        facet has more than one bucket). Two categories of
+ *                        rows are intentionally left pending so the
+ *                        "Awaiting response" surface isn't empty:
+ *                          - the short-timeout workflow (its timeout fires and
+ *                            produces an abnormal-settle history row), and
+ *                          - a curated set of reasoning-bearing workflows, so
+ *                            the soft-interface `reasoning` render is visible
+ *                            on live pending rows in the Respond flyout.
  *
  * Env overrides (defaults match `yarn start --no-base-path`):
  *   KIBANA_URL=http://localhost:5601
@@ -55,13 +65,30 @@ const CONFIG: SeedConfig = {
 
 const ARGS = new Set(process.argv.slice(2));
 const SHOULD_RESPOND = ARGS.has('--respond');
+const SHOULD_RESET = ARGS.has('--reset');
+
+// All demo workflow names share this prefix (see workflows/*.yml). Used by
+// `--reset` to find and hard-delete prior demo runs so the seeder is
+// re-runnable without piling up duplicate `inbox-demo-*-N` workflows.
+const DEMO_WORKFLOW_NAME_PREFIX = 'inbox-demo';
 
 const WORKFLOWS_DIR = path.resolve(__dirname, 'workflows');
-// Workflows whose runs should *not* be auto-responded to in
-// `--respond` mode. Currently only the short-timeout case, which
-// relies on the workflow timeout firing to populate an abnormal-settle
-// history row. Match by file basename (no extension) for stability.
+// Workflows whose runs should *not* be auto-responded to in `--respond`
+// mode because they drive a special history state. Currently only the
+// short-timeout case, which relies on the workflow timeout firing to
+// populate an abnormal-settle history row. Match by file basename (no
+// extension) for stability.
 const SKIP_RESPOND_FILES = new Set(['08_short_timeout']);
+// Reasoning-bearing workflows we deliberately leave pending in `--respond`
+// mode so the "Awaiting response" surface shows the soft-interface
+// `reasoning` render on live pending rows (not just in processed history).
+// The remaining reasoning workflows (02, 03, 05) still get responded to, so
+// the history feed keeps a healthy mix of reasoning rows too.
+const LEAVE_PENDING_FILES = new Set([
+  '01_string_input',
+  '04_enum_input',
+  '06_required_with_defaults',
+]);
 
 const authHeader = (config: SeedConfig) =>
   `Basic ${Buffer.from(`${config.username}:${config.password}`).toString('base64')}`;
@@ -87,6 +114,15 @@ const inboxHeaders = (config: SeedConfig) => ({
   // Internal API requires the elastic-api-version pin; aligned with
   // the inbox plugin's API_VERSIONS constant.
   'elastic-api-version': '1',
+});
+
+// Kibana's user-management route (`POST /internal/security/users/{username}`)
+// is an unversioned internal route, so it doesn't take `elastic-api-version`
+// but does expect the internal-origin marker. `kbn-xsrf` is already set by
+// `headers()`.
+const securityHeaders = (config: SeedConfig) => ({
+  ...headers(config),
+  'x-elastic-internal-origin': 'kibana',
 });
 
 const spacePrefix = (config: SeedConfig) =>
@@ -138,6 +174,93 @@ const triggerWorkflow = async (config: SeedConfig, workflowId: string) => {
   }
 };
 
+interface WorkflowListItem {
+  id: string;
+  name: string;
+}
+
+const listDemoWorkflowIds = async (config: SeedConfig): Promise<string[]> => {
+  const url = `${config.kibanaUrl}${spacePrefix(config)}/api/workflows?query=${encodeURIComponent(
+    DEMO_WORKFLOW_NAME_PREFIX
+  )}&size=1000`;
+  const response = await fetch(url, { headers: workflowsHeaders(config) });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to list workflows for reset (HTTP ${response.status}): ${text}`);
+  }
+  const body = (await response.json()) as { results?: WorkflowListItem[] };
+  // The free-text `query` is best-effort; re-check the prefix client-side so
+  // we never delete a non-demo workflow that happened to match.
+  return (body.results ?? [])
+    .filter((w) => typeof w.name === 'string' && w.name.startsWith(DEMO_WORKFLOW_NAME_PREFIX))
+    .map((w) => w.id);
+};
+
+const cancelWorkflowExecutions = async (config: SeedConfig, workflowId: string): Promise<void> => {
+  const url = `${config.kibanaUrl}${spacePrefix(
+    config
+  )}/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions/cancel`;
+  // Best-effort: a workflow with no active executions still returns ok; any
+  // failure here just means the subsequent hard-delete may fall back to a
+  // soft-delete, which is still enough to clean the inbox.
+  await fetch(url, { method: 'POST', headers: workflowsHeaders(config) }).catch(() => undefined);
+};
+
+const bulkDeleteWorkflows = async (
+  config: SeedConfig,
+  ids: string[],
+  force: boolean
+): Promise<Response> => {
+  const url = `${config.kibanaUrl}${spacePrefix(config)}/api/workflows?force=${force}`;
+  return fetch(url, {
+    method: 'DELETE',
+    headers: workflowsHeaders(config),
+    body: JSON.stringify({ ids }),
+  });
+};
+
+const resetDemoWorkflows = async (config: SeedConfig) => {
+  const ids = await listDemoWorkflowIds(config);
+  if (ids.length === 0) {
+    log('Reset: no existing demo workflows to delete.');
+    return;
+  }
+
+  // Runs parked on `waitForInput` count as active executions, which the
+  // engine refuses to force-delete (HTTP 409). Cancel them first, give Task
+  // Manager a moment to settle the cancellation, then hard-delete — which
+  // also purges the workflows' step-execution docs so the inbox starts clean.
+  await Promise.all(ids.map((id) => cancelWorkflowExecutions(config, id)));
+  await sleep(3000);
+
+  let response = await bulkDeleteWorkflows(config, ids, true);
+  if (response.status === 409) {
+    // A cancellation may not have fully settled; one short retry usually clears it.
+    await sleep(3000);
+    response = await bulkDeleteWorkflows(config, ids, true);
+  }
+
+  if (response.ok) {
+    log(`Reset: hard-deleted ${ids.length} existing demo workflow(s).`);
+    return;
+  }
+
+  // Last resort: soft-delete. The inbox orphan-filter hides soft-deleted
+  // workflows' rows, so the feed is clean even though the step-exec docs and
+  // workflow names linger (re-imports then get an `-N` suffix).
+  const hardText = await response.text();
+  log(
+    `Reset: hard-delete refused (HTTP ${response.status}); falling back to soft-delete. ${hardText}`,
+    'warn'
+  );
+  const soft = await bulkDeleteWorkflows(config, ids, false);
+  if (!soft.ok) {
+    const softText = await soft.text();
+    throw new Error(`Failed to delete demo workflows (HTTP ${soft.status}): ${softText}`);
+  }
+  log(`Reset: soft-deleted ${ids.length} existing demo workflow(s).`);
+};
+
 interface InboxAction {
   id: string;
   source_app: string;
@@ -169,7 +292,12 @@ const respondToAction = async (
   config: SeedConfig,
   action: InboxAction,
   input: Record<string, unknown>,
-  channel: string
+  channel: string,
+  // When provided, the response is submitted as this user (its basic-auth
+  // credentials replace the configured admin's). The server derives
+  // `respondedBy` from the authenticated principal, so this is what spreads
+  // the inbox-history "Responder" facet across multiple buckets.
+  responder?: DemoResponder
 ) => {
   const url = `${config.kibanaUrl}${spacePrefix(
     config
@@ -178,7 +306,16 @@ const respondToAction = async (
   )}/respond`;
   const response = await fetch(url, {
     method: 'POST',
-    headers: inboxHeaders(config),
+    headers: {
+      ...inboxHeaders(config),
+      ...(responder
+        ? {
+            authorization: `Basic ${Buffer.from(
+              `${responder.username}:${responder.password}`
+            ).toString('base64')}`,
+          }
+        : {}),
+    },
     body: JSON.stringify({ input, channel }),
   });
   if (!response.ok) {
@@ -264,6 +401,91 @@ const CHANNELS = [
   'slack',
 ] as const;
 
+interface DemoResponder {
+  username: string;
+  password: string;
+  fullName?: string;
+  /**
+   * When true the seeder creates-or-updates the user (idempotent) before
+   * responding. The configured admin (`elastic` by default) already exists,
+   * so it's left `false`.
+   */
+  ensure: boolean;
+}
+
+/**
+ * Demo responders the `--respond` pass rotates through so the inbox-history
+ * "Responder" facet has more than one bucket. The configured admin always
+ * participates; the extras are native users created on the fly with the
+ * `superuser` role (they need to both respond *and* drive the workflow
+ * resume). On deployments where native users can't be created (e.g.
+ * serverless), `ensureResponder` fails softly and that responder is dropped
+ * from the rotation — the seeder still responds as the configured admin.
+ */
+const buildDemoResponders = (config: SeedConfig): DemoResponder[] => [
+  { username: config.username, password: config.password, ensure: false },
+  {
+    username: 'inbox_demo_sam',
+    password: 'changeme',
+    fullName: 'Sam Rivera (demo responder)',
+    ensure: true,
+  },
+  {
+    username: 'inbox_demo_alex',
+    password: 'changeme',
+    fullName: 'Alex Chen (demo responder)',
+    ensure: true,
+  },
+];
+
+/**
+ * Create-or-update a demo responder via Kibana's user-management API. Returns
+ * the responder when it's usable (already existed or was provisioned) and
+ * `null` when provisioning failed so the caller can drop it from the rotation.
+ */
+const ensureResponder = async (
+  config: SeedConfig,
+  responder: DemoResponder
+): Promise<DemoResponder | null> => {
+  if (!responder.ensure) {
+    return responder;
+  }
+  const url = `${config.kibanaUrl}${spacePrefix(
+    config
+  )}/internal/security/users/${encodeURIComponent(responder.username)}`;
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: securityHeaders(config),
+      body: JSON.stringify({
+        username: responder.username,
+        password: responder.password,
+        roles: ['superuser'],
+        full_name: responder.fullName ?? responder.username,
+        enabled: true,
+      }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      log(
+        `Could not provision responder "${responder.username}" (HTTP ${response.status}); dropping from rotation. ${text}`,
+        'warn'
+      );
+      return null;
+    }
+    log(`Ensured demo responder "${responder.username}".`);
+    return responder;
+  } catch (err) {
+    log(
+      `Could not provision responder "${responder.username}": ${String(
+        err
+      )}; dropping from rotation.`,
+      'warn'
+    );
+    return null;
+  }
+};
+
 const respondToPendingActions = async (config: SeedConfig, imported: ImportedWorkflow[]) => {
   // Workflow execution (and the corresponding `WAITING_FOR_INPUT` step
   // doc) is queued via Task Manager, so a freshly-triggered run
@@ -278,45 +500,66 @@ const respondToPendingActions = async (config: SeedConfig, imported: ImportedWor
     return;
   }
 
-  const skipWorkflowIds = new Set(
+  // Provision the demo responders up front; keep only the ones we can act as.
+  const responders = (
+    await Promise.all(buildDemoResponders(config).map((r) => ensureResponder(config, r)))
+  ).filter((r): r is DemoResponder => r !== null);
+  log(`Responder rotation: ${responders.map((r) => r.username).join(', ')}`);
+
+  // Workflows whose pending rows we leave untouched: the timeout case (drives
+  // an abnormal-settle history row) and the curated reasoning set (keeps the
+  // "Awaiting response" surface populated with visible reasoning).
+  const skipForTimeoutIds = new Set(
     imported.filter((w) => SKIP_RESPOND_FILES.has(w.basename)).map((w) => w.workflowId)
   );
+  const leavePendingIds = new Set(
+    imported.filter((w) => LEAVE_PENDING_FILES.has(w.basename)).map((w) => w.workflowId)
+  );
+  // `source_id` shape: `${workflowId}:${runId}:${stepExecId}`. A cheap prefix
+  // check is enough — the inbox common type guarantees this for the workflows
+  // provider (see `buildWorkflowSourceId`).
+  const matchesWorkflow = (action: InboxAction, ids: Set<string>) =>
+    Array.from(ids).some((wfId) => action.source_id.startsWith(`${wfId}:`));
 
   let responded = 0;
   let skipped = 0;
-  for (let i = 0; i < pending.length; i++) {
-    const action = pending[i];
-    // `source_id` shape: `${workflowId}:${runId}:${stepExecId}`. Cheap
-    // string check is enough — the inbox common type guarantees this
-    // for the workflows provider (see `buildWorkflowSourceId`).
-    const skipForTimeout = Array.from(skipWorkflowIds).some((wfId) =>
-      action.source_id.startsWith(`${wfId}:`)
-    );
-    if (skipForTimeout) {
+  // Dedicated counter (incremented only on an actual response) so the
+  // approve/reject intent, channel, and responder spread evenly across the
+  // rows we *do* answer — independent of how many we skip.
+  let dispatched = 0;
+  for (const action of pending) {
+    if (matchesWorkflow(action, skipForTimeoutIds)) {
       log(`Skipping ${action.source_id} (reserved for timeout-driven abnormal settle)`);
       skipped++;
       continue;
     }
+    if (matchesWorkflow(action, leavePendingIds)) {
+      log(`Leaving ${action.source_id} pending (reasoning demo for "Awaiting response")`);
+      skipped++;
+      continue;
+    }
 
-    const built = buildResponseInput(action, i);
+    const built = buildResponseInput(action, dispatched);
     if (!built) {
       log(`Skipping ${action.source_id} — schema not auto-fillable`, 'warn');
       skipped++;
       continue;
     }
 
-    const channel = CHANNELS[i % CHANNELS.length];
+    const channel = CHANNELS[dispatched % CHANNELS.length];
+    const responder = responders[dispatched % responders.length];
     try {
-      await respondToAction(config, action, built.input, channel);
-      log(`Responded ${built.intent} via ${channel}: ${action.source_id}`);
+      await respondToAction(config, action, built.input, channel, responder);
+      log(`Responded ${built.intent} as ${responder.username} via ${channel}: ${action.source_id}`);
       responded++;
+      dispatched++;
     } catch (err) {
       log(`Failed to respond to ${action.source_id}: ${String(err)}`, 'error');
     }
   }
 
   log(`Respond pass complete: ${responded} responded, ${skipped} skipped.`);
-  if (skipWorkflowIds.size > 0) {
+  if (skipForTimeoutIds.size > 0) {
     log(
       `Wait ~45s for the short-timeout workflow to fire its timeout, then refresh the inbox to see the abnormal-settle history row.`
     );
@@ -324,6 +567,14 @@ const respondToPendingActions = async (config: SeedConfig, imported: ImportedWor
 };
 
 const seed = async () => {
+  if (SHOULD_RESET) {
+    try {
+      await resetDemoWorkflows(CONFIG);
+    } catch (err) {
+      log(`Reset pass failed (continuing with seed): ${String(err)}`, 'warn');
+    }
+  }
+
   log(`Reading demo workflows from ${WORKFLOWS_DIR}`);
   const files = (await fs.readdir(WORKFLOWS_DIR)).filter((file) => file.endsWith('.yml')).sort();
 

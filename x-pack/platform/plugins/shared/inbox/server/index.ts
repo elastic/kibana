@@ -18,7 +18,10 @@ export type {
   InboxPluginSetup,
   InboxPluginStart,
   InboxActionProvider,
+  InboxActionProviderFacetBucket,
+  InboxActionProviderFacetsResult,
   InboxActionProviderListParams,
+  InboxActionProviderListProcessedParams,
   InboxActionProviderListResult,
   InboxRequestContext,
 } from './types';

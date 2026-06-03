@@ -11,6 +11,7 @@ import type { InboxActionRegistry } from '../services/inbox_action_registry';
 import type { InboxSpaceIdResolver } from '../plugin';
 import { registerListInboxActionsRoute } from './actions/list_actions';
 import { registerListInboxActionsHistoryRoute } from './actions/list_history';
+import { registerListInboxActionsHistoryFacetsRoute } from './actions/list_history_facets';
 import { registerRespondToActionRoute } from './actions/respond_to_action';
 
 export interface RouteDependencies {
@@ -29,5 +30,6 @@ export interface RouteDependencies {
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerListInboxActionsRoute(dependencies);
   registerListInboxActionsHistoryRoute(dependencies);
+  registerListInboxActionsHistoryFacetsRoute(dependencies);
   registerRespondToActionRoute(dependencies);
 };

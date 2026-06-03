@@ -79,6 +79,55 @@ describe('InboxHistoryFeed', () => {
     expect(screen.queryByTestId('inboxHistoryChannelBadge')).not.toBeInTheDocument();
   });
 
+  it('flags rows whose originating workflow has been deleted with a "Workflow deleted" badge', async () => {
+    // The audit trail retains processed rows even after the workflow that
+    // produced them is deleted (see the query service — history is no longer
+    // orphan-filtered). Such rows are tagged so it's clear the source is gone.
+    httpGet.mockResolvedValueOnce({
+      actions: [
+        createStubInboxAction({
+          id: 'wf-gone:run-1:step-1',
+          status: 'approved',
+          title: 'Approve isolation of host-42',
+          response_mode: 'responded',
+          response_input: { approved: true },
+          channel: null,
+          source_app: 'workflows',
+          source_deleted: true,
+        }),
+      ],
+      total: 1,
+    });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByTestId('inboxHistorySourceDeletedBadge')).toBeInTheDocument();
+    expect(screen.getByText('Workflow deleted')).toBeInTheDocument();
+  });
+
+  it('does not flag rows whose originating workflow is still alive', async () => {
+    httpGet.mockResolvedValueOnce({
+      actions: [
+        createStubInboxAction({
+          id: 'wf-1:run-1:step-1',
+          status: 'approved',
+          title: 'Approve isolation of host-42',
+          response_mode: 'responded',
+          response_input: { approved: true },
+          channel: null,
+          source_app: 'workflows',
+          source_deleted: false,
+        }),
+      ],
+      total: 1,
+    });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('Approve isolation of host-42')).toBeInTheDocument();
+    expect(screen.queryByTestId('inboxHistorySourceDeletedBadge')).not.toBeInTheDocument();
+  });
+
   it('renders an explicit channel badge for non-default responders (well-known app slug)', async () => {
     // External clients (MCP apps, Slack, custom automations) self-tag
     // with a stable client slug — the audit feed renders a friendly

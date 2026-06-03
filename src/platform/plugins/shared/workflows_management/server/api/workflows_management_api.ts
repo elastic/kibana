@@ -62,6 +62,11 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import type {
+  InboxHistoryFacets,
+  InboxHistoryFilters,
+  WaitForInputListResult,
+} from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -858,7 +863,7 @@ export class WorkflowsManagementApi {
   public async listWaitingForInputSteps(
     spaceId: string,
     params: { page?: number; perPage?: number } = {}
-  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+  ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
@@ -867,12 +872,30 @@ export class WorkflowsManagementApi {
    * already terminated (a response was submitted, or the step
    * settled abnormally). Consumed by the Inbox plugin's workflows provider
    * to populate the processed-history audit log.
+   *
+   * Accepts the inbox-history filter bundle (`q`, `channel`, `workflowId`,
+   * `respondedBy`, `sortOrder`) which is pushed down into native ES clauses
+   * by the query service.
    */
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number } = {}
-  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    params: { page?: number; perPage?: number } & InboxHistoryFilters = {}
+  ): Promise<WaitForInputListResult> {
     return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
+  }
+
+  /**
+   * Distinct-value buckets for the inbox-history filter dropdowns
+   * (`channel`, `respondedBy`) over the space's processed history. Buckets
+   * are computed against the same baseline as the list endpoint but with no
+   * user-supplied filters applied so the dropdown options stay stable as
+   * filters toggle.
+   */
+  public async listProcessedWaitForInputFacets(
+    spaceId: string,
+    options: { maxBuckets?: number } = {}
+  ): Promise<InboxHistoryFacets> {
+    return this.workflowsService.listProcessedWaitForInputFacets(spaceId, options);
   }
 
   /**

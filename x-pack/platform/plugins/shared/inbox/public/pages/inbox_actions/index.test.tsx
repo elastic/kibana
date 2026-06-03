@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -82,5 +82,43 @@ describe('InboxActionsPage', () => {
     await waitFor(() =>
       expect(screen.getByText(/Approve isolation of host-42\?/)).toBeInTheDocument()
     );
+  });
+
+  it('expands inline reasoning for a pending action that carries it', async () => {
+    httpGet.mockImplementation(async (url: string) => {
+      if (url === INBOX_ACTIONS_URL) {
+        return {
+          actions: [
+            createStubInboxAction({
+              id: 'pending-with-reasoning',
+              title: 'Why should we proceed with this action?',
+              status: 'pending',
+              source_app: 'workflows',
+              reasoning: {
+                summary: 'Detected a recurring login failure spike from a single ASN.',
+                sections: [{ title: 'DIAGNOSIS', body: '412 failed logins in 5m from ASN 12345.' }],
+              },
+            }),
+          ],
+          total: 1,
+        };
+      }
+      if (url === INBOX_ACTIONS_HISTORY_URL) {
+        return { actions: [], total: 0 };
+      }
+      throw new Error(`Unexpected URL ${url}`);
+    });
+
+    render(<InboxActionsPage />, { wrapper: createWrapper() });
+
+    const toggle = await screen.findByTestId('inboxReasoningToggle');
+    expect(screen.queryByTestId('inboxReasoning')).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+
+    expect(await screen.findByTestId('inboxReasoning')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Detected a recurring login failure spike from a single ASN\./)
+    ).toBeInTheDocument();
   });
 });

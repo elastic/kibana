@@ -137,6 +137,27 @@ components:
           additionalProperties: true
           nullable: true
           description: Payload submitted by the responder (echoed back so audit-log surfaces can render what was submitted). Null while the action is still pending.
+        reasoning:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: |
+            Soft-interface context resolved server-side from the `output` of the
+            step that ran immediately before the `waitForInput` (i.e. the work the
+            agent did before pausing). Free-form; the UI renders a loose shape
+            (`{ summary?, details?, sections?: [{ title, body }] }`) when present
+            and tolerates extra keys. Not searchable; null when no preceding
+            step output is available.
+        source_deleted:
+          type: boolean
+          nullable: true
+          description: |
+            True when the originating entity (e.g. the workflow that produced
+            this action) has since been deleted. Only set on history/audit rows
+            — the audit trail intentionally retains processed actions for
+            deleted sources, and the UI flags them so it's clear the source is
+            gone. Pending actions for deleted sources are filtered out (they
+            can no longer be acted on) so this is never `true` there.
       required:
         - id
         - title

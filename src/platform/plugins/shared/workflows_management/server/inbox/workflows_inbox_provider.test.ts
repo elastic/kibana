@@ -56,7 +56,12 @@ const ctx = (overrides: { channel?: string } = {}) => ({
 
 const fakeApi = () => {
   const api: Partial<WorkflowsManagementApi> = {
-    listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
+    listWaitingForInputSteps: jest.fn(async () => ({
+      results: [buildStep()],
+      total: 1,
+      reasoningByStepId: new Map(),
+      deletedWorkflowIds: new Set<string>(),
+    })),
     listProcessedWaitForInputSteps: jest.fn(async () => ({
       results: [
         buildStep({
@@ -67,6 +72,8 @@ const fakeApi = () => {
         }),
       ],
       total: 1,
+      reasoningByStepId: new Map(),
+      deletedWorkflowIds: new Set<string>(),
     })),
     resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
     // Default to "step is still waiting" so existing happy-path tests
@@ -155,6 +162,42 @@ describe('createWorkflowsInboxProvider', () => {
         response_mode: 'responded',
         response_input: { approved: true, reason: 'looks good' },
       });
+    });
+
+    it('flags history rows whose parent workflow has been deleted via source_deleted', async () => {
+      const api = fakeApi();
+      (api.listProcessedWaitForInputSteps as jest.Mock).mockResolvedValueOnce({
+        results: [
+          buildStep({
+            id: 'step-exec-deleted',
+            workflowId: 'wf-gone',
+            status: ExecutionStatus.COMPLETED,
+            finishedAt: '2026-04-24T12:30:00.000Z',
+            output: { approved: true },
+          }),
+          buildStep({
+            id: 'step-exec-alive',
+            workflowId: 'wf-1',
+            status: ExecutionStatus.COMPLETED,
+            finishedAt: '2026-04-24T12:31:00.000Z',
+            output: { approved: true },
+          }),
+        ],
+        total: 2,
+        reasoningByStepId: new Map(),
+        deletedWorkflowIds: new Set(['wf-gone']),
+      });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+
+      const result = await provider.listProcessed!({}, ctx());
+
+      expect(result.actions).toHaveLength(2);
+      expect(result.actions[0]).toMatchObject({ source_deleted: true });
+      expect(result.actions[1]).toMatchObject({ source_deleted: false });
     });
 
     it('returns an empty list when there is no processed history', async () => {

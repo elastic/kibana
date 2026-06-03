@@ -530,7 +530,9 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listWaitingForInputSteps('default');
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      // 1) step-executions listing, 2) alive-workflow lookup, 3) predecessor
+      // reasoning lookup (resolved from the step before each `waitForInput`).
+      expect(mockEsClient.search).toHaveBeenCalledTimes(3);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
         query: {
@@ -613,7 +615,12 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listWaitingForInputSteps('default');
 
-      expect(result).toEqual({ results: [], total: 0 });
+      expect(result).toEqual({
+        results: [],
+        total: 0,
+        reasoningByStepId: new Map(),
+        deletedWorkflowIds: new Set(),
+      });
     });
 
     it('logs and rethrows for any other ES failure', async () => {
@@ -684,7 +691,9 @@ describe('WorkflowExecutionQueryService', () => {
 
         await service.listWaitingForInputSteps('default');
 
-        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+        // 1) step-executions listing, 2) alive-workflow lookup, 3) predecessor
+        // reasoning lookup (resolved from the step before each `waitForInput`).
+        expect(mockEsClient.search).toHaveBeenCalledTimes(3);
         const lookupArgs = mockEsClient.search.mock.calls[1][0] as {
           index: string;
           _source: boolean;
@@ -714,7 +723,12 @@ describe('WorkflowExecutionQueryService', () => {
         const result = await service.listWaitingForInputSteps('default');
 
         expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-        expect(result).toEqual({ results: [], total: 0 });
+        expect(result).toEqual({
+          results: [],
+          total: 0,
+          reasoningByStepId: new Map(),
+          deletedWorkflowIds: new Set(),
+        });
       });
 
       it('falls back to unfiltered results and warns when the workflow lookup errors', async () => {
@@ -809,7 +823,9 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listProcessedWaitForInputSteps('default');
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      // 1) processed-step listing, 2) alive-workflow lookup, 3) predecessor
+      // reasoning lookup (resolved from the step before each `waitForInput`).
+      expect(mockEsClient.search).toHaveBeenCalledTimes(3);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
         query: {
@@ -873,7 +889,12 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listProcessedWaitForInputSteps('default');
 
-      expect(result).toEqual({ results: [], total: 0 });
+      expect(result).toEqual({
+        results: [],
+        total: 0,
+        reasoningByStepId: new Map(),
+        deletedWorkflowIds: new Set(),
+      });
     });
 
     it('logs and rethrows for any other ES failure', async () => {
@@ -885,7 +906,11 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    it('drops history rows whose parent workflow has been soft-deleted', async () => {
+    it('retains history rows for deleted parent workflows and flags them via deletedWorkflowIds', async () => {
+      // The audit trail must survive workflow deletion — unlike the pending
+      // listing, processed rows are NOT dropped when their parent is gone.
+      // They're kept (total unchanged) and the deleted parent ids are
+      // reported so the provider/UI can tag them.
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [
@@ -899,8 +924,327 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listProcessedWaitForInputSteps('default');
 
-      expect(result.results.map((r) => r.id)).toEqual(['doc-1']);
-      expect(result.total).toBe(1);
+      expect(result.results.map((r) => r.id)).toEqual(['doc-1', 'doc-2']);
+      expect(result.total).toBe(2);
+      expect(result.deletedWorkflowIds).toEqual(new Set(['wf-deleted']));
+    });
+
+    it('reports an empty deletedWorkflowIds set when every parent workflow is alive', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            buildProcessedHit({ id: 'doc-1', workflowId: 'wf-alive' }),
+            buildProcessedHit({ id: 'doc-2', workflowId: 'wf-alive-2' }),
+          ],
+          total: { value: 2 },
+        },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-alive', 'wf-alive-2']);
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(result.results.map((r) => r.id)).toEqual(['doc-1', 'doc-2']);
+      expect(result.total).toBe(2);
+      expect(result.deletedWorkflowIds.size).toBe(0);
+    });
+
+    describe('history filters & sort', () => {
+      // Empty-results path short-circuits before the alive-workflow and
+      // predecessor-reasoning lookups, so a single mocked listing call is
+      // enough to inspect the query the filters produced.
+      const mockEmptyListing = () => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: { hits: [], total: { value: 0 } },
+        } as any);
+      };
+
+      it('omits all filter clauses when no filters are supplied', async () => {
+        mockEmptyListing();
+
+        await service.listProcessedWaitForInputSteps('default');
+
+        const must = (mockEsClient.search.mock.calls[0][0] as any).query.bool.must;
+        expect(must).toEqual([
+          { term: { spaceId: 'default' } },
+          { term: { stepType: 'waitForInput' } },
+        ]);
+      });
+
+      it('pushes channel/workflowId/respondedBy as terms clauses (OR within field)', async () => {
+        mockEmptyListing();
+
+        await service.listProcessedWaitForInputSteps('default', {
+          channel: ['inbox', 'slack'],
+          workflowId: ['wf-1'],
+          respondedBy: ['alice'],
+        });
+
+        const must = (mockEsClient.search.mock.calls[0][0] as any).query.bool.must;
+        expect(must).toContainEqual({ terms: { 'hitl.channel': ['inbox', 'slack'] } });
+        expect(must).toContainEqual({ terms: { workflowId: ['wf-1'] } });
+        expect(must).toContainEqual({ terms: { 'hitl.respondedBy': ['alice'] } });
+      });
+
+      it('translates free-text `q` into a case-insensitive wildcard OR with metacharacters escaped', async () => {
+        mockEmptyListing();
+
+        // The `*` is a literal the user typed — it must be escaped so it
+        // can't expand inside our `*term*` envelope.
+        await service.listProcessedWaitForInputSteps('default', { q: 'ali*ce' });
+
+        const must = (mockEsClient.search.mock.calls[0][0] as any).query.bool.must;
+        const qClause = must.find((clause: any) => clause.bool?.should?.[0]?.wildcard);
+        expect(qClause.bool.minimum_should_match).toBe(1);
+        expect(qClause.bool.should).toEqual([
+          { wildcard: { 'hitl.respondedBy': { value: '*ali\\*ce*', case_insensitive: true } } },
+          { wildcard: { workflowId: { value: '*ali\\*ce*', case_insensitive: true } } },
+          { wildcard: { stepId: { value: '*ali\\*ce*', case_insensitive: true } } },
+        ]);
+      });
+
+      it('threads sortOrder through both the respondedAt and finishedAt sort keys', async () => {
+        mockEmptyListing();
+
+        await service.listProcessedWaitForInputSteps('default', { sortOrder: 'asc' });
+
+        const sort = (mockEsClient.search.mock.calls[0][0] as any).sort;
+        expect(sort).toEqual([
+          { 'hitl.respondedAt': { order: 'asc', missing: '_last' } },
+          { finishedAt: { order: 'asc', missing: '_last' } },
+        ]);
+      });
+    });
+
+    describe('predecessor reasoning resolution', () => {
+      // Reasoning is resolved from the most-recent completed step that
+      // finished at/before the wait step started — the work the workflow did
+      // right before pausing. The lookup is a third ES search after the
+      // listing + alive-workflow lookup.
+      const mockListingWithWaitStep = (overrides: Record<string, unknown> = {}) => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              buildProcessedHit({
+                id: 'wait-1',
+                workflowId: 'wf-1',
+                workflowRunId: 'run-1',
+                startedAt: '2026-04-28T15:00:00.000Z',
+                ...overrides,
+              }),
+            ],
+            total: { value: 1 },
+          },
+        } as any);
+        mockAliveWorkflowsLookup(['wf-1']);
+      };
+
+      it('surfaces the reasoning blob from the immediate predecessor step', async () => {
+        mockListingWithWaitStep();
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  workflowRunId: 'run-1',
+                  finishedAt: '2026-04-28T14:59:00.000Z',
+                  output: { reasoning: { summary: 'did the thing' } },
+                },
+              },
+              {
+                _source: {
+                  workflowRunId: 'run-1',
+                  finishedAt: '2026-04-28T14:00:00.000Z',
+                  output: { reasoning: { summary: 'older, ignored' } },
+                },
+              },
+            ],
+          },
+        } as any);
+
+        const result = await service.listProcessedWaitForInputSteps('default');
+
+        expect(result.reasoningByStepId.get('wait-1')).toEqual({ summary: 'did the thing' });
+      });
+
+      it('skips reasoning when every completed step finished after the wait step started', async () => {
+        mockListingWithWaitStep();
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  workflowRunId: 'run-1',
+                  finishedAt: '2026-04-28T15:30:00.000Z',
+                  output: { reasoning: { summary: 'after the pause' } },
+                },
+              },
+            ],
+          },
+        } as any);
+
+        const result = await service.listProcessedWaitForInputSteps('default');
+
+        expect(result.reasoningByStepId.has('wait-1')).toBe(false);
+      });
+
+      it('ignores predecessors whose output carries no reasoning object', async () => {
+        mockListingWithWaitStep();
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  workflowRunId: 'run-1',
+                  finishedAt: '2026-04-28T14:59:00.000Z',
+                  output: { approved: true },
+                },
+              },
+            ],
+          },
+        } as any);
+
+        const result = await service.listProcessedWaitForInputSteps('default');
+
+        expect(result.reasoningByStepId.size).toBe(0);
+      });
+
+      it('never fails the listing when the predecessor lookup errors', async () => {
+        mockListingWithWaitStep();
+        mockEsClient.search.mockRejectedValueOnce(new Error('predecessor boom'));
+
+        const result = await service.listProcessedWaitForInputSteps('default');
+
+        expect(result.results.map((r) => r.id)).toEqual(['wait-1']);
+        expect(result.reasoningByStepId.size).toBe(0);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to resolve predecessor reasoning')
+        );
+      });
+    });
+  });
+
+  describe('listProcessedWaitForInputFacets', () => {
+    const aggResponse = (
+      channelBuckets: Array<{ key: string; doc_count: number }>,
+      respondedByBuckets: Array<{ key: string; doc_count: number }>
+    ) =>
+      ({
+        aggregations: {
+          channel: { buckets: channelBuckets },
+          respondedBy: { buckets: respondedByBuckets },
+        },
+      } as any);
+
+    it('issues a size:0 aggregation with the listing baseline scope and NO user filters', async () => {
+      mockEsClient.search.mockResolvedValueOnce(aggResponse([], []));
+
+      await service.listProcessedWaitForInputFacets('default');
+
+      const args = mockEsClient.search.mock.calls[0][0] as any;
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.size).toBe(0);
+      // Same baseline as the listing — but deliberately without the
+      // channel/workflow/responder/q clauses so the dropdown options stay
+      // stable as the user toggles other filters.
+      expect(args.query.bool.must).toEqual([
+        { term: { spaceId: 'default' } },
+        { term: { stepType: 'waitForInput' } },
+      ]);
+      expect(args.query.bool.should).toEqual([
+        {
+          bool: {
+            must: [
+              { exists: { field: 'finishedAt' } },
+              { terms: { status: ['completed', 'failed', 'cancelled'] } },
+            ],
+          },
+        },
+        { exists: { field: 'hitl.respondedAt' } },
+      ]);
+      expect(args.query.bool.minimum_should_match).toBe(1);
+      expect(args.aggs.channel.terms).toEqual({ field: 'hitl.channel', size: 50 });
+      expect(args.aggs.respondedBy.terms).toEqual({ field: 'hitl.respondedBy', size: 50 });
+    });
+
+    it('honours a custom maxBuckets cap on both terms aggs', async () => {
+      mockEsClient.search.mockResolvedValueOnce(aggResponse([], []));
+
+      await service.listProcessedWaitForInputFacets('default', { maxBuckets: 5 });
+
+      const args = mockEsClient.search.mock.calls[0][0] as any;
+      expect(args.aggs.channel.terms.size).toBe(5);
+      expect(args.aggs.respondedBy.terms.size).toBe(5);
+    });
+
+    it('maps agg buckets into { value, count } arrays preserving the agg count order', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        aggResponse(
+          [
+            { key: 'inbox', doc_count: 7 },
+            { key: 'slack', doc_count: 3 },
+          ],
+          [{ key: 'alice', doc_count: 6 }]
+        )
+      );
+
+      const result = await service.listProcessedWaitForInputFacets('default');
+
+      expect(result).toEqual({
+        channel: [
+          { value: 'inbox', count: 7 },
+          { value: 'slack', count: 3 },
+        ],
+        respondedBy: [{ value: 'alice', count: 6 }],
+      });
+    });
+
+    it('drops empty-string bucket values defensively', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        aggResponse(
+          [
+            { key: '', doc_count: 4 },
+            { key: 'inbox', doc_count: 2 },
+          ],
+          []
+        )
+      );
+
+      const result = await service.listProcessedWaitForInputFacets('default');
+
+      expect(result.channel).toEqual([{ value: 'inbox', count: 2 }]);
+    });
+
+    it('returns empty buckets when aggregations are absent from the response', async () => {
+      mockEsClient.search.mockResolvedValueOnce({} as any);
+
+      const result = await service.listProcessedWaitForInputFacets('default');
+
+      expect(result).toEqual({ channel: [], respondedBy: [] });
+    });
+
+    it('swallows index_not_found_exception with empty buckets (cold install case)', async () => {
+      mockEsClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      const result = await service.listProcessedWaitForInputFacets('default');
+
+      expect(result).toEqual({ channel: [], respondedBy: [] });
+    });
+
+    it('logs and rethrows on any other ES failure', async () => {
+      mockEsClient.search.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(service.listProcessedWaitForInputFacets('default')).rejects.toThrow('boom');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to compute inbox-history filter facets')
+      );
     });
   });
 

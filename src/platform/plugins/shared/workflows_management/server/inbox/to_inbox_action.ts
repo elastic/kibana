@@ -105,7 +105,10 @@ export const parseWorkflowSourceId = (
  * we surface `input.message` as the responder's prompt and `input.schema` as
  * the shape the response must conform to.
  */
-export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
+export const toInboxAction = (
+  step: EsWorkflowStepExecution,
+  reasoning?: Record<string, unknown> | null
+): InboxAction => {
   const input = (step.input ?? {}) as {
     message?: unknown;
     schema?: unknown;
@@ -129,6 +132,10 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
     input_schema: schema,
     created_at: step.startedAt,
     response_mode: 'pending',
+    // Soft-interface reasoning resolved from the step preceding this
+    // `waitForInput` (see `resolvePredecessorReasoning`). Null when the
+    // predecessor produced no `reasoning` blob.
+    reasoning: reasoning ?? null,
     // `timeout_at` and `response_mode: 'timed_out'` will land with the
     // step-level timeout work tracked in [security-team#16708](https://github.com/elastic/security-team/issues/16708).
   };
@@ -167,7 +174,11 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
  * defaults to `'approved'`. First-class approve/reject conventions on
  * the workflow YAML side will replace the heuristic in a follow-up.
  */
-export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction => {
+export const toInboxHistoryAction = (
+  step: EsWorkflowStepExecution,
+  reasoning?: Record<string, unknown> | null,
+  options?: { workflowDeleted?: boolean }
+): InboxAction => {
   const input = (step.input ?? {}) as { message?: unknown; schema?: unknown };
   const promptMessage =
     typeof input.message === 'string' && input.message.length > 0 ? input.message : undefined;
@@ -211,5 +222,12 @@ export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction
     channel: step.hitl?.channel ?? null,
     response_mode: settledAbnormally ? 'timed_out' : 'responded',
     response_input: responseInput,
+    // Soft-interface reasoning resolved from the step preceding this
+    // `waitForInput` (see `resolvePredecessorReasoning`). Null when the
+    // predecessor produced no `reasoning` blob.
+    reasoning: reasoning ?? null,
+    // The audit feed retains rows for deleted workflows; flag them so the UI
+    // can make it clear the originating workflow is gone.
+    source_deleted: options?.workflowDeleted ?? false,
   };
 };

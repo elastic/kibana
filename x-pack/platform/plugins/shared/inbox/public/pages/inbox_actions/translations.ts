@@ -254,6 +254,21 @@ export const HISTORY_TIMED_OUT_BADGE = i18n.translate(
   }
 );
 
+export const HISTORY_SOURCE_DELETED_BADGE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.sourceDeletedBadge',
+  {
+    defaultMessage: 'Workflow deleted',
+  }
+);
+
+export const HISTORY_SOURCE_DELETED_TOOLTIP = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.sourceDeletedTooltip',
+  {
+    defaultMessage:
+      'The workflow that produced this action has been deleted. This audit record is retained.',
+  }
+);
+
 export const HISTORY_PROMPT_LABEL = i18n.translate(
   'xpack.inbox.actionsPage.historySection.promptLabel',
   {
@@ -272,5 +287,97 @@ export const HISTORY_NO_RESPONSE_PAYLOAD = i18n.translate(
   'xpack.inbox.actionsPage.historySection.noResponsePayload',
   {
     defaultMessage: 'No response payload was recorded.',
+  }
+);
+
+export const HISTORY_FILTERS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.searchPlaceholder',
+  {
+    defaultMessage: 'Search responder, workflow id, or step id…',
+  }
+);
+
+export const HISTORY_FILTERS_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.searchAriaLabel',
+  {
+    defaultMessage: 'Search inbox history',
+  }
+);
+
+export const HISTORY_FILTERS_CHANNEL_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.channelLabel',
+  {
+    defaultMessage: 'Channel',
+  }
+);
+
+export const HISTORY_FILTERS_CHANNEL_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.channelSearchPlaceholder',
+  {
+    defaultMessage: 'Search channels',
+  }
+);
+
+export const HISTORY_FILTERS_RESPONDER_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.responderLabel',
+  {
+    defaultMessage: 'Responder',
+  }
+);
+
+export const HISTORY_FILTERS_RESPONDER_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.responderSearchPlaceholder',
+  {
+    defaultMessage: 'Search responders',
+  }
+);
+
+export const HISTORY_FILTERS_NO_OPTIONS = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filters.noOptions',
+  {
+    defaultMessage: 'No options available yet.',
+  }
+);
+
+export const HISTORY_SORT_NEWEST = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.sort.newest',
+  {
+    defaultMessage: 'Newest first',
+  }
+);
+
+export const HISTORY_SORT_OLDEST = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.sort.oldest',
+  {
+    defaultMessage: 'Oldest first',
+  }
+);
+
+export const REASONING_LABEL = i18n.translate('xpack.inbox.actionsPage.reasoning.label', {
+  defaultMessage: 'Reasoning',
+});
+
+export const REASONING_FULL_LABEL = i18n.translate('xpack.inbox.actionsPage.reasoning.fullLabel', {
+  defaultMessage: 'Full reasoning',
+});
+
+export const REASONING_EXPAND_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.reasoning.expandLabel',
+  {
+    defaultMessage: 'Show reasoning',
+  }
+);
+
+export const REASONING_COLLAPSE_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.reasoning.collapseLabel',
+  {
+    defaultMessage: 'Hide reasoning',
+  }
+);
+
+export const REASONING_COLUMN_SR_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.reasoning.columnScreenReaderLabel',
+  {
+    defaultMessage: 'Expand row to show reasoning',
   }
 );

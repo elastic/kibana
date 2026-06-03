@@ -42,11 +42,45 @@ export const registerListInboxActionsHistoryRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const { source_app: sourceApp, page, per_page: perPage } = request.query;
+          const {
+            source_app: sourceApp,
+            page,
+            per_page: perPage,
+            q,
+            channel,
+            workflow_id: workflowId,
+            responded_by: respondedBy,
+            sort_order: sortOrder,
+          } = request.query;
           const spaceId = getSpaceId(request);
 
+          // Normalize the free-text search: an empty string from the UI's
+          // controlled input shouldn't trigger a no-op filter that the
+          // providers then have to pre-validate.
+          const trimmedQuery = q?.trim();
+
+          // Soft cap on multi-valued filters to keep ES `terms` clauses (and
+          // the eventual `wildcard` expansion) bounded. Anything beyond
+          // MAX_FILTER_VALUES_PER_DIMENSION is truncated rather than rejected
+          // so a mistyped URL or an over-eager bookmark doesn't flip the route
+          // to 400 and hide otherwise-valid filters.
+          const MAX_FILTER_VALUES_PER_DIMENSION = 16;
+          const truncate = <T>(values: T[] | undefined): T[] | undefined =>
+            values && values.length > MAX_FILTER_VALUES_PER_DIMENSION
+              ? values.slice(0, MAX_FILTER_VALUES_PER_DIMENSION)
+              : values;
+
           const { actions, total } = await registry.listHistory(
-            { sourceApp, page, perPage },
+            {
+              sourceApp,
+              page,
+              perPage,
+              q: trimmedQuery && trimmedQuery.length > 0 ? trimmedQuery : undefined,
+              channel: truncate(channel),
+              workflowId: truncate(workflowId),
+              respondedBy: truncate(respondedBy),
+              sortOrder,
+            },
             { request, spaceId }
           );
 

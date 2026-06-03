@@ -15,6 +15,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { InboxAction } from './list_actions_route.gen';
 
@@ -24,6 +25,32 @@ export const ListInboxActionsHistoryRequestQuery = lazySchema(() =>
      * Filter actions by the originating app id
      */
     source_app: z.string().optional(),
+    /**
+     * Free-text search applied to responder, workflow id and step id (case-insensitive substring). Empty string is treated as omitted.
+     */
+    q: z.string().max(256).optional(),
+    /**
+     * Restrict to responses submitted via these channel slugs (e.g. `inbox`, `slack`, `example-mcp-app-security`). Multiple values are OR'd. The route enforces a soft cap on the total number of values to keep ES `terms` clauses bounded.
+     */
+    channel: ArrayFromString(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-z0-9][a-z0-9_-]*$/)
+    ).optional(),
+    /**
+     * Restrict to responses against these workflow ids. Multiple values are OR'd. The route enforces a soft cap on the total number of values to keep ES `terms` clauses bounded.
+     */
+    workflow_id: ArrayFromString(z.string().min(1).max(256)).optional(),
+    /**
+     * Restrict to responses submitted by these usernames. Multiple values are OR'd. The route enforces a soft cap on the total number of values to keep ES `terms` clauses bounded.
+     */
+    responded_by: ArrayFromString(z.string().min(1).max(256)).optional(),
+    /**
+     * Sort direction on the responded-at / finished-at timestamp.
+     */
+    sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

@@ -10,13 +10,16 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
+  INBOX_ACTIONS_HISTORY_FACETS_URL,
   INBOX_ACTIONS_HISTORY_URL,
   INBOX_ACTIONS_URL,
+  type ListInboxActionsHistoryFacetsResponse,
   type ListInboxActionsHistoryResponse,
   type ListInboxActionsResponse,
 } from '@kbn/inbox-common';
 import {
   queryKeys,
+  type InboxActionsHistoryFacetsFilters,
   type InboxActionsHistoryFilters,
   type InboxActionsListFilters,
 } from '../query_keys';
@@ -77,10 +80,22 @@ export const useInboxActionsHistory = (filters: InboxActionsHistoryFilters = {})
   return useQuery({
     queryKey: queryKeys.history.list(filters),
     queryFn: async (): Promise<ListInboxActionsHistoryResponse> => {
-      const query: Record<string, string | number> = {};
+      // Plain object so the kibana http client can serialise array params as
+      // repeated `?key=v&key=v` (matching the OpenAPI `style: form, explode:
+      // true` contract on the route schema).
+      const query: Record<string, string | number | string[]> = {};
       if (filters.sourceApp) query.source_app = filters.sourceApp;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
+      if (filters.q && filters.q.trim().length > 0) query.q = filters.q.trim();
+      if (filters.channel && filters.channel.length > 0) query.channel = filters.channel;
+      if (filters.workflowId && filters.workflowId.length > 0) {
+        query.workflow_id = filters.workflowId;
+      }
+      if (filters.respondedBy && filters.respondedBy.length > 0) {
+        query.responded_by = filters.respondedBy;
+      }
+      if (filters.sortOrder) query.sort_order = filters.sortOrder;
 
       return services.http!.get<ListInboxActionsHistoryResponse>(INBOX_ACTIONS_HISTORY_URL, {
         query,
@@ -90,5 +105,60 @@ export const useInboxActionsHistory = (filters: InboxActionsHistoryFilters = {})
     keepPreviousData: true,
     retry: retryOnTransientError,
     refetchInterval: INBOX_BACKGROUND_REFETCH_MS,
+  });
+};
+
+/**
+ * Stale-time on the history filter dropdown options.
+ *
+ * Channel and Responder bucket lists are slow-moving (a new responder or
+ * channel slug only appears the first time someone uses it from a
+ * previously-unseen surface), so refetching them on every dropdown open is
+ * wasteful. We let React Query serve the cached facets payload for a generous
+ * window while every other history call (`useInboxActionsHistory`) keeps its
+ * 5s background refetch.
+ *
+ * 60s mirrors typical Kibana facet caches and is short enough that a
+ * brand-new responder shows up in the dropdown within a minute of their first
+ * response without needing a hard reload.
+ */
+const INBOX_HISTORY_FACETS_STALE_MS = 60_000;
+
+/**
+ * React Query hook for the inbox-history filter dropdown options.
+ *
+ * Returns `{ channel, respondedBy }` bucket arrays (each `{ value, count }`)
+ * sourced from the cross-provider facets endpoint. Cached for
+ * {@link INBOX_HISTORY_FACETS_STALE_MS} so opening the filter popovers
+ * doesn't fire a network request every time. Errors are retried on transient
+ * (5xx) failures only — a 4xx points at a caller bug, not a transient outage.
+ */
+export const useInboxActionsHistoryFacets = (filters: InboxActionsHistoryFacetsFilters = {}) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.history.facets(filters),
+    queryFn: async (): Promise<ListInboxActionsHistoryFacetsResponse> => {
+      const query: Record<string, string> = {};
+      if (filters.sourceApp) query.source_app = filters.sourceApp;
+
+      const response = await services.http!.get<ListInboxActionsHistoryFacetsResponse>(
+        INBOX_ACTIONS_HISTORY_FACETS_URL,
+        {
+          query,
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+
+      // Normalise to a stable empty shape so consumers can render the filter
+      // popovers without null-guards (and React Query never sees `undefined`).
+      return {
+        channel: response?.channel ?? [],
+        respondedBy: response?.respondedBy ?? [],
+      };
+    },
+    keepPreviousData: true,
+    retry: retryOnTransientError,
+    staleTime: INBOX_HISTORY_FACETS_STALE_MS,
   });
 };

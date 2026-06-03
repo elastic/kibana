@@ -75,6 +75,11 @@ import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
+import type {
+  InboxHistoryFacets,
+  InboxHistoryFilters,
+  WaitForInputListResult,
+} from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
@@ -350,17 +355,31 @@ export class WorkflowsService {
   public async listWaitingForInputSteps(
     spaceId: string,
     pagination: { page?: number; perPage?: number } = {}
-  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+  ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
     return this.executionQueryService.listWaitingForInputSteps(spaceId, pagination);
   }
 
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    pagination: { page?: number; perPage?: number } = {}
-  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    options: { page?: number; perPage?: number } & InboxHistoryFilters = {}
+  ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
-    return this.executionQueryService.listProcessedWaitForInputSteps(spaceId, pagination);
+    return this.executionQueryService.listProcessedWaitForInputSteps(spaceId, options);
+  }
+
+  /**
+   * Distinct-value buckets for the inbox-history filter dropdowns
+   * (`channel`, `respondedBy`). See
+   * {@link WorkflowExecutionQueryService.listProcessedWaitForInputFacets}
+   * for the baseline-must / no-user-filters guarantee.
+   */
+  public async listProcessedWaitForInputFacets(
+    spaceId: string,
+    options: { maxBuckets?: number } = {}
+  ): Promise<InboxHistoryFacets> {
+    await this.ensureInitialized();
+    return this.executionQueryService.listProcessedWaitForInputFacets(spaceId, options);
   }
 
   public async markStepAsResponded(

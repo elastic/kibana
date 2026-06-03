@@ -9,7 +9,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { InboxAction } from '@kbn/inbox-common';
 import { InboxActionRegistry, isUnknownInboxSourceAppError } from './inbox_action_registry';
-import type { InboxActionProvider, InboxRequestContext } from './inbox_action_provider';
+import type {
+  InboxActionProvider,
+  InboxActionProviderFacetsResult,
+  InboxRequestContext,
+} from './inbox_action_provider';
 import {
   createStubInboxAction,
   createStubInboxActions,
@@ -23,7 +27,10 @@ const ctx = (): InboxRequestContext => ({
 const fakeProvider = (
   sourceApp: string,
   actions = createStubInboxActions(3, { source_app: sourceApp }),
-  options: { withListProcessed?: boolean | InboxAction[] } = { withListProcessed: false }
+  options: {
+    withListProcessed?: boolean | InboxAction[];
+    withFacets?: InboxActionProviderFacetsResult;
+  } = { withListProcessed: false }
 ): jest.Mocked<InboxActionProvider> => {
   const provider: jest.Mocked<InboxActionProvider> = {
     sourceApp,
@@ -43,6 +50,10 @@ const fakeProvider = (
       actions: historyActions,
       total: historyActions.length,
     }));
+  }
+  if (options.withFacets) {
+    const facets = options.withFacets;
+    provider.listProcessedFacets = jest.fn(async () => facets);
   }
   return provider;
 };
@@ -224,6 +235,57 @@ describe('InboxActionRegistry', () => {
       expect(result.total).toBe(2);
     });
 
+    it('forwards the search/filter/sort bundle to each provider listProcessed', async () => {
+      const withHistory = fakeProvider('workflows', [], { withListProcessed: true });
+      registry.register(withHistory);
+
+      await registry.listHistory(
+        {
+          page: 1,
+          perPage: 25,
+          q: 'alice',
+          channel: ['inbox'],
+          workflowId: ['wf-1'],
+          respondedBy: ['alice'],
+          sortOrder: 'asc',
+        },
+        ctx()
+      );
+
+      expect(withHistory.listProcessed).toHaveBeenCalledWith(
+        expect.objectContaining({
+          q: 'alice',
+          channel: ['inbox'],
+          workflowId: ['wf-1'],
+          respondedBy: ['alice'],
+          sortOrder: 'asc',
+        }),
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('orders history oldest-first when sortOrder is asc', async () => {
+      const older = createStubInboxAction({
+        id: 'older',
+        source_app: 'workflows',
+        status: 'approved',
+        created_at: '2026-04-24T08:00:00.000Z',
+        responded_at: '2026-04-24T09:00:00.000Z',
+      });
+      const newer = createStubInboxAction({
+        id: 'newer',
+        source_app: 'workflows',
+        status: 'approved',
+        created_at: '2026-04-24T10:00:00.000Z',
+        responded_at: '2026-04-24T12:00:00.000Z',
+      });
+      registry.register(fakeProvider('workflows', [], { withListProcessed: [newer, older] }));
+
+      const result = await registry.listHistory({ page: 1, perPage: 25, sortOrder: 'asc' }, ctx());
+
+      expect(result.actions.map((a) => a.id)).toEqual(['older', 'newer']);
+    });
+
     it('merge-sorts history by responded_at desc, falling back to created_at when missing', async () => {
       const historyA = createStubInboxAction({
         id: 'a',
@@ -275,6 +337,141 @@ describe('InboxActionRegistry', () => {
       expect(result.actions.map((a) => a.id)).toEqual(['healthy-1']);
       expect(result.total).toBe(1);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listProcessed'));
+    });
+  });
+
+  describe('listFacets()', () => {
+    it('returns empty buckets when no providers are registered', async () => {
+      const result = await registry.listFacets({}, ctx());
+      expect(result).toEqual({ channel: [], respondedBy: [] });
+    });
+
+    it('returns empty buckets when sourceApp matches no registered provider', async () => {
+      registry.register(fakeProvider('workflows'));
+
+      const result = await registry.listFacets({ sourceApp: 'unknown' }, ctx());
+
+      expect(result).toEqual({ channel: [], respondedBy: [] });
+    });
+
+    it('skips providers that do not implement listProcessedFacets', async () => {
+      const noFacets = fakeProvider('legacy');
+      const withFacets = fakeProvider('workflows', [], {
+        withFacets: {
+          channel: [{ value: 'inbox', count: 3 }],
+          respondedBy: [{ value: 'alice', count: 3 }],
+        },
+      });
+      registry.register(noFacets);
+      registry.register(withFacets);
+
+      const result = await registry.listFacets({}, ctx());
+
+      expect(noFacets.listProcessedFacets).toBeUndefined();
+      expect(withFacets.listProcessedFacets).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        channel: [{ value: 'inbox', count: 3 }],
+        respondedBy: [{ value: 'alice', count: 3 }],
+      });
+    });
+
+    it('sums counts across providers contributing the same value', async () => {
+      // Both a workflows provider and a (hypothetical) slack provider can
+      // surface `channel: "slack"`; the registry must collapse them into one
+      // bucket so the UI doesn't render the same chip twice.
+      registry.register(
+        fakeProvider('workflows', [], {
+          withFacets: {
+            channel: [
+              { value: 'slack', count: 2 },
+              { value: 'inbox', count: 5 },
+            ],
+            respondedBy: [{ value: 'alice', count: 7 }],
+          },
+        })
+      );
+      registry.register(
+        fakeProvider('evals', [], {
+          withFacets: {
+            channel: [{ value: 'slack', count: 4 }],
+            respondedBy: [{ value: 'bob', count: 1 }],
+          },
+        })
+      );
+
+      const result = await registry.listFacets({}, ctx());
+
+      // Sorted by descending count, then value: inbox(5) > slack(2+4=6)? No —
+      // slack 6 outranks inbox 5, so slack first.
+      expect(result.channel).toEqual([
+        { value: 'slack', count: 6 },
+        { value: 'inbox', count: 5 },
+      ]);
+      expect(result.respondedBy).toEqual([
+        { value: 'alice', count: 7 },
+        { value: 'bob', count: 1 },
+      ]);
+    });
+
+    it('breaks count ties by value for stable ordering across requests', async () => {
+      registry.register(
+        fakeProvider('workflows', [], {
+          withFacets: {
+            channel: [
+              { value: 'zeta', count: 2 },
+              { value: 'alpha', count: 2 },
+            ],
+            respondedBy: [],
+          },
+        })
+      );
+
+      const result = await registry.listFacets({}, ctx());
+
+      expect(result.channel).toEqual([
+        { value: 'alpha', count: 2 },
+        { value: 'zeta', count: 2 },
+      ]);
+    });
+
+    it('scopes to a single provider when sourceApp is specified', async () => {
+      const workflows = fakeProvider('workflows', [], {
+        withFacets: { channel: [{ value: 'inbox', count: 1 }], respondedBy: [] },
+      });
+      const evals = fakeProvider('evals', [], {
+        withFacets: { channel: [{ value: 'slack', count: 9 }], respondedBy: [] },
+      });
+      registry.register(workflows);
+      registry.register(evals);
+
+      const result = await registry.listFacets({ sourceApp: 'workflows' }, ctx());
+
+      expect(workflows.listProcessedFacets).toHaveBeenCalledTimes(1);
+      expect(evals.listProcessedFacets).not.toHaveBeenCalled();
+      expect(result.channel).toEqual([{ value: 'inbox', count: 1 }]);
+    });
+
+    it('treats a single provider failure as empty and does not short-circuit other providers', async () => {
+      const failing = fakeProvider('workflows', [], {
+        withFacets: { channel: [], respondedBy: [] },
+      });
+      (failing.listProcessedFacets as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      const healthy = fakeProvider('evals', [], {
+        withFacets: {
+          channel: [{ value: 'inbox', count: 2 }],
+          respondedBy: [{ value: 'bob', count: 2 }],
+        },
+      });
+      registry.register(failing);
+      registry.register(healthy);
+
+      const result = await registry.listFacets({}, ctx());
+
+      expect(result).toEqual({
+        channel: [{ value: 'inbox', count: 2 }],
+        respondedBy: [{ value: 'bob', count: 2 }],
+      });
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listProcessedFacets'));
     });
   });
 

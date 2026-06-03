@@ -79,6 +79,26 @@ export const InboxAction = lazySchema(() =>
      * Payload submitted by the responder (echoed back so audit-log surfaces can render what was submitted). Null while the action is still pending.
      */
     response_input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+      * Soft-interface context resolved server-side from the `output` of the
+step that ran immediately before the `waitForInput` (i.e. the work the
+agent did before pausing). Free-form; the UI renders a loose shape
+(`{ summary?, details?, sections?: [{ title, body }] }`) when present
+and tolerates extra keys. Not searchable; null when no preceding
+step output is available.
+
+      */
+    reasoning: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+      * True when the originating entity (e.g. the workflow that produced
+this action) has since been deleted. Only set on history/audit rows
+— the audit trail intentionally retains processed actions for
+deleted sources, and the UI flags them so it's clear the source is
+gone. Pending actions for deleted sources are filtered out (they
+can no longer be acted on) so this is never `true` there.
+
+      */
+    source_deleted: z.boolean().nullable().optional(),
   })
 );
 export type InboxAction = z.infer<typeof InboxAction>;

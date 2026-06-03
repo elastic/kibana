@@ -36,6 +36,26 @@ steps:
     type: console
     with:
       message: "Severity set to {{ steps.triage_severity.output.severity }}"
+  # Reasoning for the *second* HITL gate. Because step 2 stays pending after
+  # step 1 is answered, this `reasoning` blob is what the inbox renders in the
+  # "Awaiting response" flyout — exercising the soft-interface on a live
+  # pending row, not just in the processed history feed.
+  - name: assess_isolation
+    type: data.set
+    with:
+      reasoning:
+        summary: "host-42 resumed C2 beaconing after the severity call; recommending isolation to stop ongoing exfiltration."
+        sections:
+          - title: "DIAGNOSIS"
+            body: "Post-triage, host-42 made 3 callbacks in 2m to a known-bad C2 domain."
+          - title: "CHANGES MADE"
+            body: "Proposed host isolation (not yet applied — awaiting approval):"
+            code: |
+              POST /api/endpoint/isolate
+              {
+                "host": "host-42",
+                "reason": "active_c2"
+              }
   - name: approve_isolation
     type: waitForInput
     with:

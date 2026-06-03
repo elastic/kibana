@@ -38,6 +38,28 @@ export interface InboxActionProviderListParams {
   status?: ListInboxActionsRequestQuery['status'];
 }
 
+/**
+ * History/audit-feed filters surfaced through the
+ * `InboxActionProvider.listProcessed` call. Providers honour whichever
+ * subset they can answer with native indexes; unknown filters are permitted
+ * to no-op (the framework does *not* downgrade or reject the request — it
+ * would defeat the purpose of provider-extensibility to invent filters here
+ * that providers can't translate).
+ *
+ * Multi-value fields (`channel`, `workflowId`, `respondedBy`) are OR'd within
+ * a field and AND'd across fields, mirroring the OpenAPI contract documented
+ * at `kbn-inbox-common/impl/schemas/actions/list_history_route.schema.yaml`.
+ */
+export interface InboxActionProviderListProcessedParams extends InboxActionProviderListParams {
+  /** Free-text search applied to responder / workflow / step labels (case-insensitive substring). */
+  q?: string;
+  channel?: string[];
+  workflowId?: string[];
+  respondedBy?: string[];
+  /** Sort direction on the responded-at / finished-at timestamp. Default: `'desc'`. */
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface InboxActionProviderListResult {
   actions: InboxAction[];
   /**
@@ -46,6 +68,30 @@ export interface InboxActionProviderListResult {
    * from one provider.
    */
   total: number;
+}
+
+/**
+ * Bucket shape providers return from {@link InboxActionProvider.listProcessedFacets}.
+ * Mirrors `InboxActionFacetBucket` from the OpenAPI schema; each `value` is
+ * paired with the per-provider document count so the registry can sum counts
+ * when two providers happen to surface the same value (e.g. both contributing
+ * rows tagged `channel: "slack"`).
+ */
+export interface InboxActionProviderFacetBucket {
+  value: string;
+  count: number;
+}
+
+/**
+ * Result shape providers return from {@link InboxActionProvider.listProcessedFacets}.
+ * Two fixed dimensions for now (`channel`, `respondedBy`) so the
+ * inbox-history filter bar can render them without the registry needing
+ * per-dimension contracts. Adding new dimensions requires a schema bump on
+ * the inbox-common facets route, kept intentional.
+ */
+export interface InboxActionProviderFacetsResult {
+  channel: InboxActionProviderFacetBucket[];
+  respondedBy: InboxActionProviderFacetBucket[];
 }
 
 /**
@@ -72,11 +118,27 @@ export interface InboxActionProvider {
    * providers can ship the pending-only contract first and add history in
    * a follow-up. Providers that don't implement this are silently skipped
    * by the registry's history fan-out.
+   *
+   * Receives the {@link InboxActionProviderListProcessedParams} filter bundle
+   * so providers can push search/filter predicates into their native indexes
+   * (rather than the registry post-filtering merged results, which would
+   * inflate fan-out cost on large feeds).
    */
   listProcessed?(
-    params: InboxActionProviderListParams,
+    params: InboxActionProviderListProcessedParams,
     ctx: InboxRequestContext
   ): Promise<InboxActionProviderListResult>;
+
+  /**
+   * Distinct-value buckets used to populate the inbox-history filter
+   * dropdowns (Channel, Responder). Providers compute these against the same
+   * baseline scope as `listProcessed` (the space's processed history) but
+   * intentionally without applying user-supplied filter predicates — the
+   * dropdown options must stay stable as the user toggles other filters.
+   * Optional so providers can ship without facet support; the registry merge
+   * skips providers that don't implement it.
+   */
+  listProcessedFacets?(ctx: InboxRequestContext): Promise<InboxActionProviderFacetsResult>;
 
   respond(
     sourceId: string,

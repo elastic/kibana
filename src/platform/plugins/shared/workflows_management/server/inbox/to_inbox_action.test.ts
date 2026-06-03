@@ -281,6 +281,18 @@ describe('toInboxHistoryAction', () => {
     expect(action.id).toBe(action.source_id);
   });
 
+  it('defaults source_deleted to false when no deletion flag is passed', () => {
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.source_deleted).toBe(false);
+  });
+
+  it('sets source_deleted: true when the parent workflow is flagged as deleted', () => {
+    const action = toInboxHistoryAction(buildCompletedStep(), undefined, {
+      workflowDeleted: true,
+    });
+    expect(action.source_deleted).toBe(true);
+  });
+
   it('falls back to a generated title when the step has no rendered prompt', () => {
     const action = toInboxHistoryAction(
       buildCompletedStep({ input: { schema: { type: 'object' } } })
