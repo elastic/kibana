@@ -1,0 +1,89 @@
+{
+  "sha1": "583820c80b76088375faa39fa902fe190edb096d",
+  "tests": [
+    {
+      "id": "6f0ad80c78092f7-cdf015ba5f44d6f",
+      "title": "Event Annotation listing page - delete flow select all and delete removes every group and surfaces the empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing_delete.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "id": "93c379b66929b40-82424bcd0afea62",
+      "title": "Event Annotation listing page renders the toolbar and saved annotation groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "93c379b66929b40-1e09ce6cea0d5a5",
+      "title": "Event Annotation listing page search filters items by title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "93c379b66929b40-db48038a5ea500b",
+      "title": "Event Annotation listing page search keeps legacy text matching semantics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "93c379b66929b40-3f060c476ff3324",
+      "title": "Event Annotation listing page tag filter narrows the listing to tagged groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "93c379b66929b40-505825260b0b5cb",
+      "title": "Event Annotation listing page shows a no-results message when nothing matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    }
+  ]
+}
