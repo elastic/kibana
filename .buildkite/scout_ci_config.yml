@@ -85,6 +85,7 @@ packages:
   enabled:
     - core
     - kbn-scout
+    - kbn-security-hardening
     - kbn-streamlang-tests
     - user-storage
   disabled:
