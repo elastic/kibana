@@ -396,6 +396,8 @@ export class TaskManagerRunner implements TaskRunner {
           childOf: this.instance.task.traceparent,
         });
         const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
+        // captures start time - note that despite the name, stopTaskTimer() does not stop the timer
+        this.logTaskRunStartEvent(this.instance.task, stopTaskTimer());
 
         // Validate state
         const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -1102,6 +1104,28 @@ export class TaskManagerRunner implements TaskRunner {
       clearTimeout(timer);
     };
     return stop;
+  }
+
+  private logTaskRunStartEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
+    const scheduleDelayNs =
+      task.startedAt && task.scheduledAt
+        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
+        : undefined;
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskRunStart,
+        start: new Date(taskTiming.start).toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" started.`,
+    });
   }
 
   private logTaskRunEvent(
