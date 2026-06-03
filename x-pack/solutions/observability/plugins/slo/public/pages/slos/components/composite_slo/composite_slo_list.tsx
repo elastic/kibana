@@ -7,28 +7,26 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { FindCompositeSLOResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
-import { useRefreshCompositeSloSummaries } from '../../../hooks/use_refresh_composite_slo_summaries';
-import { useFetchCompositeHistoricalSummary } from '../../../hooks/use_fetch_composite_historical_summary';
-import { useFetchCompositeSloDetails } from '../../../hooks/use_fetch_composite_slo_details';
+import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
+import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useDeleteCompositeSlo } from '../../../../hooks/use_delete_composite_slo';
 import {
   useFetchCompositeSloList,
   type CompositeSloSortBy,
   type CompositeSloSortDirection,
-} from '../../../hooks/use_fetch_composite_slo_list';
-import { useFetchCompositeSloSuggestions } from '../../../hooks/use_fetch_composite_slo_suggestions';
+} from '../../../../hooks/use_fetch_composite_slo_list';
+import { useRefreshCompositeSloSummaries } from '../../../../hooks/use_refresh_composite_slo_summaries';
 import { CompositeSloDeleteModal } from './composite_slo_delete_modal';
 import { CompositeSloTable } from './composite_slo_table';
 import { CompositeSloToolbar } from './composite_slo_toolbar';
 
-type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
+type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 export function CompositeSloList() {
   useRefreshCompositeSloSummaries();
-  const { mutateAsync: deleteCompositeSlo } = useDeleteCompositeSlo();
+  const { mutate: deleteCompositeSlo } = useDeleteCompositeSlo();
 
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(25);
@@ -40,33 +38,26 @@ export function CompositeSloList() {
   const [sortDirection, setSortDirection] = useState<CompositeSloSortDirection>('desc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleSearchChange = useCallback((value: string) => {
+  useDebounce(() => setDebouncedSearch(search), 300, [search]);
+
+  const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(0);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
-  }, []);
+  };
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  const handleTagSelection = useCallback((options: EuiSelectableOption[]) => {
+  const handleTagSelection = (options: EuiSelectableOption[]) => {
     const newTags = options.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
     setSelectedTags(newTags);
     setPage(0);
-  }, []);
+  };
 
-  const handleStatusChange = useCallback((statuses: string[]) => {
+  const handleStatusChange = (statuses: string[]) => {
     setSelectedStatuses(statuses);
     setPage(0);
-  }, []);
+  };
 
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     setSearch('');
     setDebouncedSearch('');
     setSortBy('createdAt');
@@ -74,17 +65,14 @@ export function CompositeSloList() {
     setSelectedTags([]);
     setSelectedStatuses([]);
     setPage(0);
-  }, []);
-
-  const tagsParam = selectedTags.length > 0 ? selectedTags.join(',') : undefined;
-  const statusParam = selectedStatuses.length > 0 ? selectedStatuses.join(',') : undefined;
+  };
 
   const { data, isInitialLoading, isLoading, isError } = useFetchCompositeSloList({
     page: page + 1,
     perPage,
     search: debouncedSearch || undefined,
-    tags: tagsParam,
-    status: statusParam,
+    tags: selectedTags,
+    status: selectedStatuses,
     sortBy,
     sortDirection,
   });
@@ -92,30 +80,16 @@ export function CompositeSloList() {
   const results = data?.results ?? [];
   const total = data?.total ?? 0;
 
-  const { suggestions } = useFetchCompositeSloSuggestions();
-  const availableTags = useMemo(
-    () => suggestions?.tags?.map((t) => t.label).sort() ?? [],
-    [suggestions]
-  );
-
   const hasActiveFilters =
     debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
 
-  const compositeIds = useMemo(
-    () => data?.results?.map((item: CompositeSLOItem) => item.id) ?? [],
-    [data?.results]
-  );
-  const { detailsById, isLoading: isDetailsLoading } = useFetchCompositeSloDetails(compositeIds);
-  const { historicalSummaryById, isLoading: isHistoricalLoading } =
-    useFetchCompositeHistoricalSummary(compositeIds);
-
-  const handleSortChange = useCallback(
-    (newSortBy: CompositeSloSortBy, newDirection: CompositeSloSortDirection) => {
-      setSortBy(newSortBy);
-      setSortDirection(newDirection);
-    },
-    []
-  );
+  const handleSortChange = (
+    newSortBy: CompositeSloSortBy,
+    newDirection: CompositeSloSortDirection
+  ) => {
+    setSortBy(newSortBy);
+    setSortDirection(newDirection);
+  };
 
   if (isError) {
     return (
@@ -133,7 +107,6 @@ export function CompositeSloList() {
         search={search}
         isLoading={isLoading}
         selectedTags={selectedTags}
-        availableTags={availableTags}
         selectedStatuses={selectedStatuses}
         hasActiveFilters={hasActiveFilters}
         onSearchChange={handleSearchChange}
@@ -151,17 +124,12 @@ export function CompositeSloList() {
       ) : (
         <CompositeSloTable
           results={results}
-          total={total}
-          page={page}
-          perPage={perPage}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          isDetailsLoading={isDetailsLoading}
-          isHistoricalLoading={isHistoricalLoading}
-          detailsById={detailsById}
-          historicalSummaryById={historicalSummaryById}
-          onPageChange={setPage}
-          onPerPageChange={setPerPage}
+          pagination={{ pageIndex: page, pageSize: perPage, totalItemCount: total }}
+          sort={{ field: sortBy, direction: sortDirection }}
+          onPageChange={(pageIndex, pageSize) => {
+            setPage(pageIndex);
+            setPerPage(pageSize);
+          }}
           onSortChange={handleSortChange}
           onDelete={setDeleteConfirm}
         />
@@ -170,9 +138,15 @@ export function CompositeSloList() {
         <CompositeSloDeleteModal
           name={deleteConfirm.name}
           onCancel={() => setDeleteConfirm(null)}
-          onConfirm={async () => {
-            await deleteCompositeSlo({ id: deleteConfirm.id, name: deleteConfirm.name });
-            setDeleteConfirm(null);
+          onConfirm={() => {
+            deleteCompositeSlo(
+              { id: deleteConfirm.id, name: deleteConfirm.name },
+              {
+                onSettled: () => {
+                  setDeleteConfirm(null);
+                },
+              }
+            );
           }}
         />
       )}

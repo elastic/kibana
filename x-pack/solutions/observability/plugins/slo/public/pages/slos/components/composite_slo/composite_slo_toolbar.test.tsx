@@ -7,7 +7,7 @@
 
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../../utils/test_helper';
+import { render } from '../../../../utils/test_helper';
 import { CompositeSloToolbar } from './composite_slo_toolbar';
 
 const defaultProps = {
