@@ -10,15 +10,17 @@ import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
-import React, { lazy, Suspense, useMemo, useState } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import React, { lazy, Suspense, useState } from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   SloBurnRateWindowColumnHeader,
   type SloBurnRateWindow,
-} from './common/slo_burn_rate_window_column_header';
+} from '../common/slo_burn_rate_window_column_header';
 import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
-const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
+const SLODetailsFlyout = lazy(
+  () => import('../../../slo_details/shared_flyout/slo_details_flyout')
+);
 
 function getMemberBurnRateValue(
   item: CompositeSLOMemberSummary,
@@ -148,16 +150,12 @@ export function CompositeSloMembersTable({
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
 
-  const columns = useMemo(
-    () =>
-      getMemberColumns(
-        percentFormat,
-        burnRateWindow,
-        setBurnRateWindow,
-        isBurnRatePopoverOpen,
-        setIsBurnRatePopoverOpen
-      ),
-    [percentFormat, burnRateWindow, isBurnRatePopoverOpen]
+  const columns = getMemberColumns(
+    percentFormat,
+    burnRateWindow,
+    setBurnRateWindow,
+    isBurnRatePopoverOpen,
+    setIsBurnRatePopoverOpen
   );
 
   return (
