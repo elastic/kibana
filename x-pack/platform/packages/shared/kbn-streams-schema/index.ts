@@ -293,11 +293,11 @@ export type {
   StreamsKIsOnboardingResult,
   StreamsKIsOnboardingFeaturesResult,
   StreamsKIsOnboardingQueriesResult,
-  StreamsKIsOnboardingStatusResult,
+  WorkflowStatusResult,
 } from './src/onboarding';
 export {
   StreamsKIsOnboardingStep,
-  StreamsKIsOnboardingStatus,
+  WorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
 } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';

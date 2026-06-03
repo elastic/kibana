@@ -20,7 +20,7 @@ import type { Detection } from '@kbn/streams-schema';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { DetectionFlyout } from './detection_flyout';
-import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { RunDiscoveryEmptyPrompt } from '../shared/run_discovery_empty_prompt';
 import { DETECTIONS_EMPTY_PROMPT_TITLE } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
@@ -112,7 +112,7 @@ const DEFAULT_DETECTIONS_RANGE = { from: 'now-24h', to: 'now' };
 export const DetectionsTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
-  const { isRunning, handleRun } = useDiscoveryWorkflow();
+  const { isRunning, handleRun } = useSignificantEventsDiscovery();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
     from: absoluteRange.from,

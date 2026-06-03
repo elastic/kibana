@@ -13,7 +13,7 @@ import { STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/streams-schema
 import React, { useCallback, useState } from 'react';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
-import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
@@ -55,7 +55,7 @@ export function StreamsView() {
   const isConnectorCatalogUnavailable =
     !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
 
-  const { isRunning, handleRun } = useDiscoveryWorkflow();
+  const { isRunning, handleRun, handleCancel } = useSignificantEventsDiscovery();
 
   const isStreamActionable = useCallback(
     (streamName: string) => {
@@ -148,7 +148,8 @@ export function StreamsView() {
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton
               onRun={handleRun}
-              isLoading={isRunning}
+              onCancel={handleCancel}
+              isRunning={isRunning}
               isDisabled={isConnectorCatalogUnavailable}
             />
           </EuiFlexItem>

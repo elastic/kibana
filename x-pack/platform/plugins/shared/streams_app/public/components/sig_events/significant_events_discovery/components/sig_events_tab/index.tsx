@@ -30,7 +30,7 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
-import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
@@ -167,7 +167,7 @@ export const SigEventsTab = () => {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { filteredStreams } = useKiGeneration();
-  const { isRunning, handleRun } = useDiscoveryWorkflow();
+  const { isRunning, handleRun } = useSignificantEventsDiscovery();
 
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);

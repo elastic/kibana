@@ -83,7 +83,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -312,9 +312,7 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const streamsKIsOnboardingClient = plugins.workflowsManagement
-      ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
-      : undefined;
+    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
 
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
@@ -323,7 +321,7 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
-        streamsKIsOnboardingClient,
+        streamsKIsOnboardingClient: workflowClients.streamsKIsOnboardingClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -343,11 +341,11 @@ export class StreamsPlugin
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
-    if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
+    if (plugins.workflowsManagement && workflowClients.streamsKIsOnboardingClient) {
       continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
-        streamsKIsOnboardingClient,
+        streamsKIsOnboardingClient: workflowClients.streamsKIsOnboardingClient,
       });
     }
 
@@ -428,7 +426,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
-        streamsKIsOnboardingClient,
+        workflowClients,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

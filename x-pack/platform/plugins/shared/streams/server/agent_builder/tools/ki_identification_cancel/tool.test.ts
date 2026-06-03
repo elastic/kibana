@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { WorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
@@ -46,7 +46,7 @@ describe('createKiIdentificationCancelTool', () => {
       expect(result.results[0].data).toEqual({
         stream_name: 'logs.nginx',
         execution_id: 'exec-1',
-        status: StreamsKIsOnboardingStatus.Canceled,
+        status: WorkflowStatus.Canceled,
       });
     }
   });

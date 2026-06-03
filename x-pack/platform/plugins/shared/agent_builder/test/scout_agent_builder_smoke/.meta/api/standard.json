@@ -2,8 +2,8 @@
   "sha1": "477c0c903f235b6dd188aadd071768d598d2bd3f",
   "tests": [
     {
-      "id": "69056a2d02da36d-4a8c5e89b96ac8d",
-      "title": "Agent Builder — LLM smoke (converse API) should skip - no EIS models discovered",
+      "id": "69056a2d02da36d-2952bf0169e27ec",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-3.7-sonnet — simple message",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -11,8 +11,918 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
-        "line": 162,
-        "column": 14
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3465c32753a2515",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-3.7-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-c8ef907deff9c14",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-3.7-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ee7b16472d58467",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-haiku — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8caf07108d92f60",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-haiku — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ed2edede591ffcd",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-haiku — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d06be75cbe111cd",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-opus — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9f9cbf7cc3324aa",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-opus — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-92a5510acfb6c37",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-opus — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-fb932aab1823c25",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-sonnet — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ed3859a3a8e8fca",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d731bd575cd4087",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.5-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ea2d7b1ecb59af3",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-opus — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-58164f43c15944e",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-opus — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b6b782d452c00a8",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-opus — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-5a27d2ee51b7bfc",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-sonnet — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-02a8017ee6bcea1",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-26a56a54a995b60",
+      "title": "Agent Builder — LLM smoke (converse API) EIS anthropic-claude-4.6-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-66da1ff28930b59",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3e81209c56dd7ab",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b0a67067099595c",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-bb19689c2905bdd",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash-lite — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b6338c38b238d02",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash-lite — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e553b85f75a7453",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-flash-lite — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e3f0b15c92863ff",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-4463c8fbfb29891",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-bf7862d5c157797",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-2.5-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-eb4238bbbc37fc0",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.0-flash — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9ff0fa7586c6a06",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.0-flash — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a28c9b003b4f315",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.0-flash — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e13cdf74b2f436f",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.1-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b12c20715f3329b",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.1-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6dad60e7275b6f4",
+      "title": "Agent Builder — LLM smoke (converse API) EIS google-gemini-3.1-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-c42e5f3224cca84",
+      "title": "Agent Builder — LLM smoke (converse API) EIS gp-llm-v2 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b3dc78cca29294b",
+      "title": "Agent Builder — LLM smoke (converse API) EIS gp-llm-v2 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-df4c2bd806e3b52",
+      "title": "Agent Builder — LLM smoke (converse API) EIS gp-llm-v2 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-58ea59e45ed7efa",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3f9650cf67538fc",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a9887bd15e3b031",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-7594c5eee136be6",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1-mini — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a38d4e48931ca31",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1-mini — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e379498e3f03061",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-4.1-mini — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-250c7709f762529",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.2 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b0a2a493e1531c7",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.2 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a665948653451e0",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.2 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-0e90c731aa682c5",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6cce58aa62e1a44",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-69748e16d05d0b4",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-1b8f5572aa24195",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-mini — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ced8e24ea2e75c9",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-mini — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b465afba124915d",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-mini — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a9a8cc5caed390f",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-nano — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a7652bdbbdb2cd5",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-nano — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-baeac8617c667d3",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-nano — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-92b3abb9097cdfa",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-058d255fc50a38d",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-be203315d3eaa67",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-5.4-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3a6ccf67d1105a1",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-120b — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8e9f3e411aab355",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-120b — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-41303ca2ff90fd0",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-120b — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e2e644e634df041",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-20b — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-4178be95ea9217b",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-20b — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e3757b7081d3075",
+      "title": "Agent Builder — LLM smoke (converse API) EIS openai-gpt-oss-20b — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-847356480232693",
+      "title": "Agent Builder — LLM smoke (converse API) EIS rainbow-sprinkles — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9dd3ffdcb7ca664",
+      "title": "Agent Builder — LLM smoke (converse API) EIS rainbow-sprinkles — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 188,
+        "column": 16
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ef4132f1db6d303",
+      "title": "Agent Builder — LLM smoke (converse API) EIS rainbow-sprinkles — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 205,
+        "column": 16
       }
     }
   ]

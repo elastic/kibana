@@ -23,7 +23,7 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { DiscoveryFlyout } from './discovery_flyout';
-import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { RunDiscoveryEmptyPrompt } from '../shared/run_discovery_empty_prompt';
 import { DISCOVERIES_EMPTY_PROMPT_TITLE } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
@@ -109,7 +109,7 @@ const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
 export const DiscoveriesTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
-  const { isRunning, handleRun } = useDiscoveryWorkflow();
+  const { isRunning, handleRun } = useSignificantEventsDiscovery();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
     from: absoluteRange.from,

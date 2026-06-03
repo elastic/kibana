@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   TaskStatus,
@@ -13,6 +12,7 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import type { SignificantEventsDiscoveryStatusResult } from '../../../../lib/workflows/significant_events_discovery_client';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
@@ -231,10 +231,13 @@ const readAllSignificantEventsRoute = createServerRoute({
   },
 });
 
-const runDiscoveryPipelineRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/significant_events/discovery/_run',
+const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
   params: z.object({
-    body: z.object({}),
+    body: z.discriminatedUnion('action', [
+      z.object({ action: z.literal('trigger') }),
+      z.object({ action: z.literal('cancel') }),
+    ]),
   }),
   options: {
     access: 'internal',
@@ -248,40 +251,80 @@ const runDiscoveryPipelineRoute = createServerRoute({
     },
   },
   handler: async ({
+    params,
     request,
     getScopedClients,
-    getManagedWorkflowsClient,
+    workflowClients,
     getSpaceId,
     server,
     telemetry,
-  }): Promise<{ executionId: string }> => {
+  }): Promise<{ executionId: string | null }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { SignificantEventsDiscoveryClient } = workflowClients;
+
+    if (!SignificantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+
+    const spaceId = await getSpaceId(request);
+    const { body } = params;
+
+    if (body.action === 'trigger') {
+      const { executionId } = await SignificantEventsDiscoveryClient.run({
+        request,
+        spaceId,
+        triggeredBy: 'manual',
+      });
+      telemetry.trackSignificantEventsDiscoveryTriggered({
+        triggered_by: 'manual',
+        execution_id: executionId,
+        space_id: spaceId,
+      });
+      return { executionId };
+    }
+
+    const executionId = await SignificantEventsDiscoveryClient.cancel({ request, spaceId });
+    return { executionId };
+  },
+});
+
+const SignificantEventsDiscoveryStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/significant_events/discovery/_status',
+  params: z.object({}),
+  options: {
+    access: 'internal',
+    summary: 'Get the status of the Significant Events discovery pipeline',
+    description:
+      'Returns the status of the most recent Significant Events orchestrator workflow execution for the current space.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+  }): Promise<SignificantEventsDiscoveryStatusResult> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const managedWorkflowsClient = getManagedWorkflowsClient();
-    if (!managedWorkflowsClient) {
-      throw new FeatureNotEnabledError('Managed workflows client is not available');
+    if (!workflowClients) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
     }
 
     const spaceId = await getSpaceId(request);
-
-    const executionId = await managedWorkflowsClient.execute(
-      request,
-      SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
-      {
-        spaceId,
-        triggeredBy: 'manual',
-      }
-    );
-
-    telemetry.trackSignificantEventsDiscoveryTriggered({
-      triggered_by: 'manual',
-      execution_id: executionId,
-      space_id: spaceId,
-    });
-
-    return { executionId };
+    return workflowClients.SignificantEventsDiscoveryClient.getStatus({ spaceId });
   },
 });
 
@@ -289,5 +332,6 @@ export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readAllSignificantEventsRoute,
-  ...runDiscoveryPipelineRoute,
+  ...SignificantEventsDiscoveryExecuteRoute,
+  ...SignificantEventsDiscoveryStatusRoute,
 };

@@ -7,25 +7,42 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
 
 interface FindSignificantEventsButtonProps {
   onRun: () => void;
-  isLoading: boolean;
+  onCancel: () => void;
+  isRunning: boolean;
   isDisabled: boolean;
 }
 
 export const FindSignificantEventsButton = ({
   onRun,
-  isLoading,
+  onCancel,
+  isRunning,
   isDisabled,
 }: FindSignificantEventsButtonProps) => {
+  if (isRunning) {
+    return (
+      <EuiButton
+        iconType="stop"
+        onClick={onCancel}
+        color="warning"
+        data-test-subj="significant_events_cancel_discovery_button"
+      >
+        {i18n.translate('xpack.streams.significantEventsDiscovery.cancelLabel', {
+          defaultMessage: 'Cancel discovery',
+        })}
+      </EuiButton>
+    );
+  }
+
   return (
     <EuiButton
       iconType="sparkles"
       onClick={onRun}
-      isLoading={isLoading}
-      isDisabled={isDisabled || isLoading}
+      isDisabled={isDisabled}
       color="text"
       data-test-subj="significant_events_discover_insights_button"
     >

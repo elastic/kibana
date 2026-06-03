@@ -7,7 +7,7 @@
 
 import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
+import type { WorkflowStatusResult } from '@kbn/streams-schema';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
 
@@ -16,7 +16,7 @@ const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
 interface QueriesColumnProps {
   streamName: string;
-  streamOnboardingResult?: StreamsKIsOnboardingStatusResult;
+  streamOnboardingResult?: WorkflowStatusResult;
 }
 
 export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesColumnProps) {
