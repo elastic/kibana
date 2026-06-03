@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, appendTimeBucketToEsqlQuery } from '@kbn/lens-common';
 
 import React from 'react';
 
@@ -467,7 +467,6 @@ export function getTextBasedDatasource({
       if (!layer) return state;
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
-        const bucketExpr = `${tf} = BUCKET(${tf}, 50, ?_tstart, ?_tend)`;
         const timeColumn: TextBasedLayerColumn = {
           columnId,
           fieldName: tf,
@@ -477,18 +476,7 @@ export function getTextBasedDatasource({
         // Auto-modify query to add time bucketing for trendline
         let trendlineQuery = layer.query;
         if (trendlineQuery && 'esql' in trendlineQuery) {
-          const esql = trendlineQuery.esql;
-          // If STATS exists, append BY BUCKET(...); otherwise add STATS COUNT(*) BY BUCKET(...)
-          if (/\bSTATS\b/i.test(esql)) {
-            // Check if there's already a BY clause
-            if (/\bBY\b/i.test(esql)) {
-              trendlineQuery = { esql: `${esql}, ${bucketExpr}` };
-            } else {
-              trendlineQuery = { esql: `${esql} BY ${bucketExpr}` };
-            }
-          } else {
-            trendlineQuery = { esql: `${esql} | STATS COUNT(*) BY ${bucketExpr}` };
-          }
+          trendlineQuery = { esql: appendTimeBucketToEsqlQuery(trendlineQuery.esql, tf) };
         }
 
         return {

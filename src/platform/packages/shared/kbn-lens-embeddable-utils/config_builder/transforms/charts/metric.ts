@@ -9,6 +9,7 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  appendTimeBucketToEsqlQuery,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -698,16 +699,7 @@ function buildEsqlTrendlineLayer(
   if (!timeField) return undefined;
 
   // Build the trendline query: take the main query and add time bucketing
-  const mainQuery = dataSource.query;
-  const bucketExpr = `${timeField} = BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
-  let trendlineQuery: string;
-  if (/\bSTATS\b/i.test(mainQuery)) {
-    trendlineQuery = /\bBY\b/i.test(mainQuery)
-      ? `${mainQuery}, ${bucketExpr}`
-      : `${mainQuery} BY ${bucketExpr}`;
-  } else {
-    trendlineQuery = `${mainQuery} | STATS COUNT(*) BY ${bucketExpr}`;
-  }
+  const trendlineQuery = appendTimeBucketToEsqlQuery(dataSource.query, timeField);
 
   // Build trendline columns: time bucket + copies of metric columns from main layer
   const timeColumn: TextBasedLayerColumn = {

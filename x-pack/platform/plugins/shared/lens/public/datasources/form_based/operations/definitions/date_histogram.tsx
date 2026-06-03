@@ -35,13 +35,13 @@ import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-
 import { esql } from '@elastic/esql';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 
+import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 import {
   AUTO_INTERVAL,
-  AUTO_TARGET_NUMBER_OF_BUCKETS,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
   getTimeZoneAndInterval,
   hasDateRange,

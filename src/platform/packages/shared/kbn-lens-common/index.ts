@@ -417,3 +417,8 @@ export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '
 export { LENS_DATASOURCE_ID } from './embeddable/types';
 export type { LensDatasourceId } from './embeddable/types';
 export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';
+export { AUTO_TARGET_NUMBER_OF_BUCKETS } from './esql/constants';
+export {
+  buildTrendlineBucketExpression,
+  appendTimeBucketToEsqlQuery,
+} from './esql/trendline_query';
