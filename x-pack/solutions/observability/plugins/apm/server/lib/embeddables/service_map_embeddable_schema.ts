@@ -28,6 +28,8 @@ export const serviceMapCustomStateSchema = schema.object({
   // `time_range` here — presence of `time_range` is the implicit toggle (set → panel uses
   // its own; absent → panel inherits the dashboard's global time via fetch$ fallback).
   sync_with_dashboard_filters: schema.maybe(schema.boolean()),
+  // `maxSize` on each filter array is bounded by the number of distinct options the UI
+  // offers (these are closed enums), keeping the schema safe against unbounded input.
   alert_status_filter: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -35,7 +37,8 @@ export const serviceMapCustomStateSchema = schema.object({
         schema.literal('recovered'),
         schema.literal('untracked'),
         schema.literal('delayed'),
-      ])
+      ]),
+      { maxSize: 4 }
     )
   ),
   slo_status_filter: schema.maybe(
@@ -45,11 +48,14 @@ export const serviceMapCustomStateSchema = schema.object({
         schema.literal('degrading'),
         schema.literal('violated'),
         schema.literal('noData'),
-      ])
+      ]),
+      { maxSize: 4 }
     )
   ),
   connection_filter: schema.maybe(
-    schema.arrayOf(schema.oneOf([schema.literal('orphaned'), schema.literal('connected')]))
+    schema.arrayOf(schema.oneOf([schema.literal('orphaned'), schema.literal('connected')]), {
+      maxSize: 2,
+    })
   ),
   anomaly_severity_filter: schema.maybe(
     schema.arrayOf(
@@ -60,10 +66,11 @@ export const serviceMapCustomStateSchema = schema.object({
         schema.literal('warning'),
         schema.literal('low'),
         schema.literal('unknown'),
-      ])
+      ]),
+      { maxSize: 6 }
     )
   ),
-  find_query: schema.maybe(schema.string()),
+  find_query: schema.maybe(schema.string({ maxLength: 2048 })),
 });
 
 export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;

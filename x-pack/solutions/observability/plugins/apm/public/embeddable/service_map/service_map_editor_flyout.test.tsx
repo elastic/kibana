@@ -150,6 +150,12 @@ describe('<ServiceMapEditorFlyout/>', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: undefined,
           service_name: undefined,
+          sync_with_dashboard_filters: false,
+          alert_status_filter: undefined,
+          slo_status_filter: undefined,
+          connection_filter: undefined,
+          anomaly_severity_filter: undefined,
+          map_orientation: 'horizontal',
         });
       });
     });
@@ -169,6 +175,12 @@ describe('<ServiceMapEditorFlyout/>', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: 'host.name: server1',
           service_name: undefined,
+          sync_with_dashboard_filters: false,
+          alert_status_filter: undefined,
+          slo_status_filter: undefined,
+          connection_filter: undefined,
+          anomaly_severity_filter: undefined,
+          map_orientation: 'horizontal',
         });
       });
     });

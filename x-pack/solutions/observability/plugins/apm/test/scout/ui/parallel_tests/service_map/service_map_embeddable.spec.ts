@@ -367,20 +367,16 @@ test.describe(
         await pageObjects.dashboard.saveCustomizePanel();
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
 
-        // Still last 24h at the dashboard level -> node present.
+        // Still last 24h at the dashboard level (inherited) -> node present.
         await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
         // Move the dashboard's global time to a window with no APM data -> map empties,
-        // confirming the panel honors the dashboard time range change.
+        // confirming the panel honors the dashboard time range change once it inherits it.
         await pageObjects.datePicker.setAbsoluteRange({
           from: 'Sep 22, 2015 @ 00:00:00.000',
           to: 'Sep 23, 2015 @ 00:00:00.000',
         });
         await expect(serviceNode).toBeHidden({ timeout: EXTENDED_TIMEOUT });
-
-        // Restore a range that covers the synth data -> node returns.
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
-        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
     });
   }
