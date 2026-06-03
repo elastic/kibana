@@ -280,9 +280,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         isRelated: (sibling) => {
           return apiHasUseGlobalFiltersSetting(sibling)
             ? Boolean(sibling.useGlobalFilters$.getValue())
-            : false;
+            : true;
         },
-        relatedObservables: [],
         relatedSiblingObservables: ['useGlobalFilters$'],
       });
 

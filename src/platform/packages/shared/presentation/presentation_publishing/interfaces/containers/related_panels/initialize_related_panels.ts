@@ -68,7 +68,7 @@ export const initializeRelatedPanels = ({
       skipWhile(([viewMode, childrenLoading]) => childrenLoading || viewMode !== 'edit'),
       distinctUntilChanged(),
       switchMap(([viewMode, childrenLoading]) => {
-        return combineLatest([childrenApi.children$, section$]).pipe(
+        return combineLatest([childrenApi.children$, section$, ...(relatedObservables ?? [])]).pipe(
           switchMap(([children, section, ...relatedValues]) => {
             const siblingEntries = Object.entries(children).filter(
               ([siblingUuid]) => siblingUuid !== uuid

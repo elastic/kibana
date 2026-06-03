@@ -20,6 +20,7 @@ import {
   apiPublishesSettings,
   initializeRelatedPanels,
   initializeStateApi,
+  apiHasUseGlobalFiltersSetting,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -250,8 +251,16 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
           setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
-
-      const relatedPanelsApi = initializeRelatedPanels({ uuid, parentApi, isFilterControl: true });
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        isRelated: (sibling) => {
+          return apiHasUseGlobalFiltersSetting(sibling)
+            ? Boolean(sibling.useGlobalFilters$.getValue())
+            : true,
+        },
+        relatedSiblingObservables: ['useGlobalFilters$'],
+      });
 
       const api = finalizeApi({
         ...relatedPanelsApi,
