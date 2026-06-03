@@ -75,7 +75,7 @@ export function ServiceFlyoutTransactionsSection({
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { items, isLoading, maxCountExceeded } = useServiceFlyoutTransactions({
+  const { items, isLoading, maxCountExceeded, hasActiveAlerts } = useServiceFlyoutTransactions({
     http,
     serviceName,
     environment,
@@ -120,7 +120,13 @@ export function ServiceFlyoutTransactionsSection({
       maxCountExceeded={maxCountExceeded}
       latencyAggregationType={latencyAggregationType}
       showSparklines={false}
-      columns={['name', 'alerts', 'latency', 'throughput', 'errorRate']}
+      columns={[
+        'name',
+        ...(hasActiveAlerts ? (['alerts'] as const) : []),
+        'latency',
+        'throughput',
+        'errorRate',
+      ]}
       headerActions={
         openInTransactionsHref
           ? [

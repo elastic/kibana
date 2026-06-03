@@ -24,6 +24,7 @@ interface MainStatisticsResponse {
     impact?: number;
   }>;
   maxCountExceeded: boolean;
+  hasActiveAlerts: boolean;
 }
 
 export function useServiceFlyoutTransactions({
@@ -118,5 +119,6 @@ export function useServiceFlyoutTransactions({
     items,
     isLoading,
     maxCountExceeded: response?.maxCountExceeded ?? false,
+    hasActiveAlerts: response?.hasActiveAlerts ?? false,
   };
 }

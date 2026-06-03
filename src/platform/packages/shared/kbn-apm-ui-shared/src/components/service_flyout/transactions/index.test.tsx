@@ -91,4 +91,22 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(screen.queryByRole('link', { name: 'GET /api/orders' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open in APM' })).not.toBeInTheDocument();
   });
+
+  it('renders the alerts column when hasActiveAlerts is true', async () => {
+    (http.get as jest.Mock).mockResolvedValue({ ...FIXTURE_RESPONSE, hasActiveAlerts: true });
+
+    render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+    await waitFor(() => screen.getByText('GET /api/orders'));
+
+    expect(screen.getByRole('columnheader', { name: /active alerts/i })).toBeInTheDocument();
+  });
+
+  it('omits the alerts column when hasActiveAlerts is false', async () => {
+    render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+    await waitFor(() => screen.getByText('GET /api/orders'));
+
+    expect(screen.queryByRole('columnheader', { name: /active alerts/i })).not.toBeInTheDocument();
+  });
 });

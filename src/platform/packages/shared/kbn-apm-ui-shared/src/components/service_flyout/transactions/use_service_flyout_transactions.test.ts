@@ -163,6 +163,26 @@ describe('useServiceFlyoutTransactions', () => {
     await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
   });
 
+  it('reflects hasActiveAlerts from the response', async () => {
+    const http = makeHttp({
+      transactionGroups: [],
+      maxCountExceeded: false,
+      hasActiveAlerts: true,
+    });
+
+    const { result } = renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
+
+    await waitFor(() => expect(result.current.hasActiveAlerts).toBe(true));
+  });
+
+  it('defaults hasActiveAlerts to false when absent from the response', async () => {
+    const http = makeHttp(EMPTY_RESPONSE);
+
+    const { result } = renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
+
+    await waitFor(() => expect(result.current.hasActiveAlerts).toBe(false));
+  });
+
   it('re-fetches when searchQuery changes', async () => {
     const http = makeHttp(EMPTY_RESPONSE);
 
