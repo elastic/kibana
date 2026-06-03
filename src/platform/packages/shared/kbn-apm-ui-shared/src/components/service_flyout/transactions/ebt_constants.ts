@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './actions_menu';
-export * from './service_flyout/transactions';
-export * from './duration';
-export * from './duration_distribution_chart';
-export * from './http_status_code';
-export * from './span_icon';
-export * from './sparkline';
-export * from './timestamp';
-export * from './transactions_table';
-
-export { getSpanIcon } from './span_icon/get_span_icon';
+export const SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS = {
+  HEADER: 'serviceFlyoutTransactionsHeader',
+} as const;
