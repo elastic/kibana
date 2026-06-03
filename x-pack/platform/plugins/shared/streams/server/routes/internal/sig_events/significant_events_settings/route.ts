@@ -13,6 +13,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
@@ -47,11 +48,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousKiExtractionWorkflowService,
+    continuousKiOnboardingWorkflowService,
     logger,
   }): Promise<{ success: true }> => {
-    if (!continuousKiExtractionWorkflowService) {
-      throw new Error('Continuous KI extraction workflow service is not available');
+    if (!continuousKiOnboardingWorkflowService) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
     const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
@@ -96,7 +97,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
 
     if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
       try {
-        await continuousKiExtractionWorkflowService.ensureWorkflow({
+        await continuousKiOnboardingWorkflowService.ensureWorkflow({
           enabled: nextEnabled,
           request,
         });

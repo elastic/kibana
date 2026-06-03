@@ -14,16 +14,16 @@ import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/con
 import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
 
-// The managed continuous extraction workflow is installed and scheduled in the
+// The managed continuous onboarding workflow is installed and scheduled in the
 // default space so its executions (and the onboarding executions it triggers)
 // are stored there, matching the legacy workflow's original space.
 const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
 // The legacy (pre-migration) workflow was always created in the default space.
 const LEGACY_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
 
-export interface ContinuousKiExtractionWorkflowService {
+export interface ContinuousKiOnboardingWorkflowService {
   /**
-   * Reconciles the continuous extraction workflow when the user toggles the
+   * Reconciles the continuous onboarding workflow when the user toggles the
    * feature on or off.
    *
    * - Enabling only enables the managed workflow (which schedules its trigger).
@@ -38,7 +38,7 @@ export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
 }
 
-export const createContinuousKiExtractionWorkflowService = ({
+export const createContinuousKiOnboardingWorkflowService = ({
   logger,
   managementApi,
   streamsKIsOnboardingClient,
@@ -46,8 +46,8 @@ export const createContinuousKiExtractionWorkflowService = ({
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
-}): ContinuousKiExtractionWorkflowService => {
-  const log = logger.get('continuous-ki-extraction-workflow');
+}): ContinuousKiOnboardingWorkflowService => {
+  const log = logger.get('continuous-ki-onboarding-workflow');
 
   const getNonTerminalExecutions = async ({
     workflowId,
@@ -165,7 +165,7 @@ export const createContinuousKiExtractionWorkflowService = ({
     async ensureWorkflow({ enabled, request }) {
       if (enabled) {
         await setManagedEnabled({ enabled: true, request });
-        log.info(`Enabled continuous KI extraction workflow`);
+        log.info(`Enabled continuous KI onboarding workflow`);
         return;
       }
 
@@ -188,7 +188,7 @@ export const createContinuousKiExtractionWorkflowService = ({
         .cancelAllRunning({ request })
         .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
 
-      log.info(`Disabled continuous KI extraction workflow`);
+      log.info(`Disabled continuous KI onboarding workflow`);
     },
   };
 };

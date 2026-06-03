@@ -22,7 +22,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
@@ -82,9 +81,9 @@ import { PatternExtractionService } from './lib/pattern_extraction/pattern_extra
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
+  createContinuousKiOnboardingWorkflowService,
+  type ContinuousKiOnboardingWorkflowService,
+} from './lib/workflows/continuous_onboarding_workflow';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -346,10 +345,10 @@ export class StreamsPlugin
         });
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
@@ -432,7 +431,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousKiOnboardingWorkflowService,
         streamsKIsOnboardingClient,
       },
       core,
@@ -647,14 +646,7 @@ export class StreamsPlugin
         STREAMS_MANAGED_WORKFLOW_OWNER
       );
 
-      await Promise.all([
-        installWorkflows({ client }),
-        // Installed in the default space (not global) so its scheduled executions
-        // are stored alongside the onboarding executions it triggers.
-        client.install(STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, {
-          spaceId: DEFAULT_SPACE_ID,
-        }),
-      ]);
+      await installWorkflows({ client });
       this.logger.info('Streams managed workflows installed');
 
       await client.ready();
