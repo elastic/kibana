@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { PostCompositeSloSummaryRefreshResponse } from '@kbn/slo-schema';
-import type { SLORoutesDependencies } from '../../../routes/types';
+import type { SLORoutesDependencies } from '../../../routes/utils/types';
 import type { CompositeSloSummaryTaskState } from './types';
 import { getCompositeSloSummaryTaskId } from './composite_slo_summary_task';
 

@@ -12,6 +12,7 @@ import type {
   CoreSetup,
   CoreStart,
 } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { VECTORDB_PROJECT_SETTINGS } from '@kbn/serverless-vectordb-settings';
 
 import type { ServerlessVectordbConfig } from './config';
@@ -52,8 +53,30 @@ export class ServerlessVectordbPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { dataViews }: StartDependencies) {
+    this.createDefaultDataView(core, dataViews).catch(() => {});
     return {};
+  }
+
+  private async createDefaultDataView(core: CoreStart, dataViews: DataViewsServerPluginStart) {
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
+      core.savedObjects.createInternalRepository(),
+      core.elasticsearch.client.asInternalUser,
+      undefined,
+      true
+    );
+    const dataViewExists = await dataViewsService.get('default_all_data_id').catch(() => false);
+    if (!dataViewExists) {
+      const defaultDataViewExists = await dataViewsService.defaultDataViewExists();
+      if (!defaultDataViewExists) {
+        await dataViewsService.createAndSave({
+          allowNoIndex: false,
+          name: 'default:all-data',
+          title: '*,-.*',
+          id: 'default_all_data_id',
+        });
+      }
+    }
   }
 
   public stop() {}

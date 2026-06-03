@@ -8,6 +8,7 @@
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
+    "@kbn/es-types",
   ],
   "exclude": ["target/**/*"]
 }
