@@ -51,6 +51,10 @@ import {
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  DETECTION_EMULATION_ALLOWLIST_ENDPOINT_IDS_SETTING,
+  DETECTION_EMULATION_RATE_LIMITER_MAX_COMMANDS_SETTING,
+  DETECTION_EMULATION_RATE_LIMITER_WINDOW_MS_SETTING,
+  DETECTION_EMULATION_RATE_LIMITER_PER_HOST_CAPACITY_SETTING,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
@@ -586,6 +590,120 @@ export const initUiSettings = (
             },
             category: [APP_ID],
             requiresPageReload: false,
+            solutionViews: ['classic', 'security'],
+          },
+        }
+      : {}),
+    // ─── Detection Emulation guardrail overrides ──────────────────────
+    //
+    // Per-space runtime overrides for the kibana.yml-defined
+    // `xpack.securitySolution.detectionEmulation.{allowlist,rateLimiter}`
+    // defaults. Resolved per-request via `runtime_config_resolver.ts`
+    // and threaded into the rate limiter/allowlist as `effectiveConfig`
+    // overrides. Sentinel values (empty array / `0` number) mean
+    // "fall back to kibana.yml" so operators can clear their override.
+    //
+    // Gated on `detectionEmulationRealExecution` so the settings page
+    // only shows them where they have effect — the gates these knobs
+    // configure are `real_execution`-mode-only.
+    //
+    // `allowAll` and `disabled` are NOT exposed here on purpose:
+    // bypass-style flips should require a deliberate `kibana.yml` edit
+    // + restart, not a one-click toggle a space admin might forget.
+    ...(experimentalFeatures.detectionEmulationRealExecution
+      ? {
+          [DETECTION_EMULATION_ALLOWLIST_ENDPOINT_IDS_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationAllowlistEndpointIdsLabel',
+              { defaultMessage: 'Detection emulation: endpoint allowlist' }
+            ),
+            value: [],
+            type: 'array',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationAllowlistEndpointIdsDescription',
+              {
+                defaultMessage: `<p>Comma-delimited list of Elastic Defend agent IDs permitted to receive <code>real_execution</code> response actions in this space.</p><p>An empty list falls back to <code>xpack.securitySolution.detectionEmulation.allowlist.endpointIds</code> in <code>kibana.yml</code>. A non-empty list overrides it for the current space (the kibana.yml list is NOT merged in — set every endpoint you want to permit here).</p><p>Takes effect on the next <code>real_execution</code> request — no Kibana restart required.</p>`,
+                values: {
+                  p: (chunks) => `<p>${chunks}</p>`,
+                  code: (chunks) => `<code>${chunks}</code>`,
+                },
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: schema.arrayOf(schema.string({ minLength: 1 })),
+            solutionViews: ['classic', 'security'],
+          },
+          [DETECTION_EMULATION_RATE_LIMITER_MAX_COMMANDS_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterMaxCommandsLabel',
+              { defaultMessage: 'Detection emulation: per-space command cap' }
+            ),
+            value: 0,
+            type: 'number',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterMaxCommandsDescription',
+              {
+                defaultMessage: `<p>Maximum number of detection-emulation commands this space may dispatch within the rate-limit window. Per-space.</p><p><code>0</code> falls back to <code>xpack.securitySolution.detectionEmulation.rateLimiter.maxCommands</code> in <code>kibana.yml</code> (default: 100).</p><p>Mutation semantics: a lower cap is enforced on the next <code>acquire()</code>; existing in-flight reservations are not retroactively rejected. A higher cap takes effect immediately.</p>`,
+                values: {
+                  p: (chunks) => `<p>${chunks}</p>`,
+                  code: (chunks) => `<code>${chunks}</code>`,
+                },
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: validationsEnabled
+              ? schema.number({ min: 0, max: 100_000 })
+              : schema.number({ min: 0 }),
+            solutionViews: ['classic', 'security'],
+          },
+          [DETECTION_EMULATION_RATE_LIMITER_WINDOW_MS_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterWindowMsLabel',
+              { defaultMessage: 'Detection emulation: rate-limit window (ms)' }
+            ),
+            value: 0,
+            type: 'number',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterWindowMsDescription',
+              {
+                defaultMessage: `<p>Sliding-window length in milliseconds for the per-space command cap. Per-space.</p><p><code>0</code> falls back to <code>xpack.securitySolution.detectionEmulation.rateLimiter.windowMs</code> in <code>kibana.yml</code> (default: 3 600 000 = 1h).</p><p>Mutation semantics: a shorter window evicts older entries on the next acquire; a longer window keeps older entries around until they exceed the new horizon.</p>`,
+                values: {
+                  p: (chunks) => `<p>${chunks}</p>`,
+                  code: (chunks) => `<code>${chunks}</code>`,
+                },
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: validationsEnabled
+              ? schema.number({ min: 0, max: 24 * 60 * 60 * 1000 })
+              : schema.number({ min: 0 }),
+            solutionViews: ['classic', 'security'],
+          },
+          [DETECTION_EMULATION_RATE_LIMITER_PER_HOST_CAPACITY_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterPerHostCapacityLabel',
+              { defaultMessage: 'Detection emulation: per-host capacity' }
+            ),
+            value: 0,
+            type: 'number',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.detectionEmulationRateLimiterPerHostCapacityDescription',
+              {
+                defaultMessage: `<p>Maximum number of detection-emulation commands a single Elastic Defend host may receive within the per-host window. Defends host-side response-action queues.</p><p><code>0</code> falls back to <code>xpack.securitySolution.detectionEmulation.rateLimiter.perHost.capacity</code> in <code>kibana.yml</code> (default: 3).</p><p>Raising this requires confirming the target EDR vendor can absorb the additional load — vendors document a per-host queue depth before backpressure kicks in.</p>`,
+                values: {
+                  p: (chunks) => `<p>${chunks}</p>`,
+                  code: (chunks) => `<code>${chunks}</code>`,
+                },
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: validationsEnabled
+              ? schema.number({ min: 0, max: 1_000 })
+              : schema.number({ min: 0 }),
             solutionViews: ['classic', 'security'],
           },
         }

@@ -44,6 +44,10 @@ import {
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
+import {
+  type DetectionEmulationGuardrails,
+  createDetectionEmulationGuardrails,
+} from './lib/detection_emulation/execution/shared_guardrails';
 import { ManifestConstants, ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initEncryptedSavedObjects, initSavedObjects } from './saved_objects';
@@ -205,6 +209,15 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
   private trialCompanionMilestoneService: TrialCompanionMilestoneService;
   private usageCollection?: UsageCollectionSetup;
+  /**
+   * Shared detection-emulation guardrail bundle. Constructed in `setup()`
+   * before `initRoutes` runs and reused later in the same `setup()` call
+   * by `registerAgentBuilderAttachmentsAndTools` so the REST routes and
+   * the Agent Builder skill's inline tools share the same allowlist set,
+   * the same per-space + per-host rate-limit windows, and the same
+   * concurrency gate. See `lib/detection_emulation/execution/shared_guardrails.ts`.
+   */
+  private detectionEmulationGuardrails?: DetectionEmulationGuardrails;
 
   private isServerless: boolean;
 
@@ -258,7 +271,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerAgentBuilderAttachmentsAndTools(
     plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    detectionEmulationGuardrails: DetectionEmulationGuardrails
   ): void {
     if (!plugins.agentBuilder) {
       return;
@@ -287,6 +301,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       ml: plugins.ml,
       options: { endpointAppContextService },
+      core,
+      config: this.config,
+      detectionEmulationGuardrails,
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -649,6 +666,18 @@ export class Plugin implements ISecuritySolutionPlugin {
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
+
+    // Construct the detection-emulation guardrail bundle ONCE per plugin
+    // setup so the two REST routes (run_command + validate_rule) and the
+    // Agent Builder skill's five inline tool factories share the same
+    // allowlist set, the same per-space + per-host rate-limit windows,
+    // and the same in-flight concurrency gate. Constructed here (before
+    // both `initRoutes` and `registerAgentBuilderAttachmentsAndTools`
+    // run) so both wirings can reference the same instances. See
+    // `lib/detection_emulation/execution/shared_guardrails.ts` for the
+    // historical bug this prevents.
+    const detectionEmulationGuardrails = createDetectionEmulationGuardrails(config, logger);
+
     initRoutes(
       router,
       config,
@@ -667,8 +696,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      detectionEmulationGuardrails
     );
+
+    // Stash for use further down in setup() — `registerAgentBuilderAttachmentsAndTools`
+    // is called near the end of this method and must receive the same
+    // bundle so the inline tools share state with the REST routes above.
+    this.detectionEmulationGuardrails = detectionEmulationGuardrails;
 
     registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
@@ -823,7 +858,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(
+      plugins,
+      core,
+      this.logger,
+      // Non-null asserted: set unconditionally above in this same setup()
+      // method before this call site (~line 631 area), so it is always
+      // populated by the time the agent-builder wiring runs.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.detectionEmulationGuardrails!
+    );
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions, core);

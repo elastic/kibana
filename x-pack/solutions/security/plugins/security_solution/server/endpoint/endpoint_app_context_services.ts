@@ -301,12 +301,40 @@ export class EndpointAppContextService {
     return this.setupDependencies.loggerFactory.get(...contextParts);
   }
 
-  public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+  public async getEndpointAuthz(
+    request: KibanaRequest,
+    scopedEsClient?: ElasticsearchClient
+  ): Promise<EndpointAuthz> {
     if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
-    const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
+    let userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
+
+    // `getCurrentUser` reads from `http.auth.get(request).state`, which is only
+    // populated by Kibana's HTTP auth pipeline on real HTTP requests. Synthetic
+    // `fakeRequest`s constructed by Task Manager (used by Agent Builder, alerting,
+    // workflows, …) bypass that pipeline so `getCurrentUser` returns null and
+    // `userRoles` collapses to `[]`. The request still carries the operator's
+    // API key in its Authorization header, so a request-scoped ES
+    // `_security/_authenticate` call recovers the roles. Mirrors the canonical
+    // `getUserFromRequest` (`x-pack/platform/plugins/shared/agent_builder/server/services/utils.ts`)
+    // and `getAuthenticatedUser` (`workflows_execution_engine/server/lib/get_user.ts`)
+    // patterns. Removable once
+    // https://github.com/elastic/kibana/pull/261423 (`Make profile ID available
+    // in Task Manager fake requests`) lands and TM populates the auth state on
+    // fakeRequests itself.
+    if (userRoles.length === 0 && request.isFakeRequest && scopedEsClient) {
+      try {
+        const authResponse = await scopedEsClient.security.authenticate();
+        userRoles = authResponse.roles ?? [];
+      } catch {
+        // Fall through with empty roles; downstream `calculateEndpointAuthz`
+        // returns the anonymous-no-privilege authz object, which the caller
+        // surfaces as a 403.
+      }
+    }
+
     return calculateEndpointAuthz(
       this.getLicenseService(),
       fleetAuthz,

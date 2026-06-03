@@ -28,6 +28,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { DETECTIONS_TABLE_IDS } from '../../constants';
+import { EmulationFilter } from '../emulation';
 
 const { changeViewMode } = dataTableActions;
 
@@ -134,6 +135,11 @@ const AdditionalToolbarControlsComponent = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>{additionalFiltersComponent}</EuiFlexItem>
+      {DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType) && (
+        <EuiFlexItem grow={false}>
+          <EmulationFilter />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>{groupSelector}</EuiFlexItem>
     </EuiFlexGroup>
   );

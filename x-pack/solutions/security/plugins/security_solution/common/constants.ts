@@ -268,6 +268,36 @@ export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
 /** This hidden Kibana Advanced Setting stores gap reason types to exclude from gap monitoring and auto-fill */
 export const EXCLUDED_GAP_REASONS_KEY = 'securitySolution:excludedGapReasons' as const;
 
+// ─── Detection Emulation guardrail Advanced Settings ──────────────────────
+//
+// Per-space runtime overrides for the deployment-wide kibana.yml defaults
+// in `xpack.securitySolution.detectionEmulation.{allowlist,rateLimiter}`.
+// When an Advanced Setting is unset (empty array / 0 number / undefined),
+// the resolver falls back to the kibana.yml value. See
+// `server/lib/detection_emulation/runtime_config_resolver.ts` for the
+// fallback logic and `server/ui_settings.ts` for registration.
+//
+// These are gated on `experimentalFeatures.detectionEmulationRealExecution`
+// so they only show up in Advanced Settings when the feature is on —
+// otherwise they would pollute the settings page with knobs that have no
+// effect.
+
+/** Per-space allowlist override. Empty array = fall back to kibana.yml. */
+export const DETECTION_EMULATION_ALLOWLIST_ENDPOINT_IDS_SETTING =
+  'securitySolution:detectionEmulation:allowlistEndpointIds' as const;
+
+/** Per-space cap on detection-emulation commands per window. 0 = fall back to kibana.yml. */
+export const DETECTION_EMULATION_RATE_LIMITER_MAX_COMMANDS_SETTING =
+  'securitySolution:detectionEmulation:rateLimiterMaxCommands' as const;
+
+/** Per-space rate-limit window in milliseconds. 0 = fall back to kibana.yml. */
+export const DETECTION_EMULATION_RATE_LIMITER_WINDOW_MS_SETTING =
+  'securitySolution:detectionEmulation:rateLimiterWindowMs' as const;
+
+/** Per-host capacity within the rate-limit window. 0 = fall back to kibana.yml. */
+export const DETECTION_EMULATION_RATE_LIMITER_PER_HOST_CAPACITY_SETTING =
+  'securitySolution:detectionEmulation:rateLimiterPerHostCapacity' as const;
+
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
@@ -321,6 +351,23 @@ export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
+
+/**
+ * Detection emulation routes
+ */
+export const DETECTION_ENGINE_EMULATION_URL = `${INTERNAL_DETECTION_ENGINE_URL}/emulation` as const;
+/**
+ * Operator-driven halt for in-flight emulation reservations. Pairs
+ * with the runtime kill switch
+ * (`xpack.securitySolution.detectionEmulation.realExecutionEnabled`):
+ * the kill switch blocks NEW dispatches; this route releases the
+ * concurrency-gate slots already in flight so a fresh `acquire()`
+ * succeeds immediately after the operator flips the switch. Closes
+ * register row #10 residual / R-N3 — see
+ * `detection-emulation-production-risk-analysis.html`.
+ */
+export const DETECTION_ENGINE_EMULATION_HALT_URL =
+  `${DETECTION_ENGINE_EMULATION_URL}/halt` as const;
 
 /**
  * Extended alerts routes

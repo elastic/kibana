@@ -120,6 +120,7 @@ export type {
   InternalAgentDefinitionAvailabilityHandler,
   AgentRegistry,
 } from './agents';
+export { defineSkillType } from './skills';
 export type { SkillRegistry } from './skills';
 export type {
   AgentBuilderPluginSetup,

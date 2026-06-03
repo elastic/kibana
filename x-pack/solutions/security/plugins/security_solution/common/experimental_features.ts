@@ -234,6 +234,24 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Detection Emulation Agent Builder skill and the
+   * `runEmulationCommand` route's real-execution path. When `false`, the
+   * skill is not registered and the route returns 403 — there is no
+   * dry-run mode. Default off.
+   */
+  detectionEmulationRealExecution: false,
+
+  /**
+   * Enables the log-injection dispatch mode for the detection emulation
+   * `validateRule` pipeline. When `true`, the pipeline synthesises ECS
+   * documents tagged with `kibana.alert.emulation.mode: 'log_injection'`
+   * instead of dispatching real response actions to endpoints. Safe to
+   * enable in any environment; default off until the feature graduates
+   * from experimental.
+   */
+  detectionEmulationLogInjection: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,

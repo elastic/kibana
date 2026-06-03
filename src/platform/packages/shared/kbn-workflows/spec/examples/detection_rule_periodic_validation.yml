@@ -1,0 +1,206 @@
+version: '1'
+name: Detection Rule Periodic Validation
+description: >-
+  Validates a detection rule daily via the detection-emulation skill. If the
+  emulation confidence drops below a configurable threshold, opens a Kibana
+  case and notifies the on-call channel via Slack. Defaults to the safe
+  `log_injection` mode (no live endpoint actions) so the workflow is suitable
+  to run on a schedule without operator approval. Switch `mode` to
+  `real_execution` for full coverage when the operator allowlist is
+  configured.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: scheduled
+    with:
+      every: '24h'
+
+inputs:
+  properties:
+    rule_id:
+      type: string
+      description: ID of the detection rule to validate.
+      minLength: 1
+    endpoint_ids:
+      type: array
+      description: >-
+        Endpoint IDs to bind the emulation against. For `log_injection` mode,
+        any non-empty string per item is accepted (the skill uses these only
+        as host-attribution tags on the synthetic ECS docs). For
+        `real_execution` mode each ID must be an enrolled Elastic Defend
+        agent that the operator has explicitly allowlisted.
+      items:
+        type: string
+        minLength: 1
+      minItems: 1
+      maxItems: 5
+    mode:
+      type: string
+      description: >-
+        Validation mode. `log_injection` (default) writes synthetic ECS
+        documents and is safe to run unattended. `real_execution` dispatches
+        live response actions; requires operator allowlist + per-host /
+        per-space rate budget.
+      enum:
+        - log_injection
+        - real_execution
+      default: log_injection
+    confidence_threshold:
+      type: number
+      description: >-
+        Confidence score below which the workflow opens a case and pages
+        on-call. The skill produces a 0-1 score combining coverage (matched
+        signals / expected) and precision (TP / TP+FP).
+      minimum: 0
+      maximum: 1
+      default: 0.5
+    slack_connector_id:
+      type: string
+      description: >-
+        Slack connector to notify when confidence regresses. Leave blank to
+        skip the Slack step (the case is still opened).
+      default: ''
+  required:
+    - rule_id
+    - endpoint_ids
+
+steps:
+  # The agent invokes the `detection-emulation` skill (which it discovers
+  # automatically by description). The skill's `validateRule` tool enforces
+  # operator allowlist + rate-limit + concurrency gates internally — we do
+  # NOT need to re-implement them here. The structured output schema below
+  # forces the agent to return a typed result we can branch on without
+  # parsing free-form text.
+  - name: validate
+    type: ai.agent
+    timeout: 600s
+    with:
+      message: >-
+        Use the detection-emulation skill to validate rule
+        `{{ inputs.rule_id }}` against endpoints
+        {{ inputs.endpoint_ids | json }} in `{{ inputs.mode }}` mode.
+        Do not ask follow-up questions — proceed with the validation and
+        return the structured result.
+      schema:
+        title: Detection Emulation Result
+        type: object
+        properties:
+          confidence:
+            type: number
+            description: 0-1 confidence score; coverage * 0.6 + precision * 0.4.
+          coverage:
+            type: number
+            description: matched_signals / expected_signals.
+          precision:
+            type: number
+            description: true_positives / (true_positives + false_positives).
+          report_id:
+            type: string
+            description: Skill-side audit-trail ID.
+          matched_signals:
+            type: array
+            items:
+              type: string
+            description: Rule names that fired as expected.
+          unmatched_signals:
+            type: array
+            items:
+              type: string
+            description: Expected rule names that did not fire.
+          caveats:
+            type: array
+            items:
+              type: string
+            description: Skill-side scoring caveats (e.g. no_alerts_observed).
+        required:
+          - confidence
+          - report_id
+
+  # Branch on the agent's structured output. KQL conditions cannot use
+  # Liquid filters, so we read the typed field directly.
+  - name: regression_check
+    type: if
+    condition: >-
+      steps.validate.output.structured_output.confidence <
+      inputs.confidence_threshold
+    steps:
+      - name: open_case
+        type: cases.createCase
+        with:
+          title: >-
+            Detection rule `{{ inputs.rule_id }}` confidence regressed to
+            {{ steps.validate.output.structured_output.confidence }}
+          description: >-
+            ## Periodic emulation regression
+
+
+            **Rule:** `{{ inputs.rule_id }}`
+
+
+            **Mode:** `{{ inputs.mode }}`
+
+
+            **Confidence:**
+            `{{ steps.validate.output.structured_output.confidence }}`
+            (threshold `{{ inputs.confidence_threshold }}`)
+
+
+            **Coverage:**
+            `{{ steps.validate.output.structured_output.coverage }}`
+
+
+            **Precision:**
+            `{{ steps.validate.output.structured_output.precision }}`
+
+
+            **Matched signals:**
+            {{ steps.validate.output.structured_output.matched_signals | json }}
+
+
+            **Unmatched signals (investigate first):**
+            {{ steps.validate.output.structured_output.unmatched_signals | json }}
+
+
+            **Caveats:**
+            {{ steps.validate.output.structured_output.caveats | json }}
+
+
+            **Skill-side report ID:** `{{ steps.validate.output.structured_output.report_id }}`
+          tags:
+            - automation
+            - detection-emulation
+            - regression
+          owner: securitySolution
+          severity: high
+          settings:
+            syncAlerts: false
+
+      # Slack is optional — gated on the connector ID input being set so the
+      # workflow YAML works out-of-the-box for users without Slack
+      # configured. Replace `connector-id` with your own and remove the
+      # outer `if` if you want notifications to be mandatory.
+      - name: slack_notify_check
+        type: if
+        condition: 'inputs.slack_connector_id != ""'
+        steps:
+          - name: notify_slack
+            type: slack
+            connector-id: '{{ inputs.slack_connector_id }}'
+            with:
+              message: >-
+                :rotating_light: Detection rule
+                `{{ inputs.rule_id }}` confidence regressed to
+                {{ steps.validate.output.structured_output.confidence }}.
+                Case
+                `{{ steps.open_case.output.id }}` opened.
+                Unmatched signals:
+                {{ steps.validate.output.structured_output.unmatched_signals | json }}.
+    else:
+      - name: log_pass
+        type: console
+        with:
+          message: >-
+            Rule `{{ inputs.rule_id }}` passed validation with confidence
+            {{ steps.validate.output.structured_output.confidence }}
+            (>= {{ inputs.confidence_threshold }}). No action taken.

@@ -18,7 +18,11 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -301,5 +305,6 @@
     "@kbn/core-overlays-browser",
     "@kbn/workflows-management-plugin",
     "@kbn/core-application-browser-mocks",
+    "@kbn/core-security-server",
   ]
 }

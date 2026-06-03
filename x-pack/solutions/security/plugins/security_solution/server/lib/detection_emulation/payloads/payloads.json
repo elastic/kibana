@@ -1,0 +1,168 @@
+[
+  {
+    "techniqueId": "T1059.001",
+    "name": "PowerShell Script Execution",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "powershell.exe -NoProfile -NonInteractive -Command \"Get-Process | Select-Object Name,Id,CPU | Sort-Object CPU -Descending | Select-Object -First 10\""
+    },
+    "expectedSignals": [
+      "Suspicious PowerShell Script",
+      "PowerShell Script with Token Impersonation Capabilities",
+      "Execution via PowerShell"
+    ]
+  },
+  {
+    "techniqueId": "T1059.003",
+    "name": "Windows Command Shell Execution",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "cmd.exe /c whoami /all & net user & ipconfig /all"
+    },
+    "expectedSignals": [
+      "Unusual Process Execution via Windows Command Prompt",
+      "Windows Command Shell Activity",
+      "System Information Discovery via Windows Built-In Commands"
+    ]
+  },
+  {
+    "techniqueId": "T1059.004",
+    "name": "Unix Shell Execution",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "/bin/sh -c 'id && hostname && uname -a && cat /etc/passwd | head -5'"
+    },
+    "expectedSignals": [
+      "Suspicious Shell Commands",
+      "Linux Suspicious Shell Commands",
+      "System Information Discovery via Unix Commands"
+    ]
+  },
+  {
+    "techniqueId": "T1218.005",
+    "name": "Mshta Proxy Execution",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "mshta.exe vbscript:Execute(\"CreateObject(\"\"WScript.Shell\"\").Exec(\"\"cmd /c echo emulation_probe\"\"):close\")"
+    },
+    "expectedSignals": [
+      "Suspicious MSHTA Child Process",
+      "Unusual Child Process of mshta.exe",
+      "Execution via MSHTA"
+    ]
+  },
+  {
+    "techniqueId": "T1218.011",
+    "name": "Rundll32 Proxy Execution",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "rundll32.exe shell32.dll,Control_RunDLL"
+    },
+    "expectedSignals": [
+      "Unusual Rundll32 Activity",
+      "Rundll32 with Network Connection",
+      "Suspicious Rundll32 Child Process"
+    ]
+  },
+  {
+    "techniqueId": "T1053.005",
+    "name": "Scheduled Task Creation and Deletion",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "schtasks.exe /create /tn \"EmulationTest\" /tr \"calc.exe\" /sc ONCE /st 23:59 && schtasks.exe /delete /tn \"EmulationTest\" /f"
+    },
+    "expectedSignals": [
+      "Persistence via Scheduled Job Creation",
+      "Scheduled Task Created by Unusual Process",
+      "Windows Scheduled Task Created or Modified by Non-system User"
+    ]
+  },
+  {
+    "techniqueId": "T1547.001",
+    "name": "Registry Run Key Persistence",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "reg.exe add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v EmulationTest /t REG_SZ /d calc.exe /f && reg.exe delete \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v EmulationTest /f"
+    },
+    "expectedSignals": [
+      "Persistence via Run Key with Suspicious Executable",
+      "Registry Run Key with Unusual Executable",
+      "Startup Persistence by a Suspicious Process"
+    ]
+  },
+  {
+    "techniqueId": "T1057",
+    "name": "Process Discovery via Built-in Tool",
+    "agentTypes": ["endpoint", "sentinel_one", "crowdstrike", "microsoft_defender_endpoint"],
+    "command": "running-processes",
+    "parameters": null,
+    "expectedSignals": [
+      "Unusual Process Discovery Activity",
+      "Process Discovery via Built-in Applications",
+      "Enumeration of Privileged Local Groups Membership"
+    ]
+  },
+  {
+    "techniqueId": "T1003.001",
+    "name": "LSASS Process Information Access",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "tasklist.exe /fi \"imagename eq lsass.exe\" /v && powershell.exe -NoProfile -NonInteractive -Command \"Get-Process lsass | Select-Object Id,Name,WorkingSet,SessionId\""
+    },
+    "expectedSignals": [
+      "LSASS Memory Access from Unknown Executable",
+      "Credential Dumping - LSASS Memory",
+      "Potential Credential Access via LSASS Memory"
+    ]
+  },
+  {
+    "techniqueId": "T1070.004",
+    "name": "File Deletion for Indicator Removal",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "cmd.exe /c echo emulation_artifact > %TEMP%\\emulation_test.txt && del /f /q %TEMP%\\emulation_test.txt"
+    },
+    "expectedSignals": [
+      "File Deletion via Unusual Process",
+      "Indicator Removal on Host",
+      "Suspicious File Deletion by Endpoint Security"
+    ]
+  },
+  {
+    "techniqueId": "T1071.001",
+    "name": "Web Protocol C2 Simulation",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "powershell.exe -NoProfile -NonInteractive -Command \"Invoke-WebRequest -Uri 'http://example.com' -UseBasicParsing -TimeoutSec 5 | Select-Object StatusCode,StatusDescription\""
+    },
+    "expectedSignals": [
+      "Potential C2 via HTTP",
+      "Unusual Network Connection via RunDLL32",
+      "Potential Command and Control via Internet Explorer"
+    ]
+  },
+  {
+    "techniqueId": "T1112",
+    "name": "Registry Modification",
+    "agentTypes": ["endpoint"],
+    "command": "execute",
+    "parameters": {
+      "command": "reg.exe add \"HKCU\\Software\\EmulationTest\" /v TestValue /t REG_SZ /d \"EmulationData\" /f && reg.exe delete \"HKCU\\Software\\EmulationTest\" /f"
+    },
+    "expectedSignals": [
+      "Modification of Boot Configuration",
+      "Windows Registry File Creation in SMB Share",
+      "Suspicious Registry Modification"
+    ]
+  }
+]
