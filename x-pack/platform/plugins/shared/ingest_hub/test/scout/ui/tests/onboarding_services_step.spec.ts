@@ -54,7 +54,8 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).not.toBeChecked();
   });
 
-  test('deselect and reselect a service', async ({ page }) => {
+  test('deselect and reselect a service', async ({ browserAuth, page }) => {
+    await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 

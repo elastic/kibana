@@ -16,17 +16,16 @@ import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
 const VALID_DELIVERY_METHODS: DeliveryMethod[] = ['agentless', 'firehose', 'cloud_forwarder'];
 const VALID_CATEGORIES: ServiceCategory[] = [
-  'AI / ML',
-  'Cost & Billing',
+  'Analytics',
+  'Application Integration',
+  'Cloud Financial Management',
+  'Compute',
+  'Containers',
   'Databases',
-  'Infrastructure',
-  'Messaging',
-  'Monitoring',
-  'Networking',
-  'Networking / CDN',
-  'Security',
-  'Security / Networking',
-  'Serverless & Compute',
+  'Machine Learning',
+  'Management and Governance',
+  'Networking and Content Delivery',
+  'Security, Identity and Compliance',
   'Storage',
 ];
 

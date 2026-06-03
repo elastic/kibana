@@ -529,7 +529,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3_daily_storage',
-    name: 'AWS S3',
+    name: 'AWS S3 (Storage metrics)',
     category: 'Storage',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -542,7 +542,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3_request',
-    name: 'AWS S3',
+    name: 'AWS S3 (Request metrics)',
     category: 'Storage',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
@@ -555,7 +555,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   },
   {
     id: 's3access',
-    name: 'AWS S3',
+    name: 'AWS S3 (Access logs)',
     category: 'Storage',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
