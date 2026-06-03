@@ -64,6 +64,41 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   };
 }
 
+interface GroupTestSuite {
+  type: 'group';
+  key: string;
+  count: number;
+}
+
+interface FtrConfigTestSuite {
+  type: 'ftrConfig';
+  ftrConfig: string;
+  count: number;
+  /** Forwarded to FTR as FTR_EXTRA_ARGS (e.g. `--grep '…' --include path/to/test.ts`). */
+  ftrExtraArgs?: string;
+}
+
+interface ScoutConfigTestSuite {
+  type: 'scoutConfig';
+  scoutConfig: string;
+  count: number;
+}
+
+interface CommandTestSuite {
+  type: 'command';
+  label: string;
+  workingDirectory: string;
+  command: string;
+  count: number;
+  job?: string;
+  /** Optional label for `upload_scout_cypress_events` (Scout/Cypress analytics). */
+  scoutLabel?: string;
+  agentQueue?: string;
+  diskSizeGb?: number;
+  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  junitMergeWorkingDirectory?: string;
+}
+
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -83,29 +118,7 @@ function getTestSuitesFromJson(json: string) {
   }
 
   const testSuites: Array<
-    | { type: 'group'; key: string; count: number }
-    | {
-        type: 'ftrConfig';
-        ftrConfig: string;
-        count: number;
-        /** Forwarded to FTR as FTR_EXTRA_ARGS (e.g. `--grep '…' --include path/to/test.ts`). */
-        ftrExtraArgs?: string;
-      }
-    | { type: 'scoutConfig'; scoutConfig: string; count: number }
-    | {
-        type: 'command';
-        label: string;
-        workingDirectory: string;
-        command: string;
-        count: number;
-        job?: string;
-        /** Optional label for `upload_scout_cypress_events` (Scout/Cypress analytics). */
-        scoutLabel?: string;
-        agentQueue?: string;
-        diskSizeGb?: number;
-        /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
-        junitMergeWorkingDirectory?: string;
-      }
+    GroupTestSuite | FtrConfigTestSuite | ScoutConfigTestSuite | CommandTestSuite
   > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -118,7 +131,7 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group' && type !== 'command') {
+    if (!['ftrConfig', 'scoutConfig', 'group', 'command'].includes(type)) {
       fail(`testSuite.type must be "ftrConfig", "scoutConfig", "group", or "command"`);
     }
 
@@ -271,8 +284,7 @@ if (hasScoutSuites) {
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.
   const scoutFlakyRequests = testSuites.filter(
-    (t): t is { type: 'scoutConfig'; scoutConfig: string; count: number } =>
-      t.type === 'scoutConfig' && t.count > 0
+    (t): t is ScoutConfigTestSuite => t.type === 'scoutConfig' && t.count > 0
   );
 
   // Tell the planner how many jobs are already committed by FTR/Cypress + fixed-overhead
