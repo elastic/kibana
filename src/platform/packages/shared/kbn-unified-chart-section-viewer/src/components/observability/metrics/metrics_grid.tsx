@@ -33,6 +33,7 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+import { useApplicableDimensionsPerItem } from './hooks/use_applicable_dimensions_per_item';
 
 const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -40,12 +41,6 @@ const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_VIEW_DETAILS,
   ACTION_COPY_TO_DASHBOARD,
 ];
-
-const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
-
-const haveSameDimensionNames = (previous: Dimension[], next: Dimension[]): boolean =>
-  previous.length === next.length &&
-  previous.every((dimension, index) => dimension.name === next[index].name);
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -93,7 +88,6 @@ export const MetricsGrid = ({
   isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const applicableDimensionsByMetricKeyRef = useRef<Map<string, Dimension[]>>(new Map());
   const { euiTheme } = useEuiTheme();
   const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
 
@@ -115,44 +109,7 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const dimensionNameSet = useMemo(
-    () => new Set(dimensions.map((dimension) => dimension.name)),
-    [dimensions]
-  );
-
-  const applicableDimensionsPerItem = useMemo(() => {
-    const currentMetricKeys = new Set(metricItems.map((item) => getMetricUniqueKey(item)));
-
-    for (const metricKey of applicableDimensionsByMetricKeyRef.current.keys()) {
-      if (!currentMetricKeys.has(metricKey)) {
-        applicableDimensionsByMetricKeyRef.current.delete(metricKey);
-      }
-    }
-
-    return metricItems.map((item) => {
-      const nextApplicableDimensions = item.dimensionFields.filter((dimensionField) =>
-        dimensionNameSet.has(dimensionField.name)
-      );
-      const metricKey = getMetricUniqueKey(item);
-      const previousApplicableDimensions =
-        applicableDimensionsByMetricKeyRef.current.get(metricKey);
-
-      if (
-        previousApplicableDimensions &&
-        haveSameDimensionNames(previousApplicableDimensions, nextApplicableDimensions)
-      ) {
-        return previousApplicableDimensions;
-      }
-
-      const stabilizedApplicableDimensions =
-        nextApplicableDimensions.length === 0
-          ? EMPTY_APPLICABLE_DIMENSIONS
-          : nextApplicableDimensions;
-
-      applicableDimensionsByMetricKeyRef.current.set(metricKey, stabilizedApplicableDimensions);
-      return stabilizedApplicableDimensions;
-    });
-  }, [metricItems, dimensionNameSet]);
+  const applicableDimensionsPerItem = useApplicableDimensionsPerItem(metricItems, dimensions);
 
   const flyoutData = useMemo(() => {
     if (!flyoutState) {
