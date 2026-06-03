@@ -49,7 +49,7 @@ export const createSignificantEventSmlType = ({
 
   return {
     id: SIGNIFICANT_EVENT_SML_TYPE,
-    fetchFrequency: () => '10s',
+    fetchFrequency: () => '10m',
 
     async *list(context) {
       const eventClient = eventService.getClient({

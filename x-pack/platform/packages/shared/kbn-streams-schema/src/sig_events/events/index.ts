@@ -15,8 +15,8 @@ import {
 import { MAX_TEXT_LENGTH } from '../constants';
 
 export const sigEventSchema = z.object({
-  '@timestamp': z.iso.datetime(),
-  created_at: z.iso.datetime(),
+  '@timestamp': z.iso.datetime({ offset: true }),
+  created_at: z.iso.datetime({ offset: true }),
   event_id: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
@@ -24,7 +24,7 @@ export const sigEventSchema = z.object({
   // TODO: rename to status once the data stream field is renamed
   verdict: z.string(),
   workflow_execution_id: z.string(),
-  rule_names: z.array(z.string()),
+  rule_names: z.array(z.string()).optional(),
   stream_names: z.array(z.string()),
   title: z.string(),
   summary: z.string(),

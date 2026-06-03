@@ -21,8 +21,6 @@ interface CreateSignificantEventAttachmentTypeOptions {
   getScopedClients: GetScopedClients;
 }
 
-const getLatestEvent = (events: SigEvent[]): SigEvent | undefined => events.at(-1);
-
 const formatList = (values: string[] | undefined): string => {
   if (!values || values.length === 0) {
     return 'None';
@@ -65,7 +63,8 @@ export const createSignificantEventAttachmentType = ({
   ): Promise<SigEvent | undefined> => {
     const { getEventClient } = await getScopedClients({ request: context.request });
     const { hits } = await getEventClient().findByDiscoverySlug(discoverySlug);
-    return getLatestEvent(hits);
+
+    return hits.at(-1);
   };
 
   return {
