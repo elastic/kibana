@@ -41,6 +41,19 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
+    // Date nanos data for context app tests
+    log.debug('[setup:date_nanos] loading date_nanos ES data (only if it does not exist)...');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos');
+    log.debug('[setup:date_nanos] date_nanos ES data ready');
+
+    log.debug(
+      '[setup:date_nanos_custom] loading date_nanos_custom ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/date_nanos_custom'
+    );
+    log.debug('[setup:date_nanos_custom] date_nanos_custom ES data ready');
+
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
