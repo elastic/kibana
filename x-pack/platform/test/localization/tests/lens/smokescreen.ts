@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { lens } = getPageObjects(['lens']);
   const find = getService('find');
   const config = getService('config');
   const browser = getService('browser');
@@ -143,8 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create a valid XY chart with references', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
+      await lens.openNewEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -178,8 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow formatting on references', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
+      await lens.openNewEditor();
       await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
 
       await lens.configureDimension({
@@ -216,8 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
+      await lens.openNewEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
