@@ -127,6 +127,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
       defaultMessage:
         'Provide `from` for the field containing the URI string. Optionally set `to` to choose the target prefix (defaults to `url`). Extracted components become `<prefix>.scheme`, `<prefix>.domain`, `<prefix>.path`, `<prefix>.port`, etc.',
+      ignoreTag: true,
     }),
     examples: [
       {
@@ -160,6 +161,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.keepOriginal', {
         defaultMessage:
           'By default `keep_original: true` preserves the source URI at `<prefix>.original`. Combine with `remove_if_successful: true` to drop the source field only when parsing succeeds.',
+        ignoreTag: true,
       }),
     ],
   },
