@@ -327,6 +327,60 @@ test.describe(
           page.getByRole('heading', { name: 'Edit service map', level: 2 })
         ).toBeVisible();
         await expect(page.getByTestId('apmServiceMapEditorSyncFiltersToggle')).toBeChecked();
+
+        // Close the editor without changing anything so the dashboard query bar is interactable.
+        await page.getByTestId('apmServiceMapEditorCancelButton').click();
+        await expect(
+          page.getByRole('heading', { name: 'Edit service map', level: 2 })
+        ).toBeHidden();
+      });
+
+      const serviceNode = pageObjects.serviceMapPage.getServiceNodeRoot(SERVICE_MAP_TEST_SERVICE);
+
+      await test.step('with sync on, the panel respects a new dashboard KQL filter', async () => {
+        // Baseline: the panel's own filters (service/env/kuery) still resolve the node.
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+
+        // A dashboard-level KQL query that matches no documents is AND-ed with the panel's
+        // own filters when sync is enabled, so the map should empty out.
+        await pageObjects.queryBar.setQuery('service.name : "non-existent-service-xyz"');
+        await page.getByTestId('querySubmitButton').click();
+        await expect(serviceNode).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+
+        // Clearing the dashboard query brings the node back — proving the panel reacts to
+        // the dashboard filter rather than ignoring it.
+        await pageObjects.queryBar.clearQuery();
+        await page.getByTestId('querySubmitButton').click();
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      });
+
+      await test.step('the panel reflects dashboard global time range changes', async () => {
+        // The dashboard's global time isn't stored with the saved object, so pin it to a
+        // window that covers the synth data before the panel starts inheriting it.
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await page.getByTestId('dateRangePickerControlButton').blur();
+
+        // Drop the panel-level custom time range so the panel inherits the dashboard's
+        // global time (no `time_range` published -> fetch$ falls back to dashboard time).
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.disableCustomTimeRange();
+        await pageObjects.dashboard.saveCustomizePanel();
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+
+        // Still last 24h at the dashboard level -> node present.
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+
+        // Move the dashboard's global time to a window with no APM data -> map empties,
+        // confirming the panel honors the dashboard time range change.
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Sep 22, 2015 @ 00:00:00.000',
+          to: 'Sep 23, 2015 @ 00:00:00.000',
+        });
+        await expect(serviceNode).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+
+        // Restore a range that covers the synth data -> node returns.
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
     });
   }
