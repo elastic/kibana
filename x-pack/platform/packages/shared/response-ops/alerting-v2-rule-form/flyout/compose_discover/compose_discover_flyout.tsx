@@ -410,6 +410,7 @@ export function ComposeDiscoverFlyout({
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
+  const isEditing = mode === 'edit';
   const title = getFlyoutTitle(mode);
 
   const { steps } = getSteps(isAlert, builderType);
@@ -457,13 +458,13 @@ export function ComposeDiscoverFlyout({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const compose = {
+          const composed = {
             ...formValuesFromYamlToCompose(result.values),
             notifications: methods.getValues('notifications'),
           };
-          methods.reset(compose);
+          methods.reset(composed);
           syncSandbox();
-          if (getBreachQuery(compose.query).trim()) {
+          if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
         }
@@ -510,9 +511,9 @@ export function ComposeDiscoverFlyout({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncSandbox() here: sandbox is temporarily stale after methods.reset(), but
+      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
+      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
   }, [cancelYamlParse, yamlText, methods, handleSubmit]);
@@ -618,6 +619,7 @@ export function ComposeDiscoverFlyout({
                   services={baseServices}
                   onRecoveryTypeChange={handleRecoveryTypeChange}
                   onKindChange={handleKindChange}
+                  isEditing={isEditing}
                   ruleId={ruleId}
                   builderType={builderType}
                 />
