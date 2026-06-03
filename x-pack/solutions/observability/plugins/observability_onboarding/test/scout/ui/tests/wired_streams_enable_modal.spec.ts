@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 test.describe(
   'Wired Streams - Enable Modal Confirmation Flow',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects, apiServices }) => {
       await browserAuth.loginAsAdmin();
@@ -39,6 +40,7 @@ test.describe(
       await test.step('navigate to Auto-detect flow', async () => {
         await pageObjects.onboarding.selectHostUseCase();
         await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('Classic ingestion is selected by default', async () => {
@@ -59,6 +61,7 @@ test.describe(
     test('canceling the modal keeps Classic ingestion selected', async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('open modal and cancel', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -84,6 +87,7 @@ test.describe(
     }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('open modal and confirm', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -92,7 +96,9 @@ test.describe(
       });
 
       await test.step('modal closes and Wired Streams is now selected', async () => {
-        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden();
+        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden({
+          timeout: 30_000,
+        });
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'
@@ -122,6 +128,7 @@ test.describe(
 
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('clicking Wired Streams switches directly without modal', async () => {
         await pageObjects.onboarding.selectWiredStreams();

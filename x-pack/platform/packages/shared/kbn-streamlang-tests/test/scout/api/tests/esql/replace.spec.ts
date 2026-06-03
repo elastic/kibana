@@ -31,7 +31,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest(indexName, docs);
@@ -59,7 +59,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest(indexName, docs);
@@ -85,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
       await testBed.ingest(indexName, docs);
@@ -109,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Android.log' }];
       await testBed.ingest(indexName, docs);
@@ -133,7 +133,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
       await testBed.ingest(indexName, docs);
@@ -159,7 +159,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { message: 'An error occurred', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
@@ -189,7 +189,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { message: 'An error occurred', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
@@ -199,8 +199,8 @@ apiTest.describe(
 
       // Both documents should be present
       expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-      const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
       expect(doc1?.message).toBe('An warning occurred');
       expect(doc2?.message).toBeNull();
     });
@@ -223,7 +223,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'An error occurred', event: { kind: 'test' }, status: 'doc1' },
@@ -235,12 +235,12 @@ apiTest.describe(
       expect(esqlResult.documents).toHaveLength(2);
 
       // First doc should have message replaced (where condition matched)
-      const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
       expect(doc1?.message).toBe('An warning occurred');
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should keep original message (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
       expect(doc2?.message).toBe('An error occurred');
       expect(doc2?.['event.kind']).toBe('production');
     });
@@ -266,7 +266,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -288,13 +288,13 @@ apiTest.describe(
         expect(esqlResult.documents).toHaveLength(2);
 
         // First doc should have clean_message created (where condition matched)
-        const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
         expect(doc1?.message).toBe('An error occurred'); // Original preserved
         expect(doc1?.clean_message).toBe('An warning occurred'); // New field created
         expect(doc1?.['event.kind']).toBe('test');
 
         // Second doc should have clean_message as empty string (where condition not matched)
-        const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
         expect(doc2?.message).toBe('An error occurred');
         expect(doc2?.clean_message).toBe('');
         expect(doc2?.['event.kind']).toBe('production');
@@ -312,7 +312,7 @@ apiTest.describe(
           } as ReplaceProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

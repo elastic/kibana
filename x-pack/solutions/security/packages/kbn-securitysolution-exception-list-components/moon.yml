@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/securitysolution-autocomplete'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/securitysolution-list-utils'
 tags:
   - shared-browser
   - package
@@ -34,26 +36,6 @@ fileGroups:
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

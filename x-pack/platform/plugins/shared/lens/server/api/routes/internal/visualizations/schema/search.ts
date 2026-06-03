@@ -20,7 +20,7 @@ export const lensSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
-        description: 'The text to search for Lens visualizations',
+        description: 'The text to search for visualizations',
       },
     })
   ),
@@ -33,7 +33,7 @@ export const lensSearchRequestQuerySchema = schema.object({
   }),
   perPage: schema.number({
     meta: {
-      description: 'Maximum number of Lens visualizations included in a single response',
+      description: 'Maximum number of visualizations included in a single response',
     },
     defaultValue: 20,
     min: 1,
@@ -54,5 +54,5 @@ export const lensSearchResponseBodySchema = schema.object(
     data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
     meta: lensSearchResponseMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'visualizationListResponse' } }
 );

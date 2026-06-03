@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths';
 import { scoutTestTrack, type ScoutTestTrack } from './test_tracks';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order';
-import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
+import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite';
 import { getKibanaDir } from '../utils';
 import { expandAgentQueue } from '../agent_images';
 import { collectEnvFromLabels } from '../pr_labels';
@@ -57,8 +57,8 @@ async function distributeScoutTestsOnLanes() {
     throw new Error(`No Scout test tracks definition files found under ${SCOUT_TEST_TRACKS_ROOT}`);
   }
 
-  const steps: BuildkiteStep[] = [];
-  const loadIDsByStepKey: Record<string, string[]> = {};
+  const steps: BuildkiteCommandStep[] = [];
+  const loadInfoByStepKey: Record<string, { label: string; loadIDs: string[] }> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
   testTracksDefinitionPaths
@@ -72,8 +72,6 @@ async function distributeScoutTestsOnLanes() {
       // Define the effective lane number. `lane.number` is only accurate in reference to the originating test track
       const effectiveLaneNumber = steps.length + 1;
 
-      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
-
       const laneEnv = {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
         SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
@@ -82,7 +80,7 @@ async function distributeScoutTestsOnLanes() {
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
         SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '180',
+          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
         ...envVarsIfSet([
           'SERVERLESS_TESTS_ONLY',
           'UIAM_DOCKER_IMAGE',
@@ -91,10 +89,13 @@ async function distributeScoutTestsOnLanes() {
         ...collectEnvFromLabels(),
       };
 
+      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+      const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`;
+
       // Agent that will do the actual work of running the test loads
       steps.push({
-        key: `scout_test_lane_${effectiveLaneNumber}`,
-        label: `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`,
+        key: stepKey,
+        label: stepLabel,
         command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
         timeout_in_minutes: 60,
         agents: expandAgentQueue(lane.metadata.buildkite.agentQueue),
@@ -107,15 +108,16 @@ async function distributeScoutTestsOnLanes() {
         },
       });
 
-      // Lane load IDs to be referenced by the agent
-      loadIDsByStepKey[stepKey] = lane.loads;
+      // Lane load information to be referenced by the agent (IDs in particular)
+      loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
     });
 
-  // Write the test lane load IDs to disk in preparation of uploading as an artifact
-  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));
+  if (steps.length === 0) {
+    // Stop early. No test steps to upload. ✨
+    return;
+  }
 
   const bk = new BuildkiteClient();
-  bk.uploadArtifacts(testLaneLoadsFilePath);
 
   const lanesGroupStepDependencies: string[] = [];
 
@@ -130,6 +132,15 @@ async function distributeScoutTestsOnLanes() {
     // Default dependencies
     lanesGroupStepDependencies.push('build_scout_tests');
   }
+
+  bk.setMetadata(
+    'cancel_on_gate_failure_batch:scout_lanes',
+    JSON.stringify(steps.map(({ key }) => key))
+  );
+
+  // Write the test lane load IDs to disk in preparation of uploading as an artifact
+  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadInfoByStepKey));
+  bk.uploadArtifacts(testLaneLoadsFilePath);
 
   // Send it 🚀
   bk.uploadSteps([

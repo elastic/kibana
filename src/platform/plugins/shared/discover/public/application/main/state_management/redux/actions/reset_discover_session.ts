@@ -12,6 +12,7 @@ import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
@@ -52,10 +53,10 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+        const tabDataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
         let initialAppState: DiscoverAppState | undefined;
 
-        if (tabStateContainer) {
+        if (tabDataStateContainer) {
           const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
           const dataView = searchSource.getField('index');
 
@@ -64,7 +65,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           initialAppState = getInitialAppState({
-            initialUrlState: undefined,
+            initialUrlState: fromSavedObjectTabToAppState({ tab }),
             persistedTab: tab,
             dataView,
             services,

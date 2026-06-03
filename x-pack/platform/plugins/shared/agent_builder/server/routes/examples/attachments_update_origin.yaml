@@ -5,8 +5,7 @@ requestBody:
         updateOriginExample:
           description: "Example request for linking an attachment to a saved visualization"
           value:
-            origin:
-              saved_object_id: "abc123"
+            origin: "abc123"
 responses:
   200:
     description: "Indicates a successful response"
@@ -33,5 +32,4 @@ responses:
                     estimated_tokens: 50
                 description: "Sales chart"
                 active: true
-                origin:
-                  saved_object_id: "abc123"
+                origin: "abc123"

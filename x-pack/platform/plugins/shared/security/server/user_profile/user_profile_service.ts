@@ -12,6 +12,7 @@ import type {
 import pLimit from 'p-limit';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -42,6 +43,7 @@ const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
 const BULK_GET_MAX_UIDS_PER_BATCH = 50;
 const BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS = 5;
+const RUNAS_HEADER = 'es-security-runas-user';
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
   /**
@@ -288,8 +290,15 @@ export class UserProfileService {
     request: UserProfileGetCurrentParams['request']
   ): Promise<string | undefined> {
     try {
+      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+      if (!id) {
+        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+        return undefined;
+      }
+
       const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
         with_profile_uid: true,
+        id,
       });
 
       if (response.api_keys && response.api_keys.length > 0) {
@@ -336,6 +345,13 @@ export class UserProfileService {
     session: PublicMethodsOf<Session>,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
+    if (!this.license?.isEnabled()) {
+      this.logger.debug(
+        'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
     if (request.auth.isAuthenticated === false) {
       throw new Error('Request to get current user profile is not authenticated.');
     }
@@ -348,6 +364,15 @@ export class UserProfileService {
     if (await session.getSID(request)) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
+    } else if (request.headers[RUNAS_HEADER]) {
+      // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
+      // credential (e.g. `elastic`), not the effective user. Activating a profile from those
+      // credentials would associate the avatar with the proxy account, not the impersonated user.
+      // Return null because a user profile is not applicable in this context.
+      this.logger.debug(
+        `Skipping user profile retrieval for request with 'es-security-runas-user' header.`
+      );
+      return null;
     } else {
       const authType = this.getAuthHeaderType(request.headers.authorization);
 

@@ -672,6 +672,14 @@ describe('config schema', () => {
           }
         `);
       });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { basic: { ['a'.repeat(1025)]: { order: 0 } } } },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
+      });
     });
 
     describe('`token` provider', () => {
@@ -977,6 +985,16 @@ describe('config schema', () => {
           }
         `);
       });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { oidc: { ['a'.repeat(1025)]: { order: 0, realm: 'oidc1' } } },
+            },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
+      });
     });
 
     describe('`saml` provider', () => {
@@ -1104,6 +1122,16 @@ describe('config schema', () => {
             },
           }
         `);
+      });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { saml: { ['a'.repeat(1025)]: { order: 0, realm: 'saml1' } } },
+            },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
       });
     });
 
@@ -1885,13 +1913,13 @@ describe('config schema', () => {
 describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
-    mockRandomBytes.mockReturnValue('ab'.repeat(16));
+    mockRandomBytes.mockReturnValue('ab'.repeat(32));
 
     const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
       isTLSEnabled: true,
     });
-    expect(config.encryptionKey).toEqual('ab'.repeat(16));
+    expect(config.encryptionKey).toEqual('ab'.repeat(32));
 
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [

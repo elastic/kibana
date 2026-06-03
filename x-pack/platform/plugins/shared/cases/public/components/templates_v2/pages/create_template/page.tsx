@@ -17,7 +17,6 @@ import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
-import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 
 import * as i18n from '../../translations';
@@ -38,23 +37,19 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const availableOwners = useAvailableCasesOwners();
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
-  const [, setYamlEditorState] = useCasesLocalStorage<string>(
-    LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState,
-    exampleTemplateDefinition
-  );
 
   const handleCreate = useCallback(
-    async (data: YamlEditorFormValues) => {
+    async (data: YamlEditorFormValues, isEnabled: boolean) => {
       await mutateAsync({
         template: {
           owner: defaultOwnerValue,
           definition: data.definition,
+          isEnabled,
         },
       });
-      setYamlEditorState(exampleTemplateDefinition);
       navigateToCasesTemplates();
     },
-    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates, setYamlEditorState]
+    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates]
   );
 
   return (

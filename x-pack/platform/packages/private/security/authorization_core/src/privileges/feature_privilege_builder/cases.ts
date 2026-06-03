@@ -11,7 +11,7 @@ import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugi
 
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-export type CasesSupportedOperations = (typeof allOperations)[number];
+export type CasesSupportedOperations = (typeof supportedOperations)[number];
 
 /**
  * If you add a new operation type (all, push, update, etc) you should also
@@ -38,6 +38,7 @@ const settingsOperations = ['createConfiguration', 'updateConfiguration'] as con
 const createCommentOperations = ['createComment'] as const;
 const reopenOperations = ['reopenCase'] as const;
 const assignOperations = ['assignCase'] as const;
+const manageTemplatesOperations = ['manageTemplate'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
@@ -49,6 +50,7 @@ const allOperations = [
   ...reopenOperations,
   ...assignOperations,
 ] as const;
+const supportedOperations = [...allOperations, ...manageTemplatesOperations] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(
@@ -74,6 +76,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(createCommentOperations, privilegeDefinition.cases?.createComment),
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
       ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
+      ...getCasesPrivilege(manageTemplatesOperations, privilegeDefinition.cases?.manageTemplates),
     ]);
   }
 }

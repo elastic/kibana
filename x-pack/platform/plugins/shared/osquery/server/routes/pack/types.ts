@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import type { SOShard } from '../../common/types';
 import type { PackQueryInput } from './utils';
 
@@ -17,10 +18,19 @@ export interface PackResponseData {
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards?: SOShard;
+  read_only?: boolean;
+  /** Pack-level schedule type (discriminated read response). */
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
+  interval?: number;
+  /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export interface ReadPackResponseData {
@@ -32,8 +42,10 @@ export interface ReadPackResponseData {
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards: Record<string, number>;
   read_only?: boolean;
@@ -42,4 +54,10 @@ export interface ReadPackResponseData {
   migrationVersion?: Record<string, string>;
   managed?: boolean;
   coreMigrationVersion?: string;
+  /** Pack-level schedule type (discriminated read response). */
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
+  interval?: number;
+  /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
+  rrule_schedule?: RRuleScheduleConfig;
 }

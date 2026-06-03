@@ -10,7 +10,7 @@
  */
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { Index } from '../../../common';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
@@ -121,21 +121,15 @@ describe('<IndexManagementHome />', () => {
       createNonDataStreamIndex(indexName)
     );
 
-    const application = applicationServiceMock.createStartContract();
-    await renderHome(httpSetup, {
-      appServicesContext: {
-        core: { application },
-      },
-    });
+    await renderHome(httpSetup);
 
     await screen.findByTestId('indexTable');
 
     const tableActions = createIndexTableActions();
     await tableActions.clickIndexNameAt(0);
 
-    expect(application.navigateToUrl).toHaveBeenCalledWith(
-      '/app/management/data/index_management/indices/index_details?indexName=testIndex&includeHiddenIndices=true'
-    );
+    await screen.findByTestId('indexDetailsHeader');
+    expect(screen.getByTestId('indexDetailsHeader')).toBeInTheDocument();
   });
 
   it('index page works with % character in index name', async () => {
@@ -146,20 +140,18 @@ describe('<IndexManagementHome />', () => {
       createNonDataStreamIndex(indexName)
     );
 
-    const application = applicationServiceMock.createStartContract();
-    await renderHome(httpSetup, {
-      appServicesContext: {
-        core: { application },
-      },
-    });
+    await renderHome(httpSetup);
 
     await screen.findByTestId('indexTable');
 
     const tableActions = createIndexTableActions();
     await tableActions.clickIndexNameAt(0);
 
-    expect(application.navigateToUrl).toHaveBeenCalledWith(
-      '/app/management/data/index_management/indices/index_details?indexName=test%25&includeHiddenIndices=true'
+    await screen.findByTestId('indexDetailsHeader');
+    expect(screen.getByTestId('indexDetailsHeader')).toBeInTheDocument();
+    expect(httpSetup.get).toHaveBeenCalledWith(
+      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}`,
+      expect.anything()
     );
   });
 
@@ -586,42 +578,6 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByText('hot phase')).toBeInTheDocument();
       expect(screen.getByText('ILM column 2')).toBeInTheDocument();
       expect(screen.getByText('ILM managed')).toBeInTheDocument();
-    });
-
-    it('renders to search_indices index details page', async () => {
-      const indexName = 'search-index';
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
-        indexName,
-        createNonDataStreamIndex(indexName)
-      );
-
-      const navigateToUrl = jest.fn();
-      const url = `/app/elasticsearch/indices/index_details/${indexName}`;
-      await renderHome(httpSetup, {
-        appServicesContext: {
-          core: {
-            application: { navigateToUrl },
-          },
-          services: {
-            extensionsService: {
-              _indexDetailsPageRoute: {
-                renderRoute: () => {
-                  return url;
-                },
-              },
-            },
-          },
-        },
-      });
-
-      await screen.findByTestId('indexTable');
-
-      const tableActions = createIndexTableActions();
-      await tableActions.clickIndexNameAt(0);
-
-      expect(navigateToUrl).toHaveBeenCalledTimes(1);
-      expect(navigateToUrl).toHaveBeenCalledWith(url);
     });
 
     it('applies enricher updates to indices via alias when applyToAliases is true', async () => {

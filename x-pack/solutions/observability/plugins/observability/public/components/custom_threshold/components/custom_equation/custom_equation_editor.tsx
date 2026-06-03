@@ -166,7 +166,7 @@ export function CustomEquationEditor({
           color={'primary'}
           flush={'left'}
           size="xs"
-          iconType={'plusInCircleFilled'}
+          iconType={'plusCircle'}
           onClick={handleAddNewRow}
           isDisabled={disableAdd}
         >

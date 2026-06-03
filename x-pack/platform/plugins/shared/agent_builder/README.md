@@ -16,9 +16,11 @@ The agentBuilder plugin has 4 main packages:
 
 AgentBuilder agents are compatible with the Kibana inference tracing.
 
-You can enable tracing on your local instance by adding the following config parameters:
+You can enable tracing on your local instance by adding the following config parameters to `kibana.dev.yml`:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
 telemetry.enabled: true
 telemetry.tracing.enabled: true
 
@@ -26,6 +28,8 @@ telemetry.tracing.exporters.phoenix.base_url: {phoenix server url}
 telemetry.tracing.exporters.phoenix.public_url: {phoenix server url}
 telemetry.tracing.exporters.phoenix.project_name: {your project name}
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required — Elastic APM and OpenTelemetry tracing cannot run simultaneously.
 
 To run phoenix locally and configuring Kibana inference tracing accordingly:
 
@@ -36,6 +40,8 @@ docker run -p 6006:6006 -p 4317:4317 -i -t arizephoenix/phoenix:latest
 and then edit the Kibana config:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
 telemetry.enabled: true
 telemetry.tracing.enabled: true
 

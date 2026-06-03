@@ -13,7 +13,6 @@ import type {
   ESQLAstItem,
   ESQLAstMmrCommand,
   ESQLCommand,
-  ESQLMessage,
 } from '@elastic/esql/types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
@@ -21,6 +20,7 @@ import { validateMap } from '../../definitions/utils/validation/map';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getItemLocation } from './utils';
+import type { ESQLMessage } from '../../definitions/types';
 
 const MMR_WITH_MAP_DEFINITION =
   "{name='lambda', description='The relevance/diversity balancing factor', type=[double]}";

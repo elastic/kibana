@@ -10,8 +10,11 @@
 import type { FC, ReactNode } from 'react';
 import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { internalStateActions, useInternalStateDispatch } from '../../state_management/redux';
-import { TabsBarVisibility } from '../../state_management/redux/types';
+import {
+  internalStateActions,
+  TabsBarVisibility,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import type { DiscoverCustomizationContext } from '../../../../customizations';

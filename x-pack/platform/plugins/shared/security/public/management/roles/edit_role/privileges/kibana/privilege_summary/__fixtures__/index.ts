@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { EuiTableRow } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
-
-import { FeatureTableCell } from '@kbn/security-ui-components';
-import { findTestSubject } from '@kbn/test-jest-helpers';
+import { fireEvent } from '@testing-library/react';
 
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common';
-import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 
 interface DisplayedFeaturePrivileges {
   [featureId: string]: {
@@ -29,102 +24,97 @@ interface DisplayedFeaturePrivileges {
 const getSpaceKey = (entry: RoleKibanaPrivilege) => entry.spaces.join(', ');
 
 export function getDisplayedFeaturePrivileges(
-  wrapper: ReactWrapper<any>,
+  container: HTMLElement,
   role: Role
 ): DisplayedFeaturePrivileges {
-  const allExpanderButtons = findTestSubject(wrapper, 'expandPrivilegeSummaryRow');
-  allExpanderButtons.forEach((button) => button.simulate('click'));
+  const allExpanderButtons = container.querySelectorAll(
+    '[data-test-subj="expandPrivilegeSummaryRow"]'
+  );
+  allExpanderButtons.forEach((button) => fireEvent.click(button));
 
-  // each expanded row renders its own `EuiTableRow`, so there are 2 rows
-  // for each feature: one for the primary feature privilege, and one for the sub privilege form
-  const rows = wrapper.find(EuiTableRow);
+  const allRows = Array.from(container.querySelectorAll('table tbody tr'));
 
-  return rows.reduce((acc, row) => {
-    const expandedRow = row.find(PrivilegeSummaryExpandedRow);
-    if (expandedRow.length > 0) {
-      return {
-        ...acc,
-        ...getDisplayedSubFeaturePrivileges(acc, expandedRow, role),
-      };
-    } else {
-      const feature = row.find(FeatureTableCell).props().feature;
+  let currentFeatureId = '';
 
-      const primaryFeaturePrivileges = findTestSubject(row, 'privilegeColumn');
+  return allRows.reduce((acc, row) => {
+    const testSubj = row.getAttribute('data-test-subj') ?? '';
 
-      expect(primaryFeaturePrivileges).toHaveLength(role.kibana.length);
+    if (testSubj.startsWith('summaryTableRow-')) {
+      currentFeatureId = testSubj.replace('summaryTableRow-', '');
 
-      acc[feature.id] = acc[feature.id] ?? {};
+      const privilegeColumns = row.querySelectorAll('[data-test-subj~="privilegeColumn"]');
 
-      primaryFeaturePrivileges.forEach((primary, index) => {
+      expect(privilegeColumns).toHaveLength(role.kibana.length);
+
+      acc[currentFeatureId] = acc[currentFeatureId] ?? {};
+
+      privilegeColumns.forEach((primary, index) => {
         const key = getSpaceKey(role.kibana[index]);
 
-        acc[feature.id][key] = {
-          ...acc[feature.id][key],
-          primaryFeaturePrivilege: primary.text().replaceAll('Info', '').trim(), // Removing the word "info" to account for the rendered text coming from EuiIcon
+        acc[currentFeatureId][key] = {
+          ...acc[currentFeatureId][key],
+          primaryFeaturePrivilege: (primary.textContent ?? '').replaceAll('Info', '').trim(),
           hasCustomizedSubFeaturePrivileges:
-            findTestSubject(primary, 'additionalPrivilegesGranted').length > 0,
+            primary.getAttribute('data-test-subj')?.includes('additionalPrivilegesGranted') ??
+            false,
         };
       });
-
-      return acc;
+    } else if (row.querySelector('[data-test-subj="subFeatureEntry"]')) {
+      getDisplayedSubFeaturePrivileges(acc, row, currentFeatureId, role);
     }
+
+    return acc;
   }, {} as DisplayedFeaturePrivileges);
 }
 
 function getDisplayedSubFeaturePrivileges(
   displayedFeatures: DisplayedFeaturePrivileges,
-  expandedRow: ReactWrapper<any>,
+  expandedRow: Element,
+  featureId: string,
   role: Role
 ) {
-  const { feature } = expandedRow.props();
+  const subFeatureEntries = expandedRow.querySelectorAll('[data-test-subj="subFeatureEntry"]');
 
-  const subFeatureEntries = findTestSubject(expandedRow as ReactWrapper<any>, 'subFeatureEntry');
-
-  displayedFeatures[feature.id] = displayedFeatures[feature.id] ?? {};
+  displayedFeatures[featureId] = displayedFeatures[featureId] ?? {};
 
   subFeatureEntries.forEach((subFeatureEntry) => {
-    const subFeatureName = findTestSubject(subFeatureEntry, 'subFeatureName').text();
+    const subFeatureName =
+      subFeatureEntry.querySelector('[data-test-subj="subFeatureName"]')?.textContent ?? '';
 
-    const entryElements = findTestSubject(subFeatureEntry as ReactWrapper<any>, 'entry', '|=');
+    const entryElements = subFeatureEntry.querySelectorAll('[data-test-subj|="entry"]');
 
     expect(entryElements).toHaveLength(role.kibana.length);
 
     role.kibana.forEach((entry, index) => {
       const key = getSpaceKey(entry);
-      const element = findTestSubject(expandedRow as ReactWrapper<any>, `entry-${index}`);
+      const element = expandedRow.querySelector(`[data-test-subj="entry-${index}"]`);
+      if (!element) return;
 
-      const independentPrivileges = element
-        .find('EuiFlexGroup[data-test-subj="independentPrivilege"]')
-        .reduce((acc2, flexGroup) => {
-          const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
-          const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
-          if (isGranted) {
-            return [...acc2, privilegeName];
-          }
-          return acc2;
-        }, [] as string[]);
+      const independentPrivileges = Array.from(
+        element.querySelectorAll('[data-test-subj="independentPrivilege"]')
+      ).reduce((acc2, flexGroup) => {
+        const privilegeName =
+          flexGroup.querySelector('[data-test-subj="privilegeName"]')?.textContent ?? '';
+        const isGranted = !!flexGroup.querySelector('[data-euiicon-type="check"]');
+        return isGranted ? [...acc2, privilegeName] : acc2;
+      }, [] as string[]);
 
-      const mutuallyExclusivePrivileges = element
-        .find('EuiFlexGroup[data-test-subj="mutexPrivilege"]')
-        .reduce((acc2, flexGroup) => {
-          const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
-          const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
+      const mutuallyExclusivePrivileges = Array.from(
+        element.querySelectorAll('[data-test-subj="mutexPrivilege"]')
+      ).reduce((acc2, flexGroup) => {
+        const privilegeName =
+          flexGroup.querySelector('[data-test-subj="privilegeName"]')?.textContent ?? '';
+        const isGranted = !!flexGroup.querySelector('[data-euiicon-type="check"]');
+        return isGranted ? [...acc2, privilegeName] : acc2;
+      }, [] as string[]);
 
-          if (isGranted) {
-            return [...acc2, privilegeName];
-          }
-          return acc2;
-        }, [] as string[]);
-
-      displayedFeatures[feature.id][key] = {
-        ...displayedFeatures[feature.id][key],
+      displayedFeatures[featureId][key] = {
+        ...displayedFeatures[featureId][key],
         subFeaturesPrivileges: {
-          ...displayedFeatures[feature.id][key].subFeaturesPrivileges,
+          ...displayedFeatures[featureId][key].subFeaturesPrivileges,
           [subFeatureName]: [...independentPrivileges, ...mutuallyExclusivePrivileges],
         },
       };
     });
   });
-
-  return displayedFeatures;
 }

@@ -69,8 +69,7 @@ export async function cancelWorkflowIfRequested(
 
   // mark current step scopes as cancelled
   while (!nodeStack.isEmpty()) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const scopeData = nodeStack.getCurrentScope()!;
+    const scopeData = nodeStack.getCurrentScope();
     nodeStack = nodeStack.exitScope();
     const stepExecutionId = generateEncodedStepExecutionId({
       executionId: workflowExecutionState.getWorkflowExecution().id,

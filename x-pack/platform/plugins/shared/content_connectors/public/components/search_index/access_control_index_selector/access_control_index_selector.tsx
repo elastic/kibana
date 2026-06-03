@@ -93,7 +93,7 @@ export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
               {option.error ? (
                 <EuiFlexItem grow={false} align>
-                  <EuiIcon type={'warning'} />{' '}
+                  <EuiIcon type={'warning'} aria-hidden={true} />{' '}
                 </EuiFlexItem>
               ) : null}
               <EuiFlexGroup direction="column" gutterSize="none">

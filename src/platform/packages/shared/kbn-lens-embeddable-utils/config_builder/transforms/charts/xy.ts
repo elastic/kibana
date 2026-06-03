@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypedLensSerializedState, XYState as XYStateLens } from '@kbn/lens-common';
-import type { XYState } from '../../schema';
+import type { TypedLensSerializedState, XYPersistedState } from '@kbn/lens-common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { XYConfig } from '../../schema';
 import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
@@ -23,9 +24,12 @@ import { LENS_LAYER_SUFFIX } from '../constants';
 type XYLens = Extract<TypedLensSerializedState['attributes'], { visualizationType: 'lnsXY' }>;
 type XYLensState = Omit<XYLens['state'], 'filters' | 'query'>;
 
-type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & { state: XYLensState };
+type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & {
+  // Use XYPersistedState for visualization since the config builder works with persisted format
+  state: Omit<XYLensState, 'visualization'> & { visualization: XYPersistedState };
+};
 
-export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilters {
+export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilters {
   // convert layers and produce references from them
   const { layers, usedDataviews } = buildDatasourceStates(
     config,
@@ -47,9 +51,19 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
     ...Object.entries(regularDataViewsMap).map(([layerId, dataViewId]) => [layerId, dataViewId]),
     ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
   ]);
-  const visualizationState = buildVisualizationState(config, dataViewLayerToIdMap);
-  // @TODO: support annotation references
-  const references = regularDataViews.length ? buildReferences(regularDataViewsMap) : [];
+
+  const annotationGroupReferences: SavedObjectReference[] = [];
+
+  const visualizationState = buildVisualizationState(
+    config,
+    dataViewLayerToIdMap,
+    annotationGroupReferences
+  );
+
+  const references = [
+    ...annotationGroupReferences,
+    ...(regularDataViews.length ? buildReferences(regularDataViewsMap) : []),
+  ];
 
   return {
     visualizationType: 'lnsXY',
@@ -64,9 +78,9 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
   };
 }
 
-export function fromLensStateToAPI(config: LensAttributes): XYState {
+export function fromLensStateToAPI(config: LensAttributes): XYConfig {
   const { state } = config;
-  const visualizationState = state.visualization as XYStateLens;
+  const visualizationState = state.visualization as XYPersistedState;
   const layers = getDatasourceLayers(state);
 
   return {

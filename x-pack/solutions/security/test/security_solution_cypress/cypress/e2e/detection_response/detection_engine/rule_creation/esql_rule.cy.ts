@@ -55,7 +55,8 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/257365
+describe.skip(
   'Detection ES|QL rules - Rule Creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -64,7 +65,8 @@ describe(
     const rule = getEsqlRule();
     const expectedNumberOfRules = 1;
 
-    describe('creation', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/257364
+    describe.skip('creation', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
         login();

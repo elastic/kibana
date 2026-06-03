@@ -8,10 +8,12 @@
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { useQuery } from '@kbn/react-query';
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import type {
+  WorkflowInsightType,
+  SecurityWorkflowInsight,
+} from '../../../../../../../common/endpoint/types/workflow_insights';
 
-import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { WORKFLOW_INSIGHTS } from '../../translations';
@@ -22,7 +24,7 @@ interface UseFetchInsightsConfig {
   scanCompleted: boolean;
   expectedCount: number | null;
   expectedTimestamp: Moment | null;
-  insightTypes: DefendInsightType[];
+  insightTypes: WorkflowInsightType[];
 }
 
 const MAX_RETRIES = 5;

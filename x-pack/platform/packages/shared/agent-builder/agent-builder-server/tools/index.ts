@@ -23,6 +23,7 @@ export {
   type ToolHandlerFn,
   type ToolHandlerReturn,
   type ToolHandlerContext,
+  type ToolHandlerCallContext,
   type ToolHandlerResult,
   type ToolHandlerPromptReturn,
   type ToolHandlerStandardReturn,
@@ -30,5 +31,6 @@ export {
   isToolHandlerStandardReturn,
 } from './handler';
 export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './utils';
+export { describeZodSchema, formatSchemaForLlm } from './schema_utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
 export type { ToolRegistry, ToolListParams, ToolCreateParams, ToolUpdateParams } from './registry';

@@ -11,7 +11,12 @@ import React from 'react';
 
 export function Loading() {
   return (
-    <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      data-test-subj="traceWaterfallLoading"
+      direction="column"
+      alignItems="center"
+      gutterSize="s"
+    >
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="l" />
       </EuiFlexItem>

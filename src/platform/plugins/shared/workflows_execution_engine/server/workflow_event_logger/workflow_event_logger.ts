@@ -12,10 +12,12 @@ import type { Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
+  WorkflowEventFlushOptions,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];
@@ -198,8 +200,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const message = event.message || '';
 
     // Format workflow context metadata
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const meta: Record<string, any> = {
+    const meta: Record<string, unknown> = {
       workflow: {
         name: event.workflow?.name,
         execution_id: event.workflow?.execution_id,
@@ -244,7 +245,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     this.eventQueue.push(event);
   }
 
-  public async flushEvents(): Promise<void> {
+  public async flushEvents(options: WorkflowEventFlushOptions = {}): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
     const events = [...this.eventQueue];
@@ -255,6 +256,16 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
       this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
+      if (options.signal && isWorkflowTaskManagerAbortSignal(options.signal)) {
+        // Best-effort flushes are used after Task Manager aborts; do not re-queue
+        // because this process may not get another chance to flush them.
+        this.logger.debug(`Failed to index workflow events during best-effort flush`, {
+          eventsCount: events.length,
+          error: { message: error instanceof Error ? error.message : String(error) },
+        });
+        return;
+      }
+
       this.logger.error(`Failed to index workflow events: ${error.message}`, {
         eventsCount: events.length,
         error: error.stack,

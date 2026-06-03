@@ -67,6 +67,7 @@ export class EngineDescriptorClient {
       {
         status: ENGINE_STATUS.INSTALLING,
         type: entityType,
+        error: null,
         logExtractionState,
         versionState: defaultVersionState,
       },

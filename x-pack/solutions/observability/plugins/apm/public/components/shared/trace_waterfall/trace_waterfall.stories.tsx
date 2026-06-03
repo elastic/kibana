@@ -11,19 +11,12 @@ import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
 import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 
 export default stories;
@@ -188,7 +181,7 @@ export const Example: StoryFn<{}> = () => {
           status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
     />
   );
 };
@@ -245,7 +238,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       showLegend
     />
   );
@@ -306,7 +299,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       serviceName="frontend"
       showLegend
     />
@@ -332,7 +325,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
     <TraceWaterfall
       traceItems={traceItems}
       showAccordion={false}
-      highlightedTraceId="99e36adf40935241"
+      contextSpanIds={['99e36adf40935241']}
       onClick={() => {}}
     />
   );
@@ -362,7 +355,7 @@ export const APMExample: StoryFn<{}> = () => {
       ({
         id: item.span.id || item.transaction?.id,
         name: item.span.name || item.transaction?.name,
-        timestampUs: item.timestamp.us,
+        timestampUs: getTimestampUs(item),
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,

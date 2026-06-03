@@ -76,7 +76,6 @@ dependsOn:
   - '@kbn/response-ops-recurring-schedule-form'
   - '@kbn/core-mount-utils-browser-internal'
   - '@kbn/core-user-profile-browser'
-  - '@kbn/core-capabilities-common'
   - '@kbn/core-ui-settings-common'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
@@ -97,26 +96,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

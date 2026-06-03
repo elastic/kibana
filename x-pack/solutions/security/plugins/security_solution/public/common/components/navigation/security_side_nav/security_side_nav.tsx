@@ -6,35 +6,58 @@
  */
 
 import React, { useMemo } from 'react';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
+  LinkCategoryType,
+  SecurityGroupName,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import { i18nStrings } from '@kbn/security-solution-navigation/links';
+import {
   SolutionSideNav,
-  SolutionSideNavItemPosition,
   type SolutionSideNavItem,
+  SolutionSideNavItemPosition,
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../common/constants';
-import { SecurityPageName } from '../../../../app/types';
-import type { NavigationLink } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
+import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
 import { useNavLinks } from '../../../links/nav_links';
+import type { NavigationLink } from '../../../links/types';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
+import { CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES } from '../../../../onboarding/links';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const EUI_HEADER_HEIGHT = '93px';
+
+const flattenNavigationLinks = (links: NavigationLink[]): NavigationLink[] =>
+  links.flatMap((link) => [
+    link,
+    ...(link.links?.length ? flattenNavigationLinks(link.links) : []),
+  ]);
 export const BOTTOM_BAR_HEIGHT = '50px';
 
-const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration
+const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition => {
+  return id === SecurityPageName.administration
     ? SolutionSideNavItemPosition.bottom
     : SolutionSideNavItemPosition.top;
+};
 
-const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
+const LAUNCHPAD_PAGES: ReadonlySet<SecurityPageName> = new Set([
+  SecurityPageName.landing,
+  SecurityPageName.siemReadiness,
+  SecurityPageName.aiValue,
+  SecurityPageName.siemMigrationsManage,
+  SecurityPageName.siemMigrationsRules,
+  SecurityPageName.siemMigrationsDashboards,
+]);
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
@@ -42,76 +65,226 @@ const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.la
 const formatLink = (
   navLink: NavigationLink,
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  position: getNavItemPosition(navLink.id),
-  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-  ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
-  ...(navLink.categories?.length && { categories: navLink.categories }),
-  ...(navLink.links?.length && {
-    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-      if (!current.disabled) {
-        acc.push({
-          id: current.id,
-          label: current.title,
-          iconType: current.sideNavIcon,
-          isBeta: current.isBeta,
-          betaOptions: current.betaOptions,
-          ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
-        });
-      }
-      return acc;
-    }, []),
-  }),
-});
+): SolutionSideNavItem => {
+  const stripDashboardsPanel = navLink.id === SecurityPageName.dashboards;
 
-/**
- * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
- */
-const formatGetStartedLink = (
-  navLink: NavigationLink,
-  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: SolutionSideNavItemPosition.bottom,
-  appendSeparator: true,
-  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-});
+  return {
+    id: navLink.id,
+    label: navLink.title,
+    position: getNavItemPosition(navLink.id),
+    ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+    ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
+    ...(navLink.categories?.length && !stripDashboardsPanel && { categories: navLink.categories }),
+    ...(navLink.links?.length &&
+      !stripDashboardsPanel && {
+        items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+          if (!current.disabled) {
+            acc.push({
+              id: current.id,
+              label: current.title,
+              iconType: current.sideNavIcon,
+              isBeta: current.isBeta,
+              betaOptions: current.betaOptions,
+              ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+            });
+          }
+          return acc;
+        }, []),
+      }),
+  };
+};
 
-/**
- * Returns the formatted `items` and `footerItems` to be rendered in the navigation
- */
-const useSolutionSideNavItems = () => {
+const useSolutionSideNavItems = (
+  chatExperience: AIChatExperience,
+  isClassicNavExternalLinksEnabled: boolean
+): SolutionSideNavItem<string>[] | undefined => {
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
+  const { application } = useKibana().services;
+
+  const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
+    const flatNavLinks = flattenNavigationLinks(navLinks);
+    const authorizedNavById = new Map(
+      flatNavLinks
+        .filter((link) => !link.disabled && !link.unauthorized)
+        .map((link) => [link.id, link])
+    );
+
+    const areMigrationLinks = (id: SecurityPageName) =>
+      [
+        SecurityPageName.siemMigrationsManage,
+        SecurityPageName.siemMigrationsRules,
+        SecurityPageName.siemMigrationsDashboards,
+      ].includes(id);
+
+    const { launchpadPanelItems, launchpadCategories } =
+      CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES.reduce<{
+        launchpadPanelItems: SolutionSideNavItem[];
+        launchpadCategories: Array<{ type: LinkCategoryType; label?: string; linkIds: string[] }>;
+      }>(
+        (acc, { id: pageId }) => {
+          const source = authorizedNavById.get(pageId);
+          if (source == null) {
+            return acc;
+          }
+
+          const item: SolutionSideNavItem = {
+            id: pageId,
+            label: source.title,
+            ...getSecuritySolutionLinkProps({ deepLinkId: pageId }),
+          };
+
+          acc.launchpadPanelItems.push(item);
+
+          // Initialize categories on first item
+          if (acc.launchpadPanelItems.length === 1) {
+            acc.launchpadCategories = [
+              {
+                type: LinkCategoryType.separator,
+                label: undefined,
+                linkIds: [],
+              },
+              {
+                type: LinkCategoryType.title,
+                label: i18nStrings.launchPad.migrations.title,
+                linkIds: [],
+              },
+            ];
+          }
+
+          // Categorize the item
+          if (acc.launchpadCategories.length > 0) {
+            if (areMigrationLinks(pageId)) {
+              acc.launchpadCategories[1].linkIds.push(pageId);
+            } else {
+              acc.launchpadCategories[0].linkIds.push(pageId);
+            }
+          }
+
+          return acc;
+        },
+        { launchpadPanelItems: [], launchpadCategories: [] }
+      );
+
+    const launchpad: SolutionSideNavItem | null =
+      launchpadPanelItems.length > 0
+        ? {
+            id: SecurityGroupName.launchpad,
+            label: i18nStrings.launchPad.title,
+            iconType: undefined,
+            position: SolutionSideNavItemPosition.bottom,
+            items: launchpadPanelItems,
+            categories: launchpadCategories,
+            prependSeparator: true,
+            ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.landing }),
+          }
+        : null;
+
+    const administrationNavLink = navLinks.find(({ id }) => id === SecurityPageName.administration);
+    const administrationFooter: SolutionSideNavItem | null =
+      administrationNavLink != null && !administrationNavLink.disabled
+        ? {
+            ...formatLink(administrationNavLink, getSecuritySolutionLinkProps),
+            iconType: undefined,
+            position: SolutionSideNavItemPosition.bottom,
+          }
+        : null;
+
+    return [
+      ...(launchpad != null ? [launchpad] : []),
+      ...(administrationFooter != null ? [administrationFooter] : []),
+    ];
+  }, [navLinks, getSecuritySolutionLinkProps]);
 
   const sideNavItems = useMemo(() => {
     if (!navLinks?.length) {
       return undefined;
     }
-    return navLinks.reduce<SolutionSideNavItem[]>((navItems, navLink) => {
+
+    const excluded = new Set(LAUNCHPAD_PAGES);
+
+    const bodyItems = navLinks.reduce<SolutionSideNavItem[]>((navItems, navLink) => {
       if (navLink.disabled) {
         return navItems;
       }
-
-      if (isGetStartedNavItem(navLink.id)) {
-        navItems.push(formatGetStartedLink(navLink, getSecuritySolutionLinkProps));
-      } else {
-        navItems.push(formatLink(navLink, getSecuritySolutionLinkProps));
+      if (excluded?.has(navLink.id)) {
+        return navItems;
       }
+
+      if (navLink.id === SecurityPageName.administration) {
+        return navItems;
+      }
+
+      navItems.push(formatLink(navLink, getSecuritySolutionLinkProps));
+
       return navItems;
     }, []);
-  }, [navLinks, getSecuritySolutionLinkProps]);
+
+    // External app links — hrefs are built via getUrlForApp so basePath and active
+    // space are automatically prepended (handles e.g. /s/my-space/app/discover).
+    const externalLinks: SolutionSideNavItem[] = [
+      // Agent builder for AI agent chat and not classic AI experience
+      ...(chatExperience === AIChatExperience.Agent
+        ? [
+            {
+              id: SecurityPageName.externalLinkAgentBuilder,
+              label: 'Agents',
+              href: application.getUrlForApp('agent_builder', { path: '/agents' }),
+              onClick: (e: React.MouseEvent) => {
+                e.preventDefault();
+                application.navigateToApp('agent_builder', { path: '/agents' });
+              },
+              position: SolutionSideNavItemPosition.top,
+            },
+          ]
+        : []),
+      {
+        id: SecurityPageName.externalLinkDiscover,
+        label: 'Discover',
+        href: application.getUrlForApp('discover'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('discover');
+        },
+        position: SolutionSideNavItemPosition.top,
+      },
+      {
+        id: SecurityPageName.externalLinkWorkflows,
+        label: 'Workflows',
+        href: application.getUrlForApp('workflows'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('workflows');
+        },
+        position: SolutionSideNavItemPosition.top,
+      },
+    ];
+
+    return [
+      ...(isClassicNavExternalLinksEnabled ? externalLinks : []),
+      ...bodyItems,
+      ...(classicFooterItems ? classicFooterItems : []),
+    ];
+  }, [
+    application,
+    chatExperience,
+    navLinks,
+    getSecuritySolutionLinkProps,
+    classicFooterItems,
+    isClassicNavExternalLinksEnabled,
+  ]);
 
   return sideNavItems;
 };
 
-const useSelectedId = (): SecurityPageName => {
+const useSelectedId = (): string => {
   const [{ pageName }] = useRouteSpy();
   const [rootLinkInfo] = useParentLinks(pageName);
+
+  if (LAUNCHPAD_PAGES.has(pageName)) {
+    return SecurityGroupName.launchpad;
+  }
+
   return rootLinkInfo?.id ?? '';
 };
 
@@ -135,8 +308,19 @@ const usePanelBottomOffset = (): string | undefined => {
  * It takes the links to render from the generic application `links` configs.
  */
 export const SecuritySideNav: React.FC = () => {
-  const { uiSettings } = useKibana().services;
-  const items = useSolutionSideNavItems();
+  const {
+    uiSettings,
+    settings: { client },
+  } = useKibana().services;
+
+  const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
+  const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsNewHomePageEnabled'
+  );
+  const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
+    'securityClassicNavExternalLinks'
+  );
+  const items = useSolutionSideNavItems(chatExperience, isClassicNavExternalLinksEnabled);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
@@ -146,8 +330,13 @@ export const SecuritySideNav: React.FC = () => {
       ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
       false
     );
-    return getNavCategories(enableAlertsAndAttacksAlignment);
-  }, [uiSettings]);
+    return getNavCategories(
+      chatExperience,
+      enableAlertsAndAttacksAlignment,
+      isNewEAHomePageEnabled,
+      isClassicNavExternalLinksEnabled
+    );
+  }, [uiSettings, isNewEAHomePageEnabled, chatExperience, isClassicNavExternalLinksEnabled]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

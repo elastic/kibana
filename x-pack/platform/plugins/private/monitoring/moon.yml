@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/kql'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -80,27 +81,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - server/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

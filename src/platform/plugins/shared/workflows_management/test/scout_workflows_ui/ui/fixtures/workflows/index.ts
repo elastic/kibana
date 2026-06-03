@@ -12,15 +12,19 @@ export { getCreateGetUpdateCaseWorkflowYaml } from './create_get_update_case';
 export {
   getListTestWorkflowYaml,
   getTestRunWorkflowYaml,
+  getTestRunEventTabWorkflowYaml,
   getWorkflowWithLoopYaml,
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getRootLevelAutocompleteYaml,
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
+  getScrollTestWorkflowYaml,
+  getLongRunningCancellationWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
@@ -29,6 +33,12 @@ export {
   getCreateObsAlertRuleWorkflowYaml,
   getTriggerAlertWorkflowYaml,
 } from './alert_workflows';
+export {
+  getDataMapWithItemAndIndex,
+  getDataMapWithInvalidVariable,
+} from './data_map_validation_workflows';
+export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export { getInfosecDemoWorkflowYaml } from './infosec_demo_workflow';
 export {
   getAssignAfterUseSameLine,
   getAssignBeforeUseSameLine,

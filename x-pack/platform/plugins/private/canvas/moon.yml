@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/features-plugin'
-  - '@kbn/lens-plugin'
   - '@kbn/maps-plugin'
   - '@kbn/reporting-plugin'
   - '@kbn/spaces-plugin'
@@ -72,6 +71,9 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/visualizations-common'
   - '@kbn/shared-ux-utility'
+  - '@kbn/saved-search-plugin'
+  - '@kbn/lens-common'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -91,26 +93,6 @@ fileGroups:
     - tasks/mocks/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

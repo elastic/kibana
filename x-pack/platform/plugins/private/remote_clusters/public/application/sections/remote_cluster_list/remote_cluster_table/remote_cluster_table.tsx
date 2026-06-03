@@ -325,7 +325,7 @@ export class RemoteClusterTable extends Component<Props, State> {
                   );
 
               return (
-                <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+                <EuiToolTip content={label} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="remoteClusterTableRowEditButton"
                     aria-label={label}
@@ -355,7 +355,7 @@ export class RemoteClusterTable extends Component<Props, State> {
                   );
 
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <RemoveClusterButtonProvider clusterNames={[name]}>
                     {(removeCluster) => (
                       <EuiButtonIcon
@@ -409,7 +409,7 @@ export class RemoteClusterTable extends Component<Props, State> {
         <EuiButton
           {...reactRouterNavigate(history, '/add')}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="remoteClusterCreateButton"
         >
           <FormattedMessage

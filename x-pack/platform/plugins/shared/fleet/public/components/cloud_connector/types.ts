@@ -43,9 +43,16 @@ export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCreden
   azure_credentials_cloud_connector_id?: string;
 }
 
+export interface GcpCloudConnectorCredentials extends BaseCloudConnectorCredentials {
+  serviceAccount?: string;
+  audience?: string;
+  gcp_credentials_cloud_connector_id?: string | CloudConnectorSecretReference;
+}
+
 export type CloudConnectorCredentials =
   | AwsCloudConnectorCredentials
-  | AzureCloudConnectorCredentials;
+  | AzureCloudConnectorCredentials
+  | GcpCloudConnectorCredentials;
 
 export interface NewCloudConnectorFormProps {
   newPolicy: NewPackagePolicy;
@@ -81,6 +88,15 @@ export interface AzureCloudConnectorOption {
   azure_credentials_cloud_connector_id?: CloudConnectorVar;
 }
 
+export interface GcpCloudConnectorOption {
+  label: string;
+  value: string;
+  id: string;
+  serviceAccount?: CloudConnectorVar;
+  audience?: CloudConnectorVar;
+  gcp_credentials_cloud_connector_id?: CloudConnectorSecretVar;
+}
+
 export interface CloudConnectorFormProps {
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
@@ -99,12 +115,7 @@ export interface CloudConnectorFormProps {
 
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
-  | 'isCloudEnabled'
-  | 'cloudId'
-  | 'cloudHost'
-  | 'deploymentUrl'
-  | 'serverless'
-  | 'isServerlessEnabled'
+  'isCloudEnabled' | 'cloudId' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
@@ -121,4 +132,6 @@ export interface CloudConnectorField {
   dataTestSubj: string;
   value: string;
   id: string;
+  helpText?: string;
+  tooltip?: string;
 }

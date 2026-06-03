@@ -11,10 +11,8 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     this.tags(['esGate']);
 
     // load new security and platform deployment-agnostic test here
-    loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/management'));
     loadTestFile(require.resolve('../../apis/painless_lab'));
-    loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/intercepts'));
   });
 }

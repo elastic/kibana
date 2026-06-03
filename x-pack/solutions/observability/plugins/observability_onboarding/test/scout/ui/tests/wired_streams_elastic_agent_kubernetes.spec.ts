@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 import {
   setupWiredStreamsOnce,
@@ -14,7 +15,7 @@ import {
 
 test.describe(
   'Wired Streams - Elastic Agent Kubernetes Flow',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await setupWiredStreamsOnce({ apiServices });
@@ -30,6 +31,7 @@ test.describe(
         await pageObjects.onboarding.clickIntegrationCard(
           'integration-card:kubernetes-quick-start'
         );
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible with both options', async () => {
@@ -52,6 +54,7 @@ test.describe(
     }) => {
       await pageObjects.onboarding.selectKubernetesUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:kubernetes-quick-start');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('command does NOT include wired streams config in Classic mode', async () => {
         const classicCommand = await pageObjects.onboarding.getKubernetesCommandContent();

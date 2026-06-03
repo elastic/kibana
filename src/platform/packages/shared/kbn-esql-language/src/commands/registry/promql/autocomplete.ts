@@ -10,7 +10,6 @@
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import {
@@ -29,6 +28,7 @@ import {
   getUsedPromqlParamNames,
   isAtValidColumnSuggestionPosition,
   isParamValueComplete,
+  isPromqlParamAvailable,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { suggestForPromqlQuery } from '../../definitions/utils/autocomplete';
@@ -56,6 +56,8 @@ export async function autocomplete(
       cursorRelative: position.cursorRelative,
       columns: context?.columns,
       shouldWrap: position.shouldWrap,
+      variables: context?.variables,
+      supportsControls: context?.supportsControls,
     });
   }
 
@@ -64,11 +66,8 @@ export async function autocomplete(
   switch (kind) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
-      const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
-        ({ label }) =>
-          !usedParams.has(label) &&
-          !(label === PromqlParamName.Step && usedParams.has(PromqlParamName.Buckets)) &&
-          !(label === PromqlParamName.Buckets && usedParams.has(PromqlParamName.Step))
+      const availableParamSuggestions = getPromqlParamKeySuggestions().filter(({ label }) =>
+        isPromqlParamAvailable(label, usedParams)
       );
 
       const canSuggestQuery = isAtValidColumnSuggestionPosition(
@@ -90,7 +89,6 @@ export async function autocomplete(
 
       const indexSuggestions = suggestForIndexAssignment(
         innerCommandText,
-        commandStart,
         context?.timeSeriesSources,
         [commaCompleteItem, ...baseSuggestions]
       );
@@ -121,7 +119,6 @@ export async function autocomplete(
  */
 function suggestForIndexAssignment(
   commandText: string,
-  commandStart: number,
   sources: IndexAutocompleteItem[] | undefined,
   onComplete: ISuggestionItem[]
 ): ISuggestionItem[] | undefined {
@@ -131,7 +128,7 @@ function suggestForIndexAssignment(
   }
 
   const availableSources = sources ?? [];
-  const { valueText, valueStart } = indexContext;
+  const { valueText } = indexContext;
   const valueTrimmed = valueText.trimEnd();
 
   if (valueTrimmed.endsWith(',')) {
@@ -147,20 +144,20 @@ function suggestForIndexAssignment(
     return [];
   }
 
-  const { fragment, rangeToReplace } = getFragmentData(valueText);
-  const absoluteRange = fragment
-    ? {
-        start: commandStart + valueStart + rangeToReplace.start,
-        end: commandStart + valueStart + rangeToReplace.end,
-      }
-    : undefined;
+  const prefix = getCurrentIndexFragment(valueText);
 
   const sourceNames = new Set(availableSources.map(({ name }) => name));
-  if (fragment && sourceExists(fragment, sourceNames)) {
+  if (prefix && sourceExists(prefix, sourceNames)) {
     return onComplete;
   }
 
-  return buildSourceSuggestions(availableSources, fragment, absoluteRange);
+  return buildSourceSuggestions(availableSources, prefix);
+}
+
+function getCurrentIndexFragment(valueText: string): string {
+  const segments = valueText.split(',');
+  const currentSegment = segments[segments.length - 1] ?? '';
+  return currentSegment.trimStart();
 }
 
 /*
@@ -189,13 +186,11 @@ function filterAlreadyUsedSources(
 /* Converts index metadata to suggestion items with optional fragment filtering. */
 function buildSourceSuggestions(
   sources: IndexAutocompleteItem[],
-  fragment?: string,
-  rangeToReplace?: { start: number; end: number }
+  fragment?: string
 ): ISuggestionItem[] {
   return specialIndicesToSuggestions(sources).map((suggestion) => ({
     ...suggestion,
     ...(fragment ? { filterText: fragment } : {}),
-    ...(rangeToReplace ? { rangeToReplace } : {}),
   }));
 }
 

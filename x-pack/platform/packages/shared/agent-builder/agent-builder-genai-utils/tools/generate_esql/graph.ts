@@ -7,15 +7,21 @@
 
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
+import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
-import { extractEsqlQueries, executeEsql, validateEsqlQuery } from '../utils/esql';
-import { resolveResourceWithSamplingStats } from '../utils/resources';
+import {
+  extractEsqlQueries,
+  executeEsql,
+  validateEsqlQuery,
+  buildTimeRangeParams,
+} from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
@@ -32,6 +38,7 @@ import {
   isExecuteQueryAction,
   isValidateQueryAction,
 } from './actions';
+import type { EsqlLoadedDocumentation } from './documentation';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -42,6 +49,8 @@ const StateAnnotation = Annotation.Root({
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
+  disableNamedParams: Annotation<boolean | undefined>(),
+  timeRange: Annotation<TimeRange>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -62,16 +71,18 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
+  documentation,
   esqlCallbacks,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
+  documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
-    const resolvedResource = await resolveResourceWithSamplingStats({
+    const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
       esClient,
@@ -101,7 +112,7 @@ export const createNlToEsqlGraph = ({
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
       })
     );
@@ -127,12 +138,13 @@ export const createNlToEsqlGraph = ({
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,
         additionalContext: state.additionalContext,
         rowLimit: state.rowLimit,
+        disableNamedParams: state.disableNamedParams,
       })
     );
 
@@ -259,7 +271,11 @@ export const createNlToEsqlGraph = ({
 
     let action: ExecuteQueryAction;
     try {
-      const results = await executeEsql({ query, esClient });
+      const results = await executeEsql({
+        query,
+        params: buildTimeRangeParams(state.timeRange),
+        esClient,
+      });
       action = {
         type: 'execute_query',
         success: true,

@@ -53,6 +53,9 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
+jest.mock('../../hooks/use_composite_slo_enabled', () => ({
+  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_fetch_slo_definitions');
@@ -68,6 +71,9 @@ jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_space');
 jest.mock('./components/slo_list_search_bar');
+jest.mock('./components/slo_sparkline', () => ({
+  SloSparkline: () => <div data-test-subj="mockedSparkline" />,
+}));
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;

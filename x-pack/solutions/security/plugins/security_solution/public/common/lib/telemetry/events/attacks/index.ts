@@ -152,6 +152,16 @@ export const attacksScheduleFlyoutOpenedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksScheduleDetailsFlyoutOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.ScheduleDetailsFlyoutOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the schedule details flyout open', optional: false },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -163,6 +173,11 @@ export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = 
       },
     },
   },
+};
+
+export const attacksWorkflowRunTriggeredEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.WorkflowRunTriggered,
+  schema: actionSourceSchema,
 };
 
 export const attacksTelemetryEvents = [
@@ -178,5 +193,7 @@ export const attacksTelemetryEvents = [
   attacksDetailsFlyoutOpenedEvent,
   attacksExpandedViewTabClickedEvent,
   attacksScheduleFlyoutOpenedEvent,
+  attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
+  attacksWorkflowRunTriggeredEvent,
 ];

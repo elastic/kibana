@@ -16,7 +16,7 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
+import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -96,7 +96,7 @@ export const createActionHandler = async (
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
-    expiration: moment().add(5, 'minutes').toISOString(),
+    expiration: moment().add(ACTION_EXPIRATION_WEEKS, 'weeks').toISOString(),
     type: 'INPUT_ACTION',
     input_type: 'osquery',
     alert_ids: params.alert_ids,
@@ -115,6 +115,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
@@ -153,7 +154,7 @@ export const createActionHandler = async (
         (query) => ({
           action_id: query.action_id as string,
           '@timestamp': moment().toISOString(),
-          expiration: moment().add(5, 'minutes').toISOString(),
+          expiration: moment().add(ACTION_EXPIRATION_WEEKS, 'weeks').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents as string[],

@@ -29,6 +29,7 @@ import {
 import useToggle from 'react-use/lib/useToggle';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
@@ -206,7 +207,7 @@ export const ExpressionRow = ({
       <EuiFlexGroup gutterSize="xs" data-test-subj="metricThresholdExpressionRow">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={toggle}
             data-test-subj="expandRow"
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
@@ -271,7 +272,7 @@ export const ExpressionRow = ({
                     color={'primary'}
                     flush={'left'}
                     size="xs"
-                    iconType={'plusInCircleFilled'}
+                    iconType={'plusCircle'}
                     onClick={toggleWarningThreshold}
                   >
                     <FormattedMessage
@@ -312,7 +313,7 @@ export const ExpressionRow = ({
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'minusInCircleFilled'}
+                  iconType={'minusCircle'}
                   onClick={toggleWarningThreshold}
                 />
               </EuiFlexGroup>
@@ -376,6 +377,7 @@ const ThresholdElement: React.FC<{
     <>
       <StyledExpression>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
           onChangeSelectedThresholdComparator={updateComparator}

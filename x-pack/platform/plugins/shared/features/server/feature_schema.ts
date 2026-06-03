@@ -102,6 +102,7 @@ const casesSchemaObject = schema.maybe(
     createComment: schema.maybe(casesSchema),
     reopenCase: schema.maybe(casesSchema),
     assign: schema.maybe(casesSchema),
+    manageTemplates: schema.maybe(casesSchema),
   })
 );
 
@@ -156,6 +157,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     },
   }),
   name: schema.string(),
+  excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   includeIn: schema.oneOf([schema.literal('all'), schema.literal('read'), schema.literal('none')]),
   minimumLicense: schema.maybe(validSubFeaturePrivilegeLicensesSchema),
   management: schema.maybe(managementSchema),

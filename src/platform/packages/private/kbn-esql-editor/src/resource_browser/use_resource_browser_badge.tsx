@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { getSupportedCommand } from './utils';
@@ -115,6 +115,12 @@ export const useSourcesBadge = ({
 
   const sourcesLabelClickHandler = useCallback(
     (e: monaco.editor.IEditorMouseEvent) => {
+      // Only handle clicks on actual text content. When clicking above the first
+      // line or below the last line, Monaco clamps e.target.position to the
+      // nearest line (e.g. line 1, column 1), which would incorrectly match the
+      // command keyword and open the browser.
+      if (e.target.type !== monaco.editor.MouseTargetType.CONTENT_TEXT) return;
+
       const editor = editorRef.current;
       const model = editorModel.current;
       if (!editor || !model) return;

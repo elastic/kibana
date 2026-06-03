@@ -116,6 +116,56 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  uri_parts: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.uriParts.name', {
+      defaultMessage: 'URI Parts',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.description', {
+      defaultMessage:
+        'Parse a URI string into its components (scheme, domain, path, query, fragment, port, user info, and file extension).',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
+      defaultMessage:
+        'Provide `from` for the field containing the URI string. Optionally set `to` to choose the target prefix (defaults to `url`). Extracted components become `<prefix>.scheme`, `<prefix>.domain`, `<prefix>.path`, `<prefix>.port`, etc.',
+      ignoreTag: true,
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.examples.basic', {
+          defaultMessage: 'Parse a URL field using the default `url` prefix',
+        }),
+        yaml: `- action: uri_parts
+  from: attributes.request_url`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.examples.custom', {
+          defaultMessage:
+            'Store the parts under a custom prefix and drop the source field after a successful parse',
+        }),
+        yaml: `- action: uri_parts
+  from: attributes.request_url
+  to: attributes.request
+  keep_original: false
+  remove_if_successful: true`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.subfields', {
+        defaultMessage:
+          'Produces `scheme`, `domain`, `path`, `query`, `fragment`, `port` (integer), `user_info`, `username`, `password`, and `extension` as sub-fields of the target prefix.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.relative', {
+        defaultMessage:
+          'Relative URIs (e.g. `/app/login?x=1`) parse successfully with null scheme and domain. Only inputs that cannot be parsed at all produce null for every sub-field.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.keepOriginal', {
+        defaultMessage:
+          'By default `keep_original: true` preserves the source URI at `<prefix>.original`. Combine with `remove_if_successful: true` to drop the source field only when parsing succeeds.',
+        ignoreTag: true,
+      }),
+    ],
+  },
+
   set: {
     name: i18n.translate('xpack.streamlang.actionMetadata.set.name', {
       defaultMessage: 'Set',
@@ -322,7 +372,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
         description: i18n.translate(
           'xpack.streamlang.actionMetadata.removeByPrefix.examples.debug',
           {
-            defaultMessage: 'Drop all debug.* fields before indexing',
+            defaultMessage: 'Remove all debug.* fields before indexing',
           }
         ),
         yaml: `- action: remove_by_prefix
@@ -341,11 +391,12 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Remove',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.remove.description', {
-      defaultMessage: 'Delete a specific field from the document',
+      defaultMessage:
+        'Delete a specific field from the document while keeping the document itself.',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.remove.usage', {
       defaultMessage:
-        'Provide the `from` field to delete. Combine with `ignore_missing` if the field may not exist.',
+        'Provide the `from` field to delete. Combine with `ignore_missing` if the field may not exist. Add a `where` condition to remove the field only on matching documents.',
     }),
     examples: [
       {
@@ -356,12 +407,21 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
   from: password`,
       },
       {
-        description: i18n.translate('xpack.streamlang.actionMetadata.remove.examples.nested', {
-          defaultMessage: 'Drop a nested attribute when present',
+        description: i18n.translate('xpack.streamlang.actionMetadata.remove.examples.conditional', {
+          defaultMessage: 'Remove a field only when a condition is met',
         }),
         yaml: `- action: remove
-  from: attributes.debug`,
+  from: host.name
+  where:
+    field: host.name
+    eq: "host3"`,
       },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.remove.tips.notDrop', {
+        defaultMessage:
+          'To discard entire documents instead of individual fields, use drop_document',
+      }),
     ],
   },
 
@@ -370,10 +430,11 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Drop Document',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.description', {
-      defaultMessage: 'Discard the entire document from the pipeline',
+      defaultMessage: 'Discard the entire document so it is not indexed at all.',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.usage', {
-      defaultMessage: 'Drops documents matching the condition. The documents will not be indexed.',
+      defaultMessage:
+        'Drops entire documents matching the condition. The documents will not be indexed.',
     }),
     examples: [
       {
@@ -406,6 +467,10 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.dropDocument.tips.irreversible', {
         defaultMessage: 'Dropped documents are permanently discarded and will not be indexed',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.dropDocument.tips.notRemove', {
+        defaultMessage:
+          'To remove individual fields instead of discarding the entire document, use the remove action',
       }),
     ],
   },
@@ -805,6 +870,111 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     internal_networks:
       - private`,
       },
+    ],
+  },
+
+  json_extract: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.name', {
+      defaultMessage: 'JSON Extract',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.description', {
+      defaultMessage: 'Extract values from JSON strings using JSONPath-like selectors',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.usage', {
+      defaultMessage:
+        'Provide a `field` containing the JSON string and an array of `extractions` with `selector` (JSONPath-like path) and `target_field` pairs to extract specific values.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.simple', {
+          defaultMessage: 'Extract a simple top-level field',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: user_id
+      target_field: user.id`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.nested', {
+          defaultMessage: 'Extract nested values using dot notation',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: "$.metadata.client.ip"
+      target_field: client_ip
+    - selector: "items[0].name"
+      target_field: first_item_name`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.selector', {
+        defaultMessage:
+          "Selectors support dot notation (user.name), bracket notation (['user']['name']), and array indices (items[0])",
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.root', {
+        defaultMessage: 'The $ root selector is optional and can be omitted',
+      }),
+    ],
+  },
+
+  enrich: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.enrich.name', {
+      defaultMessage: 'Enrich',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.enrich.description', {
+      defaultMessage: 'Enrich a field with a policy',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.enrich.usage', {
+      defaultMessage: 'Provide a `policy_name` to enrich data with the policy.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.enrich.examples.simple', {
+          defaultMessage: 'Enrich data with a policy',
+        }),
+        yaml: `- action: enrich
+  policy_name: my_policy
+  to: my_enriched_field`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.enrich.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  registered_domain: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.name', {
+      defaultMessage: 'Registered Domain',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.description', {
+      defaultMessage: 'Extract the domain parts from an FQDN string',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.usage', {
+      defaultMessage:
+        'Provide the `expression` field containing the FQDN and `prefix` for the output columns prefix where you want to store the extracted parts (for example, `prefix.subdomain`)',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.registeredDomain.examples.simple',
+          {
+            defaultMessage: 'Extract the domain parts from an FQDN string',
+          }
+        ),
+        yaml: `- action: registered_domain
+  expression: fqdn
+  prefix: rd`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.tips.parts', {
+        defaultMessage:
+          'Extracts the following parts: domain, registered_domain, top_level_domain, subdomain',
+      }),
     ],
   },
 

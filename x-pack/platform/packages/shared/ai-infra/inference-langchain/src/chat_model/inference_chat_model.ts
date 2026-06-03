@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ZodSchema } from '@kbn/zod';
 import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
@@ -178,10 +177,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   override bindTools(tools: BindToolsInput[], kwargs?: Partial<InferenceChatModelCallOptions>) {
     // conversion will be done at call time for simplicity's sake
     // so we just need to implement this method with the default behavior to support tools
-    return this.bind({
+    return this.withConfig({
       tools,
       ...kwargs,
-    } as Partial<InferenceChatModelCallOptions>);
+    });
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
@@ -353,7 +352,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
             parameters:
               '_zod' in (schema as object)
                 ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
-                : zodToJsonSchema(schema as unknown as ZodSchema),
+                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];

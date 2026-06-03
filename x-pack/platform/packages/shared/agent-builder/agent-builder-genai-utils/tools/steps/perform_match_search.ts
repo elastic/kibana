@@ -7,13 +7,16 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { MappingField } from '../utils/mappings';
 import { isCcsTarget } from '../utils/ccs';
+import { MAX_ES_RESPONSE_SIZE_BYTES } from '../constants';
+import { extractSnippetsBatch, type TopSnippetsConfig } from './extract_snippets';
 
 export interface MatchResult {
   id: string;
   index: string;
-  highlights: string[];
+  snippets: string[];
 }
 
 export interface PerformMatchSearchResponse {
@@ -25,26 +28,35 @@ export interface PerformMatchSearchResponse {
  * for best relevance ranking. For CCS targets, falls back to a query-based
  * approach because the simplified RRF retriever syntax does not support
  * cross-cluster index patterns.
+ *
+ * When `useTopSnippets` is true, highlighting is omitted from the request
+ * because snippets will be extracted via a separate ES|QL TOP_SNIPPETS call.
  */
 const buildSearchRequest = ({
   index,
   term,
   fields,
   size,
+  useTopSnippets,
 }: {
   index: string;
   term: string;
   fields: MappingField[];
   size: number;
+  useTopSnippets: boolean;
 }): Record<string, any> => {
-  const highlightConfig = {
-    number_of_fragments: 5,
-    fragment_size: 500,
-    pre_tags: [''],
-    post_tags: [''],
-    order: 'score' as const,
-    fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
-  };
+  const highlightConfig = useTopSnippets
+    ? {}
+    : {
+        highlight: {
+          number_of_fragments: 5,
+          fragment_size: 500,
+          pre_tags: [''],
+          post_tags: [''],
+          order: 'score' as const,
+          fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
+        },
+      };
 
   // CCS fallback: the simplified RRF retriever syntax does not support
   // cross-cluster index patterns, so we use a query-based approach instead.
@@ -53,7 +65,7 @@ const buildSearchRequest = ({
       index,
       size,
       query: buildCcsQuery({ term, fields }),
-      highlight: highlightConfig,
+      ...highlightConfig,
     };
   }
 
@@ -71,7 +83,7 @@ const buildSearchRequest = ({
         fields: fields.map((field) => field.path),
       },
     },
-    highlight: highlightConfig,
+    ...highlightConfig,
   };
 };
 
@@ -107,6 +119,7 @@ export const performMatchSearch = async ({
   size,
   esClient,
   logger,
+  topSnippetsConfig,
 }: {
   term: string;
   fields: MappingField[];
@@ -114,15 +127,26 @@ export const performMatchSearch = async ({
   size: number;
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** When provided, snippets are extracted via ES|QL TOP_SNIPPETS instead of ES highlighting. */
+  topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<PerformMatchSearchResponse> => {
-  const searchRequest = buildSearchRequest({ index, term, fields, size });
+  const useTopSnippets = topSnippetsConfig != null;
+  const searchRequest = buildSearchRequest({ index, term, fields, size, useTopSnippets });
 
   logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
   let response;
   try {
-    response = await esClient.search<any>(searchRequest);
+    response = await esClient.search<any>(searchRequest, {
+      maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
+    });
   } catch (error) {
+    if (isMaximumResponseSizeExceededError(error)) {
+      throw new Error(
+        `Search response exceeded the maximum allowed size of 20MB. ` +
+          `Try reducing the result size or narrowing the query.`
+      );
+    }
     logger.debug(
       `Elasticsearch search failed for index="${index}", term="${term}": ${
         error instanceof Error ? error.message : String(error)
@@ -131,16 +155,38 @@ export const performMatchSearch = async ({
     throw error;
   }
 
-  const results = response.hits.hits.map<MatchResult>((hit) => {
-    return {
+  const hits = response.hits.hits;
+
+  if (!useTopSnippets) {
+    // Fallback: extract snippets from Elasticsearch highlighting
+    const results = hits.map<MatchResult>((hit) => ({
       id: hit._id!,
       index: hit._index!,
-      highlights: Object.entries(hit.highlight ?? {}).reduce((acc, [field, highlights]) => {
-        acc.push(...highlights);
+      snippets: Object.entries(hit.highlight ?? {}).reduce((acc, [, fragments]) => {
+        acc.push(...fragments);
         return acc;
       }, [] as string[]),
-    };
+    }));
+    return { results };
+  }
+
+  // TOP_SNIPPETS path: one ES|QL call for the entire result set
+  const docIds = hits.map((hit) => hit._id!);
+  const snippetsByDocId = await extractSnippetsBatch({
+    index,
+    docIds,
+    term,
+    fields,
+    config: topSnippetsConfig,
+    esClient,
+    logger,
   });
+
+  const results = hits.map<MatchResult>((hit) => ({
+    id: hit._id!,
+    index: hit._index!,
+    snippets: snippetsByDocId.get(hit._id!) ?? [],
+  }));
 
   return { results };
 };

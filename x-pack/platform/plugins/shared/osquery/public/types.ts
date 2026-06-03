@@ -18,6 +18,8 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
@@ -26,6 +28,7 @@ import type {
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import type { OsqueryIcon } from './components/osquery_icon';
 
 /**
  * Minimal DataProvider type for timeline integration within the osquery plugin.
@@ -56,6 +59,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResult: ReturnType<typeof getLazyOsqueryResult>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
+  OsqueryIcon: typeof OsqueryIcon;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
@@ -67,6 +71,21 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
+/**
+ * @internal
+ */
+export interface OsqueryTimelinesStart {
+  getHoverActions: () => {
+    getAddToTimelineButton: (props: {
+      dataProvider: unknown[];
+      field: string;
+      ownFocus: boolean;
+      showTooltip: boolean;
+      startServices: { analytics: unknown; i18n: unknown; theme: unknown };
+    }) => unknown;
+  };
+}
+
 export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
@@ -76,6 +95,9 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
+  timelines?: OsqueryTimelinesStart;
+  uiActions?: UiActionsStart;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 

@@ -30,6 +30,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -58,6 +59,11 @@ export const getLiveQueryDetailsRoute = (
               typeof getLiveQueryDetailsRequestQuerySchema,
               GetLiveQueryDetailsRequestQuerySchema
             >(getLiveQueryDetailsRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => getLiveQueryDetailsResponseSchema,
+            },
           },
         },
       },
@@ -111,7 +117,8 @@ export const getLiveQueryDetailsRoute = (
                   'user_profile_uid',
                   'pack_id',
                   'pack_name',
-                  'prebuilt_pack'
+                  'prebuilt_pack',
+                  'tags'
                 ),
                 queries: reduce<
                   {

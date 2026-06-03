@@ -10,7 +10,6 @@ import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem } from '../complete_items';
-import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 
 export async function autocomplete(
   query: string,
@@ -29,14 +28,6 @@ export async function autocomplete(
       advanceCursor: true,
       openSuggestions: true,
     })) ?? [];
-
-  const fragment = findFinalWord(innerText);
-  columnSuggestions.forEach((suggestion) => {
-    suggestion.rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length,
-    };
-  });
 
   return columnSuggestions;
 }

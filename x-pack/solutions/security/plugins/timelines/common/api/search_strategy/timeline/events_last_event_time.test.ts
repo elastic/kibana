@@ -48,9 +48,8 @@ describe('timelineEventsLastEventTimeRequestSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"received\\": \\"unknown-key\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
+          \\"code\\": \\"invalid_value\\",
+          \\"values\\": [
             \\"hostDetails\\",
             \\"hosts\\",
             \\"users\\",
@@ -61,7 +60,7 @@ describe('timelineEventsLastEventTimeRequestSchema', () => {
           \\"path\\": [
             \\"indexKey\\"
           ],
-          \\"message\\": \\"Invalid enum value. Expected 'hostDetails' | 'hosts' | 'users' | 'userDetails' | 'ipDetails' | 'network', received 'unknown-key'\\"
+          \\"message\\": \\"Invalid option: expected one of \\\\\\"hostDetails\\\\\\"|\\\\\\"hosts\\\\\\"|\\\\\\"users\\\\\\"|\\\\\\"userDetails\\\\\\"|\\\\\\"ipDetails\\\\\\"|\\\\\\"network\\\\\\"\\"
         }
       ]"
     `);

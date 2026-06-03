@@ -8,8 +8,53 @@
  */
 
 import { DurationFormat } from './duration';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('Duration Format', () => {
+  test('handles missing values', () => {
+    const duration = new DurationFormat(
+      {
+        inputFormat: 'seconds',
+        outputFormat: 'humanize',
+      },
+      jest.fn()
+    );
+    expect(duration.convertToText(null)).toBe('(null)');
+    expect(duration.convertToText(undefined)).toBe('(null)');
+    expectReactElementWithNull(duration.convertToReact(null));
+    expectReactElementWithNull(duration.convertToReact(undefined));
+  });
+
+  test('returns a plain string for a numeric duration', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convertToText(60)).toBe('a minute');
+    expect(formatter.convertToReact(60)).toBe('a minute');
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convertToText([60, 3600])).toBe('["a minute","an hour"]');
+    expectReactElementAsArray(formatter.convertToReact([60, 3600]), ['a minute', 'an hour']);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convertToText([60])).toBe('["a minute"]');
+    expect(formatter.convertToReact([60])).toBe('a minute');
+  });
+
   testCase({
     inputFormat: 'seconds',
     outputFormat: 'humanize',
@@ -580,7 +625,13 @@ describe('Duration Format', () => {
           },
           jest.fn()
         );
-        expect(duration.convert(input)).toBe(output);
+        expect(duration.convertToText(input)).toBe(output);
+
+        if (output === '(null)') {
+          expectReactElementWithNull(duration.convertToReact(input));
+        } else {
+          expect(duration.convertToReact(input)).toBe(output);
+        }
       });
     });
   }

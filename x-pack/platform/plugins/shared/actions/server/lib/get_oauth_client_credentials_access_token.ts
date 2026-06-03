@@ -9,14 +9,31 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
-export interface GetOAuthClientCredentialsConfig {
-  clientId: string;
-  additionalFields?: Record<string, unknown>;
-}
-
-export interface GetOAuthClientCredentialsSecrets {
-  clientSecret: string;
-}
+/**
+ * Two valid credential modes for the OAuth2 client_credentials grant:
+ *
+ *  - `client_secret`: classic clientId + clientSecret in the token request
+ *    body. May carry extra `additionalFields` to merge into the body.
+ *  - `client_assertion`: a signed JWT assertion authenticates the client
+ *    instead of a secret. `buildAdditionalFields` is invoked lazily on cache
+ *    miss so we don't pay the crypto cost on cached tokens.
+ */
+export type GetOAuthClientCredentials =
+  | {
+      type: 'client_secret';
+      config: {
+        clientId: string;
+        additionalFields?: Record<string, unknown>;
+      };
+      secrets: { clientSecret: string };
+    }
+  | {
+      type: 'client_assertion';
+      config: {
+        clientId: string;
+        buildAdditionalFields: () => Record<string, unknown>;
+      };
+    };
 
 interface GetOAuthClientCredentialsAccessTokenOpts {
   connectorId?: string;
@@ -24,10 +41,7 @@ interface GetOAuthClientCredentialsAccessTokenOpts {
   oAuthScope?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  credentials: {
-    config: GetOAuthClientCredentialsConfig;
-    secrets: GetOAuthClientCredentialsSecrets;
-  };
+  credentials: GetOAuthClientCredentials;
   connectorTokenClient?: ConnectorTokenClientContract;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
 }
@@ -42,10 +56,11 @@ export const getOAuthClientCredentialsAccessToken = async ({
   connectorTokenClient,
   tokenEndpointAuthMethod,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
-  const { clientId, additionalFields } = credentials.config;
-  const { clientSecret } = credentials.secrets;
-
-  if (!clientId || !clientSecret) {
+  const { clientId } = credentials.config;
+  const hasCredentials =
+    credentials.type === 'client_assertion' ||
+    (credentials.type === 'client_secret' && !!credentials.secrets.clientSecret);
+  if (!clientId || !hasCredentials) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }
@@ -63,19 +78,31 @@ export const getOAuthClientCredentialsAccessToken = async ({
     hasErrors = errors;
   }
 
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
+  if (
+    connectorToken === null ||
+    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
+  ) {
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
+
+    const body =
+      credentials.type === 'client_secret'
+        ? {
+            scope: oAuthScope,
+            clientId,
+            clientSecret: credentials.secrets.clientSecret,
+            ...credentials.config.additionalFields,
+          }
+        : {
+            scope: oAuthScope,
+            clientId,
+            ...credentials.config.buildAdditionalFields(),
+          };
 
     const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
       logger,
-      {
-        scope: oAuthScope,
-        clientId,
-        clientSecret,
-        ...additionalFields,
-      },
+      body,
       configurationUtilities,
       tokenEndpointAuthMethod
     );

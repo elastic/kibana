@@ -13,7 +13,7 @@ import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type {
-  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectTypeRegistration,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrationSnapshot } from '../types';
@@ -23,17 +23,26 @@ export type Task = ListrTask<TaskContext>['task'];
 
 export type FixtureMap = Record<string, TypeVersionFixtures>;
 
+export type MigrationAlgorithm = 'v2' | 'zdt';
+
 export interface TaskContext {
   gitRev: string;
+  requestedGitRev?: string;
+  baselineUsedAncestorSnapshot?: boolean;
   serverlessGitRev?: string;
-  esServer?: TestElasticsearchUtils;
+  requestedServerlessGitRev?: string;
+  serverlessBaselineUsedAncestorSnapshot?: boolean;
+  esServer?: Promise<TestElasticsearchUtils>;
   kibanaServer?: Root;
   registeredTypes?: SavedObjectsType<any>[];
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   from?: MigrationSnapshot;
   serverlessFrom?: MigrationSnapshot;
   to?: MigrationSnapshot;
   updatedTypes: SavedObjectsType<any>[];
+  typesWithNewModelVersions: SavedObjectsType<any>[];
+  migrationTypes?: SavedObjectsType<any>[];
+  wipTypes: string[];
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
   baselineMappings?: SavedObjectsTypeMappingDefinitions;
@@ -43,20 +52,21 @@ export interface TaskContext {
   };
   test: boolean; // whether the script is running with TEST data
   fix: boolean;
+  migrationAlgorithms: MigrationAlgorithm[];
+  migrationAlgorithm?: MigrationAlgorithm;
+  migrationKibanaIndex?: string;
 }
 
 export const encryptionOverrides: EncryptedSavedObjectTypeRegistration[] = [
-  // Placeholder for manually specifying any previous versions of ESO registrations
-  // Example:
-  // {
-  //   type: 'connector_token',
-  //   attributesToEncrypt: new Set(['token']),
-  //   attributesToIncludeInAAD: new Set([
-  //     'connectorId',
-  //     'tokenType',
-  //     'expiresAt',
-  //     'createdAt',
-  //     'updatedAt',
-  //   ]),
-  // },
+  {
+    type: 'connector_token',
+    attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  },
 ];

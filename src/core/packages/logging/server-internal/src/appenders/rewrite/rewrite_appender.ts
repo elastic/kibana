@@ -21,7 +21,7 @@ import { createRewritePolicy, rewritePolicyConfigSchema } from './policies';
 export class RewriteAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('rewrite'),
-    appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
     policy: rewritePolicyConfigSchema,
   });
 

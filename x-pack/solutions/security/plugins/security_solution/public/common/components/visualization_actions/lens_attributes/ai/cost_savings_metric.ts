@@ -105,7 +105,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
       query: { language: 'kuery', query: '' },
       visualization: {
         color: backgroundColor,
-        icon: 'launch',
+        icon: 'rocket',
         iconAlign: 'right',
         valuesTextAlign: 'left',
         layerId: 'unifiedHistogram',

@@ -56,6 +56,7 @@ describe('partitionStream features_tool', () => {
     it('should pick only LLM-relevant fields from a feature', () => {
       const result = toFeatureForLlmContext(sampleFeatures[0]);
 
+      expect(result).toHaveProperty('id', 'feature-1');
       expect(result).toHaveProperty('type', 'technology');
       expect(result).toHaveProperty('title', 'Node.js');
       expect(result).toHaveProperty('description');
@@ -65,7 +66,6 @@ describe('partitionStream features_tool', () => {
       expect(result).toHaveProperty('tags');
       expect(result).toHaveProperty('meta');
 
-      expect(result).not.toHaveProperty('id');
       expect(result).not.toHaveProperty('uuid');
       expect(result).not.toHaveProperty('stream_name');
       expect(result).not.toHaveProperty('status');

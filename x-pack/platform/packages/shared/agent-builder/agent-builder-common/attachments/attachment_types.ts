@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  connector = 'connector',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.connector]: ConnectorAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -58,7 +60,7 @@ export const screenContextTimeRangeSchema = z.object({
   to: z.string(),
 });
 
-export interface ScreenContextTimeRange {
+export interface TimeRange {
   from: string;
   to: string;
 }
@@ -94,7 +96,7 @@ export interface ScreenContextAttachmentData {
   /** app description */
   description?: string;
   /** the currently active time range */
-  time_range?: ScreenContextTimeRange;
+  time_range?: TimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }
@@ -129,20 +131,28 @@ export interface VisualizationAttachmentData {
   time_range?: { from: string; to: string };
 }
 
-export const visualizationOriginDataSchema = z.object({
-  saved_object_id: z.string(),
-  title: z.string().optional(),
-  description: z.string().optional(),
+/**
+ * Tag prefix used to associate tools with their parent connector instance.
+ * A tool tagged `connector:<connectorId>` belongs to that connector.
+ */
+export const CONNECTOR_TAG_PREFIX = 'connector:';
+
+export const connectorAttachmentDataSchema = z.object({
+  connector_id: z.string(),
+  connector_name: z.string(),
+  connector_type: z.string(),
 });
 
 /**
- * Origin data for a visualization attachment created by-reference.
- * Stored on the attachment for UI purposes (e.g., "Open in Lens" link).
+ * Data for a connector attachment.
  */
-export interface VisualizationOriginData {
-  saved_object_id: string;
-  title?: string;
-  description?: string;
+export interface ConnectorAttachmentData {
+  /** The saved connector instance ID */
+  connector_id: string;
+  /** Human-readable connector name */
+  connector_name: string;
+  /** Action type ID (e.g., ".slack2", ".mcp") */
+  connector_type: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

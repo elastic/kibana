@@ -20,19 +20,23 @@ import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
+import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
-import { registerOverviewEmbeddableTransforms } from './lib/embeddables/register_overview_embeddable_transforms';
-import { registerErrorBudgetEmbeddableTransforms } from './lib/embeddables/register_error_budget_embeddable_transforms';
-import { registerBurnRateEmbeddableTransforms } from './lib/embeddables/register_burn_rate_embeddable_transforms';
+import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
+import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_budget_embeddable';
+import { registerAlertsEmbeddable } from './lib/embeddables/register_alerts_embeddable';
+import { registerBurnRateEmbeddable } from './lib/embeddables/register_burn_rate_embeddable';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
-import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
-import { registerServerRoutes } from './routes/register_routes';
-import type { SLORoutesDependencies } from './routes/types';
+import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
+import { registerServerRoutes } from './routes/utils/register_routes';
+import type { SLORoutesDependencies } from './routes/utils/types';
 import {
   slo,
+  sloComposite,
   sloSettings,
+  SO_SLO_COMPOSITE_TYPE,
   SO_SLO_SETTINGS_TYPE,
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
@@ -43,6 +47,7 @@ import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
 } from './services';
+import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -59,6 +64,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
+import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -74,6 +80,7 @@ export class SLOPlugin
   private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
   private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
+  private compositeSloSummaryTask?: CompositeSloSummaryTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -88,8 +95,12 @@ export class SLOPlugin
   ): SLOServerSetup {
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-
-    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE, SO_SLO_TEMPLATE_TYPE];
+    const savedObjectTypes = [
+      SO_SLO_TYPE,
+      SO_SLO_SETTINGS_TYPE,
+      SO_SLO_TEMPLATE_TYPE,
+      SO_SLO_COMPOSITE_TYPE,
+    ];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
@@ -153,6 +164,7 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
+    core.savedObjects.registerType(sloComposite);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
@@ -179,6 +191,7 @@ export class SLOPlugin
         plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
+          compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
         getScopedClients: async ({ request, logger }) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
@@ -188,9 +201,18 @@ export class SLOPlugin
           );
 
           const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE],
+            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE, SO_SLO_COMPOSITE_TYPE],
           });
-          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const rawScopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
+          const scopedClusterClient = await getScopedClusterClientWithInspect({
+            scopedClusterClient: rawScopedClusterClient,
+            uiSettingsClient,
+            request,
+            isDev: this.isDev,
+          });
 
           const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
             pluginsStart.dataViews.dataViewsServiceFactory(
@@ -203,6 +225,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
+          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -225,6 +248,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            compositeSloRepository,
             settingsRepository,
             templateRepository,
             transformManager,
@@ -234,7 +258,9 @@ export class SLOPlugin
         },
       },
       logger: this.logger,
-      repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
+      repository: getSloServerRouteRepository({
+        isServerless: this.isServerless,
+      }),
       isDev: this.isDev,
     });
 
@@ -274,6 +300,13 @@ export class SLOPlugin
       config: this.config,
     });
 
+    this.compositeSloSummaryTask = new CompositeSloSummaryTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     new BulkDeleteTask({
       core,
       taskManager: plugins.taskManager,
@@ -287,9 +320,10 @@ export class SLOPlugin
       config: this.config,
     });
 
-    registerOverviewEmbeddableTransforms(plugins.embeddable);
-    registerErrorBudgetEmbeddableTransforms(plugins.embeddable);
-    registerBurnRateEmbeddableTransforms(plugins.embeddable);
+    registerOverviewEmbeddable(plugins.embeddable);
+    registerErrorBudgetEmbeddable(plugins.embeddable);
+    registerAlertsEmbeddable(plugins.embeddable);
+    registerBurnRateEmbeddable(plugins.embeddable);
 
     return {};
   }
@@ -300,6 +334,7 @@ export class SLOPlugin
     this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
     this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
+    this.compositeSloSummaryTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: async (request: KibanaRequest) => {

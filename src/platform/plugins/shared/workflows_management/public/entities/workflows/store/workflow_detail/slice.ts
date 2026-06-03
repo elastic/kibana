@@ -16,6 +16,13 @@ import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type { WorkflowsResponse } from '../../model/types';
 
+/**
+ * Sentinel value dispatched as `highlightedStepId` to scroll the editor to the
+ * triggers section.  Shared between the execution-detail component (producer)
+ * and the YAML editor (consumer).
+ */
+export const HIGHLIGHTED_STEP_TRIGGER = '__trigger';
+
 export const initialWorkflowsState: WorkflowsResponse = {
   workflows: {},
   totalWorkflows: 0,
@@ -37,9 +44,11 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
-  replayExecutionId: null,
+  testStepModalOpenStepId: undefined,
+  replay: undefined,
   loading: initialLoadingState,
   hasYamlSchemaValidationErrors: false,
+  aiAssisted: false,
   connectorFlyout: {
     isOpen: false,
     connectorType: undefined,
@@ -78,14 +87,31 @@ const workflowDetailSlice = createSlice({
         state.computed.workflowLookup
       );
     },
-    setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
+    setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
     setReplayExecutionId: (state, action: { payload: string | null }) => {
-      state.replayExecutionId = action.payload;
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.executionId = action.payload ?? undefined;
+      state.replay.stepExecutionId = undefined; // only one replay type at a time
+    },
+    setReplayStepExecutionId: (state, action: { payload: string | null }) => {
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.stepExecutionId = action.payload ?? undefined;
+      state.replay.executionId = undefined; // only one replay type at a time
+    },
+    setTestStepModalOpenStepId: (state, action: { payload: string | undefined }) => {
+      state.testStepModalOpenStepId = action.payload;
+    },
+    clearReplay: (state) => {
+      state.replay = undefined;
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
@@ -106,6 +132,9 @@ const workflowDetailSlice = createSlice({
 
     setHasYamlSchemaValidationErrors: (state, action: { payload: boolean }) => {
       state.hasYamlSchemaValidationErrors = action.payload;
+    },
+    setAiAssisted: (state, action: { payload: boolean }) => {
+      state.aiAssisted = action.payload;
     },
 
     // Connector flyout actions
@@ -167,12 +196,16 @@ export const {
   setHighlightedStepId,
   setIsTestModalOpen,
   setReplayExecutionId,
+  setReplayStepExecutionId,
+  setTestStepModalOpenStepId,
+  clearReplay,
   setConnectors,
   setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
   setHasYamlSchemaValidationErrors,
+  setAiAssisted,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,

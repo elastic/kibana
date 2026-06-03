@@ -329,6 +329,35 @@ const fooResourceResponse = () => {
 
 This descriptions should now be reflected in the OAS generated for your route.
 
+#### Field-level availability and `x-state`
+
+You can also attach **availability** metadata on individual fields in code-first schemas. In `@kbn/config-schema`, use `meta.availability`; with Zod v4 (`@kbn/zod/v4`), use `.meta({ openapi: { availability: ... } })`. The OpenAPI generator maps this to an `x-state` extension on the corresponding schema property (or named component).
+
+```typescript
+// @kbn/config-schema
+schema.string({
+  meta: {
+    description: 'Add a description.',
+    availability: { stability: 'stable', since: '9.4.0' },
+  },
+});
+```
+
+```typescript
+// @kbn/zod/v4
+import { z } from '@kbn/zod/v4';
+
+z.string().meta({
+  openapi: {
+    availability: { stability: 'stable', since: '9.4.0' },
+  },
+});
+```
+
+<DocCallOut title="How this appears in generated OAS">
+  For example, `stability: 'stable'` together with `since: '9.4.0'` becomes `x-state: Generally available; added in 9.4.0` on that field in the generated document.
+</DocCallOut>
+
 #### 5. Publishing OAS
 
 OAS for public routes are written to the Kibana repo as a snapshot that will ultimately be published.

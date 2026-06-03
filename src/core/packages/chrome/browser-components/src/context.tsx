@@ -9,98 +9,19 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type {
-  ChromeBreadcrumb,
-  ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-  ChromeNavLink,
-  ChromeProjectNavigationNode,
-  ChromeUserBanner,
-  NavigationTreeDefinitionUI,
-  SolutionId,
-} from '@kbn/core-chrome-browser';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
-
-/**
- * Minimal application contract needed by Chrome components.
- * Replaces `InternalApplicationStart` to break the dependency on the private
- * `@kbn/core-application-browser-internal` package.
- */
-export interface ChromeApplicationContext
-  extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
-  /** Current app's action menu mount point. */
-  currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
-}
-
-interface ChromeComponentsConfig {
-  isServerless: boolean;
-  kibanaVersion: string;
-  homeHref: string;
-  kibanaDocLink: string;
-}
-
-interface NavControlsObservables {
-  left$: Observable<ChromeNavControl[]>;
-  center$: Observable<ChromeNavControl[]>;
-  right$: Observable<ChromeNavControl[]>;
-  extension$: Observable<ChromeNavControl[]>;
-}
-
-interface ClassicChromeObservables {
-  /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
-  customNavLink$: Observable<ChromeNavLink | undefined>;
-}
-
-interface ProjectChromeObservables {
-  /** Auto-generated breadcrumbs derived from the active nav tree node. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  homeHref$: Observable<string>;
-  navigation$: Observable<{
-    solutionId: SolutionId;
-    navigationTree: NavigationTreeDefinitionUI;
-    activeNodes: ChromeProjectNavigationNode[][];
-  }>;
-}
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 export interface ChromeComponentsDeps {
-  config: ChromeComponentsConfig;
-  application: ChromeApplicationContext;
-  basePath: HttpStart['basePath'];
+  application: Pick<
+    InternalApplicationStart,
+    'navigateToUrl' | 'currentAppId$' | 'currentActionMenu$'
+  >;
+  http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;
-  navControls: NavControlsObservables;
-  /** Classic-layout-specific chrome state. */
-  classic: ClassicChromeObservables;
-  /** Project/solution-layout-specific chrome state. */
-  project: ProjectChromeObservables;
-  loadingCount$: Observable<number>;
-  helpMenu: {
-    menuLinks$: Observable<ChromeHelpMenuLink[]>;
-    extension$: Observable<ChromeHelpExtension | undefined>;
-    supportUrl$: Observable<string>;
-    globalExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  };
-  navLinks$: Observable<ChromeNavLink[]>;
-  customBranding$: Observable<CustomBranding>;
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  appMenu$: Observable<AppMenuConfig | undefined>;
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
-  sideNav: {
-    collapsed$: Observable<boolean>;
-    initialCollapsed: boolean;
-    onToggleCollapsed: (collapsed: boolean) => void;
-  };
+  customBranding: Pick<CustomBrandingStart, 'customBranding$'>;
 }
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
@@ -108,12 +29,10 @@ const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null)
 /**
  * Provides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,
  * `ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,
- * `AppMenuBar`, `Sidebar`). Wrap the layout tree once with `chrome.componentDeps`.
+ * `AppMenuBar`, `Sidebar`).
  *
- * @temporary This provider is a stepping stone toward a proper `ChromeStateProvider` that will
- * expose React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) and allow components to
- * self-hydrate without Observable props. Once that package exists this provider can be replaced.
- * @see kibana-team#2651 (Chrome & Grid Evolution epic — private repo)
+ * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the
+ * layout tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.
  */
 export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeComponentsDeps }>> = ({
   value,
@@ -123,8 +42,6 @@ export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeCompo
 /**
  * Reads `ChromeComponentsDeps` from the nearest `ChromeComponentsProvider`.
  * Throws if called outside the provider.
- *
- * @temporary See `ChromeComponentsProvider` for the migration plan.
  */
 export const useChromeComponentsDeps = (): ChromeComponentsDeps => {
   const ctx = useContext(ChromeComponentsContext);

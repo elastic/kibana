@@ -37,13 +37,19 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      tracesExperience: createLazyPageObject(TracesExperiencePage, page),
+      tracesExperience: createLazyPageObject(TracesExperiencePage, page, pageObjects.discover),
     };
 
     await use(extendedPageObjects);
   },
 });
 
-export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
+export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
-export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';
+export { expectTracesExperienceEnabled } from './helpers';
+export {
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from './synthtrace/complete_traces_experience';

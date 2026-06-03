@@ -22,14 +22,17 @@ export interface FakeRequest {
  * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
  * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
  * {@link KibanaRequest} is available. The space is derived from the URL pathname
- * (e.g. `/s/<spaceId>/...`).
+ * (e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.
  *
  * In route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies
  * {@link ScopeableUrlRequest} without needing this type.
  * @public
  */
 export interface UrlRequest extends FakeRequest {
-  /** The URL of the request, used to extract the current space for CPS routing. */
+  /**
+   * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
+   * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
+   */
   url: URL;
 }
 
@@ -45,9 +48,12 @@ export type ScopeableRequest = KibanaRequest | FakeRequest;
 /**
  * A request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.
  *
- * Covers both {@link KibanaRequest} (the typical caller from route handlers, whose URL is set by
- * the HTTP layer) and {@link UrlRequest} (a lightweight synthetic alternative for programmatic
- * use). In both cases the space is extracted from the URL pathname (e.g. `/s/<spaceId>/...`).
+ * Covers both {@link KibanaRequest} (the typical caller from route handlers) and
+ * {@link UrlRequest} (a lightweight synthetic alternative). Space resolution uses
+ * `getSpaceNPRE` from `@kbn/cps-server-utils`: for {@link KibanaRequest}, when
+ * `rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is
+ * preferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`
+ * from `request.url`. Synthetic {@link UrlRequest} values only supply `url`.
  *
  * @public
  */

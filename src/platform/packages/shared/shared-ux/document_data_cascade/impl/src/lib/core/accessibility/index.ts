@@ -9,6 +9,7 @@
 
 import { useEffect, useMemo, useCallback } from 'react';
 import { getAdaptedTableRows, useAdaptedTableRows, type Row } from '../table';
+import type { CascadeVirtualizerReturnValue } from '../virtualizer';
 import type { GroupNode } from '../../../store_provider';
 
 /**
@@ -73,7 +74,7 @@ export function useRegisterCascadeAccessibilityHelpers<G extends GroupNode>({
   tableRows: Row<G>[];
   // element might be null on initialization
   tableWrapperElement: HTMLElement | null;
-  scrollToRowIndex: (index: number) => void;
+  scrollToRowIndex: CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'];
 }) {
   // keyboard interactions handler for the tree grid
   const handleKeyDown = useCallback(
@@ -151,7 +152,7 @@ export function useRegisterCascadeAccessibilityHelpers<G extends GroupNode>({
             return event.preventDefault();
           }
           case 'Home': {
-            scrollToRowIndex(0);
+            scrollToRowIndex(0, {});
             // TODO: set focus on first row element after scroll has happened
             return event.preventDefault();
           }

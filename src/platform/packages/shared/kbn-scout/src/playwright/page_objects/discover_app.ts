@@ -13,16 +13,43 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
+export type DiscoverQueryMode = 'esql' | 'classic';
+
+export interface DiscoverGotoOptions {
+  queryMode?: DiscoverQueryMode;
+}
+
+/**
+ * Test-subject prefixes used by the Unified Tabs component.
+ */
+const UNIFIED_TABS_TEST_SUBJ = {
+  selectTabBtnPrefix: 'unifiedTabs_selectTabBtn_',
+  tabMenuBtnPrefix: 'unifiedTabs_tabMenuBtn_',
+  newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
+  tabsBar: 'unifiedTabs_tabsBar',
+  duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+} as const;
+
 export class DiscoverApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  public readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
-  async goto() {
+  async goto(options: DiscoverGotoOptions = {}) {
+    if (options.queryMode) await this.setQueryMode(options.queryMode);
+
     await this.page.gotoApp('discover');
-    await this.waitForDataViewSwitch();
+    await this.waitForDiscoverPage();
+  }
+
+  private async waitForDiscoverPage() {
+    // Discover initialization in serverless CI environments regularly exceeds the default 10s,
+    // likely due to additional plugin overhead and root profile resolution.
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
   }
 
   private async getVisibleDataViewSwitch() {
@@ -43,10 +70,6 @@ export class DiscoverApp {
     }
 
     return discoverVisible ? discoverSwitch : fallbackSwitch;
-  }
-
-  private async waitForDataViewSwitch() {
-    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
@@ -76,10 +99,47 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
-  async clickNewSearch() {
-    await this.page.testSubj.hover('discoverNewButton');
-    await this.page.testSubj.click('discoverNewButton');
-    await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
+    const item = this.page.testSubj.locator(testId);
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+  }
+
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
+    await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
@@ -90,10 +150,44 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  /**
+   * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
+   * brand-new dashboard via the "Save visualization" flow in the unified
+   * histogram. Returns once the save modal has closed.
+   */
+  async saveVisualizationToNewDashboard(visName: string) {
+    await this.page.testSubj.click('unifiedHistogramSaveVisualization');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', visName);
+    // Clicking the EuiRadio wrapper does not toggle the underlying input
+    // reliably; clicking the associated label does.
+    await this.page.locator('label[for="new-dashboard-option"]').click();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+  }
+
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',
     });
+  }
+
+  /**
+   * Assert that the "Selected fields" sidebar group contains exactly the
+   * fields named in `expected` — no more, no less. Useful for verifying ES|QL
+   * `KEEP` clauses or any explicit column-selection flow.
+   */
+  async expectSelectedSidebarFieldsToEqual(expected: readonly string[]) {
+    await this.waitUntilFieldListHasCountOfFields();
+    const selectedFields = this.page.testSubj.locator('fieldListGroupedSelectedFields');
+    await expect(selectedFields).toBeVisible();
+
+    const entries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
+    await expect(entries).toHaveCount(expected.length);
+
+    for (const field of expected) {
+      await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
+    }
   }
 
   async waitForHistogramRendered() {
@@ -106,7 +200,7 @@ export class DiscoverApp {
   }
 
   async loadSavedSearch(searchName: string) {
-    await this.page.testSubj.click('discoverOpenButton');
+    await this.clickAppMenuItem('discoverOpenButton');
     await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 
     // Filter for the search
@@ -120,7 +214,6 @@ export class DiscoverApp {
   }
 
   async getHitCountInt(): Promise<number> {
-    await this.page.waitForLoadingIndicatorHidden();
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
@@ -140,20 +233,32 @@ export class DiscoverApp {
   }
 
   async waitUntilSearchingHasFinished() {
+    // Give the grid-updating indicator a brief window to appear. Without this,
+    // `waitForSelector({ state: 'hidden' })` returns immediately when the
+    // indicator hasn't yet mounted — callers would then observe pre-search
+    // state (e.g. request-count assertions reading 0 before the search fires).
+    try {
+      await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
+        state: 'visible',
+        timeout: 2_000,
+      });
+    } catch {
+      // Indicator never appeared — assume nothing was in flight.
+    }
     await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
       state: 'hidden',
-      timeout: 30000,
+      timeout: 30_000,
     });
   }
 
   // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    await expect(table).toBeVisible();
-
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
 
@@ -208,6 +313,66 @@ export class DiscoverApp {
     await this.waitForDocViewerFlyoutOpen();
   }
 
+  /**
+   * Close the Discover document-viewer flyout and wait for it to disappear.
+   */
+  async closeDocViewerFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+  }
+
+  /**
+   * Hover the given data-grid cell and click its "expand" action, opening the
+   * cell-value popover (which embeds a Monaco editor with the row JSON).
+   *
+   * @param rowIndex - 0-based visible row index.
+   * @param columnId - EUI data-grid column id (e.g. `_source`, `@timestamp`).
+   */
+  async expandGridCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
+    const cell = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
+    );
+    await cell.hover();
+    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+  }
+
+  /**
+   * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
+   * from the field-table tab. Calling this twice on the same field toggles it off.
+   */
+  async toggleColumnInDocViewer(fieldName: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(async () => {
+      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameElement.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameElement.hover();
+      const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
+      await toggle.waitFor({ state: 'visible' });
+      await toggle.scrollIntoViewIfNeeded();
+      await toggle.click();
+    }).toPass({ timeout: 15_000 });
+  }
+
+  /**
+   * Read JSON from the active Monaco source editor (cell expansion popover, or doc
+   * flyout after the JSON tab is selected). Retries until the model is non-empty —
+   * the wrapper can return `''` before the document attaches.
+   */
+  async readMonacoJson(): Promise<{ _id: string } & Record<string, unknown>> {
+    let parsed: { _id: string } & Record<string, unknown> = { _id: '' };
+    await expect(async () => {
+      const raw = await this.codeEditor.getCodeEditorValue();
+      if (!raw) {
+        throw new Error('Monaco editor has not rendered a value yet');
+      }
+      parsed = JSON.parse(raw);
+    }).toPass({ timeout: 30_000 });
+    return parsed;
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -226,6 +391,43 @@ export class DiscoverApp {
   async getChartInterval(): Promise<string> {
     const button = this.page.testSubj.locator('unifiedHistogramTimeIntervalSelectorButton');
     return (await button.getAttribute('data-selected-value')) || '';
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
+      state: 'hidden',
+    });
+  }
+
+  /**
+   * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
+   */
+  async chooseBreakdownField(field: string) {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -249,6 +451,13 @@ export class DiscoverApp {
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
+
+  public readonly controls = {
+    getControlFrame: (controlId: string): Locator =>
+      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
+    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
+      this.controls.getControlFrame(controlId).getByText(value),
+  };
 
   async clickFieldSort(field: string, sortOption: string) {
     const header = this.getColumnHeader(field);
@@ -274,6 +483,10 @@ export class DiscoverApp {
     await this.page.testSubj.click('dscHideHistogramButton');
   }
 
+  async expectXYVisChartVisible() {
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
+  }
+
   async navigateToLensEditor() {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
@@ -284,6 +497,14 @@ export class DiscoverApp {
   }
 
   async writeAndSubmitKqlQuery(query: string) {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      throw new Error(
+        `writeAndSubmitKqlQuery requires Discover to be in classic mode, but the current mode is "${currentMode}".`
+      );
+    }
+
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
@@ -335,10 +556,14 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'esql') {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitForDocTableRendered();
     }
+
+    await this.waitUntilSearchingHasFinished();
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
@@ -355,10 +580,133 @@ export class DiscoverApp {
     await expect(tab).toHaveAttribute('aria-selected', 'true');
   }
 
+  /**
+   * Locator for the currently selected Discover tab button in the unified
+   * tabs bar.
+   */
+  private get activeTabLocator(): Locator {
+    return this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
+      .locator(
+        `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]`
+      );
+  }
+
+  /**
+   * Clicks the "New tab" button in the Discover tab bar and waits for the
+   * newly created tab to become the active one.
+   */
+  async createNewTab() {
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Returns the `data-test-subj` of the currently selected Discover tab
+   * (e.g. `unifiedTabs_selectTabBtn_<id>`). Useful for capturing a tab id
+   * before navigating away so it can be restored later by test-subj.
+   */
+  async getActiveTabTestSubj(): Promise<string> {
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    const testSubj = await this.activeTabLocator.getAttribute('data-test-subj');
+    if (!testSubj) {
+      throw new Error('Active Discover tab is missing a data-test-subj attribute');
+    }
+    return testSubj;
+  }
+
+  /**
+   * Switches to the Discover tab identified by the given full
+   * `unifiedTabs_selectTabBtn_<id>` test subject and waits for it to become
+   * the active tab.
+   */
+  async navigateToTabByTestSubj(testSubj: string) {
+    await this.page.testSubj.click(testSubj);
+    await this.page
+      .locator(`[data-test-subj="${testSubj}"][aria-selected="true"]`)
+      .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Duplicates the currently active Discover tab via its tab menu.
+   * The duplicated tab becomes the active one; this helper waits for the
+   * active-tab marker to move to a different test subject before returning.
+   */
+  async duplicateActiveTab() {
+    const originalTestSubj = await this.getActiveTabTestSubj();
+    const tabId = originalTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.duplicateMenuItem);
+
+    await this.page
+      .locator(
+        `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]:not([data-test-subj="${originalTestSubj}"])`
+      )
+      .waitFor({ state: 'visible' });
+  }
+
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
+  }
+
+  public get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesButton).toBeVisible();
+    await recommendedQueriesButton.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('menuitem', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
   }
 
   /**
@@ -400,5 +748,41 @@ export class DiscoverApp {
     }
 
     await expect(docTable).toContainText(text);
+  }
+
+  /**
+   * Persists the requested Discover query mode in localStorage on the next
+   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
+   * feature flag being toggled at the project level.
+   *
+   * Note: this is not idempotent. Each call registers an additional init
+   * script via Playwright's `addInitScript`, and on subsequent page loads
+   * every registered script runs in order, so the value written by the
+   * last call wins. Avoid calling it multiple times in the same test
+   * unless that stacking behavior is intentional.
+   */
+  public setQueryMode(mode: DiscoverQueryMode) {
+    return this.page.addInitScript(
+      ([_mode, _discoverQueryModeKey]) => {
+        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      },
+      [mode, DISCOVER_QUERY_MODE_KEY]
+    );
+  }
+
+  /**
+   * Detects whether Discover is currently rendering ES|QL or classic
+   * (KQL + data view) mode by racing the two mode-specific anchors:
+   * the ES|QL editor and the classic KQL `queryInput`.
+   */
+  async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
+    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const classicQueryInput = this.page.testSubj.locator('queryInput');
+
+    // Wait until one of the two mode-specific anchors is rendered
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+
+    // Return the mode that is currently visible
+    return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
 }

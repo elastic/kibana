@@ -90,7 +90,10 @@ export function setupCiStatsFtrTestGroupReporter({
       result: runnable.isFailed() ? 'fail' : runnable.isPending() ? 'skip' : 'pass',
       type,
       error: error?.stack,
-      stdout: getSnapshotOfRunnableLogs(runnable),
+      stdout:
+        process.env.CI_STATS_INGEST_TEST_LOGS === 'true'
+          ? getSnapshotOfRunnableLogs(runnable)
+          : undefined,
     });
   }
 

@@ -987,11 +987,7 @@ export const get_case_default_space_request = z.object({
             description: 'The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.'
         })
     }),
-    query: z.optional(z.object({
-        includeComments: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.'
-        })).default(true)
-    }))
+    query: z.optional((z.never())),
 });
 
 /**

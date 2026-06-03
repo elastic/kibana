@@ -68,6 +68,7 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   direction: 'column',
   className: 'eui-yScrollWithShadows',
   gutterSize: 's',
+  tabIndex: 0,
 })`
   max-height: 40vh;
   min-height: 270px;

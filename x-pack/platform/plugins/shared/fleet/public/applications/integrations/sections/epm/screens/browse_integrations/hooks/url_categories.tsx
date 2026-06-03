@@ -40,6 +40,7 @@ export function useSetUrlCategory() {
       })[1];
 
       const existingSearch = new URLSearchParams(search);
+      existingSearch.delete('view');
       const [basePath] = url.split('?');
 
       const qs = existingSearch.toString();

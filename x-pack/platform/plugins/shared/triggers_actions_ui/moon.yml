@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
 dependsOn:
   - '@kbn/core'
+  - '@kbn/human-readable-id'
   - '@kbn/alerting-plugin'
   - '@kbn/features-plugin'
   - '@kbn/rule-registry-plugin'
@@ -95,12 +96,17 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/actions-types'
+  - '@kbn/response-ops-oauth-hooks'
   - '@kbn/kql'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/deeplinks-observability'
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/security-plugin'
+  - '@kbn/std'
+  - '@kbn/lens-common'
+  - '@kbn/inspector-plugin'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod
@@ -115,26 +121,6 @@ fileGroups:
     - common/**/*
     - config.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

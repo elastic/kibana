@@ -25,6 +25,8 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
   getDataFrameAnalyticsProgressPhase,
@@ -35,9 +37,7 @@ import {
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink, useMlKibana } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
-import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 const TRUNCATE_TEXT_LINES = 3;
@@ -156,9 +156,11 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }} title={jobId}>
-      {jobId}
-    </EuiLink>
+    <EuiToolTip content={jobId}>
+      <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {jobId}
+      </EuiLink>
+    </EuiToolTip>
   );
 };
 
@@ -207,9 +209,8 @@ export const useColumns = (
       width: '40px',
       isExpander: true,
       render: (item: DataFrameAnalyticsListRow) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.ml.dataframe.analyticsList.rowCollapse', {
                   defaultMessage: 'Hide details for {analyticsId}',
@@ -220,8 +221,28 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              expandedRowItemIds.includes(item.config.id)
+                ? i18n.translate('xpack.ml.dataframe.analyticsList.rowCollapse', {
+                    defaultMessage: 'Hide details for {analyticsId}',
+                    values: { analyticsId: item.config.id },
+                  })
+                : i18n.translate('xpack.ml.dataframe.analyticsList.rowExpand', {
+                    defaultMessage: 'Show details for {analyticsId}',
+                    values: { analyticsId: item.config.id },
+                  })
+            }
+            iconType={
+              expandedRowItemIds.includes(item.config.id)
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
+          />
+        </EuiToolTip>
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
@@ -234,7 +255,11 @@ export const useColumns = (
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnId',
       render: (id: string) => {
-        return <span title={id}>{id}</span>;
+        return (
+          <EuiToolTip content={id}>
+            <span>{id}</span>
+          </EuiToolTip>
+        );
       },
     },
     {
@@ -246,7 +271,11 @@ export const useColumns = (
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
       render: (description: string) => {
-        return <span title={description}>{description}</span>;
+        return (
+          <EuiToolTip content={description}>
+            <span>{description}</span>
+          </EuiToolTip>
+        );
       },
     },
     {

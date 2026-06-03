@@ -8,13 +8,27 @@
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FALLBACK_OSQUERY_VERSION } from '../../common/constants';
 
-export const OsquerySchemaLink = React.memo(() => (
-  <EuiText size="xs">
-    <EuiLink href="https://osquery.io/schema/5.19.0" target="_blank">
-      <FormattedMessage id="xpack.osquery.osquerySchemaLinkLabel" defaultMessage="Osquery schema" />
-    </EuiLink>
-  </EuiText>
-));
+interface OsquerySchemaLinkProps {
+  osqueryVersion?: string;
+}
+
+export const OsquerySchemaLink = React.memo<OsquerySchemaLinkProps>(
+  ({ osqueryVersion = FALLBACK_OSQUERY_VERSION }) => (
+    <EuiText size="xs">
+      <EuiLink
+        href={`https://osquery.io/schema/${osqueryVersion}`}
+        target="_blank"
+        rel="noopener nofollow noreferrer"
+      >
+        <FormattedMessage
+          id="xpack.osquery.osquerySchemaLinkLabel"
+          defaultMessage="Osquery schema"
+        />
+      </EuiLink>
+    </EuiText>
+  )
+);
 
 OsquerySchemaLink.displayName = 'OsquerySchemaLink';

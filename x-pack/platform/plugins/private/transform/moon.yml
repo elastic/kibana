@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/discover-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-http-browser'
@@ -108,26 +109,6 @@ fileGroups:
     - test/scout/**/*
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

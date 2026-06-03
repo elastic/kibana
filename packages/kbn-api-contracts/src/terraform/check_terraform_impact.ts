@@ -18,6 +18,7 @@ import {
 export interface TerraformImpact {
   change: BreakingChange;
   terraformResource: string;
+  owners: string[];
 }
 
 export interface TerraformImpactResult {
@@ -40,7 +41,9 @@ export const checkTerraformImpact = (
   const impactedChanges = breakingChanges
     .map((change) => {
       const matchedApi = findMatchingTerraformApi(change, apiIndex);
-      return matchedApi ? { change, terraformResource: matchedApi.resource } : null;
+      return matchedApi
+        ? { change, terraformResource: matchedApi.resource, owners: matchedApi.owners }
+        : null;
     })
     .filter((impact): impact is TerraformImpact => impact !== null);
 

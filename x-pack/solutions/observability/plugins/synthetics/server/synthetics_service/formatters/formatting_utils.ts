@@ -14,10 +14,17 @@ import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 import { hasNoParams } from './param_utils';
 
-export type FormatterFn = (
+export {
+  hasNoParams,
+  extractParamReferences,
+  valueContainsParams,
+  monitorUsesGlobalParams,
+} from './param_utils';
+
+export type FormatterFn<T = number> = (
   fields: Partial<MonitorFields>,
   key: ConfigKey
-) => string | number | null;
+) => string | T | null;
 
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
@@ -71,7 +78,7 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
   return varKeys.every((v) => !params[v]);
 };
 
-export const secondsToCronFormatter: FormatterFn = (fields, key) => {
+export const secondsToCronFormatter: FormatterFn<string> = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
   return value ? `${value}s` : null;

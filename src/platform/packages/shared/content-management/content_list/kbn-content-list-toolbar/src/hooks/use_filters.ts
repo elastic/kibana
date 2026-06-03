@@ -11,16 +11,18 @@ import { Children, Fragment, isValidElement, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import type { ParsedPart } from '@kbn/content-list-assembly';
-import { useContentListSort, useFilterDisplay } from '@kbn/content-list-provider';
+import { useContentListSort, useContentListConfig } from '@kbn/content-list-provider';
 import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';
 import type { FilterContext } from '../filters/part';
 
-// Default order: starred toggle → tag facet → sort. Each resolves to undefined when its
-// corresponding service/feature is absent, so unused entries are silently dropped.
+// Default order: starred toggle → tag facet → created by → sort.
+// Each resolves to undefined when its corresponding service/feature is absent,
+// so unused entries are silently dropped.
 const DEFAULT_PARTS: ParsedPart[] = [
   { type: 'part', part: 'filter', preset: 'starred', instanceId: 'starred', attributes: {} },
   { type: 'part', part: 'filter', preset: 'tags', instanceId: 'tags', attributes: {} },
+  { type: 'part', part: 'filter', preset: 'createdBy', instanceId: 'createdBy', attributes: {} },
   { type: 'part', part: 'filter', preset: 'sort', instanceId: 'sort', attributes: {} },
 ];
 
@@ -81,19 +83,39 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { hasTags, hasStarred } = useFilterDisplay();
+  const { features, supports } = useContentListConfig();
+  const { tags: hasTags, starred: hasStarred, userProfiles: hasCreatedBy } = supports;
+  const toolbarFilters = features.toolbarFilters;
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
   // recompute more than expected. The parsing logic is cheap, so this is
-  // acceptable today. If the filter set grows or resolution becomes expensive,
-  // consider keying on a more stable signal.
+  // acceptable today.
   return useMemo(() => {
     const parts = parseFilterParts(children);
-    const context: FilterContext = { hasSorting, hasTags, hasStarred };
+    const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
 
-    return parts
-      .map((part) => filter.resolve(part, context))
-      .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting, hasTags, hasStarred]);
+    const resolvedParts = parts
+      .map((part) => ({ part, filterConfig: filter.resolve(part, context) }))
+      .filter(
+        (entry): entry is { part: ParsedPart; filterConfig: SearchFilterConfig } =>
+          entry.filterConfig !== undefined
+      );
+    // `toolbarFilters` is typed `Record<string, unknown>` in the base provider
+    // package to keep `@elastic/eui` out of its public types; the client
+    // provider always populates entries as {@link SearchFilterConfig}, so we
+    // narrow them at the consumption site.
+    const customFilters = Object.values(toolbarFilters ?? {}) as SearchFilterConfig[];
+    if (parts === DEFAULT_PARTS) {
+      const sortIndex = resolvedParts.findIndex((entry) => entry.part.preset === 'sort');
+      if (sortIndex >= 0) {
+        return [
+          ...resolvedParts.slice(0, sortIndex).map(({ filterConfig }) => filterConfig),
+          ...customFilters,
+          ...resolvedParts.slice(sortIndex).map(({ filterConfig }) => filterConfig),
+        ];
+      }
+    }
+    return [...resolvedParts.map(({ filterConfig }) => filterConfig), ...customFilters];
+  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy, toolbarFilters]);
 };

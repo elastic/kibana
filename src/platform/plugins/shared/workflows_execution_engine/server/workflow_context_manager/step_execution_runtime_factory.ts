@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
+import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -44,9 +45,14 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  */
 function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFrame[]): StackFrame[] {
   const workflowScopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
+
+  if (workflowScopeStack.isEmpty()) {
+    return stackFrames;
+  }
+
   const onTop = workflowScopeStack.getCurrentScope();
 
-  if (onTop?.nodeId === nodeId) {
+  if (onTop.nodeId === nodeId) {
     return workflowScopeStack.exitScope().stackFrames;
   }
 
@@ -82,6 +88,7 @@ export class StepExecutionRuntimeFactory {
   constructor(
     private params: {
       workflowExecutionState: WorkflowExecutionState;
+      stepIoService: StepIoService;
       workflowExecutionGraph: WorkflowGraph;
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
@@ -131,6 +138,7 @@ export class StepExecutionRuntimeFactory {
       templateEngine: new WorkflowTemplatingEngine(),
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
+      stepIoService: this.params.stepIoService,
       node,
       stackFrames: modifiedStackFrames,
       esClient: this.params.esClient,
@@ -142,6 +150,7 @@ export class StepExecutionRuntimeFactory {
       stepExecutionId,
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
+      stepIoService: this.params.stepIoService,
       stepLogger,
       stackFrames: modifiedStackFrames,
       node,

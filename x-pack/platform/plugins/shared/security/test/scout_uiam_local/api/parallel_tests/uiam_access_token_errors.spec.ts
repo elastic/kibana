@@ -18,10 +18,12 @@ import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 
-apiTest.describe('UIAM access token errors', { tag: tags.serverless.security.complete }, () => {
+// These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
+apiTest.describe('[NON-MKI] UIAM access token errors', { tag: tags.serverless.all }, () => {
   let sessionTokensFactory: (params?: {
     lifetime: { accessToken: number };
   }) => Promise<{ accessToken: string }>;
+
   apiTest.beforeAll(async ({ config: { organizationId, projectType } }) => {
     sessionTokensFactory = async (params) => {
       return await createUiamSessionTokens({

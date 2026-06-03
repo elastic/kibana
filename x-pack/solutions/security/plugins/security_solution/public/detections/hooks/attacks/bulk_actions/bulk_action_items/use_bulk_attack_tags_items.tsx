@@ -49,9 +49,9 @@ export const useBulkAttackTagsItems = ({
       {
         key: 'manage-attack-tags',
         'data-test-subj': 'attack-tags-context-menu-item',
-        name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        name: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         panel: 1,
-        label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        label: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         disableOnQuery: true,
       },
     ];
@@ -60,9 +60,9 @@ export const useBulkAttackTagsItems = ({
   const TitleContent = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
+          <EuiIconTip content={i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -87,6 +87,7 @@ export const useBulkAttackTagsItems = ({
           setIsLoading={setIsBulkActionsLoading}
           clearSelection={clearSelection}
           closePopoverMenu={closePopoverMenu}
+          emptyMessage={i18n.ATTACK_TAGS_MENU_EMPTY}
           onSubmit={async (tags, _, onSuccess, setIsLoading) => {
             closePopoverMenu();
 

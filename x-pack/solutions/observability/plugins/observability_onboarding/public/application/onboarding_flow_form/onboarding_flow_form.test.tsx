@@ -8,11 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OnboardingFlowForm } from './onboarding_flow_form';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { MemoryRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
+import type { ObservabilityOnboardingAppServices } from '../..';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../quickstart_flows/shared/use_pricing_feature');
@@ -27,7 +29,7 @@ jest.mock('./use_custom_cards', () => ({
 }));
 
 jest.mock('../package_list/package_list', () => ({
-  PackageList: ({ list }: { list: any[] }) => (
+  PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
     <div data-test-subj="package-list">
       {list.map((item, index) => (
         <div key={index} data-test-subj={`package-item-${item.id || index}`}>
@@ -38,16 +40,19 @@ jest.mock('../package_list/package_list', () => ({
   ),
 }));
 
-jest.mock('../package_list_search_form/package_list_search_form', () => ({
-  PackageListSearchForm: () => <div data-test-subj="package-search-form">Search Form</div>,
-}));
-
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUsePricingFeature = usePricingFeature as jest.MockedFunction<typeof usePricingFeature>;
+const mockPackageListSearchForm = jest.fn(({ searchQuery }: { searchQuery: string }) => (
+  <div data-test-subj="package-search-form">Search Form: {searchQuery}</div>
+));
 
-const renderWithProviders = (children: React.ReactNode) => {
+jest.mock('../package_list_search_form/package_list_search_form', () => ({
+  PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
+}));
+
+const renderWithProviders = (children: React.ReactNode, initialEntries: string[] = ['/']) => {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <I18nProvider>{children}</I18nProvider>
     </MemoryRouter>
   );
@@ -63,7 +68,7 @@ describe('OnboardingFlowForm', () => {
           isCloud: false,
         },
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
   });
 
   describe('Complete Tier (Metrics Onboarding Enabled)', () => {
@@ -174,6 +179,16 @@ describe('OnboardingFlowForm', () => {
 
       expect(screen.getByText(/Search through other ways of ingesting data/)).toBeInTheDocument();
       expect(screen.getByTestId('package-search-form')).toBeInTheDocument();
+    });
+
+    it('should pass empty searchQuery to search form when URL search is invalid KQL', () => {
+      mockUsePricingFeature.mockReturnValue(true);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?search=host:(']);
+
+      expect(mockPackageListSearchForm).toHaveBeenCalledWith(
+        expect.objectContaining({ searchQuery: '' })
+      );
     });
   });
 });

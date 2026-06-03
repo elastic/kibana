@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { isChildOf, Streams, type IngestStreamSettings } from '@kbn/streams-schema';
+import {
+  isChildOf,
+  isInheritFailureStore,
+  isInheritLifecycle,
+  Streams,
+  type IngestStreamSettings,
+} from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import type { State } from '../state';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
@@ -33,6 +39,18 @@ export function computeChange({
   return isExistingStream ? hasChanged() : hasMeaningfulValue;
 }
 
+export function classicIngestHasEsLevelChanges(
+  ingest: Streams.ClassicStream.UpsertRequest['stream']['ingest']
+) {
+  return (
+    (ingest.processing?.steps?.length ?? 0) > 0 ||
+    !isInheritLifecycle(ingest.lifecycle) ||
+    Object.keys(ingest.settings ?? {}).length > 0 ||
+    !isInheritFailureStore(ingest.failure_store) ||
+    (ingest.classic?.field_overrides && Object.keys(ingest.classic.field_overrides).length > 0)
+  );
+}
+
 export function formatSettings(settings: IngestStreamSettings, isServerless: boolean) {
   if (isServerless) {
     return {
@@ -45,6 +63,44 @@ export function formatSettings(settings: IngestStreamSettings, isServerless: boo
     'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
     'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
   };
+}
+
+export type FormattedIngestSettings = ReturnType<typeof formatSettings>;
+
+/**
+ * Maps {@link formatSettings} output (flat `index.*` keys as used by put data stream settings)
+ * into nested `template.settings.index` fields for composable index templates. Omits `null`
+ * entries so cluster defaults apply.
+ */
+export function formattedIngestSettingsToTemplateIndexSettings(
+  formatted: FormattedIngestSettings
+): {
+  number_of_replicas?: number;
+  number_of_shards?: number;
+  refresh_interval?: string | -1;
+} {
+  const index: {
+    number_of_replicas?: number;
+    number_of_shards?: number;
+    refresh_interval?: string | -1;
+  } = {};
+
+  const replicas = formatted['index.number_of_replicas'];
+  if (replicas != null) {
+    index.number_of_replicas = replicas;
+  }
+
+  const shards = formatted['index.number_of_shards'];
+  if (shards != null) {
+    index.number_of_shards = shards;
+  }
+
+  const refresh = formatted['index.refresh_interval'];
+  if (refresh != null) {
+    index.refresh_interval = refresh;
+  }
+
+  return index;
 }
 
 export function settingsUpdateRequiresRollover(

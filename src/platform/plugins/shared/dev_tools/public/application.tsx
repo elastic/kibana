@@ -108,7 +108,7 @@ function DevToolsWrapper({
 
   return (
     <main css={styles.devApp}>
-      <EuiTabs css={styles.tabs} size="l">
+      <EuiTabs css={styles.tabs}>
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}
@@ -193,7 +193,7 @@ function setBadge(application: ApplicationStart, chrome: ChromeStart) {
     tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save',
     }),
-    iconType: 'glasses',
+    iconType: 'readOnly',
   });
 }
 

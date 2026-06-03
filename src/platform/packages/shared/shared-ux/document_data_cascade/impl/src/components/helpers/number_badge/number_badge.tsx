@@ -82,7 +82,9 @@ export function NumberBadge({ value, shortenAtExpSize, textAlign = 'right' }: Nu
       }}
     >
       <h5>
-        {Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1
+        {Number.isNaN(value)
+          ? '-'
+          : Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1
           ? getSiPrefixedNumber(value)
           : Number.isInteger(value)
           ? value

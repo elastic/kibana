@@ -35,8 +35,6 @@ const getSaveDiscoverSessionParams = (
   newTimeRestore: false,
   newDescription: 'new description',
   newTags: [],
-  isTitleDuplicateConfirmed: false,
-  onTitleDuplicate: jest.fn(),
   ...overrides,
 });
 
@@ -111,11 +109,10 @@ describe('saveDiscoverSession', () => {
       ],
     });
     const discoverSession = toolkit.internalState.getState().persistedDiscoverSession;
-    const onTitleDuplicate = jest.fn();
 
     await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'], onTitleDuplicate })
+        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'] })
       )
     );
 
@@ -128,9 +125,7 @@ describe('saveDiscoverSession', () => {
     };
 
     expect(saveDiscoverSessionSpy).toHaveBeenCalledWith(updatedDiscoverSession, {
-      onTitleDuplicate,
       copyOnSave: false,
-      isTitleDuplicateConfirmed: false,
     });
 
     expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual({
@@ -229,7 +224,7 @@ describe('saveDiscoverSession', () => {
     ): { timeRestore?: boolean; timeRange?: unknown; refreshInterval?: unknown } | undefined =>
       saveDiscoverSessionSpy.mock.calls[0][0].tabs.find((t: { id: string }) => t.id === tabId);
 
-    describe('when tab has a stateContainer (initialized tab)', () => {
+    describe('when an initialized tab', () => {
       it.each([
         {
           scenario: 'newTimeRestore is true',
@@ -277,7 +272,7 @@ describe('saveDiscoverSession', () => {
       );
     });
 
-    describe('when tab does not have a stateContainer (uninitialized tab)', () => {
+    describe('when an uninitialized tab', () => {
       it.each([
         {
           scenario: 'newTimeRestore is true',

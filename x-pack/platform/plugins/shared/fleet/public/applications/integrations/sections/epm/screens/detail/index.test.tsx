@@ -21,6 +21,7 @@ import type {
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type { KibanaAssetType } from '../../../../../../../common/types/models';
+import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -32,6 +33,7 @@ import type { MockedFleetStartServices, TestRenderer } from '../../../../../../m
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import type { DetailViewPanelName } from '.';
 import { Detail } from '.';
@@ -118,7 +120,12 @@ describe('When on integration detail', () => {
       expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
     });
 
-    it('should not show Alerting tab when package has no alerting type assets', async () => {
+    it('should not show Alerting tab when package has no alerting type assets and inactivity alerting is off', async () => {
+      ExperimentalFeaturesService.init({
+        ...allowedExperimentalValues,
+        enableIntegrationInactivityAlerting: false,
+      });
+
       const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
       const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
       const itemWithoutAlertingAssets = {
@@ -143,6 +150,81 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
 
       expect(renderResult.queryByTestId('tab-alerting')).toBeNull();
+
+      // Reset to default
+      ExperimentalFeaturesService.init(allowedExperimentalValues);
+    });
+
+    it('should show Alerting tab for installed integration packages when inactivity alerting is enabled', async () => {
+      ExperimentalFeaturesService.init({
+        ...allowedExperimentalValues,
+        enableIntegrationInactivityAlerting: true,
+      });
+
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithoutAlertingAssets = {
+        ...baseResponse.item,
+        type: 'integration' as const,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithoutAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+
+      // Reset to default
+      ExperimentalFeaturesService.init(allowedExperimentalValues);
+    });
+
+    it('should show Alerting tab for pre-installed packages with alerting assets in installationInfo', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithInstalledAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+        installationInfo: {
+          install_source: 'bundled' as const,
+          installed_kibana: [
+            {
+              id: 'nginx-inactivity-rule',
+              type: KibanaSavedObjectType.alertingRuleTemplate,
+            },
+          ],
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithInstalledAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
     });
   });
 

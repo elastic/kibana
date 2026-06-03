@@ -16,6 +16,10 @@ export const commandsMetadata: Record<string, unknown> = {
     license: 'platinum',
     observability_tier: 'COMPLETE',
   },
+  dedup: {
+    type: 'command',
+    name: 'dedup',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -112,6 +116,10 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'uri_parts',
   },
+  user_agent: {
+    type: 'command',
+    name: 'user_agent',
+  },
   where: {
     type: 'command',
     name: 'where',
@@ -120,6 +128,7 @@ export const commandsMetadata: Record<string, unknown> = {
 
 export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
+  DEDUP = 'dedup',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',
@@ -144,5 +153,6 @@ export enum EsqlCommandNames {
   STATS = 'stats',
   TS_INFO = 'ts_info',
   URI_PARTS = 'uri_parts',
+  USER_AGENT = 'user_agent',
   WHERE = 'where',
 }

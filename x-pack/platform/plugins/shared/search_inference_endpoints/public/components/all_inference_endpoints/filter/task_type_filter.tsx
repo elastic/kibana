@@ -6,11 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiFilterGroup } from '@elastic/eui';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import type { FilterOptions } from '../../../types';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter } from './multi_select_filter';
-import * as i18n from './translations';
+import type { MultiSelectFilterOption } from '../../filter/multi_select_filter';
+import { MultiSelectFilter } from '../../filter/multi_select_filter';
 
 interface Props {
   optionKeys: InferenceTaskType[];
@@ -36,13 +37,20 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange, uniqueTa
   }, [uniqueTaskTypes]);
 
   return (
-    <MultiSelectFilter
-      buttonLabel={i18n.TASK_TYPE}
-      onChange={onSystemFilterChange}
-      options={filteredOptions}
-      renderOption={(option) => option.label}
-      selectedOptionKeys={optionKeys}
-      dataTestSubj="type-field-endpoints"
-    />
+    <EuiFilterGroup>
+      <MultiSelectFilter
+        buttonLabel={i18n.translate('xpack.searchInferenceEndpoints.taskType', {
+          defaultMessage: 'Type',
+        })}
+        ariaLabel={i18n.translate('xpack.searchInferenceEndpoints.taskType.ariaLabel', {
+          defaultMessage: 'Task Type Options',
+        })}
+        onChange={onSystemFilterChange}
+        options={filteredOptions}
+        renderOption={(option) => option.label}
+        selectedOptionKeys={optionKeys}
+        dataTestSubj="type-field-endpoints"
+      />
+    </EuiFilterGroup>
   );
 };

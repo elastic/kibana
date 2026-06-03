@@ -11,7 +11,10 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
 import {
   packAssetSavedObjectModelVersion1,
   packSavedObjectModelVersion1,
+  packSavedObjectModelVersion2,
+  packSavedObjectModelVersion3,
   savedQueryModelVersion1,
+  savedQueryModelVersion2,
 } from './saved_object_model_versions';
 import {
   savedQuerySavedObjectType,
@@ -57,6 +60,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     created_by: {
       type: 'text',
     },
+    created_by_profile_uid: {
+      type: 'keyword',
+    },
     platform: {
       type: 'keyword',
     },
@@ -68,6 +74,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     updated_by: {
       type: 'text',
+    },
+    updated_by_profile_uid: {
+      type: 'keyword',
     },
     interval: {
       type: 'keyword',
@@ -90,6 +99,7 @@ export const savedQueryType: SavedObjectsType = {
   mappings: savedQuerySavedObjectMappings,
   modelVersions: {
     1: savedQueryModelVersion1,
+    2: savedQueryModelVersion2,
   },
   management: {
     importableAndExportable: true,
@@ -128,10 +138,16 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     created_by: {
       type: 'keyword',
     },
+    created_by_profile_uid: {
+      type: 'keyword',
+    },
     updated_at: {
       type: 'date',
     },
     updated_by: {
+      type: 'keyword',
+    },
+    updated_by_profile_uid: {
       type: 'keyword',
     },
     enabled: {
@@ -143,6 +159,17 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     version: {
       type: 'long',
+    },
+    schedule_type: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    interval: {
+      type: 'integer',
+    },
+    rrule_schedule: {
+      dynamic: false,
+      properties: {},
     },
     queries: {
       dynamic: false,
@@ -185,6 +212,8 @@ export const packType: SavedObjectsType = {
   mappings: packSavedObjectMappings,
   modelVersions: {
     1: packSavedObjectModelVersion1,
+    2: packSavedObjectModelVersion2,
+    3: packSavedObjectModelVersion3,
   },
   management: {
     defaultSearchField: 'name',

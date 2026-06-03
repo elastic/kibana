@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { APP_ID } from '../../../../../common';
@@ -14,6 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
+import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
@@ -41,24 +42,22 @@ export const useAddToCaseActions = ({
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     if (!isAlert) {
-      return ecsData?._id
-        ? [
-            {
-              eventId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              type: AttachmentType.event,
-            },
-          ]
-        : [];
+      const eventAttachment = generateEventAttachmentWithoutOwner({
+        attachmentId: ecsData?._id,
+        index: ecsData?._index,
+      });
+      return eventAttachment ? [eventAttachment] : [];
     }
 
     return ecsData?._id
       ? [
           {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ecsData._id,
+            metadata: {
+              index: ecsData._index ?? '',
+              rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            },
           },
         ]
       : [];
@@ -122,7 +121,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-existing-case-action',
           key: 'add-to-existing-case-action',
           onClick: handleAddToExistingCaseClick,
-          size: 's',
           name: ADD_TO_EXISTING_CASE,
         },
         // add to new case menu item
@@ -131,7 +129,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-new-case-action',
           key: 'add-to-new-case-action',
           onClick: handleAddToNewCaseClick,
-          size: 's',
           name: ADD_TO_NEW_CASE,
         },
       ];

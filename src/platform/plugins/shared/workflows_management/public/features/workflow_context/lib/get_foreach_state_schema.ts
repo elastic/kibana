@@ -9,17 +9,17 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import {
+  getDetailedTypeDescription,
+  getZodTypeName,
+  inferZodType,
+  VARIABLE_REGEX,
+} from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { VARIABLE_REGEX } from '../../../../common/lib/regex';
-import {
-  getDetailedTypeDescription,
-  getSchemaAtPath,
-  getZodTypeName,
-  inferZodType,
-} from '../../../../common/lib/zod';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
@@ -97,12 +97,15 @@ const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
   return extractForeachItemSchemaFromArray(foreachParamParsed);
 };
 
+const ENTRIES_FILTER = 'entries';
+
 export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
 ): z.ZodType {
   const parsedPath = parseVariablePath(foreachParam);
   const iterateOverPath = parsedPath?.propertyPath;
+  const hasEntriesFilter = parsedPath?.filters?.includes(ENTRIES_FILTER) ?? false;
 
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
@@ -140,6 +143,8 @@ export function getForeachItemSchema(
           InvalidForeachParameterErrorCodes.INVALID_UNION
         );
       }
+    } else if (iterableSchema instanceof z.ZodObject && hasEntriesFilter) {
+      return z.object({ key: z.string(), value: z.unknown() });
     } else {
       throw new InvalidForeachParameterError(
         `Expected array for foreach iteration, but got ${getZodTypeName(

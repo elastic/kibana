@@ -50,7 +50,7 @@ export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
                 <EuiButtonIcon
                   color="text"
                   onClick={onBack}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   aria-label={txtBack}
                 />
               </div>

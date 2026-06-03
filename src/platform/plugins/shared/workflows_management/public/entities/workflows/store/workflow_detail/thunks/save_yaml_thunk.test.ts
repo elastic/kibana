@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { saveYamlThunk } from './save_yaml_thunk';
@@ -23,6 +24,11 @@ jest.mock('../utils/loading_states', () => ({
 // Mock the loadWorkflowThunk
 jest.mock('./load_workflow_thunk');
 const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 // Mock the query client
 jest.mock('../../../../../shared/lib/query_client', () => ({
@@ -64,9 +70,8 @@ describe('saveYamlThunk', () => {
     });
 
     it('should save updated workflow successfully', async () => {
-      mockServices.http.put.mockResolvedValue(undefined);
+      mockWorkflowApi.updateWorkflow.mockResolvedValue(undefined as any);
       mockLoadWorkflowThunk.mockImplementation(((arg: any) => {
-        // Return a thunk that when dispatched will update the store
         return async (dispatch: any) => {
           dispatch(setWorkflow(mockWorkflow));
           dispatch(setYamlString(mockWorkflow.yaml));
@@ -75,8 +80,8 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify({ yaml: 'name: Updated Workflow\nsteps: []' }),
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', {
+        yaml: 'name: Updated Workflow\nsteps: []',
       });
       expect(mockLoadWorkflowThunk).toHaveBeenCalled();
       expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalled();
@@ -89,7 +94,7 @@ describe('saveYamlThunk', () => {
         message: 'Bad Request',
       };
 
-      mockServices.http.put.mockRejectedValue(error);
+      mockWorkflowApi.updateWorkflow.mockRejectedValue(error);
 
       const result = await store.dispatch(saveYamlThunk());
 
@@ -111,12 +116,12 @@ describe('saveYamlThunk', () => {
     });
 
     it('should create new workflow successfully', async () => {
-      mockServices.http.post.mockResolvedValue(mockWorkflow);
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows', {
-        body: JSON.stringify({ yaml: 'name: New Workflow\nsteps: []' }),
+      expect(mockWorkflowApi.createWorkflow).toHaveBeenCalledWith({
+        yaml: 'name: New Workflow\nsteps: []',
       });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
@@ -138,7 +143,7 @@ describe('saveYamlThunk', () => {
         message: 'Bad Request',
       };
 
-      mockServices.http.post.mockRejectedValue(error);
+      mockWorkflowApi.createWorkflow.mockRejectedValue(error);
 
       const result = await store.dispatch(saveYamlThunk());
 
@@ -168,7 +173,7 @@ describe('saveYamlThunk', () => {
     store.dispatch(setYamlString('name: Test Workflow\nsteps: []'));
 
     const error = {};
-    mockServices.http.put.mockRejectedValue(error);
+    mockWorkflowApi.updateWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(saveYamlThunk());
 

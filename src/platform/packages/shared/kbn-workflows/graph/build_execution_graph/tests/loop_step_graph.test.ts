@@ -8,7 +8,12 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { ConnectorStep, ForEachStep, WorkflowYaml } from '../../../spec/schema';
+import {
+  type ConnectorStep,
+  DEFAULT_LOOP_MAX_ITERATIONS,
+  type ForEachStep,
+  type WorkflowYaml,
+} from '../../../spec/schema';
 import type { ExitForeachNode } from '../../types/nodes/loop_nodes';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
@@ -358,7 +363,7 @@ describe('convertToWorkflowGraph', () => {
       expect(exitNode.onLimit).toBe('fail');
     });
 
-    it('should not set maxIterations on exit node when not configured', () => {
+    it('should apply default maxIterations with continue mode when not configured', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -379,8 +384,8 @@ describe('convertToWorkflowGraph', () => {
 
       const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
       const exitNode = executionGraph.node('exitForeach_foreachStep') as ExitForeachNode;
-      expect(exitNode.maxIterations).toBeUndefined();
-      expect(exitNode.onLimit).toBeUndefined();
+      expect(exitNode.maxIterations).toBe(DEFAULT_LOOP_MAX_ITERATIONS);
+      expect(exitNode.onLimit).toBe('continue');
     });
 
     it('should support max-iterations combined with iteration-timeout and iteration-on-failure', () => {

@@ -14,38 +14,46 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AddExamplesPayload = lazySchema(() =>
+  z.object({
+    input: z.object({}).catchall(z.unknown()).optional(),
+    output: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
 export type AddExamplesPayload = z.infer<typeof AddExamplesPayload>;
-export const AddExamplesPayload = z.object({
-  input: z.object({}).catchall(z.unknown()).optional(),
-  output: z.object({}).catchall(z.unknown()).optional(),
-  metadata: z.object({}).catchall(z.unknown()).optional(),
-});
 
+export const AddEvaluationDatasetExamplesRequestParams = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+  })
+);
 export type AddEvaluationDatasetExamplesRequestParams = z.infer<
   typeof AddEvaluationDatasetExamplesRequestParams
 >;
-export const AddEvaluationDatasetExamplesRequestParams = z.object({
-  datasetId: z.string(),
-});
 export type AddEvaluationDatasetExamplesRequestParamsInput = z.input<
   typeof AddEvaluationDatasetExamplesRequestParams
 >;
 
+export const AddEvaluationDatasetExamplesRequestBody = lazySchema(() =>
+  z.object({
+    examples: z.array(AddExamplesPayload),
+  })
+);
 export type AddEvaluationDatasetExamplesRequestBody = z.infer<
   typeof AddEvaluationDatasetExamplesRequestBody
 >;
-export const AddEvaluationDatasetExamplesRequestBody = z.object({
-  examples: z.array(AddExamplesPayload),
-});
 export type AddEvaluationDatasetExamplesRequestBodyInput = z.input<
   typeof AddEvaluationDatasetExamplesRequestBody
 >;
 
+export const AddEvaluationDatasetExamplesResponse = lazySchema(() =>
+  z.object({
+    added: z.number().int(),
+  })
+);
 export type AddEvaluationDatasetExamplesResponse = z.infer<
   typeof AddEvaluationDatasetExamplesResponse
 >;
-export const AddEvaluationDatasetExamplesResponse = z.object({
-  added: z.number().int(),
-});

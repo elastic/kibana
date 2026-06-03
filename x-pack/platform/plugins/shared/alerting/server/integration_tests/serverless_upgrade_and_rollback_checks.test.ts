@@ -71,7 +71,8 @@ const ruleTypesInSecurityProjects: string[] = [
   'siem.newTermsRule',
 ];
 
-describe('Serverless upgrade and rollback checks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/235899
+describe.skip('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let ruleTypeRegistry: RuleTypeRegistry;

@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { type PaletteRegistry } from '@kbn/coloring';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -40,11 +40,9 @@ import {
 } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
-import { KbnPalette } from '@kbn/palettes';
-import type { KbnPaletteId } from '@kbn/palettes';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
-  XYState,
+  XYVisualizationState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -52,9 +50,9 @@ import type {
   AxisConfig,
   ValidXYDataLayerConfig,
   XYLayerConfig,
-  SeriesType as LensSeriesType,
 } from './types';
-import { getColumnToLabelMap, isLineSeries } from './state_helpers';
+import { getColumnToLabelMap } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -71,10 +69,11 @@ import {
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+import { getColorMappingDefaults } from '../../utils';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
-type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
+type State = Omit<XYVisualizationState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -458,17 +457,6 @@ const annotationLayerToExpression = (
   return buildExpression([extendedAnnotationLayerFn]).toAst();
 };
 
-/**
- * Returns the default palette for a given series type.
- * Line charts use a line-optimized palette for better contrast between overlapping series.
- */
-function getDefaultPalette(seriesType: LensSeriesType): KbnPaletteId {
-  if (isLineSeries(seriesType)) {
-    return KbnPalette.ElasticLineOptimized;
-  }
-  return KbnPalette.Default;
-}
-
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
   yAxisConfigs: AxisConfig[],
@@ -501,6 +489,7 @@ const dataLayerToExpression = (
     fn: [layer.collapseFn!],
   });
 
+  const hasActiveSplits = !layer.collapseFn && Boolean(layer.splitAccessors?.length);
   const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
@@ -513,7 +502,7 @@ const dataLayerToExpression = (
     isPercentage,
     isStacked,
     isHorizontal,
-    splitAccessors: layer.collapseFn || !layer.splitAccessors ? undefined : layer.splitAccessors,
+    splitAccessors: hasActiveSplits ? layer.splitAccessors : undefined,
     decorations: layer.yConfig
       ? layer.yConfig.map((yConfig) =>
           yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
@@ -525,7 +514,7 @@ const dataLayerToExpression = (
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(columnToLabel),
     palette: buildExpression([
-      layer.palette
+      layer.palette && !layer.collapseFn
         ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
             variable: 'palette',
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
@@ -534,7 +523,15 @@ const dataLayerToExpression = (
             name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
-    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
+    colorMapping: hasActiveSplits
+      ? layer.colorMapping
+        ? JSON.stringify(layer.colorMapping)
+        : !layer.palette
+        ? JSON.stringify(
+            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+          )
+        : undefined
+      : undefined,
   });
 
   return {

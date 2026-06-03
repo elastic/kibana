@@ -16,14 +16,13 @@ import { COMMON_UNSAFE_HEADERS, extractAttributeValue } from '../fixtures';
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
   '[NON-MKI] UIAM API Keys grant and invalidate functions',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: tags.serverless.all },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       userSessionCookieFactory = async () => {
         const samlResponse = await createSAMLResponse({
-          kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
           username: '1234567890',
           email: 'elastic_admin@elastic.co',
           roles: ['admin'],

@@ -57,7 +57,7 @@ export function truncateForDisplay(
     currentDepth?: number;
   } = {}
 ): JsonValue | string {
-  const { maxDepth = 5, maxProperties = 15, maxArrayItems = 5, currentDepth = 0 } = options;
+  const { maxDepth = 8, maxProperties = 15, maxArrayItems = 5, currentDepth = 0 } = options;
 
   // Max depth reached
   if (currentDepth >= maxDepth) {

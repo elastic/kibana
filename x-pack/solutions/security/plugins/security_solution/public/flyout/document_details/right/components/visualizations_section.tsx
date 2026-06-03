@@ -8,19 +8,21 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { AnalyzerPreviewContainer } from '../../../../flyout_v2/document/components/analyzer_preview_container';
-import { SessionPreviewContainer } from './session_preview_container';
+import { AnalyzerPreviewContainer } from '../../../../flyout_v2/document/main/components/analyzer_preview_container';
+import { SessionPreviewContainer } from '../../../../flyout_v2/document/main/components/session_preview_container';
+import { GraphPreviewContainer } from '../../../../flyout_v2/document/main/components/graph_preview_container';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { GraphPreviewContainer } from './graph_preview_container';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
+import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
+import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import {
   VISUALIZATION_SECTION_TEST_ID,
   VISUALIZATION_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/visualizations_section';
+} from '../../../../flyout_v2/document/main/components/visualizations_section';
 
 const KEY = 'visualizations';
 
@@ -33,26 +35,13 @@ export const VisualizationsSection = memo(() => {
     title: KEY,
     defaultValue: false,
   });
-  const {
-    dataAsNestedObject,
-    getFieldsData,
-    dataFormattedForFieldBrowser,
-    isRulePreview,
-    eventId,
-    indexName,
-    scopeId,
-    isPreviewMode,
-    searchHit,
-  } = useDocumentDetailsContext();
+  const { isRulePreview, eventId, indexName, scopeId, isPreviewMode, searchHit } =
+    useDocumentDetailsContext();
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph } = useGraphPreview({
-    getFieldsData,
-    ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-  });
+  const { hasGraphData } = useGraphPreview({ hit });
 
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     eventId,
@@ -60,6 +49,19 @@ export const VisualizationsSection = memo(() => {
     isFlyoutOpen: true,
     scopeId,
     isPreviewMode,
+  });
+  const { navigateToSessionView } = useNavigateToSessionView({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+    isPreviewMode,
+  });
+  const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
   });
 
   return (
@@ -70,7 +72,12 @@ export const VisualizationsSection = memo(() => {
       sectionId={KEY}
       data-test-subj={VISUALIZATION_SECTION_TEST_ID}
     >
-      <SessionPreviewContainer />
+      <SessionPreviewContainer
+        hit={hit}
+        disableNavigation={isRulePreview}
+        showIcon={!isPreviewMode}
+        onShowSessionView={navigateToSessionView}
+      />
       <EuiSpacer />
       <AnalyzerPreviewContainer
         hit={hit}
@@ -79,10 +86,15 @@ export const VisualizationsSection = memo(() => {
         showIcon={!isPreviewMode}
         disableNavigation={isRulePreview}
       />
-      {shouldShowGraph && (
+      {hasGraphData && (
         <>
           <EuiSpacer />
-          <GraphPreviewContainer />
+          <GraphPreviewContainer
+            hit={hit}
+            onShowGraph={navigateToGraphVisualization}
+            disableNavigation={isRulePreview}
+            showIcon={!isPreviewMode}
+          />
         </>
       )}
     </ExpandableSection>

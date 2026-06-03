@@ -38,7 +38,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  describe('Reporting Management app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/246637
+  // FLAKY: https://github.com/elastic/kibana/issues/246638
+  describe.skip('Reporting Management app', () => {
     let job: ReportApiJSON;
     let path: string;
 

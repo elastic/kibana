@@ -11,7 +11,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
-import { analyzerCellActionRenderer } from '../../../flyout_v2/analyzer/components/cell_actions';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { MockResolver } from './mock_resolver';
@@ -82,6 +82,7 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
+    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -102,6 +103,7 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
+    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -151,7 +153,8 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        renderCellActions={analyzerCellActionRenderer}
+        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+        renderCellActions={cellActionRenderer}
       />
     );
   }

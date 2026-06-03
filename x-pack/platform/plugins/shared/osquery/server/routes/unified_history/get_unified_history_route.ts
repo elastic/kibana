@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -24,6 +25,7 @@ import type {
 } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
@@ -34,6 +36,8 @@ import {
   type ScheduledAggregations,
 } from './process_scheduled_history';
 import type { LiveActionHit } from './map_live_hit_to_row';
+
+import { unifiedHistoryResponseSchema } from './response_schemas';
 
 const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
 
@@ -74,7 +78,16 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ),
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
+              tags: schema.maybe(schema.string()),
+              sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                defaultValue: 'desc',
+              }),
             }),
+          },
+          response: {
+            200: {
+              body: () => unifiedHistoryResponseSchema,
+            },
           },
         },
       },
@@ -82,6 +95,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
         try {
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          const ccsEnabled = await hasConnectedRemoteClusters(esClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -95,20 +109,33 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             sourceFilters: sourceFiltersRaw,
             startDate,
             endDate,
+            tags: tagsRaw,
+            sortDirection,
           } = request.query;
 
           const decoded = decodeCursor(nextPage);
           const userIds = userIdsRaw ? userIdsRaw.split(',').filter(Boolean) : undefined;
+          let tags: string[] | undefined;
+          if (tagsRaw) {
+            try {
+              tags = JSON.parse(tagsRaw);
+            } catch {
+              tags = tagsRaw.split(',').filter(Boolean);
+            }
+          }
 
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
             ? new Set(sourceFiltersRaw.split(',').filter(Boolean) as SourceFilter[])
             : undefined;
 
           const hasUserFilter = userIds && userIds.length > 0;
+          const hasTagsFilter = tags && tags.length > 0;
           const includeLive =
             !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
+          // Scheduled queries are excluded when user or tags filters are active because
+          // scheduled execution docs don't carry user_id or tags fields.
           const includeScheduled =
-            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter;
+            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter && !hasTagsFilter;
 
           const fetchSize = pageSize + 1;
 
@@ -120,6 +147,24 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           // Fetch all packs once — used for both kuery filtering and
           // resolving query names on scheduled rows.
           const packSOs = includeScheduled ? await getPacksForSpace(spaceScopedClient) : [];
+          let integrationNamespaces: string[] | undefined;
+
+          if (includeLive && osqueryContext?.service?.getIntegrationNamespaces) {
+            try {
+              const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+              const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+              integrationNamespaces =
+                osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+            } catch (err) {
+              logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
+            }
+          }
 
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;
@@ -135,9 +180,12 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 searchAfter: decoded.actionSearchAfter,
                 kuery,
                 userIds,
+                tags,
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
+                activeFilters,
               })
             : undefined;
 
@@ -153,6 +201,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
               })
             : undefined;
 
@@ -162,7 +211,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             actionsQuery
               ? esClient.search(
                   {
-                    index: `${ACTIONS_INDEX}*`,
+                    index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
                   },
                   { ignore: [404] }
@@ -172,7 +221,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ? esClient
                   .search(
                     {
-                      index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                      index: prefixIndexPatternsWithCcs(
+                        `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                        ccsEnabled
+                      ),
                       ...scheduledQuery,
                     },
                     { ignore: [404] }
@@ -197,7 +249,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
-            activeFilters,
+            integrationNamespaces,
+            ccsEnabled,
             logger,
           });
 
@@ -215,7 +268,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             filteredLiveRows,
             allScheduledRows,
             pageSize,
-            scheduledOffset
+            scheduledOffset,
+            sortDirection
           );
 
           const { nextActionSearchAfter, nextScheduledCursor, nextScheduledOffset } =

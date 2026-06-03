@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { LiveHistoryRow, SourceFilter } from '../../../common/api/unified_history/types';
+import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { mapLiveHitToRow } from './map_live_hit_to_row';
@@ -17,7 +17,8 @@ export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
   spaceId: string;
-  activeFilters?: Set<SourceFilter>;
+  integrationNamespaces?: readonly string[];
+  ccsEnabled?: boolean;
   logger: Logger;
 }
 
@@ -37,7 +38,8 @@ export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
   spaceId,
-  activeFilters,
+  integrationNamespaces,
+  ccsEnabled = false,
   logger,
 }: ProcessLiveHistoryParams): Promise<ProcessLiveHistoryResult> => {
   const liveRows: LiveHistoryRow[] = liveHits.map(mapLiveHitToRow);
@@ -55,28 +57,27 @@ export const processLiveHistory = async ({
 
   if (liveRows.length > 0) {
     try {
-      await enrichWithResultCounts(liveHits, liveRows, osqueryContext, spaceId);
+      await enrichWithResultCounts(
+        liveHits,
+        liveRows,
+        osqueryContext,
+        integrationNamespaces ?? [spaceId],
+        ccsEnabled
+      );
     } catch (err) {
       logger.warn(`Failed to enrich live rows with result counts: ${(err as Error).message}`);
     }
   }
 
-  const filteredLiveRows = activeFilters
-    ? liveRows.filter((row) => {
-        if (row.source === 'Rule') return activeFilters.has('rule');
-
-        return activeFilters.has('live');
-      })
-    : liveRows;
-
-  return { liveRows: filteredLiveRows, sortValuesMap };
+  return { liveRows, sortValuesMap };
 };
 
 const enrichWithResultCounts = async (
   liveHits: LiveActionHit[],
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
-  spaceId: string
+  integrationNamespaces: readonly string[],
+  ccsEnabled: boolean
 ): Promise<void> => {
   const allSubActionIds = liveHits.flatMap(collectSubActionIds);
   const uniqueActionIds = [...new Set(allSubActionIds)];
@@ -88,7 +89,8 @@ const enrichWithResultCounts = async (
   const resultCountsMap = await getResultCountsForActions(
     internalEsClient,
     uniqueActionIds,
-    spaceId
+    integrationNamespaces,
+    ccsEnabled
   );
 
   for (let i = 0; i < liveRows.length; i++) {

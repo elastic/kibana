@@ -9,6 +9,7 @@ import type { Streams } from '../models/streams';
 import { getDiscoverEsqlQuery } from './get_discover_esql_query';
 
 const wiredStreamDefinition: Streams.WiredStream.Definition = {
+  type: 'wired',
   name: 'logs.otel',
   description: 'Test wired stream',
   updated_at: '2025-01-01T00:00:00.000Z',
@@ -22,6 +23,7 @@ const wiredStreamDefinition: Streams.WiredStream.Definition = {
 };
 
 const queryStreamDefinition: Streams.QueryStream.Definition = {
+  type: 'query',
   name: 'logs.otel.nginx.errors',
   description: 'Test query stream',
   updated_at: '2025-01-01T00:00:00.000Z',
@@ -32,6 +34,7 @@ const queryStreamDefinition: Streams.QueryStream.Definition = {
 };
 
 const classicStreamDefinition: Streams.ClassicStream.Definition = {
+  type: 'classic',
   name: 'logs-myapp',
   description: 'Test classic stream',
   updated_at: '2025-01-01T00:00:00.000Z',

@@ -11,7 +11,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -68,5 +68,15 @@ export const buildScopedInternalSavedObjectsClientUnsafe = ({
 
   return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
+  });
+};
+
+/**
+ * Builds an internal SavedObjectsClient with security/spaces extensions disabled.
+ * Intended for background execution paths where no authenticated request exists.
+ */
+export const buildInternalSavedObjectsClientUnsafe = ({ coreStart }: { coreStart: CoreStart }) => {
+  return coreStart.savedObjects.getUnsafeInternalClient({
+    excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
   });
 };

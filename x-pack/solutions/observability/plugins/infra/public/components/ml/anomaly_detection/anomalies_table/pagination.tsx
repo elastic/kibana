@@ -37,7 +37,7 @@ export const PaginationControls = ({
         <EuiFlexGroup>
           <EuiButtonIcon
             data-test-subj="infraPaginationControlsButton"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
             aria-label={previousPageLabel}
@@ -47,7 +47,7 @@ export const PaginationControls = ({
           </span>
           <EuiButtonIcon
             data-test-subj="infraPaginationControlsButton"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}
             aria-label={nextPageLabel}

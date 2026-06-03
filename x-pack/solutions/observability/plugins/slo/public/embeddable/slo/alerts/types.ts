@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { type CoreStart } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -14,39 +14,40 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
-  SerializedTitles,
   PublishesWritableTitle,
   PublishesTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
+import type { HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type {
+  AlertsCustomState,
+  AlertsEmbeddableState,
+} from '../../../../common/embeddables/alerts/types';
 
-export interface SloItem {
-  id: string;
-  instanceId: string;
-  name: string;
-  groupBy: string;
-}
+/** Re-exported from common (derived from server schema) */
+export type {
+  AlertsCustomState,
+  AlertsEmbeddableState,
+  SloItem,
+} from '../../../../common/embeddables/alerts/types';
 
-export interface EmbeddableSloProps {
-  slos: SloItem[];
-  showAllGroupByInstances?: boolean;
-}
+export type SloAlertsEmbeddableState = AlertsEmbeddableState;
 
-export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
-
-export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
+export type SloAlertsApi = DefaultEmbeddableApi<AlertsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
+  HasDrilldowns &
+  HasSupportedTriggers &
   HasSloAlertsConfig &
   HasEditCapabilities;
 
 export interface HasSloAlertsConfig {
-  getSloAlertsConfig: () => EmbeddableSloProps;
-  updateSloAlertsConfig: (next: EmbeddableSloProps) => void;
+  getSloAlertsConfig: () => AlertsCustomState;
+  updateSloAlertsConfig: (next: AlertsCustomState) => void;
 }
 
 export interface SloEmbeddableDeps {

@@ -8,6 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { appContextService } from '../../../../app_context';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
@@ -34,11 +35,12 @@ let internalSoClientMock: ReturnType<typeof createSavedObjectClientMock>;
 
 beforeEach(() => {
   internalSoClientMock = createSavedObjectClientMock();
+  internalSoClientMock.asScopedToNamespace.mockReturnValue(internalSoClientMock as any);
   appContextService.start(
     createAppContextStartContractMock(
       {},
       false,
-      { internal: internalSoClientMock },
+      { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
       { enableIntegrationInactivityAlerting: true }
     )
   );
@@ -202,7 +204,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).toHaveBeenCalledWith(
@@ -232,6 +234,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -248,14 +251,14 @@ describe('createInactivityMonitoringTemplate', () => {
       createAppContextStartContractMock(
         {},
         false,
-        { internal: internalSoClientMock },
+        { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
         { enableIntegrationInactivityAlerting: false }
       )
     );
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -275,7 +278,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).toHaveBeenCalled();
@@ -283,6 +286,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -300,7 +304,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: inputPackage }
+      { packageInfo: inputPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -315,7 +319,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: noDataStreamsPackage }
+      { packageInfo: noDataStreamsPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -336,7 +340,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
@@ -345,6 +349,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -385,7 +390,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
@@ -404,6 +409,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -421,7 +427,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -429,6 +435,74 @@ describe('createInactivityMonitoringTemplate', () => {
       expect.stringContaining('Error creating inactivity monitoring template for package nginx'),
       expect.objectContaining({ error: expect.any(Error) })
     );
+  });
+
+  it('should save asset refs as additional space when installAsAdditionalSpace is true', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      {
+        packageInfo: mockIntegrationPackage,
+        spaceId: DEFAULT_SPACE_ID,
+        installAsAdditionalSpace: true,
+      }
+    );
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
+      true,
+      true
+    );
+  });
+
+  it('should use a space-scoped SO client and space-specific template ID when spaceId is provided', async () => {
+    const scopedClientMock = createSavedObjectClientMock();
+    internalSoClientMock.asScopedToNamespace.mockReturnValue(scopedClientMock as any);
+    scopedClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+    scopedClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage, spaceId: 'my-space' }
+    );
+
+    expect(internalSoClientMock.asScopedToNamespace).toHaveBeenCalledWith('my-space');
+    expect(scopedClientMock.create).toHaveBeenCalledWith(
+      'alerting_rule_template',
+      expect.objectContaining({
+        name: '[Nginx] Idle data streams',
+      }),
+      { id: 'fleet-nginx-inactivity-monitoring-my-space' }
+    );
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring-my-space', type: 'alerting_rule_template' }],
+      'my-space',
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+    });
   });
 });
 
@@ -476,6 +550,7 @@ describe('stepCreateAlertingAssets', () => {
 
     const context = {
       savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
       packageInstallContext: {
         packageInfo: { name: 'elastic_agent' },
         archiveIterator: createArchiveIteratorFromMap(
@@ -508,6 +583,7 @@ describe('stepCreateAlertingAssets', () => {
           deferred: false,
         },
       ],
+      DEFAULT_SPACE_ID,
       false,
       true
     );

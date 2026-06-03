@@ -24,6 +24,9 @@ dependsOn:
   - '@kbn/core-pricing-common'
   - '@kbn/licensing-types'
   - '@kbn/field-types'
+  - '@kbn/test-es-server'
+  - '@kbn/tooling-log'
+  - '@kbn/esql-scripts'
 tags:
   - shared-common
   - package
@@ -35,27 +38,8 @@ fileGroups:
   src:
     - src/**/*
     - '**/*.ts'
+    - jest.integration.config.js
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

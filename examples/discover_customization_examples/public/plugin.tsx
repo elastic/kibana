@@ -8,6 +8,7 @@
  */
 
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
@@ -30,7 +31,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -109,7 +110,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           const togglePopover = () => setIsPopoverOpen((open) => !open);
           const closePopover = () => setIsPopoverOpen(false);
           const [savedSearches, setSavedSearches] = useState<
-            Array<SOWithMetadata<SavedSearchAttributes>>
+            Array<SOWithMetadata<Pick<DiscoverSessionAttributes, 'title' | 'description'>>>
           >([]);
 
           useEffect(() => {
@@ -121,6 +122,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'discoverCustomizationExamples.logsViewSelectorAriaLabel',
+                  { defaultMessage: 'Logs view selector' }
+                )}
                 button={
                   <EuiButton
                     size="s"
@@ -138,7 +143,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 closePopover={closePopover}
               >
                 <EuiContextMenu
-                  size="s"
                   initialPanelId={0}
                   panels={[
                     {
@@ -170,11 +174,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
-          const currentTabId = stateContainer.getCurrentTab().id;
-          const dataView = useObservable(
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
-          );
+          const currentDataView$ = stateContainer.getCurrentTabDataView$();
+          const dataView = useObservable(currentDataView$, undefined);
 
           useEffect(() => {
             if (!controlGroupAPI) {

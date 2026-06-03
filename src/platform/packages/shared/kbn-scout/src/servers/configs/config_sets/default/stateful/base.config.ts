@@ -18,15 +18,27 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+// packages without `.sig` files, so opt out of upstream signature enforcement
+// (added in elastic/package-registry#1646).
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port
@@ -35,9 +47,6 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-// if config is executed on CI or locally
-const isRunOnCI = process.env.CI;
 
 const servers = {
   elasticsearch: {
@@ -88,9 +97,12 @@ export const defaultConfig: ScoutServerConfig = {
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${STATEFUL_IDP_METADATA_PATH}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
+      // SP args must match the fixed URL the mock IdP plugin embeds in SAML responses.
+      // The plugin's `onPreResponse` rewrites IdP-bound redirects to the actual Kibana URL
+      // (`server.publicBaseUrl` below) at runtime, so ES does not need to know that URL.
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
@@ -203,8 +215,6 @@ export const defaultConfig: ScoutServerConfig = {
         },
       ])}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout
-      // SAML configuration
-      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,
@@ -221,6 +231,11 @@ export const defaultConfig: ScoutServerConfig = {
         basic: { 'cloud-basic': { order: 1 } },
       })}`,
       `--server.publicBaseUrl=${kbnUrl}`,
+      // Synthetics service config — matches the FTR deployment-agnostic base
+      '--xpack.uptime.service.password=test',
+      '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.uptime.service.devUrl=mockDevUrl',
+      '--xpack.uptime.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
     ],

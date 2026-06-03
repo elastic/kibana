@@ -196,6 +196,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
         assign: permissions.assign,
+        manageTemplates: permissions.manageTemplates,
       },
       visualize: {
         crud: !!capabilities.visualize_v2?.save,
@@ -224,6 +225,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      permissions.manageTemplates,
     ]
   );
 };

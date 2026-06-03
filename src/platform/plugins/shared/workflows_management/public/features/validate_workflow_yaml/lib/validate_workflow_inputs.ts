@@ -10,9 +10,9 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { LineCounter } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { convertJsonSchemaToZodWithRefs } from '../../../../common/lib/json_schema_to_zod';
-import { isDynamicValue } from '../../../../common/lib/regex';
+import { isDynamicValue } from '@kbn/workflows-yaml';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import {
   getValueFromValueNode,

@@ -13,11 +13,17 @@ import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 import { TemplateMetadataPreview } from './template_metadata_preview';
+import { useParentTemplateDefinition } from '../hooks/use_parent_template_definition';
+import { mergeTemplateDefinitions } from '../utils/merge_template_definitions';
 import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
-export const TemplatePreview = () => {
+interface TemplatePreviewProps {
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+}
+
+export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
@@ -79,22 +85,49 @@ export const TemplatePreview = () => {
     ? parsedTemplate.data
     : lastValidTemplateRef.current;
 
-  if (!parsedTemplateData) {
+  const { definition: parentDefinition } = useParentTemplateDefinition(parsedTemplateData?.extends);
+
+  const effectiveTemplate = useMemo(() => {
+    if (!parsedTemplateData) {
+      return null;
+    }
+    if (parentDefinition) {
+      return mergeTemplateDefinitions(parentDefinition, parsedTemplateData);
+    }
+    return parsedTemplateData;
+  }, [parsedTemplateData, parentDefinition]);
+
+  const parentFieldNames = useMemo(
+    () =>
+      new Set(
+        (parentDefinition?.fields ?? [])
+          .map((f) => f.name)
+          .filter((name): name is string => typeof name === 'string')
+      ),
+    [parentDefinition]
+  );
+
+  if (!effectiveTemplate) {
     return null;
   }
 
   return (
     <div>
-      <TemplateMetadataPreview parsedTemplate={parsedTemplateData} />
+      <TemplateMetadataPreview parsedTemplate={effectiveTemplate} />
 
-      {parsedTemplateData.fields.length > 0 && (
+      {effectiveTemplate.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
           <EuiText size="xs" color="subdued">
             <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
           </EuiText>
           <EuiSpacer size="s" />
-          <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
+          <TemplateFieldRenderer
+            parsedTemplate={effectiveTemplate}
+            onFieldDefaultChange={onFieldDefaultChange}
+            parentFieldNames={parentFieldNames}
+            parentTemplateName={parentDefinition?.name ?? parsedTemplateData?.extends}
+          />
         </>
       )}
     </div>

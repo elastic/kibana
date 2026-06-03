@@ -43,6 +43,9 @@ const externals = {
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  // JSX runtime exports for SWC's importSource: '@emotion/react'
+  '@emotion/react/jsx-runtime': '__kbnSharedDeps__.EmotionReactJsxRuntime',
+  '@emotion/react/jsx-dev-runtime': '__kbnSharedDeps__.EmotionReactJsxDevRuntime',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -70,6 +73,7 @@ const externals = {
   'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
   'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
   'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
+  'zod/v4': '__kbnSharedDeps__.Zod',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
@@ -151,7 +155,9 @@ const externals = {
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
   '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
   '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
+  '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

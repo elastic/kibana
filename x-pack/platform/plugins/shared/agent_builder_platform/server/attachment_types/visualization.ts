@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type {
-  VisualizationAttachmentData,
-  VisualizationOriginData,
-} from '@kbn/agent-builder-common/attachments';
+import type { VisualizationAttachmentData } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
   visualizationAttachmentDataSchema,
-  visualizationOriginDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentResolveContext,
@@ -20,16 +16,16 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
+  type LensApiConfig,
   type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 /**
  * Creates the definition for the unified `visualization` attachment type.
  *
  * This type supports both:
  * - **By-value**: consumer provides content (`data`) directly.
- * - **By-reference**: consumer provides `origin` (e.g., `{ saved_object_id }`) →
+ * - **By-reference**: consumer provides `origin` (a saved object ID string) →
  *   `resolve()` snapshots the content once at add time.
  *
  * After creation, all attachments behave identically — the agent doesn't know
@@ -37,8 +33,7 @@ import {
  */
 export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
   AttachmentType.visualization,
-  VisualizationAttachmentData,
-  VisualizationOriginData
+  VisualizationAttachmentData
 > => {
   return {
     id: AttachmentType.visualization,
@@ -51,24 +46,14 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
       return { valid: false, error: parseResult.error.message };
     },
 
-    validateOrigin: (input) => {
-      const parseResult = visualizationOriginDataSchema.safeParse(input);
-      if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
-      }
-      return { valid: false, error: parseResult.error.message };
-    },
-
     resolve: async (
-      origin: VisualizationOriginData,
+      origin: string,
       context: AttachmentResolveContext
     ): Promise<VisualizationAttachmentData | undefined> => {
       if (!context.savedObjectsClient) return undefined;
 
-      const { saved_object_id } = origin;
-
       try {
-        const resolveResult = await context.savedObjectsClient.resolve('lens', saved_object_id);
+        const resolveResult = await context.savedObjectsClient.resolve('lens', origin);
         const savedObject = resolveResult.saved_object as { error?: { message?: string } };
 
         if (savedObject?.error) {
@@ -83,7 +68,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
         const lensApiConfig = toLensApiConfig(lensAttributes);
 
         return {
-          query: origin.title ?? saved_object_id,
+          query: origin,
           visualization: lensApiConfig as unknown as Record<string, unknown>,
           chart_type: extractChartType(lensAttributes),
           esql: extractEsql(lensAttributes),
@@ -108,7 +93,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     isReadonly: false,
 
     getAgentDescription: () => {
-      return 'A visualization attachment contains a Lens visualization configuration. It can be rendered inline using <render_attachment id="..." /> and can also be added to dashboard compositions through dashboard panel-ingestion operations.';
+      return 'A visualization attachment contains a Lens visualization configuration. Time range can be controled by configuring a time_range property directly on the attachment.data with from and to fields. Rendering it inline displays the visualization as a dynamic, interactive chart component in the conversation UI. Visualization attachments can also be added to dashboard compositions through dashboard panel-ingestion operations.';
     },
 
     getTools: () => [],
@@ -123,7 +108,7 @@ const toLensAttributes = (
   references: references ?? attributes.references ?? [],
 });
 
-const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
+const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
   new LensConfigBuilder().toAPIFormat(attributes);
 
 const extractChartType = (attributes: LensAttributes): string => {

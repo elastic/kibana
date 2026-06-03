@@ -17,4 +17,10 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 export type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
+  InferenceFeatureConfig,
+  RegisterResult,
+  InferenceFeatureRegistryContract,
+  InferenceFeatureRegistryStartContract,
+  InferenceEndpointsContract,
+  ResolvedInferenceEndpoints,
 } from './types';

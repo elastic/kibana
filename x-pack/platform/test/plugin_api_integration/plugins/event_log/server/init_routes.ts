@@ -74,6 +74,10 @@ export const registerProviderActionsRoute = (
     {
       path: '/api/log_event_fixture/{provider}/_registerProviderActions',
       security: {
+        authc: {
+          enabled: false,
+          reason: 'This route is part of a test plugin and does not require authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
@@ -83,7 +87,6 @@ export const registerProviderActionsRoute = (
         body: (value) => ({ value }),
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
-      options: { authRequired: false },
     },
     (context, request, response) => {
       const { provider } = request.params as { provider: string };

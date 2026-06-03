@@ -52,6 +52,12 @@ describe('export timelines', () => {
   let clients: MockClients;
   let context: SecuritySolutionRequestHandlerContextMock;
 
+  const registerRoute = (overrides?: Partial<ReturnType<typeof createMockConfig>>) => {
+    const routeConfig = { ...createMockConfig(), ...overrides };
+    exportTimelinesRoute(server.router, routeConfig);
+    return routeConfig;
+  };
+
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
@@ -62,7 +68,6 @@ describe('export timelines', () => {
     (convertSavedObjectToSavedPinnedEvent as unknown as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
-    exportTimelinesRoute(server.router, createMockConfig());
   });
 
   afterEach(() => {
@@ -72,6 +77,7 @@ describe('export timelines', () => {
 
   describe('status codes', () => {
     test('returns 200 when finding selected timelines', async () => {
+      registerRoute();
       const response = await server.inject(
         getExportTimelinesRequest(),
         requestContextMock.convertContext(context)
@@ -80,6 +86,7 @@ describe('export timelines', () => {
     });
 
     test('catch error when status search throws error', async () => {
+      registerRoute();
       clients.savedObjectsClient.bulkGet.mockReset();
       clients.savedObjectsClient.bulkGet.mockRejectedValue(new Error('Test error'));
       const response = await server.inject(
@@ -92,10 +99,56 @@ describe('export timelines', () => {
         status_code: 500,
       });
     });
+
+    test('returns 400 when requested ids exceed export size limit', async () => {
+      const config = registerRoute({ maxTimelineImportExportSize: 1 });
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: TIMELINE_EXPORT_URL,
+          query: {
+            file_name: 'mock_export_timeline.ndjson',
+          },
+          body: {
+            ids: ['id-1', 'id-2'],
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: `Can't export more than ${config.maxTimelineImportExportSize} timelines`,
+        status_code: 400,
+      });
+    });
+
+    test('deduplicates ids before applying export size limit', async () => {
+      registerRoute({ maxTimelineImportExportSize: 1 });
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: TIMELINE_EXPORT_URL,
+          query: {
+            file_name: 'mock_export_timeline.ndjson',
+          },
+          body: {
+            ids: ['f0e58720-57b6-11ea-b88d-3f1a31716be8', 'f0e58720-57b6-11ea-b88d-3f1a31716be8'],
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(clients.savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'f0e58720-57b6-11ea-b88d-3f1a31716be8', type: 'siem-ui-timeline' },
+      ]);
+    });
   });
 
   describe('request validation', () => {
     test('return validation error for request body', async () => {
+      registerRoute();
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
@@ -109,6 +162,7 @@ describe('export timelines', () => {
     });
 
     test('return validation error for request params', async () => {
+      registerRoute();
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,

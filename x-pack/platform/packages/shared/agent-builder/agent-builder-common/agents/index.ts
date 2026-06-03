@@ -17,12 +17,30 @@ export {
 } from './definition';
 export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
 export {
+  canCurrentUserEditAgent,
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
+  type EffectiveAgentRole,
+  type AgentAuthzArgs,
 } from './access_control';
-export type { SkillSelection } from '../skills';
+export {
+  AgentAclRole,
+  AGENT_ACL_MAX_ENTRIES,
+  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAclRole,
+  aclRoleMeets,
+  maxAclRole,
+  getEmptyAgentAcl,
+  type AgentAcl,
+  type AgentAclEntry,
+  type AgentAclPrincipalType,
+} from './acl';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,
@@ -30,19 +48,37 @@ export {
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
+export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
+export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
+export type {
+  AgentListOptions,
+  AgentCreateRequest,
+  AgentUpdateRequest,
+  AgentDeleteRequest,
+} from './crud';
 export {
+  type ConfirmPromptColor,
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,
+  type AuthorizationPromptDefinition,
+  type AuthorizationPrompt,
+  type AuthorizationPromptResponse,
+  type AuthorizationMethod,
   type PromptResponse,
   type PromptRequest,
   type ToolCallPromptRequestSource,
   type PromptRequestSource,
   type ConfirmationPromptResponseState,
+  type AuthorizationPromptResponseState,
   type PromptResponseState,
   ConfirmationStatus,
+  AuthorizationStatus,
   AgentPromptType,
   AgentPromptRequestSourceType,
   isConfirmationPrompt,
+  isAuthorizationPrompt,
+  isConfirmationPromptResponse,
+  isAuthorizationPromptResponse,
   type PromptStorageState,
 } from './prompts';

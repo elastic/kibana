@@ -106,27 +106,24 @@ const xjsonRules = { ...buildXjsonRules('json_root') };
 // We replace those rules with Console-specific rules that don't use @push
 const originalJsonRoot = xjsonRules.json_root;
 xjsonRules.json_root = [
-  // Return to root only when an unindented closing brace ends the line.
-  // This targets the top-level request body terminator and avoids breaking
-  // highlighting for nested objects where closing braces are indented.
-  // @ts-expect-error custom rule
-  matchTokensWithEOL('paren.rparen', /^}\s*/, 'root'),
-  // Keep closing braces highlighted inside nested objects without changing state.
-  [/\}/, { token: 'paren.rparen' }],
+  // Keep closing braces highlighted without changing state.
+  // We no longer transition to root here; instead, console_editor.ts
+  // injects method matching into json_root so the next request is recognized.
+  [/}/, { token: 'paren.rparen' }],
   // Don't push for opening braces to prevent stack overflow
   [/{/, { token: 'paren.lparen' }],
   // @ts-expect-error include comments into json
   { include: '@comments' },
   // @ts-expect-error include variables into json
   matchToken('variable.template', /("\${\w+}")/),
+  // @ts-expect-error include a rule to start esql highlighting (triple quotes)
+  buildEsqlStartRule(true),
+  // @ts-expect-error include a rule to start esql highlighting (single quotes)
+  buildEsqlStartRule(false),
   // @ts-expect-error include a rule to start sql highlighting
   buildSqlStartRule(),
   // @ts-expect-error include a rule to start painless highlighting
   buildPainlessStartRule(),
-  // @ts-expect-error include a rule to start esql highlighting
-  buildEsqlStartRule(false),
-  // @ts-expect-error include a rule to start esql highlighting
-  buildEsqlStartRule(true),
   // Include remaining xjson rules, filtering out the original brace rules
   ...originalJsonRoot.filter((rule) => {
     // Filter out the original @push/@pop brace rules from xjson

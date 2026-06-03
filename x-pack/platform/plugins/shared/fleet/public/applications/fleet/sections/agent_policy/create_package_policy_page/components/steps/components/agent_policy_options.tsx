@@ -147,7 +147,7 @@ export function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
                         defaultMessage="Logstash output for integrations is not supported with APM"
                       />
                     }
-                    type="warningFilled"
+                    type="warningFill"
                     size="s"
                   />
                 ) : null,

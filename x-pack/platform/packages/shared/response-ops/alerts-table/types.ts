@@ -6,25 +6,25 @@
  */
 
 import type {
-  JSX,
   ComponentClass,
   ComponentProps,
   ComponentType,
   Dispatch,
   FC,
+  JSX,
   Key,
   MutableRefObject,
   ReactNode,
   RefAttributes,
 } from 'react';
 import type {
-  AlertConsumers,
   ALERT_CASE_IDS,
-  ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -39,11 +39,9 @@ import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
@@ -51,12 +49,43 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { Case } from './apis/bulk_get_cases';
 import type { ItemsSelectionState } from './components/tags/items/types';
+
+/**
+ * A single conversation attachment or a group of attachments. Defined structurally
+ * here to avoid a compile-time dependency on agent-builder packages. The payload is
+ * passed through to openChat without inspection, so a broad structural type is enough.
+ */
+export interface ConversationAttachmentInput {
+  type: string;
+}
+
+/**
+ * Minimal structural interface for the chat service required by the alerts table.
+ * Using a local structural type avoids a compile-time dependency on agent-builder packages
+ * from this shared platform package.
+ */
+export interface OpenChatService {
+  openChat(options?: {
+    attachments?: ConversationAttachmentInput[];
+    newConversation?: boolean;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+  }): void;
+}
+
+export interface BulkAddToChatConfig {
+  convertAlertToAttachment: (alerts: TimelineItem[]) => ConversationAttachmentInput[];
+  initialMessage?: string;
+  onAddedToChat?: (itemCount: number) => void;
+}
 
 export interface Consumer {
   id: AlertConsumers;
@@ -163,18 +192,6 @@ type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   : T extends ComponentClass<infer Props>
   ? ComponentClass<Props & AP>
   : never;
-
-export interface AlertWithLegacyFormats {
-  alert: Alert;
-  /**
-   * @deprecated
-   */
-  legacyAlert: LegacyField[];
-  /**
-   * @deprecated
-   */
-  ecsAlert: any;
-}
 
 export interface AlertsTableOnLoadedProps {
   alerts: Alert[];
@@ -317,7 +334,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderCellValue?: MergeProps<
     EuiDataGridProps['renderCellValue'],
-    RenderContext<AC> & AlertWithLegacyFormats
+    RenderContext<AC> & { alert: Alert }
   >;
   /**
    * Cell popover render function
@@ -331,14 +348,20 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
-    RenderContext<AC> &
-      AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
+    RenderContext<AC> & { alert: Alert; setIsActionLoading?: (isLoading: boolean) => void }
   >;
   /**
    * Get the alert formatter for a specific rule type.
    * Used to generate "View in App" links for individual alerts.
    */
   getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Navigation config for the alert details page.
+   * When provided, the "View alert details" row action and the flyout footer
+   * render as `href` links to the alert details page instead of opening
+   * the flyout.
+   */
+  alertDetailsNavigation?: AlertDetailsNavigation;
   /**
    * Additional toolbar controls render function
    */
@@ -417,6 +440,21 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * @default new LocalStorageWrapper(window.localStorage)
    */
   configurationStorage?: IStorageWrapper | null;
+
+  /**
+   * Configuration for the bulk "Add to chat" action. When provided, a bulk
+   * action will appear in the table allowing users to add selected alerts to
+   * the Agent Builder chat.
+   */
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+
+  /**
+   * Show a CSV export button in the toolbar. The button exports all alerts matching
+   * the current filters using the reporting CSV endpoint.
+   * Note: `services.rendering` must also be provided, otherwise the button will not render.
+   * @default false
+   */
+  showCsvExportButton?: boolean;
   /**
    * Dependencies
    */
@@ -424,6 +462,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    /**
+     * Required to render the CSV export button (`showCsvExportButton`). The button will
+     * not appear if this is omitted, even when `showCsvExportButton` is true.
+     */
+    rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
@@ -432,6 +475,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
+    agentBuilder?: OpenChatService;
   };
 }
 
@@ -459,6 +503,23 @@ export type RenderContext<AC extends AdditionalContext> = {
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 
   /**
+   * The rule type IDs used to filter alerts
+   */
+  ruleTypeIds: string[];
+  /**
+   * The consumers used to filter alerts
+   */
+  consumers?: string[];
+  /**
+   * The ES query used to filter alerts
+   */
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
+  /**
+   * The current sort configuration
+   */
+  sort: AlertsTableSortCombinations[];
+
+  /**
    * Refetches all the queries, resetting the alerts pagination if necessary
    */
   refresh: () => void;
@@ -470,14 +531,6 @@ export type RenderContext<AC extends AdditionalContext> = {
 
   isLoadingAlerts: boolean;
   alerts: Alert[];
-  /**
-   * @deprecated
-   */
-  oldAlertsData: LegacyField[][];
-  /**
-   * @deprecated
-   */
-  ecsAlertsData: any[];
   alertsCount: number;
   browserFields: BrowserFields;
 
@@ -512,6 +565,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
     | 'getAlertFormatter'
+    | 'alertDetailsNavigation'
   >,
   | 'columns'
   | 'pageIndex'
@@ -554,6 +608,10 @@ export interface PublicAlertsDataGridProps
   trackScores?: boolean;
   consumers?: string[];
   /**
+   * Value to override the server side search
+   */
+  projectRouting?: ProjectRouting;
+  /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
    */
   showInspectButton?: boolean;
@@ -593,6 +651,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   extends PublicAlertsDataGridProps,
     Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];
@@ -603,6 +662,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
+  showCsvExportButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
@@ -617,21 +677,30 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
+export interface AlertDetailsNavigation {
+  /** The Kibana app ID to navigate to (e.g. 'observability') */
+  appId: string;
+  /** Returns the in-app path for a given alert ID (e.g. `/alerts/${alertId}`) */
+  getPath: (alertId: string) => string;
+}
+
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
   RenderContext<AC> &
     EuiDataGridCellValueElementProps & {
       key?: Key;
       alert: Alert;
       onActionExecuted?: () => void;
-      isAlertDetailsEnabled?: boolean;
       /**
        * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
        */
       resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
       /**
-       * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+       * SPA navigation config for the alert details page.
+       * When provided, the "View alert details" row action and flyout footer
+       * render as `href` links to the alert details page instead of opening
+       * the flyout.
        */
-      resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+      alertDetailsNavigation?: AlertDetailsNavigation;
       /**
        * Get the alert formatter for a specific rule type.
        * Used to generate "View in App" links for individual alerts.
@@ -659,6 +728,7 @@ interface PanelConfig {
   id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
+  width?: number;
 }
 
 export interface RenderContentPanelProps {

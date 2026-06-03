@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Alert } from '@kbn/alerting-types';
+
 export const browserFields = {
   host: {
     fields: {
@@ -1694,3 +1696,19 @@ export const data = [
     },
   ],
 ];
+
+export const alerts: Alert[] = data.map((row) =>
+  row.reduce<Alert>(
+    (acc, { field, value }) => {
+      if (field === '_id' || field === '_index') {
+        (acc as Record<string, unknown>)[field] = Array.isArray(value)
+          ? value[0] ?? ''
+          : (value as string) ?? '';
+      } else {
+        (acc as Record<string, unknown>)[field] = value;
+      }
+      return acc;
+    },
+    { _id: '', _index: '' } as Alert
+  )
+);

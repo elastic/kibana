@@ -22,6 +22,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
@@ -42,6 +45,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     loadTestFile(require.resolve('./_framework'));
     loadTestFile(require.resolve('./_telemetry'));
+    loadTestFile(require.resolve('./_profile_state'));
     loadTestFile(require.resolve('./extensions/_get_row_indicator_provider'));
     loadTestFile(require.resolve('./extensions/_get_row_additional_leading_controls'));
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));

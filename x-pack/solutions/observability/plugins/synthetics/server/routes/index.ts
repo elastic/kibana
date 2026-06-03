@@ -18,12 +18,17 @@ import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import {
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
+} from './settings/multi_space_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
+import { getSyntheticsCertsFacetsRoute } from './certs/get_certificates_facets';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
@@ -31,12 +36,14 @@ import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
-import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
+import { resetSyntheticsMonitorRoute } from './monitor_cruds/reset_monitor';
+import { resetSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/reset_monitor_bulk';
 import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
@@ -67,6 +74,12 @@ import { getLocationMonitors } from './settings/private_locations/get_location_m
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
+import { getMonitorsHealthRoute } from './monitor_health/get_monitor_health';
+import { getMonitorHealthRoute } from './monitor_health/get_monitor_health_single';
+import { getErrorGroupsRoute } from './errors/get_error_groups';
+import { getErrorStatsRoute } from './errors/get_error_stats';
+import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
+import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -89,7 +102,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
-  createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
@@ -98,19 +110,30 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
+  getSyntheticsCertsFacetsRoute,
   getSyntheticsSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
   getSyntheticsTriggerTaskRun,
+  resetSyntheticsMonitorRoute,
+  resetSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
+  getMonitorsHealthRoute,
+  getMonitorHealthRoute,
+  getErrorGroupsRoute,
+  getErrorStatsRoute,
+  getMonitorSummaryStatsRoute,
+  getSyntheticsDiagnosticsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

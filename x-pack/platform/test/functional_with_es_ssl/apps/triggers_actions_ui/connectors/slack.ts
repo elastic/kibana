@@ -148,7 +148,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         objectRemover.add(webhookAction.id, 'connector', 'actions');
         objectRemover.add(webApiAction.id, 'connector', 'actions');
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
       });
 
       it('should save webhook type slack connectors', async () => {
@@ -161,7 +163,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await testSubjects.click('rulesTab');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);
 

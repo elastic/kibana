@@ -20,7 +20,9 @@ export enum AttacksEventTypes {
   DetailsFlyoutOpened = 'Attacks Details Flyout Opened',
   ExpandedViewTabClicked = 'Attacks Expanded View Tab Clicked',
   ScheduleFlyoutOpened = 'Attacks Schedule Flyout Opened',
+  ScheduleDetailsFlyoutOpened = 'Attacks Schedule Details Flyout Opened',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
+  WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
 }
 
 interface AttacksTableSortChangedParams {
@@ -51,6 +53,10 @@ export interface AttacksActionBaseParams {
 
 interface AttacksScheduleFlyoutOpenedParams {
   source: 'attacks_page_header' | 'attacks_page_empty_state';
+}
+
+interface AttacksScheduleDetailsFlyoutOpenedParams {
+  source: 'attacks_page_table' | 'attack_discovery_page';
 }
 
 interface AttacksActionStatusUpdatedParams extends AttacksActionBaseParams {
@@ -96,7 +102,9 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.DetailsFlyoutOpened]: AttacksDetailsFlyoutOpenedParams;
   [AttacksEventTypes.ExpandedViewTabClicked]: AttacksExpandedViewTabClickedParams;
   [AttacksEventTypes.ScheduleFlyoutOpened]: AttacksScheduleFlyoutOpenedParams;
+  [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
+  [AttacksEventTypes.WorkflowRunTriggered]: AttacksActionBaseParams;
 }
 
 export interface AttacksTelemetryEvent {

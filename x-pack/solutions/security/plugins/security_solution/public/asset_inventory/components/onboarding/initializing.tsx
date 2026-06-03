@@ -78,7 +78,7 @@ export const Initializing = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     href={addIntegrationPath}
                     isDisabled={isLoading}
                   >

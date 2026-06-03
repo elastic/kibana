@@ -127,7 +127,7 @@ class PluginClientImpl implements PluginClient {
       );
     }
 
-    const id = randomUUID();
+    const id = createRequest.id ?? randomUUID();
     const attributes = createRequestToEs({
       id,
       createRequest,

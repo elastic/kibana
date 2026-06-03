@@ -8,11 +8,21 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  LOG_EXTRACTION_DELAY_DEFAULT,
+  LOG_EXTRACTION_FREQUENCY_DEFAULT,
+  LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+} from '../../domain/saved_objects/global_state/constants';
 
 const DEFAULT_DOCS_LIMIT = 10000;
 
@@ -24,14 +34,22 @@ const bodySchema = z.object({
   indexPatterns: z.array(z.string()).min(1),
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
-  docsLimit: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
+  maxLogsPerPage: z.number().int().min(1).optional(),
+  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+  maxLogsPerWindowCapBehavior: z
+    .enum(['defer', 'drop'])
+    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates',
+      path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
       access: 'internal',
+      summary: 'Force cross-cluster search extraction',
+      description:
+        'Trigger an immediate cross-cluster search extraction for the specified entity type, index patterns, and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -51,7 +69,15 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         const entityStoreCtx = await ctx.entityStore;
         const { logger: baseLogger, ccsLogsExtractionClient, namespace } = entityStoreCtx;
         const { entityType } = req.params;
-        const { indexPatterns, fromDateISO, toDateISO, docsLimit } = req.body;
+        const {
+          indexPatterns,
+          fromDateISO,
+          toDateISO,
+          docsLimit,
+          maxLogsPerPage,
+          maxLogsPerWindow,
+          maxLogsPerWindowCapBehavior,
+        } = req.body;
 
         const logger = baseLogger.get('forceCcsExtractToUpdates').get(entityType);
         logger.debug(
@@ -64,10 +90,16 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         const result = await ccsLogsExtractionClient.extractToUpdates({
           type: entityType,
           remoteIndexPatterns: indexPatterns,
-          fromDateISO,
-          toDateISO,
           docsLimit: docsLimit ?? DEFAULT_DOCS_LIMIT,
+          maxLogsPerPage: maxLogsPerPage ?? LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+          lookbackPeriod: LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+          delay: LOG_EXTRACTION_DELAY_DEFAULT,
+          frequency: LOG_EXTRACTION_FREQUENCY_DEFAULT,
           entityDefinition,
+          windowOverride: { fromDateISO, toDateISO },
+          maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+          maxLogsPerWindow,
+          maxLogsPerWindowCapBehavior,
         });
 
         if (result.error) {

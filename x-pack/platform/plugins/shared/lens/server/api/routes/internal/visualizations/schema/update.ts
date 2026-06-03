@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
 import { lensCMUpdateOptionsSchema, lensItemDataSchemaV2 } from '../../../../../content_management';
 import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';
@@ -34,22 +34,10 @@ export const lensUpdateRequestQuerySchema = schema.object(
 );
 
 export const lensUpdateRequestBodySchema = schema.oneOf([
-  lensApiStateSchema,
+  lensApiConfigSchema,
   lensItemDataSchemaV2,
   lensItemDataSchemaV1,
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
 ]);
 
-export const lensUpdateResponseBodySchema = schema.object(
-  {
-    id: lensResponseItemSchema.getPropSchemas().id,
-    data: lensResponseItemSchema.getPropSchemas().data,
-    meta: schema.object(
-      {
-        ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
+export const lensUpdateResponseBodySchema = lensResponseItemSchema;

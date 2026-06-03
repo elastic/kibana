@@ -8,7 +8,10 @@
  */
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { NavigateToLensContext, XYState as XYConfiguration } from '@kbn/lens-common';
+import type {
+  NavigateToLensContext,
+  XYVisualizationState as XYConfiguration,
+} from '@kbn/lens-common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../types';
 

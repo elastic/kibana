@@ -53,8 +53,9 @@ export interface GraphEdge {
 }
 
 /**
- * Represents an event/alert edge from logs and alerts indices.
- * Contains event-specific fields like action, docs, isAlert, etc.
+ * Represents an event/alert edge after TypeScript regrouping by
+ * (action, actorType, actorSubType, targetType, targetSubType, isOrigin, isOriginAlert, pinned).
+ * This is the post-regroup shape returned to the API caller.
  */
 export interface EventEdge extends GraphEdge {
   // Event/alert attributes
@@ -78,9 +79,30 @@ export interface EventEdge extends GraphEdge {
 }
 
 /**
- * Represents a relationship edge from the entity store.
+ * Raw per-triple row returned by the events ES|QL query before TypeScript
+ * regrouping. One row per (event _id × MV_EXPAND'd actor × MV_EXPAND'd target);
+ * all aggregation (badge, uniqueEventsCount, etc.) happens later in regroupEvents.
+ */
+export interface EventEsqlRow {
+  _id: string;
+  action: string;
+  actorEntityId: string;
+  targetEntityId: string | null;
+  isOrigin: boolean;
+  isOriginAlert: boolean;
+  isAlert: boolean;
+  pinned: string | null;
+  docData: string;
+  sourceIps?: string | string[] | null;
+  sourceCountryCodes?: string | string[] | null;
+  actorDocData: string;
+  targetDocData: string;
+}
+
+/**
+ * Represents a relationship edge after TypeScript regrouping by
+ * (actorNodeId, relationship, targetType, targetSubType).
  * Used for static/configuration-based relationships between entities.
- * Actor and target entities are grouped by type/subtype similar to event actors/targets.
  */
 export interface RelationshipEdge extends GraphEdge {
   relationship: string; // "Owns", "Supervises", "Depends_on", etc.
@@ -90,6 +112,32 @@ export interface RelationshipEdge extends GraphEdge {
   // Target entity grouping (relationship-specific)
   targetNodeId: string; // Override to make non-nullable for relationships
   targetIds: string[]; // All target entity IDs in this group
+}
+
+/**
+ * Raw per-triple row returned by the relationships ES|QL query before TypeScript
+ * regrouping. One row per (entity.id × relationship leaf × _target_id) tuple;
+ * aggregation (badge, *IdsCount) happens later in regroupRelationships.
+ */
+export interface RelationshipEsqlRow {
+  actorId: string;
+  actorEntityType?: string | null;
+  actorEntitySubType?: string | null;
+  actorEntityName?: string | string[] | null;
+  actorHostIps?: string[] | string | null;
+  actorDocData: string;
+  relationship: string;
+  relationshipNodeId: string;
+  targetId: string;
+  targetDocData: string;
+}
+
+export interface EntityRecord {
+  id: string;
+  name: string;
+  type: string;
+  sub_type: string;
+  docData: string;
 }
 
 /**

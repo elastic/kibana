@@ -15,7 +15,6 @@ import type {
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
-  RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
   DATASET_VAR_NAME,
@@ -30,7 +29,7 @@ import * as Registry from '../registry';
 
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getNormalizedDataStreams } from '../../../../common/services';
+import { getNormalizedDataStreams, hasDynamicSignalTypes } from '../../../../common/services';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
@@ -52,6 +51,9 @@ export const findDataStreamsFromDifferentPackages = async (
   dataStreamType?: string
 ) => {
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
+  if (!dataStream.type) {
+    throw new FleetError(`Expected data_stream.type to be defined for dataset "${datasetName}"`);
+  }
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
@@ -86,17 +88,6 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
   );
 
   return filtered.length > 1;
-};
-
-export const hasDynamicSignalTypes = (packageInfo?: PackageInfo): boolean => {
-  if (!packageInfo) {
-    return false;
-  }
-  const inputOnlyTemplate = packageInfo.policy_templates?.find(
-    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
-  ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-  return inputOnlyTemplate?.dynamic_signal_types === true;
 };
 
 // install the assets needed for inputs type packages

@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useAgentId } from '../../../../../hooks/use_conversation';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
+
+const DEFAULT_CANVAS_WIDTH = '50vw';
+const CANVAS_MIN_WIDTH = 300;
 
 const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
   defaultMessage: 'Attachment preview',
@@ -34,9 +39,27 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
+  const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+  const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
+
+  const openSidebarConversation = useCallback(() => {
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
+
+  // Track previous conversation ID to detect changes
+  const prevConversationIdRef = useRef(conversationId);
+
+  // Close canvas when conversation ID changes
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      closeCanvas();
+      prevConversationIdRef.current = conversationId;
+    }
+  }, [conversationId, closeCanvas]);
 
   const updateOrigin = useCallback(
-    async (origin: unknown) => {
+    async (origin: string) => {
       if (!conversationId || !canvasState) {
         return;
       }
@@ -67,7 +90,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -81,11 +104,13 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       uiDefinition?.getActionButtons?.({
         attachment: canvasState.attachment,
         isSidebar: canvasState.isSidebar,
+        agentId,
         updateOrigin,
+        openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, updateOrigin, dynamicButtons]);
+  }, [canvasState, uiDefinition, agentId, updateOrigin, openSidebarConversation, dynamicButtons]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -93,12 +118,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
 
-  const flyoutStyles = !isSidebar
-    ? css`
-        width: 50vw;
-      `
-    : undefined;
+  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
+  const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
+  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
 
   const flyoutBodyStyles = css`
     padding-top: ${euiTheme.size.m};
@@ -118,22 +142,38 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       aria-label={FLYOUT_ARIA_LABEL}
       ownFocus={false}
       outsideClickCloses={true}
-      css={flyoutStyles}
-      type={isSidebar ? 'overlay' : 'push'}
+      minWidth={CANVAS_MIN_WIDTH}
+      maxWidth={DEFAULT_CANVAS_WIDTH}
+      resizable={!isSidebar && !isNarrowViewport}
+      size={flyoutSize}
+      type={flyoutType}
       hideCloseButton
       paddingSize="none"
     >
       <AttachmentHeader
+        icon={header?.icon}
         title={title}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
-        showPreviewBadge
+        previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        {uiDefinition.renderCanvasContent(
-          { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
-        )}
+        <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
+          {uiDefinition.renderCanvasContent(
+            {
+              attachment,
+              isSidebar,
+              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+            },
+            {
+              registerActionButtons,
+              updateOrigin,
+              closeCanvas,
+            }
+          )}
+        </React.Fragment>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

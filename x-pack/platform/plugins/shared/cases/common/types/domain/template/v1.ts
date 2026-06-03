@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { FieldSchema } from './fields';
+import { FieldSchema, isRefField } from './fields';
 
 /**
  * Template schema for case templates
@@ -68,9 +68,18 @@ export const TemplateSchema = z.object({
   fieldCount: z.number().optional(),
 
   /**
-   * Array of field names to display in a tooltip
+   * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z.array(z.string()).optional(),
+  fieldNames: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string(),
+        type: z.string(),
+        control: z.string(),
+      })
+    )
+    .optional(),
 
   /**
    * Last time this template was used
@@ -86,6 +95,10 @@ export const TemplateSchema = z.object({
    * Whether this is the latest version for a templateId
    */
   isLatest: z.boolean().optional(),
+  /**
+   * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
+   */
+  isEnabled: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
@@ -99,9 +112,12 @@ export const ParsedTemplateDefinitionSchema = z.object({
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   category: z.string().nullable().optional(),
+  extends: z.string().optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
-      const fieldNames = new Set(fields.map((field) => field.name));
+      const fieldNames = new Set(
+        fields.map((field) => (isRefField(field) ? field.name ?? field.$ref : field.name))
+      );
       return fieldNames.size === fields.length;
     },
     { message: 'Field names must be unique.' }
@@ -118,6 +134,11 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
    * Parsed definition for the template. Needs to be validated programmatically.
    */
   definition: ParsedTemplateDefinitionSchema,
+  /**
+   * Original YAML definition string with preserved formatting and comments.
+   * This should be used when editing templates to preserve user formatting.
+   */
+  definitionString: z.string(),
   isLatest: z.boolean(),
   latestVersion: z.number(),
 });

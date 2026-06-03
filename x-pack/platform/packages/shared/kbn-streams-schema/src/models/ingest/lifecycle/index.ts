@@ -12,6 +12,7 @@ import { createIsNarrowSchema } from '../../../shared/type_guards';
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    frozen_after?: string;
     downsample?: DownsampleStep[];
   };
 }
@@ -68,6 +69,7 @@ const downsampleStepSchema = z.object({
 const dslLifecycleSchema = z.object({
   dsl: z.object({
     data_retention: z.optional(NonEmptyString),
+    frozen_after: z.optional(NonEmptyString),
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });
@@ -84,20 +86,28 @@ const errorLifecycleSchema = z.object({
   }),
 });
 
-export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
-  dslLifecycleSchema,
-  ilmLifecycleSchema,
-  inheritLifecycleSchema,
-]);
+export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z
+  .union([dslLifecycleSchema, ilmLifecycleSchema, inheritLifecycleSchema])
+  .meta({ id: 'IngestStreamLifecycle' });
 
 export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
-  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
+  z
+    .union([
+      dslLifecycleSchema,
+      ilmLifecycleSchema,
+      inheritLifecycleSchema,
+      disabledLifecycleSchema,
+      errorLifecycleSchema,
+    ])
+    .meta({ id: 'ClassicIngestStreamEffectiveLifecycle' });
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  z.union([
-    dslLifecycleSchema.extend({ from: NonEmptyString }),
-    ilmLifecycleSchema.extend({ from: NonEmptyString }),
-  ]);
+  z
+    .union([
+      dslLifecycleSchema.extend({ from: NonEmptyString }),
+      ilmLifecycleSchema.extend({ from: NonEmptyString }),
+    ])
+    .meta({ id: 'WiredIngestStreamEffectiveLifecycle' });
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
   z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);

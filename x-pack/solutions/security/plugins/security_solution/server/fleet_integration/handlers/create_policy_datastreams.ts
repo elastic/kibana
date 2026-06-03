@@ -14,7 +14,6 @@ import { SimpleMemCache } from '../../endpoint/lib/simple_mem_cache';
 import {
   DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
   ENDPOINT_ACTION_RESPONSES_DS,
-  ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
 import { stringify } from '../../endpoint/utils/stringify';
 
@@ -64,10 +63,6 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
       for (const namespace of namespaceList) {
         acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace));
         acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
-
-        if (endpointServices.isServerless()) {
-          acc.add(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
-        }
       }
 
       return acc;

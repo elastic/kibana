@@ -30,8 +30,10 @@ This separation ensures that:
 
 The trigger registry follows the same pattern as steps:
 
-- **Server-side registry**: Stores trigger definitions (id + `eventSchema` for payload validation). Other plugins register during `setup()`.
-- **Public-side registry**: Stores UI definition (title, description, icon, documentation, snippets) so the workflows UI can display triggers and help users subscribe.
+- **Server-side registry**: Stores trigger definitions (`id`, `eventSchema`, title, description, and optional documentation/snippets). Other plugins register the shared **common** definition during `setup()`.
+- **Public-side registry**: Spreads the same common definition and adds **icon** (and optional async loader) for the workflows UI.
+
+**Async registration (public only):** The public trigger registry accepts either a definition or a **loader function** `() => Promise<PublicTriggerDefinition>`. Using a loader (e.g. `() => import('./my_trigger').then(m => m.myTriggerDefinition)`) keeps trigger modules and heavy deps out of your plugin's main bundle. Loaders are resolved in the background; `workflowsExtensions.isReady()` waits for both step and trigger loaders before the workflows UI renders.
 
 To run workflows when something happens, your plugin calls **emitEvent** (via the request-scoped client or the start contract). The platform validates the payload against the trigger's `eventSchema`, then invokes the registered trigger event handler (e.g. `workflows_management`), which finds subscribed workflows and runs them in the request's space.
 

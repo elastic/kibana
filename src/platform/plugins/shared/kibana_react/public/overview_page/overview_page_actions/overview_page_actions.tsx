@@ -40,7 +40,7 @@ export const overviewPageActions = ({
       className="kbnOverviewPageHeader__actionButton"
       flush="both"
       href={addDataHref}
-      iconType="plusInCircle"
+      iconType="plusCircle"
     >
       {i18n.translate('kibana-react.kbnOverviewPageHeader.addIntegrationsButtonLabel', {
         defaultMessage: 'Add integrations',

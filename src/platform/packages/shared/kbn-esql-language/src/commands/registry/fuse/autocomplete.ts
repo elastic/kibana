@@ -19,11 +19,11 @@ import {
   noneValueCompleteItem,
 } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { EDITOR_MARKER } from '../../definitions/constants';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';
+import { columnExists, findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import {
   extractFuseArgs,
   findCommandOptionByName,
@@ -39,6 +39,9 @@ enum FusePosition {
   WITH = 'with',
 }
 
+// After `KEY BY field,`, suggest the next KEY BY field.
+const KEY_BY_TRAILING_COMMA_REGEX = /\bkey\s+by(?:\s+\S+,)+\s*$/i;
+
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
@@ -53,7 +56,7 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
   if (
     (keyBy && keyBy.incomplete) ||
     immediatelyAfterOptionFieldsList(innerText, 'key by') ||
-    keyBy?.text.includes(EDITOR_MARKER)
+    KEY_BY_TRAILING_COMMA_REGEX.test(innerText)
   ) {
     return FusePosition.KEY_BY;
   }
@@ -117,28 +120,13 @@ async function scoreByAutocomplete(
     openSuggestions: true,
   });
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return (
-      numericFields?.map((suggestion) => {
-        return {
-          ...suggestion,
-          rangeToReplace,
-        };
-      }) ?? []
-    );
-  };
-  const getSuggestionsForComplete = () => [];
+  const prefix = findFinalWord(innerText);
 
-  return await handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  if (prefix && columnExists(prefix, context)) {
+    return [];
+  }
+
+  return numericFields ?? [];
 }
 
 /**
@@ -155,28 +143,13 @@ async function groupByAutocomplete(
     openSuggestions: true,
   });
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return (
-      stringFields?.map((suggestion) => {
-        return {
-          ...suggestion,
-          rangeToReplace,
-        };
-      }) ?? []
-    );
-  };
-  const getSuggestionsForComplete = () => [];
+  const prefix = findFinalWord(innerText);
 
-  return await handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  if (prefix && columnExists(prefix, context)) {
+    return [];
+  }
+
+  return stringFields ?? [];
 }
 
 /**
@@ -199,12 +172,9 @@ async function keyByAutocomplete(
     (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
       openSuggestions: true,
     })) ?? [];
+  const prefix = findFinalWord(innerText);
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForComplete = (
-    fragment: string,
-    rangeToReplace: { start: number; end: number }
-  ) => {
+  if (prefix && columnExists(prefix, context)) {
     const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
       ...s,
       text: ` ${s.text}`,
@@ -216,30 +186,13 @@ async function keyByAutocomplete(
     return finalSuggestions.map<ISuggestionItem>((s) =>
       withAutoSuggest({
         ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        rangeToReplace,
+        preserveTypedPrefix: true,
+        requiresExistingColumnMatch: true,
       })
     );
-  };
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return allFields.map((suggestion) =>
-      withAutoSuggest({
-        ...suggestion,
-        rangeToReplace,
-      })
-    );
-  };
+  }
 
-  return handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  return allFields.map((suggestion) => withAutoSuggest({ ...suggestion }));
 }
 
 /**
@@ -263,7 +216,6 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
         kind: 'Reference',
         detail: '{ ... }',
         text: '{ $0 }',
-        sortText: '0',
         asSnippet: true,
       }),
     ];
@@ -280,7 +232,6 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
             label: '60',
             text: '60',
             kind: 'Value',
-            sortText: '1',
             detail: i18n.translate(
               'kbn-esql-language.esql.autocomplete.fuse.rank_constant_default',
               {
@@ -325,7 +276,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Linear combination of scores',
         }),
         text: 'linear ',
-        sortText: '0',
+        category: SuggestionCategory.VALUE,
       },
       {
         label: 'rrf',
@@ -334,7 +285,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Reciprocal rank fusion',
         }),
         text: 'rrf ',
-        sortText: '0',
+        category: SuggestionCategory.VALUE,
       }
     );
   }
@@ -348,7 +299,6 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
       }),
       text: 'SCORE BY ',
-      sortText: '1',
     });
   }
 
@@ -360,7 +310,6 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
         defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
       }),
       text: 'GROUP BY ',
-      sortText: '2',
     });
   }
 
@@ -372,12 +321,11 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
         defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
       }),
       text: 'KEY BY ',
-      sortText: '3',
     });
   }
 
   if (!withOption) {
-    suggestions.push({ ...withCompleteItem, sortText: '4' });
+    suggestions.push(withCompleteItem);
   }
 
   return suggestions.map((s) => withAutoSuggest(s));

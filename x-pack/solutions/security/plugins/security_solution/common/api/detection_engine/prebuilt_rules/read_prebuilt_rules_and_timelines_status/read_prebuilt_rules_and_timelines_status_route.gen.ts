@@ -14,40 +14,42 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadPrebuiltRulesAndTimelinesStatusResponse = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The total number of custom rules
+       */
+      rules_custom_installed: z.number().int().min(0),
+      /**
+       * The total number of installed prebuilt rules
+       */
+      rules_installed: z.number().int().min(0),
+      /**
+       * The total number of available prebuilt rules that are not installed
+       */
+      rules_not_installed: z.number().int().min(0),
+      /**
+       * The total number of outdated prebuilt rules
+       */
+      rules_not_updated: z.number().int().min(0),
+      /**
+       * The total number of installed prebuilt timelines
+       */
+      timelines_installed: z.number().int().min(0),
+      /**
+       * The total number of available prebuilt timelines that are not installed
+       */
+      timelines_not_installed: z.number().int().min(0),
+      /**
+       * The total number of outdated prebuilt timelines
+       */
+      timelines_not_updated: z.number().int().min(0),
+    })
+    .strict()
+);
 export type ReadPrebuiltRulesAndTimelinesStatusResponse = z.infer<
   typeof ReadPrebuiltRulesAndTimelinesStatusResponse
 >;
-export const ReadPrebuiltRulesAndTimelinesStatusResponse = z
-  .object({
-    /**
-     * The total number of custom rules
-     */
-    rules_custom_installed: z.number().int().min(0),
-    /**
-     * The total number of installed prebuilt rules
-     */
-    rules_installed: z.number().int().min(0),
-    /**
-     * The total number of available prebuilt rules that are not installed
-     */
-    rules_not_installed: z.number().int().min(0),
-    /**
-     * The total number of outdated prebuilt rules
-     */
-    rules_not_updated: z.number().int().min(0),
-    /**
-     * The total number of installed prebuilt timelines
-     */
-    timelines_installed: z.number().int().min(0),
-    /**
-     * The total number of available prebuilt timelines that are not installed
-     */
-    timelines_not_installed: z.number().int().min(0),
-    /**
-     * The total number of outdated prebuilt timelines
-     */
-    timelines_not_updated: z.number().int().min(0),
-  })
-  .strict();

@@ -20,12 +20,13 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       default_branch: main
       repository: elastic/ci-agent-images
       pipeline_file: vm-images/.buildkite/pipeline.yml
       provider_settings:
         trigger_mode: none
+      cancel_intermediate_builds: true
       schedules:
         "[ubuntu24.04] Weekly Base Image Build":
           branch: main

@@ -10,54 +10,62 @@
 import type { Document } from 'yaml';
 import { visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getPathAtOffset } from '../../../../common/lib/yaml';
+import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import type { VariableItem } from '../model/types';
 
-type Range = [start: number, end: number];
+interface ScalarEntry {
+  start: number;
+  end: number;
+  path: Array<string | number>;
+}
 
-const contentRangeCache = new WeakMap<Document, Range[]>();
+const scalarIndexCache = new WeakMap<Document, ScalarEntry[]>();
 
 /**
- * Builds a sorted list of offset ranges that cover YAML scalar values.
- * Offsets that fall outside every range are inside comments, structural
- * whitespace, or collection tokens -- none of which contain variables.
- *
- * Uses `range[1]` (value-end) rather than `range[2]` (node-end) so
- * that trailing inline comments are excluded.
+ * Builds a sorted index of every scalar in the document in a single `visit()`,
+ * pre-computing both ranges and YAML paths.
  */
-function getScalarRanges(document: Document): Range[] {
-  const cached = contentRangeCache.get(document);
-  if (cached) return cached;
+function getScalarIndex(document: Document): ScalarEntry[] {
+  const cached = scalarIndexCache.get(document);
+  if (cached) {
+    return cached;
+  }
 
-  const ranges: Range[] = [];
-
+  const entries: ScalarEntry[] = [];
   visit(document, {
-    Scalar(_k, node) {
-      if (node.range) ranges.push([node.range[0], node.range[1]]);
+    Scalar(_k, node, ancestors) {
+      if (node.range && node.value !== '') {
+        entries.push({
+          start: node.range[0],
+          end: node.range[1],
+          path: getPathFromAncestors(ancestors, node),
+        });
+      }
     },
   });
 
-  ranges.sort((a, b) => a[0] - b[0]);
-  contentRangeCache.set(document, ranges);
-  return ranges;
+  entries.sort((a, b) => a.start - b.start);
+  scalarIndexCache.set(document, entries);
+  return entries;
 }
 
-/*
-  Use binary search to find if the offset is in the YAML content.
-*/
-function isOffsetInYamlContent(ranges: Range[], offset: number): boolean {
+function findScalarAtOffset(entries: ScalarEntry[], offset: number): ScalarEntry | null {
   let lo = 0;
-  let hi = ranges.length - 1;
+  let hi = entries.length - 1;
   while (lo <= hi) {
     const mid = Math.floor((lo + hi) / 2);
-    const [start, end] = ranges[mid];
-    if (offset < start) hi = mid - 1;
-    else if (offset >= end) lo = mid + 1;
-    else return true;
+    const entry = entries[mid];
+    if (offset < entry.start) {
+      hi = mid - 1;
+    } else if (offset >= entry.end) {
+      lo = mid + 1;
+    } else {
+      return entry;
+    }
   }
-  return false;
+  return null;
 }
 
 export function collectAllVariables(
@@ -66,15 +74,17 @@ export function collectAllVariables(
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
   const yamlString = model.getValue();
-  const contentRanges = getScalarRanges(yamlDocument);
+  const scalarIndex = getScalarIndex(yamlDocument);
   const variableItems: VariableItem[] = [];
+
   for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
     const startOffset = match.index ?? 0;
-    if (isOffsetInYamlContent(contentRanges, startOffset)) {
+    const entry = findScalarAtOffset(scalarIndex, startOffset);
+    if (entry) {
       const endOffset = startOffset + (match[0].length ?? 0);
       const startPosition = model.getPositionAt(startOffset);
       const endPosition = model.getPositionAt(endOffset);
-      const yamlPath = getPathAtOffset(yamlDocument, startOffset);
+      const { path: yamlPath } = entry;
       const type =
         yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
       variableItems.push({

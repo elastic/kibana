@@ -10,10 +10,9 @@
 import React, { memo, type FC, useState, useEffect, useMemo } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
-import { useCurrentTabSelector } from '../../state_management/redux';
+import { searchSourceComparator, useCurrentTabSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { createSearchSource } from '../../state_management/utils/create_search_source';
-import { searchSourceComparator } from '../../state_management/redux/selectors/unsaved_changes';
 
 export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
   (props) => {
@@ -55,7 +54,6 @@ export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'f
         dataView={props.dataView}
         switchToDocumentView={props.switchToDocumentView}
         savedSearch={savedSearch}
-        stateContainer={props.stateContainer}
         trackUiMetric={props.trackUiMetric}
         renderViewModeToggle={props.renderViewModeToggle}
       />

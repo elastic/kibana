@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CORRELATIONS_EBT_ELEMENTS } from './ebt_constants';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -306,7 +307,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.filterDescription',
               { defaultMessage: 'Filter by value' }
             ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -323,7 +324,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.excludeDescription',
               { defaultMessage: 'Filter out value' }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -451,7 +452,10 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
-            variant="button"
+            label={i18n.translate('xpack.apm.failedTransactionsCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -463,7 +467,9 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
+            ebt={{ element: CORRELATIONS_EBT_ELEMENTS.FAILED_TRANSACTIONS }}
           />
         </EuiFlexItem>
 

@@ -9,8 +9,14 @@
 
 require('@kbn/setup-node-env/node_version_validator');
 var process = require('process');
-var backport = require('backport');
 
-backport.backportRun({
-  processArgs: process.argv.slice(2), // forward command line args to backport
-});
+import('backport')
+  .then(function (backport) {
+    backport.backportRun({
+      processArgs: process.argv.slice(2), // forward command line args to backport
+    });
+  })
+  .catch(function (err) {
+    console.error(err);
+    process.exit(1);
+  });

@@ -42,7 +42,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       data-test-subj="syntheticsStepNavStepStepIndexOfTotalStepsButton"
       size="s"
       flush="left"
-      iconType={hasMoreThanOneStep ? 'arrowDown' : undefined}
+      iconType={hasMoreThanOneStep ? 'chevronSingleDown' : undefined}
       iconSide="right"
       onClick={onButtonClick}
       style={{ height: 20 }}
@@ -80,7 +80,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

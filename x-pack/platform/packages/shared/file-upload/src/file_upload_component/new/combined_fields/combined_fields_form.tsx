@@ -178,12 +178,18 @@ export class CombinedFieldsForm extends Component<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.fileUpload.combinedFieldsForm.semanticTextOptionsAriaLabel',
+                {
+                  defaultMessage: 'Semantic text options',
+                }
+              )}
               button={
                 <EuiButton
                   onClick={this.togglePopover.bind(null, 'semantic')}
                   size="s"
                   color="text"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   isDisabled={this.isSemanticTextCompatible() === false}
                 >
                   <FormattedMessage
@@ -204,12 +210,18 @@ export class CombinedFieldsForm extends Component<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.fileUpload.combinedFieldsForm.geoPointOptionsAriaLabel',
+                {
+                  defaultMessage: 'Geo point options',
+                }
+              )}
               button={
                 <EuiButton
                   onClick={this.togglePopover.bind(null, 'geo')}
                   size="s"
                   color="text"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   isDisabled={this.isLatLonCompatible() === false}
                 >
                   <FormattedMessage

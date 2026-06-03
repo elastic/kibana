@@ -29,10 +29,6 @@ import {
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
-interface UserSettings {
-  contrastMode: 'system' | 'standard' | 'high';
-}
-
 /**
  * Props for the KibanaEuiProvider.
  */
@@ -79,9 +75,13 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
+const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
+const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
     includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+    container: FLYOUT_CONTAINER_SELECTOR,
   },
   EuiPopover: {
     repositionOnScroll: true,
@@ -128,7 +128,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const userProfileData = useObservable(getUserProfile$(), null);
 
   // If the high contrast mode value is undefined, EUI will use the OS level setting.
-  const userSettings = userProfileData?.userSettings as UserSettings | undefined;
+  const userSettings = userProfileData?.userSettings;
   let highContrastMode: boolean | undefined;
   if (userSettings?.contrastMode && userSettings?.contrastMode !== 'system') {
     highContrastMode = userSettings.contrastMode === 'high';

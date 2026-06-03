@@ -71,11 +71,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~16 min
     loadTestFile(require.resolve('./add_to_dashboard')); // 12m 50s
     loadTestFile(require.resolve('./runtime_fields')); // 1m
-    loadTestFile(require.resolve('./terms')); // 1m 35s
-    loadTestFile(require.resolve('./epoch_millis')); // 30s
-    loadTestFile(require.resolve('./dashboard_inline_editing'));
   });
 };

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
+  EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
@@ -28,12 +30,22 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverValid from 'semver/functions/valid';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
+
+import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+
+import type {
+  AutomaticImportTelemetry,
+  DataStreamResponse,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
+
+const INVALID_VERSION = '0.0.0';
 
 type ReviewDataStream = DataStreamResponse;
 
@@ -46,6 +58,7 @@ export interface ReviewIntegrationDetails {
   title: string;
   version?: string;
   dataStreams: ReviewDataStream[];
+  categories?: string[];
 }
 
 const MAX_VISIBLE_COLLECTION_METHODS = 1;
@@ -81,6 +94,10 @@ const DataCollectionMethodsCell: React.FC<{
       {hiddenCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewCollectionMethodsExpandAriaLabel',
+              { defaultMessage: 'Show all data collection methods' }
+            )}
             anchorPosition="downLeft"
             button={
               <EuiBadge
@@ -126,21 +143,28 @@ export const ReviewApproveModal: React.FC<{
   onClose: () => void;
   onEdit: (integrationId: string) => void;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: ReviewDataStream;
-    onClose: () => void;
-  }>;
+  onApproveAndInstall: (
+    integrationId: string,
+    version: string,
+    categories: string[],
+    autoInstallAfterApproval: boolean
+  ) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
 }> = ({
   isOpen,
   integrationId,
   onClose,
   onEdit,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
+  onInstallToCluster,
   DataStreamResultsFlyoutComponent,
 }) => {
+  const { automaticImport } = useStartServices();
   const [isLoadingReviewDetails, setIsLoadingReviewDetails] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -149,6 +173,38 @@ export const ReviewApproveModal: React.FC<{
   const [isVersionTouched, setIsVersionTouched] = useState(false);
   const [selectedDataStreamForFlyout, setSelectedDataStreamForFlyout] =
     useState<ReviewDataStream | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<EuiComboBoxOptionOption[]>([]);
+  const [autoInstallAfterApproval, setAutoInstallAfterApproval] = useState(true);
+  const savedCategoriesAppliedRef = useRef(false);
+
+  const autoInstallCheckboxId = useMemo(
+    () => htmlIdGenerator('manageIntegrationReviewAutoInstall')(),
+    []
+  );
+
+  const { data: categoriesData } = useGetCategoriesQuery({ prerelease: false });
+  const categoryOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      (categoriesData?.items ?? [])
+        .filter((item) => item.parent_id === undefined)
+        .map((item) => ({
+          label: item.title,
+          value: item.id,
+        })),
+    [categoriesData]
+  );
+
+  const hasAtLeastOneCategory = useMemo(
+    () =>
+      selectedCategories.some((opt) => {
+        const value = opt.value;
+        if (typeof value === 'string') {
+          return value.length > 0;
+        }
+        return Boolean(value);
+      }),
+    [selectedCategories]
+  );
 
   const loadReviewDetails = useCallback(async () => {
     setIsLoadingReviewDetails(true);
@@ -178,9 +234,40 @@ export const ReviewApproveModal: React.FC<{
       setIsVersionTouched(false);
       setReviewError(null);
       setSelectedDataStreamForFlyout(null);
+      setSelectedCategories([]);
+      savedCategoriesAppliedRef.current = false;
+      setAutoInstallAfterApproval(true);
       loadReviewDetails();
     }
   }, [isOpen, loadReviewDetails]);
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !reviewDetails ||
+      savedCategoriesAppliedRef.current ||
+      categoryOptions.length === 0
+    ) {
+      return;
+    }
+
+    const savedIds = reviewDetails.categories;
+    if (!savedIds?.length) {
+      savedCategoriesAppliedRef.current = true;
+      return;
+    }
+
+    const selected = savedIds
+      .map((id) => categoryOptions.find((opt) => String(opt.value) === id))
+      .filter((opt): opt is EuiComboBoxOptionOption =>
+        Boolean(opt && typeof opt.value === 'string' && opt.value.length > 0)
+      );
+
+    if (selected.length > 0) {
+      setSelectedCategories(selected);
+    }
+    savedCategoriesAppliedRef.current = true;
+  }, [isOpen, reviewDetails, categoryOptions]);
 
   const closeModal = useCallback(() => {
     if (isApproving) {
@@ -189,49 +276,116 @@ export const ReviewApproveModal: React.FC<{
     onClose();
   }, [isApproving, onClose]);
 
+  const handleCancelClick = useCallback(() => {
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_approve_modal_cancel_clicked',
+      { integrationId }
+    );
+    closeModal();
+  }, [automaticImport, closeModal, integrationId]);
+
   const normalizedVersion = reviewVersion.trim();
-  const isVersionValid = Boolean(semverValid(normalizedVersion));
+  const isZeroVersion = normalizedVersion.startsWith(INVALID_VERSION);
+  const isVersionValid = Boolean(semverValid(normalizedVersion)) && !isZeroVersion;
   const isVersionInputInvalid = isVersionTouched && !isVersionValid;
   const versionValidationMessage = !normalizedVersion
     ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionRequired', {
         defaultMessage: 'Version is required.',
       })
+    : isZeroVersion
+    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed', {
+        defaultMessage: 'Version {invalidVersion} is not allowed.',
+        values: { invalidVersion: INVALID_VERSION },
+      })
     : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
         defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
       });
 
-  const handleApproveAndDeploy = useCallback(async () => {
+  const handleApproveAndInstall = useCallback(async () => {
     const version = reviewVersion.trim();
-    if (!semverValid(version)) {
+    if (!semverValid(version) || version.startsWith(INVALID_VERSION)) {
       setIsVersionTouched(true);
       setReviewError(
+        version.startsWith(INVALID_VERSION)
+          ? i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroError',
+              {
+                defaultMessage: 'Version {invalidVersion} is not allowed.',
+                values: { invalidVersion: INVALID_VERSION },
+              }
+            )
+          : i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionValidationError',
+              {
+                defaultMessage: 'Provide a valid version before approving and installing.',
+              }
+            )
+      );
+      return;
+    }
+
+    const categoryIds = selectedCategories.map((opt) => opt.value as string).filter(Boolean);
+    if (categoryIds.length === 0) {
+      setReviewError(
         i18n.translate(
-          'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionValidationError',
+          'xpack.fleet.epmList.manageIntegrations.actions.reviewCategoryRequiredError',
           {
-            defaultMessage: 'Provide a valid version before approving and deploying.',
+            defaultMessage: 'Select at least one category before approving.',
           }
         )
       );
       return;
     }
 
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_approve_modal_approve_clicked',
+      {
+        integrationId,
+        version: reviewVersion.trim(),
+        dataStreamCount: reviewDetails?.dataStreams.length ?? 0,
+      }
+    );
     setIsApproving(true);
     setReviewError(null);
     try {
-      await onApproveAndDeploy(integrationId, version);
+      const willAutoInstall = autoInstallAfterApproval && Boolean(onInstallToCluster);
+      await onApproveAndInstall(integrationId, version, categoryIds, willAutoInstall);
+      if (willAutoInstall) {
+        (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+          'automatic_import_approve_modal_approve_with_auto_install_clicked',
+          {
+            integrationId,
+            version: reviewVersion.trim(),
+            dataStreamCount: reviewDetails?.dataStreams.length ?? 0,
+          }
+        );
+      }
+      if (autoInstallAfterApproval && onInstallToCluster) {
+        await onInstallToCluster(integrationId, { skipSuccessToast: true });
+      }
       onClose();
     } catch (error) {
       setReviewError(
         error instanceof Error
           ? error.message
           : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewApproveError', {
-              defaultMessage: 'Failed to approve and deploy integration.',
+              defaultMessage: 'Failed to approve and install integration.',
             })
       );
     } finally {
       setIsApproving(false);
     }
-  }, [integrationId, onApproveAndDeploy, onClose, reviewVersion]);
+  }, [
+    automaticImport,
+    autoInstallAfterApproval,
+    integrationId,
+    onApproveAndInstall,
+    onClose,
+    onInstallToCluster,
+    reviewDetails,
+    reviewVersion,
+    selectedCategories,
+  ]);
 
   const tableRows: ReviewTableRow[] = (reviewDetails?.dataStreams ?? []).map((dataStream) => ({
     id: dataStream.dataStreamId,
@@ -285,6 +439,7 @@ export const ReviewApproveModal: React.FC<{
     return (
       <DataStreamResultsFlyoutComponent
         integrationId={integrationId}
+        integrationName={reviewDetails?.title ?? ''}
         dataStream={selectedDataStreamForFlyout}
         onClose={() => setSelectedDataStreamForFlyout(null)}
       />
@@ -368,34 +523,81 @@ export const ReviewApproveModal: React.FC<{
                 isInvalid={isVersionInputInvalid}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryLabel"
+                  defaultMessage="Category"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryHelp"
+                  defaultMessage="Select at least one category."
+                />
+              }
+            >
+              <EuiComboBox
+                data-test-subj="manageIntegrationReviewModalCategories"
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryAriaLabel',
+                  { defaultMessage: 'Select categories' }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryPlaceholder',
+                  { defaultMessage: 'Select categories' }
+                )}
+                selectedOptions={selectedCategories}
+                options={categoryOptions}
+                onChange={(options) => setSelectedCategories(options)}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiCheckbox
+              id={autoInstallCheckboxId}
+              data-test-subj="manageIntegrationReviewAutoInstallCheckbox"
+              label={i18n.translate(
+                'xpack.fleet.epmList.manageIntegrations.actions.reviewModalAutoInstallLabel',
+                {
+                  defaultMessage: 'Automatically install integration after approval',
+                }
+              )}
+              checked={autoInstallAfterApproval}
+              onChange={(event) => setAutoInstallAfterApproval(event.target.checked)}
+              disabled={isApproving}
+            />
           </>
         )}
         {reviewError && (
           <>
             <EuiSpacer size="m" />
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" data-test-subj="manageIntegrationReviewError">
               {reviewError}
             </EuiText>
           </>
         )}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="manageIntegrationReviewModalCancel">
+        <EuiButtonEmpty
+          onClick={handleCancelClick}
+          data-test-subj="manageIntegrationReviewModalCancel"
+        >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCancel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
         <EuiButton
-          onClick={handleApproveAndDeploy}
+          onClick={handleApproveAndInstall}
           fill
           isLoading={isApproving}
-          isDisabled={isLoadingReviewDetails || !isVersionValid}
-          data-test-subj="manageIntegrationReviewApproveDeployButton"
+          isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
+          data-test-subj="manageIntegrationReviewApproveInstallButton"
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"
-            defaultMessage="Approve & deploy"
+            defaultMessage="Approve"
           />
         </EuiButton>
       </EuiModalFooter>

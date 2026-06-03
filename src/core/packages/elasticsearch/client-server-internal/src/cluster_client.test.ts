@@ -344,7 +344,7 @@ describe('ClusterClient', () => {
         );
       });
 
-      it("injects '_alias:_origin' when projectRouting is 'origin-only'", () => {
+      it("injects '_alias:_origin' when no projectRouting opts are provided (default)", () => {
         const onRequest = captureTransportOnRequest();
 
         const clusterClient = new ClusterClient({
@@ -358,41 +358,13 @@ describe('ClusterClient', () => {
         });
 
         const request = httpServerMock.createKibanaRequest();
-        client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+        client = clusterClient.asScoped(request).asCurrentUser;
 
         const params = makeSearchParams();
         onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
-
-      it("injects '_alias:*' when projectRouting is 'all'", () => {
-        const onRequest = captureTransportOnRequest();
-
-        const clusterClient = new ClusterClient({
-          config: createConfig(),
-          logger,
-          type: 'custom-type',
-          authHeaders,
-          agentFactoryProvider,
-          kibanaVersion,
-          onRequestHandlerFactory: mockOnRequestHandlerFactory,
-        });
-
-        const request = httpServerMock.createKibanaRequest();
-        client = clusterClient.asScoped(request, { projectRouting: 'all' }).asCurrentUser;
-
-        const params = makeSearchParams();
-        onRequest.get()({} as never, params, {}, logger);
-
-        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
-      });
-
-      // Note: child() clients that do NOT override Transport inherit the parent's routing
-      // automatically, because the ES client propagates the Transport class to child clients.
-      // However, callers who pass { Transport: CustomTransport } to child() bypass our
-      // onRequest handler and lose CPS routing. This is a known limitation.
-      // TODO: consider intercepting child() to extend any custom Transport with our onRequest.
     });
 
     it('returns a distinct scoped cluster client on each call', () => {
@@ -1386,7 +1358,9 @@ describe('ClusterClient', () => {
         // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
         // is always a child of asInternalUser, which uses origin-only routing.
         const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asSecondaryAuthUser;
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'space',
+        }).asSecondaryAuthUser;
 
         // No Transport override means the child inherits asInternalUser's origin-only Transport.
         expect(internalClient.child).toHaveBeenCalledWith(
@@ -1568,7 +1542,7 @@ describe('ClusterClient', () => {
       });
 
       const request = httpServerMock.createKibanaRequest();
-      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+      client = clusterClient.asScoped(request).asCurrentUser;
 
       const params = makeSearchParamsWithRouting();
       onRequest.get()({} as never, params, {}, logger);
@@ -1590,7 +1564,7 @@ describe('ClusterClient', () => {
       });
 
       const request = httpServerMock.createKibanaRequest();
-      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+      client = clusterClient.asScoped(request).asCurrentUser;
 
       const params = makeSearchParams();
       onRequest.get()({} as never, params, {}, logger);

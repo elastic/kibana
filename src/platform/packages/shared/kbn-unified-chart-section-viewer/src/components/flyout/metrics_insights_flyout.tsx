@@ -22,18 +22,22 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 import { useFieldsMetadataContext } from '../../context/fields_metadata';
 
 interface MetricInsightsFlyoutProps {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   esqlQuery?: string;
   onClose: () => void;
 }
 
-export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsightsFlyoutProps) => {
+export const MetricInsightsFlyout = ({
+  metricItem,
+  esqlQuery,
+  onClose,
+}: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const defaultWidth = euiTheme.base * 34;
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -109,9 +113,9 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <MetricFlyoutBody
-          metric={metric}
+          metricItem={metricItem}
           esqlQuery={esqlQuery}
-          description={fieldsMetadata[metric.name]?.description}
+          description={fieldsMetadata[metricItem.metricName]?.description}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

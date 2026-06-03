@@ -88,7 +88,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
                               <span
                                 aria-hidden="true"
                                 class="euiFormControlLayoutCustomIcon__icon"
-                                data-euiicon-type="arrowDown"
+                                data-euiicon-type="chevronSingleDown"
                               />
                             </button>
                           </div>
@@ -253,7 +253,7 @@ exports[`Clear btns enabled when there are values 1`] = `
                               <span
                                 aria-hidden="true"
                                 class="euiFormControlLayoutCustomIcon__icon"
-                                data-euiicon-type="arrowDown"
+                                data-euiicon-type="chevronSingleDown"
                               />
                             </button>
                           </div>
@@ -419,7 +419,7 @@ exports[`Renders list control 1`] = `
                               <span
                                 aria-hidden="true"
                                 class="euiFormControlLayoutCustomIcon__icon"
-                                data-euiicon-type="arrowDown"
+                                data-euiicon-type="chevronSingleDown"
                               />
                             </button>
                           </div>

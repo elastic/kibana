@@ -7,6 +7,7 @@
 
 import * as Rx from 'rxjs';
 
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -43,6 +44,13 @@ describe('Spaces Public API', () => {
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
+    const internalSavedObjectsRepository = {
+      update: jest.fn().mockResolvedValue({}),
+      create: jest.fn().mockResolvedValue({}),
+    };
+    coreStart.savedObjects.createInternalRepository = jest
+      .fn()
+      .mockReturnValue(internalSavedObjectsRepository);
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
@@ -78,6 +86,7 @@ describe('Spaces Public API', () => {
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
       isServerless: false,
+      packageInfo: { version: '8.0.0', buildNum: 12345 },
     });
 
     const { handler, config } = versionedRouterMock.getRoute('post', '/api/spaces/space').versions[
@@ -89,6 +98,9 @@ describe('Spaces Public API', () => {
       routeHandler: handler,
       savedObjectsRepositoryMock,
       mockCpsStart: options?.cpsStart,
+      coreStart,
+      internalSavedObjectsRepository,
+      log,
     };
   };
 
@@ -333,6 +345,110 @@ describe('Spaces Public API', () => {
       );
       expect(npreClient.canPutNpre).not.toHaveBeenCalled();
       expect(npreClient.putNpre).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Preferred chat experience default', () => {
+    it('persists Agent chat experience when creating a solution space', async () => {
+      const payload = {
+        id: 'solution-space',
+        name: 'Observability',
+        description: 'desc',
+        disabledFeatures: [],
+        solution: 'oblt' as const,
+      };
+
+      const { routeHandler, internalSavedObjectsRepository, coreStart } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(response.status).toEqual(200);
+      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(['config']);
+      expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+        'config',
+        '8.0.0',
+        { 'aiAssistant:preferredChatExperience': AIChatExperience.Agent },
+        { refresh: false, namespace: 'solution-space' }
+      );
+    });
+
+    it('does not seed when the new space has no solution in the request body', async () => {
+      const payload = {
+        id: 'plain-space',
+        name: 'Plain',
+        description: 'desc',
+        disabledFeatures: [],
+      };
+
+      const { routeHandler, coreStart, internalSavedObjectsRepository } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(response.status).toEqual(200);
+      expect(coreStart.savedObjects.createInternalRepository).not.toHaveBeenCalled();
+      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('persists Agent when solution view is Classic', async () => {
+      const payload = {
+        id: 'classic-space',
+        name: 'Classic nav',
+        description: 'desc',
+        disabledFeatures: [],
+        solution: 'classic' as const,
+      };
+
+      const { routeHandler, internalSavedObjectsRepository, coreStart } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(response.status).toEqual(200);
+      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(['config']);
+      expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+        'config',
+        '8.0.0',
+        { 'aiAssistant:preferredChatExperience': AIChatExperience.Agent },
+        { refresh: false, namespace: 'classic-space' }
+      );
+    });
+
+    it('still returns 200 when seeding the chat experience fails', async () => {
+      const payload = {
+        id: 'failing-seed-space',
+        name: 'Security',
+        description: 'desc',
+        disabledFeatures: [],
+        solution: 'security' as const,
+      };
+
+      const { routeHandler, internalSavedObjectsRepository, log } = await setup();
+      const warnSpy = jest.spyOn(log, 'warn');
+      internalSavedObjectsRepository.update.mockRejectedValueOnce(new Error('seed failed'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(response.status).toEqual(200);
+      expect(warnSpy).toHaveBeenCalled();
     });
   });
 });

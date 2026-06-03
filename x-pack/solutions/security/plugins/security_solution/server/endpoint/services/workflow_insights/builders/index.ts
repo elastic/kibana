@@ -6,12 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DefendInsight } from '@kbn/elastic-assistant-common';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { InvalidDefendInsightTypeError } from '@kbn/elastic-assistant-plugin/server/lib/defend_insights/errors';
 
-import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
+import type {
+  DefendInsight,
+  SecurityWorkflowInsight,
+} from '../../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../../metadata';
+import { WorkflowInsightType } from '../../../../../common/endpoint/types/workflow_insights';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 import { buildCustomWorkflowInsights } from './custom';
 
@@ -20,7 +21,7 @@ export interface BuildWorkflowInsightParams {
   endpointMetadataService: EndpointMetadataService;
   esClient: ElasticsearchClient;
   options: {
-    insightType: DefendInsightType;
+    insightType: WorkflowInsightType;
     endpointIds: string[];
     connectorId?: string;
     model?: string;
@@ -31,13 +32,13 @@ export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   switch (params.options.insightType) {
-    case DefendInsightType.enum.incompatible_antivirus:
+    case WorkflowInsightType.enum.incompatible_antivirus:
       return buildIncompatibleAntivirusWorkflowInsights(params);
-    case DefendInsightType.enum.policy_response_failure:
+    case WorkflowInsightType.enum.policy_response_failure:
       return buildCustomWorkflowInsights(params);
-    case DefendInsightType.enum.custom:
+    case WorkflowInsightType.enum.custom:
       return buildCustomWorkflowInsights(params);
     default:
-      throw new InvalidDefendInsightTypeError();
+      throw new Error('Invalid insight type');
   }
 }

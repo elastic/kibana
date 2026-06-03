@@ -6,14 +6,6 @@
  */
 
 export {
-  type SkillSelection,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
-} from './skill_selection';
-export {
   type PublicSkillDefinition,
   type PublicSkillSummary,
   type PersistedSkillCreateRequest,
@@ -30,3 +22,15 @@ export {
   skillNameRegexp,
   maxToolsPerSkill,
 } from './validation';
+export {
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
+} from './referenced_content_shared';
+export {
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+  type ReferencedContentRefineIssue,
+  collectReferencedContentRefineIssues,
+} from './referenced_content_refine';

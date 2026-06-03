@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
+  /**
+   * Optional stable ID for the attachment. When provided, the platform will
+   * replace any existing attachment with the same ID instead of creating a new one.
+   * Falls back to `${attachmentType}-${Date.now()}` when omitted.
+   */
+  attachmentId?: string;
   /**
    * Type of attachment (e.g., 'alert', 'attack_discovery')
    */
@@ -37,37 +42,40 @@ export interface UseAgentBuilderAttachmentResult {
  * Opens a conversation flyout with attachments and prefilled conversation.
  */
 export const useAgentBuilderAttachment = ({
+  attachmentId,
   attachmentType,
   attachmentData,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
+  const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
     if (!agentBuilder?.openChat) {
+      if (!hasWarned.current) {
+        window.console.warn(
+          'useAgentBuilderAttachment: agentBuilder service or openChat method is not available. ' +
+            'Ensure the agentBuilder plugin is enabled.'
+        );
+        hasWarned.current = true;
+      }
       return;
     }
 
-    // Create a unique ID for the attachment
-    const attachmentId = `${attachmentType}-${Date.now()}`;
-
-    // Create the UiAttachment object
     const attachment: AttachmentInput = {
-      id: attachmentId,
+      id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
       data: attachmentData,
     };
 
-    // Open the chat with attachment and prefilled message
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
 
   return {
     openAgentBuilderFlyout,

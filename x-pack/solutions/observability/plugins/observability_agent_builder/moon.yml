@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-plugin'
   - '@kbn/apm-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
@@ -47,6 +48,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/ai-assistant-common'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-utility'
   - '@kbn/discover-shared-plugin'
   - '@kbn/i18n'
@@ -61,6 +63,12 @@ dependsOn:
   - '@kbn/slo-schema'
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
+  - '@kbn/calculate-auto'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
+  - '@kbn/sse-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
@@ -72,27 +80,8 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

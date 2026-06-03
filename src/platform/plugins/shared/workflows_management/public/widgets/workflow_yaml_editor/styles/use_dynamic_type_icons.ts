@@ -57,6 +57,10 @@ export const predefinedStepTypes = [
     displayName: 'While',
   },
   {
+    actionTypeId: 'switch',
+    displayName: 'Switch',
+  },
+  {
     actionTypeId: 'parallel',
     displayName: 'Parallel',
   },
@@ -67,6 +71,10 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'wait',
     displayName: 'Wait',
+  },
+  {
+    actionTypeId: 'waitForInput',
+    displayName: 'Wait For Input',
   },
   {
     actionTypeId: 'data.set',
@@ -83,6 +91,22 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'workflow.executeAsync',
     displayName: 'Workflow Execute Async',
+  },
+  {
+    actionTypeId: 'workflow.output',
+    displayName: 'Workflow Output',
+  },
+  {
+    actionTypeId: 'workflow.fail',
+    displayName: 'Workflow Fail',
+  },
+  {
+    actionTypeId: 'loop.break',
+    displayName: 'Break',
+  },
+  {
+    actionTypeId: 'loop.continue',
+    displayName: 'Continue',
   },
   {
     actionTypeId: 'manual',
@@ -188,11 +212,14 @@ export function useDynamicTypeIcons(
     }
     const registry = actionTypeRegistryRef.current;
     const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
-      const actionType = registry.get(connector.actionTypeId);
+      // API can list types not registered in the UI registry => get() throws if missing.
+      const icon = registry.has(connector.actionTypeId)
+        ? registry.get(connector.actionTypeId)?.iconClass
+        : undefined;
       return {
         actionTypeId: connector.actionTypeId,
         displayName: connector.displayName,
-        icon: actionType.iconClass,
+        ...(icon !== undefined && { icon }),
       };
     });
 

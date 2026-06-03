@@ -34,10 +34,12 @@ import {
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
+  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
+import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -72,17 +74,23 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = ['es', 'oblt', 'security', 'workplaceai'] as const;
+export const serverlessProjectTypes = [
+  'es',
+  'oblt',
+  'security',
+  'workplaceai',
+  'vectordb',
+] as const;
 export type ServerlessProjectType = (typeof serverlessProjectTypes)[number];
 
 export const esServerlessProjectTypes = [
+  'elasticsearch',
   'elasticsearch_general_purpose',
-  'elasticsearch_search',
   'elasticsearch_vector',
-  'elasticsearch_timeseries',
   'observability',
   'security',
   'workplaceai',
+  'vectordb',
 ] as const;
 export type EsServerlessProjectType = (typeof esServerlessProjectTypes)[number];
 
@@ -113,20 +121,37 @@ export const esProjectTypeFromKbn = new Map<string, string>([
   ['oblt', 'observability'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
+]);
+
+// ES operator/settings.json expects 'elasticsearch' for all `elasticsearch_*` project types.
+export const esSettingsProjectTypeFromKbn = new Map<string, string>([
+  ...esProjectTypeFromKbn.entries(),
+  ['es', 'elasticsearch'],
 ]);
 
 export const kbnProjectTypeFromEs = new Map<string, string>([
+  ['elasticsearch', 'es'],
   ['elasticsearch_general_purpose', 'es'],
-  ['elasticsearch_search', 'es'],
   ['elasticsearch_vector', 'es'],
-  ['elasticsearch_timeseries', 'es'],
   ['observability', 'oblt'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
+  /** Activate snapshot-docker behavior (security, readiness check, detached mode, etc.) */
+  snapshot?: boolean;
+  license?: string;
+  version?: string;
+  /** Container name. Defaults to 'es01'. Use unique names for parallel runs. */
+  name?: string;
+  /** When true, returns immediately after ES is ready instead of tailing logs. */
+  background?: boolean;
+  /** Host-side transport port to map to container port 9300. Defaults to port + 100. */
+  transportPort?: number;
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
@@ -150,8 +175,6 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
-  /** Fully qualified URL where Kibana is hosted (including base path) */
-  kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
@@ -159,6 +182,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   resources?: string | string[];
   /** Configure ES serverless with UIAM support */
   uiam?: boolean;
+  /** Configure ES serverless with UIAM OAuth support (starts an additional uiam-oauth container) */
+  uiamOAuth?: boolean;
   /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
@@ -541,9 +566,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
   try {
     const linkedNodes = getServerlessNodes('-linked', 10);
-    const serverlessContainerNames = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).map(
-      ({ name }) => name
-    );
+    const serverlessContainerNames = SERVERLESS_NODES.concat(
+      linkedNodes,
+      getUiamContainers({ includeOAuth: true })
+    ).map(({ name }) => name);
 
     for (const name of serverlessContainerNames) {
       await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
@@ -559,10 +585,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
 export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
   const linkedNodes = getServerlessNodes('-linked', 10);
-  const namesCmd = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).flatMap(({ name }) => [
-    '--filter',
-    `name=${name}`,
-  ]);
+  const namesCmd = SERVERLESS_NODES.concat(
+    linkedNodes,
+    getUiamContainers({ includeOAuth: true })
+  ).flatMap(({ name }) => ['--filter', `name=${name}`]);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
   const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
@@ -631,14 +657,7 @@ export function resolveEsArgs(
   }
 
   // Configure mock identify provider (ES only supports SAML when running in SSL mode)
-  if (
-    ssl &&
-    'kibanaUrl' in options &&
-    options.kibanaUrl &&
-    esArgs.get('xpack.security.enabled') !== 'false'
-  ) {
-    const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
-
+  if (ssl && esArgs.get('xpack.security.enabled') !== 'false') {
     // The mock IDP setup requires a custom role mapping, but since native role mappings are disabled by default in
     // Serverless, we have to re-enable them explicitly here.
     esArgs.set('xpack.security.authc.native_role_mappings.enabled', 'true');
@@ -654,15 +673,15 @@ export function resolveEsArgs(
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
-      trimTrailingSlash(options.kibanaUrl)
+      MOCK_IDP_SP_BASE_URL
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
-      `${trimTrailingSlash(options.kibanaUrl)}/api/security/saml/callback`
+      `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
-      `${trimTrailingSlash(options.kibanaUrl)}/logout`
+      `${MOCK_IDP_SP_BASE_URL}/logout`
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
@@ -681,12 +700,12 @@ export function resolveEsArgs(
       MOCK_IDP_ATTRIBUTE_EMAIL
     );
 
-    if (options.uiam) {
+    if ('uiam' in options && options.uiam) {
       // HACK: A workaround for the Serverless ES metering service, which is enabled automatically after we set
       // `serverless.project_id`, and, if not configured _explicitly_ with an HTTP URL, expects CA certs in a
-      // fixed location (`http-certs/ca.crt`) that we cannot override. So we just point it to Kibana as if it
-      // were a metering service and use the longest possible interval to reduce noise.
-      esArgs.set('metering.url', options.kibanaUrl);
+      // fixed location (`http-certs/ca.crt`) that we cannot override. Any HTTP URL works — we reuse the SP base
+      // URL just to avoid introducing another constant — and use the longest possible interval to reduce noise.
+      esArgs.set('metering.url', MOCK_IDP_SP_BASE_URL);
       esArgs.set('metering.report_period', '60m');
 
       esArgs.set(
@@ -772,7 +791,6 @@ export async function setupServerlessVolumes(
     basePath,
     clean,
     ssl,
-    kibanaUrl,
     files,
     resources,
     projectType,
@@ -884,9 +902,9 @@ export async function setupServerlessVolumes(
     );
   }
 
-  // Create and add meta data for mock identity provider
-  if (ssl && kibanaUrl) {
-    const metadata = await createMockIdpMetadata(kibanaUrl);
+  // Create and add metadata for mock identity provider
+  if (ssl) {
+    const metadata = await createMockIdpMetadata();
     await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
     volumeCmds.push(
       '--volume',
@@ -898,7 +916,8 @@ export async function setupServerlessVolumes(
     ...getESp12Volume(),
     ...serverlessResources,
     ...(await getOperatorVolume(
-      esProjectTypeFromKbn.get(projectType)!,
+      esSettingsProjectTypeFromKbn.get(projectType)!,
+      ssl,
       overrides?.projectId,
       overrides?.operatorPath
     )),
@@ -968,17 +987,32 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
+  const startTime = Date.now();
+  const elapsed = () => `${((Date.now() - startTime) / 1000).toFixed(1)}s`;
+
+  log.info('[runServerlessCluster] Setting up Docker environment...');
   await setupDocker({ log, options });
+  log.info(`[runServerlessCluster] Docker environment ready (${elapsed()})`);
 
   const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
+  log.info(`[runServerlessCluster] Pulling Docker image(s) for: ${esServerlessImage}...`);
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
-    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => setupDockerImage({ log, image })) : []),
+    ...(options.uiam
+      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) =>
+          setupDockerImage({ log, image })
+        )
+      : []),
   ]);
+  log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
 
+  log.info('[runServerlessCluster] Setting up serverless volumes...');
   const volumeCmd = await setupServerlessVolumes(log, options);
+  log.info(`[runServerlessCluster] Serverless volumes ready (${elapsed()})`);
+
   const portCmd = resolvePort(options);
 
+  log.info('[runServerlessCluster] Starting ES nodes...');
   // This is where nodes are started
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -993,9 +1027,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       });
       return node.name;
     }).concat(
-      options.uiam ? UIAM_CONTAINERS.map((container) => runUiamContainer(log, container)) : []
+      options.uiam
+        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
+            runUiamContainer(log, container)
+          )
+        : []
     )
   );
+  log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
 
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
@@ -1011,7 +1050,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   }
 
   if (options.uiam) {
+    log.info(`[runServerlessCluster] Initializing UIAM containers (${elapsed()})...`);
     await initializeUiamContainers(log);
+    log.info(`[runServerlessCluster] UIAM containers initialized (${elapsed()})`);
   }
 
   const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
@@ -1043,7 +1084,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
     async () => {
-      if (!options.ssl || !options.kibanaUrl) {
+      if (!options.ssl) {
         return;
       }
 
@@ -1058,11 +1099,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   );
 
   if (options.waitForReady) {
-    log.info('Waiting until ES is ready to serve requests...');
+    log.info(`[runServerlessCluster] Waiting for ES cluster to be ready (${elapsed()})...`);
     await readyPromise;
+    log.info(`[runServerlessCluster] ES cluster is ready (${elapsed()})`);
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
       // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
+      log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
+      log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
     }
   }
 
@@ -1176,7 +1220,7 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
 
   await waitUntilClusterReady({ client, expectedStatus: 'green', log });
 
-  if (options.ssl && options.kibanaUrl) {
+  if (options.ssl) {
     await ensureSAMLRoleMapping(client);
   }
 
@@ -1210,7 +1254,8 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
 
   const currentJson = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
 
-  const esProjectType = esProjectTypeFromKbn.get(options.projectType) ?? options.projectType;
+  const esProjectType =
+    esSettingsProjectTypeFromKbn.get(options.projectType) ?? options.projectType;
   const linkedNodeName = `es01${LINKED_CLUSTER_NAME_SUFFIX}`;
   const linkedEndpoint = `${linkedNodeName}:${REMOTE_CLUSTER_SERVER_PORT}`;
 
@@ -1254,7 +1299,9 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
 export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
   const imagesToKillContainersFor = [
     getServerlessImage(options),
-    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => image) : []),
+    ...(options.uiam
+      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) => image)
+      : []),
   ];
   const { stdout } = execa.commandSync(
     `docker ps --filter status=running ${imagesToKillContainersFor
@@ -1302,7 +1349,14 @@ export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_
 /**
  * Runs an Elasticsearch Docker Container
  */
-export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
+export async function runDockerContainer(
+  log: ToolingLog,
+  options: DockerOptions
+): Promise<string | void> {
+  if (options.snapshot) {
+    return runDockerContainerInSnapshotMode(log, options);
+  }
+
   let image;
 
   if (!options.dockerCmd) {
@@ -1324,11 +1378,13 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
  * A volume mount for the operator folder, that contains operator specific configuration files like settings.json.
  * We mount entire folder since Elasticsearch cannot properly watch changes in bind-mounted files.
  * @param projectType Type of the serverless project.
+ * @param ssl Whether SSL is enabled (determines which secrets file to embed).
  * @param projectId Override for the project ID (defaults to MOCK_IDP_UIAM_PROJECT_ID).
  * @param operatorPath Override for the operator directory path on the host.
  */
 async function getOperatorVolume(
   projectType: string,
+  ssl: boolean = false,
   projectId: string = MOCK_IDP_UIAM_PROJECT_ID,
   operatorPath: string = SERVERLESS_OPERATOR_PATH
 ) {
@@ -1346,12 +1402,19 @@ async function getOperatorVolume(
     env: 'local',
   };
 
+  const stringSecrets = await readStringSecrets(
+    ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+  );
+
   await Fsp.writeFile(
     join(operatorPath, 'settings.json'),
     JSON.stringify(
       {
         metadata: { version: '100', compatibility: '' },
-        state: { project: { ...projectInfo, tags: projectTags } },
+        state: {
+          project: { ...projectInfo, tags: projectTags },
+          cluster_secrets: { string_secrets: stringSecrets },
+        },
       },
       null,
       2
@@ -1361,24 +1424,8 @@ async function getOperatorVolume(
 }
 
 // ---------------------------------------------------------------------------
-// Docker Snapshot Mode
+// Docker Snapshot Mode (activated by `snapshot: true` in DockerOptions)
 // ---------------------------------------------------------------------------
-
-export interface DockerSnapshotOptions extends EsClusterExecOptions {
-  license?: string;
-  version?: string;
-  port?: number;
-  ssl?: boolean;
-  kill?: boolean;
-  tag?: string;
-  image?: string;
-  /** Container name. Defaults to 'es01'. Use unique names for parallel runs. */
-  name?: string;
-  /** When true, returns immediately after ES is ready instead of tailing logs. */
-  background?: boolean;
-  /** Host-side transport port to map to container port 9300. Defaults to port + 100. */
-  transportPort?: number;
-}
 
 /**
  * Default esArgs for Docker snapshot mode.
@@ -1397,25 +1444,62 @@ const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
 ];
 
 /**
- * Runs an Elasticsearch Docker container with the same semantics as `yarn es snapshot`.
+ * Sanitize a path string into a valid Docker volume name.
+ * Strips leading dots/slashes and replaces path separators with hyphens.
+ */
+function toDockerVolumeName(rawPath: string): string {
+  const sanitized = rawPath.replace(/^[./\\]+/, '').replace(/[/\\]+/g, '-');
+  return `kbn-es-${sanitized || 'data'}`;
+}
+
+/**
+ * Runs an Elasticsearch Docker container with snapshot-equivalent semantics.
  *
  * - Applies the same default esArgs as the local snapshot flow
  * - Maps `--license=trial` → `xpack.license.self_generated.type=trial`
- * - Maps `-E path.data=<relative>` → a Docker volume mount
+ * - Maps `-E path.data=<path>` → a Docker volume (named volume if local path
+ *   doesn't exist, bind mount if it does)
  * - Waits for cluster readiness and sets up the native realm (passwords)
  */
-export async function runDockerSnapshotContainer(
+async function runDockerContainerInSnapshotMode(
   log: ToolingLog,
-  options: DockerSnapshotOptions
+  options: DockerOptions
 ): Promise<string> {
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
 
-  const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+  let tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+
+  // When ES_SNAPSHOT_MANIFEST is set, use the commit-pinned docker tag from kibana-ci
+  let repo = DOCKER_REPO;
+  const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+  if (!options.tag && !options.image && manifestUrl) {
+    const resp = await fetch(manifestUrl);
+    if (resp.ok) {
+      const manifest = await resp.json();
+      const { version, sha } = manifest;
+
+      if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+        throw createCliError(`Invalid version format in manifest: ${version}`);
+      }
+      if (!/^[0-9a-f]{40}$/.test(sha)) {
+        throw createCliError(`Invalid sha format in manifest: ${sha}`);
+      }
+
+      tag = `${version}-SNAPSHOT-${sha}`;
+      repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
+      log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+    } else {
+      log.warning(
+        `Failed to fetch ES_SNAPSHOT_MANIFEST (${resp.status}), falling back to default image`
+      );
+    }
+  }
+
   const image = resolveDockerImage({
     image: options.image,
     tag,
-    repo: DOCKER_REPO,
+    repo,
     defaultImg: DOCKER_IMG,
   });
   await setupDockerImage({ log, image });
@@ -1451,7 +1535,13 @@ export async function runDockerSnapshotContainer(
 
     if (k === 'path.data') {
       const hostPath = resolve(process.cwd(), v);
-      volumeMounts.push('--volume', `${hostPath}:/usr/share/elasticsearch/data`);
+      if (fs.existsSync(hostPath)) {
+        volumeMounts.push('--volume', `${hostPath}:/usr/share/elasticsearch/data`);
+      } else {
+        const volumeName = toDockerVolumeName(v);
+        log.info(`Local path '${v}' does not exist — using Docker volume '${volumeName}'`);
+        volumeMounts.push('--volume', `${volumeName}:/usr/share/elasticsearch/data`);
+      }
       continue;
     }
 
@@ -1573,10 +1663,7 @@ export async function runDockerSnapshotContainer(
   return containerName;
 }
 
-export async function stopDockerSnapshotContainer(
-  log: ToolingLog,
-  containerName: string
-): Promise<void> {
+export async function stopDockerContainer(log: ToolingLog, containerName: string): Promise<void> {
   try {
     await execa('docker', ['kill', containerName]);
     log.info(`Docker container ${containerName} killed`);

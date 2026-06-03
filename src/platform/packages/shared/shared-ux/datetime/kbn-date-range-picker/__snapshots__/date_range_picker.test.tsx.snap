@@ -6,7 +6,7 @@ exports[`DateRangePicker renders 1`] = `
 >
   <div
     class="euiPopover emotion-euiPopover-inline"
-    data-test-subj="dateRangePickerDialogTriggerWrapper"
+    data-test-subj="dateRangePickerPopoverTriggerWrapper"
   >
     <div
       class="css-0"
@@ -17,37 +17,58 @@ exports[`DateRangePicker renders 1`] = `
       >
         <div
           class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlLeftIconsCount: 1;"
         >
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-left"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="calendar"
+              />
+            </span>
+          </div>
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             id="generated-id-wrapper"
           >
             <button
-              class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
+              class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth-DateRangePickerControl"
+              data-date-range="now-20m to now"
               data-test-subj="dateRangePickerControlButton"
               type="button"
-              value="Last 20 minutes"
             >
               <span
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
               >
-                <span
-                  class="eui-textTruncate css-z3gg36-textContent"
-                >
-                  Last 20 minutes
-                </span>
-                 
-                <span
-                  class="euiBadge emotion-euiBadge-default"
-                  title="20min"
-                >
+                <span>
                   <span
-                    class="euiBadge__content emotion-euiBadge__content"
+                    class="eui-textTruncate css-rbdo33-root"
+                    data-test-subj="dateRangePickerValueDisplay"
                   >
                     <span
-                      class="euiBadge__text emotion-euiBadge__text"
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
                     >
-                      20min
+                      Last
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      20
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      minutes
                     </span>
                   </span>
                 </span>

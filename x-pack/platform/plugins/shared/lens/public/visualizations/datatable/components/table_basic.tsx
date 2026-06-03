@@ -6,7 +6,7 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds } from '@kbn/coloring';
+import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -55,6 +55,7 @@ import type { LensGridDirection } from '../../../../common/expressions';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
+import { createRenderDatatableCellPopover } from './datatable_cell_popover';
 import { createGridCell } from './cell_value';
 import {
   buildSchemaDetectors,
@@ -73,7 +74,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -379,24 +380,31 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         rowCellRender: function RowCellRender({ rowIndex }) {
           const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.table.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
-              iconType={
-                !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
-                  ? 'empty'
-                  : 'boxesVertical'
-              }
-              color="text"
-              onClick={() => {
-                onRowContextMenuClick({
-                  rowIndex,
-                  table: firstTableRef.current,
-                  columns: columnConfig.columns.map((col) => col.columnId),
-                });
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+                  defaultMessage: 'Show actions',
+                })}
+                iconType={
+                  !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
+                    ? 'empty'
+                    : 'boxesVertical'
+                }
+                color="text"
+                onClick={() => {
+                  onRowContextMenuClick({
+                    rowIndex,
+                    table: firstTableRef.current,
+                    columns: columnConfig.columns.map((col) => col.columnId),
+                  });
+                }}
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -425,12 +433,49 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const colInfo = getDatatableColumn(sortedTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
+        colorByTerms,
+        palette,
+        colorMapping,
+      });
+
+      let appliedPalette = hasColorConfigMismatch ? undefined : palette;
+      let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;
+
+      const shouldApplyDefaults = !palette && !colorMapping && !hasColorConfigMismatch;
+
+      if (shouldApplyDefaults) {
+        if (colorByTerms) {
+          appliedColorMapping = JSON.stringify(DEFAULT_COLOR_MAPPING_CONFIG);
+          appliedPalette = undefined;
+        } else {
+          const dataBounds = minMaxByColumnId.get(originalId) ?? getFallbackDataBounds();
+          const defaultPalette = getColorByValuePalette(props.paletteService, dataBounds);
+          const stops = defaultPalette.params?.stops || [];
+          appliedPalette = {
+            type: 'palette',
+            name: 'custom', // Only 'custom' palette has getColorForValue
+            params: {
+              colors: stops.map(({ color }) => color),
+              stops: stops.map(({ stop }) => stop),
+              gradient: false,
+              range: defaultPalette.params?.rangeType ?? 'percent',
+              rangeMin: dataBounds.min,
+              rangeMax: dataBounds.max,
+              continuity: defaultPalette.params?.continuity,
+            },
+          };
+          appliedColorMapping = undefined;
+        }
+      }
+
       const categoryRows = (untransposedDataRef.current ?? sortedTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: colorMapping
+            categories: appliedColorMapping
               ? getColorCategories(categoryRows, [originalId], [null])
               : getLegacyColorCategories(categoryRows, [originalId], [null]),
           }
@@ -446,8 +491,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         colorByTerms,
         isDarkMode,
         syncColors,
-        palette,
-        colorMapping
+        appliedPalette,
+        appliedColorMapping
       );
       cellColorFnMap.set(originalId, colorFn);
 
@@ -474,6 +519,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     minMaxByColumnId,
     syncColors,
   ]);
+
+  const renderCellPopover = useMemo(
+    () => createRenderDatatableCellPopover(sortedTable, props.columnFilterable),
+    [sortedTable, props.columnFilterable]
+  );
 
   const columnVisibility = useMemo(
     () => ({
@@ -616,6 +666,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           trailingControlColumns={trailingControlColumns}
           rowCount={sortedTable.rows.length}
           renderCellValue={renderCellValue}
+          renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
           sorting={sorting}

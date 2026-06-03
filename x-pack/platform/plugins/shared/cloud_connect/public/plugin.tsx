@@ -51,6 +51,12 @@ export class CloudConnectedPlugin
     core: CoreSetup<CloudConnectedStartDeps>,
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
+    // Skip plugin registration if running on ESS.
+    // CCM is enabled for ECE deployments and self-managed clusters.
+    if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
+      return {};
+    }
+
     // Store plugin setup references for registering hooks in start()
     this.homeSetup = plugins.home;
     this.managementSetup = plugins.management;

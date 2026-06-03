@@ -18,12 +18,17 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-custom-branding-browser",
     "@kbn/core-application-common",
     "@kbn/core-application-browser-internal",
-    "@kbn/core-chrome-browser-internal",
     "@kbn/core-overlays-browser",
-    "@kbn/core-chrome-layout-components",
+    "@kbn/ui-chrome-layout",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-browser-components",
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/core-chrome-feature-flags",
+    "@kbn/core-feature-flags-browser",
   ]
 }

@@ -11,13 +11,17 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
+  ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  internalTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
@@ -95,8 +99,9 @@ export {
   createHooksExecutionError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName } from './base/users';
+export { type UserIdAndName, type CurrentUser } from './base/users';
 export { EsResourceType } from './base/resources';
+export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
@@ -107,7 +112,24 @@ export {
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
+  type EffectiveAgentRole,
+  type AgentAuthzArgs,
+  canCurrentUserEditAgent,
+  AgentAclRole,
+  AGENT_ACL_MAX_ENTRIES,
+  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAclRole,
+  aclRoleMeets,
+  maxAclRole,
+  getEmptyAgentAcl,
+  type AgentAcl,
+  type AgentAclEntry,
+  type AgentAclPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -117,6 +139,14 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
+  AgentExecutionMode,
+  SubagentExecutionMode,
+  ExecutionStatus,
+  type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -130,12 +160,26 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type CompactionStepData,
+  type CompactionStep,
   type RoundModelUsageStats,
+  type CompactionSummary,
+  type CompactionStructuredData,
+  type CompactionToolCallSummary,
+  type CompactionEntity,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  isCompactionStep,
+  isBackgroundAgentCompleteStep,
+  type BackgroundAgentCompleteStep,
+  isTodosStep,
+  findTodosStep,
+  type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -180,6 +224,19 @@ export {
   isConversationUpdatedEvent,
   isToolProgressEvent,
   isPromptRequestEvent,
+  type CompactionStartedEvent,
+  type CompactionStartedEventData,
+  type CompactionCompletedEvent,
+  type CompactionCompletedEventData,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -187,12 +244,6 @@ export {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,
@@ -201,6 +252,14 @@ export {
   skillIdRegexp,
   skillNameRegexp,
   maxToolsPerSkill,
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+  type ReferencedContentRefineIssue,
+  collectReferencedContentRefineIssues,
 } from './skills';
 export * from './telemetry';
 export {
@@ -219,3 +278,11 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

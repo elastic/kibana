@@ -13,6 +13,10 @@ import {
   STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -22,6 +26,10 @@ import {
   streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
+  streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -57,6 +65,26 @@ const streamsFeaturesIdentifiedEventType = {
   schema: streamsFeaturesIdentifiedSchema,
 };
 
+const streamsAgentBuilderKnowledgeIndicatorCreatedEventType = {
+  eventType: STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  schema: streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+};
+
+const streamsAgentToolKiIdentificationStartedEventType = {
+  eventType: STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  schema: streamsAgentToolKiIdentificationStartedSchema,
+};
+
+const streamsAgentToolEventCreateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  schema: streamsAgentToolEventCreateSchema,
+};
+
+const streamsAgentToolEventStatusUpdateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  schema: streamsAgentToolEventStatusUpdateSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
@@ -65,4 +93,8 @@ export {
   streamsInsightsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
   streamsFeaturesIdentifiedEventType,
+  streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
+  streamsAgentToolKiIdentificationStartedEventType,
+  streamsAgentToolEventCreateEventType,
+  streamsAgentToolEventStatusUpdateEventType,
 };

@@ -19,6 +19,8 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
+import { assertCanUpdateMonitorInAllSpaces } from '../monitor_locations_utils';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 const MAX_BROWSER_MONITORS = 250;
@@ -98,10 +100,16 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
+      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(
+        monitors,
+        pushMonitorFormatter.failedMonitors.filter((m) => !!m.id).map((m) => m.id as string)
+      );
+
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     } catch (error) {
       if (error.output?.statusCode === 404) {
@@ -171,30 +179,12 @@ const validMultiSpacePrivileges = async (
   routeContext: RouteContext,
   monitors: ProjectMonitor[]
 ) => {
-  const { spaceId, request, response, server } = routeContext;
-
-  const spacesList = monitors.flatMap((monitor) => monitor.spaces ?? []);
-  if (spacesList.length === 0 || (spacesList.length === 1 && spacesList[0] === spaceId)) {
-    // If there are no spaces or only the current space, no need to check privileges
-    return validProjectMultiSpace(routeContext, monitors);
-  }
-
-  const checkSavedObjectsPrivileges =
-    server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
-
-  const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    'saved_object:synthetics-monitor/bulk_update',
-    spacesList
-  );
-  if (!hasAllRequested) {
-    throw response.forbidden({
-      body: {
-        message: i18n.translate('xpack.synthetics.addMonitor.forbidden', {
-          defaultMessage:
-            'You do not have sufficient permissions to update monitors in all required spaces.',
-        }),
-      },
-    });
+  const spacesList = [...new Set(monitors.flatMap((monitor) => monitor.spaces ?? []))];
+  if (spacesList.length > 0) {
+    const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, spacesList);
+    if (spaceAuthError) {
+      throw spaceAuthError;
+    }
   }
 
   return validProjectMultiSpace(routeContext, monitors);
@@ -220,6 +210,15 @@ export const checkPublicLocationsPermissions = async (
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+const getBrowserTimeoutWarningsForSucceededProjectMonitors = (
+  monitors: ProjectMonitor[],
+  failedMonitorsIds: string[]
+) => {
+  const failedIdsSet = new Set(failedMonitorsIds);
+  const succeededMonitors = monitors.filter((m) => !failedIdsSet.has(m.id));
+  return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
 };
 
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(

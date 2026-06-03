@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@elastic/esql/types';
 import { BasicPrettyPrinter, Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -15,15 +15,15 @@ import type {
   ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  DropDocumentProcessor,
   GrokProcessor,
   MathProcessor,
-  RenameProcessor,
-  SetProcessor,
+  RedactProcessor,
   RemoveByPrefixProcessor,
   RemoveProcessor,
-  DropDocumentProcessor,
+  RenameProcessor,
   ReplaceProcessor,
-  RedactProcessor,
+  SetProcessor,
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
@@ -32,29 +32,45 @@ import type {
   SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
+  JsonExtractProcessor,
+  EnrichProcessor,
+  UriPartsProcessor,
+  RegisteredDomainProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
-import { convertRenameProcessorToESQL } from './processors/rename';
-import { convertSetProcessorToESQL } from './processors/set';
+import {
+  getStreamlangResolverForProcessor,
+  type StreamlangResolver,
+  type StreamlangResolverOptions,
+} from '../../../types/resolvers';
 import { convertAppendProcessorToESQL } from './processors/append';
+import { convertConvertProcessorToESQL } from './processors/convert';
 import { convertDateProcessorToESQL } from './processors/date';
 import { convertDissectProcessorToESQL } from './processors/dissect';
-import { convertGrokProcessorToESQL } from './processors/grok';
-import { convertConvertProcessorToESQL } from './processors/convert';
-import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_prefix';
-import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
-import { convertReplaceProcessorToESQL } from './processors/replace';
-import { convertRedactProcessorToESQL } from './processors/redact';
-import { convertMathProcessorToESQL } from './processors/math';
-import { createTransformStringESQL } from './transform_string';
+import { convertGrokProcessorToESQL } from './processors/grok';
 import { convertJoinProcessorToESQL } from './processors/join';
-import { convertSplitProcessorToESQL } from './processors/split';
+import { convertMathProcessorToESQL } from './processors/math';
+import { convertRedactProcessorToESQL } from './processors/redact';
+import { convertRemoveProcessorToESQL } from './processors/remove';
+import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_prefix';
+import { convertRenameProcessorToESQL } from './processors/rename';
+import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertSetProcessorToESQL } from './processors/set';
 import { convertSortProcessorToESQL } from './processors/sort';
+import { convertSplitProcessorToESQL } from './processors/split';
+import { createTransformStringESQL } from './transform_string';
 import { convertConcatProcessorToESQL } from './processors/concat';
 import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
+import { convertJsonExtractProcessorToESQL } from './processors/json_extract';
+import { convertEnrichProcessorToESQL } from './processors/enrich';
+import { convertUriPartsProcessorToESQL } from './processors/uri_parts';
+import { convertRegisteredDomainProcessorToESQL } from './processors/registered_domain';
 
-function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
+async function convertProcessorToESQL(
+  processor: StreamlangProcessorDefinition,
+  resolver?: StreamlangResolver
+): Promise<ESQLAstCommand[] | null> {
   switch (processor.action) {
     case 'rename':
       return convertRenameProcessorToESQL(processor as RenameProcessor);
@@ -76,6 +92,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'uri_parts':
+      return convertUriPartsProcessorToESQL(processor as UriPartsProcessor);
 
     case 'math':
       return convertMathProcessorToESQL(processor as MathProcessor);
@@ -122,6 +141,18 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
     case 'network_direction':
       return convertNetworkDirectionProcessorToESQL(processor as NetworkDirectionProcessor);
 
+    case 'json_extract':
+      return convertJsonExtractProcessorToESQL(processor as JsonExtractProcessor);
+
+    case 'enrich':
+      if (!resolver) {
+        throw new Error('Enrich policy resolver is required for enrich processor.');
+      }
+      return await convertEnrichProcessorToESQL(processor as EnrichProcessor, resolver);
+
+    case 'registered_domain':
+      return convertRegisteredDomainProcessorToESQL(processor as RegisteredDomainProcessor);
+
     case 'manual_ingest_pipeline':
       return [
         Builder.command({
@@ -139,12 +170,21 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
   }
 }
 
-export function convertStreamlangDSLToESQLCommands(
+export async function convertStreamlangDSLToESQLCommands(
   actionSteps: StreamlangProcessorDefinition[],
-  transpilationOptions: ESQLTranspilationOptions
-): string {
-  const esqlAstCommands = actionSteps
-    .map((processor) => convertProcessorToESQL(processor))
+  transpilationOptions: ESQLTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<string> {
+  const resolvedEsqlAstCommands = await Promise.all(
+    actionSteps.map((processor) =>
+      convertProcessorToESQL(
+        processor,
+        getStreamlangResolverForProcessor(processor, resolverOptions)
+      )
+    )
+  );
+
+  const esqlAstCommands = resolvedEsqlAstCommands
     .filter((cmds): cmds is ESQLAstCommand[] => cmds !== null)
     .flat();
 

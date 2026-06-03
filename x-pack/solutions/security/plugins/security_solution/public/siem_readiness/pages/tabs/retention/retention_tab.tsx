@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type {
+  MainCategories,
   RetentionInfo,
   RetentionStatus,
   RetentionType,
-  MainCategories,
 } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -63,46 +64,48 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = getReadinessCategories;
+  const { getReadinessRetention, getReadinessCategories } = useSiemReadinessApi();
   const {
     data: retentionData,
     isLoading: retentionLoading,
     error: retentionError,
   } = getReadinessRetention;
+  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
 
-  const isLoading = categoriesLoading || retentionLoading;
-  const error = categoriesError || retentionError;
+  const isLoading = retentionLoading || categoriesLoading;
+  const error = retentionError;
 
-  // Match data streams to categories by checking if backing index contains data stream name
+  // Shared filter: same predicate used by the agent tool (contains-match).
+  // Produces the flat list of items that belong to at least one categorized SIEM index.
+  const filteredRetentionItems = useMemo(
+    () => filterRetentionItemsByCategories(retentionData?.items ?? [], categoriesData),
+    [retentionData?.items, categoriesData]
+  );
+
+  // Group filtered items by category (UI-only: respects activeCategories).
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
-    const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
+    const categoryItemsMap = new Map<string, Set<RetentionInfoWithStatus>>();
 
-    for (const category of categoriesData?.mainCategoriesMap ?? []) {
-      const isActive = activeCategories.includes(category.category as MainCategories);
-      if (isActive) {
-        const matchingRetention: RetentionInfoWithStatus[] = [];
-        for (const retention of retentionData?.items ?? []) {
-          const hasMatch = category.indices.some((idx) =>
-            idx.indexName.includes(retention.indexName)
-          );
-          if (hasMatch) {
-            matchingRetention.push(retention as RetentionInfoWithStatus);
-          }
+    for (const item of filteredRetentionItems) {
+      categoriesData?.mainCategoriesMap?.forEach((group) => {
+        if (!activeCategories.includes(group.category as MainCategories)) return;
+        if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
+          const set = categoryItemsMap.get(group.category) ?? new Set<RetentionInfoWithStatus>();
+          set.add(item as RetentionInfoWithStatus);
+          categoryItemsMap.set(group.category, set);
         }
-
-        if (matchingRetention.length > 0) {
-          result.push({ category: category.category, items: matchingRetention });
-        }
-      }
+      });
     }
 
+    const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
+    for (const category of activeCategories) {
+      const items = categoryItemsMap.get(category);
+      if (items?.size) result.push({ category, items: Array.from(items) });
+    }
     return result;
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
+  }, [filteredRetentionItems, categoriesData?.mainCategoriesMap, activeCategories]);
+
+  const hasUnfilteredData = (retentionData?.items?.length ?? 0) > 0;
 
   // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {
@@ -257,7 +260,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           }
         ),
         sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
-        width: '20%',
+        width: '15%',
         render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
           if (!retentionPeriod) {
             return (
@@ -282,6 +285,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.baselineRetentionFedRAMP',
           {
@@ -332,54 +336,53 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
-        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.action', {
-          defaultMessage: 'Action',
-        }),
-        width: '10%',
-        render: (item: RetentionInfoWithStatus) => {
-          let href: string;
-          let label: string;
-
-          const isDsl = item.retentionType === 'dsl';
-          const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
-          const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
-
-          if (isDsl || isUnmanagedDataStream) {
-            href = getDataStreamUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
-              { defaultMessage: 'View Data Stream' }
-            );
-          } else if (item.retentionType === 'ilm' && item.policyName) {
-            href = getIlmPoliciesUrl(basePath, item.policyName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
-              { defaultMessage: 'View ILM policies' }
-            );
-          } else if (isUnmanagedIndex) {
-            href = getIndexDetailsUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
-              { defaultMessage: 'View Index' }
-            );
-          } else {
-            return null;
+        field: 'indexName' as const,
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.actions',
+          {
+            defaultMessage: 'Actions',
           }
+        ),
+        actions: [
+          {
+            render: (item: RetentionInfoWithStatus) => {
+              let href: string;
+              let label: string;
 
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={href}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {label}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+              const isDsl = item.retentionType === 'dsl';
+              const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
+              const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+
+              if (isDsl || isUnmanagedDataStream) {
+                href = getDataStreamUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+                  { defaultMessage: 'View Data Stream' }
+                );
+              } else if (item.retentionType === 'ilm' && item.policyName) {
+                href = getIlmPoliciesUrl(basePath, item.policyName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
+                  { defaultMessage: 'View ILM policies' }
+                );
+              } else if (isUnmanagedIndex) {
+                href = getIndexDetailsUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+                  { defaultMessage: 'View Index' }
+                );
+              } else {
+                return null;
+              }
+
+              return (
+                <EuiButtonEmpty size="s" href={href} target="_blank">
+                  {label}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]
@@ -411,28 +414,6 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           announceOnMount
         >
           <p>{(error as Error).message}</p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.title', {
-            defaultMessage: 'No data streams found',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.description', {
-              defaultMessage: 'No data streams with security-relevant data were found.',
-            })}
-          </p>
         </EuiCallOut>
       </>
     );
@@ -492,6 +473,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortDirection="asc"
         itemName="data streams / indices"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

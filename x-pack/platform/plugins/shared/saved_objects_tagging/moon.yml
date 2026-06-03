@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/saved_objects_tagging
 dependsOn:
   - '@kbn/core'
+  - '@kbn/scout'
   - '@kbn/usage-collection-plugin'
   - '@kbn/management-plugin'
   - '@kbn/saved-objects-tagging-oss-plugin'
@@ -32,6 +33,10 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-lifecycle-browser'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/as-code-shared-telemetry'
 tags:
   - plugin
   - prod
@@ -43,27 +48,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

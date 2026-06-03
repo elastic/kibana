@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { getReviewFields } from './src/review/get_review_fields';
+export {
+  getReviewFields,
+  type ReviewFields,
+  type NormalizedReviewResult,
+} from './src/review/get_review_fields';
 export { getGrokPattern } from './src/review/get_grok_pattern';
 export { unwrapPatternDefinitions } from '@kbn/streamlang/types/utils/grok_pattern_definitions';
 export { getGrokProcessor, type GrokProcessorResult } from './src/review/get_grok_processor';
@@ -13,3 +17,9 @@ export { mergeGrokProcessors } from './src/review/merge_grok_processors';
 export { groupMessagesByPattern } from './src/group_messages';
 export { extractGrokPatternDangerouslySlow } from './src/tokenization/extract_grok_pattern';
 export { ReviewFieldsPrompt } from './src/review/review_fields_prompt';
+export {
+  assembleGrokProcessor,
+  type GrokReviewFn,
+  type AssembleGrokProcessorParams,
+} from './src/assemble_grok_processor';
+export type { GrokPatternNode, NamedFieldNode, LiteralValueNode } from './src/types';

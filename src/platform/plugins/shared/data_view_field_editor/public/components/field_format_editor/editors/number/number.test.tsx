@@ -7,58 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { shallow } from 'enzyme';
-import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
+import { createFieldFormatMock } from '../test_utils';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public/context';
+import { formatId } from './constants';
 import { NumberFormatEditor } from './number';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
-type NumberFormatEditorProps = React.ComponentProps<typeof NumberFormatEditor>;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
+}));
 
 const fieldType = 'number';
-const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: number) => input * 2),
+
+const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),
-};
+  convertToReact: jest.fn().mockImplementation((input: number) => input * 2),
+});
+
 const formatParams = {
   pattern: '',
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
-const KibanaReactContext = createKibanaReactContext(
-  coreMock.createStart({ basePath: 'my-base-path' })
-);
+const fieldFormattersNumberDocLink =
+  'https://www.elastic.co/docs/explore-analyze/numeral-formatting';
 
-describe('NumberFormatEditor', () => {
-  beforeAll(() => {
-    // Enzyme does not support the new Context API in shallow rendering.
-    // @see https://github.com/enzymejs/enzyme/issues/2189
-    (NumberFormatEditor as React.ComponentType<NumberFormatEditorProps>).contextTypes = {
-      services: () => null,
-    };
-    delete (NumberFormatEditor as Partial<typeof NumberFormatEditor>).contextType;
-  });
+const docLinks = {
+  links: {
+    indexPatterns: {
+      fieldFormattersNumber: fieldFormattersNumberDocLink,
+    },
+  },
+} as CoreStart['docLinks'];
 
-  it('should have a formatId', () => {
-    expect(NumberFormatEditor.formatId).toEqual('number');
-  });
+const KibanaReactContext = createKibanaReactContext({ docLinks });
 
-  it('should render normally', async () => {
-    const component = shallow(
+const renderNumberFormatEditor = () =>
+  renderWithI18n(
+    <KibanaReactContext.Provider>
       <NumberFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={format}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
-      />,
-      { context: KibanaReactContext.value }
+      />
+    </KibanaReactContext.Provider>
+  );
+
+describe('NumberFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(NumberFormatEditor.formatId).toEqual(formatId);
+  });
+
+  it('should render normally', () => {
+    renderNumberFormatEditor();
+
+    expect(screen.getByText(/Numeral\.js format pattern/i)).toBeVisible();
+    expect(screen.getByText('0,0.[000]')).toBeVisible();
+    expect(screen.getByText('Documentation')).toBeVisible();
+    expect(screen.getByText('Documentation').closest('a')).toHaveAttribute(
+      'href',
+      fieldFormattersNumberDocLink
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('10000')).toBeVisible();
+    expect(screen.getByText('20000')).toBeVisible();
   });
 });

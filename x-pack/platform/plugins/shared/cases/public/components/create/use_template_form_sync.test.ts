@@ -6,7 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { UseFormReturn } from 'react-hook-form';
 import { useTemplateFormSync } from './use_template_form_sync';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockSetFieldValue = jest.fn();
 const mockUseFormContext = jest.fn(() => ({ setFieldValue: mockSetFieldValue }));
@@ -22,6 +24,19 @@ jest.mock('../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
 }));
 
+const mockUseGetFieldDefinitions = jest.fn();
+jest.mock('../field_library/hooks/use_get_field_definitions', () => ({
+  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+}));
+
+const mockUseParentTemplateDefinition = jest.fn((_id: string | undefined) => ({
+  definition: undefined,
+  isFetched: true,
+}));
+jest.mock('../templates_v2/hooks/use_parent_template_definition', () => ({
+  useParentTemplateDefinition: (id: string | undefined) => mockUseParentTemplateDefinition(id),
+}));
+
 const mockTemplate = {
   templateId: 'template-1',
   templateVersion: 1,
@@ -35,16 +50,69 @@ const mockTemplate = {
   },
 };
 
+const mockTemplateWithExtendedFields = {
+  templateId: 'template-2',
+  templateVersion: 1,
+  definition: {
+    name: 'Template with Fields',
+    description: 'Has extended fields',
+    tags: [],
+    severity: 'low',
+    category: null,
+    fields: [
+      {
+        name: 'summary',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        metadata: { default: 'Default summary' },
+      },
+      {
+        name: 'effort',
+        type: 'integer',
+        control: 'INPUT_NUMBER',
+        metadata: { default: 42 },
+      },
+      {
+        name: 'priority',
+        type: 'keyword',
+        control: 'SELECT_BASIC',
+        metadata: { default: 'high', options: ['low', 'medium', 'high'] },
+      },
+      {
+        name: 'notes',
+        type: 'keyword',
+        control: 'TEXTAREA',
+      },
+    ],
+  },
+};
+
+const createInnerFormMock = (): UseFormReturn => {
+  return {
+    reset: jest.fn(),
+    setValue: jest.fn(),
+    watch: jest.fn(),
+    getValues: jest.fn(),
+  } as unknown as UseFormReturn;
+};
+
 describe('useTemplateFormSync', () => {
+  let innerForm: UseFormReturn;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    innerForm = createInnerFormMock();
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
   });
 
   it('returns the template and loading state', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    const { result } = renderHook(() => useTemplateFormSync());
+    const { result } = renderHook(() => useTemplateFormSync(innerForm));
 
     expect(result.current.template).toEqual(mockTemplate);
     expect(result.current.isLoading).toBe(false);
@@ -54,7 +122,7 @@ describe('useTemplateFormSync', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    renderHook(() => useTemplateFormSync());
+    renderHook(() => useTemplateFormSync(innerForm));
 
     expect(mockSetFieldValue).toHaveBeenCalledWith('title', 'My Template');
     expect(mockSetFieldValue).toHaveBeenCalledWith('description', 'A description');
@@ -63,13 +131,15 @@ describe('useTemplateFormSync', () => {
     expect(mockSetFieldValue).toHaveBeenCalledWith('category', 'general');
   });
 
-  it('resets form fields when templateId is cleared after a template was applied', () => {
+  it('resets parent form fields when templateId is cleared after a template was applied', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    const { rerender } = renderHook(() => useTemplateFormSync());
+    const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
 
     mockSetFieldValue.mockClear();
+    (innerForm.reset as jest.Mock).mockClear();
+
     mockUseFormData.mockReturnValue([{ templateId: '' }]);
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
@@ -79,22 +149,24 @@ describe('useTemplateFormSync', () => {
     expect(mockSetFieldValue).toHaveBeenCalledWith('tags', []);
     expect(mockSetFieldValue).toHaveBeenCalledWith('severity', 'low');
     expect(mockSetFieldValue).toHaveBeenCalledWith('category', null);
+    expect(innerForm.reset).toHaveBeenCalledWith({ [CASE_EXTENDED_FIELDS]: {} });
   });
 
   it('does not reset fields when templateId was never set', () => {
     mockUseFormData.mockReturnValue([{ templateId: '' }]);
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
-    renderHook(() => useTemplateFormSync());
+    renderHook(() => useTemplateFormSync(innerForm));
 
     expect(mockSetFieldValue).not.toHaveBeenCalled();
+    expect(innerForm.reset).not.toHaveBeenCalled();
   });
 
   it('does not re-apply the same template and version', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    const { rerender } = renderHook(() => useTemplateFormSync());
+    const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
 
     const firstCallCount = mockSetFieldValue.mock.calls.length;
     rerender();
@@ -106,7 +178,7 @@ describe('useTemplateFormSync', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    const { rerender } = renderHook(() => useTemplateFormSync());
+    const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
 
     mockSetFieldValue.mockClear();
     const updatedTemplate = { ...mockTemplate, templateVersion: 2 };
@@ -129,7 +201,7 @@ describe('useTemplateFormSync', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: partialTemplate, isLoading: false });
 
-    renderHook(() => useTemplateFormSync());
+    renderHook(() => useTemplateFormSync(innerForm));
 
     expect(mockSetFieldValue).toHaveBeenCalledWith('title', 'Partial');
     expect(mockSetFieldValue).not.toHaveBeenCalledWith('description', expect.anything());
@@ -142,18 +214,280 @@ describe('useTemplateFormSync', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
 
-    renderHook(() => useTemplateFormSync());
+    renderHook(() => useTemplateFormSync(innerForm));
 
     expect(mockSetFieldValue).not.toHaveBeenCalled();
+    expect(innerForm.reset).not.toHaveBeenCalled();
   });
 
   it('returns isLoading true when the template is loading', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
 
-    const { result } = renderHook(() => useTemplateFormSync());
+    const { result } = renderHook(() => useTemplateFormSync(innerForm));
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.template).toBeUndefined();
+  });
+
+  describe('extended fields', () => {
+    it('applies default values for extended fields into the inner form when template has fields', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: {
+          summary_as_keyword: 'Default summary',
+          effort_as_integer: '42',
+          priority_as_keyword: 'high',
+          notes_as_keyword: '',
+        },
+      });
+    });
+
+    it('clears extended fields in the inner form when template is deselected', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
+
+      (innerForm.reset as jest.Mock).mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(innerForm.reset).toHaveBeenCalledWith({ [CASE_EXTENDED_FIELDS]: {} });
+    });
+
+    it('does not touch the inner form if no template was previously applied', () => {
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).not.toHaveBeenCalled();
+    });
+
+    it('handles switching between templates with different fields', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
+
+      (innerForm.reset as jest.Mock).mockClear();
+
+      const differentTemplate = {
+        templateId: 'template-3',
+        templateVersion: 1,
+        definition: {
+          name: 'Different Template',
+          fields: [
+            {
+              name: 'other_field',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              metadata: { default: 'other value' },
+            },
+          ],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-3' }]);
+      mockUseGetTemplate.mockReturnValue({ data: differentTemplate, isLoading: false });
+
+      rerender();
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: { other_field_as_keyword: 'other value' },
+      });
+    });
+
+    it('converts numeric default values to strings', () => {
+      const templateWithNumericDefaults = {
+        templateId: 'template-numeric',
+        templateVersion: 1,
+        definition: {
+          name: 'Numeric Template',
+          fields: [
+            {
+              name: 'count',
+              type: 'integer',
+              control: 'INPUT_NUMBER',
+              metadata: { default: 0 },
+            },
+            {
+              name: 'score',
+              type: 'float',
+              control: 'INPUT_NUMBER',
+              metadata: { default: 3.14 },
+            },
+          ],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-numeric' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithNumericDefaults, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: {
+          count_as_integer: '0',
+          score_as_float: '3.14',
+        },
+      });
+    });
+
+    it('does not write extended fields when template has no fields array', () => {
+      const templateWithoutFields = {
+        templateId: 'template-no-fields',
+        templateVersion: 1,
+        definition: {
+          name: 'No Fields Template',
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-no-fields' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithoutFields, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      // reset is still called once with empty extended fields slice
+      expect(innerForm.reset).toHaveBeenCalledWith({ [CASE_EXTENDED_FIELDS]: {} });
+    });
+  });
+
+  describe('field definitions loading guard', () => {
+    it('does not apply extended field defaults while field defs are loading', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+      mockUseGetFieldDefinitions.mockReturnValue({ data: undefined, isLoading: true });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).not.toHaveBeenCalled();
+    });
+
+    it('applies extended field defaults once field defs finish loading', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+      mockUseGetFieldDefinitions.mockReturnValue({ data: undefined, isLoading: true });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
+
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [] },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: {
+          summary_as_keyword: 'Default summary',
+          effort_as_integer: '42',
+          priority_as_keyword: 'high',
+          notes_as_keyword: '',
+        },
+      });
+    });
+  });
+
+  describe('$ref field resolution', () => {
+    const templateWithRef = {
+      templateId: 'template-ref',
+      templateVersion: 1,
+      owner: 'securitySolution',
+      definition: {
+        name: 'Ref Template',
+        fields: [{ $ref: 'my_field', name: undefined }],
+      },
+    };
+
+    it('resolves $ref fields from the library and applies their defaults', () => {
+      const libraryField = {
+        name: 'my_field',
+        owner: 'securitySolution',
+        fieldDefinitionId: 'fd-1',
+        definition:
+          'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nmetadata:\n  default: lib_default\n',
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-ref' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithRef, isLoading: false });
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [libraryField] },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: { my_field_as_keyword: 'lib_default' },
+      });
+    });
+
+    it('silently skips $ref entries with an unknown name', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-ref' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithRef, isLoading: false });
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [] },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).toHaveBeenCalledWith({ [CASE_EXTENDED_FIELDS]: {} });
+    });
+
+    it('uses the override name when $ref entry has a name property', () => {
+      const libraryField = {
+        name: 'my_field',
+        owner: 'securitySolution',
+        fieldDefinitionId: 'fd-1',
+        definition:
+          'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nmetadata:\n  default: lib_default\n',
+      };
+      const templateWithNamedRef = {
+        templateId: 'template-named-ref',
+        templateVersion: 1,
+        owner: 'securitySolution',
+        definition: {
+          name: 'Named Ref Template',
+          fields: [{ $ref: 'my_field', name: 'overridden_name' }],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-named-ref' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithNamedRef, isLoading: false });
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [libraryField] },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: { overridden_name_as_keyword: 'lib_default' },
+      });
+    });
   });
 });

@@ -13,7 +13,10 @@ import { AddRuleAttachmentToChatButton } from './add_rule_attachment_to_chat_but
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { NewAgentBuilderAttachmentProps } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import type { UseAgentBuilderAttachmentParams } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import type {
   AboutStepRule,
   ActionsStepRule,
@@ -21,11 +24,13 @@ import type {
   ScheduleStepRule,
 } from '../../../common/types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockUseAgentBuilderAttachment = jest.fn();
 const mockFormatRule = jest.fn();
 const mockNewAgentBuilderAttachment = jest.fn();
+const mockActivateFormSync = jest.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -40,6 +45,14 @@ const aboutStepDataMock = {} as AboutStepRule;
 const scheduleStepDataMock = {} as ScheduleStepRule;
 const actionsStepDataMock = {} as ActionsStepRule;
 const actionTypeRegistryMock = {} as ActionTypeRegistryContract;
+
+jest.mock('../../../../common/lib/kibana');
+
+const mockKibanaServices = () => ({
+  services: {
+    aiRuleCreation: { activateFormSync: mockActivateFormSync },
+  },
+});
 
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
   useAgentBuilderAttachment: (attachment: unknown) => {
@@ -66,6 +79,7 @@ jest.mock('../../pages/rule_creation/helpers', () => ({
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue(mockKibanaServices());
   });
 
   it('captures attachment call with expected params', () => {
@@ -99,6 +113,7 @@ describe('AddRuleAttachmentToChatButton', () => {
 
     expect(mockUseAgentBuilderAttachment).toHaveBeenCalledTimes(1);
     expect(getCapturedAttachment()).toEqual<UseAgentBuilderAttachmentParams>({
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: JSON.stringify({ name: 'Formatted Rule' }),

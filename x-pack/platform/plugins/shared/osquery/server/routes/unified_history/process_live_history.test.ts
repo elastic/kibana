@@ -70,7 +70,7 @@ describe('processLiveHistory', () => {
     expect(result.sortValuesMap.get('a2')).toEqual([2000, 2]);
   });
 
-  it('filters by activeFilters when provided', async () => {
+  it('returns all rows without post-fetch source filtering', async () => {
     const hits = [
       createLiveHit({
         _source: { action_id: 'live-1', alert_ids: [], queries: [{ action_id: 'q1', query: 'x' }] },
@@ -87,12 +87,12 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       spaceId: 'default',
-      activeFilters: new Set(['live']),
       logger: {} as never,
     });
 
-    expect(result.liveRows).toHaveLength(1);
+    expect(result.liveRows).toHaveLength(2);
     expect(result.liveRows[0].source).toBe('Live');
+    expect(result.liveRows[1].source).toBe('Rule');
   });
 
   it('enriches single query rows with result counts', async () => {
@@ -124,7 +124,8 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'default'
+      ['default'],
+      false
     );
   });
 
@@ -164,7 +165,32 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      'default'
+      ['default'],
+      false
+    );
+  });
+
+  it('uses integration namespaces and CCS setting for result counts', async () => {
+    mockGetResultCountsForActions.mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
+    );
+
+    await processLiveHistory({
+      liveHits: [createLiveHit()],
+      osqueryContext: createMockOsqueryContext() as never,
+      spaceId: 'production',
+      integrationNamespaces: ['prod'],
+      ccsEnabled: true,
+      logger: {} as never,
+    });
+
+    expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
+      expect.anything(),
+      ['query-1'],
+      ['prod'],
+      true
     );
   });
 

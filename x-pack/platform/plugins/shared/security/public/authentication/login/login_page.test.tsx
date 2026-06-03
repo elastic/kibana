@@ -372,6 +372,54 @@ describe('LoginPage', () => {
       });
     });
 
+    it('shows idle timeout message when msg=SESSION_IDLE_TIMEOUT', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+      window.location.href = `http://some-host/bar?msg=SESSION_IDLE_TIMEOUT`;
+
+      renderPage(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your session has timed out due to inactivity. Please log in again.')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('shows lifespan timeout message when msg=SESSION_LIFESPAN_TIMEOUT', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+      window.location.href = `http://some-host/bar?msg=SESSION_LIFESPAN_TIMEOUT`;
+
+      renderPage(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Your session has expired because it reached the maximum lifespan. Please log in again.'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+
     it('renders as expected when loginAssistanceMessage is set', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());

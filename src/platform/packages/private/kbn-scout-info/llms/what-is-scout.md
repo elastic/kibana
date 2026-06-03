@@ -39,7 +39,7 @@ Scout makes it easy to run tests your way – sequentially, in parallel, and mor
 - Validates the Playwright configuration files to ensure consistent behavior across test suites.
 - Limits certain fixtures to provide only the functionality that a test would need.
   - For example, the ES archiver only allows tests to load archive data; unloading is disabled as we take care of that for you at the end of the test run.
-- Extends some of the existing Playwright fixtures with additional helper methods (e.g, `page.waitForLoadingIndicatorHidden()`).
+- Extends some of the existing Playwright fixtures with additional helper methods (e.g., `page.testSubj.click()`, `page.gotoApp()`).
 - Initializes page objects lazily, so that they are initialized only when your test uses them.
 
 ## Fixtures

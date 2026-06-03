@@ -6,18 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  ESQLAst,
-  ESQLAstAllCommands,
-  ESQLAstForkCommand,
-  ESQLMessage,
-} from '@elastic/esql/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand } from '@elastic/esql/types';
 import { isSubQuery, Walker } from '@elastic/esql';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { errors } from '../../definitions/utils';
+import type { ESQLMessage } from '../../definitions/types';
 
-const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;
 
 export const validate = (
@@ -28,10 +23,6 @@ export const validate = (
 ): ESQLMessage[] => {
   const forkCommand = command as ESQLAstForkCommand;
   const messages: ESQLMessage[] = [];
-
-  if (forkCommand.args.length < MIN_BRANCHES) {
-    messages.push(errors.forkTooFewBranches(forkCommand));
-  }
 
   if (forkCommand.args.length > MAX_BRANCHES) {
     messages.push(errors.forkTooManyBranches(forkCommand));

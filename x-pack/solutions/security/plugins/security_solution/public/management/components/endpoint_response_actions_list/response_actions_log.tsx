@@ -288,7 +288,7 @@ export const ResponseActionsLog = memo<
           <ManagementEmptyStateWrapper>
             <EuiFlexItem data-test-subj={getTestId('empty-prompt')}>
               <EuiEmptyPrompt
-                iconType="editorUnorderedList"
+                iconType="listBullet"
                 titleSize="s"
                 title={
                   <h2>

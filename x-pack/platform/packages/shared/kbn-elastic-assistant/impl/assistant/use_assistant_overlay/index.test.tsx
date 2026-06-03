@@ -36,7 +36,7 @@ jest.mock('../use_conversation', () => {
 });
 
 jest.mock('../../connectorland/helpers');
-jest.mock('../../connectorland/use_load_connectors', () => {
+jest.mock('@kbn/inference-connectors', () => {
   return {
     useLoadConnectors: jest.fn(() => ({
       data: mockConnectors,

@@ -27,7 +27,7 @@ const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParam
 }) => ({
   ...res,
   client_id: clientId,
-  client_secret: clientSecret,
+  ...(clientSecret ? { client_secret: clientSecret } : {}),
 });
 
 export async function requestOAuthClientCredentialsToken(
@@ -38,13 +38,16 @@ export async function requestOAuthClientCredentialsToken(
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic'
 ): Promise<OAuthTokenResponse> {
   if (tokenEndpointAuthMethod === 'client_secret_basic') {
-    const { clientId, clientSecret, ...rest } = params;
     return await requestOAuthToken<
       Omit<ClientCredentialsOAuthRequestParams, 'clientId' | 'clientSecret'>
-    >(tokenUrl, OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE, configurationUtilities, logger, rest, {
-      username: clientId ?? '',
-      password: clientSecret ?? '',
-    });
+    >(
+      tokenUrl,
+      OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+      configurationUtilities,
+      logger,
+      rewriteBodyRequest(params),
+      true
+    );
   }
 
   return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(

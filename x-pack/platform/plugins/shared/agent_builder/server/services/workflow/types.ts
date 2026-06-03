@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowExecutionState } from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
+import type { WorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 
 export type WorkflowExecutionResult =
   | { success: true; execution: WorkflowExecutionState }

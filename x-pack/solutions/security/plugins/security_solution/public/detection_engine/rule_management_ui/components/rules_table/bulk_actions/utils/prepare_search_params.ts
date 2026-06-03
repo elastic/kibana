@@ -19,6 +19,7 @@ type PrepareSearchFilterProps =
       filterOptions: FilterOptions;
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
       dryRunResult?: DryRunResult;
     };
 
@@ -81,5 +82,6 @@ export const prepareSearchParams = ({
     query: convertRulesFilterToKQL(modifiedFilterOptions),
     ...(props.gapRange ? { gapRange: props.gapRange } : {}),
     ...(props.gapFillStatuses?.length ? { gapFillStatuses: props.gapFillStatuses } : {}),
+    ...(props.schedulerId ? { schedulerId: props.schedulerId } : {}),
   };
 };

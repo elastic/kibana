@@ -65,6 +65,7 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   EventAttachmentPayload,
+  UnifiedAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -128,6 +129,11 @@ export interface CasesPublicSetup {
 export interface CasesPublicStart {
   config: {
     templatesEnabled: boolean;
+    casesRedesign: {
+      list: boolean;
+      details: boolean;
+      settings: boolean;
+    };
   };
   api: {
     getRelatedCases: (
@@ -192,7 +198,8 @@ export type SupportedCaseAttachment =
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
+  | ExternalReferenceSOAttachmentPayload
+  | UnifiedAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

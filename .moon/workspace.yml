@@ -3,7 +3,6 @@ $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
   globs:
-    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
     - src/**/moon.yml
     - x-pack/**/moon.yml
     - examples/**/moon.yml
@@ -14,6 +13,9 @@ vcs:
 
 pipeline:
   installDependencies: false
+  syncWorkspace: false
+  syncProjectDependencies: false
+  syncProjects: false
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.

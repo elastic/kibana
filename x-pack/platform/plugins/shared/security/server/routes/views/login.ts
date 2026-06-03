@@ -43,6 +43,7 @@ export function defineLoginRoutes({
       security: {
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users.',
         },
         authz: {
           enabled: false,
@@ -69,14 +70,18 @@ export function defineLoginRoutes({
     {
       path: '/internal/security/login_state',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route provides login page configuration and must be accessible to unauthenticated users.',
+        },
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization because it only provides non-sensative information about authentication provider configuration',
+            'This route is opted out from authorization because it only provides non-sensitive information about authentication provider configuration',
         },
       },
       validate: false,
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       const { allowLogin, layout = 'form' } = license.getFeatures();

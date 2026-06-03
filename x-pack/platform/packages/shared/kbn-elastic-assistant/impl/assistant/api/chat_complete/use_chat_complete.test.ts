@@ -7,12 +7,16 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useChatComplete } from './use_chat_complete';
-import { useAssistantContext, useLoadConnectors } from '../../../..';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useAssistantContext } from '../../../..';
 import type { ChatCompleteResponse } from './post_chat_complete';
 import { postChatComplete } from './post_chat_complete';
 
 jest.mock('../../../..', () => ({
   useAssistantContext: jest.fn(),
+}));
+
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 
