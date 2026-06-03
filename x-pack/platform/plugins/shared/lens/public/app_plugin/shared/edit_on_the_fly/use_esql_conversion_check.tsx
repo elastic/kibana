@@ -12,6 +12,7 @@ import type {
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
+  GenericIndexPatternColumn,
   VisualizationState,
   LensDatasourceId,
   TypedLensSerializedState,
@@ -96,15 +97,14 @@ export const useEsqlConversionCheck = (
       );
     }
 
-    // Guard: trendline check
-    if (hasTrendLineLayer(state)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.trend_line_not_supported
-      );
-    }
+    // Detect trendline layer from metric visualization state
+    const trendlineLayerId = getTrendlineLayerId(state);
 
-    // Guard: layer count
-    if (layerIds.length > 1) {
+    // Guard: layer count (trendline layers don't count — they are auto-included)
+    const dataLayerIds = trendlineLayerId
+      ? layerIds.filter((id) => id !== trendlineLayerId)
+      : layerIds;
+    if (dataLayerIds.length > 1) {
       return getEsqlConversionDisabledSettings(
         esqlConversionFailureReasonMessages.multi_layer_not_supported
       );
@@ -185,6 +185,21 @@ export const useEsqlConversionCheck = (
       },
     ];
 
+    // If there is a trendline layer, attempt to convert it alongside the main layer
+    const trendlineLayer = trendlineLayerId
+      ? tryConvertTrendlineLayer(
+          trendlineLayerId,
+          layers[trendlineLayerId],
+          framePublicAPI,
+          coreStart,
+          startDependencies,
+          columnRoles
+        )
+      : undefined;
+    if (trendlineLayer) {
+      convertibleLayers.push(trendlineLayer);
+    }
+
     const newAttributes = convertFormBasedToTextBasedLayer({
       layersToConvert: convertibleLayers,
       attributes,
@@ -208,29 +223,97 @@ export const useEsqlConversionCheck = (
   }, [
     activeVisualization,
     attributes,
-    coreStart.uiSettings,
+    coreStart,
     datasourceId,
     datasourceStates,
     framePublicAPI,
     layerIds,
     showConvertToEsqlButton,
-    startDependencies.data.nowProvider,
+    startDependencies,
     visualization,
     persistedDoc,
   ]);
 };
 
-function hasTrendLineLayer(state: unknown) {
-  return Boolean(
+/**
+ * Extracts the trendline layer ID from metric visualization state, if present.
+ */
+function getTrendlineLayerId(state: unknown): string | undefined {
+  if (
     state &&
-      typeof state === 'object' &&
-      'trendlineLayerId' in state &&
-      'trendlineMetricAccessor' in state &&
-      'trendlineTimeAccessor' in state &&
-      state.trendlineLayerId &&
-      state.trendlineMetricAccessor &&
-      state.trendlineTimeAccessor
+    typeof state === 'object' &&
+    'trendlineLayerId' in state &&
+    typeof (state as { trendlineLayerId: unknown }).trendlineLayerId === 'string'
+  ) {
+    return (state as { trendlineLayerId: string }).trendlineLayerId;
+  }
+  return undefined;
+}
+
+/**
+ * Attempts to convert a trendline layer to ES|QL.
+ * Returns a ConvertibleLayer on success, or undefined if conversion fails.
+ * Trendline layers have includeEmptyRows stripped from date_histogram columns
+ * since ES|QL trendlines don't need gap-filling and this flag blocks conversion.
+ */
+function tryConvertTrendlineLayer(
+  trendlineLayerId: string,
+  layer: FormBasedLayer | undefined,
+  framePublicAPI: FramePublicAPI,
+  coreStart: CoreStart,
+  startDependencies: LensPluginStartDependencies,
+  columnRoles: ColumnRoles
+): ConvertibleLayer | undefined {
+  if (!layer?.columnOrder || !layer?.columns) return undefined;
+
+  // Strip includeEmptyRows from date_histogram columns
+  const columns = Object.fromEntries(
+    Object.entries(layer.columns).map(([colId, col]) => {
+      const colWithParams = col as GenericIndexPatternColumn & {
+        params?: Record<string, unknown>;
+      };
+      return col.operationType === 'date_histogram' && colWithParams.params?.includeEmptyRows
+        ? [colId, { ...col, params: { ...colWithParams.params, includeEmptyRows: false } }]
+        : [colId, col];
+    })
   );
+
+  const columnEntries = layer.columnOrder.map((colId) => [colId, columns[colId]] as const);
+  const [, esAggEntries] = partition(
+    columnEntries,
+    ([, col]) =>
+      (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+        operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
+      col.operationType !== 'static_value'
+  );
+
+  try {
+    const esqlLayer = generateEsqlQuery(
+      esAggEntries,
+      { ...layer, columns },
+      framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+      coreStart.uiSettings,
+      framePublicAPI.dateRange,
+      startDependencies.data.nowProvider.get(),
+      columnRoles
+    );
+    if (!isEsqlQuerySuccess(esqlLayer)) return undefined;
+
+    return {
+      id: trendlineLayerId,
+      icon: 'layers',
+      name: 'Trendline',
+      type: layerTypes.DATA,
+      query: esqlLayer.esql,
+      isConvertibleToEsql: true,
+      conversionData: {
+        esAggsIdMap: esqlLayer.esAggsIdMap,
+        partialRows: esqlLayer.partialRows,
+      },
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 function isValidDatasourceState(

@@ -18,6 +18,7 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -35,8 +36,10 @@ import {
   buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
+  generateAdHocDataViewId,
   generateApiLayer,
   getAdhocDataviews,
+  getDataSourceIndex,
   isTextBasedLayer,
   nonNullable,
   operationFromColumn,
@@ -665,6 +668,96 @@ export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'sta
   state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
 };
 
+/**
+ * Builds a text-based trendline layer for ES|QL metric charts.
+ * The trendline layer needs its own ES|QL query with BUCKET() time bucketing
+ * and copies of the metric columns from the main layer.
+ */
+function buildEsqlTrendlineLayer(
+  config: MetricConfig,
+  mainLayerId: string,
+  mainLayer: {
+    index: string;
+    query: { esql: string };
+    timeField?: string;
+    columns: TextBasedLayerColumn[];
+  }
+): { layer: TextBasedLayer; dataViewId: string } | undefined {
+  const [primaryMetric] = config.metrics ?? [];
+  if (
+    !primaryMetric ||
+    isSecondaryMetric(primaryMetric) ||
+    primaryMetric.background_chart?.type !== 'trend'
+  )
+    return undefined;
+
+  const dataSource = 'data_source' in config ? config.data_source : undefined;
+  if (!dataSource || dataSource.type !== 'esql') return undefined;
+
+  const timeField = mainLayer.timeField;
+  if (!timeField) return undefined;
+
+  // Build the trendline query: take the main query and add time bucketing
+  const mainQuery = dataSource.query;
+  const bucketExpr = `${timeField} = BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
+  let trendlineQuery: string;
+  if (/\bSTATS\b/i.test(mainQuery)) {
+    trendlineQuery = /\bBY\b/i.test(mainQuery)
+      ? `${mainQuery}, ${bucketExpr}`
+      : `${mainQuery} BY ${bucketExpr}`;
+  } else {
+    trendlineQuery = `${mainQuery} | STATS COUNT(*) BY ${bucketExpr}`;
+  }
+
+  // Build trendline columns: time bucket + copies of metric columns from main layer
+  const timeColumn: TextBasedLayerColumn = {
+    columnId: HISTOGRAM_COLUMN_NAME,
+    fieldName: timeField,
+    meta: { type: 'date' },
+  };
+
+  const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
+  const trendlineColumns: TextBasedLayerColumn[] = [
+    timeColumn,
+    ...(metricColumn ? [{ ...metricColumn, columnId: `${ACCESSOR}_trendline` }] : []),
+  ];
+
+  // Add secondary metric column if present
+  const secondaryColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('secondary')
+  );
+  if (secondaryColumn) {
+    trendlineColumns.push({
+      ...secondaryColumn,
+      columnId: `${getAccessorName('secondary')}_trendline`,
+    });
+  }
+
+  // Add breakdown column if present
+  const breakdownColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('breakdown')
+  );
+  if (breakdownColumn) {
+    trendlineColumns.push({
+      ...breakdownColumn,
+      columnId: `${getAccessorName('breakdown')}_trendline`,
+    });
+  }
+
+  const dataSourceIndex = getDataSourceIndex(dataSource);
+  const dataViewId = generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' });
+
+  return {
+    layer: {
+      index: dataViewId,
+      query: { esql: trendlineQuery },
+      timeField,
+      columns: trendlineColumns,
+    },
+    dataViewId,
+  };
+}
+
 export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricConfigNoESQL);
@@ -672,6 +765,45 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
   const visualization = buildVisualizationState(config);
+
+  // For ES|QL metric charts with trendlines, create the trendline text-based layer.
+  // buildDatasourceStates only creates the main layer; the trendline needs its own
+  // layer with a BUCKET() time-bucketing query.
+  const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
+  const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
+  if (trendlineLayerId && mainLayer && 'query' in mainLayer && 'columns' in mainLayer) {
+    const trendlineResult = buildEsqlTrendlineLayer(
+      config,
+      DEFAULT_LAYER_ID,
+      mainLayer as {
+        index: string;
+        query: { esql: string };
+        timeField?: string;
+        columns: TextBasedLayerColumn[];
+      }
+    );
+    if (trendlineResult) {
+      layers.textBased = {
+        ...layers.textBased,
+        layers: {
+          ...layers.textBased!.layers,
+          [trendlineLayerId]: trendlineResult.layer,
+        },
+      };
+      // Register the trendline layer's dataview so ad-hoc dataviews are generated
+      const dataSource = 'data_source' in config ? config.data_source : undefined;
+      if (dataSource) {
+        const dataSourceIndex = getDataSourceIndex(dataSource);
+        usedDataviews[trendlineLayerId] = {
+          type: 'adHocDataView',
+          ...dataSourceIndex,
+          ...(dataSource.type === 'esql'
+            ? { dataSourceType: 'esql' as const, esqlQuery: dataSource.query }
+            : {}),
+        };
+      }
+    }
+  }
 
   const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
 
