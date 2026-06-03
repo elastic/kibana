@@ -25,6 +25,7 @@ plugins:
     - discover_enhanced
     - entity_store
     - error_boundary_example
+    - event_annotation_listing
     - exploratory_view
     - fleet
     - flyoutSystemExamples

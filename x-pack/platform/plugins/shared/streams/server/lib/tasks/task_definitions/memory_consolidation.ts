@@ -44,9 +44,10 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
               const { _task } = runContext.taskInstance
                 .params as TaskParams<MemoryConsolidationTaskParams>;
 
-              const { taskClient, inferenceClient } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
-              });
+              const { taskClient, inferenceClient, scopedClusterClient } =
+                await taskContext.getScopedClients({
+                  request: runContext.fakeRequest,
+                });
 
               const taskLogger = taskContext.logger.get('memory_consolidation');
 
@@ -76,7 +77,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
-                esClient: taskContext.getInternalEsClient(),
+                esClient: scopedClusterClient.asCurrentUser,
               });
 
               try {

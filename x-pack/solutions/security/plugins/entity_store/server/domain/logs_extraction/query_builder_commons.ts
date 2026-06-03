@@ -46,6 +46,8 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
+export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
+
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
