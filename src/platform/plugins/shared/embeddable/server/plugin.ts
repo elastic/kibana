@@ -9,6 +9,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
 import { identity } from 'lodash';
+import { distinctUntilChanged } from 'rxjs';
+
 import type {
   PersistableStateService,
   PersistableStateMigrateFn,
@@ -96,6 +98,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart): EmbeddableStart {
+    core.featureFlags
+      .getBooleanValue$('lens.apiFormat', false)
+      .pipe(distinctUntilChanged())
+      .subscribe((lensApiFormatEnabled) => {
+        this.transformsRegistry.resetCache();
+      });
+
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
