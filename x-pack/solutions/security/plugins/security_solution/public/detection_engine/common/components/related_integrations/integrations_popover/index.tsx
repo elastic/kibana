@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { IntegrationDescription } from '../integrations_description';
@@ -53,6 +54,7 @@ const IntegrationListItem = styled('li')`
 const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { integrations, isLoaded } = useRelatedIntegrations(relatedIntegrations);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const enabledIntegrations = useMemo(() => {
     return integrations.filter(
@@ -77,6 +79,7 @@ const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopov
       <EuiPopover
         ownFocus
         data-test-subj={'IntegrationsDisplayPopover'}
+        aria-labelledby={popoverTitleId}
         button={
           <EuiBadge
             iconType={'package'}
@@ -92,7 +95,7 @@ const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopov
         closePopover={() => setPopoverOpen(!isPopoverOpen)}
         repositionOnScroll
       >
-        <PopoverTitleWrapper data-test-subj={'IntegrationsPopoverTitle'}>
+        <PopoverTitleWrapper id={popoverTitleId} data-test-subj={'IntegrationsPopoverTitle'}>
           {i18n.INTEGRATIONS_POPOVER_TITLE(numIntegrations)}
         </PopoverTitleWrapper>
         <PopoverContentWrapper data-test-subj={'IntegrationsPopoverContentWrapper'}>

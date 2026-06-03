@@ -13,6 +13,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
+
 import { inputsFormat } from '../../../../../../../../common/constants';
 import {
   formatInputs,
@@ -368,7 +370,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          yaml.parse,
+          { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression },
           spaceSettings
         );
         setValidationResults(newValidationResult);

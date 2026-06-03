@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +28,6 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -43,11 +43,11 @@ import {
   ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
 } from '../components/home/constants';
 import {
-  EntitiesTableSection,
   DataViewContext,
-  useEntityURLState,
   type EntitiesBaseURLQuery,
+  EntitiesTableSection,
   type URLQuery,
+  useEntityURLState,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
@@ -129,18 +129,11 @@ const EntityAnalyticsHomePageContent = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const isEnterprise = useLicense().isEnterprise();
   const leadGenerationEnabled =
     useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const spaceId = useSpaceId();
-  const { dataView: entityDataView, isLoading: entityDataViewLoading } =
-    useEntityStoreDataView(spaceId);
+  const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
 
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
@@ -170,11 +163,6 @@ const EntityAnalyticsHomePageContent = () => {
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? entityDataViewLoading : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
-  );
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -209,8 +197,8 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !entityDataViewLoading : oldIndicesExist),
-    [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
   );
 
   const showEmptyPrompt = !indicesExist;
@@ -235,7 +223,7 @@ const EntityAnalyticsHomePageContent = () => {
     agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
   }, [agentBuilder]);
 
-  if (newDataViewPickerEnabled && entityDataViewLoading) {
+  if (dataViewLoading) {
     return <PageLoader />;
   }
 
@@ -250,12 +238,7 @@ const EntityAnalyticsHomePageContent = () => {
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar
-          dataView={entityDataView}
-          id={InputsModelId.global}
-          sourcererDataViewSpec={oldSourcererDataViewSpec}
-          hideDatePicker
-        />
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
       </FiltersGlobal>
 
       <HeaderPage
@@ -269,79 +252,83 @@ const EntityAnalyticsHomePageContent = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="gear"
-                size="m"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
                   { defaultMessage: 'Watchlists settings' }
                 )}
-                href={getSecuritySolutionUrl({
-                  deepLinkId: SecurityPageName.entityAnalyticsManagement,
-                  path: `/${TabId.Watchlists}`,
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  iconType="gear"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
+                    { defaultMessage: 'Watchlists settings' }
+                  )}
+                  href={getSecuritySolutionUrl({
+                    deepLinkId: SecurityPageName.entityAnalyticsManagement,
+                    path: `/${TabId.Watchlists}`,
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}
       />
 
-      {isSourcererLoading ? (
-        <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="l">
-          {leadGenerationEnabled && !leadsReadPermissionError && (
-            <EuiFlexItem>
-              <TopThreatHuntingLeads
-                leads={leads}
-                totalCount={totalCount}
-                isLoading={isLeadsLoading}
-                isGenerating={isGenerating}
-                hasGenerated={hasGenerated}
-                lastRunTimestamp={lastRunTimestamp}
-                isScheduled={isScheduled}
-                onToggleSchedule={toggleSchedule}
-                onSeeAll={handleOpenFlyout}
-                onLeadClick={handleOpenLeadInChat}
-                onHuntInChat={handleHuntInChat}
-                onGenerate={generate}
-                connectorId={connectorId}
-                hasValidConnector={hasValidConnector}
-                onConnectorIdSelected={safeSetConnectorId}
-                isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
-                hasWritePermissionError={leadsWritePermissionError}
-              />
-            </EuiFlexItem>
-          )}
-
+      <EuiFlexGroup direction="column" gutterSize="l">
+        {leadGenerationEnabled && !leadsReadPermissionError && (
           <EuiFlexItem>
-            <EuiFlexGroup wrap gutterSize="m">
-              <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
-                <EuiPanel hasBorder>
-                  <DynamicRiskLevelPanel
-                    watchlistId={selectedWatchlistId}
-                    entityDataView={entityDataView}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
-                <EuiPanel hasBorder>
-                  <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiPanel hasBorder>
-            <EntityAnalyticsEntitiesTable
-              watchlistId={selectedWatchlistId}
-              entityDataView={entityDataView}
-              entityDataViewLoading={entityDataViewLoading}
+            <TopThreatHuntingLeads
+              leads={leads}
+              totalCount={totalCount}
+              isLoading={isLeadsLoading}
+              isGenerating={isGenerating}
+              hasGenerated={hasGenerated}
+              lastRunTimestamp={lastRunTimestamp}
+              isScheduled={isScheduled}
+              onToggleSchedule={toggleSchedule}
+              onSeeAll={handleOpenFlyout}
+              onLeadClick={handleOpenLeadInChat}
+              onHuntInChat={handleHuntInChat}
+              onGenerate={generate}
+              connectorId={connectorId}
+              hasValidConnector={hasValidConnector}
+              onConnectorIdSelected={safeSetConnectorId}
+              isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
+              hasWritePermissionError={leadsWritePermissionError}
             />
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
+          </EuiFlexItem>
+        )}
+
+        <EuiFlexItem>
+          <EuiFlexGroup wrap gutterSize="m">
+            <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
+              <EuiPanel hasBorder>
+                <DynamicRiskLevelPanel
+                  watchlistId={selectedWatchlistId}
+                  entityDataView={dataView}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
+              <EuiPanel hasBorder>
+                <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiPanel hasBorder>
+          <EntityAnalyticsEntitiesTable
+            watchlistId={selectedWatchlistId}
+            entityDataView={dataView}
+            entityDataViewLoading={dataViewLoading}
+          />
+        </EuiPanel>
+      </EuiFlexGroup>
 
       {leadGenerationEnabled && isFlyoutOpen && (
         <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />

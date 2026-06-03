@@ -46,6 +46,9 @@ export interface UseDimensionsWipeParams {
  *
  * We only act on a fresh, successful response (gates on `isLoading` and
  * `hasError`) to avoid discarding intent based on stale or invalid data.
+ * We also bail when `allDimensions` is empty (no response yet, e.g. on a
+ * freshly duplicated Discover tab, or a stream with no dimensions):
+ * pruning against an empty universe would discard intent we should not touch.
  */
 export function useDimensionsWipe({
   selectedDimensions,
@@ -57,7 +60,7 @@ export function useDimensionsWipe({
   onBreakdownFieldChange,
 }: UseDimensionsWipeParams): void {
   useEffect(() => {
-    if (isLoading || hasError || selectedDimensions.length === 0) {
+    if (isLoading || hasError || selectedDimensions.length === 0 || allDimensions.length === 0) {
       return;
     }
     const pruned = selectedDimensions.filter((dimension) =>
