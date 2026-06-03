@@ -7,7 +7,16 @@
 
 export { detectionSchema, type Detection } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
-export { sigEventSchema, type SigEvent } from './events';
+export {
+  SIG_EVENT_IMPACT_OPTIONS,
+  SIG_EVENT_STATUS_OPTIONS,
+  sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
+  type SigEvent,
+  type SigEventStatus,
+  type SigEventImpact,
+} from './events';
 export {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
