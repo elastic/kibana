@@ -40,24 +40,51 @@ If Scout is already running on port 5620 — reuse it. Tell the user an existing
 ```
 Environment:
   url: $KIBANA_TEST_URL
-  username: $KIBANA_TEST_USERNAME
+  username: $KIBANA_TEST_USERNAME   # browser login only — NOT used for API calls
   password: $KIBANA_TEST_PASSWORD
-  data-setup: skip    # omit to run data setup
-  space: <id>         # omit to use "exploratory-testing"
+  api-key: $KIBANA_API_KEY          # Kibana-native API key — required for all curl setup
+  data-setup: skip                  # omit to run data setup
+  space: <id>                       # omit to use "exploratory-testing"
 ```
-Skip Scout startup. Verify connectivity:
+
+> **API key format:** the key must be a **Kibana-native** API key, not an Elasticsearch API key — they are different and Kibana rejects ES-origin keys on most endpoints. Create one via: `POST <kibana-url>/api/security/api_key` (authenticated as the admin user in the browser, or via the Kibana UI at **Stack Management → API Keys**). The encoded value (`encoded` field in the response) is what goes in `api-key:`. On ECH and ESS, basic auth is blocked for external HTTP clients — `username`/`password` are used **only** for the browser login step.
+
+Skip Scout startup. Verify connectivity and API key in one step:
 ```bash
-curl -s -u "<username>:<password>" "<url>/api/status" \
-  | python3 -c "import sys,json; s=json.load(sys.stdin); \
-    exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
+# Check Kibana is reachable (public endpoint, no auth needed)
+curl -s "<url>/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
+  exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
+
+# Validate the API key before any setup work begins:
+# A 200 or 409 means the key is valid; 401 means the key is wrong or ES-origin.
+VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "Authorization: ApiKey $APIKEY" \
+  -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+  -X POST "$KIBANA_URL/api/spaces/space" \
+  -d '{"id":"exploratory-testing","name":"Exploratory Testing","color":"#DD0A73"}')
+
+if [[ "$VALIDATE_STATUS" == "401" ]]; then
+  echo "API key rejected (401). Ensure you are using a Kibana-native key, not an ES key." >&2
+  exit 1
+elif [[ "$VALIDATE_STATUS" == "200" || "$VALIDATE_STATUS" == "409" ]]; then
+  echo "API key valid (HTTP $VALIDATE_STATUS). Proceeding."
+else
+  echo "Unexpected response $VALIDATE_STATUS when validating API key." >&2
+  exit 1
+fi
 ```
-If unreachable — **stop** and tell the user to check the environment.
+
+**No API key available?** If the invoker cannot provide a Kibana API key, fall back to browser-only setup:
+- Navigate to `<url>/app/management/kibana/spaces` as the logged-in admin and create the `exploratory-testing` space via the UI.
+- Navigate to `<url>/app/management/security/api_keys`, create a new API key with `All spaces / All privileges`, copy the `encoded` value, and use it for all subsequent curl calls.
+- Record in `config.json → skipped_setup`: `{ "step": "api-key-browser-created", "reason": "no api-key provided in Environment block; created via UI" }`.
 
 Resolve env var references in credentials (`$VAR` → environment variable value) before using them.
 
 **Failures:**
 - Scout not available within 10 min → **Stop.** Tell user to check `node scripts/scout.js start-server` logs.
-- User-provided environment unreachable → **Stop.** Tell user to check URL and credentials.
+- User-provided environment unreachable → **Stop.** Tell user to check the URL.
+- API key returns 401 → **Stop.** Tell user: "The API key was rejected. On ECH/ESS, use a Kibana-native key (Stack Management → API Keys), not an Elasticsearch API key."
 
 ---
 
@@ -195,8 +222,9 @@ Write `.exploratory-session/config.json`:
   "specs_fallback": "https://www.elastic.co/docs/solutions/security",
   "session_timeout_minutes": 90,
   "credentials": {
-    "username": "<admin username — elastic or user-provided>",
-    "password": "<admin password>"
+    "username": "<admin username — for browser login only>",
+    "password": "<admin password — for browser login only>",
+    "api_key": "<Kibana-native API key encoded value — for all curl/API setup calls>"
   },
   "created_flow_spaces": [],
   "deferred_flows": [],

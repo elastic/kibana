@@ -24,7 +24,7 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 ## How to invoke
 
-**Mode:** Single for new areas (investigation chains to any depth). Parallel when `knowledge/` is populated and speed matters — investigation limited to one level (`phases/2-explore.md`).
+**Mode:** Single for new areas (full investigation chains). Parallel when `knowledge/` is populated — investigation limited to one level (`phases/2-explore.md`).
 
 ```
 Read and follow exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
@@ -39,7 +39,7 @@ Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
 ```
-`Specs:`, `Session-timeout:`, `isolate:` optional. User-provided: append `Environment:` block (`phases/0-setup.md`).
+`Specs:`, `Session-timeout:`, `isolate:` optional. User-provided: add `Environment:` block with `api-key:` for ECH/ESS (`phases/0-setup.md`).
 
 ## Red Flags
 
