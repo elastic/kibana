@@ -69,7 +69,7 @@ export const createGetDocViewer =
               streamsFeature={streamsFeature}
               cpsManager={services.cps?.cpsManager}
               indexes={indexes}
-              docViewActions={params.actions}
+              docViewActions={toolkit.actions}
               {...props}
             />
           ),
