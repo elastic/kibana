@@ -8,15 +8,15 @@
 /**
  * Graph Streams demo page — /app/streams/_graph
  *
- * Lets a user:
- *  1. Pick a preset topology (k8s, e-commerce, firewall).
- *  2. Load it (provisions graph nodes via POST /internal/streams/_graph).
- *  3. Edit a sample document and test-route it (POST /internal/streams/_graph/_route_test).
- *  4. Delete the topology when done.
+ * Flow:
+ *  1. "Load all topologies" button at the top provisions all presets at once.
+ *  2. Pick a topology from the dropdown and view the graph.
+ *  3. Edit the sample document and click "Test route" to simulate routing.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiButton,
@@ -40,7 +40,7 @@ import { GRAPH_PRESETS } from './presets';
 import { TopologyGraph } from './topology_graph';
 
 // ---------------------------------------------------------------------------
-// Types mirroring the server route responses
+// Types
 // ---------------------------------------------------------------------------
 
 interface LoadResult {
@@ -60,40 +60,46 @@ interface RouteTestResult {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const LoadResultPanel = ({ result }: { result: LoadResult }) => {
-  const hasErrors = result.results.some((r) => r.status === 'error');
-  return (
-    <EuiCallOut
-      title={
-        hasErrors
-          ? i18n.translate('xpack.streams.graphDemo.loadPartialError', {
-              defaultMessage: 'Topology loaded with errors',
-            })
-          : i18n.translate('xpack.streams.graphDemo.loadSuccess', {
-              defaultMessage: 'Topology "{name}" loaded — {count} nodes',
-              values: { name: result.topology, count: result.nodes.length },
-            })
-      }
-      color={hasErrors ? 'warning' : 'success'}
-      iconType={hasErrors ? 'warning' : 'check'}
-    >
-      <EuiBasicTable
-        items={result.results}
-        columns={[
-          { field: 'name', name: 'Node' },
-          {
-            field: 'status',
-            name: 'Status',
-            render: (status: string) => (
-              <EuiBadge color={status === 'created' ? 'success' : 'danger'}>{status}</EuiBadge>
-            ),
-          },
-          { field: 'error', name: 'Error', render: (err?: string) => err ?? '—' },
-        ]}
-      />
-    </EuiCallOut>
-  );
-};
+const AllLoadResultsPanel = ({ results }: { results: LoadResult[] }) => (
+  <>
+    {results.map((r) => {
+      const hasErrors = r.results.some((n) => n.status === 'error');
+      return (
+        <React.Fragment key={r.topology}>
+          <EuiText size="s">
+            <strong>{r.topology}</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiBasicTable
+            items={r.results}
+            columns={[
+              { field: 'name', name: 'Node', width: '40%' },
+              {
+                field: 'status',
+                name: 'Status',
+                width: '15%',
+                render: (status: string) => (
+                  <EuiBadge color={status === 'created' ? 'success' : 'danger'}>{status}</EuiBadge>
+                ),
+              },
+              {
+                field: 'error',
+                name: 'Error',
+                render: (err?: string) => (
+                  <EuiText size="xs" color={err ? 'danger' : 'subdued'}>
+                    {err ?? '—'}
+                  </EuiText>
+                ),
+              },
+            ]}
+          />
+          {hasErrors && <EuiSpacer size="s" />}
+          <EuiSpacer size="m" />
+        </React.Fragment>
+      );
+    })}
+  </>
+);
 
 const RouteTestResultPanel = ({ result }: { result: RouteTestResult }) => {
   if (result.error) {
@@ -159,20 +165,22 @@ export const GraphStreamsDemoPage = () => {
     },
   } = useKibana();
 
-  const [selectedPresetId, setSelectedPresetId] = useState<string>(GRAPH_PRESETS[0].id);
-  const [loadResult, setLoadResult] = useState<LoadResult | null>(null);
-  const [loadLoading, setLoadLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  // ---- load-all state ----
+  const [loadAllLoading, setLoadAllLoading] = useState(false);
+  const [loadAllResults, setLoadAllResults] = useState<LoadResult[] | null>(null);
+  const [allLoaded, setAllLoaded] = useState(false);
+  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
 
+  // ---- preset / graph state ----
+  const [selectedPresetId, setSelectedPresetId] = useState<string>(GRAPH_PRESETS[0].id);
   const [docText, setDocText] = useState<string>(() =>
     JSON.stringify(GRAPH_PRESETS[0].sampleDocument, null, 2)
   );
+
+  // ---- route test state ----
   const [routeTestResult, setRouteTestResult] = useState<RouteTestResult | null>(null);
   const [routeTestLoading, setRouteTestLoading] = useState(false);
   const routeTestResultRef = useRef<HTMLDivElement>(null);
-
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteResult, setDeleteResult] = useState<string | null>(null);
 
   const selectedPreset = GRAPH_PRESETS.find((p) => p.id === selectedPresetId) ?? GRAPH_PRESETS[0];
 
@@ -186,35 +194,69 @@ export const GraphStreamsDemoPage = () => {
     const id = e.target.value;
     setSelectedPresetId(id);
     const preset = GRAPH_PRESETS.find((p) => p.id === id);
-    if (preset) {
-      setDocText(JSON.stringify(preset.sampleDocument, null, 2));
-    }
-    setLoadResult(null);
+    if (preset) setDocText(JSON.stringify(preset.sampleDocument, null, 2));
     setRouteTestResult(null);
-    setDeleteResult(null);
-    setLoadError(null);
   }, []);
 
-  const handleLoad = useCallback(async () => {
-    setLoadLoading(true);
-    setLoadError(null);
-    setLoadResult(null);
+  // Load all presets sequentially (state machine processes one change set at a time)
+  const handleLoadAll = useCallback(async () => {
+    setLoadAllLoading(true);
+    setLoadAllResults(null);
     setRouteTestResult(null);
-    try {
-      const result = await streamsRepositoryClient.fetch('POST /internal/streams/_graph', {
-        params: {
-          body: selectedPreset.topology as Parameters<
-            typeof streamsRepositoryClient.fetch<'POST /internal/streams/_graph'>
-          >[1]['params']['body'],
-        },
-      });
-      setLoadResult(result);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoadLoading(false);
+
+    const results: LoadResult[] = [];
+    for (const preset of GRAPH_PRESETS) {
+      try {
+        const result = await streamsRepositoryClient.fetch('POST /internal/streams/_graph', {
+          params: {
+            body: preset.topology as Parameters<
+              typeof streamsRepositoryClient.fetch<'POST /internal/streams/_graph'>
+            >[1]['params']['body'],
+          },
+        });
+        results.push(result);
+      } catch (err) {
+        results.push({
+          topology: preset.topology.name,
+          nodes: [],
+          results: [
+            {
+              name: preset.topology.name,
+              status: 'error',
+              error: err instanceof Error ? err.message : String(err),
+            },
+          ],
+        });
+      }
     }
-  }, [selectedPreset, streamsRepositoryClient]);
+
+    setLoadAllResults(results);
+    setAllLoaded(true);
+    setLoadAllLoading(false);
+  }, [streamsRepositoryClient]);
+
+  // Delete all presets sequentially
+  const handleDeleteAll = useCallback(async () => {
+    setDeleteAllLoading(true);
+    for (const preset of GRAPH_PRESETS) {
+      try {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/_graph/{topology}', {
+          params: {
+            path: { topology: preset.topology.name },
+            body: preset.topology as Parameters<
+              typeof streamsRepositoryClient.fetch<'DELETE /internal/streams/_graph/{topology}'>
+            >[1]['params']['body'],
+          },
+        });
+      } catch {
+        // best-effort — continue deleting others even if one fails
+      }
+    }
+    setLoadAllResults(null);
+    setAllLoaded(false);
+    setRouteTestResult(null);
+    setDeleteAllLoading(false);
+  }, [streamsRepositoryClient]);
 
   const handleRouteTest = useCallback(async () => {
     let parsedDoc: Record<string, unknown>;
@@ -232,10 +274,7 @@ export const GraphStreamsDemoPage = () => {
         'POST /internal/streams/_graph/_route_test',
         {
           params: {
-            body: {
-              source: selectedPreset.entrySource,
-              document: parsedDoc,
-            },
+            body: { source: selectedPreset.entrySource, document: parsedDoc },
           },
         }
       );
@@ -247,27 +286,18 @@ export const GraphStreamsDemoPage = () => {
     }
   }, [docText, selectedPreset, streamsRepositoryClient]);
 
-  const handleDelete = useCallback(async () => {
-    setDeleteLoading(true);
-    setDeleteResult(null);
-    try {
-      await streamsRepositoryClient.fetch('DELETE /internal/streams/_graph/{topology}', {
-        params: {
-          path: { topology: selectedPreset.topology.name },
-          body: selectedPreset.topology as Parameters<
-            typeof streamsRepositoryClient.fetch<'DELETE /internal/streams/_graph/{topology}'>
-          >[1]['params']['body'],
-        },
+  // Derive accordion button label
+  const totalNodes = loadAllResults?.reduce((sum, r) => sum + r.nodes.length, 0) ?? 0;
+  const hasLoadErrors = loadAllResults?.some((r) => r.results.some((n) => n.status === 'error'));
+  const accordionLabel = hasLoadErrors
+    ? i18n.translate('xpack.streams.graphDemo.loadedWithErrors', {
+        defaultMessage: '{count} topologies loaded (with errors)',
+        values: { count: loadAllResults?.length ?? 0 },
+      })
+    : i18n.translate('xpack.streams.graphDemo.loadedOk', {
+        defaultMessage: '{topologies} topologies · {nodes} nodes provisioned',
+        values: { topologies: loadAllResults?.length ?? 0, nodes: totalNodes },
       });
-      setLoadResult(null);
-      setRouteTestResult(null);
-      setDeleteResult(`Topology "${selectedPreset.topology.name}" deleted`);
-    } catch (err) {
-      setDeleteResult(`Delete failed: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setDeleteLoading(false);
-    }
-  }, [selectedPreset, streamsRepositoryClient]);
 
   return (
     <>
@@ -277,24 +307,59 @@ export const GraphStreamsDemoPage = () => {
         })}
         description={i18n.translate('xpack.streams.graphDemo.pageDescription', {
           defaultMessage:
-            'Prototype: provision a non-hierarchical graph topology and test-route documents through it. ' +
+            'Prototype: provision non-hierarchical graph topologies and test-route documents through them. ' +
             'Powered by ES reroute ingest processors on the streams-kbn branch.',
         })}
+        rightSideItems={[
+          allLoaded ? (
+            <EuiButtonEmpty
+              key="delete"
+              color="danger"
+              isLoading={deleteAllLoading}
+              onClick={handleDeleteAll}
+              iconType="trash"
+              size="s"
+            >
+              {i18n.translate('xpack.streams.graphDemo.deleteAllButton', {
+                defaultMessage: 'Delete all',
+              })}
+            </EuiButtonEmpty>
+          ) : null,
+          <EuiButton
+            key="load"
+            fill
+            size="s"
+            isLoading={loadAllLoading}
+            onClick={handleLoadAll}
+            iconType="play"
+          >
+            {i18n.translate('xpack.streams.graphDemo.loadAllButton', {
+              defaultMessage: 'Load all topologies',
+            })}
+          </EuiButton>,
+        ].filter(Boolean)}
       />
       <StreamsAppPageTemplate.Body>
-        {/* Preset selector */}
+        {/* Load results accordion */}
+        {loadAllResults && (
+          <>
+            <EuiAccordion
+              id="load-all-results"
+              buttonContent={accordionLabel}
+              initialIsOpen={!!hasLoadErrors}
+              paddingSize="m"
+            >
+              <AllLoadResultsPanel results={loadAllResults} />
+            </EuiAccordion>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        {/* Topology explorer */}
         <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.streams.graphDemo.step1', {
-                defaultMessage: '1. Choose a topology',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('xpack.streams.graphDemo.presetLabel', {
-              defaultMessage: 'Preset topology',
+              defaultMessage: 'Topology',
             })}
           >
             <EuiSelect
@@ -313,56 +378,6 @@ export const GraphStreamsDemoPage = () => {
             executedPipelines={routeTestResult?.executedPipelines}
             landedIn={routeTestResult?.landedIn}
           />
-          <EuiSpacer size="m" />
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton fill isLoading={loadLoading} onClick={handleLoad} iconType="play">
-                {i18n.translate('xpack.streams.graphDemo.loadButton', {
-                  defaultMessage: 'Load topology',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            {loadResult && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  isLoading={deleteLoading}
-                  onClick={handleDelete}
-                  iconType="trash"
-                >
-                  {i18n.translate('xpack.streams.graphDemo.deleteButton', {
-                    defaultMessage: 'Delete topology',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          {loadError && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut title="Load failed" color="danger" iconType="error">
-                <EuiText size="s">
-                  <pre>{loadError}</pre>
-                </EuiText>
-              </EuiCallOut>
-            </>
-          )}
-          {deleteResult && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                title={deleteResult}
-                color={deleteResult.startsWith('Delete failed') ? 'danger' : 'success'}
-                iconType={deleteResult.startsWith('Delete failed') ? 'error' : 'check'}
-              />
-            </>
-          )}
-          {loadResult && (
-            <>
-              <EuiSpacer size="m" />
-              <LoadResultPanel result={loadResult} />
-            </>
-          )}
         </EuiPanel>
 
         <EuiSpacer size="m" />
@@ -371,8 +386,8 @@ export const GraphStreamsDemoPage = () => {
         <EuiPanel hasBorder paddingSize="m">
           <EuiTitle size="s">
             <h3>
-              {i18n.translate('xpack.streams.graphDemo.step2', {
-                defaultMessage: '2. Test-route a document',
+              {i18n.translate('xpack.streams.graphDemo.routeTestTitle', {
+                defaultMessage: 'Test-route a document',
               })}
             </h3>
           </EuiTitle>
@@ -381,7 +396,7 @@ export const GraphStreamsDemoPage = () => {
             <p>
               {i18n.translate('xpack.streams.graphDemo.routeTestHint', {
                 defaultMessage:
-                  'Edit the sample document below and click "Test route" to see which node it lands in. ' +
+                  'Edit the sample document and click "Test route" to see which node it lands in. ' +
                   'Uses ES cluster-level simulate ingest — no data is persisted.',
               })}
             </p>
@@ -396,31 +411,37 @@ export const GraphStreamsDemoPage = () => {
           >
             <EuiTextArea
               fullWidth
-              rows={12}
+              rows={10}
               value={docText}
               onChange={(e) => setDocText(e.target.value)}
               style={{ fontFamily: 'monospace', fontSize: 12 }}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
-          <EuiButton
-            fill
-            isLoading={routeTestLoading}
-            disabled={!loadResult}
-            onClick={handleRouteTest}
-            iconType="inspect"
-          >
-            {i18n.translate('xpack.streams.graphDemo.routeTestButton', {
-              defaultMessage: 'Test route',
-            })}
-          </EuiButton>
-          {!loadResult && (
-            <EuiText size="xs" color="subdued" style={{ display: 'inline', marginLeft: 8 }}>
-              {i18n.translate('xpack.streams.graphDemo.routeTestDisabledHint', {
-                defaultMessage: 'Load the topology first',
-              })}
-            </EuiText>
-          )}
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={routeTestLoading}
+                disabled={!allLoaded}
+                onClick={handleRouteTest}
+                iconType="inspect"
+              >
+                {i18n.translate('xpack.streams.graphDemo.routeTestButton', {
+                  defaultMessage: 'Test route',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            {!allLoaded && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.streams.graphDemo.routeTestDisabledHint', {
+                    defaultMessage: 'Load topologies first',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           {routeTestResult && (
             <div ref={routeTestResultRef}>
               <EuiSpacer size="m" />
