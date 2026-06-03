@@ -24,9 +24,10 @@ import { test, makeEsQueryRule } from '../fixtures';
 // preserved in the test name prefixes ("Edit from rules list: …" and
 // "Edit from rule details page: …").
 
-const RULES_LIST_URL_RE = /\/app\/rules(\/|$|\?|#)/;
-const RULES_EDIT_URL_RE = /\/app\/rules\/edit\//;
-const RULES_DETAILS_URL_RE = /\/app\/rules\/rule\//;
+const SM_BASE = 'management/insightsAndAlerting/triggersActions';
+const RULES_LIST_URL_RE = new RegExp(`/app/${SM_BASE}(/|$|\\?|#)`);
+const RULES_EDIT_URL_RE = new RegExp(`/app/${SM_BASE}/edit/`);
+const RULES_DETAILS_URL_RE = new RegExp(`/app/${SM_BASE}/rule/`);
 
 test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
   let testRuleId: string;
@@ -63,7 +64,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('editActionHoverButton');
 
     await page.waitForURL(RULES_EDIT_URL_RE);
-    expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
+    expect(page.url()).toContain(`/${SM_BASE}/edit/${testRuleId}`);
 
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
     await expect(page.testSubj.locator('ruleDetailsNameInput')).toHaveValue(testRuleName);
@@ -103,7 +104,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     page,
     kbnUrl,
   }) => {
-    await page.goto(kbnUrl.get(`/app/rules/edit/${testRuleId}`));
+    await page.goto(kbnUrl.get(`/app/${SM_BASE}/edit/${testRuleId}`));
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
     await page.testSubj.click('rulePageFooterCancelButton');
@@ -119,14 +120,14 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     page,
     kbnUrl,
   }) => {
-    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
     await page.testSubj.click('ruleActionsButton');
     await page.testSubj.click('openEditRuleFlyoutButton');
 
     await page.waitForURL(RULES_EDIT_URL_RE);
-    expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
+    expect(page.url()).toContain(`/${SM_BASE}/edit/${testRuleId}`);
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
   });
 
@@ -138,7 +139,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     const updatedName = `${testRuleName}-details-v2`;
 
     // Navigate via details page so the edit page has the correct return path.
-    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
     await page.testSubj.click('ruleActionsButton');
@@ -151,7 +152,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('rulePageFooterSaveButton');
 
     await page.waitForURL(RULES_DETAILS_URL_RE);
-    expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
+    expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
     // Verify the name was actually persisted (matches FTR's getRuleById assertion).
@@ -166,7 +167,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     page,
     kbnUrl,
   }) => {
-    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
     await page.testSubj.click('ruleActionsButton');
@@ -176,7 +177,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('rulePageFooterCancelButton');
 
     await page.waitForURL(RULES_DETAILS_URL_RE);
-    expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
+    expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
   });
 });
