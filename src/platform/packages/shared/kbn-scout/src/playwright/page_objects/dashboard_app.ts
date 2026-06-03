@@ -532,11 +532,16 @@ export class DashboardApp {
   }
 
   /**
-   * Waits for all dashboard panels to finish rendering.
-   * Uses the data-render-complete attribute to determine completion.
+   * Waits for all dashboard controls and panels to finish rendering.
+   * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
     await expect(this.dashboardViewport).toBeVisible();
+
+    await expect(this.page.testSubj.locator('dashboard-control-renderer')).toHaveAttribute(
+      'data-dashboard-controls-ready',
+      'true'
+    );
 
     try {
       const count = await this.getSharedItemsCount();
