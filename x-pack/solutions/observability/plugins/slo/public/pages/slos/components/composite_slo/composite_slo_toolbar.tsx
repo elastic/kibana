@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
+import { useFetchCompositeSloSuggestions } from '../../../../hooks/use_fetch_composite_slo_suggestions';
 
-interface CompositeSloToolbarProps {
+interface Props {
   search: string;
   isLoading: boolean;
   selectedTags: string[];
-  availableTags: string[];
   selectedStatuses?: string[];
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
@@ -33,92 +33,55 @@ interface CompositeSloToolbarProps {
   onClearFilters: () => void;
 }
 
-const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
-  {
-    value: 'HEALTHY',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.healthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: 'DEGRADING',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.degrading', {
-      defaultMessage: 'Degrading',
-    }),
-  },
-  {
-    value: 'VIOLATED',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.violated', {
-      defaultMessage: 'Violated',
-    }),
-  },
-  {
-    value: 'NO_DATA',
-    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.noData', {
-      defaultMessage: 'No data',
-    }),
-  },
-];
-
 export function CompositeSloToolbar({
   search,
   isLoading,
   selectedTags,
-  availableTags,
   selectedStatuses = [],
   hasActiveFilters,
   onSearchChange,
   onTagSelectionChange,
   onStatusChange,
   onClearFilters,
-}: CompositeSloToolbarProps) {
+}: Props) {
+  const { suggestions } = useFetchCompositeSloSuggestions();
+  const availableTags = suggestions?.tags?.map((t) => t.label).sort() ?? [];
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
 
-  const tagOptions: EuiSelectableOption[] = useMemo(
-    () =>
-      availableTags.map((tag) => ({
-        label: tag,
-        checked: selectedTags.includes(tag) ? 'on' : undefined,
-      })),
-    [availableTags, selectedTags]
-  );
+  const tagOptions: EuiSelectableOption[] = availableTags.map((tag) => ({
+    label: tag,
+    checked: selectedTags.includes(tag) ? 'on' : undefined,
+  }));
 
-  const statusOptions: EuiSelectableOption[] = useMemo(
-    () =>
-      STATUS_OPTIONS.map(({ value, label }) => ({
-        key: value,
-        label,
-        checked: selectedStatuses.includes(value) ? 'on' : undefined,
-      })),
-    [selectedStatuses]
-  );
+  const statusOptions: EuiSelectableOption[] = STATUS_OPTIONS.map(({ value, label }) => ({
+    key: value,
+    label,
+    checked: selectedStatuses.includes(value) ? 'on' : undefined,
+  }));
 
-  const handleStatusChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const newStatuses = options
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as string);
-      onStatusChange?.(newStatuses);
-    },
-    [onStatusChange]
-  );
+  const handleStatusChange = (options: EuiSelectableOption[]) => {
+    const newStatuses = options
+      .filter((opt) => opt.checked === 'on')
+      .map((opt) => opt.key as string);
+    onStatusChange?.(newStatuses);
+  };
 
-  const handleToggleTagPopover = useCallback(() => {
+  const handleToggleTagPopover = () => {
     setIsTagPopoverOpen((prev) => !prev);
-  }, []);
+  };
 
-  const handleCloseTagPopover = useCallback(() => {
+  const handleCloseTagPopover = () => {
     setIsTagPopoverOpen(false);
-  }, []);
+  };
 
-  const handleToggleStatusPopover = useCallback(() => {
+  const handleToggleStatusPopover = () => {
     setIsStatusPopoverOpen((prev) => !prev);
-  }, []);
+  };
 
-  const handleCloseStatusPopover = useCallback(() => {
+  const handleCloseStatusPopover = () => {
     setIsStatusPopoverOpen(false);
-  }, []);
+  };
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
@@ -223,3 +186,30 @@ export function CompositeSloToolbar({
     </EuiFlexGroup>
   );
 }
+
+const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
+  {
+    value: 'HEALTHY',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+  },
+  {
+    value: 'DEGRADING',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.degrading', {
+      defaultMessage: 'Degrading',
+    }),
+  },
+  {
+    value: 'VIOLATED',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.violated', {
+      defaultMessage: 'Violated',
+    }),
+  },
+  {
+    value: 'NO_DATA',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.noData', {
+      defaultMessage: 'No data',
+    }),
+  },
+];
