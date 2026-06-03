@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from '../utils';
@@ -51,19 +51,26 @@ export const AppMenuOverflowButton = ({
   `;
 
   const button = (
-    <EuiButtonIcon
-      iconType="boxesVertical" // TODO: Change to "ellipsis" when it's available in EUI.
-      size="xs"
-      aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+    <EuiToolTip
+      content={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
-      color="text"
-      aria-haspopup="menu"
-      onClick={handleClick}
-      isSelected={isPopoverOpen}
-      css={buttonCss}
-      data-test-subj="app-menu-overflow-button"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesVertical" // TODO: Change to "ellipsis" when it's available in EUI.
+        size="xs"
+        aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+          defaultMessage: 'More',
+        })}
+        color="text"
+        aria-haspopup="menu"
+        onClick={handleClick}
+        isSelected={isPopoverOpen}
+        css={buttonCss}
+        data-test-subj="app-menu-overflow-button"
+      />
+    </EuiToolTip>
   );
 
   return (

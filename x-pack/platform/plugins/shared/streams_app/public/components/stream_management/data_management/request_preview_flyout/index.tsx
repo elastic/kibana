@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -59,14 +60,16 @@ export const RequestPreviewFlyout = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={downloadAriaLabel}
-              display="base"
-              size="m"
-              download="streams-request.txt"
-              href={`data:text/plain;charset=utf-8,${encodeURIComponent(codeContent)}`}
-              iconType="download"
-            />
+            <EuiToolTip content={downloadAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={downloadAriaLabel}
+                display="base"
+                size="m"
+                download="streams-request.txt"
+                href={`data:text/plain;charset=utf-8,${encodeURIComponent(codeContent)}`}
+                iconType="download"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
 

@@ -59,7 +59,7 @@ Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
 - `get_log_change_points` — statistical change point detection in log patterns.
 
 **If you need to discover what data exists:**
-- `get_index_info` — discover available indices, fields, and field values.
+- `get_index_info` — discover available indices, fields, and field values (includes Elastic Streams).
 - `get_anomaly_detection_jobs` — check if ML anomaly detection has flagged anything.
 
 **If alerts are relevant:**
