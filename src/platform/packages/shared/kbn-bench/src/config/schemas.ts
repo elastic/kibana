@@ -38,6 +38,12 @@ const scriptSchema = z.union([
 
 const scriptBenchmarkSchema = benchmarkSchemaBase.extend({
   kind: z.literal('script'),
+  ensure: z
+    .object({
+      bootstrap: z.boolean().optional(),
+      build: z.boolean().optional(),
+    })
+    .optional(),
   beforeAll: scriptSchema.optional(),
   afterAll: scriptSchema.optional(),
   before: scriptSchema.optional(),

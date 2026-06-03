@@ -10,6 +10,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { IWorkspace } from '@kbn/workspaces';
 import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
+import Fs from 'fs/promises';
+import Path from 'path';
 import { collectAndRun } from './collect_and_run';
 import { collectAndRunForRightHandSide } from './collect_and_run_for_right_hand_side';
 import { getGlobalConfig } from './config/get_global_config';
@@ -25,6 +27,8 @@ export async function bench({
   config: configGlob,
   left,
   right,
+  leftBuildDir,
+  rightBuildDir,
   profile,
   openProfile,
   grep,
@@ -35,12 +39,16 @@ export async function bench({
   config?: string | string[];
   left?: string;
   right?: string;
+  leftBuildDir?: string;
+  rightBuildDir?: string;
   profile?: boolean;
   openProfile?: boolean;
   grep?: string | string[];
   runs?: number;
   configFromCwd?: boolean;
 }) {
+  const buildDirOverrides = await resolveBuildDirOverrides({ leftBuildDir, rightBuildDir });
+
   log.info(`Creating workspace for ${left || 'current working directory'}`);
 
   const leftWorkspace = await activateWorktreeOrUseSourceRepo({
@@ -50,13 +58,15 @@ export async function bench({
 
   let rightWorkspace: IWorkspace | undefined;
 
-  if (right) {
-    log.info(`Creating workspace for ${right}`);
+  if (right || buildDirOverrides) {
+    log.info(`Creating workspace for ${right || 'current working directory'}`);
 
-    rightWorkspace = await activateWorktreeOrUseSourceRepo({
-      log,
-      ref: right,
-    });
+    rightWorkspace = right
+      ? await activateWorktreeOrUseSourceRepo({
+          log,
+          ref: right,
+        })
+      : leftWorkspace;
   }
 
   const globalConfig = getGlobalConfig();
@@ -78,6 +88,7 @@ export async function bench({
 
   const leftContext: GlobalRunContext = {
     ...globalRunContext,
+    buildDir: buildDirOverrides?.left,
     workspace: leftWorkspace,
     log: leftLog,
   };
@@ -107,6 +118,7 @@ export async function bench({
 
   const rightContext: GlobalRunContext = {
     ...globalRunContext,
+    buildDir: buildDirOverrides?.right,
     workspace: rightWorkspace,
     log: rightLog,
   };
@@ -142,4 +154,44 @@ export async function bench({
         }
       )
   );
+}
+
+async function resolveBuildDirOverrides({
+  leftBuildDir,
+  rightBuildDir,
+}: {
+  leftBuildDir?: string;
+  rightBuildDir?: string;
+}): Promise<{ left: string; right: string } | undefined> {
+  if (!leftBuildDir && !rightBuildDir) {
+    return;
+  }
+
+  if (!leftBuildDir || !rightBuildDir) {
+    throw new Error(
+      'Both --left-build-dir and --right-build-dir are required for build directory comparison overrides'
+    );
+  }
+
+  return {
+    left: await resolveBuildDirOverride('left', leftBuildDir),
+    right: await resolveBuildDirOverride('right', rightBuildDir),
+  };
+}
+
+async function resolveBuildDirOverride(side: 'left' | 'right', buildDir: string): Promise<string> {
+  const resolvedBuildDir = Path.resolve(buildDir);
+
+  let stat: Awaited<ReturnType<typeof Fs.stat>>;
+  try {
+    stat = await Fs.stat(resolvedBuildDir);
+  } catch {
+    throw new Error(`${side} build directory override does not exist: ${resolvedBuildDir}`);
+  }
+
+  if (!stat.isDirectory()) {
+    throw new Error(`${side} build directory override is not a directory: ${resolvedBuildDir}`);
+  }
+
+  return resolvedBuildDir;
 }

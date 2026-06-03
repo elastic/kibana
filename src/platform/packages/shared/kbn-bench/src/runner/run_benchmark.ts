@@ -137,6 +137,7 @@ export async function runBenchmark({
   const benchmarkContext: BenchmarkRunContext = {
     log: context.log,
     workspace,
+    buildDir: context.buildDir,
   };
 
   const wrapInTimeout = createCallbackWrapper(benchmarkContext, config.timeout);

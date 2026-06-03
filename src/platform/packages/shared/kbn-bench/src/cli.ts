@@ -18,6 +18,8 @@ export function cli() {
         log: log.withContext('@kbn/bench'),
         left: flags.left,
         right: flags.right,
+        leftBuildDir: flags['left-build-dir'],
+        rightBuildDir: flags['right-build-dir'],
         config: flags.config,
         profile: Boolean(flags.profile),
         openProfile: Boolean(flags['open-profile']),
@@ -28,11 +30,13 @@ export function cli() {
     },
     {
       flags: {
-        string: ['config', 'left', 'right', 'grep', 'runs'],
+        string: ['config', 'left', 'right', 'left-build-dir', 'right-build-dir', 'grep', 'runs'],
         boolean: ['profile', 'open-profile', 'config-from-cwd'],
         help: `--config           Location (glob) of benchmark config files
       --left            Git ref for baseline (defaults to current working directory)
       --right           Git ref to compare against
+      --left-build-dir  Build directory override for the baseline side
+      --right-build-dir Build directory override for the target side
       --profile         Collect a CPU profile for each benchmark suite
       --open-profile    After merging, open each merged profile in speedscope
       --grep            Filter benchmarks by (case-insensitive) substring(s); can repeat
