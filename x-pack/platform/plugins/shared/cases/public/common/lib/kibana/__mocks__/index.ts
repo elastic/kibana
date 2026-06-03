@@ -53,6 +53,8 @@ export const useApplicationCapabilities = jest.fn().mockReturnValue({
   dashboard: { crud: true, read: true },
 });
 
+// TODO: flip defaults to `true` once attachments/templates are GA.
+// https://github.com/elastic/security-team/issues/15066
 export const useCasesConfig = jest.fn().mockReturnValue({
   attachmentsEnabled: false,
   templatesEnabled: false,

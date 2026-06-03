@@ -27,8 +27,6 @@ jest.mock('../../attachments/file/upload_file_modal', () => ({
 jest.mock('../../../containers/use_create_attachments');
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
-// Picks up __mocks__/use_on_refresh_case_view_page.tsx; the hook returns the
-// same jest.fn() every call so we can assert on the refresh trigger directly.
 jest.mock('../use_on_refresh_case_view_page');
 
 const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
