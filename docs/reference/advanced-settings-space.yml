@@ -634,48 +634,6 @@ groups:
           self: ga
           serverless: unavailable
 
-      - setting: "labs:canvas:byValueEmbeddable"
-        id: labs-canvas-by-value-embeddable
-        description: |
-          Enables support for by-value embeddables in Canvas.
-        datatype: bool
-        default: true
-        applies_to:
-          stack: ga
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
-
-      - setting: "labs:dashboard:enable_ui"
-        id: labs-dashboard-enable-ui
-        description: |
-          Provides access to the experimental **Labs** features for **Dashboard** when activated.
-        datatype: bool
-        default: false
-        applies_to:
-          stack: ga
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
-
-      - setting: "labs:canvas:enable_ui"
-        id: labs-canvas-enable-ui
-        description: |
-          Provides access to the experimental **Labs** features for **Canvas** when activated.
-        datatype: bool
-        default: false
-        applies_to:
-          stack: ga
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
-
   - group: Accessibility
     id: kibana-accessibility-settings
     settings:

@@ -10,7 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import {
+  initializeVisibility,
+  type HasPanelCapabilities,
+  type HasSerializedChildState,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type {
   DefaultEmbeddableApi,
@@ -50,6 +54,7 @@ export async function buildEmbeddable<
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
+      ...initializeVisibility(parentApi),
       uuid,
       phase$: phaseTracker.getPhase$(),
       parentApi,

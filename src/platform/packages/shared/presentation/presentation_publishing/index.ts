@@ -43,6 +43,15 @@ export {
   timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
+export {
+  type FetchSetting,
+  type PublishesFetchSetting,
+  type PublishesIsVisible,
+  apiPublishesIsVisible,
+  apiPublishesFetchSetting,
+  onVisibilityChange,
+  initializeVisibility,
+} from './interfaces/fetch/fetch_only_visible';
 export { transformTimeRangeOut } from './interfaces/fetch/bwc/time_range_transforms';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {

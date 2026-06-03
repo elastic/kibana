@@ -52,7 +52,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
-import type { DashboardLayout } from './layout_manager/types';
+import type { DashboardLayout, PanelCounts } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 
@@ -255,6 +255,7 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
+  panelCounters$: BehaviorSubject<PanelCounts>;
   arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
 

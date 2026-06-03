@@ -22,13 +22,11 @@ import {
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
 import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
+import { embeddableService } from '../../../services/kibana_services';
 import { ensureTimeRange, useCanvasApi } from '../use_canvas_api';
 
 export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
-  const labsService = presentationUtilService.labsService;
   const dispatch = useDispatch();
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const stateTransferService = embeddableService.getStateTransfer();
   const container = useCanvasApi();
 
@@ -36,7 +34,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
   const incomingEmbeddables = stateTransferService.getIncomingEmbeddablePackage(CANVAS_APP, true);
 
   useEffect(() => {
-    if (isByValueEnabled && incomingEmbeddables?.length) {
+    if (incomingEmbeddables?.length) {
       // handle each incoming embeddable
       incomingEmbeddables.forEach(({ embeddableId, serializedState: incomingState, type }) => {
         // retrieve existing element
@@ -93,5 +91,5 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         }
       });
     }
-  }, [dispatch, selectedPage, incomingEmbeddables, isByValueEnabled, container]);
+  }, [dispatch, selectedPage, incomingEmbeddables, container]);
 };

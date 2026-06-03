@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { SETTING_CATEGORY } from './ui_settings';
 export const plugin = async () => {
   const { PresentationUtilPlugin } = await import('./plugin');
   return new PresentationUtilPlugin();

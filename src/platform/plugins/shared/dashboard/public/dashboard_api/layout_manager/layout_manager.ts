@@ -19,8 +19,10 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   skip,
   startWith,
+  switchMap,
   tap,
   type Observable,
 } from 'rxjs';
@@ -37,7 +39,7 @@ import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-l
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
-import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
+import type { SerializedTitles, PanelPackage, FetchSetting } from '@kbn/presentation-publishing';
 import {
   childrenUnsavedChanges$,
   apiHasLibraryTransforms,
@@ -46,6 +48,7 @@ import {
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
+  apiPublishesIsVisible,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
@@ -73,6 +76,7 @@ import {
   type DashboardLayout,
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
+  type PanelCounts,
 } from './types';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { anyChildrenChanges$ } from './any_children_changes';
@@ -82,7 +86,8 @@ export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>
+  trackPanel: ReturnType<typeof initializeTrackPanel>,
+  fetchSetting$: BehaviorSubject<FetchSetting>
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -496,6 +501,50 @@ export function initializeLayoutManager(
     return Boolean(sectionId && sections[sectionId].collapsed);
   }
 
+  const getPanelCounts = (): PanelCounts => {
+    const layout = layout$.value;
+    const panels = Object.values(layout.panels);
+    const uncollapsedPanels = panels.filter(({ grid }) => {
+      return !isSectionCollapsed(grid.sectionId);
+    });
+    const panelsInViewport = Object.values(children$.value).filter(
+      (api) => apiPublishesIsVisible(api) && api.isVisible$.value
+    );
+    return {
+      panelCount: panels.length,
+      visiblePanelsCount:
+        fetchSetting$.value === 'always' ? uncollapsedPanels.length : panelsInViewport.length,
+      sectionCount: Object.keys(layout.sections).length,
+    };
+  };
+  const panelCounters$ = new BehaviorSubject<PanelCounts>(getPanelCounts());
+  const anyChildVisibilityChange$ = children$.pipe(
+    startWith({}),
+    switchMap((children) => {
+      const childrenWhoPublishVisibility = Object.values(children)
+        .map((child) => (apiPublishesIsVisible(child) ? child.isVisible$ : null))
+        .filter((entry) => entry !== null) as BehaviorSubject<boolean>[];
+      return childrenWhoPublishVisibility.length > 0
+        ? combineLatest(childrenWhoPublishVisibility)
+        : of([]);
+    })
+  );
+  const panelCounterSubscription = combineLatest([
+    layout$,
+    anyChildVisibilityChange$,
+    fetchSetting$,
+  ])
+    .pipe(
+      map(() => getPanelCounts()),
+      distinctUntilChanged(
+        (a, b) =>
+          a.panelCount === b.panelCount &&
+          a.visiblePanelsCount === b.visiblePanelsCount &&
+          a.sectionCount === b.sectionCount
+      )
+    )
+    .subscribe((counts) => panelCounters$.next(counts));
+
   return {
     internalApi: {
       anyStateChange$: merge(
@@ -508,6 +557,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
+      panelCounters$,
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
@@ -693,6 +743,7 @@ export function initializeLayoutManager(
     cleanup: () => {
       childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
+      panelCounterSubscription.unsubscribe();
     },
   };
 }
