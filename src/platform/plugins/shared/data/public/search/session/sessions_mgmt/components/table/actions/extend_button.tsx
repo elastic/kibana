@@ -15,6 +15,7 @@ import moment from 'moment';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { ExtendSessionIcon } from './extend_icon';
 import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
 import type { UISession } from '../../../types';
@@ -79,7 +80,7 @@ export const createExtendActionDescriptor = (
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor => ({
-  iconType: 'sortRight',
+  iconType: ExtendSessionIcon,
   label: <FormattedMessage id="data.mgmt.searchSessions.actionExtend" defaultMessage="Extend" />,
   onClick: async () => {
     const ref = core.overlays.openModal(

@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render } from '@testing-library/react';
+import { EuiIcon } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getUiSessionMock } from '../../../__mocks__';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { createExtendActionDescriptor } from './extend_button';
 
 describe('createExtendActionDescriptor', () => {
-  it('uses a theme-aware EUI icon for the Extend action', () => {
+  it('renders the Extend action icon as an inline SVG', () => {
     const descriptor = createExtendActionDescriptor(
       {} as SearchSessionsMgmtAPI,
       getUiSessionMock(),
       coreMock.createStart()
     );
 
-    expect(descriptor.iconType).toBe('sortRight');
+    const { container } = render(<EuiIcon type={descriptor.iconType} />);
+
+    expect(container.querySelector('svg')).not.toBeNull();
+    expect(container.querySelector('img')).toBeNull();
   });
 });
