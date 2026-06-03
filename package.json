@@ -1114,6 +1114,7 @@
     "@kbn/setup-node-env": "link:src/setup_node_env",
     "@kbn/share-examples-plugin": "link:examples/share_examples",
     "@kbn/share-plugin": "link:src/platform/plugins/shared/share",
+    "@kbn/shared-components": "link:x-pack/platform/packages/shared/kbn-shared-components",
     "@kbn/shared-svg": "link:src/platform/packages/shared/kbn-shared-svg",
     "@kbn/shared-url-state": "link:src/platform/packages/shared/kbn-shared-url-state",
     "@kbn/shared-ux-ai-components": "link:src/platform/packages/shared/shared-ux/ai-components",

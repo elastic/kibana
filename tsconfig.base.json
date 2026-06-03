@@ -2304,6 +2304,8 @@
       "@kbn/share-examples-plugin/*": ["examples/share_examples/*"],
       "@kbn/share-plugin": ["src/platform/plugins/shared/share"],
       "@kbn/share-plugin/*": ["src/platform/plugins/shared/share/*"],
+      "@kbn/shared-components": ["x-pack/platform/packages/shared/kbn-shared-components"],
+      "@kbn/shared-components/*": ["x-pack/platform/packages/shared/kbn-shared-components/*"],
       "@kbn/shared-svg": ["src/platform/packages/shared/kbn-shared-svg"],
       "@kbn/shared-svg/*": ["src/platform/packages/shared/kbn-shared-svg/*"],
       "@kbn/shared-url-state": ["src/platform/packages/shared/kbn-shared-url-state"],
