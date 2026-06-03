@@ -89,10 +89,6 @@ export class WorkflowExecutionRuntimeManager {
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
   }
 
-  public get executionCursor(): WorkflowExecutionCursor {
-    return this.workflowExecutionCursor;
-  }
-
   public get workflowExecution() {
     return this.workflowExecutionState.getWorkflowExecution();
   }
@@ -136,7 +132,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return this.executionCursor.currentStackFrames;
+    return this.workflowExecutionCursor.currentStackFrames;
   }
 
   /**
@@ -210,7 +206,9 @@ export class WorkflowExecutionRuntimeManager {
     shouldStop?: (scope: ScopeData) => boolean,
     { inclusive = false }: { inclusive?: boolean } = {}
   ): void {
-    let scopeStack = WorkflowScopeStack.fromStackFrames(this.executionCursor.currentStackFrames);
+    let scopeStack = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionCursor.currentStackFrames
+    );
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();

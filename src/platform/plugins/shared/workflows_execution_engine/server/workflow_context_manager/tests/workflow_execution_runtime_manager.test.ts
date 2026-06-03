@@ -219,7 +219,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           dependencies: fakeContextDependencies,
         });
         underTest.navigateToNextNode();
-        underTest.executionCursor.commitPendingNavigation();
+        workflowExecutionCursor.commitPendingNavigation();
         await underTest.saveState();
         expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -421,13 +421,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should update local currentNodeId after pending navigation is committed', async () => {
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(underTest.getCurrentNode()).toEqual(expect.objectContaining({ id: 'node3' }));
     });
 
     it('should persist scope stack from the execution cursor', async () => {
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -486,7 +486,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should save the current nodeId in workflow execution state', async () => {
       underTest.navigateToNode('node2');
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -571,7 +571,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     const navigateToEnterNode = (nodeMock: GraphNodeUnion) => {
       workflowExecutionGraph.getNode = jest.fn().mockReturnValue(nodeMock);
       underTest.navigateToNode('node3');
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
     };
 
     it('should enter a new scope with step id when node type is enter-* and no name is provided', async () => {
@@ -671,7 +671,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('navigateToAfterNode', () => {
     it('should set next node to the one after the given nodeId', async () => {
       underTest.navigateToAfterNode('node1');
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({ currentNodeId: 'node2' })
@@ -694,7 +694,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         dependencies: fakeContextDependencies,
       });
       underTest.navigateToAfterNode('node3');
-      underTest.executionCursor.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({ currentNodeId: undefined, status: ExecutionStatus.COMPLETED })
@@ -748,7 +748,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('setWorkflowError', () => {
     it('should serialize and set error on the execution cursor', () => {
       underTest.setWorkflowError(new Error('something broke'));
-      expect(underTest.executionCursor.error).toEqual(
+      expect(workflowExecutionCursor.error).toEqual(
         expect.objectContaining({ message: 'something broke' })
       );
     });
@@ -756,13 +756,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should clear driver error when passed undefined', () => {
       underTest.setWorkflowError(new Error('something broke'));
       underTest.setWorkflowError(undefined);
-      expect(underTest.executionCursor.error).toBeUndefined();
+      expect(workflowExecutionCursor.error).toBeUndefined();
     });
   });
 
   describe('markWorkflowTimeouted', () => {
     it('should set status to TIMED_OUT with finishedAt and duration', () => {
-      const stopSpy = jest.spyOn(underTest.executionCursor, 'stop');
+      const stopSpy = jest.spyOn(workflowExecutionCursor, 'stop');
 
       underTest.markWorkflowTimeouted();
 
