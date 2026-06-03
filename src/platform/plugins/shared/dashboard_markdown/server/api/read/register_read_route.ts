@@ -14,6 +14,7 @@ import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { readMarkdownOASOperationObject } from '../oas_examples';
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
@@ -27,8 +28,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: async () =>
-          (await import('../oas_examples')).readMarkdownOASOperationObject,
+        oasOperationObject: () => readMarkdownOASOperationObject,
       },
       validate: {
         request: {

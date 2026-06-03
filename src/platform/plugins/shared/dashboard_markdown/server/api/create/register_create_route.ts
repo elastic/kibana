@@ -14,6 +14,7 @@ import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 import { create } from './create';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { createMarkdownOASOperationObject } from '../oas_examples';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
@@ -28,8 +29,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: async () =>
-          (await import('../oas_examples')).createMarkdownOASOperationObject,
+        oasOperationObject: () => createMarkdownOASOperationObject,
       },
       validate: {
         request: {

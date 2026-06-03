@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
 import { deleteMarkdown } from './delete';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { deleteMarkdownOASOperationObject } from '../oas_examples';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
@@ -26,8 +27,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: async () =>
-          (await import('../oas_examples')).deleteMarkdownOASOperationObject,
+        oasOperationObject: () => deleteMarkdownOASOperationObject,
       },
       validate: {
         request: {

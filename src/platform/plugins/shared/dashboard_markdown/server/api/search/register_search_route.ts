@@ -13,6 +13,7 @@ import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { searchMarkdownOASOperationObject } from '../oas_examples';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.get({
@@ -27,8 +28,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: async () =>
-          (await import('../oas_examples')).searchMarkdownOASOperationObject,
+        oasOperationObject: () => searchMarkdownOASOperationObject,
       },
       validate: {
         request: {

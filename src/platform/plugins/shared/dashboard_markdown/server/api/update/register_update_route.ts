@@ -15,6 +15,7 @@ import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { updateMarkdownOASOperationObject } from '../oas_examples';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
@@ -31,8 +32,7 @@ If no item exists with the specified ID, a new one is created.`,
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: async () =>
-          (await import('../oas_examples')).updateMarkdownOASOperationObject,
+        oasOperationObject: () => updateMarkdownOASOperationObject,
       },
       validate: {
         request: {
