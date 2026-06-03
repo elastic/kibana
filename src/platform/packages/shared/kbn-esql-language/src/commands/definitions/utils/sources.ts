@@ -22,7 +22,6 @@ import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
-import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
@@ -225,10 +224,7 @@ export function getSourcesFromCommands(
 ) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  // the marker gets added in queries like "FROM "
-  return args.filter(
-    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
-  );
+  return args.filter((arg) => arg.sourceType === sourceType && arg.name !== '');
 }
 
 /**
