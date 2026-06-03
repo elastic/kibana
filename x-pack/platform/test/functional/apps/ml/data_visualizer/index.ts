@@ -18,6 +18,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
     });
 
     loadTestFile(require.resolve('./index_data_visualizer'));

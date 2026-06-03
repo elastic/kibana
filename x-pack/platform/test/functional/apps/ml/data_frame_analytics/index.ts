@@ -8,6 +8,7 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('machine learning - data frame analytics', function () {
@@ -16,6 +17,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/farequote_small'
+      );
     });
 
     loadTestFile(require.resolve('./outlier_detection_creation'));
