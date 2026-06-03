@@ -85,7 +85,12 @@ const getMwRowStatuses = async (page: ScoutPage): Promise<string[]> => {
   const statuses: string[] = [];
   for (const row of rows) {
     const cell = row.locator('[data-test-subj="maintenance-windows-column-status"]');
-    statuses.push(((await cell.textContent()) ?? '').trim());
+    statuses.push(
+      ((await cell.innerText()) ?? '')
+        .trim()
+        .replace(/[^a-zA-Z\s]+$/, '')
+        .trim()
+    );
   }
   return statuses;
 };

@@ -98,12 +98,13 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       'Updated snooze settings for 2 rules.'
     );
 
-    // Verify both rules show the snoozed badge
-    for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await page.keyboard.press('Enter');
-      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
-      await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeVisible();
+    // Verify each rule's row shows the snoozed badge (row-scoped — text search is
+    // tokenized and would match both rules).
+    for (const id of [r1.data.id, r2.data.id]) {
+      const row = page
+        .locator('tr')
+        .filter({ has: page.testSubj.locator(`checkboxSelectRow-${id}`) });
+      await expect(row.locator('[data-test-subj="rulesListNotifyBadge-snoozed"]')).toBeVisible();
     }
   });
 
@@ -129,11 +130,11 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       'Updated snooze settings for 2 rules.'
     );
 
-    for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await page.keyboard.press('Enter');
-      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
-      await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
+    for (const id of [r1.data.id, r2.data.id]) {
+      const row = page
+        .locator('tr')
+        .filter({ has: page.testSubj.locator(`checkboxSelectRow-${id}`) });
+      await expect(row.locator('[data-test-subj="rulesListNotifyBadge-snoozed"]')).toBeHidden();
     }
   });
 
@@ -158,11 +159,11 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       'Updated snooze settings for 2 rules.'
     );
 
-    for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await page.keyboard.press('Enter');
-      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
-      await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeVisible();
+    for (const id of [r1.data.id, r2.data.id]) {
+      const row = page
+        .locator('tr')
+        .filter({ has: page.testSubj.locator(`checkboxSelectRow-${id}`) });
+      await expect(row.locator('[data-test-subj="rulesListNotifyBadge-scheduled"]')).toBeVisible();
     }
   });
 
@@ -191,11 +192,11 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       'Updated snooze settings for 2 rules.'
     );
 
-    for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await page.keyboard.press('Enter');
-      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
-      await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeHidden();
+    for (const id of [r1.data.id, r2.data.id]) {
+      const row = page
+        .locator('tr')
+        .filter({ has: page.testSubj.locator(`checkboxSelectRow-${id}`) });
+      await expect(row.locator('[data-test-subj="rulesListNotifyBadge-scheduled"]')).toBeHidden();
     }
   });
 
@@ -257,23 +258,30 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Disabled 2 rules');
 
-    // Clear filter and verify states
-    await page.testSubj.click('rules-list-clear-filter');
-    await refreshRulesList(page);
+    // Navigate fresh then clear the type filter if it persisted.
+    await page.gotoApp('rules');
+    await page.testSubj.click('rulesTab');
+    await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await page.testSubj
+      .locator('rules-list-clear-filter')
+      .click({ timeout: 5_000 })
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) throw e;
+      });
 
-    for (const { name, expectedStatus } of [
-      { name: r1.data.name as string, expectedStatus: 'Disabled' },
-      { name: r2.data.name as string, expectedStatus: 'Enabled' },
-      { name: r3.data.name as string, expectedStatus: 'Disabled' },
+    // Verify each rule's status by row (text search is tokenized and matches all rows).
+    for (const { id, expectedStatus } of [
+      { id: r1.data.id, expectedStatus: 'Disabled' },
+      { id: r2.data.id, expectedStatus: 'Enabled' },
+      { id: r3.data.id, expectedStatus: 'Disabled' },
     ]) {
-      await page.testSubj.locator('ruleSearchField').fill(name);
-      await page.keyboard.press('Enter');
-      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
-      await expect(page.testSubj.locator('statusDropdown')).toContainText(expectedStatus);
+      const row = page
+        .locator('tr')
+        .filter({ has: page.testSubj.locator(`checkboxSelectRow-${id}`) });
+      await expect(row.locator('[data-test-subj="statusDropdown"]')).toContainText(expectedStatus);
     }
 
     // Filter to enabled rules (only r2) and bulk-delete it
-    await page.testSubj.click('rules-list-clear-filter');
     await refreshRulesList(page);
 
     await page.testSubj.click('ruleStatusFilterButton');
@@ -293,8 +301,16 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     createdRuleIds.length = 0;
     createdRuleIds.push(r1.data.id, r3.data.id);
 
-    await page.testSubj.click('rules-list-clear-filter');
-    await refreshRulesList(page);
+    // Navigate fresh and clear the status filter before counting surviving rules.
+    await page.gotoApp('rules');
+    await page.testSubj.click('rulesTab');
+    await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await page.testSubj
+      .locator('rules-list-clear-filter')
+      .click({ timeout: 5_000 })
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) throw e;
+      });
 
     await expect(page.testSubj.locator('totalRulesCount')).toContainText('2 rules');
   });
