@@ -84,7 +84,13 @@ function getTestSuitesFromJson(json: string) {
 
   const testSuites: Array<
     | { type: 'group'; key: string; count: number }
-    | { type: 'ftrConfig'; ftrConfig: string; count: number }
+    | {
+        type: 'ftrConfig';
+        ftrConfig: string;
+        count: number;
+        /** Forwarded to FTR as FTR_EXTRA_ARGS (e.g. `--grep '…' --include path/to/test.ts`). */
+        ftrExtraArgs?: string;
+      }
     | { type: 'scoutConfig'; scoutConfig: string; count: number }
     | {
         type: 'command';
@@ -166,10 +172,15 @@ function getTestSuitesFromJson(json: string) {
         );
       }
 
+      if (item.ftrExtraArgs !== undefined && typeof item.ftrExtraArgs !== 'string') {
+        fail(`testSuite.ftrExtraArgs must be a string for ftrConfig entries`);
+      }
+
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
         count,
+        ...(typeof item.ftrExtraArgs === 'string' ? { ftrExtraArgs: item.ftrExtraArgs } : {}),
       });
       continue;
     }
@@ -302,6 +313,7 @@ for (const testSuite of testSuites) {
         command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
         env: {
           FTR_CONFIG: testSuite.ftrConfig,
+          ...(testSuite.ftrExtraArgs ? { FTR_EXTRA_ARGS: testSuite.ftrExtraArgs } : {}),
         },
         key: `${TestSuiteType.FTR}-${suiteIndex++}`,
         label: `${testSuite.ftrConfig}`,

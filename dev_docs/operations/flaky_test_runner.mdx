@@ -36,6 +36,38 @@ Because a single Scout request fans out into multiple Buildkite jobs, the Flaky 
 
 If you need more repetitions for a specific failure mode, run the Flaky Test Runner multiple times. The Buildkite platform also caps total jobs per build at 500; the planner enforces this limit precisely after fan-out, accounting for FTR/Cypress jobs already in the build, and refuses to upload more steps if the cap would be exceeded.
 
+## FTR config runs (`type: "ftrConfig"`)
+
+Each `ftrConfig` entry runs one FTR config file via `ftr_configs.sh` with Buildkite `parallelism` equal to `count` (repeat the same config N times).
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `type` | yes | Must be `"ftrConfig"`. |
+| `ftrConfig` | yes | Repo-relative path to the FTR config (from `.buildkite/ftr_configs.yml`). |
+| `count` | yes | Number of repetitions (max 50 per entry). |
+| `ftrExtraArgs` | no | Extra args forwarded to `node scripts/functional_tests` (same as `FTR_EXTRA_ARGS` in main CI), e.g. `--grep 'my test'` or `--include path/to/test_file.ts`. |
+
+Example (whole config):
+
+```json
+[{ "type": "ftrConfig", "ftrConfig": "x-pack/test/functional/config.ts", "count": 25 }]
+```
+
+Example (one config, filtered to a test file):
+
+```json
+[
+  {
+    "type": "ftrConfig",
+    "ftrConfig": "x-pack/solutions/security/test/security_solution_api_integration/config.ts",
+    "count": 25,
+    "ftrExtraArgs": "--include test_suites/detection_engine/my_test.ts"
+  }
+]
+```
+
+See `.buildkite/pipelines/flaky_tests/examples/ftr-config-with-extra-args.json`.
+
 ## Single-spec runs (`type: "command"`)
 
 The trigger UI at https://ci-stats.kibana.dev/trigger_flaky_test_runner still posts `group`, `ftrConfig`, and `scoutConfig` selections. **`command` is for programmatic triggers** (for example `bk build create` with env vars, or the internal `@elastic/flaky-runner` CLI) once this pipeline change is on the branch Buildkite uses to generate the pipeline.
