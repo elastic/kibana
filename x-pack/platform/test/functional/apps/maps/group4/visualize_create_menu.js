@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Verifies user can view, create, and edit maps from "Visualize library" table
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getService, getPageObjects }) {
   const { visualize, header, maps } = getPageObjects(['visualize', 'header', 'maps']);
   const listingTable = getService('listingTable');
