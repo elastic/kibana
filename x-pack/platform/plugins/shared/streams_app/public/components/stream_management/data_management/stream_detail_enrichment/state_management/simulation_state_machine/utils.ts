@@ -122,15 +122,29 @@ export function collectDocumentsAffectedByProcessors(
   });
 }
 
+export const METADATA_FIELDS = new Set(['_id', '_source']);
+
+export function stripMetadataFields<T extends Record<string, unknown>>(docs: T[]): T[] {
+  return docs.map((doc) => {
+    const stripped = { ...doc };
+    for (const key of METADATA_FIELDS) {
+      delete stripped[key];
+    }
+    return stripped;
+  });
+}
+
 export function getAllFieldsInOrder(
   previewRecords: FlattenRecord[] = [],
   detectedFields: DetectedField[] = []
 ): string[] {
   const fields = new Set<string>();
   previewRecords.forEach((record) => {
-    Object.keys(record).forEach((key) => {
-      fields.add(key);
-    });
+    Object.keys(record)
+      .filter((key) => !METADATA_FIELDS.has(key))
+      .forEach((key) => {
+        fields.add(key);
+      });
   });
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
