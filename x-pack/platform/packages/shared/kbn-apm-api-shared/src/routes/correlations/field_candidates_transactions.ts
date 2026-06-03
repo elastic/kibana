@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
-import { correlationsTransactionQueryRt } from './types';
 
 export interface DurationFieldCandidatesResponse {
   fieldCandidates: string[];
@@ -17,6 +16,15 @@ export interface DurationFieldCandidatesResponse {
 export const fieldCandidatesTransactionsRoute = defineRoute<DurationFieldCandidatesResponse>()({
   endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
   params: t.type({
-    query: t.intersection([correlationsTransactionQueryRt, environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
   }),
 });

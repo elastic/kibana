@@ -9,7 +9,6 @@ import type { FieldValuePair } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
-import { correlationsTransactionQueryRt } from './types';
 
 export interface FieldValuePairsResponse {
   fieldValuePairs: FieldValuePair[];
@@ -20,11 +19,17 @@ export const fieldValuePairsTransactionsRoute = defineRoute<FieldValuePairsRespo
   endpoint: 'POST /internal/apm/correlations/field_value_pairs/transactions',
   params: t.type({
     body: t.intersection([
-      correlationsTransactionQueryRt,
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
       environmentRt,
       kueryRt,
       rangeRt,
-      t.type({ fieldCandidates: t.array(t.string) }),
+      t.type({
+        fieldCandidates: t.array(t.string),
+      }),
     ]),
   }),
 });

@@ -10,7 +10,6 @@ import type { LatencyCorrelation } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
-import { correlationsTransactionQueryRt } from './types';
 
 export interface SignificantCorrelationsResponse {
   latencyCorrelations: LatencyCorrelation[];
@@ -25,6 +24,9 @@ export const significantCorrelationsTransactionsRoute =
     params: t.type({
       body: t.intersection([
         t.partial({
+          serviceName: t.string,
+          transactionName: t.string,
+          transactionType: t.string,
           durationMin: toNumberRt,
           durationMax: toNumberRt,
         }),
@@ -38,7 +40,6 @@ export const significantCorrelationsTransactionsRoute =
               fieldValue: t.union([t.string, toNumberRt]),
             })
           ),
-          correlationsTransactionQueryRt,
         }),
       ]),
     }),

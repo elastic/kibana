@@ -9,7 +9,6 @@ import type { TopValuesStats } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
-import { correlationsTransactionQueryRt } from './types';
 
 export type FieldValueStatsTransactionsResponse = TopValuesStats;
 
@@ -24,7 +23,9 @@ export const fieldValueStatsTransactionsRoute = defineRoute<FieldValueStatsTrans
       t.type({
         fieldName: t.string,
         fieldValue: t.union([t.string, t.number]),
-        correlationsTransactionQueryRt,
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
       }),
     ]),
   }),

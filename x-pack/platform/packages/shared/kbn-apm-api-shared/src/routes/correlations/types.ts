@@ -6,12 +6,6 @@
  */
 import * as t from 'io-ts';
 
-export const correlationsTransactionQueryRt = t.partial({
-  serviceName: t.string,
-  transactionName: t.string,
-  transactionType: t.string,
-});
-
 export const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
 
 export const metricRt = t.union([t.literal('latency'), t.literal('failure_rate')]);
