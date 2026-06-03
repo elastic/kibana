@@ -33,7 +33,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -53,9 +53,9 @@ spaceTest.describe(
           'Oct 21, 2019 @ 00:30:04.828723000',
         ];
 
-        for (const expected of expectedTimestamps) {
-          const found = rows.some((row) => row.includes(expected));
-          expect(found).toBe(true);
+        expect(rows).toHaveLength(expectedTimestamps.length);
+        for (let i = 0; i < expectedTimestamps.length; i++) {
+          expect(rows[i]).toContain(expectedTimestamps[i]);
         }
       }
     );

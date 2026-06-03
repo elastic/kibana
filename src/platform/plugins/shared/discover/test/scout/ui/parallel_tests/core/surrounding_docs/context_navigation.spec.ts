@@ -96,6 +96,10 @@ spaceTest.describe(
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
           expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
         }
+
+        const timeRange = await pageObjects.datePicker.getTimeConfig();
+        expect(timeRange.start).toBeTruthy();
+        expect(timeRange.end).toBeTruthy();
       }
     );
 
@@ -142,12 +146,60 @@ spaceTest.describe(
         await pageObjects.contextPage.clickRowAction(1);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await spaceTest.step('remove a filter in context view to change URL state', async () => {
+          const agentFilter = page.testSubj.locator('~filter & ~filter-key-agent');
+          await agentFilter.click();
+          await page.testSubj.click('deleteFilter');
+          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+        });
 
-        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
-        }
+        await spaceTest.step(
+          'navigate to discover via breadcrumbs and verify original filters',
+          async () => {
+            await page.testSubj.click('~breadcrumb-deepLinkId-discover');
+            await pageObjects.discover.waitUntilSearchingHasFinished();
+            await pageObjects.discover.waitForDocTableRendered();
+
+            for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+              expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
+                true
+              );
+            }
+          }
+        );
+
+        await spaceTest.step(
+          'go back to context and verify modified filter state',
+          async () => {
+            await page.goBack();
+            await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+            const filterBadges = page.testSubj.locator('^filter-badge');
+            await expect(filterBadges).toHaveCount(1);
+            const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
+            expect(
+              await pageObjects.filterBar.hasFilter({
+                field: 'extension',
+                value: extensionValue,
+                enabled: false,
+              })
+            ).toBe(true);
+          }
+        );
+
+        await spaceTest.step(
+          'return to discover and verify original filters are restored',
+          async () => {
+            await page.testSubj.click('~breadcrumb-deepLinkId-discover');
+            await pageObjects.discover.waitUntilSearchingHasFinished();
+
+            for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+              expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
+                true
+              );
+            }
+          }
+        );
       }
     );
   }

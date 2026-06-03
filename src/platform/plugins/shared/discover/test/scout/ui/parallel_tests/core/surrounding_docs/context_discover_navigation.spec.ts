@@ -65,7 +65,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'should open context view with selected document as anchor',
+      'should open context view with selected document as anchor and allow selecting next anchor',
       async ({ browserAuth, page, pageObjects }) => {
         await browserAuth.loginAsViewer();
         await pageObjects.discover.goto({ queryMode: 'classic' });
@@ -77,15 +77,35 @@ spaceTest.describe(
           .innerText();
         const firstTimestamp = firstRowText.split('\t')[0] || firstRowText.split('\n')[0];
 
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+        await spaceTest.step('verify initial anchor matches selected document', async () => {
+          await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+          await pageObjects.contextPage.clickRowAction(1);
+          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
-        await expect(anchorExpandButton).toBeVisible();
-        const anchorRow = anchorExpandButton.locator('xpath=ancestor::*[@data-grid-row-index]');
-        const anchorText = await anchorRow.innerText();
-        expect(anchorText).toContain(firstTimestamp.trim());
+          const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
+          await expect(anchorExpandButton).toBeVisible();
+          const anchorRow = anchorExpandButton.locator('xpath=ancestor::*[@data-grid-row-index]');
+          const anchorText = await anchorRow.innerText();
+          expect(anchorText).toContain(firstTimestamp.trim());
+        });
+
+        await spaceTest.step('select next anchor from context view', async () => {
+          const contextRows = await pageObjects.contextPage.getRowsText(false);
+          const timestampRegex = /\w{3}\s+\d{1,2},\s+\d{4}\s+@\s+[\d:.]+/;
+          const match = contextRows[0]?.match(timestampRegex);
+          const firstContextTimestamp = match ? match[0] : '';
+          expect(firstContextTimestamp).toBeTruthy();
+
+          await pageObjects.contextPage.openRowActions(0);
+          await pageObjects.contextPage.clickRowAction(1);
+          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+          const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
+          await expect(anchorExpandButton).toBeVisible();
+          const anchorRow = anchorExpandButton.locator('xpath=ancestor::*[@data-grid-row-index]');
+          const anchorText = await anchorRow.innerText();
+          expect(anchorText).toContain(firstContextTimestamp);
+        });
       }
     );
 

@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, addFilterWithoutStrictCheck } from '../../../fixtures/surrounding_docs';
 
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
@@ -142,12 +142,29 @@ spaceTest.describe(
       'should preserve filters when the page is refreshed',
       async ({ page, pageObjects }) => {
         await pageObjects.filterBar.addFilter({
-          field: 'extension',
+          field: TEST_ANCHOR_FILTER_FIELD,
           operator: 'is',
-          value: 'png',
+          value: TEST_ANCHOR_FILTER_VALUE,
         });
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
+        const filterBadge = page.testSubj.locator(
+          `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
+        );
+        await filterBadge.click();
+        await page.testSubj.click('pinFilter');
+
+        await addFilterWithoutStrictCheck(page, 'extension', 'png');
+        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+        expect(
+          await pageObjects.filterBar.hasFilter({
+            field: TEST_ANCHOR_FILTER_FIELD,
+            value: TEST_ANCHOR_FILTER_VALUE,
+            enabled: true,
+            pinned: true,
+          })
+        ).toBe(true);
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
@@ -155,6 +172,14 @@ spaceTest.describe(
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
+        expect(
+          await pageObjects.filterBar.hasFilter({
+            field: TEST_ANCHOR_FILTER_FIELD,
+            value: TEST_ANCHOR_FILTER_VALUE,
+            enabled: true,
+            pinned: true,
+          })
+        ).toBe(true);
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);

@@ -95,10 +95,6 @@ export class ContextPage {
     return Number(attr);
   }
 
-  async getDataGridRows(): Promise<Locator> {
-    return this.page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
-  }
-
   async openRowActions(rowIndex: number) {
     const row = this.page.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
     const expandButton = row.locator(
