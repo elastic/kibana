@@ -100,7 +100,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     // Verify both rules show the snoozed badge
     for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('searchInput').fill(name as string);
+      await page.testSubj.locator('ruleSearchField').fill(name as string);
       await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeVisible();
     }
@@ -116,7 +116,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
 
-    await page.testSubj.click('clearSearchButton');
+    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -129,7 +129,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     );
 
     for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('searchInput').fill(name as string);
+      await page.testSubj.locator('ruleSearchField').fill(name as string);
       await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
     }
@@ -144,7 +144,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
 
-    await page.testSubj.click('clearSearchButton');
+    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -157,7 +157,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     );
 
     for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('searchInput').fill(name as string);
+      await page.testSubj.locator('ruleSearchField').fill(name as string);
       await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeVisible();
     }
@@ -176,7 +176,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
 
-    await page.testSubj.click('clearSearchButton');
+    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -189,7 +189,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     );
 
     for (const name of [r1.data.name, r2.data.name]) {
-      await page.testSubj.locator('searchInput').fill(name as string);
+      await page.testSubj.locator('ruleSearchField').fill(name as string);
       await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeHidden();
     }
@@ -205,7 +205,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     await refreshRulesList(page);
 
     // Ensure any prior search text is cleared so all rules are visible.
-    await page.testSubj.locator('searchInput').fill('');
+    await page.testSubj.locator('ruleSearchField').fill('');
     // Select r1, select-all (both selected), then deselect r2 → only r1 remains
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click('selectAllRulesButton');
@@ -262,7 +262,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       { name: r2.data.name as string, expectedStatus: 'Enabled' },
       { name: r3.data.name as string, expectedStatus: 'Disabled' },
     ]) {
-      await page.testSubj.locator('searchInput').fill(name);
+      await page.testSubj.locator('ruleSearchField').fill(name);
       await expect(page.testSubj.locator('rulesList')).toContainText(name);
       await expect(page.testSubj.locator('statusDropdown')).toContainText(expectedStatus);
     }
