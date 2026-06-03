@@ -41,7 +41,7 @@ export function CreateDataSourceFlyoutTypeSettingsFlight({
       return;
     }
     const n = Number(t);
-    if (Number.isFinite(n) && Number.isInteger(n)) {
+    if (Number.isFinite(n) && Number.isInteger(n) && n >= 1 && n <= 65535) {
       portField.onChange(n);
     } else {
       portField.onChange(undefined);
@@ -87,7 +87,7 @@ export function CreateDataSourceFlyoutTypeSettingsFlight({
           defaultMessage: 'Port',
         })}
         helpText={i18n.translate('dataSets.createFlyout.flight.fields.portHelp', {
-          defaultMessage: 'Optional. Must be a whole number.',
+          defaultMessage: 'Optional. Must be a whole number between 1 and 65535.',
         })}
         fullWidth
       >
@@ -96,12 +96,9 @@ export function CreateDataSourceFlyoutTypeSettingsFlight({
           fullWidth
           type="text"
           inputMode="numeric"
-          placeholder={i18n.translate(
-            'dataSets.createFlyout.flight.fields.portOptional',
-            {
-              defaultMessage: 'Optional',
-            }
-          )}
+          placeholder={i18n.translate('dataSets.createFlyout.flight.fields.portOptional', {
+            defaultMessage: 'Optional',
+          })}
           autoComplete="off"
           value={portDisplay}
           onChange={(e) => onPortChange(e.target.value)}

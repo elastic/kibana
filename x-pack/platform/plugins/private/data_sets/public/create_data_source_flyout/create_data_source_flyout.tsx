@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { useController, useForm } from 'react-hook-form';
 
-import type { DataSourceWithSecrets } from '../../common';
+import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
 import { ALL_DATA_SOURCE_TYPES } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
@@ -47,7 +47,7 @@ import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyo
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
-  initialDataSource?: DataSourceWithSecrets;
+  initialDataSource?: DataSource;
   onClose: () => void;
   /**
    * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
@@ -62,6 +62,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 }) => {
   const isEditMode = initialDataSource !== undefined;
 
+  // todo take a closer look
   const formDefaultValues = useMemo(
     (): CreateDataSourceFlyoutFormValues =>
       initialDataSource
@@ -74,6 +75,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     defaultValues: formDefaultValues,
   });
 
+  // todo make sure name isn't duplicated
   const nameError: string | undefined = undefined;
   const saveError: string | undefined = undefined;
   const isSaving = false;
@@ -103,6 +105,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     []
   );
 
+  // todo - is this needed for initial release?
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
     () =>
       initialDataSource
@@ -110,6 +113,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         : getDefaultAuthenticationMode(dataSourceType)
   );
 
+  // runs when data source type changes
   useEffect(() => {
     if (!initialDataSource) {
       return;
@@ -118,6 +122,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     setAuthenticationMode(authenticationModeFromDataSource(initialDataSource));
   }, [initialDataSource, dataSourceType, reset]);
 
+  // when data source type changes, set the authentication mode to the default
+  // could likely be merged with above
   useEffect(() => {
     if (!isEditMode) {
       setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
@@ -126,6 +132,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
+      // todo - might be able to remove this
       applyAuthenticationModeToDataSource(
         { ...data, type: dataSourceType } as DataSourceWithSecrets,
         authenticationMode

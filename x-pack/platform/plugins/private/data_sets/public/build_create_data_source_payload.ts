@@ -150,8 +150,11 @@ export function buildOmitIdDataSource(
       let port: number | undefined;
       if (portStr) {
         const n = Number(portStr);
-        if (!Number.isFinite(n) || !Number.isInteger(n)) {
-          return { type: 'validation', message: 'Flight port must be a whole number.' };
+        if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 65535) {
+          return {
+            type: 'validation',
+            message: 'Flight port must be a whole number between 1 and 65535.',
+          };
         }
         port = n;
       }

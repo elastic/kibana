@@ -68,7 +68,7 @@ const jdbcSettingsWithSecretsSchema = schema.object({
 
 const flightSettingsSchema = schema.object({
   host: schema.string(),
-  port: schema.maybe(schema.number()),
+  port: schema.maybe(schema.number({ min: 1, max: 65535 })),
 });
 
 /**
@@ -107,4 +107,3 @@ export const putDataSourceBodySchema = schema.oneOf([
     settings: flightSettingsSchema,
   }),
 ]);
-
