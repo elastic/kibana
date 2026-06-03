@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { toInlineMemoryTools } from './to_inline_tools';
 
 export const createMemoryConsolidationSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
@@ -47,9 +48,5 @@ Review the memory wiki and consolidate, reorganize, and clean up pages to mainta
 3. Use \`platform_streams_memory_read\` to read pages before acting
 4. Use \`platform_streams_memory_write\` or \`platform_streams_memory_patch\` to merge/improve pages
 5. Use \`platform_streams_memory_delete\` to remove duplicates or stale pages`,
-    getInlineTools: () =>
-      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
-        ...rest,
-        id: id.replaceAll('.', '_'),
-      })),
+    getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
   });

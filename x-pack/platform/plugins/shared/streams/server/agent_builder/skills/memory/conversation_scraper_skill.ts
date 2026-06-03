@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { toInlineMemoryTools } from './to_inline_tools';
 
 export const createConversationScraperSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
@@ -41,9 +42,5 @@ Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
 ## Writing style
 
 Write as if documenting for a team wiki. Be factual, direct, and concise. A few paragraphs per page maximum.`,
-    getInlineTools: () =>
-      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
-        ...rest,
-        id: id.replaceAll('.', '_'),
-      })),
+    getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
   });

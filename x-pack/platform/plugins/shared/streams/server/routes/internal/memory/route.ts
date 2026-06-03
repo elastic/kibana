@@ -476,14 +476,14 @@ const createWorkflowTriggerRoute = (
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
       const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
-      if (!workflow) {
+      if (!workflow || !workflow.definition) {
         throw notFound(
           `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
         );
       }
 
       const executionId = await wfMgmt.management.runWorkflow(
-        workflow as Parameters<typeof wfMgmt.management.runWorkflow>[0],
+        { ...workflow, definition: workflow.definition },
         spaceId,
         {},
         request,

@@ -6,13 +6,14 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { MemoryToolsOptions } from '../../tools/memory/types';
 import { createMemorySearchTool } from '../../tools/memory/memory_search';
 import { createMemoryReadTool } from '../../tools/memory/memory_read';
 import { createMemoryWriteTool } from '../../tools/memory/memory_write';
 import { createMemoryListTool } from '../../tools/memory/memory_list';
 import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
+import { toInlineMemoryTool, toInlineMemoryTools } from './to_inline_tools';
 
 export const createMemorySynthesisSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
@@ -49,29 +50,23 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
 4. Use \`platform_streams_memory_write\` to create or update memory pages`,
     getInlineTools: () => {
       // Synthesis only needs read, search, list, and write — 4 tools + 1 KI tool = 5 total (limit: 7).
-      const memoryTools: SkillBoundedTool[] = [
+      const memoryTools = toInlineMemoryTools([
         createMemorySearchTool(options),
         createMemoryReadTool(options),
         createMemoryWriteTool(options),
         createMemoryListTool(options),
-      ].map(({ tags, id, ...rest }) => ({
-        ...rest,
-        id: id.replaceAll('.', '_'),
-      })) as SkillBoundedTool[];
+      ]);
 
-      const { availability: _availability, ...kiTool } = createSearchKnowledgeIndicatorsTool({
+      const kiToolDefinition = createSearchKnowledgeIndicatorsTool({
         getScopedClients: options.getScopedClients,
         server: options.server,
         logger: options.logger,
       });
 
-      return [
-        ...memoryTools,
-        {
-          ...kiTool,
-          id: kiTool.id.replaceAll('.', '_'),
-          experimental: false,
-        } as SkillBoundedTool,
-      ];
+      if (kiToolDefinition.type !== ToolType.builtin) {
+        throw new Error('Expected search knowledge indicators tool to be a builtin tool');
+      }
+
+      return [...memoryTools, { ...toInlineMemoryTool(kiToolDefinition), experimental: false }];
     },
   });
