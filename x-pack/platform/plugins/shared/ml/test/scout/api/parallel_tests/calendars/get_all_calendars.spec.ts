@@ -34,11 +34,13 @@ const TEST_CALENDARS = [
 
 const TEST_CALENDAR_IDS = TEST_CALENDARS.map((c) => c.calendar_id);
 
+// TODO: Add the ECH cloud tag once support for custom roles is implemented.
+// See related issue: https://github.com/elastic/kibana/issues/259284
 apiTest.describe(
   'ML Calendar - get all',
   {
     tag: [
-      ...tags.stateful.classic,
+      '@local-stateful-classic',
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],
