@@ -9,9 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type FormulaArgType = 'number' | 'boolean' | 'string';
+const FORMULA_ARG_TYPES = ['number', 'boolean', 'string'] as const;
+const FORMULA_ARG_TYPE_SET: ReadonlySet<string> = new Set(FORMULA_ARG_TYPES);
+export type FormulaArgType = (typeof FORMULA_ARG_TYPES)[number];
+
 export const isFormulaArgType = (value: string): value is FormulaArgType => {
-  return value === 'number' || value === 'boolean' || value === 'string';
+  return FORMULA_ARG_TYPE_SET.has(value);
 };
 
 /**
