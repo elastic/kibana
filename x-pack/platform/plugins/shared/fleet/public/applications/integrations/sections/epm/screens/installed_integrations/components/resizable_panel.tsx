@@ -17,6 +17,7 @@ import {
 import { EuiResizableButton, EuiPanel, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 const getMouseOrTouchY = (
   e: TouchEvent | MouseEvent | React.MouseEvent | React.TouchEvent
@@ -120,10 +121,12 @@ export const ResizablePanelComponent: React.FunctionComponent<{
         position: fixed;
         padding: 0;
         bottom: 0;
+        left: ${layoutVar('application.left')};
         background: ${euiTheme.euiTheme.colors.backgroundBasePlain};
       `}
     >
       {topBar}
+
       <EuiResizableButton
         css={css`
           position: absolute;
