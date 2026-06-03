@@ -42,7 +42,7 @@ export const DeploymentStatusBadges: React.FC = () => {
           kibanaVersion={
             !cloud?.isServerlessEnabled
               ? `v${kibanaVersion}`
-              : i18n.translate('xpack.search.gettingStarted.changelog', {
+              : i18n.translate('xpack.searchGettingStarted.changelog', {
                   defaultMessage: 'Changelog',
                 })
           }
