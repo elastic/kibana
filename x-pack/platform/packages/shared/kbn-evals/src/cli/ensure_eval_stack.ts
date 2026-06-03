@@ -9,8 +9,8 @@ import Fs from 'fs';
 import Path from 'path';
 import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { scoutEvalsArgs } from './prompts';
 import { resolveCcmApiKey } from '@kbn/es';
+import { scoutEvalsArgs } from './prompts';
 import {
   isServiceRunning,
   isScoutStale,
@@ -27,7 +27,6 @@ const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
 
 export const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
-
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
