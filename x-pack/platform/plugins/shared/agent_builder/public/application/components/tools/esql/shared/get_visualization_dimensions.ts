@@ -19,7 +19,7 @@ export interface VisualizationDimensions {
 export const DEFAULT_VISUALIZATION_HEIGHT = 240;
 
 const METRIC_DIMENSIONS: VisualizationDimensions = {
-  height: 130,
+  height: 158,
   width: 260,
 };
 

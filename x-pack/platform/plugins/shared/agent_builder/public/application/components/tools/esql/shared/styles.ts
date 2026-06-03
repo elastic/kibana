@@ -12,27 +12,42 @@ export const visualizationActionsClassName = 'agentBuilderVisualizationActions';
 export const visualizationTimePickerContainerClassName =
   'agentBuilderVisualizationTimePickerContainer';
 
-export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    position: 'relative',
-    overflow: 'visible',
-    display: 'flex',
-    flexDirection: 'column',
-    [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
-      width: `calc(100% - ${euiTheme.base * 4}px)`,
-    },
-    '.echChart ul': {
-      marginInlineStart: 0,
-    },
+export const visualizationWrapperStyles =
+  (dimensions?: { width?: number }) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      overflow: 'visible',
+      display: 'flex',
+      flexDirection: 'column',
+      ...(dimensions?.width !== undefined
+        ? {
+            maxWidth: dimensions.width,
+            '.echMetric': {
+              border: euiTheme.border.thin,
+              borderRadius: euiTheme.border.radius.small,
+            },
+          }
+        : {}),
+      [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
+        width: `calc(100% - ${euiTheme.base * 4}px)`,
+      },
+      '.echChart ul': {
+        listStyleType: 'none',
+        marginInlineStart: 0,
+      },
 
-    p: {
-      margin: 0,
-    },
+      p: {
+        margin: 0,
+      },
 
-    '.expExpressionRenderer__expression': {
-      padding: `${euiTheme.size.s} 0`,
-    },
-  });
+      '.expExpressionRenderer__expression': {
+        padding: `${euiTheme.size.s} 0`,
+        '[class*="metric_vis_renderer"]': {
+          paddingLeft: euiTheme.size.base,
+        },
+      },
+    });
 
 export const visualizationHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
