@@ -21,6 +21,8 @@ import { serviceDependenciesBreakdownRoute } from './service_dependencies_breakd
 import { serviceAnomalyChartsRoute } from './service_anomaly_charts';
 import { serviceAlertsCountRoute } from './service_alerts_count';
 import { serviceSlosRoute } from './service_slos';
+import { serviceMixedIngestionRoute } from './service_mixed_ingestion';
+import { serviceAnomalyScoreRoute } from './service_anomaly_score';
 
 export const servicesRouteDefinitions = {
   servicesList: servicesListRoute,
@@ -40,6 +42,8 @@ export const servicesRouteDefinitions = {
   anomalyCharts: serviceAnomalyChartsRoute,
   alertsCount: serviceAlertsCountRoute,
   slos: serviceSlosRoute,
+  mixedIngestion: serviceMixedIngestionRoute,
+  anomalyScore: serviceAnomalyScoreRoute,
 };
 
 export type { ServicesItemsResponse, MergedServiceStat } from './services_list';
@@ -84,3 +88,5 @@ export type {
   ServiceAlertsCountRouteResponse,
 } from './service_alerts_count';
 export type { ServiceSlosResponse, StatusCounts } from './service_slos';
+export type { ServiceMixedIngestionResponse } from './service_mixed_ingestion';
+export type { ServiceAnomalyScoreResponse } from './service_anomaly_score';
