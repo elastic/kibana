@@ -29,8 +29,7 @@ import {
 import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
-import { SourceEnricherService } from './source_enricher_service';
-import { ViewEnricherService } from './view_enricher_service';
+import { EnricherService } from './enricher_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -69,14 +68,18 @@ export interface EsqlPluginStart {
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
-  private readonly sourceEnricherService: SourceEnricherService;
-  private readonly viewEnricherService: ViewEnricherService;
+  private readonly sourceEnricherService: EnricherService<ESQLSourceResult>;
+  private readonly viewEnricherService: EnricherService<EsqlView>;
 
   constructor(private readonly initContext: PluginInitializerContext) {
-    this.sourceEnricherService = new SourceEnricherService(
-      initContext.logger.get('sourceEnricher')
+    this.sourceEnricherService = new EnricherService<ESQLSourceResult>(
+      initContext.logger.get('sourceEnricher'),
+      'SourceEnricher'
     );
-    this.viewEnricherService = new ViewEnricherService(initContext.logger.get('viewEnricher'));
+    this.viewEnricherService = new EnricherService<EsqlView>(
+      initContext.logger.get('viewEnricher'),
+      'ViewEnricher'
+    );
   }
 
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {

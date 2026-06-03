@@ -143,7 +143,7 @@ export function createStreamsEnrichment(
           items.map(({ name }) =>
             // Strip '$.' prefix from view names to get the underlying stream name for enrichment lookup.
             // This is needed because ES|QL autocomplete suggestions for views currently include the '$.' prefix, but our API expects raw stream names.
-            // We can remove this once ES|QL stops adding the prefix in autocomplete suggestions. See
+            // We can remove this once ES|QL stops adding the prefix in autocomplete suggestions.
             cache.fetch(name.replace('$.', ''))
           )
         ),

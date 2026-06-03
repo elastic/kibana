@@ -8,32 +8,31 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ESQLSourceResult } from '@kbn/esql-types';
 import { reportEsqlError } from '@kbn/esql-editor';
 
-type SourceEnricher = (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+type Enricher<T> = (items: T[]) => Promise<T[]>;
 
 /**
- * Service to manage ES|QL source enrichers.
- * Enrichers are chained in registration order and applied to autocomplete source suggestions.
+ * Generic service to manage ES|QL autocomplete enrichers.
+ * Enrichers are chained in registration order and applied to autocomplete suggestions.
  */
-export class SourceEnricherService {
-  private readonly enrichers: SourceEnricher[] = [];
+export class EnricherService<T> {
+  private readonly enrichers: Enricher<T>[] = [];
 
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger, private readonly errorType: string) {}
 
-  register(enricher: SourceEnricher): void {
+  register(enricher: Enricher<T>): void {
     this.enrichers.push(enricher);
   }
 
-  async enrich(sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> {
-    let enriched = sources;
+  async enrich(items: T[]): Promise<T[]> {
+    let enriched = items;
     for (const enricher of this.enrichers) {
       try {
         enriched = await enricher(enriched);
       } catch (error) {
         this.logger.error(error);
-        reportEsqlError(error, { errorType: 'SourceEnricher' });
+        reportEsqlError(error, { errorType: this.errorType });
       }
     }
     return enriched;
