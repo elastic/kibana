@@ -394,6 +394,7 @@ const TakeActionComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.TAKE_ACTION}
         anchorPosition="downCenter"
         button={button}
         closePopover={closePopover}
