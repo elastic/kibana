@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
+import { PUBLIC_API_VERSION, SYNTHETICS_API_URLS } from '../fixtures/constants';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
@@ -130,6 +131,63 @@ export function createSyntheticsPrivateLocationApi(
     return { id: data.item.id };
   };
 
+  // After the private-location saved object and its Fleet agent policy are
+  // created, the monitor-save validation reads both via *search*: a
+  // point-in-time finder for the location SO and `agentPolicyService.list` for
+  // the agent policy. Both are subject to the Elasticsearch refresh interval,
+  // so the very first monitor save immediately after setup can deterministically
+  // 400 ("Invalid private location") before the agent policy becomes
+  // search-visible — at which point the location is reported with
+  // `isInvalid: true`. The public `GET private_locations/{id}` route combines
+  // the exact same SO + agent-policy reads, so we gate setup on it until the
+  // location is both found and `isInvalid: false`.
+  interface PrivateLocationContract {
+    id?: string;
+    label?: string;
+    isInvalid?: boolean;
+  }
+  const waitForPrivateLocationsReady = async (
+    locationIds: string[],
+    urlSpaceId: string
+  ): Promise<void> => {
+    const timeoutMs = 60_000;
+    const deadline = Date.now() + timeoutMs;
+    const pending = new Set(locationIds);
+    let lastSeen = 'no response yet';
+
+    while (pending.size > 0 && Date.now() < deadline) {
+      for (const locationId of [...pending]) {
+        try {
+          const { data, status } = await kbnClient.request<PrivateLocationContract>({
+            method: 'GET',
+            path: `/s/${urlSpaceId}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
+            headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+            ignoreErrors: [404],
+            retries: 1,
+          });
+          if (status === 200 && data?.id === locationId && data?.isInvalid === false) {
+            pending.delete(locationId);
+          } else {
+            lastSeen = `status=${status} body=${JSON.stringify(data)}`;
+          }
+        } catch (error) {
+          lastSeen = error instanceof Error ? error.message : String(error);
+        }
+      }
+      if (pending.size > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+      }
+    }
+
+    if (pending.size > 0) {
+      throw new Error(
+        `Private location(s) [${[...pending].join(
+          ', '
+        )}] not ready (isInvalid:false) after ${timeoutMs}ms. Last seen: ${lastSeen}`
+      );
+    }
+  };
+
   const setTestLocations = async (
     testFleetPolicyIds: string[],
     spaceId?: string | string[]
@@ -163,6 +221,12 @@ export function createSyntheticsPrivateLocationApi(
         initialNamespaces,
       })),
     });
+
+    await waitForPrivateLocationsReady(
+      locations.map((location) => location.id),
+      urlSpaceId
+    );
+
     return locations;
   };
 
