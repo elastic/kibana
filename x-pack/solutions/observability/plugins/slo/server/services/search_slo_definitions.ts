@@ -162,8 +162,8 @@ export class SearchSLODefinitions {
           groupBy,
         };
 
-        if (remoteName || kibanaUrl) {
-          item.remote = { remoteName: remoteName ?? '', kibanaUrl: kibanaUrl ?? '' };
+        if (remoteName) {
+          item.remote = { remoteName, kibanaUrl: kibanaUrl ?? '' };
         }
 
         return item;

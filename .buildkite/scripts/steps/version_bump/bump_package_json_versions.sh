@@ -2,14 +2,17 @@
 
 set -euo pipefail
 
-.buildkite/scripts/bootstrap.sh
-
 source "$(dirname "$0")/wait_for_pr_merge.sh"
 
 branch_to_merge_into="${OVERRIDE_BRANCH:-$BRANCH}"
 
 git fetch origin $branch_to_merge_into
 git checkout -B "$branch_to_merge_into" "origin/$branch_to_merge_into"
+
+# Re-source after the checkout so the Node version matches the branches .node-version
+source .buildkite/scripts/common/setup_node.sh
+
+.buildkite/scripts/bootstrap.sh
 
 old_version=""
 store_old_version() {
@@ -70,7 +73,9 @@ store_old_version
 
 update_package_json_version
 
-update_initial_app_data
+if [[ "$branch_to_merge_into" != "8.19" ]]; then
+  update_initial_app_data
+fi
 
 update_kibana_migrator_utils
 
