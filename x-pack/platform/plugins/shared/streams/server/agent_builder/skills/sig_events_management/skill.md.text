@@ -28,6 +28,7 @@ You have 3 SigEvents tools in this skill:
 - `event_status_update`
   Use this to update an existing event status to one of: `promoted`, `acknowledged`, `demoted`.
   If an event already has the requested status or is missing, update is ignored.
+  A successful status update creates a new event version and returns that new event version id.
 
 Additional globally-available helper guidance:
 - `ki_search` can be used to gather existing Knowledge Indicators (KIs) for context.
@@ -52,7 +53,9 @@ Status update workflow:
    - `acknowledged`: known and actively tracked.
    - `demoted`: no longer incident-worthy.
 3. Call `event_status_update` with the event id and target status.
-4. Treat `{ updated: 0, ignored: 1 }` as expected when event is missing or already in the requested status.
+4. Interpret the response carefully:
+   - `{ event_id: "<new event version id>", updated: 1, ignored: 0 }` means a new event version was created; `event_id` is the new event version id.
+   - `{ event_id: "<submitted event id>", updated: 0, ignored: 1 }` means no new version was created; `event_id` is the id you submitted.
 </required_workflow>
 
 <proactive_behavior>
@@ -158,6 +161,14 @@ Example: update an existing significant event status
 Tool: `event_status_update`
 {
   "event_id": "9c4d04a1-86fe-45c2-b1dd-00891a8ba9f1",
+  "status": "acknowledged"
+}
+
+Example response when the status changes:
+{
+  "event_id": "c1a2f799-0778-42fb-8d2d-e38e13e2e819",
+  "updated": 1,
+  "ignored": 0,
   "status": "acknowledged"
 }
 </tool_examples>

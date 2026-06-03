@@ -23,8 +23,13 @@ describe('updateEventStatusToolHandler', () => {
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(eventClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ verdict: 'acknowledged' })],
+      { throwOnFail: true }
+    );
+    expect(result.event_id).not.toBe('event-1');
     expect(result).toEqual({
-      event_id: 'event-1',
+      event_id: result.event_id,
       updated: 1,
       ignored: 0,
       status: 'acknowledged',

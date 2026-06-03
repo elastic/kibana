@@ -25,18 +25,18 @@ export async function updateEventStatusToolHandler({
     return { event_id: eventId, updated: 0, ignored: 1, status };
   }
 
+  const nextEventId = uuidv4();
   const now = new Date().toISOString();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
     created_at: now,
-    event_id: uuidv4(),
+    event_id: nextEventId,
     previous_event_id: latest.event_id,
     verdict: status,
-    verdict_id: uuidv4(),
   };
 
-  await eventClient.bulkCreate([updatedEvent]);
+  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
 
-  return { event_id: eventId, updated: 1, ignored: 0, status };
+  return { event_id: nextEventId, updated: 1, ignored: 0, status };
 }

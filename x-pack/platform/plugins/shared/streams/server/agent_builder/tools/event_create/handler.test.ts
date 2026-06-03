@@ -28,11 +28,14 @@ describe('createEventToolHandler', () => {
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(eventClient.bulkCreate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        discovery_slug: expect.stringMatching(/^agent-event-[a-f0-9]{8}$/),
-      }),
-    ]);
+    expect(eventClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          discovery_slug: expect.stringMatching(/^agent-event-[a-f0-9]{8}$/),
+        }),
+      ],
+      { throwOnFail: true }
+    );
     expect(result.acknowledged).toBe(true);
     expect(result.event_id).toBeTruthy();
   });

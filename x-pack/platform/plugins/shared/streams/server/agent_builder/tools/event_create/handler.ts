@@ -47,6 +47,6 @@ export async function createEventToolHandler({
     recommendations: eventInput.recommendations,
   };
 
-  await eventClient.bulkCreate([event]);
+  await eventClient.bulkCreate([event], { throwOnFail: true });
   return { event_id: eventId, acknowledged: true };
 }
