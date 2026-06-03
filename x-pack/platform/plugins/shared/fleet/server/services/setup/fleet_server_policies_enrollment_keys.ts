@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import { AGENT_POLICY_INDEX, ENROLLMENT_API_KEYS_INDEX } from '../../../common/constants';
+import { ENROLLMENT_API_KEYS_INDEX } from '../../../common/constants';
 
 import { agentPolicyService } from '../agent_policy';
 import { generateEnrollmentAPIKey } from '../api_keys';
@@ -16,45 +16,6 @@ import { SO_SEARCH_LIMIT, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '..
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
 import { scheduleBumpAgentPoliciesTask } from '../agent_policies/bump_agent_policies_task';
-
-/**
- * Resolve the latest deployed revision (`revision_idx` in `.fleet-policies`) for many agent
- * policies in a single aggregation, Returns a map keyed by policy id; policies without a
- * deployed revision are omitted from the map.
- */
-async function getLatestFleetPolicyRevisions(
-  esClient: ElasticsearchClient,
-  agentPolicyIds: string[]
-): Promise<Map<string, number>> {
-  const latestRevisionByPolicyId = new Map<string, number>();
-  if (agentPolicyIds.length === 0) {
-    return latestRevisionByPolicyId;
-  }
-
-  const res = await esClient.search<
-    unknown,
-    { policies: { buckets: Array<{ key: string; latest_revision: { value: number | null } }> } }
-  >({
-    index: AGENT_POLICY_INDEX,
-    ignore_unavailable: true,
-    size: 0,
-    query: { terms: { policy_id: agentPolicyIds } },
-    aggs: {
-      policies: {
-        terms: { field: 'policy_id', size: agentPolicyIds.length },
-        aggs: { latest_revision: { max: { field: 'revision_idx' } } },
-      },
-    },
-  });
-
-  for (const bucket of res.aggregations?.policies?.buckets ?? []) {
-    if (bucket.latest_revision.value !== null) {
-      latestRevisionByPolicyId.set(bucket.key, bucket.latest_revision.value);
-    }
-  }
-
-  return latestRevisionByPolicyId;
-}
 
 /**
  * Return the set of agent policy ids that already have at least one enrollment API key.
@@ -117,7 +78,7 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
 
   // Resolve the latest deployed revision and which policies already have an enrollment API key
   const [latestRevisionByPolicyId, policyIdsWithEnrollmentKeys] = await Promise.all([
-    getLatestFleetPolicyRevisions(esClient, agentPolicyIds),
+    agentPolicyService.getLatestFleetPolicyRevisions(esClient, agentPolicyIds),
     getPolicyIdsWithEnrollmentAPIKeys(esClient, agentPolicyIds),
   ]);
 
