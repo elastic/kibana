@@ -56,7 +56,7 @@ const k8sTopology: GraphDsl = {
         },
         {
           action: 'set',
-          field: 'attributes.k8s.cluster',
+          to: 'attributes.k8s.cluster',
           value: 'prod-us-east-1',
         },
       ],
@@ -105,7 +105,7 @@ const ecommerceTopology: GraphDsl = {
       steps: [
         {
           action: 'set',
-          field: 'attributes.env',
+          to: 'attributes.env',
           value: 'production',
         },
       ],
@@ -114,7 +114,7 @@ const ecommerceTopology: GraphDsl = {
       steps: [
         {
           action: 'set',
-          field: 'attributes.pci_scope',
+          to: 'attributes.pci_scope',
           value: 'true',
         },
       ],
@@ -162,7 +162,7 @@ const firewallTopology: GraphDsl = {
       steps: [
         {
           action: 'set',
-          field: 'attributes.vendor_name',
+          to: 'attributes.vendor_name',
           value: 'paloalto',
         },
       ],
@@ -171,7 +171,7 @@ const firewallTopology: GraphDsl = {
       steps: [
         {
           action: 'set',
-          field: 'attributes.vendor_name',
+          to: 'attributes.vendor_name',
           value: 'checkpoint',
         },
       ],
@@ -180,7 +180,7 @@ const firewallTopology: GraphDsl = {
       steps: [
         {
           action: 'set',
-          field: 'attributes.vendor_name',
+          to: 'attributes.vendor_name',
           value: 'fortinet',
         },
       ],

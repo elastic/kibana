@@ -205,6 +205,7 @@ export const routeTestGraphRoute = createServerRoute({
     const result = await esClient.simulate.ingest({
       docs: [
         {
+          _id: crypto.randomUUID(),
           _index: params.body.source,
           _source: params.body.document,
         },

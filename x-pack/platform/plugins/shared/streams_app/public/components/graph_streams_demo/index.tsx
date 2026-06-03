@@ -15,7 +15,7 @@
  *  4. Delete the topology when done.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -243,11 +243,18 @@ export const GraphStreamsDemoPage = () => {
   );
   const [routeTestResult, setRouteTestResult] = useState<RouteTestResult | null>(null);
   const [routeTestLoading, setRouteTestLoading] = useState(false);
+  const routeTestResultRef = useRef<HTMLDivElement>(null);
 
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
 
   const selectedPreset = GRAPH_PRESETS.find((p) => p.id === selectedPresetId) ?? GRAPH_PRESETS[0];
+
+  useEffect(() => {
+    if (routeTestResult) {
+      routeTestResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [routeTestResult]);
 
   const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
@@ -485,10 +492,10 @@ export const GraphStreamsDemoPage = () => {
             </EuiText>
           )}
           {routeTestResult && (
-            <>
+            <div ref={routeTestResultRef}>
               <EuiSpacer size="m" />
               <RouteTestResultPanel result={routeTestResult} />
-            </>
+            </div>
           )}
         </EuiPanel>
       </StreamsAppPageTemplate.Body>
