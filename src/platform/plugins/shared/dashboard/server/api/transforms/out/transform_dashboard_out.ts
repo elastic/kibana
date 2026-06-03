@@ -115,7 +115,7 @@ export function transformDashboardOut(
     } catch (error) {
       const warningMessage = `Unexpected error transforming ${key}. Error: ${error.message}`;
       logger.warn(warningMessage);
-      warnings.push({
+      otherStateWarnings.push({
         type: 'dropped_property',
         message: warningMessage,
         key,
@@ -143,6 +143,6 @@ export function transformDashboardOut(
       pinned_panels: pinnedPanels,
       ...(query && { query }),
     },
-    warnings: [...warnings, ...pinnedPanelWarnings, ...searchSourceWarnings],
+    warnings: [...warnings, ...pinnedPanelWarnings, ...searchSourceWarnings, ...otherStateWarnings],
   };
 }
