@@ -196,12 +196,13 @@ export const useEsqlConversionCheck = (
           columnRoles
         )
       : undefined;
-    if (trendlineLayer) {
-      convertibleLayers.push(trendlineLayer);
-    }
+    // Trendline is auto-included in the conversion but not shown in the modal
+    const layersToConvert = trendlineLayer
+      ? [...convertibleLayers, trendlineLayer]
+      : convertibleLayers;
 
     const newAttributes = convertFormBasedToTextBasedLayer({
-      layersToConvert: convertibleLayers,
+      layersToConvert,
       attributes,
       visualizationState: visualization.state,
       datasourceStates,
@@ -266,15 +267,33 @@ function tryConvertTrendlineLayer(
 ): ConvertibleLayer | undefined {
   if (!layer?.columnOrder || !layer?.columns) return undefined;
 
-  // Strip includeEmptyRows from date_histogram columns
+  // Patch date_histogram columns for trendline conversion:
+  // - Strip includeEmptyRows (ES|QL trendlines don't need gap-filling, and this flag blocks conversion)
+  // - Fill empty sourceField with the index pattern's time field (the trendline layer is created
+  //   with sourceField: '' and relies on syncColumns to fill it later, but during conversion
+  //   we need it resolved upfront)
+  const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+  const timeFieldName = indexPattern?.timeFieldName ?? '';
   const columns = Object.fromEntries(
     Object.entries(layer.columns).map(([colId, col]) => {
+      if (col.operationType !== 'date_histogram') return [colId, col];
       const colWithParams = col as GenericIndexPatternColumn & {
+        sourceField?: string;
         params?: Record<string, unknown>;
       };
-      return col.operationType === 'date_histogram' && colWithParams.params?.includeEmptyRows
-        ? [colId, { ...col, params: { ...colWithParams.params, includeEmptyRows: false } }]
-        : [colId, col];
+      const needsSourceField = !colWithParams.sourceField && timeFieldName;
+      const needsStripEmptyRows = colWithParams.params?.includeEmptyRows;
+      if (!needsSourceField && !needsStripEmptyRows) return [colId, col];
+      return [
+        colId,
+        {
+          ...col,
+          ...(needsSourceField ? { sourceField: timeFieldName } : {}),
+          ...(needsStripEmptyRows
+            ? { params: { ...colWithParams.params, includeEmptyRows: false } }
+            : {}),
+        },
+      ];
     })
   );
 

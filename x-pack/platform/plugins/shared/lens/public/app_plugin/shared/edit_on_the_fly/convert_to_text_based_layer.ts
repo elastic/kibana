@@ -224,7 +224,7 @@ export function convertFormBasedToTextBasedLayer({
         textBased: newDatasourceState,
       },
       visualization: visualizationState,
-      needsRefresh: true,
+      needsRefresh: false,
     },
   };
 
