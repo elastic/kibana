@@ -2305,10 +2305,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.13.0.tgz#b9c079532257b7d4c46e3004ecb7b1f78f00a6b9"
   integrity sha512-Itl7zn88GEYRAqfmuRzViNy03nVHkIVLAvtjIC0b3lhjBnJgUbEG8ImfdYUExMiGraFE+2/k6v/Z8LbWXxO+JA==
 
-"@elastic/esql@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.3.0.tgz#a0e334df971512c480925c153a5940f2c534e867"
-  integrity sha512-8y0OnR23IxZk43LiR3TTXNonUkPlj/4MMM7y3En6deNt8tj4Bhm2gpG5idg3MCgnmEwXVGbWiizesDLpLq6kdQ==
+"@elastic/esql@4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.4.0.tgz#0ca6c2b3d38482012a3b95adb6b2caafd62a7b4c"
+  integrity sha512-8mbrT9as13DNJ4wFnBW9dD1F1c2qxusmMfbPWRzexMwS/8/H35YPWrryCHBU0ESyTC2ak5yqbc/733jPbpC7Cw==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -2567,10 +2567,10 @@
     history "^4.9.0"
     qs "^6.9.7"
 
-"@elastic/transport@9.3.5", "@elastic/transport@^9.3.5":
-  version "9.3.5"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-9.3.5.tgz#c041807aa366b7bd2f861c458ca4fd427e06e519"
-  integrity sha512-hIMJbt1guqr3/N2zCN45k9hw9o78qcdsO0xietLe+Bfa+JL0YafHTgkWkM1oT3Ht5sGMJaDcJZiYomSMU6CtTA==
+"@elastic/transport@9.3.7", "@elastic/transport@^9.3.5":
+  version "9.3.7"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-9.3.7.tgz#5b81998f5b6305dd6f8d9b05da824a96c53df8b8"
+  integrity sha512-L38Ax21uF2OPUmCRWycZ/dZdMYf7gMrtClcxvVrqJVFmn8ET2M++GYmFGJpLqOHS1beATxOXLWe7y2ijSQz/ng==
   dependencies:
     "@opentelemetry/api" "1.x"
     "@opentelemetry/core" "2.x"
@@ -6928,6 +6928,10 @@
   uid ""
 
 "@kbn/evals-suite-security-ai-rules@link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-security-alert-triage@link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage":
   version "0.0.0"
   uid ""
 

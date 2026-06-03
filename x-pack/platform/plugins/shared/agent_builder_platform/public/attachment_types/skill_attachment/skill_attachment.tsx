@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { AgentsServiceStartContract } from '@kbn/agent-builder-browser';
 import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import {
   ActionButtonType,
@@ -363,16 +364,11 @@ interface CreateSkillDeps {
   http: HttpStart;
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
+  agents: AgentsServiceStartContract;
 }
 
 /**
  * Factory for the `skill` UI definition.
- *
- * Why a factory: `getActionButtons` runs every render but lives in module
- * scope, so it can't use React hooks. We close over `core.http` /
- * `core.notifications` / `core.application` captured at registration time
- * and use them directly. This mirrors the pattern used by the ESQL and
- * dashboard attachment definitions.
  *
  * The Create button:
  * 1. Disables when the user lacks the `manageSkills` capability.
@@ -380,12 +376,16 @@ interface CreateSkillDeps {
  * 3. On success, calls the framework-provided `updateOrigin(skillId)` so the
  *    same attachment now references the persisted skill (the card flips to
  *    a "Created" badge and the button disables).
- * 4. On failure, surfaces the agent_builder error message via core toasts.
+ * 4. Adds the new skill to the current conversation's agent (`agentId`) so it
+ *    is immediately usable; a failure here is reported separately and does not
+ *    undo the skill creation.
+ * 5. On failure, surfaces the agent_builder error message via core toasts.
  */
 export const createSkillAttachmentDefinition = ({
   http,
   notifications,
   application,
+  agents,
 }: CreateSkillDeps): AttachmentUIDefinition<SkillAttachment> => {
   const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
   const isLatest = (attachment: SkillAttachment): boolean => {
@@ -458,7 +458,7 @@ export const createSkillAttachmentDefinition = ({
     },
     renderInlineContent: (props) => <SkillInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillCanvasContent {...props} />,
-    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
+    getActionButtons: ({ attachment, agentId, updateOrigin, openCanvas, isCanvas }) => {
       const { data } = attachment;
       const { mode, skill } = data;
 
@@ -469,6 +469,24 @@ export const createSkillAttachmentDefinition = ({
             body: JSON.stringify(skill),
           });
           await updateOrigin(response.id);
+          if (agentId) {
+            try {
+              await agents.addSkillToAgent({ agentId, skillId: response.id });
+            } catch (error) {
+              notifications.toasts.addError(error as Error, {
+                title: i18n.translate(
+                  'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
+                  {
+                    defaultMessage:
+                      'Skill "{skillId}" created, but could not be added to this agent',
+                    values: { skillId: response.id },
+                  }
+                ),
+              });
+              return;
+            }
+          }
+
           notifications.toasts.addSuccess({
             title: i18n.translate(
               'xpack.agentBuilderPlatform.attachments.skill.createSuccessToast',
