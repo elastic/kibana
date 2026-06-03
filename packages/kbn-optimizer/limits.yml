@@ -171,7 +171,7 @@ pageLoadAssetSize:
   serverless: 7412
   serverlessObservability: 21437
   serverlessSearch: 26287
-  serverlessVectordb: 7618
+  serverlessVectordb: 11999
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
