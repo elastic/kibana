@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { mkdir, writeFile } from 'fs/promises';
+import path from 'path';
+
+export const WARM_START_MEMORY_REPORT_PATH_ENV = 'KIBANA_CI_WARM_START_MEMORY_REPORT_PATH';
+export const DEFAULT_WARM_START_MEMORY_REPORT_PATH =
+  'target/warm_start_memory_regression_report.json';
+
+export interface WarmStartMemoryRegressionReportContext {
+  readonly baselineCommit?: string;
+  readonly targetCommit?: string;
+  readonly baselineBuildId?: string;
+  readonly targetBuildId?: string;
+}
+
+export interface WarmStartMemoryRegressionReport {
+  readonly baselineRssBytes: number;
+  readonly targetRssBytes: number;
+  readonly deltaBytes: number;
+  readonly allowedDeltaBytes: number;
+  readonly context?: WarmStartMemoryRegressionReportContext;
+}
+
+export const buildWarmStartMemoryRegressionReport = ({
+  baselineRssBytes,
+  targetRssBytes,
+  allowedDeltaBytes,
+  context,
+}: {
+  baselineRssBytes: number;
+  targetRssBytes: number;
+  allowedDeltaBytes: number;
+  context?: WarmStartMemoryRegressionReportContext;
+}): WarmStartMemoryRegressionReport => {
+  const report: WarmStartMemoryRegressionReport = {
+    baselineRssBytes,
+    targetRssBytes,
+    deltaBytes: targetRssBytes - baselineRssBytes,
+    allowedDeltaBytes,
+  };
+
+  if (context && Object.keys(context).length > 0) {
+    return {
+      ...report,
+      context,
+    };
+  }
+
+  return report;
+};
+
+export const getWarmStartMemoryRegressionReportPath = (): string => {
+  return process.env[WARM_START_MEMORY_REPORT_PATH_ENV] ?? DEFAULT_WARM_START_MEMORY_REPORT_PATH;
+};
+
+export const getWarmStartMemoryRegressionReportContextFromEnv =
+  (): WarmStartMemoryRegressionReportContext | undefined => {
+    const context: WarmStartMemoryRegressionReportContext = {
+      baselineCommit:
+        process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_COMMIT ??
+        process.env.GITHUB_PR_MERGE_BASE,
+      targetCommit:
+        process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_COMMIT ?? process.env.BUILDKITE_COMMIT,
+      baselineBuildId: process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID,
+      targetBuildId:
+        process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_BUILD_ID ?? process.env.BUILDKITE_BUILD_ID,
+    };
+
+    const definedContext = Object.fromEntries(
+      Object.entries(context).filter(([, value]) => value !== undefined && value !== '')
+    ) as WarmStartMemoryRegressionReportContext;
+
+    return Object.keys(definedContext).length > 0 ? definedContext : undefined;
+  };
+
+export const writeWarmStartMemoryRegressionReport = async (
+  report: WarmStartMemoryRegressionReport,
+  reportPath: string = getWarmStartMemoryRegressionReportPath()
+): Promise<string> => {
+  await mkdir(path.dirname(reportPath), { recursive: true });
+  await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  return reportPath;
+};
