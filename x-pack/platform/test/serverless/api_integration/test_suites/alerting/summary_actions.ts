@@ -558,6 +558,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_MUTED]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
