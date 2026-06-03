@@ -37,6 +37,11 @@ export interface OtelAppenderTlsConfig {
    * Defaults to `full`.
    */
   verificationMode: 'none' | 'certificate' | 'full';
+  /**
+   * Whether to allow partial trust chain verification.
+   * Defaults to `false`.
+   */
+  allowPartialTrustChain?: boolean;
 }
 
 /**
