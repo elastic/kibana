@@ -834,11 +834,11 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       const inputsValid = await validateWorkflowInputs(
-        workflow,
-        context,
-        executionId,
+        workflowExecution,
         workflowExecutionRepository,
-        this.logger
+        this.logger,
+        coreStart,
+        dependencies
       );
       if (!inputsValid) {
         return {

@@ -154,6 +154,62 @@ describe('buildWorkflowContext', () => {
       });
     });
 
+    it('should render default input values when inputs are not provided', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {},
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: 'renderedValue',
+      });
+    });
+
+    it('should render prefilled input values that match their raw schema defaults', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {
+            inputWithDefault: '{{ consts.default_input }}',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: 'renderedValue',
+      });
+    });
+
     it('should override default values with provided inputs', () => {
       setInputsSchema({
         properties: {

@@ -345,6 +345,61 @@ describe('applyInputDefaults', () => {
     });
   });
 
+  it('should render default values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: '{{ user }}' },
+      },
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+    });
+  });
+
+  it('should render provided values that still match their raw schema default', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: '{{ user }}' },
+        message: { type: 'string', default: '{{ greeting }}' },
+      },
+    });
+
+    const result = applyInputDefaults(
+      { name: '{{ user }}', message: 'custom' },
+      inputsSchema,
+      (value) => (value === '{{ user }}' ? 'Alice' : value)
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+      message: 'custom',
+    });
+  });
+
+  it('should render provided object values that still match their raw schema default', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        settings: {
+          type: 'object',
+          default: { name: '{{ user }}' },
+        },
+      },
+    });
+
+    const result = applyInputDefaults({ settings: { name: '{{ user }}' } }, inputsSchema, (value) =>
+      JSON.stringify(value) === '{"name":"{{ user }}"}' ? { name: 'Alice' } : value
+    );
+
+    expect(result).toEqual({
+      settings: { name: 'Alice' },
+    });
+  });
+
   it('should apply defaults for nested objects', () => {
     const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
