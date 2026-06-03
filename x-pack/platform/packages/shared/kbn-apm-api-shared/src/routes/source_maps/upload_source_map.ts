@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
 import type { Artifact } from '@kbn/fleet-plugin/server';
+import { stringFromBufferRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { sourceMapRt } from './source_map_types';
 
@@ -17,7 +18,7 @@ export const uploadSourceMapRoute = defineRoute<Artifact | undefined>()({
       service_name: t.string,
       service_version: t.string,
       bundle_filepath: t.string,
-      sourcemap: t.union([t.string, t.any]).pipe(jsonRt).pipe(sourceMapRt),
+      sourcemap: t.union([t.string, stringFromBufferRt]).pipe(jsonRt).pipe(sourceMapRt),
     }),
   }),
 });

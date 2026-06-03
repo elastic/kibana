@@ -11,7 +11,7 @@ import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
+import { stringFromBufferRt } from '@kbn/apm-types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { ListSourceMapArtifactsResponse } from '../fleet/source_maps';
 import {
