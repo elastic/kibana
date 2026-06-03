@@ -15,10 +15,10 @@
 @base2/pretty-print-object@1.0.1
 @elastic/apm-rum-core@5.25.2
 @elastic/charts@71.7.0
-@elastic/esql@4.2.0
+@elastic/esql@4.4.0
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@116.0.0
+@elastic/eui@116.2.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
@@ -508,7 +508,6 @@ util@0.12.5
 utility-types@3.11.0
 uuid@11.1.0
 uuid@14.0.0
-uuid@8.3.2
 value-equal@0.4.0
 vfile-location@3.0.1
 vfile-message@2.0.4

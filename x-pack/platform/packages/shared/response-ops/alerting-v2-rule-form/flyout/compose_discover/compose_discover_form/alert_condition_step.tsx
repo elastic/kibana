@@ -38,6 +38,7 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
 }
 
 export function AlertConditionStep({
@@ -45,6 +46,7 @@ export function AlertConditionStep({
   dispatch,
   services,
   onKindChange,
+  isEditing,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
@@ -73,7 +75,9 @@ export function AlertConditionStep({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dateFields.includes('@timestamp')) dateFields.unshift('@timestamp');
+    if (dateFields.length === 0) {
+      return [{ value: '@timestamp', text: '@timestamp' }];
+    }
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
@@ -94,18 +98,17 @@ export function AlertConditionStep({
     keepPreviousData: true,
   });
 
-  // Auto-populate group fields from the STATS BY clause when a query is first committed
-  // and the user hasn't already set any group fields.
+  // Auto-populate group fields from the STATS BY clause whenever the committed
+  // query changes. Re-derives on every new Apply so switching indices updates
+  // the group fields instead of leaving stale values from the previous query.
   const autoPopulatedForRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!state.queryCommitted || groupFields.length > 0 || !committedQuery) return;
+    if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
     autoPopulatedForRef.current = committedQuery;
     try {
       const { root } = Parser.parse(committedQuery);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
-      // ESQLAstItem is a wide union -- use a local type alias to access the 'by' option
-      // safely rather than an inline interface (which triggers lint in function scope).
       interface CmdOption {
         type: string;
         name: string;
@@ -115,11 +118,11 @@ export function AlertConditionStep({
         (a) => a.type === 'option' && a.name === 'by'
       );
       const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
-      if (byFields.length > 0) setValue('grouping', { fields: byFields });
+      setValue('grouping', byFields.length > 0 ? { fields: byFields } : undefined);
     } catch {
       // Non-parseable query -- skip auto-populate
     }
-  }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
+  }, [state.queryCommitted, committedQuery, setValue]);
 
   const handleTrackingToggle = useCallback(() => {
     onKindChange(isAlert ? 'signal' : 'alert');
@@ -304,7 +307,7 @@ export function AlertConditionStep({
         )}
         checked={isAlert}
         onChange={handleTrackingToggle}
-        disabled={!state.queryCommitted}
+        disabled={!state.queryCommitted || isEditing}
         data-test-subj="composeDiscoverTrackingToggle"
       />
 

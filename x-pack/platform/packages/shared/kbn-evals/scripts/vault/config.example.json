@@ -1,5 +1,5 @@
 {
-  "description": "kbn-evals CI config -- copy to config.json and fill in secrets",
+  "description": "kbn-evals config -- copy to config.json, fill in secrets",
   "contact": "REPLACE_ME",
   "owner": "REPLACE_ME",
   "environment": "local",

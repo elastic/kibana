@@ -85,6 +85,7 @@ kibana_vars=(
     elasticsearch.ssl.verificationMode
     elasticsearch.username
     externalUrl.policy
+    i18n.allowLocaleCookie
     i18n.defaultLocale
     i18n.locale
     i18n.locales

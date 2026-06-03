@@ -1,5 +1,5 @@
 {
-  "sha1": "9cf0dcfbd99d57a2927478739e2599a9fc60a378",
+  "sha1": "09149f5dafff317839f3b76f6b4edb982e766397",
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-fd6bed6385481a0",
@@ -641,13 +641,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 98,
+        "line": 97,
         "column": 7
       }
     },
     {
-      "id": "e8c3862f6d55eee-57f680c8893dd8f",
-      "title": "Rules page navigation and loading navigates to /app/rules successfully",
+      "id": "e8c3862f6d55eee-b1be38b2d4b56e5",
+      "title": "Rules page navigation and loading redirects to Stack Management rules page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -655,7 +655,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     },
@@ -669,7 +669,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 7
       }
     },
@@ -683,7 +683,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 7
       }
     },
@@ -697,7 +697,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 7
       }
     },
@@ -711,13 +711,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 7
       }
     },
     {
-      "id": "60712085c74f944-4773d1d036ead66",
-      "title": "Rules page tab functionality navigates to /app/rules/logs when clicking the Logs tab",
+      "id": "60712085c74f944-375bbd42989e239",
+      "title": "Rules page tab functionality navigates to rules logs tab when clicking the Logs tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -725,13 +725,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 7
       }
     },
     {
-      "id": "60712085c74f944-0bf63d694e57d1d",
-      "title": "Rules page tab functionality navigates back to /app/rules when clicking the Rules tab",
+      "id": "60712085c74f944-7f5a1d7fce883be",
+      "title": "Rules page tab functionality navigates back to rules list when clicking the Rules tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -739,7 +739,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 7
       }
     },
@@ -753,7 +753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 66,
+        "line": 67,
         "column": 7
       }
     },

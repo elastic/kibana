@@ -23,6 +23,15 @@ import { EnableWiredStreamsConfirmModal } from './enable_wired_streams_confirm_m
 
 export type IngestionMode = 'classic' | 'wired';
 
+const INGESTION_MODES: readonly IngestionMode[] = ['classic', 'wired'] as const;
+
+const isIngestionMode = (value: string | null | undefined): value is IngestionMode =>
+  typeof value === 'string' && (INGESTION_MODES as readonly string[]).includes(value);
+
+// Falls back to 'classic' for unknown/missing values so stale URLs never break.
+export const parseIngestionMode = (raw: string | null | undefined): IngestionMode =>
+  isIngestionMode(raw) ? raw : 'classic';
+
 interface WiredStreamsIngestionSelectorProps {
   ingestionMode: IngestionMode;
   onChange: (mode: IngestionMode) => void;

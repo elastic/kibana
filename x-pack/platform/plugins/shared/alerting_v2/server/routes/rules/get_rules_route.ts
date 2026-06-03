@@ -40,7 +40,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => findRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of rules.',
       },
       400: {
         body: () => errorResponseSchema,
