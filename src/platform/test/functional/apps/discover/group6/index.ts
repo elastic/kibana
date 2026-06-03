@@ -22,6 +22,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_sidebar'));
-    loadTestFile(require.resolve('./_sidebar_field_stats'));
   });
 }
