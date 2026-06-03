@@ -16,9 +16,9 @@ describe('buildTrendlineBucketExpression', () => {
     );
   });
 
-  it('works with dotted field names', () => {
+  it('escapes dotted field names with backticks', () => {
     expect(buildTrendlineBucketExpression('order.date')).toBe(
-      'BUCKET(order.date, 75, ?_tstart, ?_tend)'
+      'BUCKET(`order.date`, 75, ?_tstart, ?_tend)'
     );
   });
 });
@@ -42,10 +42,10 @@ describe('appendTimeBucketToEsqlQuery', () => {
     ).toBe('FROM index | STATS AVG(price) BY category, BUCKET(timestamp, 75, ?_tstart, ?_tend)');
   });
 
-  it('is case-insensitive for STATS and BY keywords', () => {
+  it('normalizes keyword casing in output', () => {
     expect(
       appendTimeBucketToEsqlQuery('FROM index | stats avg(price) by region', '@timestamp')
-    ).toBe('FROM index | stats avg(price) by region, BUCKET(@timestamp, 75, ?_tstart, ?_tend)');
+    ).toBe('FROM index | STATS AVG(price) BY region, BUCKET(@timestamp, 75, ?_tstart, ?_tend)');
   });
 
   it('handles WHERE clause before STATS', () => {
