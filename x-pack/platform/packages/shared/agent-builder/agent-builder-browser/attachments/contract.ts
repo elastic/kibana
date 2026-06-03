@@ -222,11 +222,6 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
-  /**
-   * Optional max-width (in px) for the inline attachment panel.
-   * When provided, the outer panel will not exceed this width.
-   */
-  getMaxWidth?: (attachment: TAttachment) => number | undefined;
 }
 
 /**

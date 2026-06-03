@@ -10,7 +10,6 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   type ActionButton,
@@ -73,7 +72,7 @@ export function VisualizeLens({
   return (
     <div
       data-test-subj="lensVisualization"
-      css={[visualizationWrapperStyles, width !== undefined ? css({ maxWidth: width }) : undefined]}
+      css={visualizationWrapperStyles({ width })}
     >
       {shouldRenderLocalActionButtons && (
         <FallbackVisualizationActions buttons={localActionButtons} />
