@@ -130,7 +130,7 @@ export type {
   RelationshipKind,
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
-  NormalizedRelationshipRecord,
+  RelationshipRecord,
 } from './domain/entity_metadata/relationship_metadata';
 export { ListEntityRelationshipsRequestQuery } from './domain/entity_metadata/list_entity_relationships.gen';
 export type { ListEntityRelationshipsRequestQueryInput } from './domain/entity_metadata/list_entity_relationships.gen';

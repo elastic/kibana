@@ -128,7 +128,7 @@ describe('entityRelationshipHistoryTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toBe('EMH metadata datastream does not exist for this space');
+      expect(result.reason).toBe('entity metadata datastream does not exist for this space');
     });
 
     it('returns unavailable when index check throws', async () => {
@@ -139,7 +139,7 @@ describe('entityRelationshipHistoryTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Failed to check EMH metadata datastream availability');
+      expect(result.reason).toContain('Failed to check entity metadata datastream availability');
     });
   });
 

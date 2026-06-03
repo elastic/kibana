@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-// EMH Phase 1: file does not exist yet. Implementer creates it.
 import {
   getMetadataComponentTemplateName,
   getMetadataComponentTemplate,
 } from './metadata_component_templates';
 
-describe('EMH Phase 1 — getMetadataComponentTemplate', () => {
+describe('getMetadataComponentTemplate', () => {
   const namespace = 'default';
 
   it('exposes a namespace-scoped component template name', () => {

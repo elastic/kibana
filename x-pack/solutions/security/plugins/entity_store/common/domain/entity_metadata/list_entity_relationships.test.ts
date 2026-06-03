@@ -8,7 +8,7 @@
 import { ListEntityRelationshipsRequestQuery } from './list_entity_relationships.gen';
 import { RELATIONSHIP_KINDS } from './relationship_metadata';
 
-describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)', () => {
+describe('ListEntityRelationshipsRequestQuery', () => {
   describe('happy path — accepts every supported parameter', () => {
     it('parses a fully populated query', () => {
       const result = ListEntityRelationshipsRequestQuery.safeParse({
@@ -86,7 +86,7 @@ describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)
     });
   });
 
-  describe('TS RELATIONSHIP_KINDS ↔ YAML kind enum drift guard', () => {
+  describe('drift guard: RELATIONSHIP_KINDS stays in sync with the YAML kind enum', () => {
     // The Zod `kind` field is generated from the YAML enum. Reach into the
     // generated schema and read the enum's values so that any drift between
     // the TS const and the YAML source surfaces here.
@@ -105,13 +105,13 @@ describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)
     });
 
     it.each([...RELATIONSHIP_KINDS])(
-      'YAML-sourced kind enum contains TS RELATIONSHIP_KINDS member %s',
+      'YAML-sourced kind enum contains RELATIONSHIP_KINDS member %s',
       (kind) => {
         expect(kindEnumOptions).toContain(kind);
       }
     );
 
-    it('TS RELATIONSHIP_KINDS contains every YAML-sourced kind enum member', () => {
+    it('RELATIONSHIP_KINDS contains every YAML-sourced kind enum member', () => {
       for (const kind of kindEnumOptions) {
         expect((RELATIONSHIP_KINDS as readonly string[]).includes(kind)).toBe(true);
       }

@@ -12,7 +12,7 @@ import { API_VERSIONS, ListEntityRelationshipsRequestQuery } from '../../../../c
 import {
   paramsSchema,
   registerListRelationships,
-  type NormalizedRelationshipRecord,
+  type RelationshipRecord,
 } from './list_relationships';
 import type { RelationshipMetadataDoc } from '../../../../common/domain/entity_metadata/relationship_metadata';
 
@@ -155,7 +155,7 @@ describe('registerListRelationships route', () => {
 
     expect(res.ok).toHaveBeenCalledTimes(1);
     const body = res.ok.mock.calls[0][0]?.body as {
-      records: NormalizedRelationshipRecord[];
+      records: RelationshipRecord[];
       total: number;
       page: number;
       per_page: number;

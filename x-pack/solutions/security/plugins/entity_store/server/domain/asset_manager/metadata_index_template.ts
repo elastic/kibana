@@ -29,7 +29,7 @@ export const getMetadataEntityIndexTemplateConfig = (
   name: getMetadataIndexTemplateId(namespace),
   _meta: {
     description:
-      'Index template for the Entity Metadata History (EMH) data stream. ' +
+      'Index template for the entity metadata data stream. ' +
       'Stores observation documents emitted by entity maintainers (relationships, behaviors).',
     ecs_version: '9.2.0',
     managed: true,

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-// EMH Phase 1: file does not exist yet. Implementer creates it.
 import {
   getMetadataIndexTemplateId,
   getMetadataEntityIndexTemplateConfig,
 } from './metadata_index_template';
 import { getMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
 
-describe('EMH Phase 1 — getMetadataEntityIndexTemplateConfig', () => {
+describe('getMetadataEntityIndexTemplateConfig', () => {
   const namespace = 'default';
 
   it('exposes a namespace-scoped index template id', () => {

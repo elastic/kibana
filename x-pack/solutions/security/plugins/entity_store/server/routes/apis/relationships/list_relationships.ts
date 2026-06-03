@@ -18,7 +18,7 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import {
   normalizeRelationshipRecord,
-  type NormalizedRelationshipRecord,
+  type RelationshipRecord,
 } from '../../../../common/domain/entity_metadata/relationship_metadata';
 
 export const paramsSchema = z.object({
@@ -28,10 +28,10 @@ export const paramsSchema = z.object({
     .describe('The EUID of the entity to list relationship observations for.'),
 });
 
-export type { NormalizedRelationshipRecord };
+export type { RelationshipRecord };
 
 interface ListRelationshipMetadataResponseBody {
-  records: NormalizedRelationshipRecord[];
+  records: RelationshipRecord[];
   total: number;
   page: number;
   per_page: number;
@@ -73,7 +73,7 @@ export function registerListRelationships(router: EntityStorePluginRouter) {
 
           const records = result.records
             .map(normalizeRelationshipRecord)
-            .filter((r): r is NormalizedRelationshipRecord => r !== undefined);
+            .filter((r): r is RelationshipRecord => r !== undefined);
 
           return res.ok({
             body: { records, total: result.total, page: result.page, per_page: result.per_page },

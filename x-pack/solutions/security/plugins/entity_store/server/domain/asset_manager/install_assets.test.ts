@@ -64,8 +64,8 @@ describe('uninstallElasticsearchAssets', () => {
       expect.anything(),
       getMetadataEntitiesDataStreamName(namespace)
     );
-    // Verify the resolved name matches the EMH datastream that relationship
-    // maintainers write to.
+    // Verify the resolved name matches the entity metadata datastream that
+    // relationship maintainers write to.
     expect(getMetadataEntitiesDataStreamName(namespace)).toBe(
       '.entities.v2.metadata.security_default'
     );

@@ -12,7 +12,7 @@ import type {
 import { RELATIONSHIP_KINDS } from './relationship_metadata';
 import { getMetadataComponentTemplate } from '../../../server/domain/asset_manager/metadata_component_templates';
 
-describe('EMH Phase 2 — RelationshipMetadataDoc type', () => {
+describe('RelationshipMetadataDoc', () => {
   const minimalRequired = {
     '@timestamp': '2026-05-15T10:30:00.000Z',
     'event.kind': 'event',
@@ -221,7 +221,7 @@ type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B 
 
 type EnumeratedKeys = (typeof RELATIONSHIP_OBSERVATION_FIELD_PATHS)[number];
 
-describe('EMH Phase 2 — drift guard against Phase 1 component template', () => {
+describe('drift guard: RelationshipMetadataDoc stays in sync with component template mapping', () => {
   const template = getMetadataComponentTemplate('default');
   const mappings = template.template?.mappings;
   const properties = (mappings?.properties ?? {}) as Record<string, { type?: string }>;

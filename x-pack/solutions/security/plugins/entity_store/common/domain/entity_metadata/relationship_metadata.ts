@@ -39,7 +39,7 @@ export type RelationshipMetadataDoc = {
   [K in RelationshipTargetKey]?: string;
 };
 
-export interface NormalizedRelationshipRecord {
+export interface RelationshipRecord {
   kind: RelationshipKind;
   target: string;
   timestamp: string;
@@ -48,7 +48,7 @@ export interface NormalizedRelationshipRecord {
 
 export const normalizeRelationshipRecord = (
   doc: RelationshipMetadataDoc
-): NormalizedRelationshipRecord | undefined => {
+): RelationshipRecord | undefined => {
   for (const kind of RELATIONSHIP_KINDS) {
     const target = doc[`entity.relationships.${kind}.target`];
     if (target) {

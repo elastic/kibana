@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-// EMH Phase 1: file does not exist yet. Implementer creates it mirroring
-// `updates_data_stream.ts`. This import must fail until the file is created.
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 
-describe('EMH Phase 1 — getMetadataEntitiesDataStreamName', () => {
+describe('getMetadataEntitiesDataStreamName', () => {
   it('returns the v2 metadata datastream name for the default namespace', () => {
     expect(getMetadataEntitiesDataStreamName('default')).toBe(
       '.entities.v2.metadata.security_default'

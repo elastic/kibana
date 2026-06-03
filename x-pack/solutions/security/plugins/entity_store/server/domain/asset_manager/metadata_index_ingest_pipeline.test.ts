@@ -8,14 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-// EMH Phase 1: file does not exist yet. Implementer creates it.
 import {
   getMetadataIndexIngestPipelineId,
   getMetadataIndexIngestPipelineBody,
   installMetadataIndexIngestPipeline,
 } from './metadata_index_ingest_pipeline';
 
-describe('EMH Phase 1 — metadata index ingest pipeline', () => {
+describe('metadata index ingest pipeline', () => {
   const namespace = 'default';
   let logger: Logger;
 
@@ -45,7 +44,7 @@ describe('EMH Phase 1 — metadata index ingest pipeline', () => {
       expect(setProcessor?.set?.value).toBe('{{_ingest.timestamp}}');
     });
 
-    it('does NOT include a `dot_expander` processor (EMH callers send pre-nested JSON)', () => {
+    it('does NOT include a `dot_expander` processor (callers send pre-nested JSON)', () => {
       const dotExpander = body.processors?.find((p) => p?.dot_expander !== undefined);
       expect(dotExpander).toBeUndefined();
     });

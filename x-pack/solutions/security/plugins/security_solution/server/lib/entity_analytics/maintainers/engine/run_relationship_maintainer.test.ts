@@ -51,9 +51,8 @@ const makeCrudClient = (
   bulkAppend: jest.Mock;
 } => {
   const bulkUpdate = jest.fn().mockResolvedValue(errors);
-  // EMH Phase 3a: after writeEntityIds, runIntegration must call the metadata
-  // append path through `bulkAppendRelationshipMetadata`. Mocked here so
-  // the relationship maintainer tests can assert on the second write.
+  // After writeEntityIds, runIntegration calls the metadata append path through
+  // `bulkAppendRelationshipMetadata`. Mocked here so tests can assert on the second write.
   const bulkAppend = jest.fn().mockResolvedValue([]);
   const crudClient = {
     bulkUpdateEntity: bulkUpdate,
@@ -849,7 +848,7 @@ describe('runRelationshipMaintainer', () => {
     });
   });
 
-  describe('EMH Phase 3a — write-path wiring (bulkAppendRelationshipMetadata)', () => {
+  describe('write-path wiring (bulkAppendRelationshipMetadata)', () => {
     const oneActorOneTarget = (esql: jest.Mock) => {
       esql.mockResolvedValueOnce({
         columns: [

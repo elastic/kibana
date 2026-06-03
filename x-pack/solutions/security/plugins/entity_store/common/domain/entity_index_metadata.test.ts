@@ -13,9 +13,8 @@ import {
   getEntityIndexPattern,
 } from './entity_index';
 
-describe('EMH Phase 1 — Dataset union extension', () => {
+describe('entity_index dataset constants', () => {
   it('exposes an ENTITY_METADATA constant equal to "metadata"', () => {
-    // Implementer must export `ENTITY_METADATA = 'metadata' as const`.
     expect(ENTITY_METADATA).toBe('metadata');
   });
 

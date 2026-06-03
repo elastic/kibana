@@ -10,8 +10,6 @@ import { expect } from '@kbn/scout-security/api';
 import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
-// EMH Phase 1: these imports must resolve once the Implementer creates the
-// asset_manager metadata files and the metadata install path is wired in.
 import { getMetadataEntitiesDataStreamName } from '../../../../server/domain/asset_manager/metadata_data_stream';
 import { getMetadataIndexIngestPipelineId } from '../../../../server/domain/asset_manager/metadata_index_ingest_pipeline';
 
@@ -19,7 +17,7 @@ const METADATA_DATA_STREAM = getMetadataEntitiesDataStreamName('default');
 const METADATA_INGEST_PIPELINE = getMetadataIndexIngestPipelineId('default');
 
 apiTest.describe(
-  'EMH Phase 1 — metadata datastream is installed by entity store init',
+  'metadata datastream is installed by entity store init',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;

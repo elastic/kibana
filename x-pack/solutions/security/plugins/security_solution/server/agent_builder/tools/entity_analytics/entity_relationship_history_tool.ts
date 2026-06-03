@@ -13,7 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import {
   RELATIONSHIP_KINDS,
   normalizeRelationshipRecord,
-  type NormalizedRelationshipRecord,
+  type RelationshipRecord,
 } from '@kbn/entity-store/common';
 import { securityTool } from '../constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -105,12 +105,12 @@ export const entityRelationshipHistoryTool = (
 
           return {
             status: 'unavailable',
-            reason: 'EMH metadata datastream does not exist for this space',
+            reason: 'entity metadata datastream does not exist for this space',
           };
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check EMH metadata datastream availability: ${
+            reason: `Failed to check entity metadata datastream availability: ${
               error instanceof Error ? error.message : 'Unknown error'
             }`,
           };
@@ -141,7 +141,7 @@ export const entityRelationshipHistoryTool = (
 
         const records = result.records
           .map(normalizeRelationshipRecord)
-          .filter((r): r is NormalizedRelationshipRecord => r !== undefined);
+          .filter((r): r is RelationshipRecord => r !== undefined);
 
         if (records.length === 0) {
           return {

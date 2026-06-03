@@ -14,9 +14,6 @@ import { getMetadataEntitiesDataStreamName } from '../../../../server/domain/ass
 
 const METADATA_DATA_STREAM = getMetadataEntitiesDataStreamName('default');
 
-// EMH Phase 4: the public read API for entity relationship observations.
-// Path is namespaced under ENTITY_STORE_ROUTES.public per architect review
-// (NOT /api/entity_store/...). Path param is `entityId`, not `id`.
 const LIST_RELATIONSHIPS_ROUTE = (entityId: string) =>
   `api/security/entity_store/entities/${encodeURIComponent(entityId)}/relationships`;
 
@@ -34,125 +31,121 @@ const makeMetadataDoc = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-apiTest.describe(
-  'EMH Phase 4 — GET /entities/{entityId}/relationships',
-  { tag: ENTITY_STORE_TAGS },
-  () => {
-    let defaultHeaders: Record<string, string>;
+apiTest.describe('GET /entities/{entityId}/relationships', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
-      const credentials = await samlAuth.asInteractiveUser('admin');
-      defaultHeaders = {
-        ...credentials.cookieHeader,
-        ...PUBLIC_HEADERS,
-      };
+  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...PUBLIC_HEADERS,
+    };
 
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+  });
 
-    apiTest.beforeEach(async ({ apiClient, esClient }) => {
-      // Install the entity store so the metadata datastream + ingest pipeline
-      // come up (verified by Phase 1 spec). Phase 4 reads through the alias.
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+  apiTest.beforeEach(async ({ apiClient, esClient }) => {
+    // Install the entity store so the metadata datastream + ingest pipeline
+    // come up (verified by Phase 1 spec). Phase 4 reads through the alias.
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(install.statusCode).toBe(201);
+
+    // Seed three observations for alice: two against host:laptopA at
+    // different timestamps, one communicates_with at a third timestamp.
+    const docs = [
+      makeMetadataDoc({
+        '@timestamp': '2026-04-20T08:00:00.000Z',
+        'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
+      }),
+      makeMetadataDoc({
+        '@timestamp': '2026-05-15T10:30:00.000Z',
+        'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
+      }),
+      makeMetadataDoc({
+        '@timestamp': '2026-05-10T09:00:00.000Z',
+        'entity.relationships': { communicates_with: { target: 'host:server-1' } },
+      }),
+    ];
+    for (const doc of docs) {
+      await esClient.index({
+        index: METADATA_DATA_STREAM,
+        op_type: 'create',
+        refresh: 'wait_for',
+        body: doc,
+      });
+    }
+  });
+
+  apiTest.afterEach(async ({ apiClient, esClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    await esClient.indices.deleteDataStream({ name: METADATA_DATA_STREAM }, { ignore: [404] });
+    await clearEntityStoreIndices(esClient);
+  });
+
+  apiTest(
+    'returns the oldest observation when sorted asc with per_page=1 (first-seen)',
+    async ({ apiClient }) => {
+      const resp = await apiClient.get(
+        `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=asc&per_page=1`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(resp.statusCode).toBe(200);
+      const body = resp.body as { records: Array<{ '@timestamp': string }> };
+      expect(body.records).toHaveLength(1);
+      expect(body.records[0]['@timestamp']).toBe('2026-04-20T08:00:00.000Z');
+    }
+  );
+
+  apiTest(
+    'returns the newest observation when sorted desc with per_page=1 (last-seen)',
+    async ({ apiClient }) => {
+      const resp = await apiClient.get(
+        `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=desc&per_page=1`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(resp.statusCode).toBe(200);
+      const body = resp.body as { records: Array<{ '@timestamp': string }> };
+      expect(body.records).toHaveLength(1);
+      expect(body.records[0]['@timestamp']).toBe('2026-05-15T10:30:00.000Z');
+    }
+  );
+
+  apiTest(
+    'filters by kind=communicates_with and a from date (last 30 days style)',
+    async ({ apiClient }) => {
+      const resp = await apiClient.get(
+        `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?kind=communicates_with&from=${encodeURIComponent(
+          '2026-04-27T00:00:00.000Z'
+        )}`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(resp.statusCode).toBe(200);
+      const body = resp.body as { records: Array<{ '@timestamp': string }> };
+      expect(body.records).toHaveLength(1);
+      expect(body.records[0]['@timestamp']).toBe('2026-05-10T09:00:00.000Z');
+    }
+  );
+
+  apiTest(
+    'returns an empty records array (not an error) for an entity with no observations',
+    async ({ apiClient }) => {
+      const resp = await apiClient.get(LIST_RELATIONSHIPS_ROUTE('user:nobody@local'), {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {},
       });
-      expect(install.statusCode).toBe(201);
-
-      // Seed three observations for alice: two against host:laptopA at
-      // different timestamps, one communicates_with at a third timestamp.
-      const docs = [
-        makeMetadataDoc({
-          '@timestamp': '2026-04-20T08:00:00.000Z',
-          'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
-        }),
-        makeMetadataDoc({
-          '@timestamp': '2026-05-15T10:30:00.000Z',
-          'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
-        }),
-        makeMetadataDoc({
-          '@timestamp': '2026-05-10T09:00:00.000Z',
-          'entity.relationships': { communicates_with: { target: 'host:server-1' } },
-        }),
-      ];
-      for (const doc of docs) {
-        await esClient.index({
-          index: METADATA_DATA_STREAM,
-          op_type: 'create',
-          refresh: 'wait_for',
-          body: doc,
-        });
-      }
-    });
-
-    apiTest.afterEach(async ({ apiClient, esClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-      await esClient.indices.deleteDataStream({ name: METADATA_DATA_STREAM }, { ignore: [404] });
-      await clearEntityStoreIndices(esClient);
-    });
-
-    apiTest(
-      'returns the oldest observation when sorted asc with per_page=1 (first-seen)',
-      async ({ apiClient }) => {
-        const resp = await apiClient.get(
-          `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=asc&per_page=1`,
-          { headers: defaultHeaders, responseType: 'json' }
-        );
-        expect(resp.statusCode).toBe(200);
-        const body = resp.body as { records: Array<{ '@timestamp': string }> };
-        expect(body.records).toHaveLength(1);
-        expect(body.records[0]['@timestamp']).toBe('2026-04-20T08:00:00.000Z');
-      }
-    );
-
-    apiTest(
-      'returns the newest observation when sorted desc with per_page=1 (last-seen)',
-      async ({ apiClient }) => {
-        const resp = await apiClient.get(
-          `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=desc&per_page=1`,
-          { headers: defaultHeaders, responseType: 'json' }
-        );
-        expect(resp.statusCode).toBe(200);
-        const body = resp.body as { records: Array<{ '@timestamp': string }> };
-        expect(body.records).toHaveLength(1);
-        expect(body.records[0]['@timestamp']).toBe('2026-05-15T10:30:00.000Z');
-      }
-    );
-
-    apiTest(
-      'filters by kind=communicates_with and a from date (last 30 days style)',
-      async ({ apiClient }) => {
-        const resp = await apiClient.get(
-          `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?kind=communicates_with&from=${encodeURIComponent(
-            '2026-04-27T00:00:00.000Z'
-          )}`,
-          { headers: defaultHeaders, responseType: 'json' }
-        );
-        expect(resp.statusCode).toBe(200);
-        const body = resp.body as { records: Array<{ '@timestamp': string }> };
-        expect(body.records).toHaveLength(1);
-        expect(body.records[0]['@timestamp']).toBe('2026-05-10T09:00:00.000Z');
-      }
-    );
-
-    apiTest(
-      'returns an empty records array (not an error) for an entity with no observations',
-      async ({ apiClient }) => {
-        const resp = await apiClient.get(LIST_RELATIONSHIPS_ROUTE('user:nobody@local'), {
-          headers: defaultHeaders,
-          responseType: 'json',
-        });
-        expect(resp.statusCode).toBe(200);
-        const body = resp.body as { records: unknown[] };
-        expect(body.records).toStrictEqual([]);
-      }
-    );
-  }
-);
+      expect(resp.statusCode).toBe(200);
+      const body = resp.body as { records: unknown[] };
+      expect(body.records).toStrictEqual([]);
+    }
+  );
+});
