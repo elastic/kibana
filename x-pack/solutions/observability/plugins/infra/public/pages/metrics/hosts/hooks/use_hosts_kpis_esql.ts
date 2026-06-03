@@ -134,6 +134,10 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const schema: DataSchemaFormat | undefined = searchCriteria?.preferredSchema ?? undefined;
   // Configured metrics indices (not a hardcoded pattern); the schema `nodeFilter`
   // below scopes to the right docs, so the broad pattern is safe.
+  // These are infra-metric KPIs, so the query only sees hosts with metrics docs.
+  // In a mixed fleet the table can also list APM-only hosts (no metrics), so the
+  // averaged host set can be a subset of the table's — this matches the behaviour
+  // before this change (the KPIs always read the metrics indices) and is fine.
   const indexPattern = metricsView?.indices;
   const limit = sanitizeLimit(searchCriteria.limit);
 

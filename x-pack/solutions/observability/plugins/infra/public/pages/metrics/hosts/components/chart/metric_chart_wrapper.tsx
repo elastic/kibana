@@ -57,8 +57,10 @@ export const MetricChartWrapper = React.memo(
       }
     }, [loading]);
 
-    // `Metric` only renders numbers: swap `null` → `NaN` and let the formatter
-    // emit the "–" placeholder, keeping the chart shape intact.
+    // `Metric` only renders numbers: swap `null` → `NaN`, keeping the chart
+    // shape intact. Elastic Charts bypasses `valueFormatter` for non-finite
+    // values and renders `theme.metric.nonFiniteText` instead, so the "–"
+    // placeholder is wired through the theme below (not the formatter).
     const numericValue = value ?? Number.NaN;
     const format = valueFormatter ?? DEFAULT_FORMATTER;
 
@@ -68,7 +70,7 @@ export const MetricChartWrapper = React.memo(
       color,
       extra,
       value: numericValue,
-      valueFormatter: (d: number) => (Number.isFinite(d) ? format(d) : NO_DATA_PLACEHOLDER),
+      valueFormatter: format,
     };
 
     return (
@@ -96,7 +98,10 @@ export const MetricChartWrapper = React.memo(
               `}
             >
               {loading && <ChartLoadingProgress hasTopMargin={false} />}
-              <Settings baseTheme={baseTheme} />
+              <Settings
+                baseTheme={baseTheme}
+                theme={{ metric: { nonFiniteText: NO_DATA_PLACEHOLDER } }}
+              />
               <Metric id={id} data={[[metricsData]]} />
             </Chart>
           </EuiToolTip>

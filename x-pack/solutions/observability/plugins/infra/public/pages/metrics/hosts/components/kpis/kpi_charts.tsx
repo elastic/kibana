@@ -74,11 +74,13 @@ const getFormulaAggregation = (formulaValue?: string): FormulaAggregation | unde
   return undefined;
 };
 
-const buildFormatter = (format: 'percent' | 'number' | undefined): ((value: number) => string) => {
-  if (format === 'number') {
-    return (value: number) => value.toFixed(KPI_DECIMALS);
+const buildFormatter = (format: string | undefined): ((value: number) => string) => {
+  if (format === 'percent') {
+    return (value: number) => `${(value * 100).toFixed(KPI_DECIMALS)}%`;
   }
-  return (value: number) => `${(value * 100).toFixed(KPI_DECIMALS)}%`;
+  // `number` and any other/unknown format (e.g. `bytes`/`bits`) render the raw
+  // value rather than silently coercing it into a percentage.
+  return (value: number) => value.toFixed(KPI_DECIMALS);
 };
 
 export const KpiCharts = () => {
@@ -124,7 +126,7 @@ export const KpiCharts = () => {
     <>
       {TILE_DEFS.map((tile) => {
         const formula = formulas?.get(tile.key);
-        const formatter = buildFormatter(formula?.format as 'percent' | 'number' | undefined);
+        const formatter = buildFormatter(formula?.format);
         return (
           <EuiFlexItem key={tile.id}>
             <MetricChartWrapper
