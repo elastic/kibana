@@ -17,8 +17,8 @@ import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
-import { createSignificantEventAttachmentType } from './attachments/significant_event_attachment_type';
-import { createSignificantEventSmlType } from './sml/significant_event_sml_type';
+import { registerAgentBuilderAttachments } from './attachments/register_attachments';
+import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 
 export const createMemoryToolsOptions = ({
   server,
@@ -58,20 +58,8 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
-  agentBuilder.attachments.registerType(
-    createSignificantEventAttachmentType({
-      logger: logger.get('significant_event_attachment'),
-      getScopedClients,
-    }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
-
-  agentContextLayer?.registerType(
-    createSignificantEventSmlType({
-      logger: logger.get('significant_event_sml'),
-      getScopedClients,
-    })
-  );
-
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
+  registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
 

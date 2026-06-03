@@ -24,8 +24,11 @@ const event: SigEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
+  discovery_id: 'discovery-1',
   discovery_slug: 'payment-outage',
   verdict: 'promoted',
+  workflow_execution_id: 'workflow-1',
+  rule_names: ['Payment errors'],
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
@@ -33,6 +36,7 @@ const event: SigEvent = {
   criticality: 90,
   confidence: 0.8,
   impact: 'high',
+  recommended_action: 'Restart gateway client',
   recommendations: ['Restart gateway client'],
 };
 

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Attachment,
-  AttachmentInput,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SigEvent } from '@kbn/streams-schema';
 
 export const SIGNIFICANT_EVENT_ATTACHMENT_TYPE = 'platform.streams.significant_event' as const;
@@ -24,8 +20,3 @@ export type PendingSignificantEventAttachment = AttachmentInput<
   typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SigEvent
 >;
-
-export const isSignificantEventAttachment = (
-  attachment: VersionedAttachment
-): attachment is VersionedAttachment<typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SigEvent> =>
-  attachment.type === SIGNIFICANT_EVENT_ATTACHMENT_TYPE;

@@ -21,8 +21,6 @@ interface CreateSignificantEventSmlTypeOptions {
 
 const PAGE_SIZE = 100;
 
-const getLatestEvent = (events: SigEvent[]): SigEvent | undefined => events.at(-1);
-
 const eventToSmlContent = (event: SigEvent): string => {
   return [
     event.title,
@@ -90,7 +88,8 @@ export const createSignificantEventSmlType = ({
           space: DEFAULT_SPACE_ID,
         });
         const { hits } = await eventClient.findByDiscoverySlug(originId);
-        const event = getLatestEvent(hits);
+        const event = hits.at(-1);
+
         if (!event) {
           return undefined;
         }
@@ -116,7 +115,8 @@ export const createSignificantEventSmlType = ({
     toAttachment: async (item, context) => {
       const { getEventClient } = await getScopedClients({ request: context.request });
       const { hits } = await getEventClient().findByDiscoverySlug(item.origin_id);
-      const event = getLatestEvent(hits);
+      const event = hits.at(-1);
+
       if (!event) {
         return undefined;
       }

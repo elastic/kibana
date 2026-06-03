@@ -46,7 +46,6 @@ export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SIGNIFICANT_EVENT_SML_TYPE,
-  isSignificantEventAttachment,
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
