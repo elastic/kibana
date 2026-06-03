@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 /**
@@ -41,6 +41,83 @@ export const fillIndexThresholdForm = async (page: ScoutPage, name: string) => {
     .locator('option:nth-child(2)')
     .getAttribute('value');
   await timeFieldSelect.selectOption(firstFieldValue!);
+
+  await page.testSubj.click('closePopover');
+};
+
+interface RuleFindResponse {
+  data: Array<{ id: string; name: string }>;
+}
+
+export const findRuleIdByName = async (
+  kbnClient: KbnClient,
+  name: string
+): Promise<string | undefined> => {
+  const res = await kbnClient.request<RuleFindResponse>({
+    method: 'GET',
+    path: `/api/alerting/rules/_find?search=${encodeURIComponent(name)}&search_fields=name`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+  return res.data?.data?.find((r) => r.name === name)?.id;
+};
+
+export const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/alerting/rule/${id}`,
+    headers: { 'kbn-xsrf': 'scout' },
+    ignoreErrors: [404],
+  });
+};
+
+export const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) => {
+  const res = await kbnClient.request<RuleFindResponse>({
+    method: 'GET',
+    path: `/api/alerting/rules/_find?search=${encodeURIComponent(
+      prefix
+    )}&search_fields=name&per_page=100`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+  const stale = res.data?.data?.filter((r) => r.name.startsWith(prefix)) ?? [];
+  await Promise.allSettled(stale.map((r) => deleteRuleById(kbnClient, r.id)));
+};
+
+export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
+
+// Fills the index-threshold rule form to a state where save is enabled:
+// name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
+// Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.
+// Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
+export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
+  await page.testSubj.click('createRuleButton');
+  await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
+  await page.testSubj.click('.index-threshold-SelectOption');
+  await page.testSubj.locator('ruleForm').waitFor({ state: 'visible' });
+
+  await page.testSubj.locator('ruleDetailsNameInput').fill(name);
+
+  await page.testSubj.click('selectIndexExpression');
+  const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
+  await indexCombo.waitFor({ state: 'visible' });
+
+  await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
+
+  await indexCombo
+    .locator('[data-test-subj="comboBoxSearchInput"]')
+    .pressSequentially('scout-threshold-rule', { delay: 50 });
+  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+  await indexOption.waitFor({ state: 'visible', timeout: 30000 });
+  await indexOption.click();
+
+  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
+  await timeFieldSelect.waitFor({ state: 'visible' });
+  const firstOptionValue = await timeFieldSelect
+    .locator('option:nth-child(2)')
+    .getAttribute('value');
+  if (!firstOptionValue) {
+    throw new Error('No time-field options available on thresholdAlertTimeFieldSelect');
+  }
+  await timeFieldSelect.selectOption(firstOptionValue);
 
   await page.testSubj.click('closePopover');
 };

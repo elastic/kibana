@@ -11,7 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Actions and Triggers app', function () {
     loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./connectors'));
-    loadTestFile(require.resolve('./stack_alerts_page'));
     loadTestFile(require.resolve('./email'));
   });
 };
