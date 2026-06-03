@@ -608,38 +608,38 @@ describe('Perform bulk action route', () => {
       );
     });
 
-    it('rejects payload if there are more than 10000 ids in payload for non-edit actions', async () => {
+    it('rejects payload if there are more than 1000 ids in payload for any action', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
           ...getBulkDisableRuleActionSchemaMock(),
           query: undefined,
-          ids: Array.from({ length: 10001 }).map(() => 'fake-id'),
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
         },
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual('More than 10000 ids sent for bulk action.');
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
     });
 
-    it('rejects payload if there are more than 2000 ids in payload for edit actions', async () => {
+    it('rejects payload if there are more than 1000 ids in payload for edit actions', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
           ...getPerformBulkActionEditSchemaMock(),
           query: undefined,
-          ids: Array.from({ length: 2001 }).map(() => 'fake-id'),
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
         },
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual('More than 2000 ids sent for bulk action.');
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
     });
 
     it('rejects payload if both query and ids defined', async () => {
