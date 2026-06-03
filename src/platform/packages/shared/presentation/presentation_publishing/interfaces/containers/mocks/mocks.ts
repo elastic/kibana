@@ -17,7 +17,5 @@ export const getMockPresentationContainer = (): PresentationContainer => {
     getChildApi: jest.fn(),
     getPanelCount: jest.fn(),
     children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
-    setRelatedPanelsIndicatorId: jest.fn(),
-    relatedPanelsIndicatorId$: new BehaviorSubject<string | undefined>(undefined),
   };
 };
