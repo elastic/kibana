@@ -84,7 +84,7 @@ function metaToSerializableObject(meta: unknown): Record<string, unknown> {
     typeof serializedMeta !== 'object' ||
     Array.isArray(serializedMeta)
   ) {
-    return { error: String(serializedMeta) };
+    return { error: { message: String(serializedMeta) } };
   }
 
   return serializedMeta as Record<string, unknown>;

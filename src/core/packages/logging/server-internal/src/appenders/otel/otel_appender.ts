@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isNil } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
@@ -269,7 +272,7 @@ export class OtelAppender implements DisposableAppender {
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
       body:
         this.layout instanceof JsonLayout
-          ? (JsonLayout.ecsRecord(record) as unknown as AnyValueMap)
+          ? omitDeepNilValues(JsonLayout.ecsRecord(record))
           : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
@@ -290,6 +293,14 @@ export class OtelAppender implements DisposableAppender {
     ]);
   }
 }
+
+const omitDeepNilValues = (obj: Ecs) => {
+  const result: AnyValueMap = {};
+  Object.entries(getFlattenedObject(obj))
+    .filter(([_, value]) => !isNil(value))
+    .forEach(([key, value]) => set(result, key, value));
+  return result;
+};
 
 const createExporter = (
   config: OtelAppenderConfig

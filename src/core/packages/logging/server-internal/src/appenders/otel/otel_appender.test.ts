@@ -446,15 +446,21 @@ describe('OtelAppender', () => {
       appender.append(record as unknown as ReturnType<typeof makeRecord>);
 
       const { body } = mockEmit.mock.calls[0][0];
-      // level is a LogLevel object - redundant given severity_text/severity_number
-      expect(body).not.toHaveProperty('level');
       // null fields are stripped to avoid empty entries in Elasticsearch
-      expect(body).not.toHaveProperty('spanId');
-      expect(body).not.toHaveProperty('traceId');
+      expect(body).not.toHaveProperty('span');
+      expect(body).not.toHaveProperty('trace');
+      expect(body).not.toHaveProperty('transaction');
+      expect(body).not.toHaveProperty('error');
       // non-null fields are preserved
-      expect(body).toMatchObject(
-        set(JsonLayout.ecsRecord(record), 'process.uptime', expect.any(Number))
-      );
+      const {
+        // Undefined fields are stripped
+        span,
+        trace: _trace,
+        transaction: _transaction,
+        error: _error,
+        ...ecsRecord
+      } = JsonLayout.ecsRecord(record);
+      expect(body).toMatchObject(set(ecsRecord, 'process.uptime', expect.any(Number)));
       // The layout's format() method is NOT invoked for JSON layout
       expect(mockLayoutFormat).not.toHaveBeenCalled();
     });
