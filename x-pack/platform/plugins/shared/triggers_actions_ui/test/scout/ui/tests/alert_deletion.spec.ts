@@ -372,7 +372,8 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('alert-delete-submit');
 
     // Poll the event log until the delete-alerts task completes successfully.
-    // Also verify num_deleted matches the expected count (matches FTR assertion).
+    // Verify there is exactly one delete-alerts event, that it succeeded, and that
+    // num_deleted matches the expected count (matches the FTR assertions).
     await expect
       .poll(
         async () => {
@@ -386,6 +387,7 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
             });
             const hit = results.hits.hits[0];
             return {
+              eventCount: results.hits.hits.length,
               outcome: hit?._source?.event?.outcome,
               numDeleted: hit?._source?.kibana?.alert?.deletion?.num_deleted,
             };
@@ -395,7 +397,7 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
         },
         { timeout: 30_000, intervals: [1_000] }
       )
-      .toStrictEqual({ outcome: 'success', numDeleted: DELETED_IDS.length });
+      .toStrictEqual({ eventCount: 1, outcome: 'success', numDeleted: DELETED_IDS.length });
 
     // Verify exactly the 17 surviving docs remain across all three alert indices;
     // all 18 docs that were older than 90 days must be gone.
