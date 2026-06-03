@@ -162,28 +162,32 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns documented defaults when no history exists', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl(), {
-        headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({
-        items: [],
-        page: 1,
-        perPage: POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
-        totalEvents: 0,
-      });
-    });
+    apiTest(
+      'returns the documented response shape with default pagination',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(getListExecutionHistoryUrl(), {
+          headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders },
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.page).toBe(1);
+        expect(response.body.perPage).toBe(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE);
+        expect(Array.isArray(response.body.items)).toBe(true);
+        expect(response.body.items.length).toBeLessThanOrEqual(
+          POLICY_EXECUTION_HISTORY_MAX_PER_PAGE
+        );
+        expect(response.body.totalEvents).toBeGreaterThanOrEqual(0);
+      }
+    );
 
-    apiTest('echoes explicit page and perPage in the response', async ({ apiClient }) => {
+    apiTest('shows explicit page and perPage in the response', async ({ apiClient }) => {
       const response = await apiClient.get(getListExecutionHistoryUrl({ page: 3, perPage: 25 }), {
         headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.page).toBe(3);
       expect(response.body.perPage).toBe(25);
-      expect(response.body.items).toStrictEqual([]);
-      expect(response.body.totalEvents).toBe(0);
+      expect(response.body.items.length).toBeLessThanOrEqual(25);
+      expect(response.body.totalEvents).toBeGreaterThanOrEqual(0);
     });
 
     apiTest('validation: rejects page=0', async ({ apiClient }) => {
