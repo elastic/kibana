@@ -24,7 +24,7 @@ export const ListInboxActionsHistoryRequestQuery = lazySchema(() =>
     /**
      * Filter actions by the originating app id
      */
-    source_app: z.string().optional(),
+    source_app: z.string().max(256).optional(),
     /**
      * Free-text search applied to responder, workflow id and step id (case-insensitive substring). Empty string is treated as omitted.
      */

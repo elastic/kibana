@@ -18,6 +18,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter actions by the originating app id
         - name: q
           in: query

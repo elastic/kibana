@@ -23,6 +23,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Restrict facets to the originating app id (parity with the list endpoint).
       responses:
         '200':
@@ -50,6 +51,7 @@ components:
       properties:
         value:
           type: string
+          maxLength: 256
           description: The distinct field value (e.g. a channel slug or username).
         count:
           type: integer

@@ -21,7 +21,7 @@ export const InboxActionFacetBucket = lazySchema(() =>
     /**
      * The distinct field value (e.g. a channel slug or username).
      */
-    value: z.string(),
+    value: z.string().max(256),
     /**
      * Document count for this bucket within the space's processed history.
      */
@@ -35,7 +35,7 @@ export const ListInboxActionsHistoryFacetsRequestQuery = lazySchema(() =>
     /**
      * Restrict facets to the originating app id (parity with the list endpoint).
      */
-    source_app: z.string().optional(),
+    source_app: z.string().max(256).optional(),
   })
 );
 export type ListInboxActionsHistoryFacetsRequestQuery = z.infer<
