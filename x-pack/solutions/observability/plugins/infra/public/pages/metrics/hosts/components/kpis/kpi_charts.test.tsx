@@ -130,7 +130,27 @@ describe('KpiCharts', () => {
     expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-value', 'null');
   });
 
-  it('subtitles avg tiles "Average (of N hosts)" pegged to min(hostCount, limit) and leaves the semconv disk ratio blank', async () => {
+  it('shows only the bare aggregation label when the fleet is within the limit', async () => {
+    // count (10) <= limit (100): not truncated, so no "(of N hosts)" suffix.
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 10 });
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: { preferredSchema: 'semconv', limit: 100 },
+    });
+
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Average'
+      );
+    });
+    // semconv disk ratio (no max/avg) stays blank when not truncated.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
+  });
+
+  it('discloses the limit only when the fleet exceeds it (mirrors main)', async () => {
+    // count (250) > limit (100): truncated, so suffix shows the limit.
     mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
     mockUseUnifiedSearchContext.mockReturnValue({
       searchCriteria: { preferredSchema: 'semconv', limit: 100 },
@@ -144,10 +164,14 @@ describe('KpiCharts', () => {
         'Average (of 100 hosts)'
       );
     });
-    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
+    // semconv disk ratio (no max/avg) discloses the cap without a prefix.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute(
+      'data-subtitle',
+      'of 100 hosts'
+    );
   });
 
-  it('subtitles the ECS disk tile "Max (of N hosts)" (mirrors its `max(...)` formula)', async () => {
+  it('subtitles the ECS disk tile "Max (of N hosts)" when truncated (mirrors its `max(...)` formula)', async () => {
     mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
     mockUseUnifiedSearchContext.mockReturnValue({
       searchCriteria: { preferredSchema: 'ecs', limit: 100 },

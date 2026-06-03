@@ -96,8 +96,8 @@ export const KpiCharts = () => {
     [schema, inventoryModel.metrics]
   );
 
-  // Pegged to the host set the query reduces over (and the table renders).
-  const visibleHosts = Math.min(hostCount, searchCriteria.limit);
+  const limit = searchCriteria.limit;
+  const isTruncated = limit < hostCount;
   const getSubtitle = useMemo(() => {
     return (formulaValue?: string): string => {
       if (error) {
@@ -107,20 +107,28 @@ export const KpiCharts = () => {
       }
       const aggregation = getFormulaAggregation(formulaValue);
       if (aggregation === 'max') {
-        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.maxOfHosts', {
-          defaultMessage: 'Max (of {hosts} hosts)',
-          values: { hosts: visibleHosts },
-        });
+        return isTruncated
+          ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.maxOfHosts', {
+              defaultMessage: 'Max (of {limit} hosts)',
+              values: { limit },
+            })
+          : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+              defaultMessage: 'Max',
+            });
       }
       if (aggregation === 'average') {
-        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
-          defaultMessage: 'Average (of {hosts} hosts)',
-          values: { hosts: visibleHosts },
-        });
+        return isTruncated
+          ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.averageOfHosts', {
+              defaultMessage: 'Average (of {limit} hosts)',
+              values: { limit },
+            })
+          : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+              defaultMessage: 'Average',
+            });
       }
       return '';
     };
-  }, [error, visibleHosts]);
+  }, [error, isTruncated, limit]);
 
   return (
     <>
