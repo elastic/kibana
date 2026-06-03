@@ -581,10 +581,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(3);
           expect(response.attributes.summary.total).toEqual(3);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedCreatedIndexEntry)])
           );
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedUpdatedDocumentEntry)])
           );
           expect(response.attributes.results.deleted).toEqual(expect.arrayContaining([entry1.id]));
@@ -606,7 +606,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -627,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedIndexEntry)])
           );
         });
@@ -681,7 +681,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -723,7 +723,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -836,7 +836,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
