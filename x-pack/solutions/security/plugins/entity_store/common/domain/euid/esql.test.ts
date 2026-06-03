@@ -267,7 +267,7 @@ describe('getEuidEsqlEvaluation', () => {
   it('returns raw field for generic (skipTypePrepend: no type prefix)', () => {
     const result = getEuidEsqlEvaluation('generic');
 
-    const expected = 'entity.id';
+    const expected = 'TO_STRING(entity.id)';
     expect(normalize(result)).toBe(normalize(expected));
   });
 
