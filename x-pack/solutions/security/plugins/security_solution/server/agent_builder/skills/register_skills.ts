@@ -62,7 +62,9 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
-  await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
+  if (experimentalFeatures.dexAiSkillFindRules) {
+    await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
+  }
   await agentBuilder.skills.register(siemReadinessSkill);
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
