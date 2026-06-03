@@ -83,7 +83,7 @@ export class MetricsTab extends ServiceDetailsTab {
     return this.panels.getLegendLabels(panelTitle);
   }
 
-  async getUrlTimeRange(): Promise<{ rangeFrom: string | null; rangeTo: string | null }> {
+  getUrlTimeRange(): { rangeFrom: string | null; rangeTo: string | null } {
     const url = new URL(this.page.url());
     return {
       rangeFrom: url.searchParams.get('rangeFrom'),

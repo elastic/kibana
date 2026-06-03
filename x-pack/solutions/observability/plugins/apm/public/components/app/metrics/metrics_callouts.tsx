@@ -16,6 +16,7 @@ import type { IngestionTimeRange, IngestionTimeRanges } from '../../../../common
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { isLeftClick, isModifiedClick } from '../../../utils/mouse_event';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
 export function NoDataForRangeCallout() {
@@ -52,9 +53,6 @@ const formatTimestamp = (ts: number) => asAbsoluteDateTime(ts, 'minutes');
 
 const formatRange = (range: IngestionTimeRange) =>
   `${formatTimestamp(range.from)} - ${formatTimestamp(range.to)}`;
-
-const isModifiedClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
-  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 const INSTRUMENTATION_NAMES: Record<'classicApm' | 'otelNative', string> = {
   classicApm: i18n.translate('xpack.apm.metrics.instrumentationNames.classicApmLabel', {
@@ -135,7 +133,7 @@ export function MixedAgentCallout({
           calloutType: hasOverlap ? 'overlap' : 'non_overlap',
           selectedInstrumentationType: getIngestionPath(type === 'otelNative'),
         });
-        if (event.defaultPrevented || event.button !== 0 || isModifiedClick(event)) {
+        if (event.defaultPrevented || !isLeftClick(event) || isModifiedClick(event)) {
           return;
         }
 

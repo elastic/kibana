@@ -36,15 +36,7 @@ function renderWithWrapper(ui: React.ReactElement) {
     ...render(
       <MockApmPluginContextWrapper
         history={history}
-        value={
-          {
-            ...mockApmPluginContextValue,
-            core: {
-              ...mockApmPluginContextValue.core,
-              telemetry: mockTelemetryClient,
-            },
-          } as unknown as ApmPluginContextValue
-        }
+        value={mockApmPluginContextValue as unknown as ApmPluginContextValue}
       >
         {ui}
       </MockApmPluginContextWrapper>

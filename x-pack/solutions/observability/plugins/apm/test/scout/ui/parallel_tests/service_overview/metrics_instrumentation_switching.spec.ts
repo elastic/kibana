@@ -54,7 +54,7 @@ test.describe(
         await expect(metricsTab.getPanelByTitle(OTEL_JAVA_PANEL_TITLE)).toHaveCount(0);
         await expect(metricsTab.noDataForRangeCallout).toHaveCount(0);
 
-        const { rangeFrom, rangeTo } = await metricsTab.getUrlTimeRange();
+        const { rangeFrom, rangeTo } = metricsTab.getUrlTimeRange();
         expect(rangeFrom).toBe(testData.METRICS_MIGRATION_CLASSIC_START_DATE);
         expect(rangeTo).toBe(testData.METRICS_MIGRATION_SEQUENTIAL_CLASSIC_END_DATE);
       });
@@ -75,7 +75,7 @@ test.describe(
         });
         await expect(metricsTab.getPanelByTitle(CLASSIC_JAVA_PANEL_TITLE)).toHaveCount(0);
 
-        const { rangeFrom, rangeTo } = await metricsTab.getUrlTimeRange();
+        const { rangeFrom, rangeTo } = metricsTab.getUrlTimeRange();
         expect(rangeFrom).toBe(testData.METRICS_MIGRATION_SEQUENTIAL_OTEL_START_DATE);
         expect(rangeTo).toBe(testData.METRICS_MIGRATION_OTEL_END_DATE);
       });
@@ -164,7 +164,7 @@ test.describe(
         await expect(metricsTab.getPanelByTitle(OTEL_JAVA_PANEL_TITLE)).toHaveCount(0);
         await expect(metricsTab.noDataForRangeCallout).toHaveCount(0);
 
-        const { rangeFrom, rangeTo } = await metricsTab.getUrlTimeRange();
+        const { rangeFrom, rangeTo } = metricsTab.getUrlTimeRange();
         expect(rangeFrom).toBe(testData.METRICS_MIGRATION_CLASSIC_START_DATE);
         expect(rangeTo).toBe(testData.METRICS_MIGRATION_OVERLAP_CLASSIC_END_DATE);
       });
@@ -186,7 +186,7 @@ test.describe(
         await expect(metricsTab.getPanelByTitle(CLASSIC_JAVA_PANEL_TITLE)).toHaveCount(0);
         await expect(metricsTab.noDataForRangeCallout).toHaveCount(0);
 
-        const { rangeFrom, rangeTo } = await metricsTab.getUrlTimeRange();
+        const { rangeFrom, rangeTo } = metricsTab.getUrlTimeRange();
         expect(rangeFrom).toBe(testData.METRICS_MIGRATION_OVERLAP_OTEL_START_DATE);
         expect(rangeTo).toBe(testData.METRICS_MIGRATION_OTEL_END_DATE);
       });
