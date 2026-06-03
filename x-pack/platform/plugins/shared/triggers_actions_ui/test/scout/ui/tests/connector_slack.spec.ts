@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, KbnClient } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -14,50 +14,12 @@ import {
   CONNECTORS_LIST_SELECTORS,
   defineIndexThresholdRule,
   THRESHOLD_TEST_INDEX,
+  findRuleIdByName,
+  deleteRuleById,
+  deleteRulesByPrefix,
 } from '../fixtures';
 
-// Two FTR tests in the connector-page describe were `it.skip`'d due to the
-// Slack channel-allowlist requirement (PR #167150). They remain out of scope
-// here for the same reason — preserving FTR parity.
-
 const RULES_LIST_SUBJ = 'rulesList';
-
-interface RuleFindResponse {
-  data: Array<{ id: string; name: string }>;
-}
-
-const findRuleIdByName = async (
-  kbnClient: KbnClient,
-  name: string
-): Promise<string | undefined> => {
-  const res = await kbnClient.request<RuleFindResponse>({
-    method: 'GET',
-    path: `/api/alerting/rules/_find?search=${encodeURIComponent(name)}&search_fields=name`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-  return res.data?.data?.find((r) => r.name === name)?.id;
-};
-
-const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/alerting/rule/${id}`,
-    headers: { 'kbn-xsrf': 'scout' },
-    ignoreErrors: [404],
-  });
-};
-
-const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) => {
-  const res = await kbnClient.request<RuleFindResponse>({
-    method: 'GET',
-    path: `/api/alerting/rules/_find?search=${encodeURIComponent(
-      prefix
-    )}&search_fields=name&per_page=100`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-  const stale = res.data?.data?.filter((r) => r.name.startsWith(prefix)) ?? [];
-  await Promise.allSettled(stale.map((r) => deleteRuleById(kbnClient, r.id)));
-};
 
 const selectConnectorInRuleAction = async (page: ScoutPage, connectorName: string) => {
   await page.testSubj.click('ruleActionsAddActionButton');

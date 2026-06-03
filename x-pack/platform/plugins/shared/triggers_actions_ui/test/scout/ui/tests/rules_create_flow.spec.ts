@@ -5,35 +5,15 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
-
-interface RuleFindResponse {
-  data: Array<{ id: string; name: string }>;
-}
-
-const findRuleIdByName = async (
-  kbnClient: KbnClient,
-  name: string
-): Promise<string | undefined> => {
-  const res = await kbnClient.request<RuleFindResponse>({
-    method: 'GET',
-    path: `/api/alerting/rules/_find?search=${encodeURIComponent(name)}&search_fields=name`,
-    headers: { 'kbn-xsrf': 'scout' },
-  });
-  return res.data?.data?.find((r) => r.name === name)?.id;
-};
-
-const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/api/alerting/rule/${id}`,
-    headers: { 'kbn-xsrf': 'scout' },
-    ignoreErrors: [404],
-  });
-};
+import {
+  test,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+  findRuleIdByName,
+  deleteRuleById,
+} from '../fixtures';
 
 test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
   const createdRuleNames: string[] = [];
