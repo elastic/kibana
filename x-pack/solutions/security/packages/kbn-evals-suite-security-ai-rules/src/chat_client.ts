@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 // These string literals mirror the constants defined in security_solution/common/constants.
 // They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
+
+// The dedicated `security.agent` was removed in https://github.com/elastic/kibana/pull/263996;
+// security capabilities are now skills/tools on the default Agent Builder agent. Allow an env
+// override so a custom agent can still be targeted if needed.
+const AI_RULE_GENERATION_AGENT_ID =
+  process.env.AGENT_BUILDER_AGENT_ID ?? agentBuilderDefaultAgentId;
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
@@ -48,7 +54,7 @@ export class SecurityRuleGenerationClient {
     error?: string;
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      agent_id: AI_RULE_GENERATION_AGENT_ID,
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
       capabilities: { visualizations: true },
