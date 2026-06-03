@@ -11,14 +11,14 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import {
   buildActorEntityIdEval,
   buildTargetEntityIdEvals,
   buildEntityFieldHints,
   buildSourceMetadataEvals,
-  buildEntityEnrichment,
-  checkIfEntitiesIndexLookupMode,
+  checkIfEntitiesIndexExists,
 } from '../graph/utils';
 import type { EventRecord } from './types';
 
@@ -45,12 +45,12 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const entityStoreIndexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
     indexPatterns,
     eventCount: eventIds.length,
-    isLookupIndexAvailable,
+    entityStoreIndexExists,
     spaceId,
   });
 
@@ -89,20 +89,54 @@ const buildDslFilter = (eventIds: string[], start: string | number, end: string 
 interface BuildEventsQueryParams {
   indexPatterns: string[];
   eventCount: number;
-  isLookupIndexAvailable: boolean;
+  entityStoreIndexExists: boolean;
   spaceId: string;
 }
 
 const buildEventsEsqlQuery = ({
   indexPatterns,
   eventCount,
-  isLookupIndexAvailable,
+  entityStoreIndexExists,
   spaceId,
 }: BuildEventsQueryParams): string => {
   // Generate document ID params
   const documentIdParams = Array.from({ length: eventCount }, (_, idx) => `?doc_id${idx}`).join(
     ', '
   );
+
+  const indexName = getEntitiesLatestIndexName(spaceId);
+  const enrichmentEsql = entityStoreIndexExists
+    ? `| DROP entity.id
+| DROP entity.target.id
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${indexName} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
+| RENAME actorLookupEntityId = entity.id
+| RENAME actorEntityEngineType = entity.EngineMetadata.Type
+
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${indexName} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
+| RENAME targetLookupEntityId = entity.id
+| RENAME targetEntityEngineType = entity.EngineMetadata.Type`
+    : `// No enrichment available - use null values
+| EVAL actorEntityName = TO_STRING(null)
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)`;
 
   return `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
@@ -114,7 +148,7 @@ ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND targetEntityId
 ${buildEntityFieldHints(GRAPH_ACTOR_ENTITY_FIELDS, GRAPH_TARGET_ENTITY_FIELDS)}
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
-${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
+${enrichmentEsql}
 | EVAL docId = _id
 | EVAL eventId = event.id
 | EVAL index = _index

@@ -17,7 +17,6 @@ import {
 } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 import type { Discovery } from '../../sig_events/discoveries';
-import type { Verdict } from '../../sig_events/verdicts';
 import type { SigEvent } from '../../sig_events/events';
 
 /**
@@ -137,7 +136,6 @@ interface LifecycleDetection {
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   discoveries: Discovery[];
-  verdicts: Verdict[];
   events: SigEvent[];
 }
 

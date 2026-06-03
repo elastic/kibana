@@ -2,42 +2,49 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
-    - agent_builder
     - automatic_import
     - banners
     - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
-    - data_views
+    - data_view_editor
     - data_view_management
+    - data_views
     - dev_tools
     - discover
     - discover_enhanced
     - entity_store
     - error_boundary_example
+    - event_annotation_listing
     - exploratory_view
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
     - grokdebugger
+    - home
+    - index_lifecycle_management
     - index_management
     - infra
     - ingest_hub
     - ingest_pipelines
     - intercepts
-    - home
     - kibana_overview
+    - kql
     - lens
     - logstash
+    - management
     - maps
     - ml
     - monitoring

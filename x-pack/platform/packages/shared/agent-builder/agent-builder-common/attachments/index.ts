@@ -48,6 +48,8 @@ export type {
   AttachmentRefActor,
   AttachmentDiff,
   AttachmentInput,
+  AttachmentGroup,
+  ConversationAttachment,
   UpdateOriginResponse,
 } from './versioned_attachment';
 export {
@@ -59,7 +61,9 @@ export {
   attachmentRefOperationSchema,
   attachmentRefActorSchema,
   attachmentInputSchema,
+  attachmentGroupSchema,
   attachmentDiffSchema,
+  isAttachmentGroup,
   getLatestVersion,
   getVersion,
   createVersionId,
