@@ -376,6 +376,55 @@ describe('bench E2E', () => {
     ).rejects.toThrow('left build directory override does not exist');
   });
 
+  it('should print the diff before a thrown onCompare callback fails the run', async () => {
+    const leftBuildDir = path.join(tempDir, 'on_compare_left_build');
+    const rightBuildDir = path.join(tempDir, 'on_compare_right_build');
+    fs.mkdirSync(leftBuildDir);
+    fs.mkdirSync(rightBuildDir);
+
+    const onCompareConfigPath = path.join(tempDir, 'on_compare.config.js');
+    fs.writeFileSync(
+      onCompareConfigPath,
+      `
+      module.exports = {
+        name: 'on-compare-test',
+        runs: 1,
+        onCompare() {
+          throw new Error('comparison policy failed');
+        },
+        benchmarks: [{
+          kind: 'module',
+          name: 'fast.module',
+          module: ${JSON.stringify(path.join(tempDir, 'fast_benchmark.js'))},
+          compare: { missing: 'skip' },
+        }],
+      };
+    `
+    );
+
+    mockedCollectConfigPaths.mockResolvedValue([onCompareConfigPath]);
+
+    let rejection: Error | undefined;
+    try {
+      await bench({
+        log,
+        config: onCompareConfigPath,
+        leftBuildDir,
+        rightBuildDir,
+        runs: 1,
+      });
+    } catch (error) {
+      rejection = error as Error;
+    }
+
+    expect(rejection?.message).toContain('comparison policy failed');
+
+    const output = capturedOutput.join('\n');
+
+    expect(output).toContain('Benchmark diff:');
+    expect(output).toContain('fast.module');
+  }, 10000);
+
   it('should fail clearly when a build directory override is not a directory', async () => {
     const leftBuildPath = path.join(tempDir, 'left_build_file');
     const rightBuildDir = path.join(tempDir, 'existing_right_build_for_file_check');

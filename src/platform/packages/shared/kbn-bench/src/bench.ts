@@ -12,6 +12,7 @@ import type { IWorkspace } from '@kbn/workspaces';
 import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
 import Fs from 'fs/promises';
 import Path from 'path';
+import { runOnCompareCallbacks } from './compare/run_on_compare_callbacks';
 import { collectAndRun } from './collect_and_run';
 import { collectAndRunForRightHandSide } from './collect_and_run_for_right_hand_side';
 import { getGlobalConfig } from './config/get_global_config';
@@ -154,6 +155,12 @@ export async function bench({
         }
       )
   );
+
+  await runOnCompareCallbacks({
+    log,
+    leftResults,
+    rightResults,
+  });
 }
 
 async function resolveBuildDirOverrides({
