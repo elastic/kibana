@@ -118,10 +118,17 @@ export function createSyntheticsPrivateLocationApi(
   };
 
   const addFleetPolicy = async (name: string, spaceIds: string[] = ['default']) => {
+    // A private location only needs an agent policy to host its synthetics
+    // package policy; it never needs system monitoring. Enabling `sysMonitoring`
+    // makes Fleet create an extra `system` package policy on every agent policy
+    // — pure overhead for these tests (the suite created ~44 agent policies in a
+    // full run). The synthetics package-policy assertions all filter by
+    // `package.name: synthetics`, so the dropped system policy is invisible to
+    // the count-sensitive specs.
     const { data } = await fleetApi.agent_policies.create({
       policyName: name,
       policyNamespace: 'default',
-      sysMonitoring: true,
+      sysMonitoring: false,
       params: {
         description: '',
         monitoring_enabled: [],
