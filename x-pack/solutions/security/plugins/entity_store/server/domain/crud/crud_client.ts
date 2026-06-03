@@ -197,8 +197,7 @@ export class CRUDClient {
       writable: true,
     });
 
-    const baseBulkAppendRelationshipMetadata =
-      this.bulkAppendRelationshipMetadata.bind(this);
+    const baseBulkAppendRelationshipMetadata = this.bulkAppendRelationshipMetadata.bind(this);
     const tracedBulkAppendRelationshipMetadata = (
       docs: RelationshipMetadataDoc[]
     ): Promise<BulkObjectResponse[]> =>

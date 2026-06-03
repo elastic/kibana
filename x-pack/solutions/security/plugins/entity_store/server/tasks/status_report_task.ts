@@ -151,7 +151,9 @@ async function runTask({
     telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
   } catch (e) {
     // Datastream doesn't exist when v2 FF is off — not an error worth surfacing.
-    logger.debug(`Metadata datastream not present, skipping metadata usage report: ${getErrorMessage(e)}`);
+    logger.debug(
+      `Metadata datastream not present, skipping metadata usage report: ${getErrorMessage(e)}`
+    );
   }
 
   // Report status
