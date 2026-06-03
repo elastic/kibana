@@ -18,6 +18,7 @@ import {
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { ChangeHistoryItem } from './change_history_item';
 import { TrackingStartedFooter } from './change_history_footer';
+import { DIFFABLE_CHANGE_ACTIONS } from './constants';
 import * as i18n from './translations';
 
 interface ChangeHistoryTimelineProps {
@@ -40,17 +41,19 @@ export function RuleChangesHistoryTimeline({
   onSelectItem,
   onLoadMore,
 }: ChangeHistoryTimelineProps): JSX.Element {
-  const hasAutoSelectedRef = useRef(false);
+  const autoSelectedIdRef = useRef<string | undefined>(undefined);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Auto-select the first item
+  // Auto-select the first active item, and follow it when a new one appears at the top
   useEffect(() => {
-    if (hasAutoSelectedRef.current || items.length === 0) {
+    const firstActiveItem = items.find((item) => DIFFABLE_CHANGE_ACTIONS.includes(item.action));
+
+    if (!firstActiveItem || firstActiveItem.id === autoSelectedIdRef.current) {
       return;
     }
 
-    hasAutoSelectedRef.current = true;
-    onSelectItem?.(items[0]);
+    autoSelectedIdRef.current = firstActiveItem.id;
+    onSelectItem?.(firstActiveItem);
   }, [items, onSelectItem]);
 
   // Track scrolling to load more items
