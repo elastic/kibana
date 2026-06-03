@@ -117,7 +117,7 @@ export class DatePicker {
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
     await inputFrom.fill(to);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await this.page.testSubj.locator('parseAbsoluteDateFormat').click({ force: true });
     await this.page.keyboard.press('Escape');
     // and later change start date
     await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
@@ -125,7 +125,7 @@ export class DatePicker {
     const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputTo.clear();
     await inputTo.fill(from);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await this.page.testSubj.locator('parseAbsoluteDateFormat').click({ force: true });
     await this.page.keyboard.press('Escape');
 
     if (validateDates) {

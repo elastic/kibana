@@ -41,7 +41,7 @@ export class FilterBar {
       'filterFieldSuggestionList > comboBoxSearchInput',
       options.field
     );
-    await this.page.locator(`.euiComboBoxOption[title="${options.field}"]`).click();
+    await this.page.testSubj.click(`filterFieldOption-${options.field}`);
     // set operator
     await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
       /euiComboBox-isDisabled/
@@ -50,7 +50,7 @@ export class FilterBar {
       'filterOperatorList > comboBoxSearchInput',
       options.operator
     );
-    await this.page.locator(`.euiComboBoxOption[title="${options.operator}"]`).click();
+    await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
     // set value
     const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
     await expect(filterParamsInput).not.toHaveAttribute('disabled');

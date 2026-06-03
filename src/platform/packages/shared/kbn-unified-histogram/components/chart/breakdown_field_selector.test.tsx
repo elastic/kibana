@@ -267,7 +267,7 @@ describe('BreakdownFieldSelector', () => {
     });
 
     act(() => {
-      screen.getByTitle('bytes').click();
+      screen.getByRole('option', { name: /bytes/ }).click();
     });
 
     expect(onBreakdownFieldChange).toHaveBeenCalledWith(selectedField);
@@ -308,7 +308,7 @@ describe('BreakdownFieldSelector', () => {
     });
 
     act(() => {
-      screen.getByTitle('bytes').click();
+      screen.getByRole('option', { name: /bytes/ }).click();
     });
 
     expect(onBreakdownFieldChange).toHaveBeenCalledWith(selectedField);

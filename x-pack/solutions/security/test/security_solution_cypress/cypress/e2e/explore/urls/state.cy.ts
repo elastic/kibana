@@ -115,16 +115,8 @@ describe(
 
     it('sets the global start and end dates from the url', () => {
       visit(ABSOLUTE_DATE_RANGE.url);
-      cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
-        'have.attr',
-        'title',
-        ABSOLUTE_DATE.startTime
-      );
-      cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
-        'have.attr',
-        'title',
-        ABSOLUTE_DATE.endTime
-      );
+      cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should('have.text', ABSOLUTE_DATE.startTime);
+      cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should('have.text', ABSOLUTE_DATE.endTime);
     });
 
     it('sets the url state when start and end date are set', () => {
@@ -160,35 +152,25 @@ describe(
 
       cy.get(
         GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)
-      ).should('have.attr', 'title', ABSOLUTE_DATE.startTime);
+      ).should('have.text', ABSOLUTE_DATE.startTime);
       cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
-        'have.attr',
-        'title',
+        'have.text',
         ABSOLUTE_DATE.endTime
       );
     });
 
     it('sets the timeline start and end dates independently of the global start and end dates when times are unlocked', () => {
       visit(ABSOLUTE_DATE_RANGE.urlUnlinked);
-      cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
-        'have.attr',
-        'title',
-        ABSOLUTE_DATE.startTime
-      );
-      cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
-        'have.attr',
-        'title',
-        ABSOLUTE_DATE.endTime
-      );
+      cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should('have.text', ABSOLUTE_DATE.startTime);
+      cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should('have.text', ABSOLUTE_DATE.endTime);
 
       openTimelineUsingToggle();
 
       cy.get(
         GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)
-      ).should('have.attr', 'title', ABSOLUTE_DATE.startTimeTimelineFormatted);
+      ).should('have.text', ABSOLUTE_DATE.startTimeTimelineFormatted);
       cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
-        'have.attr',
-        'title',
+        'have.text',
         ABSOLUTE_DATE.endTimeTimelineFormatted
       );
     });
