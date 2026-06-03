@@ -11,7 +11,7 @@ echo "Reconciling labels from v${OLD_VERSION} to v${NEW_VERSION}"
 SCRIPT_DIR=".buildkite/scripts/steps/version_bump"
 
 echo "Installing dependencies..."
-npm ci --prefix "$SCRIPT_DIR"
+npm ci --prefix ".buildkite"
 
 DRY_RUN_FLAG=""
 if [[ "${DRY_RUN:-false}" == "true" ]]; then
