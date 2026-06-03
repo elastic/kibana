@@ -45,7 +45,7 @@ export const ChromeAppHeader = ({ menu, titleAppend }: ChromeAppHeaderProps) => 
       ...menu,
       items: menu?.items?.map((item) => ({
         ...item,
-        // We need more space for the tabs as the header is now in the same row. Move all items to the overflow menu.
+        // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
         // (Except switch language)
         overflow: item.id !== AppMenuActionId.switchLanguageMode,
       })),
