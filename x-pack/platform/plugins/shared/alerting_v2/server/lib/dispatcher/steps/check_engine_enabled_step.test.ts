@@ -25,7 +25,7 @@ describe('CheckEngineEnabledStep', () => {
     step = new CheckEngineEnabledStep(loggerService, settingsService);
   });
 
-  it('continues when alerting v2 is enabled', async () => {
+  it('continues when alerting is enabled', async () => {
     mockUiSettingsClient.get.mockResolvedValue(true);
 
     const state = createDispatcherPipelineState();
@@ -35,7 +35,7 @@ describe('CheckEngineEnabledStep', () => {
     expect(mockUiSettingsClient.get).toHaveBeenCalledWith(ALERTING_V2_ENABLED_SETTING_ID);
   });
 
-  it('halts with engine_disabled when alerting v2 is disabled', async () => {
+  it('halts with engine_disabled when alerting is disabled', async () => {
     mockUiSettingsClient.get.mockResolvedValue(false);
 
     const state = createDispatcherPipelineState();

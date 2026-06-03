@@ -61,7 +61,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
    *   401 — request was not authenticated (Kibana core enforces auth).
    *   403 — request lacks the route's `requiredPrivileges`.
    *   500 — any uncaught throw boomifies to 500.
-   *   503 — alerting v2 is administratively disabled (kill switch).
+   *   503 — alerting is administratively disabled (kill switch).
    *
    * Route-specific codes (400 / 404 / 409 / …) belong on each subclass.
    */
@@ -82,7 +82,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     503: {
       body: () => errorResponseSchema,
       description:
-        'Indicates the alerting v2 engine is disabled by the `alerting:v2:enabled` advanced setting.',
+        'Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.',
     },
   };
 
@@ -124,15 +124,15 @@ export abstract class BaseAlertingRoute implements RouteHandler {
    * Global kill switch for the alerting v2 HTTP surface.
    *
    * Reads the `alerting:v2:enabled` advanced setting and short-circuits with
-   * a 503 `ALERTING_V2_DISABLED` error before any route-specific work runs
+   * a 503 `ALERTING_DISABLED` error before any route-specific work runs
    * when the operator has turned the engine off.
    */
   private async assertAlertingEnabled(): Promise<void> {
     const enabled = await this.ctx.settings.get(ALERTING_V2_ENABLED_SETTING_ID);
 
     if (!enabled) {
-      throw Boom.serverUnavailable('Alerting v2 is disabled.', {
-        code: ALERTING_V2_ERROR_CODES.ALERTING_V2_DISABLED,
+      throw Boom.serverUnavailable('Alerting is disabled.', {
+        code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
       });
     }
   }

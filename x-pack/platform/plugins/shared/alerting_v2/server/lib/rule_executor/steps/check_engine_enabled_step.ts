@@ -17,7 +17,7 @@ import type { SettingsServiceContract } from '../../services/settings_service/se
 import { SettingsServiceToken } from '../../services/settings_service/tokens';
 
 /**
- * Global kill switch for the alerting v2 engine.
+ * Global kill switch for the alerting engine.
  *
  * Reads the `alerting:v2:enabled` advanced setting and halts the pipeline
  * before any work is performed when the operator has turned the engine off.
@@ -43,7 +43,7 @@ export class CheckEngineEnabledStep implements RuleExecutionStep {
 
       if (!enabled) {
         this.logger.debug({
-          message: `[${this.name}] Alerting v2 is disabled, halting rule ${state.input.ruleId}`,
+          message: `[${this.name}] Alerting is disabled, halting rule ${state.input.ruleId}`,
         });
 
         return { type: 'halt', reason: 'engine_disabled', state };

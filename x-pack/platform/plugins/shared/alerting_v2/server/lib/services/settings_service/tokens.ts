@@ -11,7 +11,7 @@ import type { SettingsServiceContract } from './settings_service';
 
 /**
  * Pre-configured UI settings client used by the SettingsService to read and
- * write alerting v2 advanced settings. Bind this token to the appropriate
+ * write alerting advanced settings. Bind this token to the appropriate
  * client (e.g. `uiSettings.globalAsScopedToClient(internalSoClient)`).
  */
 export const UiSettingsClientToken = Symbol.for(
@@ -20,7 +20,7 @@ export const UiSettingsClientToken = Symbol.for(
 
 /**
  * SettingsService — typed wrapper around the UI settings client for alerting
- * v2 advanced settings.
+ * advanced settings.
  */
 export const SettingsServiceToken = Symbol.for(
   'alerting_v2.SettingsService'

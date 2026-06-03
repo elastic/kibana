@@ -66,8 +66,8 @@ describe('BaseAlertingRoute', () => {
     expect(route.executeFn).toHaveBeenCalledTimes(1);
   });
 
-  describe('alerting v2 kill switch', () => {
-    it('short-circuits with a 503 ALERTING_V2_DISABLED error when the setting is off', async () => {
+  describe('alerting kill switch', () => {
+    it('short-circuits with a 503 ALERTING_DISABLED error when the setting is off', async () => {
       mockUiSettingsClient.get.mockResolvedValue(false);
 
       await route.handle();
@@ -76,9 +76,9 @@ describe('BaseAlertingRoute', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          code: ALERTING_V2_ERROR_CODES.ALERTING_V2_DISABLED,
+          code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
           error: 'Service Unavailable',
-          message: 'Alerting v2 is disabled.',
+          message: 'Alerting is disabled.',
         },
       });
     });

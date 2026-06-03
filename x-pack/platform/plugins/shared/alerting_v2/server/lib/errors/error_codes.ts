@@ -59,11 +59,11 @@ export const ALERTING_V2_ERROR_CODES = {
 
   // ───────────────────────── Engine state ────────────────────
   /**
-   * The alerting v2 engine is administratively disabled via the
+   * The alerting engine is administratively disabled via the
    * `alerting:v2:enabled` advanced setting. Emitted by every HTTP route
    * with status 503 before any route-specific work runs.
    */
-  ALERTING_V2_DISABLED: 'ALERTING_V2_DISABLED',
+  ALERTING_DISABLED: 'ALERTING_DISABLED',
 
   // ──────────────────────────── Generic ──────────────────────
   /** Catch-all 5xx code when no domain-specific code applies. */

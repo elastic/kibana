@@ -159,7 +159,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
         })
         .catch((err) => {
           logger.warn(
-            `Failed to read alerting v2 enabled setting; rule management skill not registered: ${err}`
+            `Failed to read alerting enabled setting; rule management skill not registered: ${err}`
           );
         });
     }

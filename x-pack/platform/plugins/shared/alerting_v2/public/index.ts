@@ -57,14 +57,14 @@ export const module = new ContainerModule(({ bind }) => {
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
-    const alertingV2Section = management.sections.register({
+    const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'V2 Alerting Preview',
       tip: 'Start exploring our latest alerts experience',
       order: 1,
     });
 
-    alertingV2Section.registerApp({
+    alertingSection.registerApp({
       id: ALERTING_V2_RULES_APP_ID,
       title: 'Rules',
       order: 1,
@@ -79,7 +79,7 @@ export const module = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingV2Section.registerApp({
+    alertingSection.registerApp({
       id: ALERTING_V2_EPISODES_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.alertEpisodesNavTitle', {
         defaultMessage: 'Alerts',
@@ -96,7 +96,7 @@ export const module = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingV2Section.registerApp({
+    alertingSection.registerApp({
       id: ALERTING_V2_ACTION_POLICIES_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
         defaultMessage: 'Action Policies',
@@ -113,7 +113,7 @@ export const module = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingV2Section.registerApp({
+    alertingSection.registerApp({
       id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
         defaultMessage: 'Execution history',
@@ -144,13 +144,13 @@ export const module = new ContainerModule(({ bind }) => {
         workflowForm: { Component: () => null, defaultValue: () => ({}), supported: false },
       });
 
-      const alertingV2Enabled = coreStart.settings.globalClient.get<boolean>(
+      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
         ALERTING_V2_ENABLED_SETTING_ID,
         false
       );
 
-      if (!alertingV2Enabled) {
-        disableAlertingManagementUi(alertingV2Section);
+      if (!alertingEnabled) {
+        disableAlertingManagementUi(alertingSection);
         return;
       }
 

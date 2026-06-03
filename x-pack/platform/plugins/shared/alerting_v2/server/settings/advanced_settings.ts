@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { UiSettingsParams } from '@kbn/core/types';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  type AlertingV2AdvancedSettingId,
-  type AlertingV2AdvancedSettingValueMap,
+  type AlertingAdvancedSettingId,
+  type AlertingAdvancedSettingValueMap,
 } from '../../common/advanced_settings';
 
 const ALERTING_V2_CATEGORY = 'alertingV2';
@@ -19,12 +19,12 @@ const ALERTING_V2_CATEGORY = 'alertingV2';
 /**
  * Shape that the runtime registration must satisfy. For each setting ID, the
  * registered `UiSettingsParams` is parameterized by the value type declared
- * in {@link AlertingV2AdvancedSettingValueMap} — which forces `schema` to be
+ * in {@link AlertingAdvancedSettingValueMap} — which forces `schema` to be
  * a `Type<T>` and `value`/`getValue` to produce `T`. This is what keeps the
  * runtime config-schema in sync with the canonical value-type contract.
  */
 type AlertingV2AdvancedSettingsRegistration = {
-  [K in AlertingV2AdvancedSettingId]: UiSettingsParams<AlertingV2AdvancedSettingValueMap[K]>;
+  [K in AlertingAdvancedSettingId]: UiSettingsParams<AlertingAdvancedSettingValueMap[K]>;
 };
 
 export const alertingAdvancedSettings = {

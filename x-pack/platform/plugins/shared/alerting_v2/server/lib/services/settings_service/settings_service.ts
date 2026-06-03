@@ -8,26 +8,26 @@
 import type { IUiSettingsClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type {
-  AlertingV2AdvancedSettingId,
-  AlertingV2AdvancedSettingValue,
+  AlertingAdvancedSettingId,
+  AlertingAdvancedSettingValue,
 } from '../../../../common/advanced_settings';
 import { UiSettingsClientToken } from './tokens';
 
 export interface SettingsServiceContract {
   /**
-   * Reads the current value of an alerting v2 advanced setting, falling back
+   * Reads the current value of an alerting advanced setting, falling back
    * to the registered default when the user has not provided a value. The
-   * return type is resolved from {@link AlertingV2AdvancedSettingValueMap}.
+   * return type is resolved from {@link AlertingAdvancedSettingValueMap}.
    */
-  get<K extends AlertingV2AdvancedSettingId>(key: K): Promise<AlertingV2AdvancedSettingValue<K>>;
+  get<K extends AlertingAdvancedSettingId>(key: K): Promise<AlertingAdvancedSettingValue<K>>;
   /**
-   * Persists a value for an alerting v2 advanced setting and marks it as
+   * Persists a value for an alerting advanced setting and marks it as
    * user-provided. The accepted value type is resolved from
-   * {@link AlertingV2AdvancedSettingValueMap}.
+   * {@link AlertingAdvancedSettingValueMap}.
    */
-  set<K extends AlertingV2AdvancedSettingId>(
+  set<K extends AlertingAdvancedSettingId>(
     key: K,
-    value: AlertingV2AdvancedSettingValue<K>
+    value: AlertingAdvancedSettingValue<K>
   ): Promise<void>;
 }
 
@@ -38,15 +38,15 @@ export class SettingsService implements SettingsServiceContract {
     private readonly uiSettingsClient: IUiSettingsClient
   ) {}
 
-  public async get<K extends AlertingV2AdvancedSettingId>(
+  public async get<K extends AlertingAdvancedSettingId>(
     key: K
-  ): Promise<AlertingV2AdvancedSettingValue<K>> {
-    return this.uiSettingsClient.get<AlertingV2AdvancedSettingValue<K>>(key);
+  ): Promise<AlertingAdvancedSettingValue<K>> {
+    return this.uiSettingsClient.get<AlertingAdvancedSettingValue<K>>(key);
   }
 
-  public async set<K extends AlertingV2AdvancedSettingId>(
+  public async set<K extends AlertingAdvancedSettingId>(
     key: K,
-    value: AlertingV2AdvancedSettingValue<K>
+    value: AlertingAdvancedSettingValue<K>
   ): Promise<void> {
     await this.uiSettingsClient.set(key, value);
   }
