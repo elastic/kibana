@@ -73,15 +73,59 @@ body, html {
   font-weight: 400;
 }
 
+/*
+ * Sized to match <EuiLoadingElastic size="xxl" /> (euiTheme.size.xxl,
+ * i.e. 2.5 * 16px = 40px on the Borealis base). Kept in sync with the
+ * SSR-safe `Logo` SVG defined in views/logo.tsx.
+ */
 .kbnLoaderWrap svg {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   margin: auto;
   line-height: 1;
 }
 
-.kbnLoader path {
-  stroke: #FFFFFF;
+/*
+ * Replica of @elastic/eui's `euiLoadingElasticStyles` so the boot
+ * splash animates identically to <EuiLoadingElastic />. We can't use
+ * the EUI component on the splash because this markup is rendered
+ * before any JS / Emotion has booted, so the animation lives in plain
+ * CSS shipped via /ui/legacy_styles.css (parser-blocking <link> in
+ * <head>, loaded before the inline body script flips the splash to
+ * `display: flex`).
+ *
+ * Scoped to `.kbnLoaderWrap` so the same <Logo /> stays static when
+ * reused by the legacy browser error screen.
+ */
+@keyframes kbnLoadingElastic {
+  0%   { transform: scale3d(.2, .2, -.7); }
+  40%  { transform: scale3d(1, 1, 2); }
+  50%  { transform: scale3d(.99, .99, 2); }
+  70%  { transform: scale3d(.96, .96, -2.5); }
+  100% { transform: scale3d(.98, .98, 2); }
+}
+
+.kbnLoaderWrap .kbnLoader path {
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  .kbnLoaderWrap .kbnLoader path {
+    animation-name: kbnLoadingElastic;
+    animation-fill-mode: forwards;
+    animation-direction: alternate;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0, 0.63, 0.49, 1);
+    animation-iteration-count: infinite;
+  }
+
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(1) { animation-delay: 0s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(2) { animation-delay: 0.035s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(3) { animation-delay: 0.125s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(4) { animation-delay: 0.155s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(5) { animation-delay: 0.075s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(6) { animation-delay: 0.06s; }
 }
 
 .kbnProgress {

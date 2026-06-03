@@ -99,7 +99,19 @@ export const Template: FunctionComponent<Props> = ({
           style={{ display: 'none' }}
           data-test-subj="kbnLoadingMessage"
         >
-          <div className="kbnLoaderWrap">
+          {/*
+           * `role="progressbar"` + `aria-label` mirror what
+           * `<EuiLoadingElastic />` exposes. The wrapper owns the
+           * loading announcement so the inline SVG in `<Logo />` can
+           * stay decorative (`aria-hidden`).
+           */}
+          <div
+            className="kbnLoaderWrap"
+            role="progressbar"
+            aria-label={i18n.translate('core.ui.loadingElasticAriaLabel', {
+              defaultMessage: 'Loading Elastic',
+            })}
+          >
             {logo}
             <div
               className="kbnWelcomeText"
