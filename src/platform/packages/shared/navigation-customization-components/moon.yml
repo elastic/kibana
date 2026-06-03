@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
+  - '@kbn/core-chrome-browser'
 tags:
   - shared-browser
   - package
