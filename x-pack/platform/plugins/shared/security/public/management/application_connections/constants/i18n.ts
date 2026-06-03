@@ -222,6 +222,14 @@ export const labels = {
       'xpack.security.management.applicationConnections.update.emptyValidationError',
       { defaultMessage: 'Connection name cannot be empty.' }
     ),
+    tooLongValidationError: (maxLength: number) =>
+      i18n.translate(
+        'xpack.security.management.applicationConnections.update.tooLongValidationError',
+        {
+          defaultMessage: 'Connection name must be {maxLength} characters or fewer.',
+          values: { maxLength },
+        }
+      ),
     successToast: (name: string) =>
       i18n.translate('xpack.security.management.applicationConnections.update.successToast', {
         defaultMessage: "Renamed connection to ''{name}''",
