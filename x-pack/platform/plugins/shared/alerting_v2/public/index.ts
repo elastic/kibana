@@ -30,6 +30,7 @@ import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
@@ -54,58 +55,6 @@ export const module = new ContainerModule(({ bind }) => {
     ) as WorkflowsExtensionsPublicPluginSetup;
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
-
-    getStartServices().then(([coreStart]) => {
-      const diContainer = coreStart.injection.getContainer();
-      setKibanaServices({
-        http: coreStart.http,
-        notifications: coreStart.notifications,
-        application: coreStart.application,
-        data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
-        dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
-        lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
-        expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
-        uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
-        workflowForm: { Component: () => null, defaultValue: () => ({}), supported: false },
-      });
-
-      const alertingV2Enabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_ENABLED_SETTING_ID,
-        false
-      );
-
-      const agentBuilderToken = PluginStart('agentBuilder');
-      if (alertingV2Enabled && diContainer.isBound(agentBuilderToken)) {
-        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
-        import(
-          /* webpackChunkName: "alerting_v2_rule_attachment" */
-          './agent_builder/attachments/rule_attachment_definition'
-        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE: ruleAttachmentType }) => {
-          agentBuilder.attachments.addAttachmentType(
-            ruleAttachmentType,
-            createRuleAttachmentDefinition({
-              container: diContainer,
-            })
-          );
-        });
-        import(
-          /* webpackChunkName: "alerting_v2_action_policy_attachment" */
-          './agent_builder/attachments/action_policy_attachment_definition'
-        ).then(
-          ({
-            createActionPolicyAttachmentDefinition,
-            ACTION_POLICY_ATTACHMENT_TYPE: actionPolicyAttachmentType,
-          }) => {
-            agentBuilder.attachments.addAttachmentType(
-              actionPolicyAttachmentType,
-              createActionPolicyAttachmentDefinition({
-                container: diContainer,
-              })
-            );
-          }
-        );
-      }
-    });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingV2Section = management.sections.register({
@@ -179,6 +128,63 @@ export const module = new ContainerModule(({ bind }) => {
           coreStart,
         });
       },
+    });
+
+    getStartServices().then(([coreStart]) => {
+      const diContainer = coreStart.injection.getContainer();
+      setKibanaServices({
+        http: coreStart.http,
+        notifications: coreStart.notifications,
+        application: coreStart.application,
+        data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
+        dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
+        lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
+        expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
+        uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        workflowForm: { Component: () => null, defaultValue: () => ({}), supported: false },
+      });
+
+      const alertingV2Enabled = coreStart.settings.globalClient.get<boolean>(
+        ALERTING_V2_ENABLED_SETTING_ID,
+        false
+      );
+
+      if (!alertingV2Enabled) {
+        disableAlertingManagementUi(alertingV2Section);
+        return;
+      }
+
+      const agentBuilderToken = PluginStart('agentBuilder');
+      if (diContainer.isBound(agentBuilderToken)) {
+        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
+        import(
+          /* webpackChunkName: "alerting_v2_rule_attachment" */
+          './agent_builder/attachments/rule_attachment_definition'
+        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE: ruleAttachmentType }) => {
+          agentBuilder.attachments.addAttachmentType(
+            ruleAttachmentType,
+            createRuleAttachmentDefinition({
+              container: diContainer,
+            })
+          );
+        });
+        import(
+          /* webpackChunkName: "alerting_v2_action_policy_attachment" */
+          './agent_builder/attachments/action_policy_attachment_definition'
+        ).then(
+          ({
+            createActionPolicyAttachmentDefinition,
+            ACTION_POLICY_ATTACHMENT_TYPE: actionPolicyAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              actionPolicyAttachmentType,
+              createActionPolicyAttachmentDefinition({
+                container: diContainer,
+              })
+            );
+          }
+        );
+      }
     });
   });
 });
