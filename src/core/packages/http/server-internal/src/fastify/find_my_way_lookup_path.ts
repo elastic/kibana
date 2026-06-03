@@ -88,14 +88,6 @@ function isValidFindMyWayMatch(match: FindMyWayMatch): boolean {
   return !routeMatchHasEmptyNamedPathParam(params, wildcardName);
 }
 
-function isCatchAllFindMyWayMatch(match: FindMyWayMatch): boolean {
-  const wildcardName = (match as { store?: { wildcardName?: string } }).store?.wildcardName;
-  if (wildcardName) {
-    return true;
-  }
-  return match.params != null && Object.prototype.hasOwnProperty.call(match.params, '*');
-}
-
 function findIfValid(
   fmw: FmwInstance<HTTPVersion.V1>,
   method: string,
