@@ -152,9 +152,6 @@ apiTest.describe(
               breach: {
                 query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
-              recovery: {
-                strategy: 'no_breach',
-              },
             },
           })
         );

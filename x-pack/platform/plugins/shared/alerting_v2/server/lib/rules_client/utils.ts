@@ -116,6 +116,8 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       lookback: data.schedule.lookback,
     },
     query: data.query,
+    recovery_strategy: data.recovery_strategy,
+    no_data_strategy: data.no_data_strategy,
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
@@ -137,8 +139,13 @@ function resolveBuilderType(
 
   const queryChanged =
     updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
+  const strategyChanged =
+    (updateData.recovery_strategy !== undefined &&
+      updateData.recovery_strategy !== existingAttrs.recovery_strategy) ||
+    (updateData.no_data_strategy !== undefined &&
+      updateData.no_data_strategy !== existingAttrs.no_data_strategy);
 
-  if (queryChanged) {
+  if (queryChanged || strategyChanged) {
     return undefined;
   }
 
@@ -173,6 +180,12 @@ export function buildUpdateRuleAttributes(
     // `query` - callers must send a complete new shape (we can't merge across formats),
     // so omitted = preserved, present = full replacement.
     query: updateData.query ?? existingAttrs.query,
+    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
+    recovery_strategy: nullToUndefined(
+      updateData.recovery_strategy,
+      existingAttrs.recovery_strategy
+    ),
+    no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
       updateData.state_transition,
@@ -217,6 +230,8 @@ export function transformRuleSoAttributesToRuleApiResponse(
       lookback: attrs.schedule.lookback,
     },
     query: attrs.query,
+    recovery_strategy: attrs.recovery_strategy,
+    no_data_strategy: attrs.no_data_strategy,
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
     artifacts: attrs.artifacts,

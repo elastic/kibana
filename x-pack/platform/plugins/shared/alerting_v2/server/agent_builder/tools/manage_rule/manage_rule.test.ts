@@ -144,6 +144,70 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
+    it('stores recovery_strategy and no_data_strategy from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Recovery Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+              },
+              recovery_strategy: 'query',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { recovery_strategy?: string };
+      };
+      expect(addCall.data.recovery_strategy).toBe('query');
+    });
+
+    it('stores no_data_strategy and has_data from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'No-Data Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                has_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
+              },
+              no_data_strategy: 'emit',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { no_data_strategy?: string };
+      };
+      expect(addCall.data.no_data_strategy).toBe('emit');
+    });
+
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({

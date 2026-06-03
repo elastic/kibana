@@ -194,15 +194,16 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'validation: rejects a signal rule with a recovery query in standalone format',
+    'validation: rejects a signal rule with recovery_strategy "query"',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
+        recovery_strategy: 'query',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -219,10 +220,11 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
+        no_data_strategy: 'emit',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: { query: 'FROM logs-* | LIMIT 1', behavior: 'emit' },
+          has_data: { query: 'FROM logs-* | LIMIT 1' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -234,15 +236,16 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'validation: rejects recovery with strategy: "query" missing the leaf query field',
+    'validation: rejects with recovery_strategy: "query" and missing the recovery query field',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'invalid-recovery' },
+        recovery_strategy: 'query',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
           // @ts-expect-error — exercising runtime cross-field validation
-          recovery: { strategy: 'query' },
+          recovery: {},
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -258,11 +261,11 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'invalid-no-breach' },
+        recovery_strategy: 'no_breach',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          // @ts-expect-error — exercising runtime cross-field validation
-          recovery: { strategy: 'no_breach', query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -281,10 +284,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
+        recovery_strategy: undefined,
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 10' },
-          recovery: undefined,
         },
         metadata: { name: 'created-signal-rule' },
       });
@@ -340,6 +343,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-recover-rule' },
+        recovery_strategy: 'query',
         query: {
           format: 'standalone',
           breach: {
@@ -347,7 +351,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
               'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
           },
           recovery: {
-            strategy: 'query',
             query:
               'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
           },
@@ -359,18 +362,19 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.recovery_strategy).toBe('query');
     }
   );
 
   apiTest(
-    'create: returns 201 with standalone format and recovery strategy "no_breach"',
+    'create: returns 201 with standalone format and recovery_strategy "no_breach"',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-no-breach-recovery' },
+        recovery_strategy: 'no_breach',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          recovery: { strategy: 'no_breach' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -378,19 +382,20 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.recovery_strategy).toBe('no_breach');
     }
   );
 
   apiTest(
-    'create: returns 201 with standalone format and a no_data query',
+    'create: returns 201 with standalone format and a has_data query',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-no-data-rule' },
+        no_data_strategy: 'emit',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0', behavior: 'emit' },
+          has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -399,6 +404,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.no_data_strategy).toBe('emit');
     }
   );
 
@@ -424,11 +430,12 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'composed-recover-rule' },
+        recovery_strategy: 'query',
         query: {
           format: 'composed',
           base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
           breach: { segment: 'WHERE max_val >= 10' },
-          recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
+          recovery: { segment: 'WHERE max_val < 5' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -437,19 +444,20 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.recovery_strategy).toBe('query');
     }
   );
 
   apiTest(
-    'create: returns 201 with composed format and no_data with default behavior',
+    'create: returns 201 with composed format and no_data_strategy',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'composed-no-data-rule' },
+        no_data_strategy: 'last_known_status',
         query: {
           format: 'composed',
           base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
           breach: { segment: 'WHERE count >= 1' },
-          no_data: { segment: 'WHERE count == 0', behavior: 'last_status' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -457,7 +465,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.no_data_strategy).toBe('last_known_status');
     }
   );
 

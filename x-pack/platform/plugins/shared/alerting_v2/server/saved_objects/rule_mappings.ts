@@ -29,6 +29,8 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         lookback: { type: 'keyword' },
       },
     },
+    recovery_strategy: { type: 'keyword' },
+    no_data_strategy: { type: 'keyword' },
     query: {
       properties: {
         format: { type: 'keyword' },
@@ -41,16 +43,13 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         },
         recovery: {
           properties: {
-            strategy: { type: 'keyword' },
             segment: { type: 'text' },
             query: { type: 'text' },
           },
         },
-        no_data: {
+        has_data: {
           properties: {
-            segment: { type: 'text' },
             query: { type: 'text' },
-            behavior: { type: 'keyword' },
           },
         },
       },

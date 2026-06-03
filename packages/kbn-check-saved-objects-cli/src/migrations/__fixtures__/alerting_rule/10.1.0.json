@@ -4,6 +4,8 @@
     {
       "kind": "alert|signal",
       "time_field": "string",
+      "recovery_strategy": "string?|null",
+      "no_data_strategy": "string?|null",
       "query": "object?",
       "state_transition": "object?|null",
       "artifacts": "array?",

@@ -22,22 +22,22 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  *   want. Tests that care about the lifecycle override it explicitly. Signal
  *   rules must opt out via `state_transition: undefined` because the schema
  *   forbids state_transition for `kind: 'signal'`.
- * - `query.recovery: { strategy: 'no_breach' }` so that, by default, rules
- *   recover whenever a previously-breaching group stops appearing in the
- *   breach query results. Signal rules must opt out by passing
- *   `query: { ..., recovery: undefined }` because the schema forbids
- *   `recovery`/`no_data` on `kind: 'signal'`. Tests that override `query`
- *   should include `recovery: { strategy: 'no_breach' }` (or another valid
- *   recovery) if they want the executor to emit recovery events.
+ * - `recovery_strategy: 'no_breach'` so that, by default, rules recover
+ *   whenever a previously-breaching group stops appearing in the breach query
+ *   results. Signal rules must opt out by passing
+ *   `recovery_strategy: undefined` (or `'none'`) because the schema forbids
+ *   recovery strategies on `kind: 'signal'`. Tests that override `query`
+ *   should include `recovery_strategy: 'no_breach'` (or another valid
+ *   strategy) if they want the executor to emit recovery events.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+  recovery_strategy: 'no_breach',
   query: {
     format: 'standalone',
     breach: { query: 'FROM logs-* | LIMIT 10' },
-    recovery: { strategy: 'no_breach' },
   },
   time_field: '@timestamp',
   grouping: { fields: ['host.name'] },

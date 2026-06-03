@@ -34,14 +34,15 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
 
 /**
  * Builds the API `query` field from the form's query values. Emits
- * `standalone` format with an optional `recovery: { strategy: 'query' }`
- * block when the compose discover flow has configured a custom recovery
- * condition.
+ * `standalone` format with an optional `recovery` block when the compose
+ * discover flow has configured a custom recovery condition. The corresponding
+ * `recovery_strategy: 'query'` is emitted as a top-level field in
+ * `mapFormValuesToRuleRequest`.
  */
 const mapQuery = (query: FormValues['query']): Query => ({
   format: 'standalone',
   breach: { query: query.breach },
-  ...(query.recover ? { recovery: { strategy: 'query' as const, query: query.recover } } : {}),
+  ...(query.recover ? { recovery: { query: query.recover } } : {}),
 });
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
@@ -119,6 +120,7 @@ export interface RuleRequestCommon {
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
+  recovery_strategy?: 'query';
   grouping?: { fields: string[] };
   state_transition?: {
     pending_count?: number;
@@ -142,6 +144,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     time_field: timeField,
     schedule: mapSchedule(schedule),
     query: mapQuery(query),
+    ...(query.recover ? { recovery_strategy: 'query' as const } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),

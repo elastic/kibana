@@ -31,49 +31,29 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     every: schema.string(),
     lookback: schema.maybe(schema.string()),
   }),
+  recovery_strategy: schema.maybe(
+    schema.oneOf([schema.literal('no_breach'), schema.literal('query'), schema.literal('none')])
+  ),
+  no_data_strategy: schema.maybe(
+    schema.oneOf([
+      schema.literal('last_known_status'),
+      schema.literal('emit'),
+      schema.literal('recover'),
+      schema.literal('none'),
+    ])
+  ),
   query: schema.oneOf([
     schema.object({
       format: schema.literal('composed'),
       base: schema.string(),
       breach: schema.object({ segment: schema.string() }),
-      recovery: schema.maybe(
-        schema.oneOf([
-          schema.object({
-            strategy: schema.literal('query'),
-            segment: schema.string(),
-          }),
-          schema.object({
-            strategy: schema.literal('no_breach'),
-          }),
-        ])
-      ),
-      no_data: schema.maybe(
-        schema.object({
-          segment: schema.string(),
-          behavior: schema.oneOf([schema.literal('emit'), schema.literal('last_status')]),
-        })
-      ),
+      recovery: schema.maybe(schema.object({ segment: schema.string() })),
     }),
     schema.object({
       format: schema.literal('standalone'),
       breach: schema.object({ query: schema.string() }),
-      recovery: schema.maybe(
-        schema.oneOf([
-          schema.object({
-            strategy: schema.literal('query'),
-            query: schema.string(),
-          }),
-          schema.object({
-            strategy: schema.literal('no_breach'),
-          }),
-        ])
-      ),
-      no_data: schema.maybe(
-        schema.object({
-          query: schema.string(),
-          behavior: schema.oneOf([schema.literal('emit'), schema.literal('last_status')]),
-        })
-      ),
+      recovery: schema.maybe(schema.object({ query: schema.string() })),
+      has_data: schema.maybe(schema.object({ query: schema.string() })),
     }),
   ]),
   state_transition: schema.maybe(

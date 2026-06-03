@@ -68,7 +68,7 @@ describe('composeFormToCreateRequest', () => {
     });
   });
 
-  it('includes recovery with strategy: query when form has recovery segment', () => {
+  it('includes recovery with recovery_strategy: query when form has recovery segment', () => {
     const values: ComposeFormValues = {
       ...baseFormValues,
       query: {
@@ -83,13 +83,15 @@ describe('composeFormToCreateRequest', () => {
       format: 'composed',
       base: BASE,
       breach: { segment: ALERT_SEGMENT },
-      recovery: { strategy: 'query', segment: RECOVERY_SEGMENT },
+      recovery: { segment: RECOVERY_SEGMENT },
     });
+    expect(result.recovery_strategy).toBe('query');
   });
 
-  it('omits recovery when form has none', () => {
+  it('omits recovery and recovery_strategy when form has none', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.query).not.toHaveProperty('recovery');
+    expect(result.recovery_strategy).toBeUndefined();
   });
 
   it('maps standalone form values to standalone request', () => {
@@ -105,8 +107,9 @@ describe('composeFormToCreateRequest', () => {
     expect(result.query).toEqual({
       format: 'standalone',
       breach: { query: 'FROM logs-* | WHERE count > 100' },
-      recovery: { strategy: 'query', query: 'FROM logs-* | WHERE count < 100' },
+      recovery: { query: 'FROM logs-* | WHERE count < 100' },
     });
+    expect(result.recovery_strategy).toBe('query');
   });
 
   it('omits tags when empty', () => {
@@ -286,16 +289,17 @@ describe('mapRuleToComposeFormValues', () => {
     }
   });
 
-  it('maps recovery segment from composed query with strategy: query', () => {
-    const rule = {
+  it('maps recovery segment from composed query when recovery_strategy: query', () => {
+    const rule: RuleResponse = {
       ...baseRuleResponse,
+      recovery_strategy: 'query',
       query: {
         format: 'composed',
         base: BASE,
         breach: { segment: ALERT_SEGMENT },
-        recovery: { strategy: 'query', segment: RECOVERY_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
       },
-    } as RuleResponse;
+    };
     const result = mapRuleToComposeFormValues(rule);
     if (result.query.format === 'composed') {
       expect(result.query.recovery?.segment).toBe(RECOVERY_SEGMENT);
@@ -309,16 +313,16 @@ describe('mapRuleToComposeFormValues', () => {
     }
   });
 
-  it('omits recovery when strategy is no_breach (form does not surface it)', () => {
-    const rule = {
+  it('omits recovery when recovery_strategy is no_breach (form does not surface it)', () => {
+    const rule: RuleResponse = {
       ...baseRuleResponse,
+      recovery_strategy: 'no_breach',
       query: {
         format: 'composed',
         base: BASE,
         breach: { segment: ALERT_SEGMENT },
-        recovery: { strategy: 'no_breach' },
       },
-    } as RuleResponse;
+    };
     const result = mapRuleToComposeFormValues(rule);
     if (result.query.format === 'composed') {
       expect(result.query.recovery).toBeUndefined();
@@ -338,14 +342,15 @@ describe('mapRuleToComposeFormValues', () => {
   });
 
   it('maps standalone query with recovery', () => {
-    const rule = {
+    const rule: RuleResponse = {
       ...baseRuleResponse,
+      recovery_strategy: 'query',
       query: {
         format: 'standalone',
         breach: { query: 'FROM logs-*' },
-        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE status == "ok"' },
+        recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
       },
-    } as RuleResponse;
+    };
     const result = mapRuleToComposeFormValues(rule);
     expect(result.query).toEqual({
       format: 'standalone',

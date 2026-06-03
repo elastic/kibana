@@ -460,6 +460,9 @@
           }
         }
       },
+      "no_data_strategy": {
+        "type": "keyword"
+      },
       "query": {
         "properties": {
           "base": {
@@ -478,15 +481,9 @@
           "format": {
             "type": "keyword"
           },
-          "no_data": {
+          "has_data": {
             "properties": {
-              "behavior": {
-                "type": "keyword"
-              },
               "query": {
-                "type": "text"
-              },
-              "segment": {
                 "type": "text"
               }
             }
@@ -498,13 +495,13 @@
               },
               "segment": {
                 "type": "text"
-              },
-              "strategy": {
-                "type": "keyword"
               }
             }
           }
         }
+      },
+      "recovery_strategy": {
+        "type": "keyword"
       },
       "schedule": {
         "properties": {

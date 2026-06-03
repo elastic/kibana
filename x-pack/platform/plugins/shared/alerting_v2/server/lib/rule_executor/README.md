@@ -117,13 +117,20 @@ The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes
 - `format: 'composed'` — `base` ES\|QL plus pipe-less segments for each phase.
 - `format: 'standalone'` — independent ES\|QL queries for each phase.
 
-In both formats the same three sub-objects describe how the executor materializes events:
+In both formats the `breach` sub-object is required; the `recovery` sub-object is optional. Recovery and no-data behaviour are now controlled by **top-level rule fields** rather than fields nested inside `query`:
 
 | Sub-object | Required? | Behavior |
 | --- | --- | --- |
 | `breach` | Yes | The breach query (composed: `segment`; standalone: `query`). Produces breached events on matching rows. |
-| `recovery` | Optional | Controls recovery. Omitting it disables recovery entirely. Otherwise `strategy: 'no_breach' \| 'query'` selects the recovery mode; for `'query'` the leaf field is required. |
-| `no_data` | Optional | Accepted by the API schema for forward compatibility, but the executor does not yet act on it. The field is stored on the rule and validated like the other blocks; no-data event emission will be wired up in a future change. |
+| `recovery` | Optional | The recovery query payload only. Present when `recovery_strategy` is `'query'` and holds the leaf field: `segment` for composed, `query` for standalone. No `strategy` field — that is the top-level `recovery_strategy`. |
+| `has_data` | Optional (standalone only) | Data-presence query. Present when `no_data_strategy` is not `'none'`. Composed queries do not have a `has_data` block. |
+
+Top-level strategy fields (sit alongside `query` on the rule, not inside it):
+
+| Top-level field | Values | Meaning |
+| --- | --- | --- |
+| `recovery_strategy` | `'no_breach'` \| `'query'` \| `'none'` | How the executor detects recovery. `'none'` disables recovery entirely. |
+| `no_data_strategy` | `'emit'` \| `'last_known_status'` \| `'recover'` \| `'none'` | How the executor reacts when `has_data` returns no rows. The executor does not yet act on this field — no-data event emission will be wired up in a future change. |
 
 ## Operational parameters
 
@@ -164,27 +171,29 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules and is optional. A rule without `query.recovery` never emits recovery events.
+Recovery only applies to `kind: alert` rules and is optional. A rule with `recovery_strategy: 'none'` (or no `recovery_strategy`) never emits recovery events.
 
 ### `no_breach` recovery
 
-Selected when `query.recovery.strategy === 'no_breach'`. The executor:
+Selected when `recovery_strategy === 'no_breach'`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state
 2. compares that active set to the current breach batch
 3. emits one recovered event for each active group missing from the current breached set
 
+No `query.recovery` block is needed for this mode.
+
 ### `query` recovery
 
-If `query.recovery.strategy === 'query'`, the executor runs the configured recovery query (composed `recovery.segment` appended to `base`, or standalone `recovery.query`) and only emits recovery events for rows whose computed `group_hash` matches the active set.
+Selected when `recovery_strategy === 'query'`. The executor runs the configured recovery query — composed `base` + `query.recovery.segment`, or standalone `query.recovery.query` — and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| `query.recovery` | Recovery is emitted when |
+| `recovery_strategy` | Recovery is emitted when |
 | --- | --- |
-| _absent_ | Never. The executor skips the active-group lookup entirely. |
-| `strategy: 'no_breach'` | An active group is absent from the current breach batch. |
-| `strategy: 'query'` | A recovery query row matches a currently active group. |
+| absent / `'none'` | Never. The executor skips the active-group lookup entirely. |
+| `'no_breach'` | An active group is absent from the current breach batch. |
+| `'query'` | A recovery query row matches a currently active group. |
 
 Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
 

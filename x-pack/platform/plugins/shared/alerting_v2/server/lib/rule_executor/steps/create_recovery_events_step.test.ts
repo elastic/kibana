@@ -46,7 +46,7 @@ describe('CreateRecoveryEventsStep', () => {
   }
 
   describe('recovery disabled', () => {
-    it('skips recovery entirely when recovery is omitted', async () => {
+    it('skips recovery entirely when recovery_strategy is omitted', async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       const breachedEvents = [createAlertEvent({ group_hash: 'hash-1' })];
@@ -54,6 +54,7 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: undefined,
           query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
         }),
         alertEventsBatch: breachedEvents,
@@ -100,10 +101,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch: breachedEvents,
@@ -134,10 +135,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
@@ -165,10 +166,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch,
@@ -196,10 +197,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch,
@@ -225,10 +226,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch: [],
@@ -256,11 +257,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'composed',
             base: 'FROM metrics-*',
             breach: { segment: 'WHERE cpu > 0.9' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
@@ -292,11 +293,12 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'composed',
             base: 'FROM metrics-* | STATS AVG(cpu) BY host.name',
             breach: { segment: 'WHERE AVG(cpu) > 0.9' },
-            recovery: { strategy: 'query', segment: 'WHERE AVG(cpu) < 0.5' },
+            recovery: { segment: 'WHERE AVG(cpu) < 0.5' },
           },
         }),
         alertEventsBatch: [],
@@ -336,13 +338,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: {
-              strategy: 'query',
-              query: 'FROM logs-* | WHERE recovered = true',
-            },
+            recovery: { query: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
         alertEventsBatch: [],
@@ -369,10 +369,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok = true' },
+            recovery: { query: 'FROM logs-* | WHERE ok = true' },
           },
         }),
         alertEventsBatch: [],
@@ -398,13 +399,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: {
-              strategy: 'query',
-              query: 'FROM logs-* | WHERE recovered = true',
-            },
+            recovery: { query: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
         alertEventsBatch: breachedEvents,
@@ -434,12 +433,12 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           grouping: { fields: ['host.name'] },
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
             recovery: {
-              strategy: 'query',
               query: 'FROM logs-* | WHERE error_count == 0 | STATS count(*) BY host.name',
             },
           },
@@ -468,10 +467,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'query', query: 'FROM logs-*' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: breachedEvents,
@@ -498,10 +498,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE invalid syntax' },
+            recovery: { query: 'FROM logs-* | WHERE invalid syntax' },
           },
         }),
         alertEventsBatch: [],
@@ -524,10 +525,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'query', query: 'FROM logs-*' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
@@ -548,10 +550,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'query', query: 'FROM logs-*' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
@@ -576,10 +579,10 @@ describe('CreateRecoveryEventsStep', () => {
         input,
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'no_breach',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: { strategy: 'no_breach' },
           },
         }),
         alertEventsBatch: [createAlertEvent()],

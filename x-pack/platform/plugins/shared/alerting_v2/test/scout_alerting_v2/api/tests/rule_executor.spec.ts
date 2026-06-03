@@ -772,7 +772,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
-            recovery: { strategy: 'no_breach' },
           },
         })
       );
@@ -920,13 +919,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-recovery-query' },
+        recovery_strategy: 'query',
         query: {
           format: 'standalone',
           breach: {
             query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
           recovery: {
-            strategy: 'query',
             query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
@@ -1001,13 +1000,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-multi' },
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
             recovery: {
-              strategy: 'query',
               query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
@@ -1091,13 +1090,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-no-match' },
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-no-match" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
             recovery: {
-              strategy: 'query',
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-other-host" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
@@ -1164,13 +1163,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-empty' },
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
             recovery: {
-              strategy: 'query',
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
@@ -1237,7 +1236,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
-            recovery: { strategy: 'no_breach' },
           },
         })
       );
@@ -1343,7 +1341,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
-            recovery: { strategy: 'no_breach' },
           },
         })
       );
@@ -1474,11 +1471,12 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-composed-recover' },
+          recovery_strategy: 'query',
           query: {
             format: 'composed',
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-composed-recover" | STATS max_val = MAX(value) BY host.name`,
             breach: { segment: `WHERE max_val >= 10` },
-            recovery: { strategy: 'query', segment: `WHERE max_val < 5` },
+            recovery: { segment: `WHERE max_val < 5` },
           },
         })
       );
@@ -1541,7 +1539,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
-            recovery: { strategy: 'no_breach' },
           },
         })
       );

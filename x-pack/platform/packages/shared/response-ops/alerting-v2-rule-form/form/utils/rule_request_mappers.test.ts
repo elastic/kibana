@@ -333,6 +333,28 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toBeUndefined();
     });
 
+    it('maps recover query to recovery block without strategy and sets recovery_strategy: "query"', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: { breach: 'FROM logs-* | LIMIT 10', recover: 'FROM logs-* | WHERE ok == true' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+        recovery: { query: 'FROM logs-* | WHERE ok == true' },
+      });
+      expect(result.recovery_strategy).toBe('query');
+    });
+
+    it('omits recovery_strategy when query.recover is absent', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.recovery_strategy).toBeUndefined();
+    });
+
     it('keeps non-empty runbook artifact value unchanged', () => {
       const formValues: FormValues = {
         ...baseFormValues,

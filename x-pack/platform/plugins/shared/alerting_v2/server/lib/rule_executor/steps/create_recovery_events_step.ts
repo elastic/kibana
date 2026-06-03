@@ -52,8 +52,8 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      // Omitting `query.recovery` disables recovery entirely.
-      if (rule.query.recovery == null) {
+      // recovery_strategy of 'none' (or null) disables recovery entirely.
+      if (rule.recovery_strategy == null || rule.recovery_strategy === 'none') {
         step.logger.debug({
           message: `[${step.name}] Recovery disabled for rule ${input.ruleId}`,
         });
@@ -74,7 +74,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const effectiveQuery = getRecoverEsqlQuery(rule.query);
+      const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
       const recoveryEvents = effectiveQuery
         ? await step.executeRecoveryQuery({ rule, effectiveQuery, input, activeGroupHashes })
         : buildRecoveryAlertEvents({

@@ -46,13 +46,11 @@ const alertRule: RuleApiResponse = {
   id: 'rule-2',
   kind: 'alert',
   metadata: { name: 'Test Alert Rule' },
+  recovery_strategy: 'query',
   query: {
     format: 'standalone',
     breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-    recovery: {
-      strategy: 'query',
-      query: 'FROM metrics-* | WHERE avg(cpu) < 0.5',
-    },
+    recovery: { query: 'FROM metrics-* | WHERE avg(cpu) < 0.5' },
   },
   grouping: { fields: ['host.name', 'service.name'] },
   state_transition: { pending_count: 3, pending_timeframe: '5m' },

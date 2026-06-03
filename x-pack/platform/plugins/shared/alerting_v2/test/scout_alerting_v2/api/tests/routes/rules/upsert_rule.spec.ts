@@ -130,10 +130,10 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: undefined,
           },
           metadata: { name: 'alert-rule' },
         }),

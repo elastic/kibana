@@ -93,6 +93,90 @@ describe('executeRuleOperations', () => {
       });
       expect(result.queryColumns).toBeUndefined();
     });
+
+    it('stores recovery_strategy: "no_breach" on the rule data', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          recovery_strategy: 'no_breach',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBe('no_breach');
+    });
+
+    it('stores recovery_strategy: "query" and recovery block on the rule data', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+          },
+          recovery_strategy: 'query',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBe('query');
+      expect((result.data.query as { recovery?: { query: string } }).recovery).toEqual({
+        query: 'FROM metrics-* | WHERE cpu < 0.5',
+      });
+    });
+
+    it('stores no_data_strategy: "emit" and has_data block on the rule data', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            has_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+          no_data_strategy: 'emit',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data_strategy).toBe('emit');
+      expect((result.data.query as { has_data?: { query: string } }).has_data).toEqual({
+        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+      });
+    });
+
+    it('does not set recovery_strategy when omitted from set_query', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBeUndefined();
+      expect(result.data.no_data_strategy).toBeUndefined();
+    });
+
+    it('preserves existing recovery_strategy when a subsequent set_query omits it', async () => {
+      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.recovery_strategy).toBe('no_breach');
+    });
   });
 
   describe('set_grouping with column validation', () => {
@@ -209,21 +293,11 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('throws when signal rule sets a recovery block', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_kind', kind: 'signal' },
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | WHERE error == true' },
-            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE error == false' },
-          },
-        },
-      ];
+    it('throws when signal rule has recovery_strategy set', async () => {
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
 
-      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'Signal rules cannot configure recovery or no_data queries'
+      await expect(executeRuleOperations({ recovery_strategy: 'query' }, ops)).rejects.toThrow(
+        'Signal rules cannot set recovery_strategy or no_data_strategy'
       );
     });
   });
@@ -304,18 +378,10 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('wraps recovery on signal kind', async () => {
+    it('wraps recovery_strategy error on signal kind', async () => {
       await expectValidationError(
-        executeRuleOperations({}, [
+        executeRuleOperations({ recovery_strategy: 'query' }, [
           { operation: 'set_kind', kind: 'signal' },
-          {
-            operation: 'set_query',
-            query: {
-              format: 'standalone',
-              breach: { query: 'FROM logs-* | WHERE error == true' },
-              recovery: { strategy: 'query', query: 'FROM logs-* | WHERE error == false' },
-            },
-          },
         ])
       );
     });
@@ -385,6 +451,44 @@ describe('executeRuleOperations', () => {
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(RuleOperationValidationError);
+    });
+
+    it('passes validation for a rule with recovery_strategy: "query"', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      const result = await executeRuleOperations(
+        {
+          ...validRule,
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
+            recovery: { query: 'FROM metrics-* | WHERE ok == true' },
+          },
+        },
+        ops
+      );
+
+      expect(result.data.recovery_strategy).toBe('query');
+    });
+
+    it('passes validation for a rule with no_data_strategy: "emit"', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      const result = await executeRuleOperations(
+        {
+          ...validRule,
+          no_data_strategy: 'emit',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
+            has_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+        },
+        ops
+      );
+
+      expect(result.data.no_data_strategy).toBe('emit');
     });
   });
 

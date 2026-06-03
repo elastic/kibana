@@ -14,6 +14,8 @@ import {
   ruleKindSchema,
   scheduleSchema,
   querySchema,
+  recoveryStrategySchema,
+  noDataStrategySchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
@@ -45,6 +47,8 @@ export const setScheduleOperationSchema = scheduleSchema
 export const setQueryOperationSchema = z.object({
   operation: z.literal('set_query'),
   query: querySchema,
+  recovery_strategy: recoveryStrategySchema.optional(),
+  no_data_strategy: noDataStrategySchema.optional(),
 });
 
 export const setGroupingOperationSchema = groupingSchema.extend({
@@ -176,6 +180,10 @@ export const executeRuleOperations = async (
         next = {
           ...next,
           query: op.query,
+          ...(op.recovery_strategy !== undefined
+            ? { recovery_strategy: op.recovery_strategy }
+            : {}),
+          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
         break;
 
@@ -246,7 +254,7 @@ export const executeRuleOperations = async (
 
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
-      'Signal rules cannot configure recovery or no_data queries.'
+      'Signal rules cannot set recovery_strategy or no_data_strategy.'
     );
   }
 

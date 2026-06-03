@@ -51,9 +51,9 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
 };
 
 /**
- * The compose form stores recovery as an optional leaf (no strategy field) —
- * presence means "custom recovery query". Translate to the canonical API
- * `recovery` discriminated union here.
+ * Maps the compose form query to the API query shape. Recovery strategy is
+ * inferred from presence of the recovery block and set as a top-level field
+ * in `composeFormToCreateRequest`.
  */
 const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
   if (q.format === 'composed') {
@@ -61,15 +61,13 @@ const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
       format: 'composed',
       base: q.base,
       breach: { segment: q.breach.segment },
-      ...(q.recovery
-        ? { recovery: { strategy: 'query' as const, segment: q.recovery.segment } }
-        : {}),
+      ...(q.recovery ? { recovery: { segment: q.recovery.segment } } : {}),
     };
   }
   return {
     format: 'standalone',
     breach: { query: q.breach.query },
-    ...(q.recovery ? { recovery: { strategy: 'query' as const, query: q.recovery.query } } : {}),
+    ...(q.recovery ? { recovery: { query: q.recovery.query } } : {}),
   };
 };
 
@@ -78,6 +76,7 @@ export const composeFormToCreateRequest = (
   builderType?: string
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
+  const hasRecovery = formValues.query.recovery != null;
 
   return {
     kind: formValues.kind,
@@ -91,6 +90,7 @@ export const composeFormToCreateRequest = (
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     query: composeQueryToApiQuery(formValues.query),
+    ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -122,25 +122,30 @@ export const composeFormToUpdateRequest = (
 // ---------------------------------------------------------------------------
 
 /**
- * Maps the API query shape to the compose form's narrower shape. The compose
- * form does not surface `no_data` or `recovery.strategy === 'no_breach'` —
- * `no_data` is dropped here, and a `no_breach` recovery becomes "no recovery
- * configured" on the form (it will revert to disabled on save if the user
- * doesn't change anything).
+ * Maps the API query shape to the compose form's narrower shape. A
+ * `recovery_strategy` of `'no_breach'` (or absent) is not surfaced by this
+ * form — only `'query'` maps a recovery block onto the form.
  */
-const apiQueryToRuleQuery = (q: RuleResponse['query']): ComposeFormValues['query'] => {
+const apiQueryToRuleQuery = (
+  q: RuleResponse['query'],
+  recoveryStrategy?: RuleResponse['recovery_strategy']
+): ComposeFormValues['query'] => {
   if (q.format === 'composed') {
     return {
       format: 'composed',
       base: q.base,
       breach: { segment: q.breach.segment },
-      ...(q.recovery?.strategy === 'query' ? { recovery: { segment: q.recovery.segment } } : {}),
+      ...(recoveryStrategy === 'query' && q.recovery
+        ? { recovery: { segment: q.recovery.segment } }
+        : {}),
     };
   }
   return {
     format: 'standalone',
     breach: { query: q.breach.query },
-    ...(q.recovery?.strategy === 'query' ? { recovery: { query: q.recovery.query } } : {}),
+    ...(recoveryStrategy === 'query' && q.recovery
+      ? { recovery: { query: q.recovery.query } }
+      : {}),
   };
 };
 
@@ -184,7 +189,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToRuleQuery(rule.query),
+    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),

@@ -104,15 +104,15 @@ export const queryFormatSchema = z.enum(['composed', 'standalone']);
 export const queryFormat = queryFormatSchema.enum;
 export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
-/** Strategy selector for the optional `recovery` block. */
-export const recoveryStrategySchema = z.enum(['query', 'no_breach']);
+/** Recovery strategy. */
+export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
 export const recoveryStrategy = recoveryStrategySchema.enum;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
-/** Behavior selector for the optional `no_data` block. */
-export const noDataBehaviorSchema = z.enum(['emit', 'last_status']);
-export const noDataBehavior = noDataBehaviorSchema.enum;
-export type NoDataBehavior = z.infer<typeof noDataBehaviorSchema>;
+/** No-data strategy. */
+export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
+export const noDataStrategy = noDataStrategySchema.enum;
+export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
  * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
@@ -137,35 +137,12 @@ const composedBreachSchema = z
   })
   .strict();
 
-const composedRecoveryQuerySchema = z
+const composedRecoverySchema = z
   .object({
-    strategy: z.literal(recoveryStrategy.query),
     segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
   })
-  .strict();
-
-const composedRecoveryNoBreachSchema = z
-  .object({
-    strategy: z.literal(recoveryStrategy.no_breach),
-  })
-  .strict();
-
-const composedRecoverySchema = z
-  .discriminatedUnion('strategy', [composedRecoveryQuerySchema, composedRecoveryNoBreachSchema])
-  .describe(
-    'Recovery configuration. `query` runs a custom recovery segment; `no_breach` uses the default no-breach recovery.'
-  );
-
-const composedNoDataSchema = z
-  .object({
-    segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment that selects no-data groups.'
-    ),
-    behavior: noDataBehaviorSchema
-      .default(noDataBehavior.emit)
-      .describe('How to handle no-data results: emit a no-data event or hold the last status.'),
-  })
-  .strict();
+  .strict()
+  .describe('Recovery query segment. Present only when recovery_strategy is "query".');
 
 /** Standalone wrappers (full queries). */
 
@@ -175,33 +152,19 @@ const standaloneBreachSchema = z
   })
   .strict();
 
-const standaloneRecoveryQuerySchema = z
+const standaloneRecoverySchema = z
   .object({
-    strategy: z.literal(recoveryStrategy.query),
     query: esqlQuerySchema.describe('Full ES|QL query for recovery detection.'),
   })
-  .strict();
+  .strict()
+  .describe('Recovery query. Present only when recovery_strategy is "query".');
 
-const standaloneRecoveryNoBreachSchema = z
+const standaloneHasDataSchema = z
   .object({
-    strategy: z.literal(recoveryStrategy.no_breach),
+    query: esqlQuerySchema.describe('Full ES|QL query that detects presence of data.'),
   })
-  .strict();
-
-const standaloneRecoverySchema = z
-  .discriminatedUnion('strategy', [standaloneRecoveryQuerySchema, standaloneRecoveryNoBreachSchema])
-  .describe(
-    'Recovery configuration. `query` runs a custom recovery query; `no_breach` uses the default no-breach recovery.'
-  );
-
-const standaloneNoDataSchema = z
-  .object({
-    query: esqlQuerySchema.describe('Full ES|QL query that selects no-data groups.'),
-    behavior: noDataBehaviorSchema
-      .default(noDataBehavior.emit)
-      .describe('How to handle no-data results: emit a no-data event or hold the last status.'),
-  })
-  .strict();
+  .strict()
+  .describe('No-data detection query. Present only when no_data_strategy is not "none".');
 
 export const composedQuerySchema = z
   .object({
@@ -212,11 +175,10 @@ export const composedQuerySchema = z
     breach: composedBreachSchema.describe('Breach detection configuration (required).'),
     recovery: composedRecoverySchema
       .optional()
-      .describe('Recovery configuration. When omitted, recovery is disabled.'),
-    no_data: composedNoDataSchema.optional().describe('No-data detection configuration.'),
+      .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
-  .describe('Composed query: a shared base with appendable breach/recovery/no_data segments.');
+  .describe('Composed query: a shared base with appendable breach and recovery segments.');
 
 export const standaloneQuerySchema = z
   .object({
@@ -224,11 +186,13 @@ export const standaloneQuerySchema = z
     breach: standaloneBreachSchema.describe('Breach detection configuration (required).'),
     recovery: standaloneRecoverySchema
       .optional()
-      .describe('Recovery configuration. When omitted, recovery is disabled.'),
-    no_data: standaloneNoDataSchema.optional().describe('No-data detection configuration.'),
+      .describe('Recovery query. Required when recovery_strategy is "query".'),
+    has_data: standaloneHasDataSchema
+      .optional()
+      .describe('No-data detection query. Required when no_data_strategy is not "none".'),
   })
   .strict()
-  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
+  .describe('Standalone queries: independent full queries for breach, recovery, and has_data.');
 
 export const querySchema = z
   .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
@@ -247,13 +211,15 @@ export const getBreachEsqlQuery = (query: Query): string =>
     : query.breach.query;
 
 /**
- * Returns the recovery ES|QL query if the rule has one configured with
- * `recovery.strategy === 'query'`, otherwise `undefined`. For composed
- * queries this is `base` + `recovery.segment`; for standalone it's
- * `recovery.query` verbatim.
+ * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,
+ * otherwise `undefined`. For composed queries this is `base` +
+ * `recovery.segment`; for standalone it's `recovery.query` verbatim.
  */
-export const getRecoverEsqlQuery = (query: Query): string | undefined => {
-  if (query.recovery?.strategy !== recoveryStrategy.query) return undefined;
+export const getRecoverEsqlQuery = (
+  query: Query,
+  strategy?: RecoveryStrategy
+): string | undefined => {
+  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
   if (query.format === 'composed') {
     return composeEsqlQuery(query.base, query.recovery.segment);
   }
@@ -261,16 +227,15 @@ export const getRecoverEsqlQuery = (query: Query): string | undefined => {
 };
 
 /**
- * Returns the no-data ES|QL query if the rule has one configured, otherwise
- * `undefined`. For composed queries this is `base` + `no_data.segment`; for
- * standalone it's `no_data.query` verbatim.
+ * Returns the has-data ES|QL query when `noDataStrategy` is not `'none'`,
+ * otherwise `undefined`. Only standalone queries support a `has_data` block.
  */
-export const getNoDataEsqlQuery = (query: Query): string | undefined => {
-  if (!query.no_data) return undefined;
-  if (query.format === 'composed') {
-    return composeEsqlQuery(query.base, query.no_data.segment);
+export const getNoDataEsqlQuery = (query: Query, strategy?: NoDataStrategy): string | undefined => {
+  if (strategy == null || strategy === noDataStrategy.none) return undefined;
+  if (query.format === 'standalone' && query.has_data) {
+    return query.has_data.query;
   }
-  return query.no_data.query;
+  return undefined;
 };
 
 /**
@@ -373,6 +338,16 @@ export const createRuleDataBaseSchema = z
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,
+    recovery_strategy: recoveryStrategySchema
+      .optional()
+      .describe(
+        'How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.'
+      ),
+    no_data_strategy: noDataStrategySchema
+      .optional()
+      .describe(
+        'How to handle no-data situations. "emit" emits a no-data event; "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection.'
+      ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
@@ -392,9 +367,15 @@ export const isSignalUsingStandaloneFormat = (data: {
 }): boolean => data.kind !== 'signal' || data.query?.format === queryFormat.standalone;
 
 /** Signal rules only run a breach query — no recovery or no-data behaviour. */
-export const isSignalQueryBreachOnly = (data: { kind?: string; query?: Query }): boolean => {
-  if (data.kind !== 'signal' || data.query?.format !== queryFormat.standalone) return true;
-  return data.query.recovery == null && data.query.no_data == null;
+export const isSignalQueryBreachOnly = (data: {
+  kind?: string;
+  recovery_strategy?: RecoveryStrategy | null;
+  no_data_strategy?: NoDataStrategy | null;
+}): boolean => {
+  if (data.kind !== 'signal') return true;
+  const recoveryOk = data.recovery_strategy == null || data.recovery_strategy === 'none';
+  const noDataOk = data.no_data_strategy == null || data.no_data_strategy === 'none';
+  return recoveryOk && noDataOk;
 };
 
 export const createRuleDataSchema = createRuleDataBaseSchema
@@ -407,8 +388,8 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     path: ['query', 'format'],
   })
   .refine(isSignalQueryBreachOnly, {
-    message: 'Signal rules cannot set recover or no_data queries.',
-    path: ['query'],
+    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+    path: ['recovery_strategy'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
@@ -445,6 +426,8 @@ export const updateRuleDataSchema = z
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
+    recovery_strategy: recoveryStrategySchema.optional().nullable(),
+    no_data_strategy: noDataStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),

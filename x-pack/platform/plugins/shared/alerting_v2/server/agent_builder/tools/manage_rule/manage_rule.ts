@@ -44,10 +44,12 @@ Use operations[] to:
 1. set_metadata — set name, description, and tags
 2. set_kind — set rule kind (alert | signal)
 3. set_schedule — set execution interval and lookback window
-4. set_query — set the rule's detection query. Two formats are supported:
-   - composed: shared "base" ES|QL query with appendable pipe-less segments — required "breach: { segment }", optional "recovery: { strategy: 'query'|'no_breach', segment? }" and "no_data: { segment, behavior: 'emit'|'last_status' }"
-   - standalone: independent full ES|QL queries — required "breach: { query }", optional "recovery: { strategy: 'query'|'no_breach', query? }" and "no_data: { query, behavior: 'emit'|'last_status' }"
-   Omitting "recovery" disables recovery entirely; signal rules must use standalone and cannot configure recovery or no_data.
+4. set_query — set the rule's detection query plus recovery and no-data strategies. Fields:
+   - query (required): two formats supported:
+     - composed: required "base" (ES|QL string) + "breach: { segment }", optional "recovery: { segment }" (only when recovery_strategy is "query")
+     - standalone: required "breach: { query }", optional "recovery: { query }" (only when recovery_strategy is "query") and "has_data: { query }" (only when no_data_strategy is not "none")
+   - recovery_strategy (optional): "no_breach" | "query" | "none" — "no_breach" recovers when breach stops, "query" runs a separate recovery query, "none" disables recovery. Signal rules cannot set this.
+   - no_data_strategy (optional): "last_known_status" | "emit" | "recover" | "none" — controls behaviour when no data is present; requires a "has_data" block in standalone queries. Signal rules cannot set this.
 5. set_grouping — set fields to group alerts by
 6. set_state_transition — set consecutive breaches threshold
 7. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,

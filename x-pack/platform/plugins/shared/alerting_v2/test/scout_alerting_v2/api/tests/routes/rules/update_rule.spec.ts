@@ -135,6 +135,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
+          recovery_strategy: 'query',
           query: {
             format: 'standalone',
             breach: {
@@ -142,7 +143,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
                 'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
             },
             recovery: {
-              strategy: 'query',
               query:
                 'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
             },
@@ -151,6 +151,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
+      expect(response.body.recovery_strategy).toBe('query');
       expect(response.body.query).toStrictEqual({
         format: 'standalone',
         breach: {
@@ -158,7 +159,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
             'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
         },
         recovery: {
-          strategy: 'query',
           query:
             'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
         },
@@ -168,7 +168,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'update: should add a no_data query to a standalone-format rule',
+    'update: should add a has_data query to a standalone-format rule',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-add-no-data' } })
@@ -177,19 +177,21 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
+          no_data_strategy: 'emit',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 1' },
-            no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0', behavior: 'emit' },
+            has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
           },
         },
       });
 
       expect(response).toHaveStatusCode(200);
+      expect(response.body.no_data_strategy).toBe('emit');
       expect(response.body.query).toStrictEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | LIMIT 1' },
-        no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0', behavior: 'emit' },
+        has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
@@ -230,21 +232,23 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
+          recovery_strategy: 'query',
           query: {
             format: 'composed',
             base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
             breach: { segment: 'WHERE max_val >= 10' },
-            recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
+            recovery: { segment: 'WHERE max_val < 5' },
           },
         },
       });
 
       expect(response).toHaveStatusCode(200);
+      expect(response.body.recovery_strategy).toBe('query');
       expect(response.body.query).toStrictEqual({
         format: 'composed',
         base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
         breach: { segment: 'WHERE max_val >= 10' },
-        recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
+        recovery: { segment: 'WHERE max_val < 5' },
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
@@ -408,10 +412,10 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },
-            recovery: undefined,
           },
           metadata: { name: 'signal-rule' },
         })
