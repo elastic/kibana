@@ -1,5 +1,5 @@
 {
-  "sha1": "6edc73e50c4c29dce7acd79bccf073c93c68e4b3",
+  "sha1": "f33a76451025fdb85c586fdf3a37b0e0c2f88543",
   "tests": [
     {
       "id": "edad46751593082-f1df5a4d8ec8b23",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 149,
+        "line": 153,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 166,
+        "line": 164,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 198,
+        "line": 196,
         "column": 10
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 212,
+        "line": 210,
         "column": 10
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 226,
+        "line": 224,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 240,
+        "line": 238,
         "column": 10
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 198,
+        "line": 207,
         "column": 10
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 211,
+        "line": 220,
         "column": 10
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 265,
+        "line": 269,
         "column": 10
       }
     },
@@ -137,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 295,
+        "line": 297,
         "column": 10
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 309,
+        "line": 311,
         "column": 10
       }
     },
@@ -165,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 323,
+        "line": 325,
         "column": 10
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
-        "line": 337,
+        "line": 339,
         "column": 10
       }
     }

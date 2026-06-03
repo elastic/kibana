@@ -16,7 +16,7 @@ import {
   removeMetricThresholdDataForge,
 } from '../fixtures/data_forge';
 import { getAdminHeaders, type RuleResponse } from '../fixtures/helpers';
-import { pollUntilTrue } from '../fixtures/poll';
+import { pollUntilTrue, retryForSuccess } from '../fixtures/poll';
 
 /**
  * Ported from FTR
@@ -154,18 +154,16 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
     // Resolve the fired alert's uuid up front so individual tests don't depend
     // on each other's execution order for it. If a test that needs `alertId`
     // ran before the one that produced it, the value would be `undefined`.
-    await pollUntilTrue(
+    alertId = await retryForSuccess(
       async () => {
         const resp = await esClient.search<Record<string, unknown>>({
           index: METRICS_ALERTS_INDEX,
           query: { bool: { filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }] } },
           ignore_unavailable: true,
         });
-        if (resp.hits.hits.length === 0) {
-          return false;
-        }
-        alertId = resp.hits.hits[0]._source?.['kibana.alert.uuid'] as string;
-        return true;
+        const uuid = resp.hits.hits[0]?._source?.['kibana.alert.uuid'];
+        expect(uuid).toBeDefined();
+        return uuid as string;
       },
       { timeoutMs: 120_000, intervalMs: 3_000, label: 'metric threshold alert uuid' }
     );
@@ -220,19 +218,16 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
   });
 
   apiTest('should set correct information in the alert document', async ({ esClient }) => {
-    let source: Record<string, unknown> = {};
-    await pollUntilTrue(
+    const source = await retryForSuccess(
       async () => {
         const resp = await esClient.search<Record<string, unknown>>({
           index: METRICS_ALERTS_INDEX,
           query: { bool: { filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }] } },
           ignore_unavailable: true,
         });
-        if (resp.hits.hits.length === 0) {
-          return false;
-        }
-        source = resp.hits.hits[0]._source as Record<string, unknown>;
-        return true;
+        const hit = resp.hits.hits[0]?._source;
+        expect(hit).toBeDefined();
+        return hit as Record<string, unknown>;
       },
       { timeoutMs: 120_000, intervalMs: 3_000, label: 'metric threshold alert document' }
     );
@@ -272,8 +267,9 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
   });
 
   apiTest('should set correct action parameter: ruleType', async ({ esClient }) => {
-    let source: { ruleType?: string; alertDetailsUrl?: string; reason?: string } = {};
-    await pollUntilTrue(
+    // The whole assertion block is wrapped so it retries until the action
+    // document has been written and transient ES errors are tolerated.
+    await retryForSuccess(
       async () => {
         const resp = await esClient.search<{
           ruleType: string;
@@ -283,21 +279,18 @@ apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, (
           index: ALERT_ACTION_INDEX,
           ignore_unavailable: true,
         });
-        if (resp.hits.hits.length === 0) {
-          return false;
-        }
-        source = resp.hits.hits[0]._source ?? {};
-        return true;
+        const source: { ruleType?: string; alertDetailsUrl?: string; reason?: string } =
+          resp.hits.hits[0]?._source ?? {};
+
+        expect(source.ruleType).toBe('metrics.alert.threshold');
+        // The host/port of the public base URL differs between FTR and Scout,
+        // so we assert the alert details path + id rather than the absolute URL.
+        expect(source.alertDetailsUrl).toContain(`/app/observability/alerts/${alertId}`);
+        expect(source.reason).toBe(
+          'system.cpu.user.pct is 90% in the last 5 mins. Alert when above 50%.'
+        );
       },
       { timeoutMs: 120_000, intervalMs: 3_000, label: 'metric threshold action document' }
-    );
-
-    expect(source.ruleType).toBe('metrics.alert.threshold');
-    // The host/port of the public base URL differs between FTR and Scout, so we
-    // assert the alert details path + id rather than the full absolute URL.
-    expect(source.alertDetailsUrl).toContain(`/app/observability/alerts/${alertId}`);
-    expect(source.reason).toBe(
-      'system.cpu.user.pct is 90% in the last 5 mins. Alert when above 50%.'
     );
   });
 

@@ -10,27 +10,57 @@ const sleep = (ms: number): Promise<void> =>
     setTimeout(resolve, ms);
   });
 
+export interface RetryOptions {
+  timeoutMs: number;
+  intervalMs: number;
+  /** Identifies which wait failed when the deadline is reached. */
+  label: string;
+}
+
 /**
- * Poll `fn` until it resolves `true` or the timeout elapses. The Scout `/api`
- * `expect` does not expose Playwright's retrying `toPass` / `expect.poll`, so API
- * specs use this helper for eventual-consistency waits (mirrors the SLO suite).
+ * Retry `block` until it resolves without throwing, or the timeout elapses —
+ * the API-spec analogue of FTR's retry service. Any block of requests /
+ * `expect` assertions can be wrapped, and transient failures (an ES 4xx while
+ * the cluster is still starting, a connection reset, an assertion that is not
+ * true yet) are retried instead of failing on the first attempt. The last error
+ * is re-thrown with the `label` for context once the deadline passes.
+ *
+ * The Scout `/api` `expect` does not expose Playwright's retrying `toPass` /
+ * `expect.poll`, so API specs use this for eventual-consistency waits.
+ */
+export async function retryForSuccess<T>(
+  block: () => Promise<T>,
+  { timeoutMs, intervalMs, label }: RetryOptions
+): Promise<T> {
+  const deadline = Date.now() + timeoutMs;
+  let lastError: Error | undefined;
+  while (Date.now() < deadline) {
+    try {
+      return await block();
+    } catch (e) {
+      // Keep retrying through transient errors; the latest one is surfaced
+      // with the label if we never succeed.
+      lastError = e instanceof Error ? e : new Error(String(e));
+    }
+    await sleep(intervalMs);
+  }
+  throw new Error(
+    `[${label}] timed out after ${timeoutMs}ms${lastError ? `: ${lastError.message}` : ''}`
+  );
+}
+
+/**
+ * Convenience wrapper around `retryForSuccess` for the common "poll until a
+ * condition is true" case. Shares the same retry loop, so it also retries
+ * through transient errors thrown by `fn`.
  */
 export async function pollUntilTrue(
   fn: () => Promise<boolean>,
-  options: { timeoutMs: number; intervalMs: number; label: string }
+  options: RetryOptions
 ): Promise<void> {
-  const deadline = Date.now() + options.timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      if (await fn()) {
-        return;
-      }
-    } catch (e) {
-      // Surface the polling context: a raw ES 4xx / connection error otherwise
-      // propagates with no hint of which wait failed.
-      throw new Error(`[${options.label}] ${(e as Error).message}`);
+  await retryForSuccess(async () => {
+    if (!(await fn())) {
+      throw new Error('condition is not true yet');
     }
-    await sleep(options.intervalMs);
-  }
-  throw new Error(`[${options.label}] timed out after ${options.timeoutMs}ms`);
+  }, options);
 }

@@ -118,6 +118,22 @@ apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.cla
   apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
     headers = await getAdminHeaders(requestAuth);
     await createDataView(apiClient, headers);
+
+    // Create the shared rule up front so the tests below don't depend on each
+    // other's execution order for `ruleId`.
+    const rule = await createCustomThresholdRule(apiClient, headers, {
+      name: 'Threshold rule',
+      params: {
+        criteria: buildCriteria(),
+        alertOnNoData: true,
+        alertOnGroupDisappear: true,
+        searchConfiguration: {
+          query: { query: '', language: 'kuery' },
+          index: DATA_VIEW_ID,
+        },
+      },
+    });
+    ruleId = rule.id;
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
@@ -135,20 +151,14 @@ apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.cla
   });
 
   apiTest('create a threshold rule', async ({ apiClient }) => {
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Threshold rule',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: true,
-        alertOnGroupDisappear: true,
-        searchConfiguration: {
-          query: { query: '', language: 'kuery' },
-          index: DATA_VIEW_ID,
-        },
-      },
+    // The shared rule is created in `beforeAll`; verify it persisted and is
+    // readable so the dependent tests below can rely on it.
+    const res = await apiClient.get(`api/alerting/rule/${ruleId}`, {
+      headers,
+      responseType: 'json',
     });
-    ruleId = rule.id;
-    expect(ruleId).toBeDefined();
+    expect(res).toHaveStatusCode(200);
+    expect((res.body as RuleResponse).id).toBe(ruleId);
   });
 
   apiTest(
