@@ -27,6 +27,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
+  apiHasUseGlobalFiltersSetting,
   initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
@@ -273,7 +274,17 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         },
       });
 
-      const relatedPanelsApi = initializeRelatedPanels({ uuid, parentApi, isFilterControl: true });
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        isRelated: (sibling) => {
+          return apiHasUseGlobalFiltersSetting(sibling)
+            ? Boolean(sibling.useGlobalFilters$.getValue())
+            : false;
+        },
+        relatedObservables: [],
+        relatedSiblingObservables: ['useGlobalFilters$'],
+      });
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const errorsSubscription = combineLatest([

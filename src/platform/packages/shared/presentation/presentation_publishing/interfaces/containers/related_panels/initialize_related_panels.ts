@@ -16,6 +16,7 @@ import {
   map,
   of,
   pairwise,
+  skipWhile,
   switchMap,
   take,
   takeUntil,
@@ -23,55 +24,23 @@ import {
 } from 'rxjs';
 
 import { Parser, Walker } from '@elastic/esql';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { apiPublishesESQLVariable } from '@kbn/esql-types';
-import type { AggregateQuery } from '@kbn/es-query';
-import { apiHasSections, apiPublishesChildren } from '../presentation_container';
-import {
-  apiAppliesFilters,
-  apiAppliesTimeslice,
-  apiHasUseGlobalFiltersSetting,
-} from '../../fetch/applies_filters';
-import { apiPublishesESQLQuery } from '../../publishes_esql_query';
 import type { ViewMode } from '../../publishes_view_mode';
 import { apiPublishesViewMode } from '../../publishes_view_mode';
-import type { PublishingSubject } from '../../../publishing_subject';
+import { apiHasSections, apiPublishesChildren } from '../presentation_container';
 
-// Redeclare instead of importing from `@kbn/esql-utils` to avoid circular dependency issues
-const getESQLQueryVariables = (esql: string): string[] => {
-  const { root } = Parser.parse(esql);
-  return Walker.params(root).map((v) => v.text.replace(/^\?+/, ''));
-};
-
-interface BaseProps {
-  uuid: string;
-  parentApi: unknown;
-  isFilterControl?: boolean;
-  esqlQuery$?: PublishingSubject<AggregateQuery>;
-}
-
-type ESQLControlProps = BaseProps & {
-  isESQLControl: true;
-  esqlVariable$: PublishingSubject<ESQLControlVariable>;
-};
-
-type NonESQLControlProps = BaseProps & {
-  isESQLControl?: never;
-  esqlVariable$?: never;
-};
-
-/**
- * Initializes `relatedPanels$` for an embeddable based on its role in the dashboard
- * (or any sibling-aware container):
- */
 export const initializeRelatedPanels = ({
   uuid,
   parentApi,
-  isFilterControl,
-  isESQLControl,
-  esqlQuery$,
-  esqlVariable$,
-}: ESQLControlProps | NonESQLControlProps): { relatedPanels$: BehaviorSubject<string[]> } => {
+  relatedObservables,
+  relatedSiblingObservables,
+  isRelated,
+}: {
+  uuid: string;
+  parentApi: unknown;
+  relatedObservables?: Observable<unknown>[];
+  relatedSiblingObservables?: string[];
+  isRelated: (sibling: unknown) => boolean;
+}): { relatedPanels$: BehaviorSubject<string[]> } => {
   const relatedPanels$ = new BehaviorSubject<string[]>([]);
 
   if (!apiPublishesChildren(parentApi)) {
@@ -84,106 +53,102 @@ export const initializeRelatedPanels = ({
     ? parentApi.viewMode$
     : of('view' as ViewMode);
 
-  const query$: Observable<string | undefined> =
-    esqlQuery$?.pipe(map((query) => query?.esql)) ?? of(undefined);
-
   const teardown$ = childrenApi.children$.pipe(
     pairwise(),
     filter(([prev, curr]) => uuid in prev && !(uuid in curr)),
     take(1)
   );
 
-  viewMode$
+  combineLatest([
+    viewMode$,
+    'childrenLoading$' in parentApi
+      ? (parentApi.childrenLoading$ as Observable<boolean>)
+      : of(false),
+  ])
     .pipe(
+      skipWhile(([viewMode, childrenLoading]) => childrenLoading || viewMode !== 'edit'),
       distinctUntilChanged(),
-      switchMap((viewMode) => {
-        if (viewMode !== 'edit') return of<string[]>([]);
-
-        return combineLatest([childrenApi.children$, section$, query$]).pipe(
-          switchMap(([children, section, query]) => {
+      switchMap(([viewMode, childrenLoading]) => {
+        return combineLatest([childrenApi.children$, section$]).pipe(
+          switchMap(([children, section, ...relatedValues]) => {
             const siblingEntries = Object.entries(children).filter(
               ([siblingUuid]) => siblingUuid !== uuid
             );
             if (siblingEntries.length === 0) return of<string[]>([]);
 
-            const siblingObservables = siblingEntries.map(([siblingUuid, sibling]) => {
-              const siblingSection$: Observable<string | undefined> = apiHasSections(parentApi)
-                ? parentApi.panelSection$(siblingUuid)
-                : of(undefined);
-              const siblingQuery$: Observable<string | undefined> = apiPublishesESQLQuery(sibling)
-                ? sibling.query$.pipe(map((q) => q?.esql))
-                : of(undefined);
-              const siblingUseGlobalFilters$: Observable<boolean | undefined> =
-                apiHasUseGlobalFiltersSetting(sibling) ? sibling.useGlobalFilters$ : of(undefined);
-              return combineLatest([siblingSection$, siblingQuery$, siblingUseGlobalFilters$]).pipe(
-                map(([siblingSection, siblingESQL, siblingUseGlobalFilters]) => ({
-                  uuid: siblingUuid,
-                  sibling,
-                  section: siblingSection,
-                  esql: siblingESQL,
-                  useGlobalFilters: siblingUseGlobalFilters,
-                }))
-              );
-            });
+            const siblingObservables =
+              siblingEntries.map(([siblingUuid, sibling]) => {
+                const siblingSection$: Observable<string | undefined> = apiHasSections(parentApi)
+                  ? parentApi.panelSection$(siblingUuid)
+                  : of(undefined);
 
+                const otherObservables: Observable<unknown>[] = (
+                  relatedSiblingObservables ?? []
+                ).reduce(
+                  (prev, key) =>
+                    Object.hasOwn(sibling as object, key)
+                      ? [...prev, (sibling as Record<string, Observable<unknown>>)[key]]
+                      : prev,
+                  [] as Observable<unknown>[]
+                );
+
+                return combineLatest([siblingSection$, ...otherObservables]).pipe(
+                  map(([siblingSection]) => ({
+                    uuid: siblingUuid,
+                    sibling,
+                    section: siblingSection,
+                  }))
+                );
+              }) ?? [];
+            console.log({ siblingObservables });
             return combineLatest(siblingObservables).pipe(
               map((siblings) => {
+                console.log({ siblings });
                 const related: string[] = [];
-                for (const {
-                  uuid: siblingUuid,
-                  sibling,
-                  section: siblingSection,
-                  esql: siblingESQL,
-                  useGlobalFilters: siblingUseGlobalFilters,
-                } of siblings) {
-                  const isSiblingFilterControl =
-                    apiAppliesFilters(sibling) || apiAppliesTimeslice(sibling);
-                  const isSiblingESQLControl = apiPublishesESQLVariable(sibling);
-                  const compatibleScope =
-                    section === siblingSection ||
-                    (section === undefined && (isESQLControl || isFilterControl)) ||
-                    (siblingSection === undefined &&
-                      (isSiblingFilterControl || isSiblingESQLControl));
-                  if (!compatibleScope) continue;
-
-                  if (isESQLControl) {
-                    const siblingUsesESQLVariable =
-                      siblingESQL &&
-                      getESQLQueryVariables(siblingESQL).includes(esqlVariable$.value.key);
-
-                    if (siblingUsesESQLVariable) {
-                      // If a sibling uses this control's ES|QL variable, it's related
-                      related.push(siblingUuid);
-                      continue;
-                    } else if (!isSiblingESQLControl) {
-                      // If the sibling does not use this ES|QL control's variable, only bail out if the sibling is not
-                      // also an ES|QL control. Otherwise, continue on to check if this control consumes the sibling's variable
-                      continue;
-                    }
-                    continue;
+                for (const { uuid: siblingUuid, sibling, section: siblingSection } of siblings) {
+                  const compatibleScope = section === siblingSection || section === undefined;
+                  if (compatibleScope && isRelated(sibling)) {
+                    related.push(siblingUuid);
                   }
 
-                  if (isSiblingESQLControl) {
-                    // Panels that publish an ES|QL query are related to ES|QL controls that publish variables they use
-                    if (!query) continue;
-                    const usedVariables = getESQLQueryVariables(query);
-                    if (usedVariables.includes(sibling.esqlVariable$.value.key)) {
-                      related.push(siblingUuid);
-                    }
-                    continue;
-                  }
+                  // if (isESQLControl) {
+                  //   const siblingUsesESQLVariable =
+                  //     siblingESQL &&
+                  //     getESQLQueryVariables(siblingESQL).includes(esqlVariable$.value.key);
 
-                  if (isFilterControl) {
-                    // Filter/time controls are related to all siblings in their scope that use global filters
-                    if (siblingUseGlobalFilters !== false) related.push(siblingUuid);
-                    continue;
-                  }
+                  //   if (siblingUsesESQLVariable) {
+                  //     // If a sibling uses this control's ES|QL variable, it's related
+                  //     related.push(siblingUuid);
+                  //     continue;
+                  //   } else if (!isSiblingESQLControl) {
+                  //     // If the sibling does not use this ES|QL control's variable, only bail out if the sibling is not
+                  //     // also an ES|QL control. Otherwise, continue on to check if this control consumes the sibling's variable
+                  //     continue;
+                  //   }
+                  //   continue;
+                  // }
 
-                  if (!isSiblingFilterControl) continue;
+                  // if (isSiblingESQLControl) {
+                  //   // Panels that publish an ES|QL query are related to ES|QL controls that publish variables they use
+                  //   if (!query) continue;
+                  //   const usedVariables = getESQLQueryVariables(query);
+                  //   if (usedVariables.includes(sibling.esqlVariable$.value.key)) {
+                  //     related.push(siblingUuid);
+                  //   }
+                  //   continue;
+                  // }
 
-                  // All non-control panels are related to any filter or time-slider control
-                  // in the same scope
-                  related.push(siblingUuid);
+                  // if (isFilterControl) {
+                  //   // Filter/time controls are related to all siblings in their scope that use global filters
+                  //   if (siblingUseGlobalFilters !== false) related.push(siblingUuid);
+                  //   continue;
+                  // }
+
+                  // if (!isSiblingFilterControl) continue;
+
+                  // // All non-control panels are related to any filter or time-slider control
+                  // // in the same scope
+                  // related.push(siblingUuid);
                 }
 
                 return related;

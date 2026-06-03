@@ -9,11 +9,12 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, of, startWith } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
+  apiPublishesESQLVariable,
   apiPublishesESQLVariables,
   isStaticESQLControl,
   type QueryESQLControl,
@@ -21,10 +22,12 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
+  apiPublishesESQLQuery,
   initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
@@ -63,17 +66,15 @@ export const getESQLControlFactory = <
         'variableName'
       );
 
-      const tooltipLabel$ = new BehaviorSubject<string>(state.title ?? '');
-      const tooltipLabelSubscription = combineLatest([
+      const tooltipLabel$ = combineLatest([
         selections.api.esqlVariable$,
         labelManager.api.label$,
-      ])
-        .pipe(
-          map(([{ key: variableName, type: variableType }, label]) => {
-            return getTooltipTitle(variableName, variableType, label);
-          })
-        )
-        .subscribe((next) => tooltipLabel$.next(next));
+      ]).pipe(
+        map(([{ key: variableName, type: variableType }, label]) => {
+          return getTooltipTitle(variableName, variableType, label);
+        }),
+        startWith(state.title)
+      );
 
       const stateApi = initializeStateApi<typeof initialState>({
         uuid,
@@ -103,9 +104,34 @@ export const getESQLControlFactory = <
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        isESQLControl: true,
-        esqlQuery$: selections.api.query$,
-        esqlVariable$: selections.api.esqlVariable$,
+        isRelated: (sibling) => {
+          // If a sibling uses this control's ES|QL variable, it's related
+          const siblingESQL = apiPublishesESQLQuery(sibling)
+            ? sibling.query$.getValue().esql
+            : undefined;
+          const siblingUsesESQLVariable =
+            siblingESQL &&
+            getESQLQueryVariables(siblingESQL).includes(
+              selections.api.esqlVariable$.getValue().key
+            );
+          if (siblingUsesESQLVariable) {
+            return true;
+          }
+
+          // Panels that publish an ES|QL query are related to ES|QL controls that publish variables they use
+          const isSiblingESQLControl = apiPublishesESQLVariable(sibling);
+          if (isSiblingESQLControl) {
+            const usedVariables = getESQLQueryVariables(selections.api.query$.getValue().esql);
+            if (usedVariables.includes(sibling.esqlVariable$.value.key)) {
+              return true;
+            }
+          }
+          return false;
+        },
+        relatedObservables: [
+          selections.api.query$?.pipe(map((query) => query?.esql)) ?? of(undefined),
+        ],
+        relatedSiblingObservables: ['query$'],
       });
 
       const api = finalizeApi({
@@ -225,7 +251,6 @@ export const getESQLControlFactory = <
             return () => {
               selections.cleanup();
               labelManager.cleanup();
-              tooltipLabelSubscription.unsubscribe();
             };
           }, []);
 
