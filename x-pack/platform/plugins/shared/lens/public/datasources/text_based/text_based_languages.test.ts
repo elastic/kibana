@@ -1039,7 +1039,7 @@ describe('Textbased Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"Test 1\\":[{\\"columnId\\":\\"a\\",\\"fieldName\\":\\"Test 1\\",\\"meta\\":{\\"type\\":\\"number\\"},\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\"}],\\"Test 2\\":[{\\"columnId\\":\\"b\\",\\"fieldName\\":\\"Test 2\\",\\"meta\\":{\\"type\\":\\"number\\"},\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\"}]}",
+                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\",\\"dataType\\":\\"number\\",\\"operationType\\":\\"literal\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\",\\"dataType\\":\\"number\\",\\"operationType\\":\\"literal\\"}]}",
                 ],
                 "isTextBased": Array [
                   true,

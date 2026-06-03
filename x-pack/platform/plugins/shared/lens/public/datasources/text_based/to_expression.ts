@@ -23,24 +23,23 @@ function getExpressionForLayer(
 
   let idMapper: Record<string, OriginalColumn[]> = {};
   layer.columns.forEach((col) => {
+    // Only pick fields that OriginalColumn declares; the Omit<> drops the
+    // `interval: never` discriminant that doesn't apply to text-based columns.
+    const mapped = {
+      id: col.columnId,
+      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
+      variable: col.variable,
+      format: col.params?.format,
+      dataType: col.meta?.type as OriginalColumn['dataType'],
+      customLabel: col.customLabel,
+      operationType: 'literal',
+    } as OriginalColumn;
     if (idMapper[col.fieldName]) {
-      idMapper[col.fieldName].push({
-        ...col,
-        id: col.columnId,
-        label: col.customLabel ? col.label : col.fieldName,
-        variable: col?.variable,
-      } as unknown as OriginalColumn);
+      idMapper[col.fieldName].push(mapped);
     } else {
       idMapper = {
         ...idMapper,
-        [col.fieldName]: [
-          {
-            ...col,
-            id: col.columnId,
-            label: col.customLabel ? col.label : col.fieldName,
-            variable: col?.variable,
-          } as unknown as OriginalColumn,
-        ],
+        [col.fieldName]: [mapped],
       };
     }
   });
