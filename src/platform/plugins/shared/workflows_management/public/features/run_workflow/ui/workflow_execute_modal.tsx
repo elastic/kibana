@@ -302,6 +302,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         };
 
     const isFillHeightTriggerBody =
+      selectedTrigger === 'alert' ||
       selectedTrigger === 'event' ||
       selectedTrigger === 'manual' ||
       selectedTrigger === 'historical';

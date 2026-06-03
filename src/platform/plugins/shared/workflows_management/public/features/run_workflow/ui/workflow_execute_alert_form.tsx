@@ -316,7 +316,7 @@ export const WorkflowExecuteAlertForm = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" css={{ flex: 1, minHeight: 0, height: '100%' }}>
       <EuiFlexItem grow={false}>
         <AlertsSearchBar
           appName="workflow_management"
@@ -367,7 +367,7 @@ export const WorkflowExecuteAlertForm = ({
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
+      <EuiFlexItem css={{ overflow: 'auto' }}>
         <EuiBasicTable
           itemId="_id"
           rowHeader="@timestamp"
