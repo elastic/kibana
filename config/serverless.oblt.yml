@@ -107,3 +107,9 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+xpack.security.mcp.oauth2.metadata:
+  authorization_servers: ['https://iam.eu-west-1.aws.svc.qa.elastic.cloud/oauth2']
+  resource: https://issue-serverless-auwlp-pr272451-a9cbef.kb.eu-west-1.aws.qa.elastic.cloud/api/agent_builder/mcp
+uiSettings.overrides:
+  agentBuilder:uiamOAuthClientManagement: true
