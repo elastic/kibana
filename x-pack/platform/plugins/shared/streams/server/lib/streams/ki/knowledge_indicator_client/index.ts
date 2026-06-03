@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from '../../ki/knowledge_indicator_client/rules/rules_management_client';
+export {
+  KnowledgeIndicatorClient,
+  type KIBulkOperation,
+  type KnowledgeIndicatorClientDeps,
+  type KnowledgeIndicatorDataStreamClient,
+  type RuleUnbackedFilter,
+} from './knowledge_indicator_client';
