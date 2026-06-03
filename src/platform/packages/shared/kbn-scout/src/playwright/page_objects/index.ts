@@ -29,10 +29,7 @@ import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
-export {
-  CopySavedObjectsToSpaceFlyout,
-  SavedObjectsManagementPage,
-};
+export { CopySavedObjectsToSpaceFlyout, SavedObjectsManagementPage };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
