@@ -197,7 +197,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     server,
   }): Promise<SignificantEventsGetResponse> => {
     const {
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
       scopedClusterClient,
       licensing,
@@ -213,7 +213,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -224,7 +224,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
   },
 });

@@ -85,13 +85,13 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, getQueryClient, getFeatureClient, streamsClient } =
+              const { taskClient, getKnowledgeIndicatorClient, streamsClient } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
                   rulesClientOptions: { cloneApiKeysOnCreate: true },
                 });
 
-              const featureClient = await getFeatureClient();
+              const kiClient = await getKnowledgeIndicatorClient();
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -109,7 +109,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                       if (!isFeaturesOnlyStep) {
                         const { shouldIdentify } = await shouldIdentifyFeatures({
-                          featureClient,
+                          kiClient,
                           streamName,
                           thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
                         });
@@ -163,7 +163,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       }
 
                       await persistQueries(streamName, queriesTaskResult.queries, {
-                        queryClient: await getQueryClient(),
+                        kiClient,
                         streamsClient,
                       });
                       break;

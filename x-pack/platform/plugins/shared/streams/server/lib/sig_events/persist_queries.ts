@@ -8,10 +8,7 @@
 import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD, normalizeEsqlSafe, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
-import type {
-  QueryClient,
-  QueryClientBulkIndexOperation,
-} from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient, KIBulkOperation } from '../streams/ki';
 import type { StreamsClient } from '../streams/client';
 
 export interface PersistQueriesResult {
@@ -27,11 +24,11 @@ export async function persistQueries(
   streamName: string,
   queries: GeneratedSignificantEventQuery[],
   deps: {
-    queryClient: QueryClient;
+    kiClient: KnowledgeIndicatorClient;
     streamsClient: StreamsClient;
   }
 ): Promise<PersistQueriesResult> {
-  const { queryClient, streamsClient } = deps;
+  const { kiClient, streamsClient } = deps;
 
   if (queries.length === 0) {
     return { persistedQueries: [], skippedQueries: [] };
@@ -39,7 +36,7 @@ export async function persistQueries(
 
   const definition = await streamsClient.getStream(streamName);
 
-  const { [streamName]: existingLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
+  const { [streamName]: existingLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link.query]));
   const existingEsqls = new Set(
     existingLinks.map((link) => normalizeEsqlSafe(link.query.esql.query))
@@ -48,8 +45,8 @@ export async function persistQueries(
     existingLinks.filter((link) => link.rule_backed).map((link) => link.query.id)
   );
 
-  const standardOps: QueryClientBulkIndexOperation[] = [];
-  const ruleOps: QueryClientBulkIndexOperation[] = [];
+  const standardOps: KIBulkOperation[] = [];
+  const ruleEligibleQueries: Array<{ id: string } & GeneratedSignificantEventQuery> = [];
   const persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }> = [];
   const skippedQueries: GeneratedSignificantEventQuery[] = [];
 
@@ -66,34 +63,35 @@ export async function persistQueries(
     existingEsqls.add(normalizedEsql);
 
     if (replaces && existingById.has(replaces)) {
-      const op = { index: { id: replaces, ...indexFields } };
-      if (ruleBackedIds.has(replaces)) {
-        ruleOps.push(op);
+      const queryId = replaces;
+      if (ruleBackedIds.has(queryId)) {
+        ruleEligibleQueries.push({ id: queryId, ...query });
       } else {
-        standardOps.push(op);
+        standardOps.push({ index: { query: { id: queryId, ...indexFields, rule_backed: false } } });
       }
-      persistedQueries.push({ ...query, id: replaces });
+      persistedQueries.push({ ...query, id: queryId });
     } else {
       const id = v4();
-      const op = { index: { id, ...indexFields } };
       if (isRuleEligible(query)) {
-        ruleOps.push(op);
+        ruleEligibleQueries.push({ id, ...query });
       } else {
-        standardOps.push(op);
+        standardOps.push({ index: { query: { id, ...indexFields, rule_backed: false } } });
       }
       persistedQueries.push({ ...query, id });
     }
   }
 
   if (standardOps.length > 0) {
-    await queryClient.bulk(definition, standardOps, { createRules: false });
+    await kiClient.bulk(streamName, standardOps);
   }
 
-  // Rule-backed replacements and new high-severity non-STATS queries go
-  // through the default path (syncQueries) so that backing Kibana rules
-  // are created, updated, or properly uninstalled.
-  if (ruleOps.length > 0) {
-    await queryClient.bulk(definition, ruleOps);
+  if (ruleEligibleQueries.length > 0) {
+    const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
+    await kiClient.syncQueries(
+      definition,
+      ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => q),
+      { currentLinks }
+    );
   }
 
   return { persistedQueries, skippedQueries };

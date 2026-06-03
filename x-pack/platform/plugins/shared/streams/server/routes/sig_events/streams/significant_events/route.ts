@@ -190,7 +190,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
   }): Promise<SignificantEventsGetResponse> => {
     const {
       streamsClient,
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
       scopedClusterClient,
       licensing,
@@ -208,7 +208,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -219,7 +219,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
   },
 });
@@ -290,8 +290,7 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
-      getFeatureClient,
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -314,13 +313,12 @@ const generateSignificantEventsRoute = createServerRoute({
         })
       : undefined;
 
-    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
+    const [connector, definition, { significantEventsPromptOverride }, kiClient] =
       await Promise.all([
         inferenceClient.getConnectorById(connectorId),
         streamsClient.getStream(params.path.name),
         new PromptsConfigService({ soClient, logger }).getPrompt(),
-        getFeatureClient(),
-        getQueryClient(),
+        getKnowledgeIndicatorClient(),
       ]);
 
     return fromRxjs(
@@ -332,8 +330,7 @@ const generateSignificantEventsRoute = createServerRoute({
         },
         {
           inferenceClient,
-          featureClient,
-          queryClient,
+          kiClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,

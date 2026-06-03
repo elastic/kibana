@@ -130,6 +130,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.getPromotableUnbackedQueries(filters);
   }
 
+  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+    return this.reader.findFeaturesByIds(ids);
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,

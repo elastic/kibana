@@ -18,7 +18,7 @@ interface StreamFeaturesApi {
   scheduleFeaturesIdentificationTask: () => Promise<void>;
   /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute with action: 'cancel' instead */
   cancelFeaturesIdentificationTask: () => Promise<void>;
-  deleteFeature: (uuid: string) => Promise<void>;
+  deleteFeature: (id: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
   excludeFeaturesInBulk: (uuids: string[]) => Promise<void>;
   restoreFeaturesInBulk: (uuids: string[]) => Promise<void>;
@@ -70,11 +70,11 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
           },
         });
       },
-      deleteFeature: async (uuid: string) => {
-        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+      deleteFeature: async (id: string) => {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{id}', {
           signal,
           params: {
-            path: { name: streamName, uuid },
+            path: { name: streamName, id },
           },
         });
       },

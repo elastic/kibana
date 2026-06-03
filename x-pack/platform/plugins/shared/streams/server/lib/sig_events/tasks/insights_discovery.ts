@@ -60,13 +60,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 scopedClusterClient,
                 streamsClient,
                 inferenceClient,
-                getQueryClient,
+                getKnowledgeIndicatorClient,
                 insightClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
-              const queryClient = await getQueryClient();
+              const kiClient = await getKnowledgeIndicatorClient();
 
               const taskLogger = taskContext.logger.get('insights_discovery');
               const connectorId =
@@ -93,7 +93,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               try {
                 const result = await generateInsights({
                   streamsClient,
-                  queryClient,
+                  kiClient,
                   esClient: scopedClusterClient.asCurrentUser,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,

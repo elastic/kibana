@@ -106,15 +106,26 @@ export function RulesTable({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'}
-                  aria-label={
+                <EuiToolTip
+                  content={
                     selectedKnowledgeIndicatorId === item.query.id
                       ? MINIMIZE_DETAILS_ARIA_LABEL
                       : VIEW_DETAILS_ARIA_LABEL
                   }
-                  onClick={() => onViewDetails(item)}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={
+                      selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'
+                    }
+                    aria-label={
+                      selectedKnowledgeIndicatorId === item.query.id
+                        ? MINIMIZE_DETAILS_ARIA_LABEL
+                        : VIEW_DETAILS_ARIA_LABEL
+                    }
+                    onClick={() => onViewDetails(item)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => onViewDetails(item)}>
@@ -235,7 +246,7 @@ export function RulesTable({
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiInMemoryTable<KnowledgeIndicator>
         items={filteredRules}
-        itemId={(item) => (item.kind === 'query' ? item.query.id : item.feature.uuid)}
+        itemId={(item) => (item.kind === 'query' ? item.query.id : item.feature.id)}
         columns={columns}
         selection={{
           selected: selectedRules,

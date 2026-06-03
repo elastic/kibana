@@ -17,7 +17,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { GenerateInsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { QueryClient } from '../../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import type { StreamsClient } from '../../streams/client';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
@@ -33,7 +33,7 @@ export interface InsightsMemoryTools {
 
 export async function generateInsights({
   streamsClient,
-  queryClient,
+  kiClient,
   esClient,
   inferenceClient,
   signal,
@@ -42,7 +42,7 @@ export async function generateInsights({
   memoryTools,
 }: {
   streamsClient: StreamsClient;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
@@ -61,7 +61,7 @@ export async function generateInsights({
     streams.map(async (stream) => {
       const streamInsightResult = await generateStreamInsights({
         stream,
-        queryClient,
+        kiClient,
         esClient,
         inferenceClient,
         signal,
@@ -145,7 +145,7 @@ export async function generateInsights({
 
 async function generateStreamInsights({
   stream,
-  queryClient,
+  kiClient,
   esClient,
   inferenceClient,
   signal,
@@ -153,14 +153,14 @@ async function generateStreamInsights({
   memoryTools,
 }: {
   stream: Streams.all.Definition;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
   memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
-  const queries = await queryClient.getAssets(stream.name);
+  const queries = await kiClient.getQueryLinks([stream.name], { ruleUnbacked: 'exclude' });
 
   const queryDataResults = await Promise.all(
     queries.map((query) =>

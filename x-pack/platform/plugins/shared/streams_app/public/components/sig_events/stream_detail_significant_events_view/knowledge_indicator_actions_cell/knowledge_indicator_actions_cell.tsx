@@ -44,7 +44,7 @@ export function KnowledgeIndicatorActionsCell({
     const computed = isComputedFeature(knowledgeIndicator.feature);
 
     if (!computed) {
-      if (knowledgeIndicator.feature.excluded_at) {
+      if (knowledgeIndicator.feature.excluded) {
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
@@ -52,7 +52,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature.id);
             }}
           >
             {RESTORE_LABEL}
@@ -66,7 +66,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature.id);
             }}
           >
             {EXCLUDE_LABEL}
@@ -130,13 +130,15 @@ export function KnowledgeIndicatorActionsCell({
     <EuiPopover
       aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-          isLoading={isMutating}
-          isDisabled={isMutating}
-          onClick={() => setIsActionsMenuOpen((current) => !current)}
-        />
+        <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+            isLoading={isMutating}
+            isDisabled={isMutating}
+            onClick={() => setIsActionsMenuOpen((current) => !current)}
+          />
+        </EuiToolTip>
       }
       isOpen={isActionsMenuOpen}
       closePopover={() => setIsActionsMenuOpen(false)}

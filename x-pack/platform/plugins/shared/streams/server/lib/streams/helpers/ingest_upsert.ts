@@ -12,9 +12,7 @@ import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema';
 import type { UpsertStreamResponse } from '../client';
 import type { StreamsClient } from '../client';
 import type { AttachmentClient } from '../attachments/attachment_client';
-import type { QueryClient } from '../assets/query/query_client';
-import { ASSET_TYPE } from '../assets/fields';
-import type { Query } from '../../../../common/queries';
+import type { KnowledgeIndicatorClient } from '../ki';
 
 export async function getStreamAssets({
   name,
@@ -22,11 +20,11 @@ export async function getStreamAssets({
   attachmentClient,
 }: {
   name: string;
-  queryClient: QueryClient;
+  queryClient: KnowledgeIndicatorClient;
   attachmentClient: AttachmentClient;
 }): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
-  const [assets, attachments] = await Promise.all([
-    queryClient.getAssets(name),
+  const [queryLinksMap, attachments] = await Promise.all([
+    queryClient.getStreamToQueryLinksMap([name]),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -34,9 +32,7 @@ export async function getStreamAssets({
     .filter((attachment) => attachment.type === 'dashboard')
     .map((attachment) => attachment.id);
 
-  const queries = assets
-    .filter((asset): asset is Query => asset[ASSET_TYPE] === 'query')
-    .map((asset) => asset.query);
+  const queries = (queryLinksMap[name] ?? []).map((link) => link.query);
 
   const rules = attachments
     .filter((attachment) => attachment.type === 'rule')
@@ -54,7 +50,7 @@ export async function updateWiredIngest({
   description,
 }: {
   streamsClient: StreamsClient;
-  queryClient: QueryClient;
+  queryClient: KnowledgeIndicatorClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: WiredIngestUpsertRequest;
@@ -105,7 +101,7 @@ export async function updateClassicIngest({
   description,
 }: {
   streamsClient: StreamsClient;
-  queryClient: QueryClient;
+  queryClient: KnowledgeIndicatorClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: ClassicIngestUpsertRequest;
@@ -174,7 +170,7 @@ export async function patchIngestAndUpsert({
   patchFn,
 }: {
   streamsClient: StreamsClient;
-  queryClient: QueryClient;
+  queryClient: KnowledgeIndicatorClient;
   attachmentClient: AttachmentClient;
   name: string;
   patchFn: (definition: Streams.ingest.all.Definition) => StreamPatch;
