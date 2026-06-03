@@ -7,9 +7,9 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import type { RelationshipObservationDoc } from '@kbn/entity-store/common';
+import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
-import { writeRelationshipObservations } from './write_relationship_observations';
+import { writeRelationshipMetadatas } from './write_relationship_metadatas';
 import type { EntityRelationshipRecord } from './types';
 import { LOOKBACK_WINDOW } from './constants';
 
@@ -32,20 +32,20 @@ const makeCrudClient = (
 } => {
   const bulkAppend = jest.fn().mockResolvedValue(responses);
   const crudClient = {
-    bulkAppendRelationshipObservations: bulkAppend,
+    bulkAppendRelationshipMetadata: bulkAppend,
   } as unknown as EntityUpdateClient;
   return { crudClient, bulkAppend };
 };
 
-const getDocsFromCall = (bulkAppend: jest.Mock): RelationshipObservationDoc[] => {
+const getDocsFromCall = (bulkAppend: jest.Mock): RelationshipMetadataDoc[] => {
   const [args] = bulkAppend.mock.calls;
-  return args[0] as RelationshipObservationDoc[];
+  return args[0] as RelationshipMetadataDoc[];
 };
 
-describe('writeRelationshipObservations', () => {
+describe('writeRelationshipMetadatas', () => {
   it('does not call the CRUD client when records is empty', async () => {
     const { crudClient, bulkAppend } = makeCrudClient();
-    await writeRelationshipObservations(crudClient, loggerMock.create(), [], baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), [], baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
@@ -58,7 +58,7 @@ describe('writeRelationshipObservations', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(1);
   });
@@ -74,7 +74,7 @@ describe('writeRelationshipObservations', () => {
         },
       },
     ];
-    await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(3);
     const targets = docs.map((d) => d['entity.relationships.accesses_frequently.target']);
@@ -100,7 +100,7 @@ describe('writeRelationshipObservations', () => {
         },
       },
     ];
-    await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     // 2 + 1 + 1 = 4 docs.
     expect(docs).toHaveLength(4);
@@ -118,7 +118,7 @@ describe('writeRelationshipObservations', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
@@ -131,12 +131,12 @@ describe('writeRelationshipObservations', () => {
         relationships: { accesses_frequently: [], accesses_infrequently: [] },
       },
     ];
-    await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
   describe('doc field population', () => {
-    let docs: RelationshipObservationDoc[];
+    let docs: RelationshipMetadataDoc[];
 
     beforeEach(async () => {
       const { crudClient, bulkAppend } = makeCrudClient();
@@ -147,7 +147,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
       docs = getDocsFromCall(bulkAppend);
     });
 
@@ -202,7 +202,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.user']).toEqual(['alice']);
     });
@@ -216,7 +216,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toEqual(['laptopA']);
     });
@@ -230,7 +230,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { communicates_with: ['user:bob@corp'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toBeUndefined();
     });
@@ -239,7 +239,7 @@ describe('writeRelationshipObservations', () => {
   describe('error propagation', () => {
     it('does NOT catch CRUDClient exceptions — they propagate to the boundary', async () => {
       const crudClient = {
-        bulkAppendRelationshipObservations: jest
+        bulkAppendRelationshipMetadata: jest
           .fn()
           .mockRejectedValue(new Error('bulk transport failure')),
       } as unknown as EntityUpdateClient;
@@ -251,7 +251,7 @@ describe('writeRelationshipObservations', () => {
         },
       ];
       await expect(
-        writeRelationshipObservations(crudClient, loggerMock.create(), records, baseContext)
+        writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext)
       ).rejects.toThrow(/bulk transport failure/);
     });
 
@@ -267,7 +267,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(crudClient, logger, records, baseContext);
       expect(logger.error).toHaveBeenCalled();
     });
 
@@ -281,7 +281,7 @@ describe('writeRelationshipObservations', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipObservations(crudClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(crudClient, logger, records, baseContext);
       expect(logger.error).not.toHaveBeenCalled();
     });
   });

@@ -60,7 +60,7 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
-    LIST_RELATIONSHIP_OBSERVATIONS: `${PUBLIC_BASE_ROUTE}/observations/relationships/{entityId}`,
+    LIST_ENTITY_RELATIONSHIPS: `${PUBLIC_BASE_ROUTE}/entities/{entityId}/relationships`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
@@ -122,11 +122,15 @@ export {
   getLatestEntityIndexPattern,
 } from './domain/entity_index';
 
-export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_observation';
+export {
+  RELATIONSHIP_KINDS,
+  normalizeRelationshipRecord,
+} from './domain/entity_metadata/relationship_metadata';
 export type {
   RelationshipKind,
-  RelationshipObservationDoc,
-  RelationshipObservationMaintainer,
-} from './domain/entity_metadata/relationship_observation';
+  RelationshipMetadataDoc,
+  RelationshipMetadataMaintainer,
+  NormalizedRelationshipRecord,
+} from './domain/entity_metadata/relationship_metadata';
 export { ListEntityRelationshipsRequestQuery } from './domain/entity_metadata/list_entity_relationships.gen';
 export type { ListEntityRelationshipsRequestQueryInput } from './domain/entity_metadata/list_entity_relationships.gen';

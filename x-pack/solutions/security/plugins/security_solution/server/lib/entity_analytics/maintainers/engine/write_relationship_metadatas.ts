@@ -7,11 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import type { RelationshipObservationDoc } from '@kbn/entity-store/common';
+import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
 import type { EntityRelationshipRecord } from './types';
 
-interface WriteRelationshipObservationsContext {
+interface WriteRelationshipMetadataContext {
   scanId: string;
   maintainerKind: string;
   lookbackWindow: string;
@@ -34,13 +34,13 @@ function parseHostName(targetEuid: string): string | undefined {
   return targetEuid.slice(HOST_EUID_PREFIX.length);
 }
 
-function buildObservation(
+function buildRelationshipMetadata(
   record: EntityRelationshipRecord & { entityId: string },
   relType: string,
   target: string,
-  context: WriteRelationshipObservationsContext
-): RelationshipObservationDoc {
-  const doc: RelationshipObservationDoc = {
+  context: WriteRelationshipMetadataContext
+): RelationshipMetadataDoc {
+  const doc: RelationshipMetadataDoc = {
     '@timestamp': context.observedAt,
     'event.kind': 'event',
     'event.action': 'relationship_observed',
@@ -52,7 +52,7 @@ function buildObservation(
       lookback_window: context.lookbackWindow,
     },
   };
-  // Cast to satisfy the dynamic-keyed mapped portion of RelationshipObservationDoc.
+  // Cast to satisfy the dynamic-keyed mapped portion of RelationshipMetadataDoc.
   (doc as Record<string, unknown>)[`entity.relationships.${relType}.target`] = target;
 
   const username = parseUsername(record.entityId);
@@ -66,37 +66,37 @@ function buildObservation(
   return doc;
 }
 
-export const writeRelationshipObservations = async (
+export const writeRelationshipMetadatas = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
   records: EntityRelationshipRecord[],
-  context: WriteRelationshipObservationsContext
+  context: WriteRelationshipMetadataContext
 ): Promise<void> => {
   if (records.length === 0) return;
 
   const validRecords = records.filter(
     (r): r is EntityRelationshipRecord & { entityId: string } => r.entityId !== null
   );
-  const docs: RelationshipObservationDoc[] = [];
+  const docs: RelationshipMetadataDoc[] = [];
   for (const record of validRecords) {
     for (const [relType, targets] of Object.entries(record.relationships)) {
       for (const target of targets) {
-        docs.push(buildObservation(record, relType, target, context));
+        docs.push(buildRelationshipMetadata(record, relType, target, context));
       }
     }
   }
 
   if (docs.length === 0) return;
 
-  const failures = await crudClient.bulkAppendRelationshipObservations(docs);
+  const failures = await crudClient.bulkAppendRelationshipMetadata(docs);
 
   if (failures.length > 0) {
     logger.error(
       `Failed to append ${failures.length} of ${
         docs.length
-      } relationship observations: ${JSON.stringify(failures)}`
+      } relationship metadata: ${JSON.stringify(failures)}`
     );
     return;
   }
-  logger.info(`Appended ${docs.length} relationship observations to metadata datastream`);
+  logger.info(`Appended ${docs.length} relationship metadata to metadata datastream`);
 };

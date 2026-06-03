@@ -9,10 +9,14 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { API_VERSIONS, ListEntityRelationshipsRequestQuery } from '../../../../common';
-import { paramsSchema, registerListRelationships } from './list_relationships';
-import type { RelationshipObservationDoc } from '../../../../common/domain/entity_metadata/relationship_observation';
+import {
+  paramsSchema,
+  registerListRelationships,
+  type NormalizedRelationshipRecord,
+} from './list_relationships';
+import type { RelationshipMetadataDoc } from '../../../../common/domain/entity_metadata/relationship_metadata';
 
-const makeDoc = (overrides: Partial<RelationshipObservationDoc> = {}): RelationshipObservationDoc =>
+const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({
     '@timestamp': '2026-05-15T10:30:00.000Z',
     'event.kind': 'event',
@@ -28,10 +32,10 @@ const makeDoc = (overrides: Partial<RelationshipObservationDoc> = {}): Relations
       lookback_window: 'now-30d',
     },
     ...overrides,
-  } as RelationshipObservationDoc);
+  } as RelationshipMetadataDoc);
 
 const createMockContext = (overrides?: { listResult?: unknown }) => {
-  const listRelationshipObservations = jest
+  const listRelationshipMetadata = jest
     .fn()
     .mockResolvedValue(overrides?.listResult ?? { records: [], total: 0, page: 1, per_page: 10 });
   const featureFlags = {
@@ -39,14 +43,14 @@ const createMockContext = (overrides?: { listResult?: unknown }) => {
   };
   const entityStoreCtx = {
     logger: loggerMock.create(),
-    crudClient: { listRelationshipObservations },
+    crudClient: { listRelationshipMetadata },
     featureFlags,
     namespace: 'default',
   };
   // Mock context only needs the fields the route + middleware pipeline read;
   // typed loosely to match the existing middleware-test pattern.
   const ctx: any = { entityStore: Promise.resolve(entityStoreCtx) };
-  return { ctx, listRelationshipObservations, featureFlags };
+  return { ctx, listRelationshipMetadata, featureFlags };
 };
 
 describe('registerListRelationships route', () => {
@@ -56,10 +60,10 @@ describe('registerListRelationships route', () => {
     router = mockRouter.create();
   });
 
-  it('registers the route at /api/security/entity_store/observations/relationships/{entityId}', () => {
+  it('registers the route at /api/security/entity_store/entities/{entityId}/relationships', () => {
     registerListRelationships(router);
     const [config] = (router.versioned.get as jest.Mock).mock.calls[0];
-    expect(config.path).toBe('/api/security/entity_store/observations/relationships/{entityId}');
+    expect(config.path).toBe('/api/security/entity_store/entities/{entityId}/relationships');
   });
 
   it('declares the route as public access', () => {
@@ -86,27 +90,27 @@ describe('registerListRelationships route', () => {
   });
 
   it('validates the query schema and rejects invalid sort_order', () => {
-    expect(
-      ListEntityRelationshipsRequestQuery.safeParse({ sort_order: 'sideways' }).success
-    ).toBe(false);
+    expect(ListEntityRelationshipsRequestQuery.safeParse({ sort_order: 'sideways' }).success).toBe(
+      false
+    );
   });
 
   it('rejects an invalid ISO-8601 `from` query param', () => {
-    expect(
-      ListEntityRelationshipsRequestQuery.safeParse({ from: 'not-a-date' }).success
-    ).toBe(false);
+    expect(ListEntityRelationshipsRequestQuery.safeParse({ from: 'not-a-date' }).success).toBe(
+      false
+    );
   });
 
   it('accepts an empty query object (all params optional)', () => {
     expect(ListEntityRelationshipsRequestQuery.safeParse({}).success).toBe(true);
   });
 
-  it('forwards entityId + query params to crudClient.listRelationshipObservations', async () => {
+  it('forwards entityId + query params to crudClient.listRelationshipMetadata', async () => {
     registerListRelationships(router);
     const route = (router.versioned.get as jest.Mock).mock.results[0].value;
     const [, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
-    const { ctx, listRelationshipObservations } = createMockContext();
+    const { ctx, listRelationshipMetadata } = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { entityId: 'user:alice@corp' },
       query: {
@@ -120,8 +124,8 @@ describe('registerListRelationships route', () => {
 
     await handler(ctx, req, res);
 
-    expect(listRelationshipObservations).toHaveBeenCalledTimes(1);
-    const params = listRelationshipObservations.mock.calls[0][0];
+    expect(listRelationshipMetadata).toHaveBeenCalledTimes(1);
+    const params = listRelationshipMetadata.mock.calls[0][0];
     expect(params).toMatchObject({
       entityId: 'user:alice@corp',
       kind: 'communicates_with',
@@ -131,7 +135,7 @@ describe('registerListRelationships route', () => {
     });
   });
 
-  it('returns the records array from the data client (typed RelationshipObservationDoc[])', async () => {
+  it('returns normalized records (kind, target, timestamp, source)', async () => {
     registerListRelationships(router);
     const route = (router.versioned.get as jest.Mock).mock.results[0].value;
     const [, handler] = (route.addVersion as jest.Mock).mock.calls[0];
@@ -150,14 +154,20 @@ describe('registerListRelationships route', () => {
     await handler(ctx, req, res);
 
     expect(res.ok).toHaveBeenCalledTimes(1);
-    const [okCall] = res.ok.mock.calls;
-    const body = okCall[0]?.body as {
-      records: RelationshipObservationDoc[];
+    const body = res.ok.mock.calls[0][0]?.body as {
+      records: NormalizedRelationshipRecord[];
       total: number;
       page: number;
       per_page: number;
     };
-    expect(body.records).toEqual([doc]);
+    expect(body.records).toEqual([
+      {
+        kind: 'accesses_frequently',
+        target: 'host:laptopA',
+        timestamp: '2026-05-01T00:00:00.000Z',
+        source: 'elastic_defend',
+      },
+    ]);
     expect(body.total).toBe(1);
     expect(body.page).toBe(1);
     expect(body.per_page).toBe(10);

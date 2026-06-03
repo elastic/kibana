@@ -6,13 +6,13 @@
  */
 
 import type {
-  RelationshipObservationDoc,
-  RelationshipObservationMaintainer,
-} from './relationship_observation';
-import { RELATIONSHIP_KINDS } from './relationship_observation';
+  RelationshipMetadataDoc,
+  RelationshipMetadataMaintainer,
+} from './relationship_metadata';
+import { RELATIONSHIP_KINDS } from './relationship_metadata';
 import { getMetadataComponentTemplate } from '../../../server/domain/asset_manager/metadata_component_templates';
 
-describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
+describe('EMH Phase 2 — RelationshipMetadataDoc type', () => {
   const minimalRequired = {
     '@timestamp': '2026-05-15T10:30:00.000Z',
     'event.kind': 'event',
@@ -24,7 +24,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       scan_id: 'a3f2e1',
       lookback_window: '24h',
     },
-  } satisfies RelationshipObservationDoc;
+  } satisfies RelationshipMetadataDoc;
 
   it('accepts a minimal document with only the required fields', () => {
     expect(minimalRequired['@timestamp']).toBe('2026-05-15T10:30:00.000Z');
@@ -38,7 +38,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
   });
 
   it('accepts a document with all optional fields populated', () => {
-    const fullDoc: RelationshipObservationDoc = {
+    const fullDoc: RelationshipMetadataDoc = {
       '@timestamp': '2026-05-15T10:30:00.000Z',
       'event.kind': 'event',
       'event.action': 'relationship_observed',
@@ -70,7 +70,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       'supervises',
     ] as const;
     for (const kind of kinds) {
-      const doc: RelationshipObservationDoc = {
+      const doc: RelationshipMetadataDoc = {
         '@timestamp': '2026-05-15T10:30:00.000Z',
         'event.kind': 'event',
         'event.action': 'relationship_observed',
@@ -88,18 +88,18 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
   });
 
   it('pins event.kind to the literal "event"', () => {
-    const eventKind: RelationshipObservationDoc['event.kind'] = 'event';
+    const eventKind: RelationshipMetadataDoc['event.kind'] = 'event';
     expect(eventKind).toBe('event');
     // @ts-expect-error event.kind must be the literal 'event'
-    const badKind: RelationshipObservationDoc['event.kind'] = 'state';
+    const badKind: RelationshipMetadataDoc['event.kind'] = 'state';
     expect(badKind).toBe('state');
   });
 
   it('pins event.action to the literal "relationship_observed"', () => {
-    const eventAction: RelationshipObservationDoc['event.action'] = 'relationship_observed';
+    const eventAction: RelationshipMetadataDoc['event.action'] = 'relationship_observed';
     expect(eventAction).toBe('relationship_observed');
     // @ts-expect-error event.action must be the literal 'relationship_observed'
-    const badAction: RelationshipObservationDoc['event.action'] = 'anomaly_observed';
+    const badAction: RelationshipMetadataDoc['event.action'] = 'anomaly_observed';
     expect(badAction).toBe('anomaly_observed');
   });
 
@@ -117,7 +117,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       },
     };
     // @ts-expect-error Maintainer must be Capitalized; lowercase `maintainer` is not assignable
-    const _bad: RelationshipObservationDoc = docWithLowercase;
+    const _bad: RelationshipMetadataDoc = docWithLowercase;
     expect(_bad).toBeDefined();
   });
 
@@ -134,7 +134,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       },
     };
     // @ts-expect-error @timestamp is required
-    const _bad: RelationshipObservationDoc = missingTimestamp;
+    const _bad: RelationshipMetadataDoc = missingTimestamp;
     expect(_bad).toBeDefined();
   });
 
@@ -147,7 +147,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       'entity.source': 'elastic_defend',
     };
     // @ts-expect-error Maintainer is required
-    const _bad: RelationshipObservationDoc = missingMaintainer;
+    const _bad: RelationshipMetadataDoc = missingMaintainer;
     expect(_bad).toBeDefined();
   });
 
@@ -165,7 +165,7 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       },
     };
     // @ts-expect-error Maintainer.scan_id is required
-    const _bad: RelationshipObservationDoc = partialMaintainer;
+    const _bad: RelationshipMetadataDoc = partialMaintainer;
     expect(_bad).toBeDefined();
   });
 });
@@ -184,10 +184,10 @@ const FLAT_TEMPLATE_PATHS = [
 ] as const;
 
 const MAINTAINER_SUB_KEYS = ['kind', 'scan_id', 'lookback_window'] as const satisfies ReadonlyArray<
-  keyof RelationshipObservationMaintainer
+  keyof RelationshipMetadataMaintainer
 >;
 
-// Every top-level key on `RelationshipObservationDoc`. The `satisfies`
+// Every top-level key on `RelationshipMetadataDoc`. The `satisfies`
 // clause asserts the array is a subset of `keyof`; the type-level equality
 // assertion below pins it to the full set, so adding a new field to the
 // type without listing it here fails compilation.
@@ -208,10 +208,10 @@ const RELATIONSHIP_OBSERVATION_FIELD_PATHS = [
   'entity.relationships.depends_on.target',
   'entity.relationships.owns.target',
   'entity.relationships.supervises.target',
-] as const satisfies ReadonlyArray<keyof RelationshipObservationDoc>;
+] as const satisfies ReadonlyArray<keyof RelationshipMetadataDoc>;
 
 // True iff A and B are mutually assignable. Used to enforce exhaustiveness
-// at the type level: any field added to `RelationshipObservationDoc`
+// at the type level: any field added to `RelationshipMetadataDoc`
 // without a matching entry in `RELATIONSHIP_OBSERVATION_FIELD_PATHS` makes
 // this resolve to `false`, so the assertion at the bottom of this describe
 // fails compilation.
@@ -229,8 +229,8 @@ describe('EMH Phase 2 — drift guard against Phase 1 component template', () =>
     Record<string, { path_match?: string; mapping?: { type?: string } }>
   >;
 
-  it('RELATIONSHIP_OBSERVATION_FIELD_PATHS exhaustively covers keyof RelationshipObservationDoc', () => {
-    const exhaustive: Equals<EnumeratedKeys, keyof RelationshipObservationDoc> = true;
+  it('RELATIONSHIP_OBSERVATION_FIELD_PATHS exhaustively covers keyof RelationshipMetadataDoc', () => {
+    const exhaustive: Equals<EnumeratedKeys, keyof RelationshipMetadataDoc> = true;
     expect(exhaustive).toBe(true);
   });
 
@@ -263,7 +263,7 @@ describe('EMH Phase 2 — drift guard against Phase 1 component template', () =>
   });
 
   it.each(RELATIONSHIP_OBSERVATION_FIELD_PATHS)(
-    'maps every keyof RelationshipObservationDoc — %s — to the Phase 1 template',
+    'maps every keyof RelationshipMetadataDoc — %s — to the Phase 1 template',
     (path) => {
       if (path === 'Maintainer') {
         for (const sub of MAINTAINER_SUB_KEYS) {

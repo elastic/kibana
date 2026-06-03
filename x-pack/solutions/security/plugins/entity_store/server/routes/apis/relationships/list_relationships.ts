@@ -16,7 +16,10 @@ import {
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import type { RelationshipObservationDoc } from '../../../../common/domain/entity_metadata/relationship_observation';
+import {
+  normalizeRelationshipRecord,
+  type NormalizedRelationshipRecord,
+} from '../../../../common/domain/entity_metadata/relationship_metadata';
 
 export const paramsSchema = z.object({
   entityId: z
@@ -25,8 +28,10 @@ export const paramsSchema = z.object({
     .describe('The EUID of the entity to list relationship observations for.'),
 });
 
-interface ListRelationshipObservationsResponseBody {
-  records: RelationshipObservationDoc[];
+export type { NormalizedRelationshipRecord };
+
+interface ListRelationshipMetadataResponseBody {
+  records: NormalizedRelationshipRecord[];
   total: number;
   page: number;
   per_page: number;
@@ -35,7 +40,7 @@ interface ListRelationshipObservationsResponseBody {
 export function registerListRelationships(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.public.LIST_RELATIONSHIP_OBSERVATIONS,
+      path: ENTITY_STORE_ROUTES.public.LIST_ENTITY_RELATIONSHIPS,
       access: 'public',
       summary: 'List entity relationship observations',
       description:
@@ -56,21 +61,23 @@ export function registerListRelationships(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(
-        async (
-          ctx,
-          req,
-          res
-        ): Promise<IKibanaResponse<ListRelationshipObservationsResponseBody>> => {
+        async (ctx, req, res): Promise<IKibanaResponse<ListRelationshipMetadataResponseBody>> => {
           const { logger, crudClient } = await ctx.entityStore;
 
           logger.debug('List entity relationship observations api called');
 
-          const result = await crudClient.listRelationshipObservations({
+          const result = await crudClient.listRelationshipMetadata({
             entityId: req.params.entityId,
             ...req.query,
           });
 
-          return res.ok({ body: result });
+          const records = result.records
+            .map(normalizeRelationshipRecord)
+            .filter((r): r is NormalizedRelationshipRecord => r !== undefined);
+
+          return res.ok({
+            body: { records, total: result.total, page: result.page, per_page: result.per_page },
+          });
         }
       )
     );

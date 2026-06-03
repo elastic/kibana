@@ -19,13 +19,13 @@ export type RelationshipKind = (typeof RELATIONSHIP_KINDS)[number];
 
 type RelationshipTargetKey = `entity.relationships.${RelationshipKind}.target`;
 
-export interface RelationshipObservationMaintainer {
+export interface RelationshipMetadataMaintainer {
   kind: string;
   scan_id: string;
   lookback_window: string;
 }
 
-export type RelationshipObservationDoc = {
+export type RelationshipMetadataDoc = {
   '@timestamp': string;
   'event.kind': 'event';
   'event.action': 'relationship_observed';
@@ -34,7 +34,25 @@ export type RelationshipObservationDoc = {
   'entity.source': string;
   'related.user'?: string[];
   'related.hosts'?: string[];
-  Maintainer: RelationshipObservationMaintainer;
+  Maintainer: RelationshipMetadataMaintainer;
 } & {
   [K in RelationshipTargetKey]?: string;
+};
+
+export interface NormalizedRelationshipRecord {
+  kind: RelationshipKind;
+  target: string;
+  timestamp: string;
+  source: string;
+}
+
+export const normalizeRelationshipRecord = (
+  doc: RelationshipMetadataDoc
+): NormalizedRelationshipRecord | undefined => {
+  for (const kind of RELATIONSHIP_KINDS) {
+    const target = doc[`entity.relationships.${kind}.target`];
+    if (target) {
+      return { kind, target, timestamp: doc['@timestamp'], source: doc['entity.source'] };
+    }
+  }
 };

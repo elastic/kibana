@@ -21,8 +21,8 @@ import type { EntityType } from '../../../common';
 import {
   RELATIONSHIP_KINDS,
   type RelationshipKind,
-  type RelationshipObservationDoc,
-} from '../../../common/domain/entity_metadata/relationship_observation';
+  type RelationshipMetadataDoc,
+} from '../../../common/domain/entity_metadata/relationship_metadata';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
 import {
   ENTITY_METADATA,
@@ -95,9 +95,9 @@ interface BulkUpdateEntityParams {
   force?: boolean;
 }
 
-const RELATIONSHIP_OBSERVATIONS_SORT_FIELDS = ['@timestamp', 'event.ingested'] as const;
+const RELATIONSHIP_METADATA_SORT_FIELDS = ['@timestamp', 'event.ingested'] as const;
 
-export interface ListRelationshipObservationsParams {
+export interface ListRelationshipMetadataParams {
   entityId: string;
   kind?: RelationshipKind;
   target?: string;
@@ -109,8 +109,8 @@ export interface ListRelationshipObservationsParams {
   sort_order?: SortOrder;
 }
 
-export interface ListRelationshipObservationsResult {
-  records: RelationshipObservationDoc[];
+export interface ListRelationshipMetadataResult {
+  records: RelationshipMetadataDoc[];
   total: number;
   page: number;
   per_page: number;
@@ -197,23 +197,23 @@ export class CRUDClient {
       writable: true,
     });
 
-    const baseBulkAppendRelationshipObservations =
-      this.bulkAppendRelationshipObservations.bind(this);
-    const tracedBulkAppendRelationshipObservations = (
-      docs: RelationshipObservationDoc[]
+    const baseBulkAppendRelationshipMetadata =
+      this.bulkAppendRelationshipMetadata.bind(this);
+    const tracedBulkAppendRelationshipMetadata = (
+      docs: RelationshipMetadataDoc[]
     ): Promise<BulkObjectResponse[]> =>
       runWithSpan({
-        name: 'entityStore.crud.bulk_append_relationship_observations',
+        name: 'entityStore.crud.bulk_append_relationship_metadatas',
         namespace,
         attributes: {
-          'entity_store.crud.operation': 'bulk_append_relationship_observations',
+          'entity_store.crud.operation': 'bulk_append_relationship_metadatas',
           'entity_store.objects.count': docs.length,
         },
-        cb: () => baseBulkAppendRelationshipObservations(docs),
+        cb: () => baseBulkAppendRelationshipMetadata(docs),
       });
 
-    Object.defineProperty(this, 'bulkAppendRelationshipObservations', {
-      value: tracedBulkAppendRelationshipObservations,
+    Object.defineProperty(this, 'bulkAppendRelationshipMetadata', {
+      value: tracedBulkAppendRelationshipMetadata,
       configurable: true,
       writable: true,
     });
@@ -272,21 +272,21 @@ export class CRUDClient {
       writable: true,
     });
 
-    const baseListRelationshipObservations = this.listRelationshipObservations.bind(this);
-    const tracedListRelationshipObservations = (
-      params: ListRelationshipObservationsParams
-    ): Promise<ListRelationshipObservationsResult> =>
+    const baseListRelationshipMetadata = this.listRelationshipMetadata.bind(this);
+    const tracedListRelationshipMetadata = (
+      params: ListRelationshipMetadataParams
+    ): Promise<ListRelationshipMetadataResult> =>
       runWithSpan({
-        name: 'entityStore.crud.list_relationship_observations',
+        name: 'entityStore.crud.list_relationship_metadata',
         namespace,
         attributes: {
-          'entity_store.crud.operation': 'list_relationship_observations',
+          'entity_store.crud.operation': 'list_relationship_metadata',
         },
-        cb: () => baseListRelationshipObservations(params),
+        cb: () => baseListRelationshipMetadata(params),
       });
 
-    Object.defineProperty(this, 'listRelationshipObservations', {
-      value: tracedListRelationshipObservations,
+    Object.defineProperty(this, 'listRelationshipMetadata', {
+      value: tracedListRelationshipMetadata,
       configurable: true,
       writable: true,
     });
@@ -405,16 +405,16 @@ export class CRUDClient {
       });
   }
 
-  // Appends RelationshipObservationDoc records to the metadata datastream.
+  // Appends RelationshipMetadataDoc records to the metadata datastream.
   // Datastream is append-only, so the bulk op is `create` rather than `update`.
   // Mirrors `bulkUpdateEntity`'s contract: does not throw on partial bulk
   // failure — returns one BulkObjectResponse per failed item. Transport-level
   // exceptions from esClient.bulk propagate to the maintainer's task boundary.
-  public async bulkAppendRelationshipObservations(
-    docs: RelationshipObservationDoc[]
+  public async bulkAppendRelationshipMetadata(
+    docs: RelationshipMetadataDoc[]
   ): Promise<BulkObjectResponse[]> {
     if (docs.length === 0) return [];
-    const operations: Array<BulkOperationContainer | RelationshipObservationDoc> = [];
+    const operations: Array<BulkOperationContainer | RelationshipMetadataDoc> = [];
     for (const doc of docs) {
       operations.push({ create: {} }, doc);
     }
@@ -553,17 +553,17 @@ export class CRUDClient {
 
   // Reads relationship observations from the metadata datastream alias. The
   // method owns query construction — routes forward parsed params untouched.
-  public async listRelationshipObservations(
-    params: ListRelationshipObservationsParams
-  ): Promise<ListRelationshipObservationsResult> {
+  public async listRelationshipMetadata(
+    params: ListRelationshipMetadataParams
+  ): Promise<ListRelationshipMetadataResult> {
     const page = params.page ?? 1;
     const perPage = params.per_page ?? 10;
     const sortField: string = params.sort_field ?? '@timestamp';
     const sortOrder: SortOrder = params.sort_order ?? 'desc';
 
-    if (!(RELATIONSHIP_OBSERVATIONS_SORT_FIELDS as readonly string[]).includes(sortField)) {
+    if (!(RELATIONSHIP_METADATA_SORT_FIELDS as readonly string[]).includes(sortField)) {
       throw new BadCRUDRequestError(
-        `Invalid sort_field "${sortField}": must be one of ${RELATIONSHIP_OBSERVATIONS_SORT_FIELDS.join(
+        `Invalid sort_field "${sortField}": must be one of ${RELATIONSHIP_METADATA_SORT_FIELDS.join(
           ', '
         )}`
       );
@@ -599,7 +599,7 @@ export class CRUDClient {
       });
     }
 
-    const resp = await this.esClient.search<RelationshipObservationDoc>({
+    const resp = await this.esClient.search<RelationshipMetadataDoc>({
       index: getEntitiesAlias(ENTITY_METADATA, this.namespace),
       query: { bool: { filter } },
       from: (page - 1) * perPage,
@@ -609,7 +609,7 @@ export class CRUDClient {
 
     const records = resp.hits.hits
       .map((hit) => hit._source)
-      .filter((src): src is RelationshipObservationDoc => src !== undefined);
+      .filter((src): src is RelationshipMetadataDoc => src !== undefined);
     const total =
       typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
 

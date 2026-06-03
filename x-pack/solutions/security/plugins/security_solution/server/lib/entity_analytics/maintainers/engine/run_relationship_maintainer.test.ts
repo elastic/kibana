@@ -52,12 +52,12 @@ const makeCrudClient = (
 } => {
   const bulkUpdate = jest.fn().mockResolvedValue(errors);
   // EMH Phase 3a: after writeEntityIds, runIntegration must call the metadata
-  // append path through `bulkAppendRelationshipObservations`. Mocked here so
+  // append path through `bulkAppendRelationshipMetadata`. Mocked here so
   // the relationship maintainer tests can assert on the second write.
   const bulkAppend = jest.fn().mockResolvedValue([]);
   const crudClient = {
     bulkUpdateEntity: bulkUpdate,
-    bulkAppendRelationshipObservations: bulkAppend,
+    bulkAppendRelationshipMetadata: bulkAppend,
   } as unknown as EntityUpdateClient;
   return { crudClient, bulkUpdate, bulkAppend };
 };
@@ -849,7 +849,7 @@ describe('runRelationshipMaintainer', () => {
     });
   });
 
-  describe('EMH Phase 3a — write-path wiring (bulkAppendRelationshipObservations)', () => {
+  describe('EMH Phase 3a — write-path wiring (bulkAppendRelationshipMetadata)', () => {
     const oneActorOneTarget = (esql: jest.Mock) => {
       esql.mockResolvedValueOnce({
         columns: [
@@ -861,7 +861,7 @@ describe('runRelationshipMaintainer', () => {
       });
     };
 
-    it('calls bulkAppendRelationshipObservations after writeEntityIds for each integration that produced records', async () => {
+    it('calls bulkAppendRelationshipMetadata after writeEntityIds for each integration that produced records', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkUpdate, bulkAppend } = makeCrudClient();
       search.mockResolvedValueOnce(
@@ -884,7 +884,7 @@ describe('runRelationshipMaintainer', () => {
       expect(appendOrder).toBeGreaterThan(updateOrder);
     });
 
-    it('does NOT call bulkAppendRelationshipObservations when no records were produced', async () => {
+    it('does NOT call bulkAppendRelationshipMetadata when no records were produced', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, bulkAppend } = makeCrudClient();
       search.mockResolvedValueOnce(successResponse([]));
@@ -1020,7 +1020,7 @@ describe('runRelationshipMaintainer', () => {
       expect(docs).toHaveLength(3);
     });
 
-    it('propagates exceptions thrown by bulkAppendRelationshipObservations (no try/catch around the write)', async () => {
+    it('propagates exceptions thrown by bulkAppendRelationshipMetadata (no try/catch around the write)', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkAppend } = makeCrudClient();
       search.mockResolvedValueOnce(

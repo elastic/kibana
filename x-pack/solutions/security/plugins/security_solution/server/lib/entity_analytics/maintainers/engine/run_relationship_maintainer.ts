@@ -23,7 +23,7 @@ import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_di
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
-import { writeRelationshipObservations } from './write_relationship_observations';
+import { writeRelationshipMetadatas } from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
@@ -164,7 +164,7 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   abortController: AbortController | undefined,
-  observationContext: { scanId: string; observedAt: string }
+  metadataContext: { scanId: string; observedAt: string }
 ): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult }> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
@@ -226,12 +226,12 @@ async function runIntegration(
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
-  await writeRelationshipObservations(crudClient, logger, records, {
-    scanId: observationContext.scanId,
+  await writeRelationshipMetadatas(crudClient, logger, records, {
+    scanId: metadataContext.scanId,
     maintainerKind: MAINTAINER_KIND,
     lookbackWindow: LOOKBACK_WINDOW,
     entitySource: config.id,
-    observedAt: observationContext.observedAt,
+    observedAt: metadataContext.observedAt,
   });
   return { buckets: totalBuckets, recordsCount: records.length, write };
 }
@@ -293,7 +293,7 @@ export const runRelationshipMaintainer = async ({
   // One scan_id + observedAt for the whole maintainer pass. Every observation
   // doc emitted across all integrations in this run carries the same values
   // so a reader can group records by maintainer-run.
-  const observationContext = {
+  const metadataContext = {
     scanId: randomUUID(),
     observedAt: new Date().toISOString(),
   };
@@ -317,7 +317,7 @@ export const runRelationshipMaintainer = async ({
       namespace,
       crudClient,
       abortController,
-      observationContext
+      metadataContext
     );
     totalBuckets += buckets;
     totalRecords += recordsCount;

@@ -7,8 +7,8 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { RelationshipObservationDoc } from '../../../common/domain/entity_metadata/relationship_observation';
-import { RELATIONSHIP_KINDS } from '../../../common/domain/entity_metadata/relationship_observation';
+import type { RelationshipMetadataDoc } from '../../../common/domain/entity_metadata/relationship_metadata';
+import { RELATIONSHIP_KINDS } from '../../../common/domain/entity_metadata/relationship_metadata';
 import { getEntitiesAlias } from '../../../common/domain/entity_index';
 import { ENTITY_METADATA } from '../../../common/domain/entity_index';
 import { CRUDClient } from './crud_client';
@@ -23,7 +23,7 @@ jest.mock('../../telemetry/traces', () => {
   };
 });
 
-const makeDoc = (overrides: Partial<RelationshipObservationDoc> = {}): RelationshipObservationDoc =>
+const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({
     '@timestamp': '2026-05-15T10:30:00.000Z',
     'event.kind': 'event',
@@ -39,7 +39,7 @@ const makeDoc = (overrides: Partial<RelationshipObservationDoc> = {}): Relations
       lookback_window: 'now-30d',
     },
     ...overrides,
-  } as RelationshipObservationDoc);
+  } as RelationshipMetadataDoc);
 
 describe('CRUDClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -81,16 +81,16 @@ describe('CRUDClient', () => {
     });
   });
 
-  describe('bulkAppendRelationshipObservations', () => {
+  describe('bulkAppendRelationshipMetadata', () => {
     it('returns an empty BulkObjectResponse[] and skips esClient.bulk when no docs are passed', async () => {
-      const result = await client.bulkAppendRelationshipObservations([]);
+      const result = await client.bulkAppendRelationshipMetadata([]);
       expect(result).toEqual([]);
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
     it('calls esClient.bulk with the namespace-scoped metadata datastream name', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
-      await client.bulkAppendRelationshipObservations([makeDoc()]);
+      await client.bulkAppendRelationshipMetadata([makeDoc()]);
       const [call] = esClient.bulk.mock.calls;
       const { index } = call[0] as { index: string };
       expect(index).toBe('.entities.v2.metadata.security_default');
@@ -98,7 +98,7 @@ describe('CRUDClient', () => {
 
     it('uses the `create` bulk op (datastreams are append-only)', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
-      await client.bulkAppendRelationshipObservations([makeDoc(), makeDoc()]);
+      await client.bulkAppendRelationshipMetadata([makeDoc(), makeDoc()]);
       const [call] = esClient.bulk.mock.calls;
       const { operations } = call[0] as { operations: unknown[] };
       // For `create`, operations should be pairs of [{ create: {} }, document].
@@ -115,7 +115,7 @@ describe('CRUDClient', () => {
     it('passes each doc through as the bulk document body', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
       const doc = makeDoc({ 'entity.id': 'user:bob@corp' });
-      await client.bulkAppendRelationshipObservations([doc]);
+      await client.bulkAppendRelationshipMetadata([doc]);
       const [call] = esClient.bulk.mock.calls;
       const { operations } = call[0] as { operations: unknown[] };
       // Operations layout for `create`: [{ create: {} }, document].
@@ -124,7 +124,7 @@ describe('CRUDClient', () => {
 
     it('returns [] when esClient.bulk reports no errors', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
-      const result = await client.bulkAppendRelationshipObservations([makeDoc()]);
+      const result = await client.bulkAppendRelationshipMetadata([makeDoc()]);
       expect(result).toEqual([]);
     });
 
@@ -150,7 +150,7 @@ describe('CRUDClient', () => {
           },
         ],
       } as never);
-      const result = await client.bulkAppendRelationshipObservations([makeDoc(), makeDoc()]);
+      const result = await client.bulkAppendRelationshipMetadata([makeDoc(), makeDoc()]);
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         status: 503,
@@ -174,41 +174,41 @@ describe('CRUDClient', () => {
           },
         ],
       } as never);
-      await expect(client.bulkAppendRelationshipObservations([makeDoc()])).resolves.toBeDefined();
+      await expect(client.bulkAppendRelationshipMetadata([makeDoc()])).resolves.toBeDefined();
     });
 
     it('propagates exceptions from esClient.bulk (does not swallow transport errors)', async () => {
       esClient.bulk.mockRejectedValueOnce(new Error('transport failure'));
-      await expect(client.bulkAppendRelationshipObservations([makeDoc()])).rejects.toThrow(
+      await expect(client.bulkAppendRelationshipMetadata([makeDoc()])).rejects.toThrow(
         /transport failure/
       );
     });
 
-    it('wraps the call in runWithSpan with the entityStore.crud.bulk_append_relationship_observations name', async () => {
+    it('wraps the call in runWithSpan with the entityStore.crud.bulk_append_relationship_metadatas name', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
-      await client.bulkAppendRelationshipObservations([makeDoc()]);
+      await client.bulkAppendRelationshipMetadata([makeDoc()]);
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const spanNames = calls.map((c) => (c[0] as { name?: string }).name);
-      expect(spanNames).toContain('entityStore.crud.bulk_append_relationship_observations');
+      expect(spanNames).toContain('entityStore.crud.bulk_append_relationship_metadatas');
     });
 
     it('records the doc count on the tracing span attributes', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [] });
-      await client.bulkAppendRelationshipObservations([makeDoc(), makeDoc(), makeDoc()]);
+      await client.bulkAppendRelationshipMetadata([makeDoc(), makeDoc(), makeDoc()]);
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const matching = calls.find(
         (c) =>
           (c[0] as { name?: string }).name ===
-          'entityStore.crud.bulk_append_relationship_observations'
+          'entityStore.crud.bulk_append_relationship_metadatas'
       );
       expect(matching).toBeDefined();
       const attrs = (matching![0] as { attributes?: Record<string, unknown> }).attributes ?? {};
-      expect(attrs['entity_store.crud.operation']).toBe('bulk_append_relationship_observations');
+      expect(attrs['entity_store.crud.operation']).toBe('bulk_append_relationship_metadatas');
       expect(attrs['entity_store.objects.count']).toBe(3);
     });
   });
 
-  describe('listRelationshipObservations', () => {
+  describe('listRelationshipMetadata', () => {
     const EMPTY_HITS = {
       hits: { hits: [], total: { value: 0, relation: 'eq' as const } },
       took: 1,
@@ -235,7 +235,7 @@ describe('CRUDClient', () => {
 
     it('reads through the metadata alias getEntitiesAlias(ENTITY_METADATA, namespace) — not a hardcoded index', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const body = getSearchBody();
       expect(body.index).toBe(getEntitiesAlias(ENTITY_METADATA, 'default'));
     });
@@ -243,14 +243,14 @@ describe('CRUDClient', () => {
     it('uses the namespace passed to the client when resolving the alias', async () => {
       const otherClient = new CRUDClient({ esClient, logger, namespace: 'tenant-x' });
       mockEmptySearch();
-      await otherClient.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await otherClient.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const body = getSearchBody();
       expect(body.index).toBe(getEntitiesAlias(ENTITY_METADATA, 'tenant-x'));
     });
 
     it('applies an implicit event.action: "relationship_observed" filter on every query', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const filters = (getSearchBody().query.bool?.filter ?? []) as Array<Record<string, unknown>>;
       const hasActionFilter = filters.some(
         (f) =>
@@ -264,7 +264,7 @@ describe('CRUDClient', () => {
 
     it('applies entity.id term filter from the entityId param', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const filters = (getSearchBody().query.bool?.filter ?? []) as Array<Record<string, unknown>>;
       const hasEntityIdFilter = filters.some(
         (f) =>
@@ -278,7 +278,7 @@ describe('CRUDClient', () => {
 
     it('kind=K alone → exists query on entity.relationships.K', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         kind: 'communicates_with',
       });
@@ -293,7 +293,7 @@ describe('CRUDClient', () => {
 
     it('kind=K + target=T → term on entity.relationships.K.target (no exists)', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         kind: 'accesses_frequently',
         target: 'host:laptopA',
@@ -313,7 +313,7 @@ describe('CRUDClient', () => {
 
     it('target=T without kind → bool.should over every RELATIONSHIP_KINDS target, minimum_should_match=1', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         target: 'host:laptopA',
       });
@@ -348,7 +348,7 @@ describe('CRUDClient', () => {
 
     it('from / to → @timestamp range filter on the query', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         from: '2026-04-27T00:00:00.000Z',
         to: '2026-05-27T00:00:00.000Z',
@@ -366,7 +366,7 @@ describe('CRUDClient', () => {
 
     it('applies defaults page=1, per_page=10 when omitted (from=0, size=10)', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const body = getSearchBody();
       expect(body.from).toBe(0);
       expect(body.size).toBe(10);
@@ -374,7 +374,7 @@ describe('CRUDClient', () => {
 
     it('pagination math: from = (page-1)*per_page, size = per_page', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         page: 3,
         per_page: 25,
@@ -386,14 +386,14 @@ describe('CRUDClient', () => {
 
     it('default sort is [{ @timestamp: desc }, { _shard_doc: desc }]', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const { sort } = getSearchBody();
       expect(sort).toEqual([{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }]);
     });
 
     it('honors sort_field=event.ingested and sort_order=asc, retaining the _shard_doc tie-breaker', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({
+      await client.listRelationshipMetadata({
         entityId: 'user:alice@corp',
         sort_field: 'event.ingested',
         sort_order: 'asc',
@@ -404,7 +404,7 @@ describe('CRUDClient', () => {
 
     it('rejects sort_field values outside the allowlist (@timestamp, event.ingested) without calling esClient', async () => {
       await expect(
-        client.listRelationshipObservations({
+        client.listRelationshipMetadata({
           entityId: 'user:alice@corp',
           sort_field: 'entity.id',
         })
@@ -414,14 +414,14 @@ describe('CRUDClient', () => {
 
     it('returns an empty records array when the search has no hits', async () => {
       mockEmptySearch();
-      const result = await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      const result = await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       expect(result.records).toEqual([]);
       expect(result.total).toBe(0);
       expect(result.page).toBe(1);
       expect(result.per_page).toBe(10);
     });
 
-    it('maps hits to RelationshipObservationDoc[] preserving the stored doc shape', async () => {
+    it('maps hits to RelationshipMetadataDoc[] preserving the stored doc shape', async () => {
       const doc1 = makeDoc({ '@timestamp': '2026-05-01T10:00:00.000Z' });
       const doc2 = makeDoc({ '@timestamp': '2026-05-02T10:00:00.000Z' });
       esClient.search.mockResolvedValueOnce({
@@ -433,30 +433,30 @@ describe('CRUDClient', () => {
           total: { value: 2, relation: 'eq' as const },
         },
       } as never);
-      const result = await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      const result = await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       expect(result.records).toEqual([doc1, doc2]);
       expect(result.total).toBe(2);
     });
 
-    it('wraps the call in runWithSpan with the entityStore.crud.list_relationship_observations name', async () => {
+    it('wraps the call in runWithSpan with the entityStore.crud.list_relationship_metadata name', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const spanNames = calls.map((c) => (c[0] as { name?: string }).name);
-      expect(spanNames).toContain('entityStore.crud.list_relationship_observations');
+      expect(spanNames).toContain('entityStore.crud.list_relationship_metadata');
     });
 
     it('records the operation name on the tracing span attributes', async () => {
       mockEmptySearch();
-      await client.listRelationshipObservations({ entityId: 'user:alice@corp' });
+      await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const matching = calls.find(
         (c) =>
-          (c[0] as { name?: string }).name === 'entityStore.crud.list_relationship_observations'
+          (c[0] as { name?: string }).name === 'entityStore.crud.list_relationship_metadata'
       );
       expect(matching).toBeDefined();
       const attrs = (matching![0] as { attributes?: Record<string, unknown> }).attributes ?? {};
-      expect(attrs['entity_store.crud.operation']).toBe('list_relationship_observations');
+      expect(attrs['entity_store.crud.operation']).toBe('list_relationship_metadata');
     });
   });
 });

@@ -10,7 +10,12 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
-import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
+import {
+  entityRiskScoreTool,
+  entityRelationshipHistoryTool,
+  getEntityTool,
+  searchEntitiesTool,
+} from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
@@ -33,6 +38,7 @@ export const registerTools = async (
   isServerless: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
+  agentBuilder.tools.register(entityRelationshipHistoryTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));

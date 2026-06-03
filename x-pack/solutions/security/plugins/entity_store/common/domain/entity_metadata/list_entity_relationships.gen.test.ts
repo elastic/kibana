@@ -6,7 +6,7 @@
  */
 
 import { ListEntityRelationshipsRequestQuery } from './list_entity_relationships.gen';
-import { RELATIONSHIP_KINDS } from './relationship_observation';
+import { RELATIONSHIP_KINDS } from './relationship_metadata';
 
 describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)', () => {
   describe('happy path — accepts every supported parameter', () => {

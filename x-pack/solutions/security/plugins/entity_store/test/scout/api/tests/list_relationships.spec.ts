@@ -18,11 +18,11 @@ const METADATA_DATA_STREAM = getMetadataEntitiesDataStreamName('default');
 // Path is namespaced under ENTITY_STORE_ROUTES.public per architect review
 // (NOT /api/entity_store/...). Path param is `entityId`, not `id`.
 const LIST_RELATIONSHIPS_ROUTE = (entityId: string) =>
-  `api/security/entity_store/observations/relationships/${encodeURIComponent(entityId)}`;
+  `api/security/entity_store/entities/${encodeURIComponent(entityId)}/relationships`;
 
 const ALICE = 'user:alice@local';
 
-const makeObservationDoc = (overrides: Record<string, unknown> = {}) => ({
+const makeMetadataDoc = (overrides: Record<string, unknown> = {}) => ({
   '@timestamp': '2026-05-15T10:30:00.000Z',
   event: { kind: 'event', action: 'relationship_observed' },
   entity: { id: ALICE, source: 'elastic_defend' },
@@ -35,7 +35,7 @@ const makeObservationDoc = (overrides: Record<string, unknown> = {}) => ({
 });
 
 apiTest.describe(
-  'EMH Phase 4 — GET /observations/relationships/{entityId}',
+  'EMH Phase 4 — GET /entities/{entityId}/relationships',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
@@ -65,15 +65,15 @@ apiTest.describe(
       // Seed three observations for alice: two against host:laptopA at
       // different timestamps, one communicates_with at a third timestamp.
       const docs = [
-        makeObservationDoc({
+        makeMetadataDoc({
           '@timestamp': '2026-04-20T08:00:00.000Z',
           'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
         }),
-        makeObservationDoc({
+        makeMetadataDoc({
           '@timestamp': '2026-05-15T10:30:00.000Z',
           'entity.relationships': { accesses_frequently: { target: 'host:laptopA' } },
         }),
-        makeObservationDoc({
+        makeMetadataDoc({
           '@timestamp': '2026-05-10T09:00:00.000Z',
           'entity.relationships': { communicates_with: { target: 'host:server-1' } },
         }),
