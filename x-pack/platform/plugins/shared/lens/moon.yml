@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/lens-common'
   - '@kbn/lens-common-2'
+  - '@kbn/std'
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
